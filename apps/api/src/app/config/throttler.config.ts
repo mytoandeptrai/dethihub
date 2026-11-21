@@ -1,5 +1,3 @@
-import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
-
 import {
   RATE_LIMIT_KEY,
   RATE_LIMIT_NAMES,
@@ -42,10 +40,9 @@ const routeLimitName = (context: ExecutionContext): RateLimitName | undefined =>
   (Reflect.getMetadata(RATE_LIMIT_KEY, context.getClass()) as RateLimitName | undefined)
 
 export function createThrottlerOptions(
-  env: Pick<Env, 'THROTTLE_TTL' | 'THROTTLE_LIMIT' | 'REDIS_URL'>,
+  env: Pick<Env, 'THROTTLE_TTL' | 'THROTTLE_LIMIT'>,
 ): ThrottlerModuleOptions {
   return {
-    storage: new ThrottlerStorageRedisService(env.REDIS_URL),
     getTracker: (request) => trackerFor(request as TrackedRequest),
     throttlers: [
       { name: 'default', ttl: env.THROTTLE_TTL, limit: env.THROTTLE_LIMIT },

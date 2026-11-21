@@ -73,7 +73,6 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
         createThrottlerOptions({
           THROTTLE_TTL: configService.get('THROTTLE_TTL', { infer: true }),
           THROTTLE_LIMIT: configService.get('THROTTLE_LIMIT', { infer: true }),
-          REDIS_URL: configService.get('REDIS_URL', { infer: true }),
         }),
       inject: [ConfigService],
     }),
