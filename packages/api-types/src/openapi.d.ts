@@ -518,6 +518,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/billing/pricing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Price list for top-ups */
+        get: operations["BillingController_getPricing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a top-up order and its payment link */
+        post: operations["BillingController_createOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/orders/{orderCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status of your order; a waiting order is checked with PayOS */
+        get: operations["BillingController_getOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/orders/{orderCode}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close your payment window */
+        post: operations["BillingController_cancelOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/first-bonus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Packs whose first-purchase bonus you already earned */
+        get: operations["BillingController_firstBonus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/payos/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** PayOS payment notification (signed) */
+        post: operations["BillingController_payosWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -786,6 +888,50 @@ export interface components {
             url: string;
             cached: boolean;
             quota?: components["schemas"]["QuotaDto"] | null;
+        };
+        PricingPackDto: {
+            vnd: number;
+            bonus: number;
+        };
+        PricingResponseDto: {
+            pointsPer1000: number;
+            minVnd: number;
+            maxVnd: number;
+            packs: components["schemas"]["PricingPackDto"][];
+            defaultVnd: number;
+        };
+        CreateOrderDto: {
+            /** @description Amount in VND; the allowed range comes from the price list */
+            vnd: number;
+        };
+        CreatedOrderResponseDto: {
+            orderCode: number;
+            checkoutUrl: string;
+            points: number;
+            vnd: number;
+            /** @description VietQR string to draw the QR code from */
+            qrCode: string;
+            bin: string;
+            accountNumber: string;
+            accountName: string;
+            /** @description Transfer content the payer must use exactly */
+            description: string;
+            /** @description Unix seconds when the payment link expires */
+            expiresAt: number;
+        };
+        OrderResponseDto: {
+            orderCode: number;
+            /** @enum {string} */
+            status: "pending" | "paid" | "cancelled" | "expired" | "failed";
+            vnd: number;
+            points: number;
+        };
+        FirstBonusResponseDto: {
+            /** @description Packs (VND) whose first-purchase bonus was earned */
+            bonused: number[];
+        };
+        WebhookAckResponseDto: {
+            ok: boolean;
         };
         FieldError: {
             /**
@@ -1992,6 +2138,187 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FigureResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BillingController_getPricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BillingController_createOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedOrderResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BillingController_getOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BillingController_cancelOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BillingController_firstBonus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FirstBonusResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BillingController_payosWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description PayOS payment notification */
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookAckResponseDto"];
                 };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */

@@ -25,6 +25,7 @@ import { SupabaseAuthGuard } from '@/modules/access-control/presentation/guards/
 import { AiModule } from '@/modules/ai/ai.module'
 import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { MaintenanceGuard } from '@/modules/app-settings/presentation/guards/maintenance.guard'
+import { BillingModule } from '@/modules/billing/billing.module'
 import { CacheModule } from '@/modules/cache/cache.module'
 import { ExamModule } from '@/modules/exam/exam.module'
 import { MediaModule } from '@/modules/media/media.module'
@@ -89,6 +90,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     WorkspaceModule, // synced user items
     StorageModule, // uploads, documents, file reads
     MediaModule, // text extraction, vision, image generation, figure store
+    BillingModule, // PayOS top-up orders and webhook
   ],
   providers: [
     // Global guards (order matters: authentication first, then roles, then maintenance, then throttler)

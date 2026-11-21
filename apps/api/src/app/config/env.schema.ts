@@ -142,6 +142,13 @@ export const envSchema = z.object({
   IMAGE_BASE_URL: optionalText,
   IMAGE_MODEL: optionalText,
 
+  // PayOS: the three keys come from one payment channel; any missing key closes payments
+  PAYOS_CLIENT_ID: optionalText,
+  PAYOS_API_KEY: optionalText,
+  PAYOS_CHECKSUM_KEY: optionalText,
+  PAYOS_BASE_URL: z.url().default('https://api-merchant.payos.vn'),
+  PUBLIC_SITE_URL: z.url().default('http://localhost:8080'),
+
   // LLM providers: an empty key disables the provider; base URL and model fall back to code defaults
   LLM_API_KEY: optionalText,
   LLM_BASE_URL: optionalText,

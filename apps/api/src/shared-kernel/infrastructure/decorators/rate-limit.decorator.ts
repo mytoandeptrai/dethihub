@@ -10,6 +10,7 @@ export const RATE_LIMIT_NAMES = [
   'exam',
   'admin',
   'pay',
+  'payos-webhook',
   'workspace',
   'files',
 ] as const

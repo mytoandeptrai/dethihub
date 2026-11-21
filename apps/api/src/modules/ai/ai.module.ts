@@ -16,6 +16,7 @@ import { ProviderConfigService } from '@/modules/ai/application/services/provide
 import { QuotaService } from '@/modules/ai/application/services/quota.service'
 import { AiMeterAdapter } from '@/modules/ai/infrastructure/adapters/ai-meter.adapter'
 import { AnthropicAdapter } from '@/modules/ai/infrastructure/adapters/anthropic.adapter'
+import { CreditGrantAdapter } from '@/modules/ai/infrastructure/adapters/credit-grant.adapter'
 import { OpenAiCompatibleAdapter } from '@/modules/ai/infrastructure/adapters/openai-compatible.adapter'
 import { TaskPromptsAdapter } from '@/modules/ai/infrastructure/adapters/task-prompts.adapter'
 import { VisionReaderAdapter } from '@/modules/ai/infrastructure/adapters/vision-reader.adapter'
@@ -26,9 +27,10 @@ import { ProviderSettingsRepositoryImpl } from '@/modules/ai/infrastructure/repo
 import { QuotaRepositoryImpl } from '@/modules/ai/infrastructure/repositories/quota.repository'
 import { AiController } from '@/modules/ai/presentation/controllers/ai.controller'
 import { AI_METER } from '@/shared-kernel/application/ports/ai-meter.port'
+import { CREDIT_GRANT } from '@/shared-kernel/application/ports/credit-grant.port'
 import { VISION_READER } from '@/shared-kernel/application/ports/vision-reader.port'
 
-@Global() // @global-approved: other contexts meter AI points and read images through shared-kernel ports
+@Global() // @global-approved: other contexts meter AI points, read images and grant credits through shared-kernel ports
 @Module({
   controllers: [AiController],
   providers: [
@@ -46,7 +48,8 @@ import { VISION_READER } from '@/shared-kernel/application/ports/vision-reader.p
     { provide: ANTHROPIC_PROVIDER, useClass: AnthropicAdapter },
     { provide: AI_METER, useClass: AiMeterAdapter },
     { provide: VISION_READER, useClass: VisionReaderAdapter },
+    { provide: CREDIT_GRANT, useClass: CreditGrantAdapter },
   ],
-  exports: [AI_METER, VISION_READER],
+  exports: [AI_METER, VISION_READER, CREDIT_GRANT],
 })
 export class AiModule {}
