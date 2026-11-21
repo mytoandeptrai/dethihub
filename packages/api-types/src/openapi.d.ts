@@ -313,6 +313,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/workspace/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Synced items of one kind owned by the current user */
+        get: operations["WorkspaceItemController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspace/items/{kind}/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Create or replace an item; 413 when it exceeds a storage limit */
+        put: operations["WorkspaceItemController_save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workspace/items/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete the given items of the current user */
+        delete: operations["WorkspaceItemController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -489,6 +540,18 @@ export interface components {
         ReportRequestDto: {
             reason: string;
             detail?: string;
+        };
+        ItemResponseDto: {
+            id: string;
+            data: {
+                [key: string]: unknown;
+            };
+        };
+        SaveItemDto: {
+            /** @description The whole item, stored as it is */
+            data: {
+                [key: string]: unknown;
+            };
         };
         FieldError: {
             /**
@@ -1291,6 +1354,100 @@ export interface operations {
                 "application/json": components["schemas"]["ReportRequestDto"];
             };
         };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    WorkspaceItemController_list: {
+        parameters: {
+            query: {
+                kind: "doc" | "deck" | "board" | "online" | "upload";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    WorkspaceItemController_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: "doc" | "deck" | "board" | "online" | "upload";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveItemDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    WorkspaceItemController_remove: {
+        parameters: {
+            query: {
+                /** @description Comma-separated item ids, at most 200 */
+                ids: string[];
+            };
+            header?: never;
+            path: {
+                kind: "doc" | "deck" | "board" | "online" | "upload";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             204: {
                 headers: {

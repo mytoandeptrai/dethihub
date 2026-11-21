@@ -34,6 +34,8 @@ async function bootstrap() {
   // A published exam carries its whole document; submissions are answer maps
   app.use('/api/me/exams', json({ limit: '2mb' }))
   app.use(/^\/api\/exams\/[^/]+\/attempts$/, json({ limit: '256kb' }))
+  // An item can be 2 MB; the cap above it lets the quota message answer instead of a parser error
+  app.use('/api/workspace/items', json({ limit: '3mb' }))
   app.use(json({ limit: '100kb' }))
   app.use(urlencoded({ extended: true, limit: '100kb' }))
 

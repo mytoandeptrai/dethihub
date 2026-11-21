@@ -103,6 +103,15 @@ export const envSchema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET: z.string().optional(),
 
+  // Per-account storage cap in bytes when no per-user override exists
+  STORAGE_MAX_BYTES: z
+    .string()
+    .optional()
+    .transform((value) => {
+      const parsed = nonNegativeNumber(value, 10 * 1024 * 1024)
+      return parsed > 0 ? parsed : 10 * 1024 * 1024
+    }),
+
   // AI points (1 point = 1,000 tokens); empty or invalid falls back to the default
   AI_WELCOME_POINTS: z
     .string()
