@@ -1,4 +1,6 @@
-export const TOKENS_PER_POINT = 1000
+import { TOKENS_PER_POINT } from '@/shared-kernel/application/ports/ai-meter.port'
+
+export { TOKENS_PER_POINT }
 
 /** limit = monthly base + credit balance; usage above base is paid from credits */
 export interface Quota {

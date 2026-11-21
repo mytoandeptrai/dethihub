@@ -130,6 +130,18 @@ export const envSchema = z.object({
     .transform((value) => nonNegativeNumber(value, 0)),
   AI_RECEIPT_SECRET: z.string().optional(),
 
+  // Image generation: Agnes answers directly, the second provider answers with a job to poll
+  AI_IMAGE_POINTS: z
+    .string()
+    .optional()
+    .transform((value) => nonNegativeNumber(value, 5)),
+  AGNES_API_KEY: optionalText,
+  AGNES_BASE_URL: optionalText,
+  AGNES_IMAGE_MODEL: optionalText,
+  IMAGE_API_KEY: optionalText,
+  IMAGE_BASE_URL: optionalText,
+  IMAGE_MODEL: optionalText,
+
   // LLM providers: an empty key disables the provider; base URL and model fall back to code defaults
   LLM_API_KEY: optionalText,
   LLM_BASE_URL: optionalText,

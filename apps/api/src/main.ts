@@ -36,6 +36,7 @@ async function bootstrap() {
   app.use(/^\/api\/exams\/[^/]+\/attempts$/, json({ limit: '256kb' }))
   // An item can be 2 MB; the cap above it lets the quota message answer instead of a parser error
   app.use('/api/workspace/items', json({ limit: '3mb' }))
+  app.use('/api/media/extract/vision', json({ limit: '6mb' }))
   app.use(json({ limit: '100kb' }))
   app.use(urlencoded({ extended: true, limit: '100kb' }))
 

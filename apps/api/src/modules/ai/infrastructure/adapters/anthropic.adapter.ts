@@ -7,6 +7,25 @@ import type {
   LlmResult,
 } from '@/modules/ai/application/ports/llm-provider.port'
 
+const DATA_URL = /^data:(image\/(?:jpeg|png|webp|gif));base64,(.+)$/
+
+function imageBlocks(images: string[]): Anthropic.Beta.BetaImageBlockParam[] {
+  const blocks: Anthropic.Beta.BetaImageBlockParam[] = []
+  for (const url of images) {
+    const match = DATA_URL.exec(url)
+    if (!match) continue
+    blocks.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: match[1] as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif',
+        data: match[2] ?? '',
+      },
+    })
+  }
+  return blocks
+}
+
 @Injectable()
 export class AnthropicAdapter implements LlmProviderPort {
   readonly #clients = new Map<string, Anthropic>()
@@ -24,6 +43,13 @@ export class AnthropicAdapter implements LlmProviderPort {
     // the Messages API does not accept a trailing assistant turn
     while (messages.at(-1)?.role === 'assistant') messages.pop()
     if (messages.length === 0) throw new Error('no user message')
+    const lastMessage = messages.at(-1)
+    if (request.images?.length && lastMessage && typeof lastMessage.content === 'string') {
+      lastMessage.content = [
+        ...imageBlocks(request.images),
+        { type: 'text', text: lastMessage.content },
+      ]
+    }
 
     // streaming + finalMessage(): a large max_tokens would otherwise hit the SDK's HTTP timeout
     const stream = this.#client(target.apiKey, target.baseUrl).beta.messages.stream(

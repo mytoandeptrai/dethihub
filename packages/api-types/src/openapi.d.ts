@@ -450,6 +450,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/media/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read the text of a docx, pdf, xlsx, pptx or text file */
+        post: operations["MediaController_extract"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/media/extract/vision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read scanned PDF pages (up to 3 images) with a vision model */
+        post: operations["MediaController_readPages"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/media/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Draw an AI image; costs AI points */
+        post: operations["MediaController_drawImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/media/figures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Get a shared figure by English name; drawn once, free afterwards */
+        post: operations["MediaController_getFigure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -679,6 +747,45 @@ export interface components {
             kinds: {
                 [key: string]: components["schemas"]["KindUsageDto"];
             };
+        };
+        ExtractBodyDto: {
+            /** Format: binary */
+            file: string;
+            /** @description Keep emphasis markers and embedded images */
+            marks?: boolean;
+        };
+        ExtractedFileResponseDto: {
+            name: string;
+            /** @enum {string} */
+            kind: "docx" | "pdf" | "xlsx" | "pptx" | "text" | "unsupported";
+            text: string;
+            slides?: string[];
+            images?: string[];
+            warning?: string;
+        };
+        VisionBodyDto: {
+            /** @description 1 to 3 page images as jpeg/png/webp data URLs */
+            images: string[];
+        };
+        VisionResponseDto: {
+            text: string;
+            quota: components["schemas"]["QuotaDto"] | null;
+        };
+        ImageBodyDto: {
+            prompt: string;
+        };
+        ImageResponseDto: {
+            dataUrl: string;
+            quota: components["schemas"]["QuotaDto"] | null;
+        };
+        FigureBodyDto: {
+            /** @description English name, letters, spaces and hyphens only */
+            en: string;
+        };
+        FigureResponseDto: {
+            url: string;
+            cached: boolean;
+            quota?: components["schemas"]["QuotaDto"] | null;
         };
         FieldError: {
             /**
@@ -1758,6 +1865,134 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    MediaController_extract: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ExtractBodyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractedFileResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    MediaController_readPages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VisionBodyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VisionResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    MediaController_drawImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImageBodyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    MediaController_getFigure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FigureBodyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FigureResponseDto"];
+                };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
             default: {

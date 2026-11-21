@@ -11,6 +11,7 @@ import type {
   LlmRequest,
   LlmResult,
 } from '@/modules/ai/application/ports/llm-provider.port'
+import type { ChatMessage } from '@/modules/ai/domain/billing'
 import type { Completion } from '@/modules/ai/infrastructure/adapters/chat-completion-stream'
 
 function citationsOf(
@@ -24,6 +25,21 @@ function citationsOf(
     }
   }
   return [...byUrl.values()].slice(0, 20)
+}
+
+function withImages(messages: ChatMessage[], images: string[]): unknown[] {
+  const last = messages.length - 1
+  return messages.map((message, index) =>
+    index === last
+      ? {
+          role: message.role,
+          content: [
+            { type: 'text', text: message.content },
+            ...images.map((url) => ({ type: 'image_url', image_url: { url } })),
+          ],
+        }
+      : message,
+  )
 }
 
 @Injectable()
@@ -44,7 +60,9 @@ export class OpenAiCompatibleAdapter implements LlmProviderPort {
       },
       body: JSON.stringify({
         model: target.model,
-        messages: request.messages,
+        messages: request.images?.length
+          ? withImages(request.messages, request.images)
+          : request.messages,
         max_tokens: request.maxTokens,
         ...((opencode || target.effort) && request.reasoningEffort
           ? { reasoning_effort: request.reasoningEffort }

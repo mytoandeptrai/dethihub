@@ -11,6 +11,8 @@ export interface LlmStream {
 export interface LlmRequest {
   target: Target
   messages: ChatMessage[]
+  /** data URLs attached to the last user message */
+  images?: string[]
   maxTokens: number
   temperature?: number
   reasoningEffort?: string

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 
 import { AI_CALL_LOG_REPOSITORY } from '@/modules/ai/application/ports/ai-call-log.repository.port'
 import { CREDIT_REPOSITORY } from '@/modules/ai/application/ports/credit.repository.port'
@@ -14,16 +14,21 @@ import { ChatService } from '@/modules/ai/application/services/chat.service'
 import { FeedbackService } from '@/modules/ai/application/services/feedback.service'
 import { ProviderConfigService } from '@/modules/ai/application/services/provider-config.service'
 import { QuotaService } from '@/modules/ai/application/services/quota.service'
+import { AiMeterAdapter } from '@/modules/ai/infrastructure/adapters/ai-meter.adapter'
 import { AnthropicAdapter } from '@/modules/ai/infrastructure/adapters/anthropic.adapter'
 import { OpenAiCompatibleAdapter } from '@/modules/ai/infrastructure/adapters/openai-compatible.adapter'
 import { TaskPromptsAdapter } from '@/modules/ai/infrastructure/adapters/task-prompts.adapter'
+import { VisionReaderAdapter } from '@/modules/ai/infrastructure/adapters/vision-reader.adapter'
 import { AiCallLogRepositoryImpl } from '@/modules/ai/infrastructure/repositories/ai-call-log.repository'
 import { CreditRepositoryImpl } from '@/modules/ai/infrastructure/repositories/credit.repository'
 import { FeedbackRepositoryImpl } from '@/modules/ai/infrastructure/repositories/feedback.repository'
 import { ProviderSettingsRepositoryImpl } from '@/modules/ai/infrastructure/repositories/provider-settings.repository'
 import { QuotaRepositoryImpl } from '@/modules/ai/infrastructure/repositories/quota.repository'
 import { AiController } from '@/modules/ai/presentation/controllers/ai.controller'
+import { AI_METER } from '@/shared-kernel/application/ports/ai-meter.port'
+import { VISION_READER } from '@/shared-kernel/application/ports/vision-reader.port'
 
+@Global() // @global-approved: other contexts meter AI points and read images through shared-kernel ports
 @Module({
   controllers: [AiController],
   providers: [
@@ -39,6 +44,9 @@ import { AiController } from '@/modules/ai/presentation/controllers/ai.controlle
     { provide: TASK_PROMPTS, useClass: TaskPromptsAdapter },
     { provide: OPENAI_COMPATIBLE_PROVIDER, useClass: OpenAiCompatibleAdapter },
     { provide: ANTHROPIC_PROVIDER, useClass: AnthropicAdapter },
+    { provide: AI_METER, useClass: AiMeterAdapter },
+    { provide: VISION_READER, useClass: VisionReaderAdapter },
   ],
+  exports: [AI_METER, VISION_READER],
 })
 export class AiModule {}
