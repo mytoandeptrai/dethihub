@@ -23,9 +23,10 @@ services:
       - key: NODE_VERSION
         value: "24"
       # Secrets: set in the Render dashboard (sync: false keeps them out of git).
-      # DATABASE_URL must point sslcert to the Secret File, e.g.
-      # ...?sslmode=require&sslcert=/etc/secrets/aiven-ca.pem
+      # Supabase pooler URL; sslmode=require is already part of the connection string.
       - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
         sync: false
       - key: REDIS_URL
         sync: false

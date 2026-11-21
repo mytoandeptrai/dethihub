@@ -10,6 +10,30 @@ import type {
   Todo,
   User,
   Verification,
+  AdminAudit,
+  AiCall,
+  AiCredit,
+  AiCreditEvent,
+  AiFeedback,
+  AiProviderSetting,
+  AiQuotaOverride,
+  AiRefund,
+  AiUsage,
+  AppSetting,
+  AppUserRole,
+  BankQuestion,
+  CommunityExam,
+  ExamAttempt,
+  ExamAttemptLock,
+  Feedback,
+  PaymentOrder,
+  Presence,
+  Report,
+  SecurityFlag,
+  UserDocument,
+  UserImage,
+  UserItem,
+  UserQuota,
 } from '@prisma/client'
 
 /**
@@ -57,3 +81,31 @@ export type InsertJobDatabase = Prisma.JobUncheckedCreateInput
 
 export type { AuditLog }
 export type InsertAuditLog = Prisma.AuditLogUncheckedCreateInput
+
+/** de-ro domain models (see packages/database/prisma/schema.prisma) */
+export type {
+  AdminAudit,
+  AiCall,
+  AiCredit,
+  AiCreditEvent,
+  AiFeedback,
+  AiProviderSetting,
+  AiQuotaOverride,
+  AiRefund,
+  AiUsage,
+  AppSetting,
+  AppUserRole,
+  BankQuestion,
+  CommunityExam,
+  ExamAttempt,
+  ExamAttemptLock,
+  Feedback,
+  PaymentOrder,
+  Presence,
+  Report,
+  SecurityFlag,
+  UserDocument,
+  UserImage,
+  UserItem,
+  UserQuota,
+}

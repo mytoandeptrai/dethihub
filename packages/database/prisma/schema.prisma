@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -22,22 +23,22 @@ enum LoginStatus {
 }
 
 model User {
-  id              String     @id
+  id              String    @id
   name            String
   email           String
-  emailVerified   Boolean    @default(false) @map("email_verified")
+  emailVerified   Boolean   @default(false) @map("email_verified")
   image           String?
-  role            UserRole   @default(USER)
-  banned          Boolean?   @default(false)
-  banReason       String?    @map("ban_reason")
-  banExpires      DateTime?  @map("ban_expires") @db.Timestamp(6)
-  username        String     @default("")
-  displayUsername String     @default("") @map("display_username")
-  displayName     String?    @map("display_name") @db.VarChar(50)
-  bio             String?    @db.VarChar(500)
-  preferences     Json       @default("{}")
-  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  role            UserRole  @default(USER)
+  banned          Boolean?  @default(false)
+  banReason       String?   @map("ban_reason")
+  banExpires      DateTime? @map("ban_expires") @db.Timestamp(6)
+  username        String    @default("")
+  displayUsername String    @default("") @map("display_username")
+  displayName     String?   @map("display_name") @db.VarChar(50)
+  bio             String?   @db.VarChar(500)
+  preferences     Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   accounts  Account[]
   sessions  Session[]
@@ -130,19 +131,19 @@ model Todo {
 }
 
 model Article {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title        String
   content      String
-  slug         String    @unique
-  status       String    @default("draft")
-  tags         Json      @default("[]")
-  category     String    @default("other")
-  author       String    @default("")
-  viewCount    Int       @default(0) @map("view_count")
-  isPinned     Boolean   @default(false) @map("is_pinned")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  publishedAt  DateTime? @map("published_at") @db.Timestamptz(6)
+  slug         String                  @unique
+  status       String                  @default("draft")
+  tags         Json                    @default("[]")
+  category     String                  @default("other")
+  author       String                  @default("")
+  viewCount    Int                     @default(0) @map("view_count")
+  isPinned     Boolean                 @default(false) @map("is_pinned")
+  createdAt    DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  publishedAt  DateTime?               @map("published_at") @db.Timestamptz(6)
   /// Full-text search vector; maintained via raw SQL on write
   searchVector Unsupported("tsvector") @default(dbgenerated("''::tsvector")) @map("search_vector")
 
@@ -205,4 +206,397 @@ model AuditLog {
   @@index([occurredAt], map: "audit_logs_occurred_at_idx")
   @@index([createdAt], map: "audit_logs_created_at_idx")
   @@map("audit_logs")
+}
+
+// =============================================================================
+// de-ro domain models. Table/column names stay snake_case to match de-ro SQL.
+// Every `*_id` / `owner_id` / `admin_id` uuid is `auth.users.id` (Supabase Auth, schema
+// not managed by Prisma), so none of them declares a relation.
+// CHECK constraints, the generated `user_items.bytes` column and the PostgREST lockdown
+// (RLS + REVOKE) live in the hand-edited SQL of migration `dero_init`.
+// =============================================================================
+
+// ---- platform ---------------------------------------------------------------
+
+model AppUserRole {
+  /// auth.users.id
+  userId    String   @id @map("user_id") @db.Uuid
+  /// 'admin' | 'moderator' (CHECK)
+  role      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("user_roles")
+}
+
+model SecurityFlag {
+  /// auth.users.id
+  userId      String    @id @map("user_id") @db.Uuid
+  strikes     Int       @default(0)
+  /// Permanent lock = 9999-12-31 (Prisma cannot represent Postgres 'infinity')
+  lockedUntil DateTime? @map("locked_until") @db.Timestamptz(6)
+  firstAt     DateTime  @default(now()) @map("first_at") @db.Timestamptz(6)
+  lastAt      DateTime  @default(now()) @map("last_at") @db.Timestamptz(6)
+  lastAction  String?   @map("last_action")
+  lastIp      String?   @map("last_ip")
+
+  @@map("security_flags")
+}
+
+model AppSetting {
+  /// 'maintenance' | 'announcements' | 'pricing'
+  key       String   @id
+  value     Json     @default("{}")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("app_settings")
+}
+
+model Presence {
+  /// auth.users.id
+  userId   String   @id @map("user_id") @db.Uuid
+  lastSeen DateTime @default(now()) @map("last_seen") @db.Timestamptz(6)
+
+  @@index([lastSeen(sort: Desc)], map: "presence_last_seen_idx")
+  @@map("presence")
+}
+
+model Feedback {
+  id        BigInt   @id @default(autoincrement())
+  /// auth.users.id
+  userId    String?  @map("user_id") @db.Uuid
+  email     String?
+  message   String
+  page      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  read      Boolean  @default(false)
+
+  @@index([createdAt(sort: Desc)], map: "feedback_created_at_idx")
+  @@map("feedback")
+}
+
+model AdminAudit {
+  id        BigInt   @id @default(autoincrement())
+  /// auth.users.id; null = system. Kept even after the account is deleted.
+  adminId   String?  @map("admin_id") @db.Uuid
+  action    String
+  target    String?
+  detail    Json?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)], map: "admin_audit_created_idx")
+  @@index([action], map: "admin_audit_action_idx")
+  @@map("admin_audit")
+}
+
+// ---- ai ---------------------------------------------------------------------
+
+model AiUsage {
+  /// auth.users.id
+  userId     String    @map("user_id") @db.Uuid
+  /// 'YYYY-MM' (UTC)
+  month      String
+  tokens     BigInt    @default(0)
+  requests   Int       @default(0)
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  /// Tokens held by in-flight requests (CHECK >= 0)
+  reserved   BigInt    @default(0)
+  reservedAt DateTime? @map("reserved_at") @db.Timestamptz(6)
+
+  @@id([userId, month])
+  @@map("ai_usage")
+}
+
+model AiCredit {
+  /// auth.users.id
+  userId    String   @id @map("user_id") @db.Uuid
+  /// Tokens (1 point = 1,000 tokens); CHECK >= 0
+  balance   BigInt   @default(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("ai_credits")
+}
+
+model AiCreditEvent {
+  id        BigInt   @id @default(autoincrement())
+  /// auth.users.id
+  userId    String   @map("user_id") @db.Uuid
+  /// ^[a-z_]{1,32}$ (CHECK): welcome | admin | topup | ...
+  kind      String
+  /// > 0 (CHECK)
+  tokens    BigInt
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId, createdAt(sort: Desc)], map: "ai_credit_events_user_idx")
+  @@map("ai_credit_events")
+}
+
+model AiQuotaOverride {
+  /// auth.users.id
+  userId        String   @id @map("user_id") @db.Uuid
+  /// null = unlimited
+  monthlyTokens BigInt?  @map("monthly_tokens")
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("ai_quota_overrides")
+}
+
+model AiRefund {
+  /// HMAC receipt; primary key makes each refund one-shot
+  receipt   String   @id
+  /// auth.users.id
+  userId    String   @map("user_id") @db.Uuid
+  /// >= 0 (CHECK)
+  tokens    BigInt
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId, createdAt(sort: Desc)], map: "ai_refunds_user_day_idx")
+  @@map("ai_refunds")
+}
+
+model AiCall {
+  id               BigInt   @id @default(autoincrement())
+  /// auth.users.id
+  userId           String?  @map("user_id") @db.Uuid
+  model            String
+  provider         String
+  ok               Boolean
+  error            String?
+  promptTokens     Int      @default(0) @map("prompt_tokens")
+  completionTokens Int      @default(0) @map("completion_tokens")
+  cost             Decimal?
+  ms               Int      @default(0)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)], map: "ai_calls_created_at_idx")
+  @@map("ai_calls")
+}
+
+model AiFeedback {
+  id        BigInt   @id @default(autoincrement())
+  /// auth.users.id
+  userId    String?  @map("user_id") @db.Uuid
+  /// up | down | undo | resend | complaint (CHECK)
+  kind      String
+  /// exam | slide | board (CHECK)
+  mode      String   @default("exam")
+  request   String   @default("")
+  reply     String   @default("")
+  context   String   @default("")
+  note      String   @default("")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)], map: "ai_feedback_created_at_idx")
+  @@map("ai_feedback")
+}
+
+model AiProviderSetting {
+  provider  String   @id
+  model     String?
+  baseUrl   String?  @map("base_url")
+  /// AES-256-GCM ciphertext
+  apiKeyEnc String?  @map("api_key_enc")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("ai_provider_settings")
+}
+
+// ---- exam -------------------------------------------------------------------
+
+model CommunityExam {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// auth.users.id; null once the owner account is deleted (exam is kept)
+  ownerId         String?   @map("owner_id") @db.Uuid
+  title           String    @default("")
+  subject         String    @default("")
+  grade           String    @default("")
+  school          String    @default("")
+  doc             Json      @default("{}")
+  questionCount   Int       @default(0) @map("question_count")
+  durationMinutes Int       @default(45) @map("duration_minutes")
+  totalPoints     Float     @default(0) @map("total_points")
+  preview         String    @default("")
+  listed          Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// published | hidden | removed (CHECK)
+  status          String    @default("published")
+  removedReason   String?   @map("removed_reason")
+  /// auth.users.id of the moderator; kept after the account is deleted
+  moderatedBy     String?   @map("moderated_by") @db.Uuid
+  moderatedAt     DateTime? @map("moderated_at") @db.Timestamptz(6)
+  /// Auto-gradable questions without an answer key; null = not computed (CHECK >= 0)
+  missingKeys     Int?      @map("missing_keys")
+
+  attempts ExamAttempt[]
+  locks    ExamAttemptLock[]
+  reports  Report[]
+
+  @@index([listed, status, createdAt(sort: Desc)], map: "community_exams_listed_status_created_idx")
+  @@index([ownerId, createdAt(sort: Desc)], map: "community_exams_owner_idx")
+  @@index([status], map: "community_exams_status_idx")
+  @@map("community_exams")
+}
+
+model ExamAttempt {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  examId          String   @map("exam_id") @db.Uuid
+  /// auth.users.id; null for guests
+  userId          String?  @map("user_id") @db.Uuid
+  studentName     String   @default("") @map("student_name")
+  score           Float    @default(0)
+  maxScore        Float    @default(0) @map("max_score")
+  durationSeconds Int      @default(0) @map("duration_seconds")
+  answers         Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// 8-64 chars (CHECK)
+  deviceId        String?  @map("device_id")
+  /// <= 30 chars (CHECK)
+  className       String?  @map("class_name")
+  /// 1-999 (CHECK)
+  seatNo          Int?     @map("seat_no")
+
+  exam CommunityExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId, createdAt(sort: Desc)], map: "exam_attempts_exam_created_idx")
+  @@index([examId, deviceId], map: "exam_attempts_exam_device")
+  @@map("exam_attempts")
+}
+
+model ExamAttemptLock {
+  examId    String   @map("exam_id") @db.Uuid
+  /// auth.users.id
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  exam CommunityExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@id([examId, userId])
+  @@map("exam_attempt_locks")
+}
+
+model Report {
+  id         BigInt    @id @default(autoincrement())
+  examId     String    @map("exam_id") @db.Uuid
+  /// auth.users.id
+  reporterId String?   @map("reporter_id") @db.Uuid
+  /// <= 100 chars (CHECK)
+  reason     String
+  /// <= 1000 chars (CHECK)
+  detail     String?
+  /// open | resolved | dismissed (CHECK)
+  status     String    @default("open")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// auth.users.id
+  resolvedBy String?   @map("resolved_by") @db.Uuid
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+
+  exam CommunityExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId], map: "reports_exam_id_idx")
+  @@index([status, createdAt(sort: Desc)], map: "reports_status_idx")
+  @@map("reports")
+}
+
+// ---- workspace --------------------------------------------------------------
+
+model UserItem {
+  /// auth.users.id
+  ownerId   String                 @map("owner_id") @db.Uuid
+  /// doc | deck | board | online | upload (CHECK)
+  kind      String
+  id        String
+  data      Json                   @default("{}")
+  /// Never overwritten on update (see 05-api-workspace); null for legacy rows
+  createdAt DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// GENERATED ALWAYS AS (octet_length(data::text)) STORED, created in migration SQL.
+  /// Read-only: Prisma never writes it; use $queryRaw for storage sums.
+  bytes     Unsupported("bigint")?
+
+  @@id([ownerId, kind, id])
+  @@index([ownerId, kind], map: "user_items_owner_kind_idx")
+  @@index([createdAt(sort: Desc)], map: "user_items_created_at_idx")
+  @@map("user_items")
+}
+
+// ---- storage ----------------------------------------------------------------
+
+model UserDocument {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// auth.users.id
+  ownerId   String   @map("owner_id") @db.Uuid
+  name      String
+  mime      String
+  /// 0 < size <= 20 MB (CHECK)
+  size      BigInt
+  url       String
+  subject   String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([ownerId, createdAt(sort: Desc)], map: "user_documents_owner_created_idx")
+  @@map("user_documents")
+}
+
+model UserImage {
+  /// auth.users.id
+  ownerId   String   @map("owner_id") @db.Uuid
+  key       String
+  /// > 0 (CHECK)
+  size      BigInt
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([ownerId, key])
+  @@map("user_images")
+}
+
+model UserQuota {
+  /// auth.users.id
+  userId    String   @id @map("user_id") @db.Uuid
+  /// > 0 (CHECK)
+  maxBytes  BigInt   @map("max_bytes")
+  note      String?
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("user_quota")
+}
+
+// ---- billing ----------------------------------------------------------------
+
+model PaymentOrder {
+  /// Sequence restarted at 100001 in migration SQL
+  orderCode     BigInt    @id @default(autoincrement()) @map("order_code")
+  /// auth.users.id
+  userId        String    @map("user_id") @db.Uuid
+  /// > 0 (CHECK)
+  vnd           Int
+  /// Points to credit, bonus included; > 0 (CHECK)
+  points        Int
+  /// Chosen pack; null = custom amount
+  packVnd       Int?      @map("pack_vnd")
+  /// First-time pack bonus inside `points`; >= 0 (CHECK)
+  bonusPoints   Int       @default(0) @map("bonus_points")
+  /// pending | paid | cancelled | expired | failed (CHECK)
+  status        String    @default("pending")
+  paymentLinkId String?   @map("payment_link_id")
+  checkoutUrl   String?   @map("checkout_url")
+  reference     String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  paidAt        DateTime? @map("paid_at") @db.Timestamptz(6)
+
+  @@index([userId, createdAt(sort: Desc)], map: "payment_orders_user_idx")
+  @@map("payment_orders")
+}
+
+// ---- bank -------------------------------------------------------------------
+
+model BankQuestion {
+  id        String    @id
+  data      Json
+  /// published | hidden (CHECK)
+  status    String    @default("published")
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  /// auth.users.id
+  updatedBy String?   @map("updated_by") @db.Uuid
+
+  @@index([updatedAt(sort: Desc)], map: "bank_questions_updated_at_idx")
+  @@map("bank_questions")
 }

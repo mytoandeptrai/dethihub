@@ -48,6 +48,11 @@ pnpm --filter @workspace/database db:push
 - Keep Better Auth–compatible field names on identity tables
 - Export type aliases from `src/types.ts` when application code needs Insert/Select shapes
 - Rebuild `@workspace/database` before consuming new types in `apps/api`
+- Every migration that adds a table must also `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` (no policies): Supabase exposes `public` through PostgREST. `dero_init` already revokes `anon`/`authenticated`, and default privileges cover new tables
+- CHECK constraints and generated columns are hand-written SQL in the migration (Prisma does not generate them); create it with `migrate dev --create-only`
+- `user_items.bytes` is a generated column mapped as `Unsupported`; delete any `ALTER TABLE "user_items" ... "bytes"` line Prisma generates in later migrations
+- `migrate dev` runs only against local docker Postgres: override `DATABASE_URL`/`DIRECT_URL` on the command line (the package `.env` points at Supabase); apply to Supabase with `migrate deploy`
+- Permanent account lock uses `9999-12-31`, not `infinity` (Prisma cannot represent it)
 
 ## Prohibited
 

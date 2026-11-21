@@ -32,6 +32,25 @@ const TEST_ACCOUNTS = [
   },
 ] as const
 
+// Defaults mirror de-ro/src/lib/pricing.ts DEFAULT_PRICING
+const APP_SETTINGS = {
+  maintenance: { on: false },
+  announcements: { items: [] },
+  pricing: {
+    pointsPer1000: 25,
+    minVnd: 2000,
+    maxVnd: 100_000,
+    packs: [
+      { vnd: 2000, bonus: 0 },
+      { vnd: 5000, bonus: 0.05 },
+      { vnd: 10_000, bonus: 0.1 },
+      { vnd: 20_000, bonus: 0.15 },
+      { vnd: 50_000, bonus: 0.2 },
+    ],
+    defaultVnd: 10_000,
+  },
+} as const
+
 async function seed() {
   const databaseUrl = process.env['DATABASE_URL']
   if (!databaseUrl) {
@@ -44,6 +63,12 @@ async function seed() {
   const prisma = createPrismaClient({ datasourceUrl: databaseUrl })
 
   try {
+    for (const [key, value] of Object.entries(APP_SETTINGS)) {
+      // update: {} keeps values an admin already edited
+      await prisma.appSetting.upsert({ where: { key }, create: { key, value }, update: {} })
+      console.log(`✅ app_settings.${key} ready`)
+    }
+
     for (const account of TEST_ACCOUNTS) {
       console.log(`🔍 Checking account: ${account.email}`)
 
