@@ -10,11 +10,13 @@ import { PlatformRoleService } from '@/modules/access-control/application/servic
 import { RoleAuthorizationService } from '@/modules/access-control/application/services/role-authorization.service'
 import { SecurityStrikeService } from '@/modules/access-control/application/services/security-strike.service'
 import { JoseTokenVerifierAdapter } from '@/modules/access-control/infrastructure/adapters/jose-token-verifier.adapter'
+import { SupabaseUserProfileLookupAdapter } from '@/modules/access-control/infrastructure/adapters/supabase-user-profile-lookup.adapter'
 import { SupabaseAuthAdminAdapter } from '@/modules/access-control/infrastructure/adapters/supabase-auth-admin.adapter'
 import { AdminAuditRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/admin-audit.repository'
 import { SecurityFlagRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/security-flag.repository'
 import { UserRoleRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/user-role.repository'
 import { MeController } from '@/modules/access-control/presentation/controllers/me.controller'
+import { USER_PROFILE_LOOKUP } from '@/shared-kernel/application/ports/user-profile-lookup.port'
 
 @Global() // @global-approved: auth guards and the auth user directory are consumed by every context
 @Module({
@@ -27,10 +29,16 @@ import { MeController } from '@/modules/access-control/presentation/controllers/
     SupabaseAuthAdminAdapter,
     { provide: TOKEN_VERIFIER, useClass: JoseTokenVerifierAdapter },
     { provide: AUTH_USER_DIRECTORY, useExisting: SupabaseAuthAdminAdapter },
+    { provide: USER_PROFILE_LOOKUP, useClass: SupabaseUserProfileLookupAdapter },
     { provide: USER_ROLE_REPOSITORY, useClass: UserRoleRepositoryImpl },
     { provide: SECURITY_FLAG_REPOSITORY, useClass: SecurityFlagRepositoryImpl },
     { provide: ADMIN_AUDIT_REPOSITORY, useClass: AdminAuditRepositoryImpl },
   ],
-  exports: [AuthenticationService, PlatformRoleService, RoleAuthorizationService],
+  exports: [
+    AuthenticationService,
+    PlatformRoleService,
+    RoleAuthorizationService,
+    USER_PROFILE_LOOKUP,
+  ],
 })
 export class AccessControlModule {}

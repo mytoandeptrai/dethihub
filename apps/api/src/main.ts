@@ -31,6 +31,9 @@ async function bootstrap() {
 
   // AI chat carries whole source documents; every other route stays small
   app.use('/api/ai/chat', json({ limit: '2mb' }))
+  // A published exam carries its whole document; submissions are answer maps
+  app.use('/api/me/exams', json({ limit: '2mb' }))
+  app.use(/^\/api\/exams\/[^/]+\/attempts$/, json({ limit: '256kb' }))
   app.use(json({ limit: '100kb' }))
   app.use(urlencoded({ extended: true, limit: '100kb' }))
 

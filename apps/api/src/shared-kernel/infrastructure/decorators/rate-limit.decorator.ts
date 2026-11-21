@@ -6,6 +6,7 @@ export const RATE_LIMIT_NAMES = [
   'upload',
   'extract',
   'attempt',
+  'attempt-exam',
   'exam',
   'admin',
   'pay',
@@ -16,4 +17,4 @@ export type RateLimitName = (typeof RATE_LIMIT_NAMES)[number]
 
 export const RATE_LIMIT_KEY = 'rateLimitName'
 
-export const RateLimit = (name: RateLimitName) => SetMetadata(RATE_LIMIT_KEY, name)
+export const RateLimit = (...names: RateLimitName[]) => SetMetadata(RATE_LIMIT_KEY, names)
