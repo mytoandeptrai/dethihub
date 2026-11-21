@@ -1,14 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common'
 
 import { ADMIN_AUDIT_REPOSITORY } from '@/modules/access-control/application/ports/admin-audit.repository.port'
+import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import { SECURITY_FLAG_REPOSITORY } from '@/modules/access-control/application/ports/security-flag.repository.port'
 import { PlatformRoleService } from '@/modules/access-control/application/services/platform-role.service'
-import { AUTH_USER_DIRECTORY } from '@/shared-kernel/application/ports/auth-user-directory.port'
 
 import type { AdminAuditRepository } from '@/modules/access-control/application/ports/admin-audit.repository.port'
+import type { AuthUserDirectory } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import type { SecurityFlagRepository } from '@/modules/access-control/application/ports/security-flag.repository.port'
-import type { AuthUserDirectory } from '@/shared-kernel/application/ports/auth-user-directory.port'
-import type { SecurityStrikePort } from '@/shared-kernel/application/ports/security-strike.port'
 
 const PERMANENT_AFTER_STRIKES = 2
 const TEMPORARY_BAN = '72h'
@@ -20,7 +19,7 @@ const MESSAGE_TEMPORARY =
   'Tài khoản đã bị khoá 3 ngày và bị gắn cờ theo dõi do cố truy cập trái phép vào khu vực quản trị.'
 
 @Injectable()
-export class SecurityStrikeService implements SecurityStrikePort {
+export class SecurityStrikeService {
   constructor(
     private readonly roles: PlatformRoleService,
     @Inject(SECURITY_FLAG_REPOSITORY) private readonly flags: SecurityFlagRepository,

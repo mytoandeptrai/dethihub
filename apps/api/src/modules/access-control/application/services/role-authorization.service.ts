@@ -1,14 +1,13 @@
 import { ForbiddenException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common'
 
+import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import { BANNED_MESSAGE } from '@/modules/access-control/application/services/authentication.service'
 import { PlatformRoleService } from '@/modules/access-control/application/services/platform-role.service'
-import { AUTH_USER_DIRECTORY } from '@/shared-kernel/application/ports/auth-user-directory.port'
-import { SECURITY_STRIKE } from '@/shared-kernel/application/ports/security-strike.port'
+import { SecurityStrikeService } from '@/modules/access-control/application/services/security-strike.service'
 import { satisfiesRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { AuthUserDirectory } from '@/shared-kernel/application/ports/auth-user-directory.port'
-import type { SecurityStrikePort } from '@/shared-kernel/application/ports/security-strike.port'
+import type { AuthUserDirectory } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 import type { AuthenticatedUser } from '@/shared-kernel/infrastructure/types/authenticated-user'
 
@@ -20,7 +19,7 @@ export class RoleAuthorizationService {
   constructor(
     private readonly roles: PlatformRoleService,
     @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectory,
-    @Inject(SECURITY_STRIKE) private readonly strike: SecurityStrikePort,
+    private readonly strike: SecurityStrikeService,
   ) {}
 
   async authorize(

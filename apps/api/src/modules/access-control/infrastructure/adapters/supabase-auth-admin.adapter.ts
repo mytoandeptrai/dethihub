@@ -8,7 +8,7 @@ import type { Env } from '@/app/config/env.schema'
 import type {
   AuthUser,
   AuthUserDirectory,
-} from '@/shared-kernel/application/ports/auth-user-directory.port'
+} from '@/modules/access-control/application/ports/auth-user-directory.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { User } from '@supabase/supabase-js'
 

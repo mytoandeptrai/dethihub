@@ -1,11 +1,11 @@
 import { ForbiddenException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common'
 
+import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import { TOKEN_VERIFIER } from '@/modules/access-control/application/ports/token-verifier.port'
-import { AUTH_USER_DIRECTORY } from '@/shared-kernel/application/ports/auth-user-directory.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
+import type { AuthUserDirectory } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import type { TokenVerifier } from '@/modules/access-control/application/ports/token-verifier.port'
-import type { AuthUserDirectory } from '@/shared-kernel/application/ports/auth-user-directory.port'
 import type { AuthenticatedUser } from '@/shared-kernel/infrastructure/types/authenticated-user'
 
 const MAX_TOKEN_LENGTH = 4096

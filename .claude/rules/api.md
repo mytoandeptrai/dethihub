@@ -144,6 +144,15 @@ When stuck:
 - Stage 3 needs a state machine → that's a stage-4 signal; stop and confirm whether to introduce an aggregate
 - User says "drop the domain to simplify" → stop and ask why; downgrading loses business semantics
 
+## Ports, Implementations and Providers
+
+Follow the base modules (`order`, `article`, `auth`); do not invent a new shape.
+
+- Only repositories and adapters implement a port. Services, guards, and listeners do not `implements` anything (guards implement Nest's `CanActivate`)
+- Repository class is `XxxRepositoryImpl` in `infrastructure/repositories/xxx.repository.ts`; adapters live in `infrastructure/adapters/`
+- Only ports use `{ provide: X_TOKEN, useClass: Impl }`; services are listed directly in `providers`
+- Do not create a port or token (including in `shared-kernel`) before a real second consumer exists, and always ask the user first; a service another context needs is exported from its module instead
+
 ## Naming and Style
 
 Backed by `oxlint` + `dependency-cruiser`. Claude doesn't need to memorize conventions before writing new files — fix on lint failure. See `.oxlintrc.json` / `.dependency-cruiser.cjs`.
