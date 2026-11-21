@@ -127,6 +127,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Online heartbeat of the signed-in user */
+        post: operations["PresenceController_ping"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/settings": {
         parameters: {
             query?: never;
@@ -154,6 +171,23 @@ export interface paths {
         get?: never;
         /** Validate and save one setting (maintenance | announcements | pricing) */
         put: operations["AdminSettingsController_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/site/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Maintenance state and the announcements to show */
+        get: operations["SiteStatusController_get"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -1085,6 +1119,23 @@ export interface paths {
         patch: operations["AdminFeedbackController_markRead"];
         trace?: never;
     };
+    "/api/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send feedback (guest or signed in) */
+        post: operations["FeedbackController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/bank/overrides": {
         parameters: {
             query?: never;
@@ -1364,6 +1415,23 @@ export interface components {
             value: {
                 [key: string]: unknown;
             };
+        };
+        SiteMaintenanceDto: {
+            on: boolean;
+            message: string;
+            until: Record<string, never> | null;
+        };
+        SiteAnnouncementDto: {
+            id: string;
+            title: string;
+            text: string;
+            image: string;
+            tryPath: string;
+            until: Record<string, never> | null;
+        };
+        SiteStatusResponseDto: {
+            maintenance: components["schemas"]["SiteMaintenanceDto"];
+            announcements: components["schemas"]["SiteAnnouncementDto"][];
         };
         ChatMessageDto: {
             /**
@@ -1936,6 +2004,13 @@ export interface components {
             /** @default true */
             read: boolean;
         };
+        SubmitFeedbackDto: {
+            message: string;
+            /** @description Defaults to the signed-in account email */
+            email?: string;
+            /** @description Cut to 500 characters */
+            page?: string;
+        };
         PublicOverrideDto: {
             id: string;
             /** @enum {string} */
@@ -2490,6 +2565,32 @@ export interface operations {
             };
         };
     };
+    PresenceController_ping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
     AdminSettingsController_getAll: {
         parameters: {
             query?: never;
@@ -2539,6 +2640,34 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingValueResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    SiteStatusController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteStatusResponseDto"];
                 };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
@@ -4455,6 +4584,36 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["MarkFeedbackReadDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    FeedbackController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitFeedbackDto"];
             };
         };
         responses: {

@@ -21,6 +21,9 @@ import { AdminUserRepositoryImpl } from '@/modules/access-control/infrastructure
 import { SecurityFlagRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/security-flag.repository'
 import { UserRoleRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/user-role.repository'
 import { AdminUserController } from '@/modules/access-control/presentation/controllers/admin-user.controller'
+import { PresenceController } from '@/modules/access-control/presentation/controllers/presence.controller'
+import { PresenceRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/presence.repository'
+import { PRESENCE_REPOSITORY } from '@/modules/access-control/application/ports/presence.repository.port'
 import { MeController } from '@/modules/access-control/presentation/controllers/me.controller'
 import { ADMIN_AUDIT } from '@/shared-kernel/application/ports/admin-audit.port'
 import { USER_PROFILE_LOOKUP } from '@/shared-kernel/application/ports/user-profile-lookup.port'
@@ -30,7 +33,7 @@ import { UserDataRepositoryImpl } from '@/modules/access-control/infrastructure/
 
 @Global() // @global-approved: auth guards and the auth user directory are consumed by every context
 @Module({
-  controllers: [MeController, AdminUserController],
+  controllers: [MeController, AdminUserController, PresenceController],
   providers: [
     UserDeletionListener,
     { provide: USER_DATA_REPOSITORY, useClass: UserDataRepositoryImpl },
@@ -48,6 +51,7 @@ import { UserDataRepositoryImpl } from '@/modules/access-control/infrastructure/
     { provide: SECURITY_FLAG_REPOSITORY, useClass: SecurityFlagRepositoryImpl },
     { provide: ADMIN_AUDIT_REPOSITORY, useClass: AdminAuditRepositoryImpl },
     { provide: ADMIN_USER_REPOSITORY, useClass: AdminUserRepositoryImpl },
+    { provide: PRESENCE_REPOSITORY, useClass: PresenceRepositoryImpl },
     { provide: ADMIN_AUDIT, useClass: AdminAuditAdapter },
   ],
   exports: [

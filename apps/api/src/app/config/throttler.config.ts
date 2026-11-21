@@ -25,6 +25,7 @@ export const RATE_LIMITS: Record<RateLimitName, readonly [number, number]> = {
   'payos-webhook': [300, 300],
   workspace: [0, 600],
   files: [600, 600],
+  feedback: [5, 30],
 }
 
 interface TrackedRequest {

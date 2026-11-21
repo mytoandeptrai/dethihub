@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
-import { IsBoolean, IsOptional } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
+import { Trim } from '@/shared-kernel/infrastructure/decorators/input-transform.decorator'
 import { AdminPageQueryDto } from '@/shared-kernel/infrastructure/dtos/admin-page-query.dto'
 
 import type { FeedbackRecord } from '@/modules/feedback/application/ports/feedback.repository.port'
@@ -15,6 +16,27 @@ export class FeedbackListQueryDto extends AdminPageQueryDto {
   )
   @IsBoolean()
   read?: boolean
+}
+
+export class SubmitFeedbackDto {
+  @ApiProperty({ maxLength: 2000 })
+  @Trim(Number.MAX_SAFE_INTEGER)
+  @IsString()
+  @IsNotEmpty({ message: 'Nhập nội dung góp ý.' })
+  @MaxLength(2000, { message: 'Góp ý tối đa 2000 ký tự.' })
+  message!: string
+
+  @ApiPropertyOptional({ description: 'Defaults to the signed-in account email' })
+  @IsOptional()
+  @Trim(255)
+  @IsString()
+  email?: string
+
+  @ApiPropertyOptional({ description: 'Cut to 500 characters' })
+  @IsOptional()
+  @Trim(500)
+  @IsString()
+  page?: string
 }
 
 export class MarkFeedbackReadDto {

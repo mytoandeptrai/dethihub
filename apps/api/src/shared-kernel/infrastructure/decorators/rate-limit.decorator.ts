@@ -13,6 +13,7 @@ export const RATE_LIMIT_NAMES = [
   'payos-webhook',
   'workspace',
   'files',
+  'feedback',
 ] as const
 
 export type RateLimitName = (typeof RATE_LIMIT_NAMES)[number]
