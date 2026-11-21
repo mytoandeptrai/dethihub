@@ -32,7 +32,6 @@ const TEST_ACCOUNTS = [
   },
 ] as const
 
-// Defaults mirror de-ro/src/lib/pricing.ts DEFAULT_PRICING
 const APP_SETTINGS = {
   maintenance: { on: false },
   announcements: { items: [] },

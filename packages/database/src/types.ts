@@ -82,7 +82,6 @@ export type InsertJobDatabase = Prisma.JobUncheckedCreateInput
 export type { AuditLog }
 export type InsertAuditLog = Prisma.AuditLogUncheckedCreateInput
 
-/** de-ro domain models (see packages/database/prisma/schema.prisma) */
 export type {
   AdminAudit,
   AiCall,

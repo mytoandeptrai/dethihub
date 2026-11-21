@@ -410,7 +410,7 @@ ALTER TABLE "payment_orders" ADD CONSTRAINT "payment_orders_status_check" CHECK 
 
 ALTER TABLE "bank_questions" ADD CONSTRAINT "bank_questions_status_check" CHECK ("status" IN ('published', 'hidden'));
 
--- Order codes start at 100001 (de-ro: identity start with 100001)
+-- Order codes start at 100001
 ALTER SEQUENCE "payment_orders_order_code_seq" RESTART WITH 100001;
 
 -- =============================================================================

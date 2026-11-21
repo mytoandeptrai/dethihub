@@ -209,11 +209,11 @@ model AuditLog {
 }
 
 // =============================================================================
-// de-ro domain models. Table/column names stay snake_case to match de-ro SQL.
+// Domain models. Table and column names stay snake_case.
 // Every `*_id` / `owner_id` / `admin_id` uuid is `auth.users.id` (Supabase Auth, schema
 // not managed by Prisma), so none of them declares a relation.
 // CHECK constraints, the generated `user_items.bytes` column and the PostgREST lockdown
-// (RLS + REVOKE) live in the hand-edited SQL of migration `dero_init`.
+// (RLS + REVOKE) live in the hand-edited SQL of migration `domain_init`.
 // =============================================================================
 
 // ---- platform ---------------------------------------------------------------
