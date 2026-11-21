@@ -23,6 +23,7 @@ export const RATE_LIMITS: Record<RateLimitName, readonly [number, number]> = {
   admin: [20, 600],
   pay: [10, 120],
   workspace: [0, 600],
+  files: [600, 600],
 }
 
 interface TrackedRequest {

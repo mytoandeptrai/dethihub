@@ -11,6 +11,7 @@ export const RATE_LIMIT_NAMES = [
   'admin',
   'pay',
   'workspace',
+  'files',
 ] as const
 
 export type RateLimitName = (typeof RATE_LIMIT_NAMES)[number]

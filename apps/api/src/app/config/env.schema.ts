@@ -97,7 +97,14 @@ export const envSchema = z.object({
   SUPABASE_JWT_ISSUER: z.url().optional(),
   SUPABASE_JWT_AUDIENCE: z.string().default('authenticated'),
 
-  // Cloudflare R2 (object storage)
+  // Object storage backend
+  STORAGE_DRIVER: z.enum(['supabase', 'r2']).default('supabase'),
+  SUPABASE_STORAGE_BUCKET: z.string().min(1).default('dethihub'),
+
+  // Secret for private document keys; falls back to SUPABASE_SERVICE_ROLE_KEY
+  DOC_KEY_SECRET: z.string().optional(),
+
+  // Cloudflare R2 (used when STORAGE_DRIVER=r2)
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),

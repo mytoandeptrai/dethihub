@@ -27,6 +27,7 @@ import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { MaintenanceGuard } from '@/modules/app-settings/presentation/guards/maintenance.guard'
 import { CacheModule } from '@/modules/cache/cache.module'
 import { ExamModule } from '@/modules/exam/exam.module'
+import { StorageModule } from '@/modules/storage/storage.module'
 import { WorkspaceModule } from '@/modules/workspace/workspace.module'
 import { HealthModule } from '@/modules/health/health.module'
 
@@ -85,6 +86,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     AiModule, // AI quota, credits, chat
     ExamModule, // published exams, attempts, reports
     WorkspaceModule, // synced user items
+    StorageModule, // uploads, documents, file reads
   ],
   providers: [
     // Global guards (order matters: authentication first, then roles, then maintenance, then throttler)
