@@ -26,6 +26,7 @@
     "deps": "depcruise src --config .dependency-cruiser.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
     "@aws-sdk/client-s3": "^3.1175.0",
     "@keyv/redis": "^5.1.6",
     "@nest-lab/throttler-storage-redis": "^1.2.0",
@@ -44,12 +45,14 @@
     "@prisma/client": "^6.19.3",
     "@scalar/nestjs-api-reference": "^1.1.4",
     "@supabase/supabase-js": "^2.119.2",
+    "@workspace/core": "workspace:*",
     "@workspace/database": "workspace:*",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.8",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
     "dayjs": "^1.11.20",
+    "express": "5.2.1",
     "ioredis": "^6.0.0",
     "jose": "^6.2.18",
     "keyv": "^5.6.0",

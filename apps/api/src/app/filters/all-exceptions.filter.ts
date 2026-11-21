@@ -7,6 +7,7 @@ import {
   Logger,
   Optional,
   Inject,
+  PayloadTooLargeException,
   UnprocessableEntityException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -92,6 +93,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
         `[DB] code=${exception.code} meta=${JSON.stringify(exception.meta ?? {})}`,
       )
       return this.problemDetailsFilter.catch(httpException, host)
+    }
+
+    // body-parser rejects an oversized body before any route runs
+    if (
+      typeof exception === 'object' &&
+      exception !== null &&
+      (exception as { type?: string }).type === 'entity.too.large' &&
+      this.problemDetailsFilter
+    ) {
+      return this.problemDetailsFilter.catch(
+        new PayloadTooLargeException({
+          code: 'BAD_REQUEST',
+          message: 'Request body is too large',
+        }),
+        host,
+      )
     }
 
     // Only handle non-HTTP exceptions (system errors)

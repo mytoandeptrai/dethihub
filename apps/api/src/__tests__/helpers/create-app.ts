@@ -50,7 +50,7 @@ export async function createTestApp(options: CreateTestAppOptions = {}): Promise
     app.get(RequestContextInterceptor),
     app.get(CorrelationIdInterceptor),
     app.get(TraceContextInterceptor),
-    new TimeoutInterceptor(30_000),
+    new TimeoutInterceptor(app.get(Reflector), 30_000),
     new LocationHeaderInterceptor(),
     new LinkHeaderInterceptor(),
     new TransformInterceptor(app.get(Reflector)),

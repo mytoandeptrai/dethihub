@@ -1,6 +1,7 @@
 import { RequestMethod } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
+import { json, urlencoded } from 'express'
 import { Logger } from 'nestjs-pino'
 
 import { createCorsConfig } from '@/app/config/security.config'
@@ -25,7 +26,13 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true, // buffer logs until Logger is ready
+    bodyParser: false, // body limits are set per route below
   })
+
+  // AI chat carries whole source documents; every other route stays small
+  app.use('/api/ai/chat', json({ limit: '2mb' }))
+  app.use(json({ limit: '100kb' }))
+  app.use(urlencoded({ extended: true, limit: '100kb' }))
 
   // Behind Render's proxy: req.ip must be the client address for rate-limit tracking
   app.set('trust proxy', 1)
@@ -68,7 +75,7 @@ async function bootstrap() {
     app.get(TraceContextInterceptor),
 
     // 2. Timeout control (30 seconds)
-    new TimeoutInterceptor(30_000),
+    new TimeoutInterceptor(app.get(Reflector), 30_000),
 
     // 3. Location header (201 Created)
     new LocationHeaderInterceptor(),

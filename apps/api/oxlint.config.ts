@@ -2,6 +2,7 @@ import { base, depend, node, promise, unicorn, vitest } from '@infra-x/code-qual
 import { defineConfig } from 'oxlint'
 
 export default defineConfig({
+  ignorePatterns: ['src/modules/ai/infrastructure/prompts/generated/prompts.generated.ts'],
   extends: [
     base(),
     unicorn(),

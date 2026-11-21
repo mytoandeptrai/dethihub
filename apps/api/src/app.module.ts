@@ -22,6 +22,7 @@ import { ETagMiddleware } from '@/app/middleware/etag.middleware'
 import { AccessControlModule } from '@/modules/access-control/access-control.module'
 import { PlatformRolesGuard } from '@/modules/access-control/presentation/guards/platform-roles.guard'
 import { SupabaseAuthGuard } from '@/modules/access-control/presentation/guards/supabase-auth.guard'
+import { AiModule } from '@/modules/ai/ai.module'
 import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { MaintenanceGuard } from '@/modules/app-settings/presentation/guards/maintenance.guard'
 import { CacheModule } from '@/modules/cache/cache.module'
@@ -80,6 +81,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     CacheModule, // Redis cache
     AccessControlModule, // authentication, platform roles, security strikes
     AppSettingsModule, // app settings and maintenance mode
+    AiModule, // AI quota, credits, chat
   ],
   providers: [
     // Global guards (order matters: authentication first, then roles, then maintenance, then throttler)

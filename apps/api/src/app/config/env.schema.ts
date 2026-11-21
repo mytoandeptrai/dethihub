@@ -5,6 +5,18 @@ import { z } from 'zod'
  *
  * Uses Zod for type-safe environment variable validation
  */
+const nonNegativeNumber = (value: string | undefined, fallback: number): number => {
+  const parsed = Number(value)
+  return value !== undefined && value.trim() !== '' && Number.isFinite(parsed) && parsed >= 0
+    ? parsed
+    : fallback
+}
+
+const optionalText = z
+  .string()
+  .optional()
+  .transform((value) => value?.trim() || undefined)
+
 export const envSchema = z.object({
   // Application environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -90,6 +102,58 @@ export const envSchema = z.object({
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET: z.string().optional(),
+
+  // AI points (1 point = 1,000 tokens); empty or invalid falls back to the default
+  AI_WELCOME_POINTS: z
+    .string()
+    .optional()
+    .transform((value) => nonNegativeNumber(value, 80)),
+  AI_MONTHLY_TOKENS: z
+    .string()
+    .optional()
+    .transform((value) => nonNegativeNumber(value, 0)),
+  AI_RECEIPT_SECRET: z.string().optional(),
+
+  // LLM providers: an empty key disables the provider; base URL and model fall back to code defaults
+  LLM_API_KEY: optionalText,
+  LLM_BASE_URL: optionalText,
+  LLM_MODEL: optionalText,
+  LLM_FALLBACK_MODEL: optionalText,
+  LLM_TIMEOUT_MS: z
+    .string()
+    .optional()
+    .transform((value) => {
+      const parsed = nonNegativeNumber(value, 250_000)
+      return parsed >= 10_000 ? parsed : 250_000
+    }),
+  STRONG_POINT_FACTOR: z
+    .string()
+    .optional()
+    .transform((value) => {
+      const parsed = nonNegativeNumber(value, 3)
+      return parsed >= 1 && parsed <= 10 ? parsed : 3
+    }),
+  DEEPSEEK_API_KEY: optionalText,
+  DEEPSEEK_BASE_URL: optionalText,
+  DEEPSEEK_MODEL: optionalText,
+  DEEPSEEK_STRONG_MODEL: optionalText,
+  GEMINI_API_KEY: optionalText,
+  GEMINI_BASE_URL: optionalText,
+  GEMINI_MODEL: optionalText,
+  FOSTA_API_KEY: optionalText,
+  FOSTA_BASE_URL: optionalText,
+  FOSTA_MODEL: optionalText,
+  ANYROUTER_API_KEY: optionalText,
+  ANYROUTER_BASE_URL: optionalText,
+  ANYROUTER_MODEL: optionalText,
+  NIGHTROUTER_API_KEY: optionalText,
+  NIGHTROUTER_BASE_URL: optionalText,
+  NIGHTROUTER_MODEL: optionalText,
+  ANTHROPIC_API_KEY: optionalText,
+  ANTHROPIC_BASE_URL: optionalText,
+  ANTHROPIC_MODEL: optionalText,
+  AI_SETTINGS_SECRET: optionalText,
+  AI_ENDPOINT_ALLOWED_HOSTS: optionalText,
 
   // CORS configuration
   ALLOWED_ORIGINS: z

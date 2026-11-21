@@ -28,6 +28,7 @@ export function createCorsConfig(allowedOrigins?: string[]): CorsOptions {
       'X-Correlation-Id',
       'Traceparent',
       'Tracestate',
+      'X-Ai-Retry-Of',
     ],
     exposedHeaders: [
       'X-Request-Id',
