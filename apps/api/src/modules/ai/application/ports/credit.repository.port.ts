@@ -13,6 +13,8 @@ export interface CreditRepositoryPort {
   consume(userId: string, month: string, base: number): Promise<{ used: number; balance: number }>
   /** null when the receipt was already refunded or the daily refund limit is reached */
   refund(userId: string, month: string, receipt: string, tokens: number): Promise<number | null>
+  /** adds tokens to the balance, records the event and returns the new balance */
+  grant(userId: string, tokens: number, kind: string): Promise<number>
   sumGranted(userId: string): Promise<number>
   listEvents(userId: string, limit: number): Promise<CreditEvent[]>
 }

@@ -41,6 +41,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Accounts with usage, role, security flag and online state */
+        get: operations["AdminUserController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/ban": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ban an account; no hours = permanent */
+        post: operations["AdminUserController_ban"];
+        /** Lift a ban and the security lock (strikes are kept) */
+        delete: operations["AdminUserController_unban"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/security-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete the security flag row (does not lift a ban) */
+        delete: operations["AdminUserController_clearFlag"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an account and its data in every context */
+        delete: operations["AdminUserController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin audit log, newest first */
+        get: operations["AdminUserController_audit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Maintenance, announcements and pricing settings */
+        get: operations["AdminSettingsController_getAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/settings/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Validate and save one setting (maintenance | announcements | pricing) */
+        put: operations["AdminSettingsController_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ai/chat": {
         parameters: {
             query?: never;
@@ -103,6 +223,128 @@ export interface paths {
         put?: never;
         /** Record dissatisfaction with an AI reply */
         post: operations["AiController_feedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/users/{id}/quota": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quota override, usage and credit balance of a user */
+        get: operations["AiAdminController_getQuota"];
+        /** Set the monthly token limit of a user (null = unlimited) */
+        put: operations["AiAdminController_setQuota"];
+        post?: never;
+        /** Remove the override; the default monthly limit applies again */
+        delete: operations["AiAdminController_clearQuota"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/users/{id}/credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add tokens to a balance (claims the welcome gift first when missing) */
+        post: operations["AiAdminController_grantCredits"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** AI calls per day, model and provider */
+        get: operations["AiAdminController_stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Latest failed AI calls with the affected user */
+        get: operations["AiAdminController_errors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Provider settings with masked keys (no call is made) */
+        get: operations["AiAdminController_providers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/providers/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save model, endpoint and API key of a provider */
+        put: operations["AiAdminController_saveProvider"];
+        post?: never;
+        /** Drop the saved settings; the provider falls back to the environment */
+        delete: operations["AiAdminController_resetProvider"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ai/providers/{provider}/ping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a one-word prompt to a provider (costs a few tokens) */
+        post: operations["AiAdminController_ping"];
         delete?: never;
         options?: never;
         head?: never;
@@ -313,6 +555,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/exams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Community exams (moderators see listed ones only), without the doc */
+        get: operations["ExamAdminController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/exams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One exam with its doc for preview */
+        get: operations["ExamAdminController_get"];
+        put?: never;
+        post?: never;
+        /** Delete an exam for good */
+        delete: operations["ExamAdminController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/exams/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Publish, hide or remove an exam (removing needs a reason) */
+        patch: operations["ExamAdminController_setStatus"];
+        trace?: never;
+    };
+    "/api/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exam reports (moderators see reports of listed exams only) */
+        get: operations["ExamAdminController_listReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/reports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark a report resolved or dismissed */
+        patch: operations["ExamAdminController_resolveReport"];
+        trace?: never;
+    };
     "/api/workspace/items": {
         parameters: {
             query?: never;
@@ -445,6 +773,58 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/storage/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Storage limit override and usage of a user */
+        get: operations["StorageAdminController_getUser"];
+        /** Set the storage limit of a user (maxBytes null = default 10 MB) */
+        put: operations["StorageAdminController_setUser"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Uploaded documents of all users plus the top 20 by size */
+        get: operations["StorageAdminController_listDocuments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a document row and, when unshared, its stored file */
+        delete: operations["StorageAdminController_deleteDocument"];
         options?: never;
         head?: never;
         patch?: never;
@@ -620,6 +1000,296 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Top-up orders with revenue totals */
+        get: operations["PaymentAdminController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/payments/{orderCode}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask PayOS about an unsettled order and act on the answer */
+        post: operations["PaymentAdminController_sync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/payments/{orderCode}/credit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Credit an order by hand (a note is required) */
+        post: operations["PaymentAdminController_credit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User feedback, newest first */
+        get: operations["AdminFeedbackController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/feedback/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark feedback read or unread (unknown ids are ignored) */
+        patch: operations["AdminFeedbackController_markRead"];
+        trace?: never;
+    };
+    "/api/bank/overrides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Question bank overrides; hidden questions carry no data */
+        get: operations["BankController_overrides"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/bank/overrides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All overrides with full data, newest first */
+        get: operations["AdminBankController_overrides"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/bank/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a question (id is made by the server) */
+        post: operations["AdminBankController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/bank/questions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Override a static question or edit a created one */
+        put: operations["AdminBankController_update"];
+        post?: never;
+        /** Drop the override (revert a static question, delete a created one) */
+        delete: operations["AdminBankController_revert"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/bank/questions/{id}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hide a question */
+        post: operations["AdminBankController_hide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/bank/questions/{id}/unhide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a hidden question again */
+        post: operations["AdminBankController_unhide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/bank/vision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read exam page images into question JSON (no points charged) */
+        post: operations["AdminBankController_vision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/stats/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Totals and per-day counts (Asia/Ho_Chi_Minh days) */
+        get: operations["AdminOpsController_overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/stats/online": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Users seen in the last 2 minutes (newest 20) */
+        get: operations["AdminOpsController_online"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ping the database and file store (all, or one `target`) */
+        get: operations["AdminOpsController_health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/health/targets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Endpoints and masked keys of the services that can be pinged */
+        get: operations["AdminOpsController_targets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/db/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** CPU, RAM, disk and connections of the Postgres server */
+        get: operations["AdminOpsController_dbMetrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -629,6 +1299,71 @@ export interface components {
             userId: string;
             /** @enum {string|null} */
             role: "moderator" | "admin" | null;
+        };
+        AdminUserResponseDto: {
+            id: string;
+            email: Record<string, never> | null;
+            displayName: Record<string, never> | null;
+            avatarUrl: Record<string, never> | null;
+            createdAt: string;
+            lastSignInAt: Record<string, never> | null;
+            bannedUntil: Record<string, never> | null;
+            docs: number;
+            decks: number;
+            tokensThisMonth: number;
+            role: Record<string, never> | null;
+            strikes: Record<string, never> | null;
+            lockedUntil: Record<string, never> | null;
+            lastAction: Record<string, never> | null;
+            online: boolean;
+        };
+        AdminUserListResponseDto: {
+            items: components["schemas"]["AdminUserResponseDto"][];
+            total: number;
+        };
+        BanUserDto: {
+            /** @description Ban length in hours; omitted = permanent */
+            hours?: number;
+            reason?: string;
+        };
+        DeleteUserDto: {
+            /** @description Must match the account email (case-insensitive) */
+            confirmEmail: string;
+        };
+        AuditRowResponseDto: {
+            id: string;
+            adminId: Record<string, never> | null;
+            action: string;
+            target: Record<string, never> | null;
+            detail: {
+                [key: string]: unknown;
+            } | null;
+            createdAt: string;
+        };
+        AuditListResponseDto: {
+            items: components["schemas"]["AuditRowResponseDto"][];
+            total: number;
+        };
+        SettingsResponseDto: {
+            maintenance: {
+                [key: string]: unknown;
+            };
+            announcements: {
+                [key: string]: unknown;
+            };
+            pricing: {
+                [key: string]: unknown;
+            } | null;
+        };
+        SetSettingDto: {
+            value: {
+                [key: string]: unknown;
+            };
+        };
+        SettingValueResponseDto: {
+            value: {
+                [key: string]: unknown;
+            };
         };
         ChatMessageDto: {
             /**
@@ -706,6 +1441,89 @@ export interface components {
             reply?: string;
             context?: string;
             note?: string;
+        };
+        QuotaOverrideDto: {
+            monthlyTokens: Record<string, never> | null;
+            note: string;
+        };
+        UserQuotaResponseDto: {
+            override: components["schemas"]["QuotaOverrideDto"] | null;
+            defaultLimit: number;
+            usedThisMonth: number;
+            requestsThisMonth: number;
+            credits: number;
+            welcomePending: boolean;
+            emptyDay: number;
+            freeEmpty: number;
+        };
+        SetQuotaDto: {
+            /** @description null = unlimited; otherwise 0..1e9 tokens per month */
+            monthlyTokens: Record<string, never> | null;
+            note?: string;
+        };
+        GrantCreditsDto: {
+            /** @description Tokens to add (1 point = 1,000 tokens), 1..100,000,000 */
+            tokens: number;
+            note?: string;
+        };
+        BalanceResponseDto: {
+            balance: number;
+        };
+        AiStatsRowDto: {
+            day: string;
+            model: string;
+            provider: string;
+            calls: number;
+            errors: number;
+            tokens: number;
+            cost: Record<string, never> | null;
+            avgMs: number;
+        };
+        AiStatsResponseDto: {
+            days: number;
+            rows: components["schemas"]["AiStatsRowDto"][];
+        };
+        AiErrorDto: {
+            id: number;
+            userId: Record<string, never> | null;
+            model: string;
+            provider: string;
+            error: Record<string, never> | null;
+            ms: number;
+            createdAt: string;
+            userName: string;
+            userEmail: string;
+            emptyDay: number;
+        };
+        AiErrorsResponseDto: {
+            freeEmpty: number;
+            items: components["schemas"]["AiErrorDto"][];
+        };
+        ProviderDto: {
+            provider: string;
+            model: string;
+            defaultModel: string;
+            endpoint: string;
+            defaultEndpoint: string;
+            keyMask: string;
+            custom: boolean;
+        };
+        ProvidersResponseDto: {
+            providers: components["schemas"]["ProviderDto"][];
+        };
+        SaveProviderDto: {
+            model?: string;
+            /** @description Empty = the default endpoint */
+            endpoint?: string;
+            /** @description Empty = keep the saved key */
+            apiKey?: string;
+        };
+        PingResponseDto: {
+            provider: string;
+            model: string;
+            ok: boolean;
+            ms: number;
+            error?: string;
         };
         ExamCardDto: {
             id: string;
@@ -797,6 +1615,85 @@ export interface components {
             reason: string;
             detail?: string;
         };
+        AdminExamDto: {
+            id: string;
+            ownerId: Record<string, never> | null;
+            ownerEmail: Record<string, never> | null;
+            title: string;
+            subject: string;
+            grade: string;
+            school: string;
+            createdAt: string;
+            questionCount: number;
+            durationMinutes: number;
+            totalPoints: number;
+            preview: string;
+            listed: boolean;
+            /** @enum {string} */
+            status: "published" | "hidden" | "removed";
+            removedReason: Record<string, never> | null;
+            moderatedBy: Record<string, never> | null;
+            moderatedAt: Record<string, never> | null;
+            missingKeys: Record<string, never> | null;
+            openReports: number;
+        };
+        AdminExamListResponseDto: {
+            items: components["schemas"]["AdminExamDto"][];
+            total: number;
+        };
+        AdminExamDetailDto: {
+            id: string;
+            ownerId: Record<string, never> | null;
+            ownerEmail: Record<string, never> | null;
+            title: string;
+            subject: string;
+            grade: string;
+            school: string;
+            createdAt: string;
+            questionCount: number;
+            durationMinutes: number;
+            totalPoints: number;
+            preview: string;
+            listed: boolean;
+            /** @enum {string} */
+            status: "published" | "hidden" | "removed";
+            removedReason: Record<string, never> | null;
+            moderatedBy: Record<string, never> | null;
+            moderatedAt: Record<string, never> | null;
+            missingKeys: Record<string, never> | null;
+            openReports: number;
+            doc: {
+                [key: string]: unknown;
+            };
+        };
+        SetExamStatusDto: {
+            /** @enum {string} */
+            status: "published" | "hidden" | "removed";
+            /** @description Required when removing, max 500 chars */
+            reason?: string;
+        };
+        AdminReportDto: {
+            id: string;
+            examId: string;
+            examTitle: Record<string, never> | null;
+            reporterId: Record<string, never> | null;
+            reporterEmail: Record<string, never> | null;
+            reason: string;
+            detail: Record<string, never> | null;
+            /** @enum {string} */
+            status: "open" | "resolved" | "dismissed";
+            createdAt: string;
+            resolvedBy: Record<string, never> | null;
+            resolvedAt: Record<string, never> | null;
+        };
+        AdminReportListResponseDto: {
+            items: components["schemas"]["AdminReportDto"][];
+            total: number;
+        };
+        ResolveReportDto: {
+            /** @enum {string} */
+            status: "resolved" | "dismissed";
+        };
         ItemResponseDto: {
             id: string;
             data: {
@@ -849,6 +1746,46 @@ export interface components {
             kinds: {
                 [key: string]: components["schemas"]["KindUsageDto"];
             };
+        };
+        StorageOverrideDto: {
+            maxBytes: number;
+            note: string;
+        };
+        UserStorageResponseDto: {
+            override: components["schemas"]["StorageOverrideDto"] | null;
+            defaultBytes: number;
+            used: number;
+        };
+        SetStorageDto: {
+            /** @description null removes the override; else 1 MiB..1 GiB in bytes */
+            maxBytes: Record<string, never> | null;
+            note?: string;
+        };
+        AdminDocumentDto: {
+            id: string;
+            ownerId: string;
+            ownerEmail: Record<string, never> | null;
+            name: string;
+            mime: string;
+            size: number;
+            url: string;
+            subject: Record<string, never> | null;
+            createdAt: string;
+        };
+        TopStorageUserDto: {
+            ownerId: string;
+            email: string;
+            name: string;
+            totalSize: number;
+            docCount: number;
+        };
+        AdminDocumentListResponseDto: {
+            items: components["schemas"]["AdminDocumentDto"][];
+            topUsers: components["schemas"]["TopStorageUserDto"][];
+            total: number;
+        };
+        DeleteDocumentResponseDto: {
+            fileRemoved: boolean;
         };
         ExtractBodyDto: {
             /** Format: binary */
@@ -932,6 +1869,176 @@ export interface components {
         };
         WebhookAckResponseDto: {
             ok: boolean;
+        };
+        AdminPaymentDto: {
+            orderCode: number;
+            userId: string;
+            email: Record<string, never> | null;
+            vnd: number;
+            points: number;
+            bonusPoints: number;
+            /** @enum {string} */
+            status: "pending" | "paid" | "cancelled" | "expired" | "failed";
+            reference: Record<string, never> | null;
+            createdAt: string;
+            paidAt: Record<string, never> | null;
+            attention: boolean;
+        };
+        RevenueSlotDto: {
+            vnd: number;
+            count: number;
+        };
+        MonthlyRevenueDto: {
+            vnd: number;
+            count: number;
+            /** @example 2026-11 */
+            month: string;
+        };
+        RevenueDto: {
+            day: components["schemas"]["RevenueSlotDto"];
+            prevDay: components["schemas"]["RevenueSlotDto"];
+            week: components["schemas"]["RevenueSlotDto"];
+            prevWeek: components["schemas"]["RevenueSlotDto"];
+            month: components["schemas"]["RevenueSlotDto"];
+            prevMonth: components["schemas"]["RevenueSlotDto"];
+            all: components["schemas"]["RevenueSlotDto"];
+            months: components["schemas"]["MonthlyRevenueDto"][];
+        };
+        PaymentListResponseDto: {
+            items: components["schemas"]["AdminPaymentDto"][];
+            total: number;
+            configured: boolean;
+            revenue: components["schemas"]["RevenueDto"];
+        };
+        SyncPaymentResponseDto: {
+            /** @description Status PayOS reported; null when it could not answer */
+            payos: Record<string, never> | null;
+            status: string;
+        };
+        CreditOrderDto: {
+            /** @description Why the order is credited by hand (e.g. the bank transaction id) */
+            note: string;
+        };
+        FeedbackResponseDto: {
+            id: string;
+            userId: Record<string, never> | null;
+            email: Record<string, never> | null;
+            message: string;
+            page: Record<string, never> | null;
+            createdAt: string;
+            read: boolean;
+        };
+        FeedbackListResponseDto: {
+            items: components["schemas"]["FeedbackResponseDto"][];
+            total: number;
+        };
+        MarkFeedbackReadDto: {
+            /** @default true */
+            read: boolean;
+        };
+        PublicOverrideDto: {
+            id: string;
+            /** @enum {string} */
+            status: "published" | "hidden";
+            data: {
+                [key: string]: unknown;
+            } | null;
+        };
+        AdminOverrideDto: {
+            id: string;
+            /** @enum {string} */
+            status: "published" | "hidden";
+            data: {
+                [key: string]: unknown;
+            } | null;
+            updatedAt: Record<string, never> | null;
+            updatedBy: Record<string, never> | null;
+        };
+        SaveBankQuestionDto: {
+            entry: {
+                [key: string]: unknown;
+            };
+            /**
+             * @description Anything but 'hidden' publishes
+             * @enum {string}
+             */
+            status?: "published" | "hidden";
+        };
+        BankSavedResponseDto: {
+            id: string;
+            entry: {
+                [key: string]: unknown;
+            };
+        };
+        HideBankQuestionDto: {
+            /** @description Stored when the question has no override row yet */
+            entry?: {
+                [key: string]: unknown;
+            };
+        };
+        BankVisionDto: {
+            /** @description 1..4 jpeg/png/webp data URLs */
+            images: string[];
+        };
+        BankVisionResponseDto: {
+            content: string;
+            model: string;
+            tokens: number;
+        };
+        DailyStatsDto: {
+            day: string;
+            newUsers: number;
+            newDocs: number;
+            newDecks: number;
+            newCommunityExams: number;
+        };
+        StatsOverviewResponseDto: {
+            days: number;
+            totalUsers: number;
+            active7d: number;
+            active30d: number;
+            onlineCount: number;
+            chartDays: components["schemas"]["DailyStatsDto"][];
+        };
+        OnlineUserDto: {
+            userId: string;
+            email: string;
+            name: string;
+            avatar: string;
+            lastSeen: string;
+        };
+        OnlineResponseDto: {
+            onlineCount: number;
+            users: components["schemas"]["OnlineUserDto"][];
+        };
+        PingResultDto: {
+            ok: boolean;
+            ms: number;
+            error?: string;
+        };
+        HealthResponseDto: {
+            checkedAt: string;
+            supabase?: components["schemas"]["PingResultDto"];
+            r2?: components["schemas"]["PingResultDto"];
+        };
+        HealthTargetDto: {
+            endpoint: string;
+            keyMask: string;
+        };
+        HealthTargetsResponseDto: {
+            supabase: components["schemas"]["HealthTargetDto"];
+            r2: components["schemas"]["HealthTargetDto"];
+        };
+        DbMetricsResponseDto: {
+            name: string;
+            region: string;
+            compute: string;
+            checkedAt: string;
+            cpu: Record<string, never> | null;
+            ram: Record<string, never> | null;
+            disk: Record<string, never> | null;
+            connections: Record<string, never> | null;
+            maxConnections: Record<string, never> | null;
         };
         FieldError: {
             /**
@@ -1197,6 +2304,254 @@ export interface operations {
             };
         };
     };
+    AdminUserController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+                /** @description Matches email or display name within the page, max 100 chars */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminUserController_ban: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BanUserDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminUserController_unban: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminUserController_clearFlag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminUserController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteUserDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminUserController_audit: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminSettingsController_getAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminSettingsController_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingValueResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
     AiController_chat: {
         parameters: {
             query?: never;
@@ -1308,6 +2663,314 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_getQuota: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserQuotaResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_setQuota: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetQuotaDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_clearQuota: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_grantCredits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantCreditsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalanceResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_stats: {
+        parameters: {
+            query?: {
+                /** @description Clamped to 1..90 */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiStatsResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_errors: {
+        parameters: {
+            query?: {
+                /** @description Clamped to 1..100 */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiErrorsResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvidersResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_saveProvider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveProviderDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvidersResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_resetProvider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvidersResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AiAdminController_ping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PingResponseDto"];
+                };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
             default: {
@@ -1752,6 +3415,197 @@ export interface operations {
             };
         };
     };
+    ExamAdminController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+                /** @description Title contains, max 100 chars */
+                q?: string;
+                status?: "published" | "hidden" | "removed";
+                subject?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminExamListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    ExamAdminController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminExamDetailDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    ExamAdminController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    ExamAdminController_setStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetExamStatusDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    ExamAdminController_listReports: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+                status?: "open" | "resolved" | "dismissed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminReportListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    ExamAdminController_resolveReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveReportDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
     WorkspaceItemController_list: {
         parameters: {
             query: {
@@ -2011,6 +3865,132 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    StorageAdminController_getUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserStorageResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    StorageAdminController_setUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStorageDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    StorageAdminController_listDocuments: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+                /** @description Name contains, max 100 chars */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDocumentListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    StorageAdminController_deleteDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteDocumentResponseDto"];
+                };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
             default: {
@@ -2319,6 +4299,556 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebhookAckResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    PaymentAdminController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+                filter?: "all" | "pending" | "paid" | "closed" | "attention";
+                /** @description Exact order code */
+                orderCode?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    PaymentAdminController_sync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncPaymentResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    PaymentAdminController_credit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreditOrderDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminFeedbackController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description Clamped to 1..100 */
+                perPage?: number;
+                /** @description Only filters when given */
+                read?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminFeedbackController_markRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkFeedbackReadDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    BankController_overrides: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicOverrideDto"][];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_overrides: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverrideDto"][];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveBankQuestionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankSavedResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveBankQuestionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankSavedResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_revert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_hide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HideBankQuestionDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_unhide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminBankController_vision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BankVisionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankVisionResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminOpsController_overview: {
+        parameters: {
+            query?: {
+                /** @description Clamped to 1..90 */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsOverviewResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminOpsController_online: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnlineResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminOpsController_health: {
+        parameters: {
+            query?: {
+                target?: "supabase" | "r2";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminOpsController_targets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthTargetsResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    AdminOpsController_dbMetrics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DbMetricsResponseDto"];
                 };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */

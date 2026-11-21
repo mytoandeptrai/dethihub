@@ -15,6 +15,7 @@ interface GuardedRequest {
   ip?: string
   route?: { path?: string }
   user?: AuthenticatedUser
+  platformRole?: PlatformRole
 }
 
 @Injectable()
@@ -36,7 +37,12 @@ export class PlatformRolesGuard implements CanActivate {
       throw new UnauthorizedException({ code: ErrorCode.TOKEN_MISSING, message: 'Cần đăng nhập.' })
     }
     const action = `${request.method} ${request.route?.path ?? request.path}`
-    await this.authorization.authorize(request.user, required, action, request.ip ?? '')
+    request.platformRole = await this.authorization.authorize(
+      request.user,
+      required,
+      action,
+      request.ip ?? '',
+    )
     return true
   }
 }

@@ -10,6 +10,7 @@ import {
 import { PROVIDER_SETTINGS_REPOSITORY } from '@/modules/ai/application/ports/provider-settings.repository.port'
 import { QUOTA_REPOSITORY } from '@/modules/ai/application/ports/quota.repository.port'
 import { TASK_PROMPTS } from '@/modules/ai/application/ports/task-prompts.port'
+import { AiAdminService } from '@/modules/ai/application/services/ai-admin.service'
 import { ChatService } from '@/modules/ai/application/services/chat.service'
 import { FeedbackService } from '@/modules/ai/application/services/feedback.service'
 import { ProviderConfigService } from '@/modules/ai/application/services/provider-config.service'
@@ -25,16 +26,23 @@ import { CreditRepositoryImpl } from '@/modules/ai/infrastructure/repositories/c
 import { FeedbackRepositoryImpl } from '@/modules/ai/infrastructure/repositories/feedback.repository'
 import { ProviderSettingsRepositoryImpl } from '@/modules/ai/infrastructure/repositories/provider-settings.repository'
 import { QuotaRepositoryImpl } from '@/modules/ai/infrastructure/repositories/quota.repository'
+import { AiAdminController } from '@/modules/ai/presentation/controllers/ai-admin.controller'
 import { AiController } from '@/modules/ai/presentation/controllers/ai.controller'
 import { AI_METER } from '@/shared-kernel/application/ports/ai-meter.port'
 import { CREDIT_GRANT } from '@/shared-kernel/application/ports/credit-grant.port'
 import { VISION_READER } from '@/shared-kernel/application/ports/vision-reader.port'
+import { USER_DATA_REPOSITORY } from '@/modules/ai/application/ports/user-data.repository.port'
+import { UserDeletionListener } from '@/modules/ai/application/listeners/user-deletion.listener'
+import { UserDataRepositoryImpl } from '@/modules/ai/infrastructure/repositories/user-data.repository'
 
 @Global() // @global-approved: other contexts meter AI points, read images and grant credits through shared-kernel ports
 @Module({
-  controllers: [AiController],
+  controllers: [AiController, AiAdminController],
   providers: [
+    UserDeletionListener,
+    { provide: USER_DATA_REPOSITORY, useClass: UserDataRepositoryImpl },
     ChatService,
+    AiAdminService,
     ProviderConfigService,
     QuotaService,
     FeedbackService,

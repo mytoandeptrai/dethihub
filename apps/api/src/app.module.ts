@@ -22,16 +22,20 @@ import { ETagMiddleware } from '@/app/middleware/etag.middleware'
 import { AccessControlModule } from '@/modules/access-control/access-control.module'
 import { PlatformRolesGuard } from '@/modules/access-control/presentation/guards/platform-roles.guard'
 import { SupabaseAuthGuard } from '@/modules/access-control/presentation/guards/supabase-auth.guard'
+import { TargetProtectionGuard } from '@/modules/access-control/presentation/guards/target-protection.guard'
 import { AiModule } from '@/modules/ai/ai.module'
 import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { MaintenanceGuard } from '@/modules/app-settings/presentation/guards/maintenance.guard'
+import { BankModule } from '@/modules/bank/bank.module'
 import { BillingModule } from '@/modules/billing/billing.module'
 import { CacheModule } from '@/modules/cache/cache.module'
 import { ExamModule } from '@/modules/exam/exam.module'
+import { FeedbackModule } from '@/modules/feedback/feedback.module'
+import { HealthModule } from '@/modules/health/health.module'
 import { MediaModule } from '@/modules/media/media.module'
+import { OpsModule } from '@/modules/ops/ops.module'
 import { StorageModule } from '@/modules/storage/storage.module'
 import { WorkspaceModule } from '@/modules/workspace/workspace.module'
-import { HealthModule } from '@/modules/health/health.module'
 
 import type { Env } from '@/app/config/env.schema'
 import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
@@ -91,11 +95,15 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     StorageModule, // uploads, documents, file reads
     MediaModule, // text extraction, vision, image generation, figure store
     BillingModule, // PayOS top-up orders and webhook
+    FeedbackModule, // user feedback inbox
+    BankModule, // question bank overrides and admin editing
+    OpsModule, // admin stats, health and database metrics
   ],
   providers: [
     // Global guards (order matters: authentication first, then roles, then maintenance, then throttler)
     { provide: APP_GUARD, useClass: SupabaseAuthGuard },
     { provide: APP_GUARD, useClass: PlatformRolesGuard },
+    { provide: APP_GUARD, useClass: TargetProtectionGuard },
     { provide: APP_GUARD, useClass: MaintenanceGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Exception filters (require ClsService injection)

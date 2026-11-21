@@ -1,4 +1,4 @@
-import { createDecipheriv, createHash } from 'node:crypto'
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 
 export const MIN_SETTINGS_SECRET_LENGTH = 32
 
@@ -21,4 +21,12 @@ export function decryptKey(secret: string, sealed: string): string | null {
   } catch {
     return null
   }
+}
+
+/** Inverse of decryptKey; the caller checks the secret length first */
+export function encryptKey(secret: string, plain: string): string {
+  const iv = randomBytes(12)
+  const cipher = createCipheriv('aes-256-gcm', createHash('sha256').update(secret).digest(), iv)
+  const data = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
+  return ['v1', iv.toString('base64'), cipher.getAuthTag().toString('base64'), data.toString('base64')].join(':')
 }

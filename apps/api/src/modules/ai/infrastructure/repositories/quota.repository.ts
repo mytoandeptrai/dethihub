@@ -16,7 +16,27 @@ export class QuotaRepositoryImpl implements QuotaRepositoryPort {
   async findOverride(userId: string): Promise<QuotaOverride | null> {
     const row = await this.prisma.aiQuotaOverride.findUnique({ where: { userId } })
     if (!row) return null
-    return { monthlyTokens: row.monthlyTokens === null ? null : Number(row.monthlyTokens) }
+    return {
+      monthlyTokens: row.monthlyTokens === null ? null : Number(row.monthlyTokens),
+      note: row.note,
+    }
+  }
+
+  async findRequests(userId: string, month: string): Promise<number> {
+    const row = await this.prisma.aiUsage.findUnique({ where: { userId_month: { userId, month } } })
+    return row?.requests ?? 0
+  }
+
+  async upsertOverride(userId: string, monthlyTokens: number | null, note: string | null): Promise<void> {
+    await this.prisma.aiQuotaOverride.upsert({
+      where: { userId },
+      create: { userId, monthlyTokens, note },
+      update: { monthlyTokens, note },
+    })
+  }
+
+  async deleteOverride(userId: string): Promise<void> {
+    await this.prisma.aiQuotaOverride.deleteMany({ where: { userId } })
   }
 
   async findUsedTokens(userId: string, month: string): Promise<number> {

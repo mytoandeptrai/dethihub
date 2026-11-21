@@ -96,6 +96,9 @@ export const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   SUPABASE_JWT_ISSUER: z.url().optional(),
   SUPABASE_JWT_AUDIENCE: z.string().default('authenticated'),
+  // Labels for the admin database card; the metrics endpoint does not report them
+  SUPABASE_REGION: z.string().default('ap-southeast-1'),
+  SUPABASE_COMPUTE: z.string().default('Nano'),
 
   // Object storage backend
   STORAGE_DRIVER: z.enum(['supabase', 'r2']).default('supabase'),

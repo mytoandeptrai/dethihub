@@ -7,6 +7,9 @@ export interface ProviderSettingRow {
 
 export interface ProviderSettingsRepositoryPort {
   findAll(): Promise<ProviderSettingRow[]>
+  find(provider: string): Promise<ProviderSettingRow | null>
+  upsert(row: ProviderSettingRow): Promise<void>
+  delete(provider: string): Promise<void>
 }
 
 export const PROVIDER_SETTINGS_REPOSITORY = Symbol('PROVIDER_SETTINGS_REPOSITORY')

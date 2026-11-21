@@ -98,6 +98,18 @@ export class CreditRepositoryImpl implements CreditRepositoryPort {
     })
   }
 
+  async grant(userId: string, tokens: number, kind: string): Promise<number> {
+    return this.prisma.$transaction(async (tx) => {
+      const credit = await tx.aiCredit.upsert({
+        where: { userId },
+        create: { userId, balance: tokens },
+        update: { balance: { increment: tokens } },
+      })
+      await tx.aiCreditEvent.create({ data: { userId, kind, tokens } })
+      return Number(credit.balance)
+    })
+  }
+
   async sumGranted(userId: string): Promise<number> {
     const result = await this.prisma.aiCreditEvent.aggregate({
       where: { userId },

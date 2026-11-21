@@ -24,6 +24,16 @@ interface Override {
 
 const CACHE_MS = 30_000
 
+export interface ProviderView {
+  provider: ProviderName
+  model: string
+  defaultModel: string
+  endpoint: string
+  defaultEndpoint: string
+  keyMask: string
+  custom: boolean
+}
+
 const DEFAULTS: Record<ProviderName, { baseUrl: string; model: string }> = {
   deepseek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-flash' },
   gemini: {
@@ -46,6 +56,30 @@ export class ProviderConfigService {
     private readonly config: ConfigService<Env, true>,
     @Inject(PROVIDER_SETTINGS_REPOSITORY) private readonly settings: ProviderSettingsRepositoryPort,
   ) {}
+
+  /** Drops the 30 s override cache so a saved or reset provider applies at once */
+  invalidate(): void {
+    this.#overrides = null
+  }
+
+  /** Every provider with its effective model, endpoint and masked key (no network call) */
+  async describe(): Promise<ProviderView[]> {
+    const overrides = await this.#readOverrides()
+    return (Object.keys(DEFAULTS) as ProviderName[]).map((name) => {
+      const base = this.#fromEnv(name)
+      const override = overrides[name]
+      const key = override?.apiKey || base.apiKey
+      return {
+        provider: name,
+        model: override?.model || base.model,
+        defaultModel: base.model,
+        endpoint: override?.baseUrl || base.baseUrl,
+        defaultEndpoint: base.baseUrl,
+        keyMask: key ? (key.length >= 8 ? `••••${key.slice(-4)}` : '••••') : '',
+        custom: Boolean(override?.baseUrl),
+      }
+    })
+  }
 
   /** Providers without a key are left out. Throws when an environment base URL is unsafe */
   async load(): Promise<ProviderConfig> {
