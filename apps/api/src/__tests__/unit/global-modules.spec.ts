@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import { glob } from 'node:fs/promises'
 import path from 'node:path'
-
 /**
  * Architecture guard: @Global() usage
  *
@@ -20,6 +19,7 @@ const APPROVED_GLOBAL_MODULES = new Set([
   'src/modules/audit-log/audit-log.module.ts',
   'src/modules/auth/auth.module.ts',
   'src/modules/identity/identity.module.ts',
+  'src/modules/access-control/access-control.module.ts',
 ])
 
 const SRC_ROOT = path.resolve(import.meta.dirname, '../../../')

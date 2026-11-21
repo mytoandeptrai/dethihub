@@ -27,6 +27,9 @@ async function bootstrap() {
     bufferLogs: true, // buffer logs until Logger is ready
   })
 
+  // Behind Render's proxy: req.ip must be the client address for rate-limit tracking
+  app.set('trust proxy', 1)
+
   // Use nestjs-pino Logger
   app.useLogger(app.get(Logger))
 

@@ -8,6 +8,12 @@ export default defineConfig({
     environment: 'node',
     root: './',
     include: ['src/__tests__/**/*.e2e-spec.ts'],
+    exclude: [
+      'src/__tests__/article.e2e-spec.ts',
+      'src/__tests__/auth.e2e-spec.ts',
+      'src/__tests__/order.e2e-spec.ts',
+      'src/__tests__/user-management.e2e-spec.ts',
+    ],
     setupFiles: ['./src/__tests__/setup.ts'],
     testTimeout: 30_000,
   },

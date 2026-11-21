@@ -21,6 +21,9 @@ export const envSchema = z.object({
   // Database connection string
   DATABASE_URL: z.url().default('postgres://postgres:postgres@localhost:5432/vsa_m_nest'),
 
+  // Direct (session) connection used only by `prisma migrate deploy`
+  DIRECT_URL: z.url().optional(),
+
   // Database connection pool configuration
   DB_POOL_MAX: z
     .string()
@@ -75,6 +78,18 @@ export const envSchema = z.object({
     .refine((value) => /^\d+[smhd]$/.test(value), {
       message: 'JWT_REFRESH_EXPIRES_IN format is invalid (e.g. 60s, 15m, 2h, 7d)',
     }),
+
+  // Supabase (Auth only: JWKS verification and the Auth Admin API)
+  SUPABASE_URL: z.url(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  SUPABASE_JWT_ISSUER: z.url().optional(),
+  SUPABASE_JWT_AUDIENCE: z.string().default('authenticated'),
+
+  // Cloudflare R2 (object storage)
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET: z.string().optional(),
 
   // CORS configuration
   ALLOWED_ORIGINS: z

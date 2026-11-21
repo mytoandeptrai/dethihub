@@ -64,7 +64,7 @@ export class ThrottlerExceptionFilter implements ExceptionFilter {
       errors: [
         {
           code: 'RATE_LIMIT_EXCEEDED',
-          message: `You have sent ${limit} requests within ${ttl} seconds. Please try again later.`,
+          message: 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.',
           constraints: {
             limit,
             remaining: 0,

@@ -8,6 +8,7 @@ import { ClsModule } from 'nestjs-cls'
 
 import { createClsConfig } from '@/app/config/cls.config'
 import { validateEnv } from '@/app/config/env.schema'
+import { createThrottlerOptions } from '@/app/config/throttler.config'
 import { PrismaModule } from '@/app/database/prisma.module'
 import { DomainEventsModule } from '@/app/events/domain-events.module'
 import { AllExceptionsFilter } from '@/app/filters/all-exceptions.filter'
@@ -18,19 +19,13 @@ import { RequestContextInterceptor } from '@/app/interceptors/request-context.in
 import { TraceContextInterceptor } from '@/app/interceptors/trace-context.interceptor'
 import { LoggerModule } from '@/app/logger/logger.module'
 import { ETagMiddleware } from '@/app/middleware/etag.middleware'
-import { AnalyticsModule } from '@/modules/analytics/analytics.module'
-import { ArticleModule } from '@/modules/article/article.module'
-import { AuditLogModule } from '@/modules/audit-log/audit-log.module'
-import { AuthModule } from '@/modules/auth/auth.module'
-import { JwtAuthGuard } from '@/modules/auth/presentation/guards/jwt-auth.guard'
-import { RolesGuard } from '@/modules/auth/presentation/guards/roles.guard'
+import { AccessControlModule } from '@/modules/access-control/access-control.module'
+import { PlatformRolesGuard } from '@/modules/access-control/presentation/guards/platform-roles.guard'
+import { SupabaseAuthGuard } from '@/modules/access-control/presentation/guards/supabase-auth.guard'
+import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
+import { MaintenanceGuard } from '@/modules/app-settings/presentation/guards/maintenance.guard'
 import { CacheModule } from '@/modules/cache/cache.module'
 import { HealthModule } from '@/modules/health/health.module'
-import { IdentityModule } from '@/modules/identity/identity.module'
-import { OrderModule } from '@/modules/order/order.module'
-import { ScheduledTasksModule } from '@/modules/scheduled-tasks/scheduled-tasks.module'
-import { TodoModule } from '@/modules/todo/todo.module'
-import { UploadModule } from '@/modules/upload/upload.module'
 
 import type { Env } from '@/app/config/env.schema'
 import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
@@ -73,31 +68,24 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     // Rate limiting module: prevent API abuse (read from env vars; unlimited by default locally)
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService<Env, true>) => [
-        {
-          ttl: configService.get('THROTTLE_TTL', { infer: true }),
-          limit: configService.get('THROTTLE_LIMIT', { infer: true }),
-        },
-      ],
+      useFactory: (configService: ConfigService<Env, true>) =>
+        createThrottlerOptions({
+          THROTTLE_TTL: configService.get('THROTTLE_TTL', { infer: true }),
+          THROTTLE_LIMIT: configService.get('THROTTLE_LIMIT', { infer: true }),
+          REDIS_URL: configService.get('REDIS_URL', { infer: true }),
+        }),
       inject: [ConfigService],
     }),
     HealthModule, // health check module
-    AuditLogModule, // audit log module (global)
-    // Business modules
-    TodoModule, // Todo module (anemic model example)
-    CacheModule, // Cache module (thin application layer example)
-    ArticleModule, // Article module (rich model DDD example)
-    AuthModule, // Auth module (authentication + DDD example)
-    IdentityModule, // Identity module (user identity shared subdomain, @Global)
-    OrderModule, // Order module (rich model DDD + 4 advanced HTTP features)
-    ScheduledTasksModule, // Scheduled tasks (cron, interval, timeout examples)
-    UploadModule, // File upload (Multer + local storage)
-    AnalyticsModule, // Analytics dashboard data endpoints
+    CacheModule, // Redis cache
+    AccessControlModule, // authentication, platform roles, security strikes
+    AppSettingsModule, // app settings and maintenance mode
   ],
   providers: [
-    // Global guards (order matters: JWT first, then roles, then throttler)
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
-    { provide: APP_GUARD, useClass: RolesGuard },
+    // Global guards (order matters: authentication first, then roles, then maintenance, then throttler)
+    { provide: APP_GUARD, useClass: SupabaseAuthGuard },
+    { provide: APP_GUARD, useClass: PlatformRolesGuard },
+    { provide: APP_GUARD, useClass: MaintenanceGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Exception filters (require ClsService injection)
     AllExceptionsFilter,
