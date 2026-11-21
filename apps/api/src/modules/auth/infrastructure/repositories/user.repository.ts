@@ -4,7 +4,7 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   User,
-  UserRepository,
+  UserRepositoryPort,
   CreateUserData,
 } from '@/modules/auth/application/ports/user.repository.port'
 import type { UserDatabase } from '@workspace/database'
@@ -16,7 +16,7 @@ import type { UserDatabase } from '@workspace/database'
  * Adapts to the better-auth schema.
  */
 @Injectable()
-export class UserRepositoryImpl implements UserRepository {
+export class UserRepositoryImpl implements UserRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateUserData): Promise<User> {

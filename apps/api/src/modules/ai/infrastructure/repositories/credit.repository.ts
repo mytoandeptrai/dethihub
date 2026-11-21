@@ -4,14 +4,14 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   CreditEvent,
-  CreditRepository,
+  CreditRepositoryPort,
 } from '@/modules/ai/application/ports/credit.repository.port'
 
 const MAX_REFUNDS_PER_DAY = 20
 const DAY_MS = 24 * 60 * 60 * 1000
 
 @Injectable()
-export class CreditRepositoryImpl implements CreditRepository {
+export class CreditRepositoryImpl implements CreditRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findBalance(userId: string): Promise<number | null> {

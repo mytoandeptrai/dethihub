@@ -7,39 +7,39 @@
 import { createMock } from '@golevelup/ts-vitest'
 
 import type { DomainEventPublisher } from '@/app/events/domain-event-publisher'
-import type { AuthIdentityRepository } from '@/modules/auth/application/ports/auth-identity.repository.port'
-import type { AuthSessionRepository } from '@/modules/auth/application/ports/auth-session.repository.port'
-import type { LoginLogRepository } from '@/modules/auth/application/ports/login-log.repository.port'
-import type { PasswordHasher } from '@/modules/auth/application/ports/password-hasher.port'
-import type { UserRoleRepository } from '@/modules/auth/application/ports/user-role.repository.port'
-import type { UserRepository } from '@/modules/auth/application/ports/user.repository.port'
-import type { IdentityRepository } from '@/modules/identity/application/ports/user.repository.port'
-import type { JobRepository } from '@/modules/order/application/ports/job.repository.port'
-import type { OrderRepository } from '@/modules/order/application/ports/order.repository.port'
+import type { AuthIdentityRepositoryPort } from '@/modules/auth/application/ports/auth-identity.repository.port'
+import type { AuthSessionRepositoryPort } from '@/modules/auth/application/ports/auth-session.repository.port'
+import type { LoginLogRepositoryPort } from '@/modules/auth/application/ports/login-log.repository.port'
+import type { PasswordHasherPort } from '@/modules/auth/application/ports/password-hasher.port'
+import type { UserRoleRepositoryPort } from '@/modules/auth/application/ports/user-role.repository.port'
+import type { UserRepositoryPort } from '@/modules/auth/application/ports/user.repository.port'
+import type { IdentityRepositoryPort } from '@/modules/identity/application/ports/user.repository.port'
+import type { JobRepositoryPort } from '@/modules/order/application/ports/job.repository.port'
+import type { OrderRepositoryPort } from '@/modules/order/application/ports/order.repository.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { ConfigService } from '@nestjs/config'
 import type { JwtService } from '@nestjs/jwt'
 
 export function createAuthMocks() {
   return {
-    authIdentityRepo: createMock<AuthIdentityRepository>(),
-    authSessionRepo: createMock<AuthSessionRepository>(),
-    passwordHasher: createMock<PasswordHasher>(),
-    userRoleRepo: createMock<UserRoleRepository>(),
-    userRepo: createMock<UserRepository>(),
+    authIdentityRepo: createMock<AuthIdentityRepositoryPort>(),
+    authSessionRepo: createMock<AuthSessionRepositoryPort>(),
+    passwordHasher: createMock<PasswordHasherPort>(),
+    userRoleRepo: createMock<UserRoleRepositoryPort>(),
+    userRepo: createMock<UserRepositoryPort>(),
     jwtService: createMock<JwtService>(),
     configService: createMock<ConfigService>(),
     eventPublisher: createMock<DomainEventPublisher>(),
-    loginLogRepo: createMock<LoginLogRepository>(),
+    loginLogRepo: createMock<LoginLogRepositoryPort>(),
   }
 }
 
 export function createOAuthMocks() {
   return {
-    authIdentityRepo: createMock<AuthIdentityRepository>(),
-    authSessionRepo: createMock<AuthSessionRepository>(),
-    userRoleRepo: createMock<UserRoleRepository>(),
-    userRepo: createMock<UserRepository>(),
+    authIdentityRepo: createMock<AuthIdentityRepositoryPort>(),
+    authSessionRepo: createMock<AuthSessionRepositoryPort>(),
+    userRoleRepo: createMock<UserRoleRepositoryPort>(),
+    userRepo: createMock<UserRepositoryPort>(),
     jwtService: createMock<JwtService>(),
     configService: createMock<ConfigService>(),
     eventPublisher: createMock<DomainEventPublisher>(),
@@ -48,8 +48,8 @@ export function createOAuthMocks() {
 
 export function createOrderMocks() {
   return {
-    orderRepository: createMock<OrderRepository>(),
-    jobRepository: createMock<JobRepository>(),
+    orderRepository: createMock<OrderRepositoryPort>(),
+    jobRepository: createMock<JobRepositoryPort>(),
     cache: createMock<CachePort>(),
     domainEventPublisher: createMock<DomainEventPublisher>(),
   }
@@ -57,7 +57,7 @@ export function createOrderMocks() {
 
 export function createUserMocks() {
   return {
-    userRepository: createMock<IdentityRepository>(),
+    userRepository: createMock<IdentityRepositoryPort>(),
     eventPublisher: createMock<DomainEventPublisher>(),
   }
 }

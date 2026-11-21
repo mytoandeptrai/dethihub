@@ -1,4 +1,4 @@
-export interface TaskPrompts {
+export interface TaskPromptsPort {
   /** system prompt of the task; null when the task is unknown or its input has the wrong shape */
   build(task: unknown, input: unknown): string | null
 }

@@ -7,7 +7,7 @@ import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 import type { Env } from '@/app/config/env.schema'
 import type {
   AuthUser,
-  AuthUserDirectory,
+  AuthUserDirectoryPort,
 } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { User } from '@supabase/supabase-js'
@@ -15,7 +15,7 @@ import type { User } from '@supabase/supabase-js'
 const BAN_CACHE_TTL_SECONDS = 30
 
 @Injectable()
-export class SupabaseAuthAdminAdapter implements AuthUserDirectory {
+export class SupabaseAuthAdminAdapter implements AuthUserDirectoryPort {
   readonly #admin
 
   constructor(

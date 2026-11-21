@@ -13,7 +13,7 @@ export interface UpdateProfileData {
   avatarUrl?: string | null
 }
 
-export interface ProfileRepository {
+export interface ProfileRepositoryPort {
   findById(id: string): Promise<ProfileData | null>
   update(id: string, data: UpdateProfileData): Promise<ProfileData | null>
 }

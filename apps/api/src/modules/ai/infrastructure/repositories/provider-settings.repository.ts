@@ -4,11 +4,11 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   ProviderSettingRow,
-  ProviderSettingsRepository,
+  ProviderSettingsRepositoryPort,
 } from '@/modules/ai/application/ports/provider-settings.repository.port'
 
 @Injectable()
-export class ProviderSettingsRepositoryImpl implements ProviderSettingsRepository {
+export class ProviderSettingsRepositoryImpl implements ProviderSettingsRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<ProviderSettingRow[]> {

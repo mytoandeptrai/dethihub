@@ -18,7 +18,7 @@ const isNotFound = (error: unknown): boolean => {
   return name === 'NoSuchKey' || name === 'NotFound' || $metadata?.httpStatusCode === 404
 }
 
-export class R2ObjectStorage implements ObjectStoragePort {
+export class R2ObjectStorageAdapter implements ObjectStoragePort {
   constructor(
     private readonly client: S3Client,
     private readonly bucket: string,

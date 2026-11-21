@@ -12,7 +12,7 @@ import type {
   UserInfo,
   UserListQuery,
   UserListResult,
-  IdentityRepository,
+  IdentityRepositoryPort,
   UserSummary,
 } from '@/modules/identity/application/ports/user.repository.port'
 
@@ -25,7 +25,7 @@ const BCRYPT_ROUNDS = 12
  * accounts: authentication credentials
  */
 @Injectable()
-export class UserRepositoryImpl implements IdentityRepository {
+export class UserRepositoryImpl implements IdentityRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: UserListQuery): Promise<UserListResult> {

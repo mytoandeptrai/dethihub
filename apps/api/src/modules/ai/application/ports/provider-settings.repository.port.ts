@@ -5,7 +5,7 @@ export interface ProviderSettingRow {
   apiKeyEnc: string | null
 }
 
-export interface ProviderSettingsRepository {
+export interface ProviderSettingsRepositoryPort {
   findAll(): Promise<ProviderSettingRow[]>
 }
 

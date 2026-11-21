@@ -5,9 +5,9 @@ import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/
 import { SECURITY_FLAG_REPOSITORY } from '@/modules/access-control/application/ports/security-flag.repository.port'
 import { PlatformRoleService } from '@/modules/access-control/application/services/platform-role.service'
 
-import type { AdminAuditRepository } from '@/modules/access-control/application/ports/admin-audit.repository.port'
-import type { AuthUserDirectory } from '@/modules/access-control/application/ports/auth-user-directory.port'
-import type { SecurityFlagRepository } from '@/modules/access-control/application/ports/security-flag.repository.port'
+import type { AdminAuditRepositoryPort } from '@/modules/access-control/application/ports/admin-audit.repository.port'
+import type { AuthUserDirectoryPort } from '@/modules/access-control/application/ports/auth-user-directory.port'
+import type { SecurityFlagRepositoryPort } from '@/modules/access-control/application/ports/security-flag.repository.port'
 
 const PERMANENT_AFTER_STRIKES = 2
 const TEMPORARY_BAN = '72h'
@@ -22,9 +22,9 @@ const MESSAGE_TEMPORARY =
 export class SecurityStrikeService {
   constructor(
     private readonly roles: PlatformRoleService,
-    @Inject(SECURITY_FLAG_REPOSITORY) private readonly flags: SecurityFlagRepository,
-    @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectory,
-    @Inject(ADMIN_AUDIT_REPOSITORY) private readonly audit: AdminAuditRepository,
+    @Inject(SECURITY_FLAG_REPOSITORY) private readonly flags: SecurityFlagRepositoryPort,
+    @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectoryPort,
+    @Inject(ADMIN_AUDIT_REPOSITORY) private readonly audit: AdminAuditRepositoryPort,
   ) {}
 
   /** Returns the warning to show the caller, or null when nothing was enforced (including infrastructure errors) */

@@ -22,7 +22,7 @@ import type {
   UserInfo,
   UserListQuery,
   UserListResult,
-  IdentityRepository,
+  IdentityRepositoryPort,
   UserSummary,
 } from '@/modules/identity/application/ports/user.repository.port'
 import type { IdentityPort, UserIdentity } from '@/shared-kernel/application/ports/identity.port'
@@ -35,7 +35,7 @@ import type { RoleType } from '@/shared-kernel/domain/value-objects/role.vo'
 export class UserService implements IdentityPort {
   constructor(
     @Inject(IDENTITY_REPOSITORY)
-    private readonly userRepository: IdentityRepository,
+    private readonly userRepository: IdentityRepositoryPort,
     private readonly eventPublisher: DomainEventPublisher,
   ) {}
 

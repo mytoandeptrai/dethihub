@@ -5,7 +5,7 @@ export interface StrikeResult {
   isNew: boolean
 }
 
-export interface SecurityFlagRepository {
+export interface SecurityFlagRepositoryPort {
   recordStrike(userId: string, action: string, ip: string): Promise<StrikeResult>
   revertStrike(userId: string, strikes: number): Promise<void>
 }

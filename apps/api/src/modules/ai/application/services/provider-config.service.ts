@@ -8,7 +8,7 @@ import { decryptKey } from '@/modules/ai/domain/settings-crypto'
 import type { Env } from '@/app/config/env.schema'
 import type {
   ProviderSettingRow,
-  ProviderSettingsRepository,
+  ProviderSettingsRepositoryPort,
 } from '@/modules/ai/application/ports/provider-settings.repository.port'
 import type {
   ProviderConfig,
@@ -44,7 +44,7 @@ export class ProviderConfigService {
 
   constructor(
     private readonly config: ConfigService<Env, true>,
-    @Inject(PROVIDER_SETTINGS_REPOSITORY) private readonly settings: ProviderSettingsRepository,
+    @Inject(PROVIDER_SETTINGS_REPOSITORY) private readonly settings: ProviderSettingsRepositoryPort,
   ) {}
 
   /** Providers without a key are left out. Throws when an environment base URL is unsafe */

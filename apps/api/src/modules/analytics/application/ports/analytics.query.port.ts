@@ -24,8 +24,8 @@ export interface ArticleCategoryStats {
   categories: ArticleCategoryStatItem[]
 }
 
-// Read-only query interface (no write operations — use IAnalyticsQuery, not IAnalyticsRepository)
-export interface IAnalyticsQuery {
+// Read-only query interface (no write operations — use AnalyticsQueryPort, not IAnalyticsRepository)
+export interface AnalyticsQueryPort {
   getSummary(): Promise<AnalyticsSummary>
   getMonthlyOverview(): Promise<MonthlyOverview>
   getArticleCategoryStats(): Promise<ArticleCategoryStats>

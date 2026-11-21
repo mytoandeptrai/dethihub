@@ -2,7 +2,7 @@ export interface QuotaOverride {
   monthlyTokens: number | null
 }
 
-export interface QuotaRepository {
+export interface QuotaRepositoryPort {
   findOverride(userId: string): Promise<QuotaOverride | null>
   findUsedTokens(userId: string, month: string): Promise<number>
   /** false when the tokens already used plus those held by other in-flight calls reach the limit */

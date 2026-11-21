@@ -8,14 +8,14 @@ import { OrderPaidEvent } from '@/modules/order/domain/events/order-paid.event'
 import { OrderShipRequestedEvent } from '@/modules/order/domain/events/order-ship-requested.event'
 import { AUDIT_LOGGER } from '@/shared-kernel/application/ports/audit-logger.port'
 
-import type { AuditLogger } from '@/shared-kernel/application/ports/audit-logger.port'
+import type { AuditLoggerPort } from '@/shared-kernel/application/ports/audit-logger.port'
 
 @Injectable()
 export class OrderEventsListener {
   private readonly logger = new Logger(OrderEventsListener.name)
 
   constructor(
-    @Inject(AUDIT_LOGGER) private readonly auditLogger: AuditLogger,
+    @Inject(AUDIT_LOGGER) private readonly auditLogger: AuditLoggerPort,
     private readonly cls: ClsService,
   ) {}
 

@@ -4,12 +4,12 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   AdminAuditEntry,
-  AdminAuditRepository,
+  AdminAuditRepositoryPort,
 } from '@/modules/access-control/application/ports/admin-audit.repository.port'
 import type { Prisma } from '@workspace/database'
 
 @Injectable()
-export class AdminAuditRepositoryImpl implements AdminAuditRepository {
+export class AdminAuditRepositoryImpl implements AdminAuditRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async record(entry: AdminAuditEntry): Promise<void> {

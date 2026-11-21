@@ -17,13 +17,13 @@ import { UserLoggedInEvent } from '@/modules/auth/domain/events/user-logged-in.e
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type { Env } from '@/app/config/env.schema'
-import type { AuthIdentityRepository } from '@/modules/auth/application/ports/auth-identity.repository.port'
-import type { AuthSessionRepository } from '@/modules/auth/application/ports/auth-session.repository.port'
+import type { AuthIdentityRepositoryPort } from '@/modules/auth/application/ports/auth-identity.repository.port'
+import type { AuthSessionRepositoryPort } from '@/modules/auth/application/ports/auth-session.repository.port'
 import type { JwtPayload } from '@/modules/auth/application/ports/jwt.port'
-import type { LoginLogRepository } from '@/modules/auth/application/ports/login-log.repository.port'
-import type { PasswordHasher } from '@/modules/auth/application/ports/password-hasher.port'
-import type { UserRoleRepository } from '@/modules/auth/application/ports/user-role.repository.port'
-import type { UserRepository } from '@/modules/auth/application/ports/user.repository.port'
+import type { LoginLogRepositoryPort } from '@/modules/auth/application/ports/login-log.repository.port'
+import type { PasswordHasherPort } from '@/modules/auth/application/ports/password-hasher.port'
+import type { UserRoleRepositoryPort } from '@/modules/auth/application/ports/user-role.repository.port'
+import type { UserRepositoryPort } from '@/modules/auth/application/ports/user.repository.port'
 import type { RoleType } from '@/shared-kernel/domain/value-objects/role.vo'
 
 interface DeviceContext {
@@ -38,19 +38,19 @@ interface DeviceContext {
 export class AuthService {
   constructor(
     @Inject(AUTH_IDENTITY_REPOSITORY)
-    private readonly authIdentityRepo: AuthIdentityRepository,
+    private readonly authIdentityRepo: AuthIdentityRepositoryPort,
     @Inject(AUTH_SESSION_REPOSITORY)
-    private readonly authSessionRepo: AuthSessionRepository,
+    private readonly authSessionRepo: AuthSessionRepositoryPort,
     @Inject(PASSWORD_HASHER)
-    private readonly passwordHasher: PasswordHasher,
+    private readonly passwordHasher: PasswordHasherPort,
     @Inject(USER_ROLE_REPOSITORY)
-    private readonly userRoleRepo: UserRoleRepository,
+    private readonly userRoleRepo: UserRoleRepositoryPort,
     @Inject(USER_REPOSITORY)
-    private readonly userRepo: UserRepository,
+    private readonly userRepo: UserRepositoryPort,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Env, true>,
     private readonly eventPublisher: DomainEventPublisher,
-    @Inject(LOGIN_LOG_REPOSITORY) private readonly loginLogRepo: LoginLogRepository,
+    @Inject(LOGIN_LOG_REPOSITORY) private readonly loginLogRepo: LoginLogRepositoryPort,
   ) {}
 
   async login(email: string, password: string, deviceContext?: DeviceContext) {

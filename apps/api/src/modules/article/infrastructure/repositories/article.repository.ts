@@ -14,7 +14,7 @@ import type {
   ArticleCursorResult,
   ArticleListQuery,
   ArticleListResult,
-  ArticleRepository,
+  ArticleRepositoryPort,
 } from '@/modules/article/application/ports/article.repository.port'
 import type { ArticleCategory } from '@/modules/article/domain/aggregates/article.aggregate'
 import type { ArticleDatabase } from '@workspace/database'
@@ -22,12 +22,12 @@ import type { ArticleDatabase } from '@workspace/database'
 type ArticleRow = Omit<ArticleDatabase, 'searchVector'>
 
 /**
- * Prisma implementation of ArticleRepository
+ * Prisma implementation of ArticleRepositoryPort
  *
  * searchVector is Unsupported(tsvector) — maintained via raw SQL after upsert.
  */
 @Injectable()
-export class ArticleRepositoryImpl implements ArticleRepository {
+export class ArticleRepositoryImpl implements ArticleRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Article[]> {

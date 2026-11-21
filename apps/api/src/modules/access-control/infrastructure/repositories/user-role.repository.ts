@@ -3,11 +3,11 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/app/database/prisma.service'
 import { isPlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 
-import type { UserRoleRepository } from '@/modules/access-control/application/ports/user-role.repository.port'
+import type { UserRoleRepositoryPort } from '@/modules/access-control/application/ports/user-role.repository.port'
 import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 
 @Injectable()
-export class UserRoleRepositoryImpl implements UserRoleRepository {
+export class UserRoleRepositoryImpl implements UserRoleRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findRole(userId: string): Promise<PlatformRole | null> {

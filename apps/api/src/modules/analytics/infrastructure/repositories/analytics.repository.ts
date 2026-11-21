@@ -6,7 +6,7 @@ import type {
   AnalyticsSummary,
   ArticleCategoryStatItem,
   ArticleCategoryStats,
-  IAnalyticsQuery,
+  AnalyticsQueryPort,
   MonthlyOverview,
   MonthlyOverviewItem,
 } from '@/modules/analytics/application/ports/analytics.query.port'
@@ -14,7 +14,7 @@ import type {
 const ARTICLE_CATEGORIES = ['tech', 'design', 'product', 'other'] as const
 
 @Injectable()
-export class AnalyticsRepositoryImpl implements IAnalyticsQuery {
+export class AnalyticsRepositoryImpl implements AnalyticsQueryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async getSummary(): Promise<AnalyticsSummary> {

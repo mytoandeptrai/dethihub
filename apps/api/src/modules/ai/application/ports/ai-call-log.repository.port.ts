@@ -10,7 +10,7 @@ export interface AiCallRecord {
   ms: number
 }
 
-export interface AiCallLogRepository {
+export interface AiCallLogRepositoryPort {
   log(call: AiCallRecord): Promise<void>
   /** failed calls of the last 24 hours that left the user with nothing (empty answer, broken stream), counted up to `limit` */
   countRecentFreeFails(userId: string, limit: number): Promise<number>

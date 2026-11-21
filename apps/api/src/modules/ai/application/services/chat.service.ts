@@ -36,13 +36,13 @@ import { checkReceipt, issueReceipt, requestHash } from '@/modules/ai/domain/rec
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type { Env } from '@/app/config/env.schema'
-import type { AiCallLogRepository } from '@/modules/ai/application/ports/ai-call-log.repository.port'
+import type { AiCallLogRepositoryPort } from '@/modules/ai/application/ports/ai-call-log.repository.port'
 import type {
   Citation,
-  LlmProvider,
+  LlmProviderPort,
   LlmStream,
 } from '@/modules/ai/application/ports/llm-provider.port'
-import type { TaskPrompts } from '@/modules/ai/application/ports/task-prompts.port'
+import type { TaskPromptsPort } from '@/modules/ai/application/ports/task-prompts.port'
 import type { ChatMessage, Usage } from '@/modules/ai/domain/billing'
 import type { Target } from '@/modules/ai/domain/provider-chain'
 import type { Quota } from '@/modules/ai/domain/quota'
@@ -107,10 +107,10 @@ export class ChatService {
     private readonly quotas: QuotaService,
     private readonly providers: ProviderConfigService,
     private readonly config: ConfigService<Env, true>,
-    @Inject(TASK_PROMPTS) private readonly prompts: TaskPrompts,
-    @Inject(AI_CALL_LOG_REPOSITORY) private readonly calls: AiCallLogRepository,
-    @Inject(OPENAI_COMPATIBLE_PROVIDER) private readonly openAiCompatible: LlmProvider,
-    @Inject(ANTHROPIC_PROVIDER) private readonly anthropic: LlmProvider,
+    @Inject(TASK_PROMPTS) private readonly prompts: TaskPromptsPort,
+    @Inject(AI_CALL_LOG_REPOSITORY) private readonly calls: AiCallLogRepositoryPort,
+    @Inject(OPENAI_COMPATIBLE_PROVIDER) private readonly openAiCompatible: LlmProviderPort,
+    @Inject(ANTHROPIC_PROVIDER) private readonly anthropic: LlmProviderPort,
   ) {}
 
   async chat(command: ChatCommand, sink?: ChatSink): Promise<ChatReply> {

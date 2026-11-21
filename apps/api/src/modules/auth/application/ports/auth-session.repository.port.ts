@@ -13,7 +13,7 @@ export const AUTH_SESSION_REPOSITORY = Symbol('AUTH_SESSION_REPOSITORY')
  * - Device info tracking (ipAddress + userAgent)
  * - Session revocation = record deletion (adapts better-auth)
  */
-export interface AuthSessionRepository {
+export interface AuthSessionRepositoryPort {
   /**
    * Save a session
    */

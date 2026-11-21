@@ -13,6 +13,6 @@ export interface AuditLogInput {
   occurredAt?: Date
 }
 
-export interface AuditLogger {
+export interface AuditLoggerPort {
   log(data: AuditLogInput): Promise<void>
 }

@@ -5,7 +5,7 @@ export interface CreditEvent {
   createdAt: Date
 }
 
-export interface CreditRepository {
+export interface CreditRepositoryPort {
   findBalance(userId: string): Promise<number | null>
   /** grants the welcome tokens once and returns the balance */
   claimWelcome(userId: string, tokens: number): Promise<number>

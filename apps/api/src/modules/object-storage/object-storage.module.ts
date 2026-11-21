@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
 import { OBJECT_STORAGE } from '@/modules/object-storage/application/ports/object-storage.port'
-import { R2ObjectStorage } from '@/modules/object-storage/infrastructure/adapters/r2-object-storage.adapter'
+import { R2ObjectStorageAdapter } from '@/modules/object-storage/infrastructure/adapters/r2-object-storage.adapter'
 
 import type { Env } from '@/app/config/env.schema'
 
@@ -27,7 +27,7 @@ import type { Env } from '@/app/config/env.schema'
           endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
           credentials: { accessKeyId, secretAccessKey },
         })
-        return new R2ObjectStorage(client, bucket)
+        return new R2ObjectStorageAdapter(client, bucket)
       },
     },
   ],

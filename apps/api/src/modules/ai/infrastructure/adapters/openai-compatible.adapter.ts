@@ -7,7 +7,7 @@ import { readStream, StreamFold } from '@/modules/ai/infrastructure/adapters/cha
 
 import type {
   Citation,
-  LlmProvider,
+  LlmProviderPort,
   LlmRequest,
   LlmResult,
 } from '@/modules/ai/application/ports/llm-provider.port'
@@ -27,7 +27,7 @@ function citationsOf(
 }
 
 @Injectable()
-export class OpenAiCompatibleAdapter implements LlmProvider {
+export class OpenAiCompatibleAdapter implements LlmProviderPort {
   /** the opencode gateway routes and caches by this header and rejects calls without it */
   readonly #sessionId = randomUUID()
 

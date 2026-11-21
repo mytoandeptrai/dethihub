@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
-  AiCallLogRepository,
+  AiCallLogRepositoryPort,
   AiCallRecord,
 } from '@/modules/ai/application/ports/ai-call-log.repository.port'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
 @Injectable()
-export class AiCallLogRepositoryImpl implements AiCallLogRepository {
+export class AiCallLogRepositoryImpl implements AiCallLogRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async log(call: AiCallRecord): Promise<void> {

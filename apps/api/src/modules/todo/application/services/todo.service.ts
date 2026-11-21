@@ -3,7 +3,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { TODO_REPOSITORY } from '@/modules/todo/application/ports/todo.repository.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { TodoRepository } from '@/modules/todo/application/ports/todo.repository.port'
+import type { TodoRepositoryPort } from '@/modules/todo/application/ports/todo.repository.port'
 import type { InsertTodo, Todo } from '@workspace/database'
 
 type CreateTodoInput = Omit<InsertTodo, 'id' | 'createdAt' | 'updatedAt'>
@@ -24,7 +24,7 @@ type UpdateTodoInput = Partial<CreateTodoInput>
 export class TodoService {
   constructor(
     @Inject(TODO_REPOSITORY)
-    private readonly todoRepository: TodoRepository,
+    private readonly todoRepository: TodoRepositoryPort,
   ) {}
 
   async findAll(): Promise<Todo[]> {

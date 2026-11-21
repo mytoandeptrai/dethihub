@@ -6,7 +6,7 @@ import { LoginLogQueryDto } from '@/modules/auth/presentation/dtos/login-log-que
 import { LoginLogListResponseDto } from '@/modules/auth/presentation/dtos/login-log-response.dto'
 import { Roles } from '@/shared-kernel/infrastructure/decorators/roles.decorator'
 
-import type { LoginLogRepository } from '@/modules/auth/application/ports/login-log.repository.port'
+import type { LoginLogRepositoryPort } from '@/modules/auth/application/ports/login-log.repository.port'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -14,7 +14,7 @@ import type { LoginLogRepository } from '@/modules/auth/application/ports/login-
 export class LoginLogController {
   constructor(
     @Inject(LOGIN_LOG_REPOSITORY)
-    private readonly loginLogRepository: LoginLogRepository,
+    private readonly loginLogRepository: LoginLogRepositoryPort,
   ) {}
 
   @Get('login-logs')

@@ -4,12 +4,12 @@ import { FEEDBACK_REPOSITORY } from '@/modules/ai/application/ports/feedback.rep
 
 import type {
   AiFeedbackInput,
-  FeedbackRepository,
+  FeedbackRepositoryPort,
 } from '@/modules/ai/application/ports/feedback.repository.port'
 
 @Injectable()
 export class FeedbackService {
-  constructor(@Inject(FEEDBACK_REPOSITORY) private readonly feedback: FeedbackRepository) {}
+  constructor(@Inject(FEEDBACK_REPOSITORY) private readonly feedback: FeedbackRepositoryPort) {}
 
   async log(input: AiFeedbackInput): Promise<boolean> {
     try {

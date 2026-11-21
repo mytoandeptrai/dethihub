@@ -18,8 +18,8 @@ import { OrderItem } from '@/modules/order/domain/value-objects/order-item.vo'
 import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { JobRepository, Job } from '@/modules/order/application/ports/job.repository.port'
-import type { OrderRepository } from '@/modules/order/application/ports/order.repository.port'
+import type { JobRepositoryPort, Job } from '@/modules/order/application/ports/job.repository.port'
+import type { OrderRepositoryPort } from '@/modules/order/application/ports/order.repository.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 
 interface IdempotencyRecord {
@@ -57,9 +57,9 @@ const IDEMPOTENCY_TTL_SECONDS = 86_400
 export class OrderService {
   constructor(
     @Inject(ORDER_REPOSITORY)
-    private readonly orderRepository: OrderRepository,
+    private readonly orderRepository: OrderRepositoryPort,
     @Inject(JOB_REPOSITORY)
-    private readonly jobRepository: JobRepository,
+    private readonly jobRepository: JobRepositoryPort,
     @Inject(CACHE_PORT)
     private readonly cache: CachePort,
     private readonly domainEventPublisher: DomainEventPublisher,

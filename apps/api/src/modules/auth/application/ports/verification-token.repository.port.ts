@@ -31,7 +31,7 @@ export interface VerificationToken {
  * - Only one valid token per identifier
  * - Deleted immediately after verification (single-use)
  */
-export interface VerificationTokenRepository {
+export interface VerificationTokenRepositoryPort {
   /**
    * Create a verification token (overwrites any existing token for the same identifier)
    */

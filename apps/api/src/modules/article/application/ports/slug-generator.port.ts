@@ -5,7 +5,7 @@ import type { Slug } from '@/modules/article/domain/value-objects/slug.vo'
  *
  * Defines the abstract interface for the slug generation service.
  */
-export interface SlugGenerator {
+export interface SlugGeneratorPort {
   /**
    * Generate a slug from a title.
    *
@@ -25,6 +25,6 @@ export interface SlugGenerator {
 }
 
 /**
- * SlugGenerator injection token
+ * SlugGeneratorPort injection token
  */
 export const SLUG_GENERATOR = Symbol('SLUG_GENERATOR')

@@ -5,7 +5,7 @@ import type { Order } from '@/modules/order/domain/aggregates/order.aggregate'
  *
  * Defines the abstract interface for order data access
  */
-export interface OrderRepository {
+export interface OrderRepositoryPort {
   findById(id: string): Promise<Order | null>
   save(order: Order): Promise<void>
   /**

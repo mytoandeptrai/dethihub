@@ -11,7 +11,7 @@ export interface AiFeedbackInput {
   note: string
 }
 
-export interface FeedbackRepository {
+export interface FeedbackRepositoryPort {
   save(feedback: AiFeedbackInput): Promise<void>
 }
 

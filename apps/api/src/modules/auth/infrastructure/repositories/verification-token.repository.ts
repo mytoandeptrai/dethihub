@@ -6,7 +6,7 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   VerificationToken,
-  VerificationTokenRepository,
+  VerificationTokenRepositoryPort,
 } from '@/modules/auth/application/ports/verification-token.repository.port'
 import type { VerificationTokenDatabase } from '@workspace/database'
 
@@ -18,7 +18,7 @@ import type { VerificationTokenDatabase } from '@workspace/database'
  * Characteristic: only one valid token per identifier.
  */
 @Injectable()
-export class VerificationTokenRepositoryImpl implements VerificationTokenRepository {
+export class VerificationTokenRepositoryImpl implements VerificationTokenRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: {

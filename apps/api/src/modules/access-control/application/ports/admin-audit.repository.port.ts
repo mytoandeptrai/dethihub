@@ -7,6 +7,6 @@ export interface AdminAuditEntry {
   detail: Record<string, unknown>
 }
 
-export interface AdminAuditRepository {
+export interface AdminAuditRepositoryPort {
   record(entry: AdminAuditEntry): Promise<void>
 }

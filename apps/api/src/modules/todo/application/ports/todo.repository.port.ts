@@ -6,7 +6,7 @@ import type { Todo, InsertTodo } from '@workspace/database'
  * Defines the abstract interface for Todo data access
  * Follows the Dependency Inversion Principle: the application layer defines the interface, the infrastructure layer implements it
  */
-export interface TodoRepository {
+export interface TodoRepositoryPort {
   /**
    * Find all todos
    */

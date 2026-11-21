@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common'
 
 import { PrismaService } from '@/app/database/prisma.service'
 
-import type { TodoRepository } from '@/modules/todo/application/ports/todo.repository.port'
+import type { TodoRepositoryPort } from '@/modules/todo/application/ports/todo.repository.port'
 import type { Todo, InsertTodo } from '@workspace/database'
 
 /**
  * Todo Repository Prisma implementation
  */
 @Injectable()
-export class TodoRepositoryImpl implements TodoRepository {
+export class TodoRepositoryImpl implements TodoRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Todo[]> {

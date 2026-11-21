@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { PrismaService } from '@/app/database/prisma.service'
 
-import type { UserRoleRepository } from '@/modules/auth/application/ports/user-role.repository.port'
+import type { UserRoleRepositoryPort } from '@/modules/auth/application/ports/user-role.repository.port'
 import type { RoleType } from '@/shared-kernel/domain/value-objects/role.vo'
 
 /**
@@ -11,7 +11,7 @@ import type { RoleType } from '@/shared-kernel/domain/value-objects/role.vo'
  * Single-role management (adapts better-auth users.role field)
  */
 @Injectable()
-export class UserRoleRepositoryImpl implements UserRoleRepository {
+export class UserRoleRepositoryImpl implements UserRoleRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async setRole(userId: string, role: RoleType): Promise<void> {

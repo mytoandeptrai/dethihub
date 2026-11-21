@@ -44,7 +44,7 @@ export interface AuditLogListResult {
   total: number
 }
 
-export interface AuditLogRepository {
+export interface AuditLogRepositoryPort {
   create(data: AuditLogData): Promise<void>
   findAll(query: AuditLogListQuery): Promise<AuditLogListResult>
 }

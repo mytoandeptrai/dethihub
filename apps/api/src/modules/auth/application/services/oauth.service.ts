@@ -15,25 +15,25 @@ import { UserLoggedInViaOAuthEvent } from '@/modules/auth/domain/events/user-log
 import { UserRegisteredViaOAuthEvent } from '@/modules/auth/domain/events/user-registered-via-oauth.event'
 
 import type { Env } from '@/app/config/env.schema'
-import type { AuthIdentityRepository } from '@/modules/auth/application/ports/auth-identity.repository.port'
-import type { AuthSessionRepository } from '@/modules/auth/application/ports/auth-session.repository.port'
+import type { AuthIdentityRepositoryPort } from '@/modules/auth/application/ports/auth-identity.repository.port'
+import type { AuthSessionRepositoryPort } from '@/modules/auth/application/ports/auth-session.repository.port'
 import type { JwtPayload } from '@/modules/auth/application/ports/jwt.port'
 import type { OAuthUserProfile } from '@/modules/auth/application/ports/oauth.port'
-import type { UserRoleRepository } from '@/modules/auth/application/ports/user-role.repository.port'
-import type { UserRepository } from '@/modules/auth/application/ports/user.repository.port'
+import type { UserRoleRepositoryPort } from '@/modules/auth/application/ports/user-role.repository.port'
+import type { UserRepositoryPort } from '@/modules/auth/application/ports/user.repository.port'
 import type { RoleType } from '@/shared-kernel/domain/value-objects/role.vo'
 
 @Injectable()
 export class OAuthService {
   constructor(
     @Inject(AUTH_IDENTITY_REPOSITORY)
-    private readonly authIdentityRepo: AuthIdentityRepository,
+    private readonly authIdentityRepo: AuthIdentityRepositoryPort,
     @Inject(AUTH_SESSION_REPOSITORY)
-    private readonly authSessionRepo: AuthSessionRepository,
+    private readonly authSessionRepo: AuthSessionRepositoryPort,
     @Inject(USER_ROLE_REPOSITORY)
-    private readonly userRoleRepo: UserRoleRepository,
+    private readonly userRoleRepo: UserRoleRepositoryPort,
     @Inject(USER_REPOSITORY)
-    private readonly userRepo: UserRepository,
+    private readonly userRepo: UserRepositoryPort,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Env, true>,
     private readonly eventPublisher: DomainEventPublisher,

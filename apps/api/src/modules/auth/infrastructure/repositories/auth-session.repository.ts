@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/app/database/prisma.service'
 import { AuthSession } from '@/modules/auth/domain/entities/auth-session.entity'
 
-import type { AuthSessionRepository } from '@/modules/auth/application/ports/auth-session.repository.port'
+import type { AuthSessionRepositoryPort } from '@/modules/auth/application/ports/auth-session.repository.port'
 import type { SessionDatabase } from '@workspace/database'
 
 /**
@@ -13,7 +13,7 @@ import type { SessionDatabase } from '@workspace/database'
  * Adapts the better-auth schema.
  */
 @Injectable()
-export class AuthSessionRepositoryImpl implements AuthSessionRepository {
+export class AuthSessionRepositoryImpl implements AuthSessionRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(session: AuthSession): Promise<void> {

@@ -9,11 +9,11 @@ import type {
   LoginLogEntry,
   LoginLogRecord,
   LoginLogQueryParams,
-  LoginLogRepository,
+  LoginLogRepositoryPort,
 } from '@/modules/auth/application/ports/login-log.repository.port'
 
 @Injectable()
-export class LoginLogRepositoryImpl implements LoginLogRepository {
+export class LoginLogRepositoryImpl implements LoginLogRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(entry: LoginLogEntry): Promise<void> {

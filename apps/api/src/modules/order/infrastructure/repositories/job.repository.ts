@@ -5,7 +5,7 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   Job,
-  JobRepository,
+  JobRepositoryPort,
   JobStatus,
 } from '@/modules/order/application/ports/job.repository.port'
 import type { JobDatabase } from '@workspace/database'
@@ -14,7 +14,7 @@ import type { JobDatabase } from '@workspace/database'
  * Job Repository Prisma implementation
  */
 @Injectable()
-export class JobRepositoryImpl implements JobRepository {
+export class JobRepositoryImpl implements JobRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Job | null> {

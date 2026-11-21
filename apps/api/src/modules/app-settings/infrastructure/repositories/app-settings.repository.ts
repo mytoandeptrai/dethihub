@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common'
 
 import { PrismaService } from '@/app/database/prisma.service'
 
-import type { AppSettingsRepository } from '@/modules/app-settings/application/ports/app-settings.repository.port'
+import type { AppSettingsRepositoryPort } from '@/modules/app-settings/application/ports/app-settings.repository.port'
 import type { Prisma } from '@workspace/database'
 
 @Injectable()
-export class AppSettingsRepositoryImpl implements AppSettingsRepository {
+export class AppSettingsRepositoryImpl implements AppSettingsRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async find(key: string): Promise<unknown> {

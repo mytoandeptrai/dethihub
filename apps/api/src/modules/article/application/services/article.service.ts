@@ -12,9 +12,9 @@ import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type {
   ArticleCursorResult,
-  ArticleRepository,
+  ArticleRepositoryPort,
 } from '@/modules/article/application/ports/article.repository.port'
-import type { SlugGenerator } from '@/modules/article/application/ports/slug-generator.port'
+import type { SlugGeneratorPort } from '@/modules/article/application/ports/slug-generator.port'
 import type { ArticleCategory } from '@/modules/article/domain/aggregates/article.aggregate'
 
 /**
@@ -24,9 +24,9 @@ import type { ArticleCategory } from '@/modules/article/domain/aggregates/articl
 export class ArticleService {
   constructor(
     @Inject(ARTICLE_REPOSITORY)
-    private readonly articleRepository: ArticleRepository,
+    private readonly articleRepository: ArticleRepositoryPort,
     @Inject(SLUG_GENERATOR)
-    private readonly slugGenerator: SlugGenerator,
+    private readonly slugGenerator: SlugGeneratorPort,
     private readonly domainEventPublisher: DomainEventPublisher,
   ) {}
 

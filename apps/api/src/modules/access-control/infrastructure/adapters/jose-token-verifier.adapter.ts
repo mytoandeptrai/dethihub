@@ -4,12 +4,12 @@ import { createRemoteJWKSet, errors, jwtVerify } from 'jose'
 
 import type { Env } from '@/app/config/env.schema'
 import type {
-  TokenVerifier,
+  TokenVerifierPort,
   VerifiedToken,
 } from '@/modules/access-control/application/ports/token-verifier.port'
 
 @Injectable()
-export class JoseTokenVerifier implements TokenVerifier {
+export class JoseTokenVerifierAdapter implements TokenVerifierPort {
   readonly #jwks: ReturnType<typeof createRemoteJWKSet>
   readonly #issuer: string
   readonly #audience: string

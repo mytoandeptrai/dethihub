@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/app/database/prisma.service'
 import { AuthIdentity } from '@/modules/auth/domain/aggregates/auth-identity.aggregate'
 
-import type { AuthIdentityRepository } from '@/modules/auth/application/ports/auth-identity.repository.port'
+import type { AuthIdentityRepositoryPort } from '@/modules/auth/application/ports/auth-identity.repository.port'
 import type { AuthProvider } from '@/modules/auth/domain/value-objects/auth-provider'
 import type { AccountDatabase } from '@workspace/database'
 
@@ -14,7 +14,7 @@ import type { AccountDatabase } from '@workspace/database'
  * Adapts the better-auth accounts table.
  */
 @Injectable()
-export class AuthIdentityRepositoryImpl implements AuthIdentityRepository {
+export class AuthIdentityRepositoryImpl implements AuthIdentityRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(identity: AuthIdentity): Promise<void> {

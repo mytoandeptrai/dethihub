@@ -8,19 +8,19 @@ import { ArticleStatus } from '@/modules/article/domain/enums/article-status.enu
 import { Slug } from '@/modules/article/domain/value-objects/slug.vo'
 
 import type { DomainEventPublisher } from '@/app/events/domain-event-publisher'
-import type { ArticleRepository } from '@/modules/article/application/ports/article.repository.port'
-import type { SlugGenerator } from '@/modules/article/application/ports/slug-generator.port'
+import type { ArticleRepositoryPort } from '@/modules/article/application/ports/article.repository.port'
+import type { SlugGeneratorPort } from '@/modules/article/application/ports/slug-generator.port'
 import type { DeepMocked } from '@golevelup/ts-vitest'
 
 describe('articleService', () => {
   let service: ArticleService
-  let articleRepository: DeepMocked<ArticleRepository>
-  let slugGenerator: DeepMocked<SlugGenerator>
+  let articleRepository: DeepMocked<ArticleRepositoryPort>
+  let slugGenerator: DeepMocked<SlugGeneratorPort>
   let domainEventPublisher: DeepMocked<DomainEventPublisher>
 
   beforeEach(() => {
-    articleRepository = createMock<ArticleRepository>()
-    slugGenerator = createMock<SlugGenerator>()
+    articleRepository = createMock<ArticleRepositoryPort>()
+    slugGenerator = createMock<SlugGeneratorPort>()
     domainEventPublisher = createMock<DomainEventPublisher>()
     service = new ArticleService(articleRepository, slugGenerator, domainEventPublisher)
 

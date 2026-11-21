@@ -10,7 +10,7 @@ export interface AuthUser {
   bannedUntil: string | null
 }
 
-export interface AuthUserDirectory {
+export interface AuthUserDirectoryPort {
   isBanned(userId: string, options?: { fresh?: boolean }): Promise<boolean>
   forgetBan(userId: string): Promise<void>
   getUser(userId: string): Promise<AuthUser | null>

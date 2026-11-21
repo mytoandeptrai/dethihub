@@ -8,11 +8,11 @@ import type {
   AuditLogListQuery,
   AuditLogListResult,
   AuditLogRecord,
-  AuditLogRepository,
+  AuditLogRepositoryPort,
 } from '@/modules/audit-log/application/ports/audit-log.repository.port'
 
 @Injectable()
-export class AuditLogRepositoryImpl implements AuditLogRepository {
+export class AuditLogRepositoryImpl implements AuditLogRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: AuditLogData): Promise<void> {

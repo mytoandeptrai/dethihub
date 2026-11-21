@@ -8,7 +8,7 @@ export const PASSWORD_HASHER = Symbol('PASSWORD_HASHER')
  *
  * Abstracts password hashing and verification, decoupled from the concrete hashing algorithm
  */
-export interface PasswordHasher {
+export interface PasswordHasherPort {
   /**
    * Hash a plain-text password
    */

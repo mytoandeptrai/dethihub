@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
-  SecurityFlagRepository,
+  SecurityFlagRepositoryPort,
   StrikeResult,
 } from '@/modules/access-control/application/ports/security-flag.repository.port'
 
@@ -14,7 +14,7 @@ const PERMANENT_LOCK = new Date('9999-12-31T00:00:00.000Z')
 const MAX_TEXT_LENGTH = 60
 
 @Injectable()
-export class SecurityFlagRepositoryImpl implements SecurityFlagRepository {
+export class SecurityFlagRepositoryImpl implements SecurityFlagRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async recordStrike(userId: string, action: string, ip: string): Promise<StrikeResult> {

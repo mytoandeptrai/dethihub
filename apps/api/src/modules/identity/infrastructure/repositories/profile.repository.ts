@@ -4,13 +4,13 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   ProfileData,
-  ProfileRepository,
+  ProfileRepositoryPort,
   UpdateProfileData,
 } from '@/modules/identity/application/ports/profile.repository.port'
 import type { UserDatabase } from '@workspace/database'
 
 @Injectable()
-export class ProfileRepositoryImpl implements ProfileRepository {
+export class ProfileRepositoryImpl implements ProfileRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<ProfileData | null> {

@@ -9,7 +9,7 @@ import { AuthenticationService } from '@/modules/access-control/application/serv
 import { PlatformRoleService } from '@/modules/access-control/application/services/platform-role.service'
 import { RoleAuthorizationService } from '@/modules/access-control/application/services/role-authorization.service'
 import { SecurityStrikeService } from '@/modules/access-control/application/services/security-strike.service'
-import { JoseTokenVerifier } from '@/modules/access-control/infrastructure/adapters/jose-token-verifier.adapter'
+import { JoseTokenVerifierAdapter } from '@/modules/access-control/infrastructure/adapters/jose-token-verifier.adapter'
 import { SupabaseAuthAdminAdapter } from '@/modules/access-control/infrastructure/adapters/supabase-auth-admin.adapter'
 import { AdminAuditRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/admin-audit.repository'
 import { SecurityFlagRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/security-flag.repository'
@@ -25,7 +25,7 @@ import { MeController } from '@/modules/access-control/presentation/controllers/
     RoleAuthorizationService,
     SecurityStrikeService,
     SupabaseAuthAdminAdapter,
-    { provide: TOKEN_VERIFIER, useClass: JoseTokenVerifier },
+    { provide: TOKEN_VERIFIER, useClass: JoseTokenVerifierAdapter },
     { provide: AUTH_USER_DIRECTORY, useExisting: SupabaseAuthAdminAdapter },
     { provide: USER_ROLE_REPOSITORY, useClass: UserRoleRepositoryImpl },
     { provide: SECURITY_FLAG_REPOSITORY, useClass: SecurityFlagRepositoryImpl },

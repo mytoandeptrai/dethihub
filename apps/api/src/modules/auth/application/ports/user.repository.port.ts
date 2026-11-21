@@ -30,7 +30,7 @@ export interface CreateUserData {
  * Auth-scoped user repository: read + create only.
  * Management operations (ban, delete) belong to UserManagementRepository.
  */
-export interface UserRepository {
+export interface UserRepositoryPort {
   create(data: CreateUserData): Promise<User>
   findById(id: string): Promise<User | null>
   exists(id: string): Promise<boolean>

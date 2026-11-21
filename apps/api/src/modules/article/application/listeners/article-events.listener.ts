@@ -8,14 +8,14 @@ import { ArticlePublishedEvent } from '@/modules/article/domain/events/article-p
 import { ArticleUpdatedEvent } from '@/modules/article/domain/events/article-updated.event'
 import { AUDIT_LOGGER } from '@/shared-kernel/application/ports/audit-logger.port'
 
-import type { AuditLogger } from '@/shared-kernel/application/ports/audit-logger.port'
+import type { AuditLoggerPort } from '@/shared-kernel/application/ports/audit-logger.port'
 
 @Injectable()
 export class ArticleEventsListener {
   private readonly logger = new Logger(ArticleEventsListener.name)
 
   constructor(
-    @Inject(AUDIT_LOGGER) private readonly auditLogger: AuditLogger,
+    @Inject(AUDIT_LOGGER) private readonly auditLogger: AuditLoggerPort,
     private readonly cls: ClsService,
   ) {}
 

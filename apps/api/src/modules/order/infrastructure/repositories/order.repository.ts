@@ -8,7 +8,7 @@ import { Money } from '@/modules/order/domain/value-objects/money.vo'
 import { OrderItem } from '@/modules/order/domain/value-objects/order-item.vo'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { OrderRepository } from '@/modules/order/application/ports/order.repository.port'
+import type { OrderRepositoryPort } from '@/modules/order/application/ports/order.repository.port'
 import type { OrderDatabase } from '@workspace/database'
 
 /**
@@ -18,7 +18,7 @@ import type { OrderDatabase } from '@workspace/database'
  * If 0 rows are updated, the version has been modified by another request; throws 412.
  */
 @Injectable()
-export class OrderRepositoryImpl implements OrderRepository {
+export class OrderRepositoryImpl implements OrderRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Order | null> {

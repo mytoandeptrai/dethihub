@@ -14,7 +14,7 @@ export const AUTH_IDENTITY_REPOSITORY = Symbol('AUTH_IDENTITY_REPOSITORY')
  * - google/github: OAuth authentication
  * - phone: phone number authentication
  */
-export interface AuthIdentityRepository {
+export interface AuthIdentityRepositoryPort {
   /**
    * Save an auth identity (create or update)
    */

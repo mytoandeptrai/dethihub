@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { Slug } from '@/modules/article/domain/value-objects/slug.vo'
 
-import type { SlugGenerator } from '@/modules/article/application/ports/slug-generator.port'
+import type { SlugGeneratorPort } from '@/modules/article/application/ports/slug-generator.port'
 
 /**
  * Slug Generator Service implementation
@@ -10,7 +10,7 @@ import type { SlugGenerator } from '@/modules/article/application/ports/slug-gen
  * Converts a title into a URL-friendly slug.
  */
 @Injectable()
-export class SlugGeneratorService implements SlugGenerator {
+export class SlugGeneratorService implements SlugGeneratorPort {
   /**
    * Generate a slug from a title.
    *

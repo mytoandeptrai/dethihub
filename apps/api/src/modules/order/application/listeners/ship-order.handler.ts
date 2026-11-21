@@ -4,7 +4,7 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { JOB_REPOSITORY, JobStatus } from '@/modules/order/application/ports/job.repository.port'
 import { OrderShipRequestedEvent } from '@/modules/order/domain/events/order-ship-requested.event'
 
-import type { JobRepository } from '@/modules/order/application/ports/job.repository.port'
+import type { JobRepositoryPort } from '@/modules/order/application/ports/job.repository.port'
 
 /**
  * Ship order event handler
@@ -18,7 +18,7 @@ export class ShipOrderHandler {
 
   constructor(
     @Inject(JOB_REPOSITORY)
-    private readonly jobRepository: JobRepository,
+    private readonly jobRepository: JobRepositoryPort,
   ) {}
 
   @OnEvent(OrderShipRequestedEvent.name, { async: true })

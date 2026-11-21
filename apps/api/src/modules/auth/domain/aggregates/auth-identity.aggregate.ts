@@ -60,7 +60,7 @@ export class AuthIdentity extends BaseAggregateRoot {
   /**
    * Create an email/password auth identity
    *
-   * @param passwordHash Pre-hashed password (hashing is handled by PasswordHasher in the service layer)
+   * @param passwordHash Pre-hashed password (hashing is handled by PasswordHasherPort in the service layer)
    */
   static createEmailIdentity(
     id: string,
@@ -176,7 +176,7 @@ export class AuthIdentity extends BaseAggregateRoot {
   /**
    * Change the password (email authentication only)
    *
-   * @param newPasswordHash Pre-hashed new password (hashing is handled by PasswordHasher in the service layer)
+   * @param newPasswordHash Pre-hashed new password (hashing is handled by PasswordHasherPort in the service layer)
    */
   changePassword(newPasswordHash: string): void {
     if (this.#providerId !== 'email') {

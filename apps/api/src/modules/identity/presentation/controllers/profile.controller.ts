@@ -8,7 +8,7 @@ import {
 } from '@/modules/identity/presentation/dtos/profile.dto'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { ProfileRepository } from '@/modules/identity/application/ports/profile.repository.port'
+import type { ProfileRepositoryPort } from '@/modules/identity/application/ports/profile.repository.port'
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -16,7 +16,7 @@ import type { ProfileRepository } from '@/modules/identity/application/ports/pro
 export class ProfileController {
   constructor(
     @Inject(PROFILE_REPOSITORY)
-    private readonly profileRepository: ProfileRepository,
+    private readonly profileRepository: ProfileRepositoryPort,
   ) {}
 
   @Get()

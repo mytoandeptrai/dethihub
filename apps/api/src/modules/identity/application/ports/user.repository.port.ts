@@ -88,7 +88,7 @@ export interface UserSummary {
  *
  * Defines persistence operations for user management
  */
-export interface IdentityRepository {
+export interface IdentityRepositoryPort {
   findAll(query: UserListQuery): Promise<UserListResult>
   findById(id: string): Promise<UserInfo | null>
   findByEmail(email: string): Promise<UserInfo | null>

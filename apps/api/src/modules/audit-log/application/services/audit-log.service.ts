@@ -6,7 +6,7 @@ import { AUDIT_LOG_REPOSITORY } from '@/modules/audit-log/application/ports/audi
 import type {
   AuditLogListQuery,
   AuditLogListResult,
-  AuditLogRepository,
+  AuditLogRepositoryPort,
 } from '@/modules/audit-log/application/ports/audit-log.repository.port'
 import type { AuditLogInput } from '@/shared-kernel/application/ports/audit-logger.port'
 
@@ -16,7 +16,7 @@ export class AuditLogService {
 
   constructor(
     @Inject(AUDIT_LOG_REPOSITORY)
-    private readonly repo: AuditLogRepository,
+    private readonly repo: AuditLogRepositoryPort,
     private readonly cls: ClsService,
   ) {}
 

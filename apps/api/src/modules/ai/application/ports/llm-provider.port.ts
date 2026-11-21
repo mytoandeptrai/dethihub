@@ -33,7 +33,7 @@ export interface LlmResult {
   broken?: boolean
 }
 
-export interface LlmProvider {
+export interface LlmProviderPort {
   /** throws LlmUpstreamError on a non-2xx answer; any other error means the call did not complete (timeout, network) */
   complete(request: LlmRequest): Promise<LlmResult>
 }

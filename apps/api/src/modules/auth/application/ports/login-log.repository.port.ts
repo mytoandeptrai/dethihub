@@ -27,7 +27,7 @@ export interface LoginLogQueryParams {
   status?: 'success' | 'failed'
 }
 
-export interface LoginLogRepository {
+export interface LoginLogRepositoryPort {
   create(entry: LoginLogEntry): Promise<void>
   findAll(params: LoginLogQueryParams): Promise<{ data: LoginLogRecord[]; total: number }>
 }

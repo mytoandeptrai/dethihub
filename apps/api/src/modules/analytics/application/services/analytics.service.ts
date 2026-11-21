@@ -7,7 +7,7 @@ import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 import type {
   AnalyticsSummary,
   ArticleCategoryStats,
-  IAnalyticsQuery,
+  AnalyticsQueryPort,
   MonthlyOverview,
 } from '@/modules/analytics/application/ports/analytics.query.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
@@ -30,7 +30,7 @@ export class AnalyticsService {
 
   constructor(
     @Inject(ANALYTICS_QUERY)
-    private readonly analyticsQuery: IAnalyticsQuery,
+    private readonly analyticsQuery: AnalyticsQueryPort,
     @Inject(CACHE_PORT)
     private readonly cache: CachePort,
   ) {}

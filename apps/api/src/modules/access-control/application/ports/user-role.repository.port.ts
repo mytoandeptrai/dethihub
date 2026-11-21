@@ -2,6 +2,6 @@ import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform
 
 export const USER_ROLE_REPOSITORY = Symbol('USER_ROLE_REPOSITORY')
 
-export interface UserRoleRepository {
+export interface UserRoleRepositoryPort {
   findRole(userId: string): Promise<PlatformRole | null>
 }

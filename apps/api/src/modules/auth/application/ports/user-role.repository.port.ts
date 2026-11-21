@@ -10,7 +10,7 @@ export const USER_ROLE_REPOSITORY = Symbol('USER_ROLE_REPOSITORY')
  *
  * Single-role management (adapts better-auth users.role field)
  */
-export interface UserRoleRepository {
+export interface UserRoleRepositoryPort {
   /**
    * Set the role for a user
    */

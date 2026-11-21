@@ -4,13 +4,13 @@ import { PrismaService } from '@/app/database/prisma.service'
 
 import type {
   QuotaOverride,
-  QuotaRepository,
+  QuotaRepositoryPort,
 } from '@/modules/ai/application/ports/quota.repository.port'
 
 const STALE_RESERVATION_MS = 6 * 60 * 1000
 
 @Injectable()
-export class QuotaRepositoryImpl implements QuotaRepository {
+export class QuotaRepositoryImpl implements QuotaRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findOverride(userId: string): Promise<QuotaOverride | null> {

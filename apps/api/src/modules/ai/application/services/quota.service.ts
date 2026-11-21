@@ -6,16 +6,16 @@ import { QUOTA_REPOSITORY } from '@/modules/ai/application/ports/quota.repositor
 import { monthKey, TOKENS_PER_POINT } from '@/modules/ai/domain/quota'
 
 import type { Env } from '@/app/config/env.schema'
-import type { CreditRepository } from '@/modules/ai/application/ports/credit.repository.port'
-import type { QuotaRepository } from '@/modules/ai/application/ports/quota.repository.port'
+import type { CreditRepositoryPort } from '@/modules/ai/application/ports/credit.repository.port'
+import type { QuotaRepositoryPort } from '@/modules/ai/application/ports/quota.repository.port'
 import type { Quota } from '@/modules/ai/domain/quota'
 import type { Receipt } from '@/modules/ai/domain/receipt'
 
 @Injectable()
 export class QuotaService {
   constructor(
-    @Inject(QUOTA_REPOSITORY) private readonly quotas: QuotaRepository,
-    @Inject(CREDIT_REPOSITORY) private readonly credits: CreditRepository,
+    @Inject(QUOTA_REPOSITORY) private readonly quotas: QuotaRepositoryPort,
+    @Inject(CREDIT_REPOSITORY) private readonly credits: CreditRepositoryPort,
     private readonly config: ConfigService<Env, true>,
   ) {}
 

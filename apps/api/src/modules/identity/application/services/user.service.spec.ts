@@ -6,16 +6,16 @@ import { UserFixtures } from '@/__tests__/unit/factories/domain-fixtures'
 import { UserService } from '@/modules/identity/application/services/user.service'
 
 import type { DomainEventPublisher } from '@/app/events/domain-event-publisher'
-import type { IdentityRepository } from '@/modules/identity/application/ports/user.repository.port'
+import type { IdentityRepositoryPort } from '@/modules/identity/application/ports/user.repository.port'
 import type { DeepMocked } from '@golevelup/ts-vitest'
 
 describe('userService', () => {
   let service: UserService
-  let userRepository: DeepMocked<IdentityRepository>
+  let userRepository: DeepMocked<IdentityRepositoryPort>
   let eventPublisher: DeepMocked<DomainEventPublisher>
 
   beforeEach(() => {
-    userRepository = createMock<IdentityRepository>()
+    userRepository = createMock<IdentityRepositoryPort>()
     eventPublisher = createMock<DomainEventPublisher>()
     eventPublisher.publish.mockResolvedValue()
     service = new UserService(userRepository, eventPublisher)

@@ -7,7 +7,7 @@ import { SecurityStrikeService } from '@/modules/access-control/application/serv
 import { satisfiesRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { AuthUserDirectory } from '@/modules/access-control/application/ports/auth-user-directory.port'
+import type { AuthUserDirectoryPort } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 import type { AuthenticatedUser } from '@/shared-kernel/infrastructure/types/authenticated-user'
 
@@ -18,7 +18,7 @@ const FORBIDDEN_MESSAGE = 'Không có quyền.'
 export class RoleAuthorizationService {
   constructor(
     private readonly roles: PlatformRoleService,
-    @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectory,
+    @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectoryPort,
     private readonly strike: SecurityStrikeService,
   ) {}
 

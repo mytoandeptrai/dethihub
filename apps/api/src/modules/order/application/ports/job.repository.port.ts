@@ -24,7 +24,7 @@ export interface Job {
  *
  * Abstract interface for async job data access
  */
-export interface JobRepository {
+export interface JobRepositoryPort {
   findById(id: string): Promise<Job | null>
   create(job: Omit<Job, 'createdAt' | 'updatedAt'>): Promise<Job>
   updateStatus(

@@ -5,7 +5,7 @@ export interface VerifiedToken {
   email: string | null
 }
 
-export interface TokenVerifier {
+export interface TokenVerifierPort {
   /** null = token is invalid or expired; throws when the keys cannot be fetched */
   verify(token: string): Promise<VerifiedToken | null>
 }

@@ -4,8 +4,8 @@ import { IDENTITY_REPOSITORY } from '@/modules/identity/application/ports/user.r
 import { createTestApp } from './helpers/create-app.js'
 import { createRequest } from './helpers/create-request.js'
 
-import type { UserRoleRepository } from '@/modules/auth/application/ports/user-role.repository.port'
-import type { IdentityRepository } from '@/modules/identity/application/ports/user.repository.port'
+import type { UserRoleRepositoryPort } from '@/modules/auth/application/ports/user-role.repository.port'
+import type { IdentityRepositoryPort } from '@/modules/identity/application/ports/user.repository.port'
 import type { INestApplication } from '@nestjs/common'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -30,8 +30,8 @@ interface UserListResponse {
 describe('userManagement E2E Tests', () => {
   let app: INestApplication
   let prefix: string
-  let userRepo: IdentityRepository
-  let userRoleRepo: UserRoleRepository
+  let userRepo: IdentityRepositoryPort
+  let userRoleRepo: UserRoleRepositoryPort
 
   // Track created user IDs for cleanup
   const createdUserIds: string[] = []
@@ -44,8 +44,8 @@ describe('userManagement E2E Tests', () => {
   beforeAll(async () => {
     app = await createTestApp()
     prefix = globalThis.e2ePrefix ?? `e2e-${Date.now()}`
-    userRepo = app.get<IdentityRepository>(IDENTITY_REPOSITORY)
-    userRoleRepo = app.get<UserRoleRepository>(USER_ROLE_REPOSITORY)
+    userRepo = app.get<IdentityRepositoryPort>(IDENTITY_REPOSITORY)
+    userRoleRepo = app.get<UserRoleRepositoryPort>(USER_ROLE_REPOSITORY)
 
     const adminEmail = `${prefix}-admin@test.com`
     const regularEmail = `${prefix}-user@test.com`

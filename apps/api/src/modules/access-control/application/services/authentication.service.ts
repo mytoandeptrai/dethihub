@@ -4,8 +4,8 @@ import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/
 import { TOKEN_VERIFIER } from '@/modules/access-control/application/ports/token-verifier.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { AuthUserDirectory } from '@/modules/access-control/application/ports/auth-user-directory.port'
-import type { TokenVerifier } from '@/modules/access-control/application/ports/token-verifier.port'
+import type { AuthUserDirectoryPort } from '@/modules/access-control/application/ports/auth-user-directory.port'
+import type { TokenVerifierPort } from '@/modules/access-control/application/ports/token-verifier.port'
 import type { AuthenticatedUser } from '@/shared-kernel/infrastructure/types/authenticated-user'
 
 const MAX_TOKEN_LENGTH = 4096
@@ -19,8 +19,8 @@ export const TOKEN_BUSY_MESSAGE =
 @Injectable()
 export class AuthenticationService {
   constructor(
-    @Inject(TOKEN_VERIFIER) private readonly verifier: TokenVerifier,
-    @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectory,
+    @Inject(TOKEN_VERIFIER) private readonly verifier: TokenVerifierPort,
+    @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectoryPort,
   ) {}
 
   /** null = guest (no token or an invalid one); throws 403 for a banned account and 503 when it cannot be checked */

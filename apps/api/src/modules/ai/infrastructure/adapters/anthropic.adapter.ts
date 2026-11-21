@@ -2,13 +2,13 @@ import Anthropic from '@anthropic-ai/sdk'
 import { Injectable } from '@nestjs/common'
 
 import type {
-  LlmProvider,
+  LlmProviderPort,
   LlmRequest,
   LlmResult,
 } from '@/modules/ai/application/ports/llm-provider.port'
 
 @Injectable()
-export class AnthropicAdapter implements LlmProvider {
+export class AnthropicAdapter implements LlmProviderPort {
   readonly #clients = new Map<string, Anthropic>()
 
   async complete(request: LlmRequest): Promise<LlmResult> {

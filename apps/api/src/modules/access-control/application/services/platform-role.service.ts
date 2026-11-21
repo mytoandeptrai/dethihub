@@ -4,7 +4,7 @@ import { USER_ROLE_REPOSITORY } from '@/modules/access-control/application/ports
 import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 import { isPlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 
-import type { UserRoleRepository } from '@/modules/access-control/application/ports/user-role.repository.port'
+import type { UserRoleRepositoryPort } from '@/modules/access-control/application/ports/user-role.repository.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 
@@ -14,7 +14,7 @@ const NO_ROLE = ''
 @Injectable()
 export class PlatformRoleService {
   constructor(
-    @Inject(USER_ROLE_REPOSITORY) private readonly roles: UserRoleRepository,
+    @Inject(USER_ROLE_REPOSITORY) private readonly roles: UserRoleRepositoryPort,
     @Inject(CACHE_PORT) private readonly cache: CachePort,
   ) {}
 

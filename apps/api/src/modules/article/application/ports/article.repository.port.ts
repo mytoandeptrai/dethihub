@@ -42,7 +42,7 @@ export interface ArticleCursorResult {
  * Follows the Dependency Inversion Principle: the application layer defines
  * the interface and the infrastructure layer provides the implementation.
  */
-export interface ArticleRepository {
+export interface ArticleRepositoryPort {
   /**
    * Retrieve all articles (no pagination)
    */

@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { APP_SETTINGS_REPOSITORY } from '@/modules/app-settings/application/ports/app-settings.repository.port'
 import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 
-import type { AppSettingsRepository } from '@/modules/app-settings/application/ports/app-settings.repository.port'
+import type { AppSettingsRepositoryPort } from '@/modules/app-settings/application/ports/app-settings.repository.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 
 const SETTINGS_CACHE_TTL_SECONDS = 30
@@ -11,7 +11,7 @@ const SETTINGS_CACHE_TTL_SECONDS = 30
 @Injectable()
 export class AppSettingsService {
   constructor(
-    @Inject(APP_SETTINGS_REPOSITORY) private readonly settings: AppSettingsRepository,
+    @Inject(APP_SETTINGS_REPOSITORY) private readonly settings: AppSettingsRepositoryPort,
     @Inject(CACHE_PORT) private readonly cache: CachePort,
   ) {}
 
