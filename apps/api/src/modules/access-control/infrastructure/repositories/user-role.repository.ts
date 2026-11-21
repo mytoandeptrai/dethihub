@@ -7,7 +7,7 @@ import type { UserRoleRepository } from '@/modules/access-control/application/po
 import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 
 @Injectable()
-export class PrismaUserRoleRepository implements UserRoleRepository {
+export class UserRoleRepositoryImpl implements UserRoleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findRole(userId: string): Promise<PlatformRole | null> {

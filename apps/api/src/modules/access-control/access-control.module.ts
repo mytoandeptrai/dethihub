@@ -10,9 +10,9 @@ import { RoleAuthorizationService } from '@/modules/access-control/application/s
 import { SecurityStrikeService } from '@/modules/access-control/application/services/security-strike.service'
 import { JoseTokenVerifier } from '@/modules/access-control/infrastructure/adapters/jose-token-verifier.adapter'
 import { SupabaseAuthAdminAdapter } from '@/modules/access-control/infrastructure/adapters/supabase-auth-admin.adapter'
-import { PrismaAdminAuditRepository } from '@/modules/access-control/infrastructure/repositories/admin-audit.repository'
-import { PrismaSecurityFlagRepository } from '@/modules/access-control/infrastructure/repositories/security-flag.repository'
-import { PrismaUserRoleRepository } from '@/modules/access-control/infrastructure/repositories/user-role.repository'
+import { AdminAuditRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/admin-audit.repository'
+import { SecurityFlagRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/security-flag.repository'
+import { UserRoleRepositoryImpl } from '@/modules/access-control/infrastructure/repositories/user-role.repository'
 import { MeController } from '@/modules/access-control/presentation/controllers/me.controller'
 import { AUTH_USER_DIRECTORY } from '@/shared-kernel/application/ports/auth-user-directory.port'
 import { SECURITY_STRIKE } from '@/shared-kernel/application/ports/security-strike.port'
@@ -29,9 +29,9 @@ import { SECURITY_STRIKE } from '@/shared-kernel/application/ports/security-stri
     { provide: TOKEN_VERIFIER, useClass: JoseTokenVerifier },
     { provide: AUTH_USER_DIRECTORY, useExisting: SupabaseAuthAdminAdapter },
     { provide: SECURITY_STRIKE, useExisting: SecurityStrikeService },
-    { provide: USER_ROLE_REPOSITORY, useClass: PrismaUserRoleRepository },
-    { provide: SECURITY_FLAG_REPOSITORY, useClass: PrismaSecurityFlagRepository },
-    { provide: ADMIN_AUDIT_REPOSITORY, useClass: PrismaAdminAuditRepository },
+    { provide: USER_ROLE_REPOSITORY, useClass: UserRoleRepositoryImpl },
+    { provide: SECURITY_FLAG_REPOSITORY, useClass: SecurityFlagRepositoryImpl },
+    { provide: ADMIN_AUDIT_REPOSITORY, useClass: AdminAuditRepositoryImpl },
   ],
   exports: [
     AuthenticationService,

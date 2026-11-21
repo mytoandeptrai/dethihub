@@ -9,7 +9,7 @@ import type {
 import type { Prisma } from '@workspace/database'
 
 @Injectable()
-export class PrismaAdminAuditRepository implements AdminAuditRepository {
+export class AdminAuditRepositoryImpl implements AdminAuditRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async record(entry: AdminAuditEntry): Promise<void> {

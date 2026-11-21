@@ -4,13 +4,12 @@ import { APP_SETTINGS_REPOSITORY } from '@/modules/app-settings/application/port
 import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 
 import type { AppSettingsRepository } from '@/modules/app-settings/application/ports/app-settings.repository.port'
-import type { AppSettingsPort } from '@/shared-kernel/application/ports/app-settings.port'
 import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 
 const SETTINGS_CACHE_TTL_SECONDS = 30
 
 @Injectable()
-export class AppSettingsService implements AppSettingsPort {
+export class AppSettingsService {
   constructor(
     @Inject(APP_SETTINGS_REPOSITORY) private readonly settings: AppSettingsRepository,
     @Inject(CACHE_PORT) private readonly cache: CachePort,

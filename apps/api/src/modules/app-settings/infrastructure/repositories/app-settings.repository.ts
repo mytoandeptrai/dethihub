@@ -6,7 +6,7 @@ import type { AppSettingsRepository } from '@/modules/app-settings/application/p
 import type { Prisma } from '@workspace/database'
 
 @Injectable()
-export class PrismaAppSettingsRepository implements AppSettingsRepository {
+export class AppSettingsRepositoryImpl implements AppSettingsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async find(key: string): Promise<unknown> {

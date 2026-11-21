@@ -2,7 +2,7 @@ import { S3Client } from '@aws-sdk/client-s3'
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { R2ObjectStorage } from '@/modules/object-storage/r2-object-storage.adapter'
+import { R2ObjectStorage } from '@/modules/object-storage/infrastructure/adapters/r2-object-storage.adapter'
 import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 
 import type { Env } from '@/app/config/env.schema'
