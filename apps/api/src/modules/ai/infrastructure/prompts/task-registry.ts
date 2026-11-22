@@ -108,11 +108,20 @@ function soanDe(raw: unknown): string | null {
 
 const hoiTruoc = (): string => ASK_ONLY_SYSTEM
 
+type SlideTaskInput = Record<string, unknown> & { pro?: boolean }
+
+function slideInput(raw: unknown): SlideTaskInput {
+  const { pro, ...input } = (raw ?? {}) as Record<string, unknown>
+  return { ...input, pro: pro === true }
+}
+
 function slideChat(raw: unknown): string | null {
-  const o = (raw ?? {}) as Record<string, unknown>
+  const o = slideInput(raw)
   if (o.variant !== 'plan' && o.variant !== 'chat' && o.variant !== 'html') return null
   return buildSlideChatSystem({
     variant: o.variant,
+    pro: o.pro === true,
+    think: o.think === true,
     ask: o.ask === true,
     contextSummary: str(o.contextSummary),
     webFound: str(o.webFound),
@@ -125,12 +134,13 @@ function bangVe(raw: unknown): string {
   return buildBoardSystem({
     ops: o.ops === true,
     contextSummary: str(o.contextSummary),
+    think: o.think === true,
     ...sourceFields(o),
   })
 }
 
 function slideLo(raw: unknown): string | null {
-  const o = (raw ?? {}) as Record<string, unknown>
+  const o = slideInput(raw)
   const plan = planOf(o.plan)
   const idx = Array.isArray(o.indices) ? o.indices.slice(0, 40).map(Number) : []
   if (
@@ -139,15 +149,15 @@ function slideLo(raw: unknown): string | null {
     idx.some((i) => !Number.isInteger(i) || i < 0 || i >= plan.slides.length)
   )
     return null
-  return buildSlideBatchSystem(plan, idx, o.think === true)
+  return buildSlideBatchSystem(plan, idx, o.think === true, o.pro === true)
 }
 
 function slideTrang(raw: unknown): string | null {
-  const o = (raw ?? {}) as Record<string, unknown>
+  const o = slideInput(raw)
   const plan = planOf(o.plan)
   const i = Number(o.index)
   if (!plan || !Number.isInteger(i) || i < 0 || i >= plan.slides.length) return null
-  return buildSlidePageSystem(plan, i)
+  return buildSlidePageSystem(plan, i, o.pro === true)
 }
 
 function slideSua(raw: unknown): string | null {

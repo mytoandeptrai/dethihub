@@ -22,7 +22,7 @@ export class AdminSettingsController {
 
   @Get()
   @PlatformRoles('moderator')
-  @ApiOperation({ summary: 'Maintenance, announcements and pricing settings' })
+  @ApiOperation({ summary: 'Maintenance, announcements, pricing and AI welcome settings' })
   @ApiResponse({ status: 200, type: SettingsResponseDto })
   async getAll(): Promise<SettingsResponseDto> {
     return (await this.settings.getAll()) as unknown as SettingsResponseDto
@@ -30,7 +30,9 @@ export class AdminSettingsController {
 
   @Put(':key')
   @PlatformRoles('admin')
-  @ApiOperation({ summary: 'Validate and save one setting (maintenance | announcements | pricing)' })
+  @ApiOperation({
+    summary: 'Validate and save one setting (maintenance | announcements | pricing | ai_welcome)',
+  })
   @ApiResponse({ status: 200, type: SettingValueResponseDto })
   async set(
     @CurrentUser() admin: AuthenticatedUser,

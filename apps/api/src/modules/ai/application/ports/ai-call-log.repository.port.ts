@@ -8,6 +8,9 @@ export interface AiCallRecord {
   completionTokens: number
   cost: number | null
   ms: number
+  kind?: string
+  /** tokens charged to the user for this call; successful calls only */
+  billed?: number
 }
 
 export interface AiCallStatsRow {

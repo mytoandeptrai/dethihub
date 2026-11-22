@@ -99,15 +99,17 @@ export class PublishedExam extends BaseAggregateRoot {
   }
 
   /** The link, student attempts and reports stay with this id */
-  replaceContent(actorId: string, doc: ExamDoc, listed: boolean): void {
+  replaceContent(actorId: string, doc: ExamDoc, listed: boolean, hasOpenReport: boolean): void {
     this.#assertEditableBy(actorId)
+    if (hasOpenReport) throw new ExamRuleError('edit-under-review')
     this.#doc = doc
     this.#listed = listed
     this.#summary = ExamSummary.fromDoc(doc)
   }
 
-  setListed(actorId: string, listed: boolean): void {
+  setListed(actorId: string, listed: boolean, hasOpenReport: boolean): void {
     this.#assertEditableBy(actorId)
+    if (hasOpenReport) throw new ExamRuleError('edit-under-review')
     this.#listed = listed
   }
 

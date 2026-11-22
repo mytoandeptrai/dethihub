@@ -15,7 +15,10 @@ const DEFAULTS: Record<string, unknown> = {
   maintenance: { on: false },
   announcements: { items: [] },
   pricing: null,
+  ai_welcome: null,
 }
+
+const camelCase = (key: string) => key.replaceAll(/_(\w)/g, (_, char: string) => char.toUpperCase())
 
 @Injectable()
 export class AdminSettingsService {
@@ -26,12 +29,18 @@ export class AdminSettingsService {
 
   async getAll(): Promise<Record<string, unknown>> {
     const entries = await Promise.all(
-      SETTING_KEYS.map(async (key) => [key, (await this.settings.get(key)) ?? DEFAULTS[key]] as const),
+      SETTING_KEYS.map(
+        async (key) => [camelCase(key), (await this.settings.get(key)) ?? DEFAULTS[key]] as const,
+      ),
     )
     return Object.fromEntries(entries)
   }
 
-  async set(adminId: string, key: string, value: Record<string, unknown>): Promise<Record<string, unknown>> {
+  async set(
+    adminId: string,
+    key: string,
+    value: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     let clean: Record<string, unknown>
     try {
       clean = sanitizeSetting(key, value)

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { PrismaService } from '@/app/database/prisma.service'
+import { mailboxKey } from '@/modules/ai/domain/mailbox-key'
 
 import type {
   CreditEvent,
@@ -21,11 +22,32 @@ export class CreditRepositoryImpl implements CreditRepositoryPort {
 
   async claimWelcome(userId: string, tokens: number): Promise<number> {
     return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.aiCredit.findUnique({ where: { userId } })
+      if (existing) return Number(existing.balance)
+
+      let grant = Math.max(tokens, 0)
+      if (grant > 0) {
+        const [account] = await tx.$queryRaw<
+          { email: string | null }[]
+        >`SELECT email FROM auth.users WHERE id = ${userId}::uuid`
+        const mailbox = mailboxKey(account?.email)
+        if (mailbox) {
+          await tx.$executeRaw`
+            INSERT INTO ai_welcome_claims (mailbox, user_id) VALUES (${mailbox}, ${userId}::uuid)
+            ON CONFLICT (mailbox) DO NOTHING`
+          const claim = await tx.aiWelcomeClaim.findUnique({ where: { mailbox } })
+          // Another account already took this mailbox's gift
+          if (claim?.userId !== userId) grant = 0
+        }
+      }
+
       const inserted = await tx.$executeRaw`
-        INSERT INTO ai_credits (user_id, balance) VALUES (${userId}::uuid, ${Math.max(tokens, 0)}::bigint)
+        INSERT INTO ai_credits (user_id, balance) VALUES (${userId}::uuid, ${grant}::bigint)
         ON CONFLICT (user_id) DO NOTHING`
-      if (inserted > 0 && tokens > 0) {
-        await tx.aiCreditEvent.create({ data: { userId, kind: 'welcome', tokens } })
+      if (inserted > 0 && grant > 0) {
+        // Usage before the gift must not eat into it
+        await tx.aiUsage.updateMany({ where: { userId }, data: { tokens: 0 } })
+        await tx.aiCreditEvent.create({ data: { userId, kind: 'welcome', tokens: grant } })
       }
       const row = await tx.aiCredit.findUnique({ where: { userId } })
       return Number(row?.balance ?? 0)

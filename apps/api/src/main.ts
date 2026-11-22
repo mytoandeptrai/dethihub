@@ -31,8 +31,8 @@ async function bootstrap() {
 
   // AI chat carries whole source documents; every other route stays small
   app.use('/api/ai/chat', json({ limit: '2mb' }))
-  // A published exam carries its whole document; submissions are answer maps
-  app.use('/api/me/exams', json({ limit: '2mb' }))
+  // A published exam carries its whole document (capped at 2 MB by the service, so its message answers first)
+  app.use('/api/me/exams', json({ limit: '2100kb' }))
   app.use(/^\/api\/exams\/[^/]+\/attempts$/, json({ limit: '256kb' }))
   // An item can be 2 MB; the cap above it lets the quota message answer instead of a parser error
   app.use('/api/workspace/items', json({ limit: '3mb' }))

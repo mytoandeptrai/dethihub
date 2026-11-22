@@ -1,4 +1,4 @@
-export type ExamRuleViolation = 'not-owner' | 'removed' | 'under-review'
+export type ExamRuleViolation = 'not-owner' | 'removed' | 'under-review' | 'edit-under-review'
 
 export class ExamRuleError extends Error {
   readonly violation: ExamRuleViolation

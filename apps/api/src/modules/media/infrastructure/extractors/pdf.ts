@@ -1,3 +1,4 @@
+import { assertSafePdfXref } from '@/modules/media/infrastructure/extractors/pdf-xref-guard'
 import { EMPH_OFF, EMPH_ON, MAX_TEXT } from '@/modules/media/infrastructure/extractors/text'
 
 import type { TextItem } from 'pdfjs-dist/types/src/display/api.js'
@@ -193,7 +194,11 @@ async function markStyledFonts(
   }
 }
 
+const PDF_MAX_PAGES = 1500
+const PDF_MIN_BYTES_PER_PAGE = 60
+
 export async function extractPdf(data: Buffer, marks = false): Promise<string> {
+  assertSafePdfXref(data)
   // The bundled function cannot find pdf.worker.mjs on its own; load it up front so pdf.js uses it
   const g = globalThis as { pdfjsWorker?: unknown }
   // @ts-expect-error pdf.js ships no types for the worker file
@@ -206,6 +211,10 @@ export async function extractPdf(data: Buffer, marks = false): Promise<string> {
   const doc = await task.promise
   const pages: string[] = []
   try {
+    // A real page costs at least a few hundred bytes; a page tree repeating one page (~6 bytes each) exhausts memory
+    if (doc.numPages > PDF_MAX_PAGES || doc.numPages * PDF_MIN_BYTES_PER_PAGE > data.length) {
+      throw new Error('Tệp PDF có số trang bất thường, không đọc được.')
+    }
     for (let p = 1; p <= doc.numPages; p++) {
       const page = await doc.getPage(p)
       const content = await page.getTextContent()

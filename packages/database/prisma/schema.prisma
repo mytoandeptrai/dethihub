@@ -316,6 +316,50 @@ model AiCredit {
   @@map("ai_credits")
 }
 
+/// One welcome gift per normalized mailbox. No FK: deleting the account must not reset the gift.
+model AiWelcomeClaim {
+  mailbox   String   @id
+  /// auth.users.id of the account that took the gift (a trace, not a relation)
+  userId    String   @map("user_id") @db.Uuid
+  claimedAt DateTime @default(now()) @map("claimed_at") @db.Timestamptz(6)
+
+  @@map("ai_welcome_claims")
+}
+
+/// When each kind of alert was last sent, so the same alert is not repeated within the cooldown.
+model AlertState {
+  kind       String   @id
+  lastSentAt DateTime @default(now()) @map("last_sent_at") @db.Timestamptz(6)
+
+  @@map("alert_state")
+}
+
+/// Email domains refused at signup (disposable mailboxes); matched with subdomains by a trigger on auth.users.
+model BlockedEmailDomain {
+  domain String @id
+
+  @@map("blocked_email_domains")
+}
+
+/// One account per canonical mailbox, maintained by triggers on auth.users (no relation on purpose).
+model SignupGuard {
+  userId    String   @id @map("user_id") @db.Uuid
+  canonical String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("signup_guard")
+}
+
+/// Signup attempts per IP, written by the Auth "Before User Created" hook.
+model SignupIpLog {
+  id        BigInt   @id @default(autoincrement())
+  ip        String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([ip, createdAt(sort: Desc)])
+  @@map("signup_ip_log")
+}
+
 model AiCreditEvent {
   id        BigInt   @id @default(autoincrement())
   /// auth.users.id
@@ -366,9 +410,14 @@ model AiCall {
   completionTokens Int      @default(0) @map("completion_tokens")
   cost             Decimal?
   ms               Int      @default(0)
+  /// what the call was for (chat task, image, vision-source...), derived on the server
+  kind             String?
+  /// tokens charged to the user's allowance for this call; only on successful rows
+  billed           Int?
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   @@index([createdAt(sort: Desc)], map: "ai_calls_created_at_idx")
+  @@index([userId, kind, createdAt(sort: Desc)])
   @@map("ai_calls")
 }
 

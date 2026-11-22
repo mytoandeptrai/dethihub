@@ -210,18 +210,27 @@ async function prepareDocx(
  * Scan the tag nesting depth of every XML part in linear time before handing the file to mammoth.
  */
 const MAX_XML_DEPTH = 200
-async function assertSaneDocxXml(data: Buffer) {
+// Tag counts: a few KB of deflated parts expand to tens of thousands of paragraphs and the parser takes
+// hundreds of MB; real documents are far below
+const MAX_XML_TAGS_PART = 400_000
+const MAX_XML_TAGS_TOTAL = 800_000
+export async function assertSaneDocxXml(data: Buffer) {
   const mod = await import('jszip')
   const zip = await mod.default.loadAsync(data)
+  let tags = 0
   for (const name of Object.keys(zip.files)) {
     if (!name.endsWith('.xml') && !name.endsWith('.rels')) continue
     const entry = zip.files[name]
     if (!entry) continue
     const xml = await entry.async('string')
     let depth = 0
+    let partTags = 0
     for (let i = xml.indexOf('<'); i >= 0; i = xml.indexOf('<', i + 1)) {
       const c = xml[i + 1]
       if (c === '?' || c === '!') continue
+      if (++partTags > MAX_XML_TAGS_PART || ++tags > MAX_XML_TAGS_TOTAL) {
+        throw new Error('Tệp có cấu trúc bất thường, không đọc được.')
+      }
       if (c === '/') {
         depth--
         continue

@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -23,6 +24,7 @@ import {
   grade,
   revealOf,
 } from '@/modules/exam/domain/policies/attempt-grading.policy'
+import { resolveStudent } from '@/modules/exam/domain/policies/roster.policy'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type {
@@ -76,6 +78,13 @@ export class AttemptService {
     if (!row) throw examNotFound('Không tìm thấy đề.')
 
     const exam = docToExam(row.doc, command.examId)
+    const student = resolveStudent(exam.settings?.roster, command.name, command.seat)
+    if (!student) {
+      throw new BadRequestException({
+        code: ErrorCode.BAD_REQUEST,
+        message: 'Tên không có trong danh sách lớp.',
+      })
+    }
     const device = command.deviceId.length >= MIN_DEVICE_ID_LENGTH ? command.deviceId : null
     const oneAttempt = exam.settings?.oneAttempt === true
 
@@ -86,7 +95,7 @@ export class AttemptService {
         message: 'Đề này chỉ làm một lần, em cần đăng nhập để nộp bài.',
       })
     }
-    if (!oneAttempt) await this.#enforceCaps(command, device)
+    if (!oneAttempt) await this.#enforceCaps(command, student.name, device)
 
     const reveal = revealOf(row.listed, exam.settings)
     const graded = grade(flatQuestions(exam), command.answers, reveal.fullKey)
@@ -94,13 +103,13 @@ export class AttemptService {
       {
         examId: command.examId,
         userId: command.userId,
-        studentName: command.name,
+        studentName: student.name,
         score: graded.score,
         maxScore: graded.max,
         durationSeconds: command.seconds,
         deviceId: device,
         className: command.className || null,
-        seatNo: command.seat ?? null,
+        seatNo: student.seat ?? null,
       },
       oneAttempt,
     )
@@ -139,7 +148,11 @@ export class AttemptService {
    * gradebook. Name and device id are self-reported, so the main cap counts the whole exam; accounts
    * and devices get a smaller cap of their own.
    */
-  async #enforceCaps(command: SubmitAttemptCommand, device: string | null): Promise<void> {
+  async #enforceCaps(
+    command: SubmitAttemptCommand,
+    studentName: string,
+    device: string | null,
+  ): Promise<void> {
     let mine: number
     let guests: number
     try {
@@ -148,7 +161,7 @@ export class AttemptService {
           ? this.attempts.countByUser(command.examId, command.userId)
           : device
             ? this.attempts.countByGuestDevice(command.examId, device)
-            : 0,
+            : this.attempts.countByGuestName(command.examId, studentName),
         command.userId ? 0 : this.attempts.countGuests(command.examId),
       ])
     } catch {

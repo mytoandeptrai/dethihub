@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common'
 
+import { UserDeletionListener } from '@/modules/ai/application/listeners/user-deletion.listener'
 import { AI_CALL_LOG_REPOSITORY } from '@/modules/ai/application/ports/ai-call-log.repository.port'
 import { CREDIT_REPOSITORY } from '@/modules/ai/application/ports/credit.repository.port'
 import { FEEDBACK_REPOSITORY } from '@/modules/ai/application/ports/feedback.repository.port'
@@ -10,11 +11,13 @@ import {
 import { PROVIDER_SETTINGS_REPOSITORY } from '@/modules/ai/application/ports/provider-settings.repository.port'
 import { QUOTA_REPOSITORY } from '@/modules/ai/application/ports/quota.repository.port'
 import { TASK_PROMPTS } from '@/modules/ai/application/ports/task-prompts.port'
+import { USER_DATA_REPOSITORY } from '@/modules/ai/application/ports/user-data.repository.port'
 import { AiAdminService } from '@/modules/ai/application/services/ai-admin.service'
 import { ChatService } from '@/modules/ai/application/services/chat.service'
 import { FeedbackService } from '@/modules/ai/application/services/feedback.service'
 import { ProviderConfigService } from '@/modules/ai/application/services/provider-config.service'
 import { QuotaService } from '@/modules/ai/application/services/quota.service'
+import { WelcomePointsService } from '@/modules/ai/application/services/welcome-points.service'
 import { AiMeterAdapter } from '@/modules/ai/infrastructure/adapters/ai-meter.adapter'
 import { AnthropicAdapter } from '@/modules/ai/infrastructure/adapters/anthropic.adapter'
 import { CreditGrantAdapter } from '@/modules/ai/infrastructure/adapters/credit-grant.adapter'
@@ -26,17 +29,17 @@ import { CreditRepositoryImpl } from '@/modules/ai/infrastructure/repositories/c
 import { FeedbackRepositoryImpl } from '@/modules/ai/infrastructure/repositories/feedback.repository'
 import { ProviderSettingsRepositoryImpl } from '@/modules/ai/infrastructure/repositories/provider-settings.repository'
 import { QuotaRepositoryImpl } from '@/modules/ai/infrastructure/repositories/quota.repository'
+import { UserDataRepositoryImpl } from '@/modules/ai/infrastructure/repositories/user-data.repository'
 import { AiAdminController } from '@/modules/ai/presentation/controllers/ai-admin.controller'
 import { AiController } from '@/modules/ai/presentation/controllers/ai.controller'
+import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { AI_METER } from '@/shared-kernel/application/ports/ai-meter.port'
 import { CREDIT_GRANT } from '@/shared-kernel/application/ports/credit-grant.port'
 import { VISION_READER } from '@/shared-kernel/application/ports/vision-reader.port'
-import { USER_DATA_REPOSITORY } from '@/modules/ai/application/ports/user-data.repository.port'
-import { UserDeletionListener } from '@/modules/ai/application/listeners/user-deletion.listener'
-import { UserDataRepositoryImpl } from '@/modules/ai/infrastructure/repositories/user-data.repository'
 
 @Global() // @global-approved: other contexts meter AI points, read images and grant credits through shared-kernel ports
 @Module({
+  imports: [AppSettingsModule],
   controllers: [AiController, AiAdminController],
   providers: [
     UserDeletionListener,
@@ -45,6 +48,7 @@ import { UserDataRepositoryImpl } from '@/modules/ai/infrastructure/repositories
     AiAdminService,
     ProviderConfigService,
     QuotaService,
+    WelcomePointsService,
     FeedbackService,
     { provide: QUOTA_REPOSITORY, useClass: QuotaRepositoryImpl },
     { provide: CREDIT_REPOSITORY, useClass: CreditRepositoryImpl },

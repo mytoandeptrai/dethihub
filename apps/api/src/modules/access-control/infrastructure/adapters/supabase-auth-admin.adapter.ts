@@ -13,20 +13,23 @@ import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { User } from '@supabase/supabase-js'
 
 const BAN_CACHE_TTL_SECONDS = 30
+const SEARCH_TIMEOUT_MS = 10_000
 
 @Injectable()
 export class SupabaseAuthAdminAdapter implements AuthUserDirectoryPort {
   readonly #admin
+  readonly #url: string
+  readonly #serviceKey: string
 
   constructor(
     config: ConfigService<Env, true>,
     @Inject(CACHE_PORT) private readonly cache: CachePort,
   ) {
-    this.#admin = createClient(
-      config.get('SUPABASE_URL', { infer: true }),
-      config.get('SUPABASE_SERVICE_ROLE_KEY', { infer: true }),
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    ).auth.admin
+    this.#url = config.get('SUPABASE_URL', { infer: true })
+    this.#serviceKey = config.get('SUPABASE_SERVICE_ROLE_KEY', { infer: true })
+    this.#admin = createClient(this.#url, this.#serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    }).auth.admin
   }
 
   async isBanned(userId: string, options: { fresh?: boolean } = {}): Promise<boolean> {
@@ -56,7 +59,12 @@ export class SupabaseAuthAdminAdapter implements AuthUserDirectoryPort {
     return toAuthUser(data.user)
   }
 
-  async listUsers(page: number, perPage: number): Promise<{ users: AuthUser[]; total: number }> {
+  async listUsers(
+    page: number,
+    perPage: number,
+    query?: string,
+  ): Promise<{ users: AuthUser[]; total: number }> {
+    if (query) return this.#searchUsers(page, perPage, query)
     const { data, error } = await this.#admin.listUsers({ page, perPage })
     if (error) throw error
     return {
@@ -79,6 +87,30 @@ export class SupabaseAuthAdminAdapter implements AuthUserDirectoryPort {
     const { error } = await this.#admin.deleteUser(userId)
     if (error) throw error
     await this.forgetBan(userId)
+  }
+
+  // The SDK has no `filter` option, so a search calls the admin endpoint directly
+  async #searchUsers(
+    page: number,
+    perPage: number,
+    query: string,
+  ): Promise<{ users: AuthUser[]; total: number }> {
+    const params = new URLSearchParams({
+      page: String(page),
+      per_page: String(perPage),
+      filter: query,
+    })
+    const response = await fetch(`${this.#url}/auth/v1/admin/users?${params}`, {
+      headers: { apikey: this.#serviceKey, Authorization: `Bearer ${this.#serviceKey}` },
+      signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
+    })
+    if (!response.ok) throw new Error(`Auth admin search failed: ${response.status}`)
+    const body = (await response.json()) as { users?: User[]; total?: number }
+    const users = (body.users ?? []).map((user) => toAuthUser(user))
+    return {
+      users,
+      total: Number(response.headers.get('x-total-count') ?? body.total ?? users.length),
+    }
   }
 
   #bannedOnMissingUser(error: { status?: number }): boolean {

@@ -29,6 +29,16 @@ export interface AiHoldDenied {
   quota: AiQuotaView | null
 }
 
+/** A finished call outside chat (an image) that should show up in the AI call log */
+export interface AiCallNote {
+  provider: string
+  model: string
+  kind: string
+  /** tokens charged to the user */
+  billed: number
+  ms: number
+}
+
 export interface AiMeterPort {
   /** `shortfall` words the refusal when the user has points left but fewer than needed */
   hold(
@@ -36,4 +46,6 @@ export interface AiMeterPort {
     tokens: number,
     shortfall: (neededPoints: string, leftPoints: string) => string,
   ): Promise<AiHold | AiHoldDenied>
+  /** Best-effort: never throws */
+  record(userId: string, call: AiCallNote): Promise<void>
 }

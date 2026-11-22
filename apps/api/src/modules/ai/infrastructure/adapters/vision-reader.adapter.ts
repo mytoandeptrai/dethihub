@@ -67,6 +67,7 @@ export class VisionReaderAdapter implements VisionReaderPort {
             completionTokens: Number(usage?.completion_tokens ?? usage?.output_tokens) || 0,
             cost: costFromUsage(usage, target.provider),
             ms: Date.now() - started,
+            kind: mode === 'text' ? 'vision-source' : 'vision-bank',
           })
           .catch(() => {})
 

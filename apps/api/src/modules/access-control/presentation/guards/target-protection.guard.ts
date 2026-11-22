@@ -38,12 +38,8 @@ export class TargetProtectionGuard implements CanActivate {
     const isAdmin = !isSelf && (await this.roles.getRole(targetId, { fresh: true })) === 'admin'
     if (!isSelf && !isAdmin) return true
 
-    await this.audit.record(user.id, `${action}.denied`, targetId, {
-      reason: isSelf ? 'self' : 'admin',
-    })
-    throw new BadRequestException({
-      code: ErrorCode.ADMIN_TARGET_PROTECTED,
-      message: isSelf ? SELF_MESSAGE : ADMIN_MESSAGE,
-    })
+    const message = isSelf ? SELF_MESSAGE : ADMIN_MESSAGE
+    await this.audit.record(user.id, `${action}.denied`, targetId, { reason: message })
+    throw new BadRequestException({ code: ErrorCode.ADMIN_TARGET_PROTECTED, message })
   }
 }

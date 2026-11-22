@@ -36,7 +36,7 @@ export class FigureService {
     if (!slug) {
       throw new BadRequestException({
         code: ErrorCode.BAD_REQUEST,
-        message: 'Tên hình không hợp lệ.',
+        message: 'Tên đồ vật (tiếng Anh) không hợp lệ.',
       })
     }
     if (await this.#exists(slug)) return { url: figureUrl(slug), cached: true }

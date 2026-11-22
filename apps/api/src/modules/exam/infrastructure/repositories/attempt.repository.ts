@@ -74,6 +74,10 @@ export class AttemptRepositoryImpl implements AttemptRepositoryPort {
     return this.prisma.examAttempt.count({ where: { examId, userId: null, deviceId } })
   }
 
+  countByGuestName(examId: string, studentName: string): Promise<number> {
+    return this.prisma.examAttempt.count({ where: { examId, userId: null, studentName } })
+  }
+
   countGuests(examId: string): Promise<number> {
     return this.prisma.examAttempt.count({ where: { examId, userId: null } })
   }

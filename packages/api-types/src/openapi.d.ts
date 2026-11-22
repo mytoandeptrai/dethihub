@@ -151,7 +151,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Maintenance, announcements and pricing settings */
+        /** Maintenance, announcements, pricing and AI welcome settings */
         get: operations["AdminSettingsController_getAll"];
         put?: never;
         post?: never;
@@ -169,7 +169,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Validate and save one setting (maintenance | announcements | pricing) */
+        /** Validate and save one setting (maintenance | announcements | pricing | ai_welcome) */
         put: operations["AdminSettingsController_set"];
         post?: never;
         delete?: never;
@@ -1403,6 +1403,9 @@ export interface components {
                 [key: string]: unknown;
             };
             pricing: {
+                [key: string]: unknown;
+            } | null;
+            aiWelcome: {
                 [key: string]: unknown;
             } | null;
         };

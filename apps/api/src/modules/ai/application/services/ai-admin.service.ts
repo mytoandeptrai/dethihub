@@ -10,14 +10,16 @@ import {
 import { PROVIDER_SETTINGS_REPOSITORY } from '@/modules/ai/application/ports/provider-settings.repository.port'
 import { QUOTA_REPOSITORY } from '@/modules/ai/application/ports/quota.repository.port'
 import { ProviderConfigService } from '@/modules/ai/application/services/provider-config.service'
+import { WelcomePointsService } from '@/modules/ai/application/services/welcome-points.service'
 import { EMPTY_FREE_PER_DAY } from '@/modules/ai/domain/billing'
 import { assertAllowedUrl, isAllowedEndpoint } from '@/modules/ai/domain/endpoint'
 import { LlmUpstreamError } from '@/modules/ai/domain/provider-chain'
-import { monthKey, TOKENS_PER_POINT } from '@/modules/ai/domain/quota'
+import { monthKey } from '@/modules/ai/domain/quota'
 import { encryptKey, MIN_SETTINGS_SECRET_LENGTH } from '@/modules/ai/domain/settings-crypto'
 import { ADMIN_AUDIT } from '@/shared-kernel/application/ports/admin-audit.port'
 import { USER_PROFILE_LOOKUP } from '@/shared-kernel/application/ports/user-profile-lookup.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
+import { assertSafeEndpoint } from '@/shared-kernel/infrastructure/net/safe-url'
 
 import type { Env } from '@/app/config/env.schema'
 import type {
@@ -76,6 +78,7 @@ export class AiAdminService {
     @Inject(USER_PROFILE_LOOKUP) private readonly profiles: UserProfileLookupPort,
     private readonly providers: ProviderConfigService,
     private readonly config: ConfigService<Env, true>,
+    private readonly welcome: WelcomePointsService,
   ) {}
 
   async getQuota(userId: string): Promise<UserQuotaView> {
@@ -95,7 +98,7 @@ export class AiAdminService {
       usedThisMonth: used,
       requestsThisMonth: requests,
       // No balance row yet: the welcome gift arrives with the first call, show that instead of 0
-      credits: balance ?? this.#welcomeTokens(),
+      credits: balance ?? (await this.welcome.tokens()),
       welcomePending: balance === null,
       emptyDay,
       freeEmpty: EMPTY_FREE_PER_DAY,
@@ -120,7 +123,7 @@ export class AiAdminService {
   ): Promise<number> {
     // Without a balance row the manual grant would create it and the user would lose the welcome gift
     if ((await this.credits.findBalance(userId)) === null) {
-      await this.credits.claimWelcome(userId, this.#welcomeTokens())
+      await this.credits.claimWelcome(userId, await this.welcome.tokens())
     }
     const balance = await this.credits.grant(userId, tokens, 'admin')
     await this.audit.record(adminId, 'credits.grant', userId, { tokens, balance, note })
@@ -189,6 +192,7 @@ export class AiAdminService {
       }
       try {
         assertAllowedUrl(next, 'Endpoint')
+        await assertSafeEndpoint(next)
       } catch (error) {
         throw bad(error instanceof Error ? error.message : 'Endpoint không hợp lệ.')
       }
@@ -248,9 +252,5 @@ export class AiAdminService {
     const view = (await this.providers.describe()).find((item) => item.provider === provider)
     if (!view) throw bad('Provider không hợp lệ.')
     return view
-  }
-
-  #welcomeTokens(): number {
-    return this.config.get('AI_WELCOME_POINTS', { infer: true }) * TOKENS_PER_POINT
   }
 }

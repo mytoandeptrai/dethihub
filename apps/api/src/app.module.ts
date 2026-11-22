@@ -24,6 +24,7 @@ import { PlatformRolesGuard } from '@/modules/access-control/presentation/guards
 import { SupabaseAuthGuard } from '@/modules/access-control/presentation/guards/supabase-auth.guard'
 import { TargetProtectionGuard } from '@/modules/access-control/presentation/guards/target-protection.guard'
 import { AiModule } from '@/modules/ai/ai.module'
+import { AlertsModule } from '@/modules/alerts/alerts.module'
 import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { MaintenanceGuard } from '@/modules/app-settings/presentation/guards/maintenance.guard'
 import { BankModule } from '@/modules/bank/bank.module'
@@ -98,6 +99,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     FeedbackModule, // user feedback inbox
     BankModule, // question bank overrides and admin editing
     OpsModule, // admin stats, health and database metrics
+    AlertsModule, // Telegram alerts on signups, AI errors, AI cost and long maintenance
   ],
   providers: [
     // Global guards (order matters: authentication first, then roles, then maintenance, then throttler)

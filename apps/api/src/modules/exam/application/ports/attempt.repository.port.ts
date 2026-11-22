@@ -33,6 +33,8 @@ export interface AttemptRepositoryPort {
   insertWithLock(attempt: NewAttempt & { userId: string }): Promise<'saved' | 'duplicate'>
   countByUser(examId: string, userId: string): Promise<number>
   countByGuestDevice(examId: string, deviceId: string): Promise<number>
+  /** Guests without a usable device id are counted by the name they typed */
+  countByGuestName(examId: string, studentName: string): Promise<number>
   countGuests(examId: string): Promise<number>
   listForExams(examIds: string[], limit: number, afterId?: string): Promise<AttemptRow[]>
 }

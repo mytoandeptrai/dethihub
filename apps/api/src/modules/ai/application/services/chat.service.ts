@@ -21,6 +21,7 @@ import {
 import { TASK_PROMPTS } from '@/modules/ai/application/ports/task-prompts.port'
 import { ProviderConfigService } from '@/modules/ai/application/services/provider-config.service'
 import { QuotaService } from '@/modules/ai/application/services/quota.service'
+import { aiKind } from '@/modules/ai/domain/ai-kind'
 import {
   billOf,
   costFromUsage,
@@ -240,7 +241,14 @@ export class ChatService {
     // tokens a provider billed for an attempt that gave the user nothing: charged only beyond the free allowance
     let wasted = 0
 
-    const log = (target: Target, startedAt: number, error: string | null, usage?: Usage) => {
+    const kind = aiKind(command.task, command.taskInput)
+    const log = (
+      target: Target,
+      startedAt: number,
+      error: string | null,
+      usage?: Usage,
+      billed?: number,
+    ) => {
       logs.push(
         this.calls
           .log({
@@ -253,6 +261,8 @@ export class ChatService {
             completionTokens: usage?.completion_tokens ?? usage?.output_tokens ?? 0,
             cost: costFromUsage(usage, target.provider),
             ms: Date.now() - startedAt,
+            kind,
+            billed,
           })
           .catch(() => {}),
       )
@@ -301,8 +311,8 @@ export class ChatService {
         }
 
         if (result.content.trim()) {
-          log(target, startedAt, null, result.usage)
           const spent = bill(result.usage, result.content + result.reasoning)
+          log(target, startedAt, null, result.usage, spent)
           const [after] = await Promise.all([
             this.#settle(billing, spent, wasted),
             release(),

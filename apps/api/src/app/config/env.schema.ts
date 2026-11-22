@@ -12,6 +12,11 @@ const nonNegativeNumber = (value: string | undefined, fallback: number): number 
     : fallback
 }
 
+const positiveNumber = (value: string | undefined, fallback: number): number => {
+  const parsed = nonNegativeNumber(value, fallback)
+  return parsed > 0 ? parsed : fallback
+}
+
 const optionalText = z
   .string()
   .optional()
@@ -126,7 +131,7 @@ export const envSchema = z.object({
   AI_WELCOME_POINTS: z
     .string()
     .optional()
-    .transform((value) => nonNegativeNumber(value, 80)),
+    .transform((value) => nonNegativeNumber(value, 120)),
   AI_MONTHLY_TOKENS: z
     .string()
     .optional()
@@ -144,6 +149,34 @@ export const envSchema = z.object({
   IMAGE_API_KEY: optionalText,
   IMAGE_BASE_URL: optionalText,
   IMAGE_MODEL: optionalText,
+
+  // Telegram alert bot: runs only when both token and chat id are set; thresholds are optional
+  TELEGRAM_BOT_TOKEN: optionalText,
+  TELEGRAM_CHAT_ID: optionalText,
+  ALERT_COOLDOWN_MIN: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 60)),
+  ALERT_SIGNUPS_1H: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 10)),
+  ALERT_AI_ERR_RATE: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 0.3)),
+  ALERT_AI_MIN_CALLS: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 10)),
+  ALERT_AI_COST_USD: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 5)),
+  ALERT_MAINTENANCE_MIN: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 120)),
 
   // PayOS: the three keys come from one payment channel; any missing key closes payments
   PAYOS_CLIENT_ID: optionalText,

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  PayloadTooLargeException,
 } from '@nestjs/common'
 
 import { EXAM_REPOSITORY } from '@/modules/exam/application/ports/exam.repository.port'
@@ -14,6 +15,7 @@ import {
 } from '@/modules/exam/application/services/exam-query.service'
 import { PublishedExam } from '@/modules/exam/domain/aggregates/published-exam.aggregate'
 import { ExamRuleError } from '@/modules/exam/domain/errors/exam-rule.error'
+import { isDocTooLarge, isOwnerAtLimit } from '@/modules/exam/domain/policies/publish-limits.policy'
 import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
@@ -42,6 +44,11 @@ function ruleToHttp(error: ExamRuleError): Error {
         code: ErrorCode.EXAM_UNDER_REVIEW,
         message: 'Đề đang được kiểm duyệt nên chưa gỡ được.',
       })
+    case 'edit-under-review':
+      return new ConflictException({
+        code: ErrorCode.EXAM_UNDER_REVIEW,
+        message: 'Đề đang được kiểm duyệt, chưa sửa được. Thử lại sau khi có kết quả.',
+      })
   }
 }
 
@@ -51,6 +58,12 @@ const invalidDoc = () =>
 function assertDoc(doc: ExamDoc): void {
   if (typeof doc.id !== 'string' || typeof doc.title !== 'string' || !Array.isArray(doc.blocks)) {
     throw invalidDoc()
+  }
+  if (isDocTooLarge(doc)) {
+    throw new PayloadTooLargeException({
+      code: ErrorCode.EXAM_TOO_LARGE,
+      message: 'Đề quá lớn (tối đa 2 MB).',
+    })
   }
 }
 
@@ -72,6 +85,12 @@ export class ExamPublishService {
 
   async publish(ownerId: string, doc: ExamDoc, listed: boolean): Promise<PublishedExam> {
     const exam = this.#create(ownerId, doc, listed)
+    if (isOwnerAtLimit(await this.exams.countByOwner(ownerId))) {
+      throw new ConflictException({
+        code: ErrorCode.EXAM_LIMIT,
+        message: 'Đã đạt số đề tối đa.',
+      })
+    }
     await this.exams.save(exam)
     return exam
   }
@@ -89,7 +108,7 @@ export class ExamPublishService {
       return this.publish(ownerId, doc, listed)
     }
     try {
-      existing.replaceContent(ownerId, doc, listed)
+      existing.replaceContent(ownerId, doc, listed, await this.reports.hasOpen(id))
     } catch (error) {
       throw error instanceof ExamRuleError ? ruleToHttp(error) : error
     }
@@ -101,7 +120,7 @@ export class ExamPublishService {
   async setListed(ownerId: string, id: string, listed: boolean): Promise<void> {
     const exam = await this.#find(id)
     try {
-      exam.setListed(ownerId, listed)
+      exam.setListed(ownerId, listed, await this.reports.hasOpen(id))
     } catch (error) {
       throw error instanceof ExamRuleError ? ruleToHttp(error) : error
     }

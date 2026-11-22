@@ -24,6 +24,7 @@ import type { Env } from '@/app/config/env.schema'
 import type {
   GeneratedImage,
   ImageGeneratorPort,
+  ProducedImage,
 } from '@/modules/media/application/ports/image-generator.port'
 import type { AiQuotaView } from '@/shared-kernel/application/ports/ai-meter.port'
 
@@ -50,7 +51,8 @@ export class ImageGenerationService {
     const tokens = this.config.get('AI_IMAGE_POINTS', { infer: true }) * TOKENS_PER_POINT
     const hold = await this.meter.hold(userId, tokens, imageShortfall)
 
-    let image: GeneratedImage
+    const startedAt = Date.now()
+    let image: ProducedImage
     try {
       image = await this.generator.generate(prompt)
     } catch (error) {
@@ -67,6 +69,16 @@ export class ImageGenerationService {
         message: 'Không tạo được ảnh, thử lại sau.',
       })
     }
-    return { ...image, quota: await hold.settle(tokens) }
+    const [quota] = await Promise.all([
+      hold.settle(tokens),
+      this.meter.record(userId, {
+        provider: 'image',
+        model: image.model,
+        kind: 'image',
+        billed: tokens,
+        ms: Date.now() - startedAt,
+      }),
+    ])
+    return { buffer: image.buffer, mime: image.mime, quota }
   }
 }

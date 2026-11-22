@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 
+import { AI_CALL_LOG_REPOSITORY } from '@/modules/ai/application/ports/ai-call-log.repository.port'
 import { QuotaService } from '@/modules/ai/application/services/quota.service'
 import { quotaMessage, remainingTokens, TOKENS_PER_POINT } from '@/modules/ai/domain/quota'
 
+import type { AiCallLogRepositoryPort } from '@/modules/ai/application/ports/ai-call-log.repository.port'
 import type {
+  AiCallNote,
   AiHold,
   AiHoldDenied,
   AiMeterPort,
@@ -14,7 +17,28 @@ const points = (tokens: number): string =>
 
 @Injectable()
 export class AiMeterAdapter implements AiMeterPort {
-  constructor(private readonly quotas: QuotaService) {}
+  constructor(
+    private readonly quotas: QuotaService,
+    @Inject(AI_CALL_LOG_REPOSITORY) private readonly calls: AiCallLogRepositoryPort,
+  ) {}
+
+  async record(userId: string, call: AiCallNote): Promise<void> {
+    await this.calls
+      .log({
+        userId,
+        provider: call.provider,
+        model: call.model,
+        ok: true,
+        error: null,
+        promptTokens: 0,
+        completionTokens: 0,
+        cost: null,
+        ms: call.ms,
+        kind: call.kind,
+        billed: call.billed,
+      })
+      .catch(() => {})
+  }
 
   async hold(
     userId: string,

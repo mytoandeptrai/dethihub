@@ -3,7 +3,11 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { AI_METER } from '@/shared-kernel/application/ports/ai-meter.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { AiHold, AiMeterPort } from '@/shared-kernel/application/ports/ai-meter.port'
+import type {
+  AiCallNote,
+  AiHold,
+  AiMeterPort,
+} from '@/shared-kernel/application/ports/ai-meter.port'
 
 /** Holds AI points for one media call; a refusal becomes a 429 */
 @Injectable()
@@ -24,5 +28,9 @@ export class MediaMeterService {
       },
       HttpStatus.TOO_MANY_REQUESTS,
     )
+  }
+
+  record(userId: string, call: AiCallNote): Promise<void> {
+    return this.meter.record(userId, call)
   }
 }

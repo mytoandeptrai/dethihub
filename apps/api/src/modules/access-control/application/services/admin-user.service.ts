@@ -35,20 +35,18 @@ export class AdminUserService {
     perPage: number,
     query: string,
   ): Promise<{ items: AdminUserView[]; total: number }> {
-    const { users, total } = await this.directory.listUsers(page, perPage)
-    const needle = query.toLowerCase()
-    const matching = needle
-      ? users.filter((user) =>
-          `${user.email ?? ''} ${user.displayName ?? ''}`.toLowerCase().includes(needle),
-        )
-      : users
+    const { users, total } = await this.directory.listUsers(
+      page,
+      perPage,
+      query.trim() || undefined,
+    )
     const activity = new Map(
-      (await this.repository.activityOf(matching.map((user) => user.id))).map((row) => [
+      (await this.repository.activityOf(users.map((user) => user.id))).map((row) => [
         row.userId,
         row,
       ]),
     )
-    const items = matching
+    const items = users
       .map((user) => ({ user, activity: activity.get(user.id) ?? null }))
       .toSorted((a, b) => Number(b.activity?.online ?? false) - Number(a.activity?.online ?? false))
     return { items, total }

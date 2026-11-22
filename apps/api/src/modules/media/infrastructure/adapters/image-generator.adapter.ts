@@ -5,11 +5,12 @@ import { ConfigService } from '@nestjs/config'
 
 import { ImageProviderNotConfiguredError } from '@/modules/media/application/ports/image-generator.port'
 import { withLanguageNote } from '@/modules/media/domain/policies/image-request.policy'
-import { assertPublicHttpsUrl } from '@/modules/media/infrastructure/safe-url'
+import { assertPublicHttpsUrl } from '@/shared-kernel/infrastructure/net/safe-url'
 
 import type { Env } from '@/app/config/env.schema'
 import type {
   GeneratedImage,
+  ProducedImage,
   ImageGeneratorPort,
 } from '@/modules/media/application/ports/image-generator.port'
 
@@ -51,14 +52,15 @@ const upstreamMessage = (status: number, body: UpstreamBody): string => {
 export class ImageGeneratorAdapter implements ImageGeneratorPort {
   constructor(private readonly config: ConfigService<Env, true>) {}
 
-  async generate(prompt: string): Promise<GeneratedImage> {
+  async generate(prompt: string): Promise<ProducedImage> {
     const providers = this.#providers()
     if (providers.length === 0) throw new ImageProviderNotConfiguredError()
 
     const errors: string[] = []
     for (const provider of providers) {
       try {
-        return await this.#generateWith(provider, withLanguageNote(prompt))
+        const image = await this.#generateWith(provider, withLanguageNote(prompt))
+        return { ...image, model: provider.model }
       } catch (error) {
         errors.push(`${provider.model}: ${error instanceof Error ? error.message : String(error)}`)
       }

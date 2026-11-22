@@ -3,7 +3,8 @@ import { ConfigService } from '@nestjs/config'
 
 import { CREDIT_REPOSITORY } from '@/modules/ai/application/ports/credit.repository.port'
 import { QUOTA_REPOSITORY } from '@/modules/ai/application/ports/quota.repository.port'
-import { monthKey, TOKENS_PER_POINT } from '@/modules/ai/domain/quota'
+import { WelcomePointsService } from '@/modules/ai/application/services/welcome-points.service'
+import { monthKey } from '@/modules/ai/domain/quota'
 
 import type { Env } from '@/app/config/env.schema'
 import type { CreditRepositoryPort } from '@/modules/ai/application/ports/credit.repository.port'
@@ -17,6 +18,7 @@ export class QuotaService {
     @Inject(QUOTA_REPOSITORY) private readonly quotas: QuotaRepositoryPort,
     @Inject(CREDIT_REPOSITORY) private readonly credits: CreditRepositoryPort,
     private readonly config: ConfigService<Env, true>,
+    private readonly welcome: WelcomePointsService,
   ) {}
 
   /** null = unlimited. A database failure never blocks the user: usage is counted again once it can be written */
@@ -32,7 +34,8 @@ export class QuotaService {
       if (override && override.monthlyTokens === null) return null
 
       const base = override ? Number(override.monthlyTokens) : monthly
-      const credits = balance ?? (await this.credits.claimWelcome(userId, this.welcomeTokens()))
+      const credits =
+        balance ?? (await this.credits.claimWelcome(userId, await this.welcome.tokens()))
       return { used, limit: base + credits, scope: 'month', base, credits }
     } catch {
       return { used: 0, limit: Math.max(monthly, 1), scope: 'month' }
@@ -107,9 +110,5 @@ export class QuotaService {
 
   async listCreditEvents(userId: string, limit: number) {
     return this.credits.listEvents(userId, limit)
-  }
-
-  private welcomeTokens(): number {
-    return this.config.get('AI_WELCOME_POINTS', { infer: true }) * TOKENS_PER_POINT
   }
 }

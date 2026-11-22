@@ -42,6 +42,8 @@ export class AiCallLogRepositoryImpl implements AiCallLogRepositoryPort {
         completionTokens: Math.max(0, Math.round(call.completionTokens)),
         cost: call.cost,
         ms: Math.max(0, Math.round(call.ms)),
+        kind: call.kind?.slice(0, 40) ?? null,
+        billed: call.billed === undefined ? null : Math.max(0, Math.round(call.billed)),
       },
     })
   }
@@ -72,7 +74,9 @@ export class AiCallLogRepositoryImpl implements AiCallLogRepositoryPort {
       },
       _count: { _all: true },
     })
-    return new Map(groups.flatMap((group) => (group.userId ? [[group.userId, group._count._all]] : [])))
+    return new Map(
+      groups.flatMap((group) => (group.userId ? [[group.userId, group._count._all]] : [])),
+    )
   }
 
   async stats(days: number): Promise<AiCallStatsRow[]> {

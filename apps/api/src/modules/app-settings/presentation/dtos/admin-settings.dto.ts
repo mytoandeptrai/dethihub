@@ -11,6 +11,7 @@ export class SettingsResponseDto {
   @ApiProperty({ type: 'object', additionalProperties: true }) maintenance!: unknown
   @ApiProperty({ type: 'object', additionalProperties: true }) announcements!: unknown
   @ApiProperty({ type: 'object', additionalProperties: true, nullable: true }) pricing!: unknown
+  @ApiProperty({ type: 'object', additionalProperties: true, nullable: true }) aiWelcome!: unknown
 }
 
 export class SettingValueResponseDto {

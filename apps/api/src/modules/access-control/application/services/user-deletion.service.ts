@@ -1,4 +1,10 @@
-import { BadGatewayException, BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadGatewayException,
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 
 import { DomainEventPublisher } from '@/app/events/domain-event-publisher'
 import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/auth-user-directory.port'
@@ -42,7 +48,7 @@ export class UserDeletionService {
     try {
       await this.directory.ban(userId, PERMANENT_BAN)
       await this.directory.forgetBan(userId)
-      await this.events.publish(new UserDeletionRequestedEvent(userId))
+      await this.events.publish(new UserDeletionRequestedEvent(userId, adminId, user.email ?? null))
       await this.directory.deleteUser(userId)
     } catch (error) {
       await this.audit.record(adminId, 'users.delete.failed', userId, { error: String(error) })

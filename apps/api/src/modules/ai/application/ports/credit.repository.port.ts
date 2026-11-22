@@ -7,7 +7,7 @@ export interface CreditEvent {
 
 export interface CreditRepositoryPort {
   findBalance(userId: string): Promise<number | null>
-  /** grants the welcome tokens once and returns the balance */
+  /** grants the welcome tokens once per mailbox (a repeated mailbox gets 0) and returns the balance */
   claimWelcome(userId: string, tokens: number): Promise<number>
   /** moves the usage above `base` from the month's usage onto the balance */
   consume(userId: string, month: string, base: number): Promise<{ used: number; balance: number }>

@@ -1,4 +1,4 @@
-export const SETTING_KEYS = ['maintenance', 'announcements', 'pricing'] as const
+export const SETTING_KEYS = ['maintenance', 'announcements', 'pricing', 'ai_welcome'] as const
 
 export type SettingKey = (typeof SETTING_KEYS)[number]
 
@@ -67,6 +67,12 @@ function announcements(value: Raw): Raw {
   return { items }
 }
 
+function aiWelcome(value: Raw): Raw {
+  const points = wholeNumber(value['points'])
+  if (!(points >= 0 && points <= 10_000)) fail('Điểm chào mừng phải là số nguyên từ 0 đến 10.000.')
+  return { points }
+}
+
 function pricing(value: Raw): Raw {
   const pointsPer1000 = wholeNumber(value['pointsPer1000'])
   const minVnd = wholeNumber(value['minVnd'])
@@ -111,5 +117,6 @@ export function sanitizeSetting(key: string, value: Raw): Raw {
   if (!isSettingKey(key)) return fail('Cài đặt không tồn tại.')
   if (key === 'maintenance') return maintenance(value)
   if (key === 'announcements') return announcements(value)
+  if (key === 'ai_welcome') return aiWelcome(value)
   return pricing(value)
 }
