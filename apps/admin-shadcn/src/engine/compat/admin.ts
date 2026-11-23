@@ -10,7 +10,7 @@ export async function adminRequest(action: string, body: Record<string, unknown>
   const order = { params: { path: { orderCode: Number(body.orderCode) } } }
   const query = { params: { query: body } }
   const ok = { ok: true }
-  const page = (result: { items: unknown[]; total: number }, key: string) => ({ ...result, [key]: result.items, page: Number(body.page ?? 1), perPage: Number(body.perPage ?? 20) })
+  const page = <T extends { items: unknown[]; total: number }>(result: T, key: string) => ({ ...result, [key]: result.items, page: Number(body.page ?? 1), perPage: Number(body.perPage ?? 20) })
   switch (action) {
     case 'me': {
       const me = await getMe()
