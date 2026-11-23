@@ -31,7 +31,13 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: path.resolve(__dirname, '../..'),
-    resolveAlias: { '@editor-engine': './src/engine/compat/editor-root.tsx' },
+    resolveAlias: {
+      '@editor-engine': './src/engine/compat/editor-root.tsx',
+      '@engine-pricing': './src/engine/compat/pricing.ts',
+      '@engine-dialogs': './src/engine/compat/dialogs.ts',
+      '@engine-designs': './src/engine/compat/designs.ts',
+      '@engine-navigation': './src/engine/compat/navigation.ts',
+    },
   },
   headers() {
     return [

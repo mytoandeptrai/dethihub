@@ -26,7 +26,7 @@ interface Options {
 
 type Spec = Options & { id: number; kind: 'alert' | 'confirm' | 'prompt' | 'content'; message: ReactNode; resolve: (v: never) => void }
 
-const useDialogs = create<{ queue: Spec[] }>(() => ({ queue: [] }))
+export const useDialogs = create<{ queue: Spec[] }>(() => ({ queue: [] }))
 let seq = 0
 
 function open<T>(kind: Spec['kind'], message: ReactNode, o: Options = {}) {

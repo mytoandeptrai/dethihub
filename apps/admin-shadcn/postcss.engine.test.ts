@@ -4,7 +4,26 @@ import createScope from './postcss.engine.cjs'
 
 const rootParent = { type: 'root', name: '' }
 
-function scopeSelectors(selectors: string[], file = '/project/src/styles/editor.css', parent = rootParent) {
+describe('marketing stylesheet isolation', () => {
+  it('scopes product utilities without raising specificity', () => {
+    expect(scopeSelectors(['.hub-home', 'button'], '/project/src/styles/product.css')).toEqual([
+      ':where(html[data-product-shell]) .hub-home',
+      ':where(html[data-product-shell]) button',
+    ])
+  })
+  it('keeps product tokens and dark mode restricted to the marketing/app routes', () => {
+    expect(scopeSelectors([':root', '.dark'], '/project/src/styles/product.css')).toEqual([
+      'html[data-product-shell]',
+      'html[data-product-shell].dark',
+    ])
+  })
+})
+
+function scopeSelectors(
+  selectors: string[],
+  file = '/project/src/styles/editor.css',
+  parent = rootParent,
+) {
   const rule = { selectors, parent }
   createScope().OnceExit({
     source: { input: { file } },

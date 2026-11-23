@@ -8,6 +8,7 @@ import { AppProvider } from './provide'
 
 import type { Metadata } from 'next'
 import '@/styles/globals.css'
+import '@/styles/product.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
