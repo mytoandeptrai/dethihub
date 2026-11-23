@@ -209,7 +209,7 @@ async function imageOf(ctx: Ctx, rid: string): Promise<string | null> {
       const ext = path.split('.').pop()?.toLowerCase() ?? ''
       const type = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : ext === 'png' ? 'image/png' : ext === 'gif' ? 'image/gif' : ext === 'svg' ? 'image/svg+xml' : ext === 'webp' ? 'image/webp' : ''
       if (!f || !type) return null // EMF/WMF: trình duyệt không vẽ được
-      const blob = new Blob([await f.async('uint8array')], { type })
+      const blob = new Blob([await f.async('uint8array') as Uint8Array<ArrayBuffer>], { type })
       return toDataUrl(await shrink(blob, type))
     })())
   }
