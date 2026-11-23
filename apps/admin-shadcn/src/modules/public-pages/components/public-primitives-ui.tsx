@@ -75,6 +75,7 @@ export function Button({
         size={size === 'md' ? 'default' : size}
         className={classes}
         render={children as ReactElement}
+        nativeButton={false}
       />
     )
   return (
