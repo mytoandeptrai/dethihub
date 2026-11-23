@@ -8,11 +8,11 @@ describe('error page e2e', () => {
   beforeEach(() => {
     vi.spyOn(console, 'error').mockImplementation(vi.fn())
   })
-  it('calls reset on Try again click', async () => {
+  it('calls reset on retry click', async () => {
     const user = userEvent.setup()
     const reset = vi.fn()
     render(<ErrorPage error={new Error('Test error')} reset={reset} />)
-    await user.click(screen.getByRole('button', { name: 'Try again' }))
+    await user.click(screen.getByRole('button', { name: 'Thử lại' }))
     expect(reset).toHaveBeenCalledOnce()
   })
 

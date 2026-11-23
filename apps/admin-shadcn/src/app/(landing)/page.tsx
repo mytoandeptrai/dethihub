@@ -1,5 +1,3 @@
-import { HeroSection } from '@/features/landing/hero-section'
+import { HomeContainer } from '@/modules/foundation'
 
-export default function Home() {
-  return <HeroSection />
-}
+export default HomeContainer

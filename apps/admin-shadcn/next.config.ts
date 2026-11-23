@@ -1,13 +1,27 @@
 import path from 'node:path'
 
+import createNextIntlPlugin from 'next-intl/plugin'
+
 import type { NextConfig } from 'next'
 
+const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000')
+const supabaseOrigin = new URL(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://example.supabase.co',
+)
+const remotePattern = (url: URL) => ({
+  protocol: url.protocol.slice(0, -1) as 'http' | 'https',
+  hostname: url.hostname,
+  port: url.port,
+})
+
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
   transpilePackages: ['@workspace/ui'],
   images: {
-    remotePatterns: [{ hostname: 'images.shadcnspace.com' }],
+    remotePatterns: [remotePattern(apiOrigin), remotePattern(supabaseOrigin)],
+  },
+  async rewrites() {
+    return [{ source: '/api/files/:path*', destination: apiOrigin.origin + '/api/files/:path*' }]
   },
   turbopack: {
     root: path.resolve(__dirname, '../..'),
@@ -27,4 +41,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default createNextIntlPlugin('./src/i18n/request.ts')(nextConfig)
