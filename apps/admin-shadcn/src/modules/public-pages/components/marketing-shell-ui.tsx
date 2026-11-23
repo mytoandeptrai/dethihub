@@ -6,7 +6,8 @@ import Image from 'next/image'
 
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { AvatarUi, Button, ContactLinks, Link, NavLink } from '@/modules/public-pages/components'
+import { AvatarUi, Button, Link, NavLink } from '@/modules/public-pages/components/public-primitives-ui'
+import { ContactLinks } from '@/modules/public-pages/components/contact-links-ui'
 
 import type { useMarketingContainer } from '@/modules/public-pages/hooks'
 const NAV = [

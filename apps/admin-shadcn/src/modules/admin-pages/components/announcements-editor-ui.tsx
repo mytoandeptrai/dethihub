@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { SiteButton as Button, EmptyState, Spinner } from '@/components/product-ui'
 import { t } from '@/i18n/translate'
 import { AnnouncementPopup } from '@/modules/admin-pages/components/announcement-preview-ui'
-import { Switch } from '@/modules/admin-pages/containers'
+import Switch from '@/modules/admin-pages/containers/switch-container'
 import { AnnouncementsEditorModel } from '@/modules/admin-pages/hooks'
 import { toDatetimeLocalString, toIsoString } from '@/modules/admin-pages/hooks/admin-utils'
 

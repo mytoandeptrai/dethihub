@@ -23,7 +23,7 @@ import {
   AdminRowActions,
   AdminTable,
 } from '@/modules/admin-pages/components/admin-primitives-ui'
-import { PricingEditor } from '@/modules/admin-pages/containers'
+import PricingEditor from '@/modules/admin-pages/containers/pricing-editor-container'
 import { PaymentsPanelModel } from '@/modules/admin-pages/hooks'
 import { formatViDateTime } from '@/modules/admin-pages/hooks/admin-utils'
 

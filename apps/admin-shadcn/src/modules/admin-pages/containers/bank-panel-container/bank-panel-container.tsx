@@ -1,9 +1,5 @@
 'use client'
-import {
-  BankPanelBankPanelUi,
-  BankPanelQuestionDrawerUi,
-  BankPanelQuestionFormModalUi,
-} from '@/modules/admin-pages/components'
+import { BankPanelBankPanelUi, BankPanelQuestionDrawerUi, BankPanelQuestionFormModalUi } from '@/modules/admin-pages/components/bank-panel-ui'
 import { BankPanelModel } from '@/modules/admin-pages/hooks'
 export function BankPanelContainer(
   ...args: Parameters<typeof BankPanelModel.useBankPanelContainer>

@@ -16,7 +16,7 @@ import { hasTextEffects } from '@/engine/lib/slideTextEffects'
 import { elementHeight } from '@/engine/lib/slideText'
 import { readableTextOn, type ResolvedTheme } from '@/engine/lib/slideTheme'
 import { uploadImage } from '@/engine/lib/mediaStore'
-import { MathCell, clamp } from './SlideEditor'
+import { MathCell, clamp } from './slideViewHelpers'
 import { fontStack, ConnectorSvg, shapeCss, isHollowShape, HOLLOW_HIT, shapeInner, ShapeText, ChartView, AutoFitText, imageImgStyle, imageStyleParts, VideoView, SlideElView } from './slideRender'
 
 export const FRAME_HOVER = 'slide-frame-hover'

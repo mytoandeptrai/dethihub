@@ -51,7 +51,7 @@ import {
   AdminRowActions,
   AdminTable,
 } from '@/modules/admin-pages/components/admin-primitives-ui'
-import { BankAiPanel } from '@/modules/admin-pages/containers'
+import BankAiPanel from '@/modules/admin-pages/containers/bank-ai-panel-container'
 import { BankPanelModel } from '@/modules/admin-pages/hooks'
 import { formatViDateTime } from '@/modules/admin-pages/hooks/admin-utils'
 import { keyedText } from '@/modules/admin-pages/hooks/keyed-text'

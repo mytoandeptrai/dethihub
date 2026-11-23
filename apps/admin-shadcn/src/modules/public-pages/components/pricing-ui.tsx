@@ -3,15 +3,9 @@ import { DEFAULT_PACK_VND, basePoints } from '@engine-pricing'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { t } from '@/i18n/translate'
-import {
-  Button,
-  Card,
-  PageHeader,
-  PageShell,
-  Segmented,
-  inputClass,
-} from '@/modules/public-pages/components'
-import { CheckoutContainer as PayCheckout } from '@/modules/public-pages/containers'
+import { Button, Card, Segmented, inputClass } from '@/modules/public-pages/components/public-primitives-ui'
+import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
+import PayCheckout from '@/modules/public-pages/containers/checkout-container'
 
 import type { usePricingContainer } from '@/modules/public-pages/hooks'
 const fmt = (n: number) => n.toLocaleString('vi-VN')

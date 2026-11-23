@@ -1,3 +1,4 @@
+import { wait } from './adminShared'
 /**
  * Client cho trang Admin: kiểu dữ liệu + hàm gọi `/api/admin` (server/admin.ts).
  * Giao diện CHỈ dùng các hàm ở đây. Chế độ dữ liệu giả (mock) bật bằng `?mock=1` trên URL
@@ -7,6 +8,8 @@
 import { adminRequest } from '@/engine/compat/admin'
 import { adminBankVision } from '@/apis/admin/requests'
 import { applyPricing, type PricingConfig } from './pricing'
+
+export { AdminError, wait } from './adminShared'
 
 export type AdminRole = 'admin' | 'moderator'
 
@@ -74,15 +77,6 @@ export interface AuditEntry {
   createdAt: string
 }
 
-export class AdminError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message)
-  }
-}
-
 export const isAdminMock = (): boolean => {
   // bản thật không có dữ liệu giả: người thường mở ?mock=1 không được vào giao diện admin
   if (!(process.env.NODE_ENV === 'development')) return false
@@ -120,9 +114,6 @@ export async function post<T>(action: string, body: Record<string, unknown> = {}
 async function send<T>(action: string, body: Record<string, unknown>): Promise<T> {
   return await adminRequest(action, body) as T
 }
-
-/** Dữ liệu giả trả sau 250ms (giống mạng thật) */
-export const wait = <T,>(v: T) => new Promise<T>((r) => setTimeout(() => r(structuredClone(v)), 250))
 
 // ---------- API ----------
 

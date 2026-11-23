@@ -1,5 +1,5 @@
 'use client'
-import { PricingEditorPricingEditorUi } from '@/modules/admin-pages/components'
+import { PricingEditorPricingEditorUi } from '@/modules/admin-pages/components/pricing-editor-ui'
 import { PricingEditorModel } from '@/modules/admin-pages/hooks'
 export function PricingEditorContainer(
   ...args: Parameters<typeof PricingEditorModel.usePricingEditorContainer>

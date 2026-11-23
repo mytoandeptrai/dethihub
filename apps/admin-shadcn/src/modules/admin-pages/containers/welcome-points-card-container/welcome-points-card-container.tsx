@@ -1,5 +1,5 @@
 'use client'
-import { WelcomePointsCardWelcomePointsCardUi } from '@/modules/admin-pages/components'
+import { WelcomePointsCardWelcomePointsCardUi } from '@/modules/admin-pages/components/welcome-points-card-ui'
 import { WelcomePointsCardModel } from '@/modules/admin-pages/hooks'
 export function WelcomePointsCardContainer(
   ...args: Parameters<typeof WelcomePointsCardModel.useWelcomePointsCardContainer>

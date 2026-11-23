@@ -1,5 +1,5 @@
 'use client'
-import { AuditPanelAuditPanelUi } from '@/modules/admin-pages/components'
+import { AuditPanelAuditPanelUi } from '@/modules/admin-pages/components/audit-panel-ui'
 import { AuditPanelModel } from '@/modules/admin-pages/hooks'
 export function AuditPanelContainer(
   ...args: Parameters<typeof AuditPanelModel.useAuditPanelContainer>

@@ -1,8 +1,5 @@
 'use client'
-import {
-  HealthDrawerHealthDrawerUi,
-  HealthDrawerProviderFormUi,
-} from '@/modules/admin-pages/components'
+import { HealthDrawerHealthDrawerUi, HealthDrawerProviderFormUi } from '@/modules/admin-pages/components/health-drawer-ui'
 import { HealthDrawerModel } from '@/modules/admin-pages/hooks'
 export function HealthDrawerContainer(
   ...args: Parameters<typeof HealthDrawerModel.useHealthDrawerContainer>

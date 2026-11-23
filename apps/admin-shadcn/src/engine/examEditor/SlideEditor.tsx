@@ -1,3 +1,4 @@
+import { revealStyle, clamp, decorStyle } from './slideViewHelpers'
 /**
  * Trình soạn bài giảng trình chiếu (slide).
  *
@@ -22,8 +23,6 @@ import { keepCustomBg, slideBgStyle, withBackground } from '@/engine/lib/slideBa
 import { AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignStartHorizontal, AlignStartVertical, ChevronLeft, ChevronRight, CopyPlus, Group, Layers, Lock, LockOpen, Minimize2, MonitorPlay, Ungroup } from 'lucide-react'
 import { alignBoxes, type AlignMode } from '@/engine/lib/slideAlign'
 import { graphicMainColor } from '@/engine/lib/slideGraphics'
-import { hasRich } from '@/engine/lib/slideMath'
-import { renderMath } from '@/engine/lib/math'
 import { autoAnimate, clearAnimation, slideSteps, applyElementAnim, startOf } from '@/engine/lib/slideAnim'
 import { EmptyState } from '@/engine/components/ui'
 import { cn } from '@/engine/lib/cn'
@@ -50,17 +49,6 @@ import { SlideThumb, SlideElView, SlideFooterView, elTransform } from './slideRe
 import { InkLayer, PresentToolbar, PresenterWindow, usePresentTools } from './PresentTools'
 import { GroupToolbar, SnapGuides, EditableEl, setSnapEnabled } from './slideEditParts'
 
-/** Trạng thái ẩn/hiện của hiệu ứng bấm-chuột: mờ dần + trượt/phóng nhẹ (translate/scale tách khỏi transform xoay của phần tử). */
-const HIDDEN_POSE: Record<NonNullable<SlideElement['anim']>, React.CSSProperties> = {
-  fade: {},
-  rise: { translate: '0 2.4cqw' },
-  drop: { translate: '0 -2.4cqw' },
-  left: { translate: '-6cqw 0' },
-  right: { translate: '6cqw 0' },
-  zoom: { scale: '0.8' },
-  spin: { rotate: '-90deg', scale: '0.6' },
-}
-
 /** cài đặt nhỏ theo trình duyệt (lưới, đường gióng); localStorage hỏng thì dùng mặc định */
 function readPref(key: string, fallback: boolean): boolean {
   try {
@@ -78,12 +66,6 @@ function writePref(key: string, value: boolean): boolean {
   }
   return value
 }
-
-export const revealStyle = (shown: boolean, anim: SlideElement['anim'] = 'fade', ms = 450): React.CSSProperties => ({
-  opacity: shown ? 1 : 0,
-  ...(shown ? { translate: '0 0', scale: '1', rotate: '0deg' } : HIDDEN_POSE[anim] ?? {}),
-  transition: `opacity ${ms}ms ease, translate ${ms}ms cubic-bezier(.2,.8,.2,1), scale ${ms}ms cubic-bezier(.2,.8,.2,1), rotate ${ms}ms cubic-bezier(.2,.8,.2,1)`,
-})
 
 /** Lớp phủ cả slide bọc một phần tử; zoom phóng quanh tâm phần tử chứ không quanh tâm slide. */
 /** Chạy thử hiệu ứng ngay trên bản soạn (kiểu Canva): phủ bản sao phần tử lên đúng chỗ, ẩn bản thật, diễn một lần rồi tự tắt. */
@@ -125,13 +107,6 @@ function RevealLayer({ el, shown, children }: { el: SlideElement; shown: boolean
   )
 }
 
-/**
- * Vẽ công thức trong slide. `\frac` → `\tfrac` (phân số cỡ chữ thường): phân số
- * cỡ display cao ~2,2em làm dòng chữ phình ra và bị `FitText` co nhỏ.
- */
-export const slideMathHtml = (text: string): string =>
-  renderMath(text.replace(/\\(d?)frac/g, '\\tfrac')).replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
-
 /** Ô bảng có công thức: hiện KaTeX khi không gõ, nhấp đúp để sửa mã. */
 /** hàng màu trong bảng Định dạng: bấm ô màu để mở bảng ô vuông + mã màu ngay bên dưới */
 function PaneColor({ label, value, themeColors, onPick }: { label: string; value: string; themeColors: string[]; onPick: (color: string) => void }) {
@@ -154,31 +129,7 @@ function PaneColor({ label, value, themeColors, onPick }: { label: string; value
   )
 }
 
-export function MathCell({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const [editing, setEditing] = useState(false)
-  if (hasRich(value) && !editing) {
-    return (
-      <span
-        data-tip="Nhấp đúp để sửa công thức"
-        onDoubleClick={() => setEditing(true)}
-        dangerouslySetInnerHTML={{ __html: slideMathHtml(value) }}
-      />
-    )
-  }
-  return (
-    <input
-      autoFocus={editing}
-      onBlur={() => setEditing(false)}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-transparent outline-none"
-      style={{ color: 'inherit' }}
-    />
-  )
-}
-
 const uid = () => Math.random().toString(36).slice(2, 10)
-export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
 /** biến màu cho hoạ tiết nền `.slide-frame[data-decor]` (slide.css) */
 /**
@@ -218,9 +169,6 @@ function PrintDeck({ slides, theme, footer, onDone }: { slides: Slide[]; theme: 
     document.body,
   )
 }
-
-export const decorStyle = (theme: ResolvedTheme): React.CSSProperties =>
-  ({ '--slide-decor-ink': theme.fg, '--slide-decor-accent': theme.secondary }) as React.CSSProperties
 
 export interface SlideEditorActions {
   present: () => void
@@ -1962,3 +1910,5 @@ export function SlideEditor({
  * ở tab Bắt đầu.
  */
 export { SlideThumb } from './slideRender'
+
+export { revealStyle, slideMathHtml, MathCell, clamp, decorStyle } from './slideViewHelpers'

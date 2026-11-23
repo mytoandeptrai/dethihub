@@ -1,12 +1,5 @@
 'use client'
-import {
-  UsersPanelGrantCreditsModalUi,
-  UsersPanelStorageSectionUi,
-  UsersPanelUserAvatarUi,
-  UsersPanelUserAvatarWithPresenceUi,
-  UsersPanelUserDetailDrawerUi,
-  UsersPanelUsersPanelUi,
-} from '@/modules/admin-pages/components'
+import { UsersPanelGrantCreditsModalUi, UsersPanelStorageSectionUi, UsersPanelUserAvatarUi, UsersPanelUserAvatarWithPresenceUi, UsersPanelUserDetailDrawerUi, UsersPanelUsersPanelUi } from '@/modules/admin-pages/components/users-panel-ui'
 import { UsersPanelModel } from '@/modules/admin-pages/hooks'
 export function UsersPanelContainer(
   ...args: Parameters<typeof UsersPanelModel.useUsersPanelContainer>

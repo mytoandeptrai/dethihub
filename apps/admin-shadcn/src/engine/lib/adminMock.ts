@@ -3,25 +3,24 @@
  * Bản build production không nạp file này.
  */
 import type { PricingConfig } from './pricing'
-import {
-  AdminError,
-  wait,
-  type AdminMe,
-  type AdminUser,
-  type AiErrorRow,
-  type AiStatRow,
-  type Announcement,
-  type AppSettings,
-  type AuditEntry,
-  type DbStatus,
-  type HealthProvider,
-  type HealthReport,
-  type HealthResult,
-  type HealthService,
-  type MaintenanceSetting,
-  type UserPage,
-  type UserQuota,
-  type UserStorage,
+import { AdminError, wait } from './adminShared'
+import type {
+  AdminMe,
+  AdminUser,
+  AiErrorRow,
+  AiStatRow,
+  Announcement,
+  AppSettings,
+  AuditEntry,
+  DbStatus,
+  HealthProvider,
+  HealthReport,
+  HealthResult,
+  HealthService,
+  MaintenanceSetting,
+  UserPage,
+  UserQuota,
+  UserStorage,
 } from './adminApi'
 
 const MOCK_USERS: AdminUser[] = Array.from({ length: 57 }, (_, i) => ({

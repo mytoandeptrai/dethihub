@@ -3,7 +3,8 @@ import { Skeleton } from '@workspace/ui/components/skeleton'
 import dynamic from 'next/dynamic'
 
 import { t } from '@/i18n/translate'
-import { Card, PageHeader, PageShell } from '@/modules/public-pages/components'
+import { Card } from '@/modules/public-pages/components/public-primitives-ui'
+import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
 
 import type { useDesignsContainer } from '@/modules/public-pages/hooks'
 const SlideThumb = dynamic(() => import('@engine-designs').then((m) => m.SlideThumb), {

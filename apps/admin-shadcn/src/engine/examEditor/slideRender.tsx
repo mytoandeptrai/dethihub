@@ -15,7 +15,7 @@ import type { DeckFooter, Slide, SlideElement } from '@/engine/store/docs'
 import { HtmlSlideFrame } from './HtmlSlide'
 import { readableTextOn, type ResolvedTheme } from '@/engine/lib/slideTheme'
 import { readableElements } from '@/engine/lib/slideContrast'
-import { revealStyle, slideMathHtml, decorStyle } from './SlideEditor'
+import { revealStyle, slideMathHtml, decorStyle } from './slideViewHelpers'
 
 export function SlideFooterView({
   footer,

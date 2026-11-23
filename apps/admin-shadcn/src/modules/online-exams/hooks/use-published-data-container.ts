@@ -31,7 +31,7 @@ import {
   DEMO_ROW,
   demoAttempts,
   PAGE,
-} from '@/modules/online-exams/hooks/use-online-published-container'
+} from '@/modules/online-exams/hooks/published-demo'
 
 import type { lib_community_CommunityRow as CommunityRow } from '@online-exams-engine'
 

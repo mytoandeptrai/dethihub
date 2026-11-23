@@ -1,5 +1,5 @@
 'use client'
-import { DbStatusCardDbStatusCardUi, DbStatusCardSgFlagUi } from '@/modules/admin-pages/components'
+import { DbStatusCardDbStatusCardUi, DbStatusCardSgFlagUi } from '@/modules/admin-pages/components/db-status-card-ui'
 import { DbStatusCardModel } from '@/modules/admin-pages/hooks'
 export function SgFlagContainer(...args: Parameters<typeof DbStatusCardModel.useSgFlagContainer>) {
   const props = DbStatusCardModel.useSgFlagContainer(...args)

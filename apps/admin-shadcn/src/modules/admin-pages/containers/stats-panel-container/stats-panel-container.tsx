@@ -1,5 +1,5 @@
 'use client'
-import { StatsPanelStatsPanelUi } from '@/modules/admin-pages/components'
+import { StatsPanelStatsPanelUi } from '@/modules/admin-pages/components/stats-panel-ui'
 import { StatsPanelModel } from '@/modules/admin-pages/hooks'
 export function StatsPanelContainer(
   ...args: Parameters<typeof StatsPanelModel.useStatsPanelContainer>

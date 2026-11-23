@@ -1,12 +1,5 @@
 'use client'
-import {
-  ContentPanelContentPanelUi,
-  ContentPanelDocsTabUi,
-  ContentPanelExamDrawerUi,
-  ContentPanelExamsTabUi,
-  ContentPanelFeedbackTabUi,
-  ContentPanelReportsTabUi,
-} from '@/modules/admin-pages/components'
+import { ContentPanelContentPanelUi, ContentPanelDocsTabUi, ContentPanelExamDrawerUi, ContentPanelExamsTabUi, ContentPanelFeedbackTabUi, ContentPanelReportsTabUi } from '@/modules/admin-pages/components/content-panel-ui'
 import { ContentPanelModel } from '@/modules/admin-pages/hooks'
 export function ContentPanelContainer(
   ...args: Parameters<typeof ContentPanelModel.useContentPanelContainer>

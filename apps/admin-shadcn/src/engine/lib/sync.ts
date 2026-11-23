@@ -6,7 +6,7 @@
  * mục mới thuộc tài khoản này thì đẩy lên; mục từng đồng bộ mà máy chủ không còn (xoá ở máy khác) thì bỏ khỏi máy này.
  * Sau đó mỗi thay đổi được đẩy lên sau ~1,5 giây, từng mục một request nên một mục quá lớn không chặn các mục khác.
  */
-import { currentSession, getSession } from '@/engine/lib/auth'
+import { currentSession, getSession } from '@/engine/lib/auth-session'
 import { workspaceItemList, workspaceItemSave, removeWorkspaceItems } from '@/apis/workspace/requests'
 import type { WorkspaceItemListInput } from '@/apis/workspace/types'
 type WorkspaceKind = WorkspaceItemListInput['params']['query']['kind']

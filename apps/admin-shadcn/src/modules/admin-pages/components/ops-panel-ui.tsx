@@ -15,13 +15,11 @@ import {
 } from '@/components/product-ui'
 import { t } from '@/i18n/translate'
 import { AdminTable } from '@/modules/admin-pages/components/admin-primitives-ui'
-import {
-  AnnouncementsEditor,
-  DbStatusCard,
-  HealthDrawer,
-  Switch,
-  WelcomePointsCard,
-} from '@/modules/admin-pages/containers'
+import AnnouncementsEditor from '@/modules/admin-pages/containers/announcements-editor-container'
+import DbStatusCard from '@/modules/admin-pages/containers/db-status-card-container'
+import HealthDrawer from '@/modules/admin-pages/containers/health-drawer-container'
+import Switch from '@/modules/admin-pages/containers/switch-container'
+import WelcomePointsCard from '@/modules/admin-pages/containers/welcome-points-card-container'
 import { OpsPanelModel } from '@/modules/admin-pages/hooks'
 import { formatNumber, formatViDateTime } from '@/modules/admin-pages/hooks/admin-utils'
 

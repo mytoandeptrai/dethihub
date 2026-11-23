@@ -1,46 +1,18 @@
-import type { Session as SupabaseSession } from '@supabase/supabase-js'
+import { currentSession, getCachedSession, getSession, saveSession } from './auth-session'
+import type { Session } from './auth-session'
 import { appPaths, safeRedirect } from '@/config/app-paths'
 import { getBrowserSupabase } from '@/lib/supabase/browser'
 
-export interface Session {
-  access_token: string
-  refresh_token: string
-  expires_at: number
-  user: { id: string; email: string; name?: string; avatar?: string }
-}
+export { AUTH_EVENT, currentSession, getSession, toEngineSession } from './auth-session'
+export type { Session } from './auth-session'
 export class AuthError extends Error {}
-export const AUTH_EVENT = 'dethinhbien-auth'
-let cached: Session | null = null
-let listening = false
-export function toEngineSession(session: SupabaseSession | null): Session | null {
-  if (!session) return null
-  const meta = session.user.user_metadata
-  return { access_token: session.access_token, refresh_token: session.refresh_token, expires_at: session.expires_at ?? 0, user: { id: session.user.id, email: session.user.email ?? '', name: meta.display_name || meta.full_name || meta.name, avatar: meta.avatar_url || meta.picture } }
-}
-function saveSession(session: SupabaseSession | null) {
-  cached = toEngineSession(session)
-  window.dispatchEvent(new Event(AUTH_EVENT))
-}
-export function getSession(): Session | null {
-  if (!listening && typeof window !== 'undefined') {
-    listening = true
-    getBrowserSupabase().auth.onAuthStateChange((_event, session) => saveSession(session))
-  }
-  return cached
-}
 function check(error: { message: string } | null) { if (error) throw new AuthError(error.message) }
-export async function currentSession(_options: { keepOnError?: boolean } = {}): Promise<Session | null> {
-  getSession()
-  const { data, error } = await getBrowserSupabase().auth.getSession()
-  if (error) return null
-  cached = toEngineSession(data.session)
-  return cached
-}
 export async function signIn(email: string, password: string, captchaToken?: string): Promise<Session> {
   const { data, error } = await getBrowserSupabase().auth.signInWithPassword({ email, password, options: { captchaToken } })
   check(error); saveSession(data.session)
-  if (!cached) throw new AuthError('Bạn cần đăng nhập lại.')
-  return cached
+  const session = getCachedSession()
+  if (!session) throw new AuthError('Bạn cần đăng nhập lại.')
+  return session
 }
 export async function signUp(email: string, password: string, name: string, captchaToken?: string): Promise<{ needsConfirm: boolean }> {
   const { data, error } = await getBrowserSupabase().auth.signUp({ email, password, options: { captchaToken, data: { display_name: name }, emailRedirectTo: window.location.origin + appPaths.auth.callback.href } })

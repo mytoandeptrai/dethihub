@@ -3,7 +3,7 @@
  * thay vì base64 nặng trong localStorage. Ảnh cũ dạng data URL vẫn chạy bình thường.
  */
 import { uploadImageFile } from '@/apis/storage/requests'
-import { currentSession } from '@/engine/lib/auth'
+import { currentSession } from '@/engine/lib/auth-session'
 import { apiFetch } from '@/engine/lib/apiFetch'
 
 /** Đẩy data URL lên R2, trả về đường dẫn. Chuỗi không phải data URL thì giữ nguyên. */
