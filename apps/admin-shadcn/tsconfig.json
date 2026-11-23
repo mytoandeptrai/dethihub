@@ -10,6 +10,8 @@
       "@engine-navigation": ["./.engine-types/engine/compat/navigation.d.ts"],
       "@workspace-engine": ["./.engine-types/engine/compat/workspace.d.ts"],
       "@online-exams-engine": ["./.engine-types/engine/compat/online-exams.d.ts"],
+      "@student-engine": ["./.engine-types/engine/compat/student-exams.d.ts"],
+      "@student-kernel": ["./.engine-types/engine/compat/student-kernel.d.ts"],
       "@online-exams-kernel": ["./.engine-types/engine/compat/online-exams-kernel.d.ts"],
       "@/*": [
         "./src/*"

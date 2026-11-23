@@ -68,6 +68,22 @@ export const myExamSaveMutation = () =>
         : requests.myExamPublish({ body }),
   })
 
+export const studentPlayQuery = (id: string, deviceId: string) => queryOptions({
+  queryKey: [...examsKeys.all, 'studentPlay', id, deviceId],
+  staleTime: 0,
+  retry: false,
+  queryFn: async () => {
+    const [play, gate] = await Promise.all([
+      requests.communityExamPlay({ params: { path: { id } } }),
+      requests.communityExamGate({ params: { path: { id }, query: { deviceId } } }),
+    ])
+    return { ...play, gate }
+  },
+})
+
+export const studentAttemptMutation = () => mutationOptions({ mutationFn: requests.communityExamSubmit })
+export const examReportMutation = () => mutationOptions({ mutationFn: requests.examReportReport })
+
 export const myExamSetListedMutation = () =>
   mutationOptions({ mutationFn: requests.myExamSetListed })
 export const myExamUnpublishMutation = () =>

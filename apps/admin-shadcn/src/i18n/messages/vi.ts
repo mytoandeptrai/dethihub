@@ -1,11 +1,13 @@
 import publicCopy from './public-copy'
 import workspaceCopy from './workspace-copy'
+import studentCopy from './student-copy'
 import onlineExamsCopy from './online-exams-copy'
 
 const messages = {
   publicCopy,
   workspaceCopy,
   onlineExamsCopy,
+  studentCopy,
   product: {
     studentPlay: 'Bài kiểm tra trực tuyến',
     studentQuiz: 'Làm đề',

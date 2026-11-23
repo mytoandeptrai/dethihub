@@ -39,6 +39,8 @@ const nextConfig: NextConfig = {
       '@engine-navigation': './src/engine/compat/navigation.ts',
       '@workspace-engine': './src/engine/compat/workspace.ts',
       '@online-exams-engine': './src/engine/compat/online-exams.ts',
+      '@student-engine': './src/engine/compat/student-exams.ts',
+      '@student-kernel': './src/engine/compat/student-kernel.tsx',
       '@online-exams-kernel': './src/engine/compat/online-exams-kernel.ts',
     },
   },

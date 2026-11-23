@@ -1,3 +1,3 @@
-import { WorkspaceContainer } from '@/modules/shell'
+import {OnlineOpenContainer} from '@/modules/student-exams'
 
-export default WorkspaceContainer
+export default OnlineOpenContainer

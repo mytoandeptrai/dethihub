@@ -13,17 +13,17 @@ export async function communityExamAuthors(options: Types.CommunityExamAuthorsIn
 }
 
 export async function communityExamCommunityDoc(options: Types.CommunityExamCommunityDocInput) {
-  const { data } = await apiClient.GET('/api/exams/community/{id}', options)
-  return data!
+  const { data } = await apiClient.GET('/api/exams/community/{id}', { ...options, cache: 'no-store' })
+  return data as unknown as Record<string, unknown>
 }
 
 export async function communityExamPlay(options: Types.CommunityExamPlayInput) {
-  const { data } = await apiClient.GET('/api/exams/{id}/play', options)
+  const { data } = await apiClient.GET('/api/exams/{id}/play', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function communityExamGate(options: Types.CommunityExamGateInput) {
-  const { data } = await apiClient.GET('/api/exams/{id}/gate', options)
+  const { data } = await apiClient.GET('/api/exams/{id}/gate', { ...options, cache: 'no-store' })
   return data!
 }
 
