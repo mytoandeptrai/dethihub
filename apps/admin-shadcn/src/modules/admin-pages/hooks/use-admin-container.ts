@@ -1,6 +1,14 @@
 'use client'
 import { useMe } from '@/apis/me'
-export type AdminSection = 'overview' | 'users' | 'content' | 'bank'
+export type AdminSection =
+  | 'overview'
+  | 'users'
+  | 'content'
+  | 'bank'
+  | 'stats'
+  | 'payments'
+  | 'ai'
+  | 'audit'
 export function useAdminContainer(section: AdminSection) {
   const me = useMe().data
   return {

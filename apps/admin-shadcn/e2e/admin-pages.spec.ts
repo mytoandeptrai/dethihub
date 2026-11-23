@@ -25,8 +25,9 @@ function errorsOf(page: Page) {
   })
   return errors
 }
-async function fixtures(context: BrowserContext) {
+async function fixtures(context: BrowserContext, role: string | null = 'admin') {
   const fixture = createAdminFixture()
+  fixture.setRole(role)
   const headers = {
     'access-control-allow-origin': origin,
     'access-control-allow-credentials': 'true',
@@ -268,7 +269,11 @@ test('fixture content tabs, moderation, reports, documents and feedback', async 
       .toBe(true)
     await page.getByRole('button', { name: 'Đã hiểu', exact: true }).click()
     await page.getByRole('radio', { name: 'Phản hồi', exact: true }).click()
-    await page.getByRole('button', { name: 'Đã đọc', exact: true }).last().click()
+    await page
+      .getByRole('button', { name: 'Đã đọc', exact: true })
+      .filter({ has: page.locator('svg.lucide-check') })
+      .last()
+      .click()
     await expect
       .poll(() =>
         fixture.requests.some((item) => item.path.endsWith('/read') && item.body.read === true),

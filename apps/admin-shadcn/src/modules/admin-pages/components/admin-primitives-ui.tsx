@@ -47,6 +47,11 @@ function useReturnFocus() {
   }
   return () => opener.current
 }
+function hasForegroundDialog() {
+  return !!document.querySelector(
+    '[data-slot="dialog-content"]:not([data-admin-modal], [data-admin-drawer])',
+  )
+}
 export function AdminDrawer({
   children,
   className,
@@ -59,8 +64,11 @@ export function AdminDrawer({
   return (
     <Dialog
       open
-      onOpenChange={(open) => {
-        if (!open) onClose()
+      onOpenChange={(open, details) => {
+        if (!open) {
+          if (hasForegroundDialog()) details.cancel()
+          else onClose()
+        }
       }}
     >
       <DialogContent
@@ -99,7 +107,8 @@ export function AdminModal({
       open
       onOpenChange={(open, details) => {
         if (!open) {
-          if (container?.querySelector('[data-portal-child]')) details.cancel()
+          if (container?.querySelector('[data-portal-child]') || hasForegroundDialog())
+            details.cancel()
           else onClose()
         }
       }}

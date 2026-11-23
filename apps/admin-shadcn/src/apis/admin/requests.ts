@@ -3,7 +3,7 @@ import { apiClient } from '@/lib/api-client'
 import type * as Types from './types'
 
 export async function adminUserList(options: Types.AdminUserListInput) {
-  const { data } = await apiClient.GET('/api/admin/users', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/users', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -28,12 +28,12 @@ export async function adminUserRemove(options: Types.AdminUserRemoveInput) {
 }
 
 export async function adminUserAudit(options: Types.AdminUserAuditInput) {
-  const { data } = await apiClient.GET('/api/admin/audit', options)
+  const { data } = await apiClient.GET('/api/admin/audit', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function adminSettingsGetAll(options: Types.AdminSettingsGetAllInput) {
-  const { data } = await apiClient.GET('/api/admin/settings', options)
+  const { data } = await apiClient.GET('/api/admin/settings', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -43,7 +43,10 @@ export async function adminSettingsSet(options: Types.AdminSettingsSetInput) {
 }
 
 export async function aiAdminGetQuota(options: Types.AiAdminGetQuotaInput) {
-  const { data } = await apiClient.GET('/api/admin/ai/users/{id}/quota', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/ai/users/{id}/quota', {
+    ...options,
+    cache: 'no-store',
+  })
   return data!
 }
 
@@ -63,17 +66,17 @@ export async function aiAdminGrantCredits(options: Types.AiAdminGrantCreditsInpu
 }
 
 export async function aiAdminStats(options: Types.AiAdminStatsInput) {
-  const { data } = await apiClient.GET('/api/admin/ai/stats', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/ai/stats', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function aiAdminErrors(options: Types.AiAdminErrorsInput) {
-  const { data } = await apiClient.GET('/api/admin/ai/errors', options)
+  const { data } = await apiClient.GET('/api/admin/ai/errors', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function aiAdminProviders(options: Types.AiAdminProvidersInput) {
-  const { data } = await apiClient.GET('/api/admin/ai/providers', options)
+  const { data } = await apiClient.GET('/api/admin/ai/providers', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -93,12 +96,12 @@ export async function aiAdminPing(options: Types.AiAdminPingInput) {
 }
 
 export async function examAdminList(options: Types.ExamAdminListInput) {
-  const { data } = await apiClient.GET('/api/admin/exams', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/exams', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function examAdminGet(options: Types.ExamAdminGetInput) {
-  const { data } = await apiClient.GET('/api/admin/exams/{id}', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/exams/{id}', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -113,7 +116,7 @@ export async function examAdminSetStatus(options: Types.ExamAdminSetStatusInput)
 }
 
 export async function examAdminListReports(options: Types.ExamAdminListReportsInput) {
-  const { data } = await apiClient.GET('/api/admin/reports', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/reports', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -123,7 +126,10 @@ export async function examAdminResolveReport(options: Types.ExamAdminResolveRepo
 }
 
 export async function storageAdminGetUser(options: Types.StorageAdminGetUserInput) {
-  const { data } = await apiClient.GET('/api/admin/storage/users/{id}', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/storage/users/{id}', {
+    ...options,
+    cache: 'no-store',
+  })
   return data!
 }
 
@@ -133,7 +139,7 @@ export async function storageAdminSetUser(options: Types.StorageAdminSetUserInpu
 }
 
 export async function storageAdminListDocuments(options: Types.StorageAdminListDocumentsInput) {
-  const { data } = await apiClient.GET('/api/admin/documents', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/documents', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -143,7 +149,7 @@ export async function storageAdminDeleteDocument(options: Types.StorageAdminDele
 }
 
 export async function paymentAdminList(options: Types.PaymentAdminListInput) {
-  const { data } = await apiClient.GET('/api/admin/payments', options)
+  const { data } = await apiClient.GET('/api/admin/payments', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -158,7 +164,7 @@ export async function paymentAdminCredit(options: Types.PaymentAdminCreditInput)
 }
 
 export async function adminFeedbackList(options: Types.AdminFeedbackListInput) {
-  const { data } = await apiClient.GET('/api/admin/feedback', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/feedback', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -168,7 +174,10 @@ export async function adminFeedbackMarkRead(options: Types.AdminFeedbackMarkRead
 }
 
 export async function adminBankOverrides(options: Types.AdminBankOverridesInput) {
-  const { data } = await apiClient.GET('/api/admin/bank/overrides', {...options,cache:'no-store'})
+  const { data } = await apiClient.GET('/api/admin/bank/overrides', {
+    ...options,
+    cache: 'no-store',
+  })
   return data!
 }
 
@@ -203,26 +212,32 @@ export async function adminBankVision(options: Types.AdminBankVisionInput) {
 }
 
 export async function adminOpsOverview(options: Types.AdminOpsOverviewInput) {
-  const { data } = await apiClient.GET('/api/admin/stats/overview', options)
+  const { data } = await apiClient.GET('/api/admin/stats/overview', {
+    ...options,
+    cache: 'no-store',
+  })
   return data!
 }
 
 export async function adminOpsOnline(options: Types.AdminOpsOnlineInput) {
-  const { data } = await apiClient.GET('/api/admin/stats/online', options)
+  const { data } = await apiClient.GET('/api/admin/stats/online', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function adminOpsHealth(options: Types.AdminOpsHealthInput) {
-  const { data } = await apiClient.GET('/api/admin/health', options)
+  const { data } = await apiClient.GET('/api/admin/health', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function adminOpsTargets(options: Types.AdminOpsTargetsInput) {
-  const { data } = await apiClient.GET('/api/admin/health/targets', options)
+  const { data } = await apiClient.GET('/api/admin/health/targets', {
+    ...options,
+    cache: 'no-store',
+  })
   return data!
 }
 
 export async function adminOpsDbMetrics(options: Types.AdminOpsDbMetricsInput) {
-  const { data } = await apiClient.GET('/api/admin/db/metrics', options)
+  const { data } = await apiClient.GET('/api/admin/db/metrics', { ...options, cache: 'no-store' })
   return data!
 }

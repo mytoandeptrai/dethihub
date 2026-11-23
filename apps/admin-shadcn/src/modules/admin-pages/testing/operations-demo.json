@@ -1,0 +1,3274 @@
+{
+  "now": 1795432921429,
+  "settings": {
+    "maintenance": {
+      "on": false,
+      "message": ""
+    },
+    "pricing": null,
+    "aiWelcome": null,
+    "announcements": {
+      "items": [
+        {
+          "id": "mock-1",
+          "on": true,
+          "title": "Xáo đề giữ nguyên đáp án",
+          "text": "Tạo nhiều mã đề từ một đề gốc chỉ với một lần bấm.",
+          "image": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22960%22%20height%3D%22540%22%3E%3Crect%20width%3D%22960%22%20height%3D%22540%22%20fill%3D%22%23c9805f%22%2F%3E%3C%2Fsvg%3E",
+          "tryPath": "/soan-de",
+          "until": null
+        },
+        {
+          "id": "mock-2",
+          "on": true,
+          "title": "Bảo trì cuối tuần",
+          "text": "Tối Chủ nhật hệ thống nâng cấp khoảng 15 phút.\nBạn nhớ lưu đề trước giờ đó nhé.",
+          "image": "",
+          "tryPath": "",
+          "until": null
+        },
+        {
+          "id": "mock-3",
+          "on": true,
+          "title": "",
+          "text": "",
+          "image": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22960%22%20height%3D%22540%22%3E%3Crect%20width%3D%22960%22%20height%3D%22540%22%20fill%3D%22%238a9a7b%22%2F%3E%3C%2Fsvg%3E",
+          "tryPath": "",
+          "until": null
+        }
+      ]
+    }
+  },
+  "ai": {
+    "days": 7,
+    "rows": [
+      {
+        "day": "2026-11-23",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 30,
+        "errors": 0,
+        "tokens": 186000,
+        "cost": 0.36,
+        "avgMs": 4000
+      },
+      {
+        "day": "2026-11-23",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 15,
+        "errors": 1,
+        "tokens": 93000,
+        "cost": null,
+        "avgMs": 7500
+      },
+      {
+        "day": "2026-11-23",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 28,
+        "errors": 2,
+        "tokens": 173600,
+        "cost": null,
+        "avgMs": 11000
+      },
+      {
+        "day": "2026-11-22",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 37,
+        "errors": 1,
+        "tokens": 229400,
+        "cost": 0.444,
+        "avgMs": 4120
+      },
+      {
+        "day": "2026-11-22",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 22,
+        "errors": 2,
+        "tokens": 136400,
+        "cost": null,
+        "avgMs": 7620
+      },
+      {
+        "day": "2026-11-22",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 35,
+        "errors": 3,
+        "tokens": 217000,
+        "cost": null,
+        "avgMs": 11120
+      },
+      {
+        "day": "2026-11-21",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 44,
+        "errors": 2,
+        "tokens": 272800,
+        "cost": 0.528,
+        "avgMs": 4240
+      },
+      {
+        "day": "2026-11-21",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 29,
+        "errors": 3,
+        "tokens": 179800,
+        "cost": null,
+        "avgMs": 7740
+      },
+      {
+        "day": "2026-11-21",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 2,
+        "errors": 0,
+        "tokens": 12400,
+        "cost": null,
+        "avgMs": 11240
+      },
+      {
+        "day": "2026-11-20",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 51,
+        "errors": 3,
+        "tokens": 316200,
+        "cost": 0.612,
+        "avgMs": 4360
+      },
+      {
+        "day": "2026-11-20",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 36,
+        "errors": 0,
+        "tokens": 223200,
+        "cost": null,
+        "avgMs": 7860
+      },
+      {
+        "day": "2026-11-20",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 9,
+        "errors": 1,
+        "tokens": 55800,
+        "cost": null,
+        "avgMs": 11360
+      },
+      {
+        "day": "2026-11-19",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 58,
+        "errors": 0,
+        "tokens": 359600,
+        "cost": 0.696,
+        "avgMs": 4480
+      },
+      {
+        "day": "2026-11-19",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 3,
+        "errors": 1,
+        "tokens": 18600,
+        "cost": null,
+        "avgMs": 7980
+      },
+      {
+        "day": "2026-11-19",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 16,
+        "errors": 2,
+        "tokens": 99200,
+        "cost": null,
+        "avgMs": 11480
+      },
+      {
+        "day": "2026-11-18",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 65,
+        "errors": 1,
+        "tokens": 403000,
+        "cost": 0.78,
+        "avgMs": 4600
+      },
+      {
+        "day": "2026-11-18",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 10,
+        "errors": 2,
+        "tokens": 62000,
+        "cost": null,
+        "avgMs": 8100
+      },
+      {
+        "day": "2026-11-18",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 23,
+        "errors": 3,
+        "tokens": 142600,
+        "cost": null,
+        "avgMs": 11600
+      },
+      {
+        "day": "2026-11-17",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 32,
+        "errors": 2,
+        "tokens": 198400,
+        "cost": 0.384,
+        "avgMs": 4720
+      },
+      {
+        "day": "2026-11-17",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 17,
+        "errors": 3,
+        "tokens": 105400,
+        "cost": null,
+        "avgMs": 8220
+      },
+      {
+        "day": "2026-11-17",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 30,
+        "errors": 0,
+        "tokens": 186000,
+        "cost": null,
+        "avgMs": 11720
+      }
+    ]
+  },
+  "ai30": {
+    "days": 30,
+    "rows": [
+      {
+        "day": "2026-11-23",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 30,
+        "errors": 0,
+        "tokens": 186000,
+        "cost": 0.36,
+        "avgMs": 4000
+      },
+      {
+        "day": "2026-11-23",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 15,
+        "errors": 1,
+        "tokens": 93000,
+        "cost": null,
+        "avgMs": 7500
+      },
+      {
+        "day": "2026-11-23",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 28,
+        "errors": 2,
+        "tokens": 173600,
+        "cost": null,
+        "avgMs": 11000
+      },
+      {
+        "day": "2026-11-22",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 37,
+        "errors": 1,
+        "tokens": 229400,
+        "cost": 0.444,
+        "avgMs": 4120
+      },
+      {
+        "day": "2026-11-22",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 22,
+        "errors": 2,
+        "tokens": 136400,
+        "cost": null,
+        "avgMs": 7620
+      },
+      {
+        "day": "2026-11-22",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 35,
+        "errors": 3,
+        "tokens": 217000,
+        "cost": null,
+        "avgMs": 11120
+      },
+      {
+        "day": "2026-11-21",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 44,
+        "errors": 2,
+        "tokens": 272800,
+        "cost": 0.528,
+        "avgMs": 4240
+      },
+      {
+        "day": "2026-11-21",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 29,
+        "errors": 3,
+        "tokens": 179800,
+        "cost": null,
+        "avgMs": 7740
+      },
+      {
+        "day": "2026-11-21",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 2,
+        "errors": 0,
+        "tokens": 12400,
+        "cost": null,
+        "avgMs": 11240
+      },
+      {
+        "day": "2026-11-20",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 51,
+        "errors": 3,
+        "tokens": 316200,
+        "cost": 0.612,
+        "avgMs": 4360
+      },
+      {
+        "day": "2026-11-20",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 36,
+        "errors": 0,
+        "tokens": 223200,
+        "cost": null,
+        "avgMs": 7860
+      },
+      {
+        "day": "2026-11-20",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 9,
+        "errors": 1,
+        "tokens": 55800,
+        "cost": null,
+        "avgMs": 11360
+      },
+      {
+        "day": "2026-11-19",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 58,
+        "errors": 0,
+        "tokens": 359600,
+        "cost": 0.696,
+        "avgMs": 4480
+      },
+      {
+        "day": "2026-11-19",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 3,
+        "errors": 1,
+        "tokens": 18600,
+        "cost": null,
+        "avgMs": 7980
+      },
+      {
+        "day": "2026-11-19",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 16,
+        "errors": 2,
+        "tokens": 99200,
+        "cost": null,
+        "avgMs": 11480
+      },
+      {
+        "day": "2026-11-18",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 65,
+        "errors": 1,
+        "tokens": 403000,
+        "cost": 0.78,
+        "avgMs": 4600
+      },
+      {
+        "day": "2026-11-18",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 10,
+        "errors": 2,
+        "tokens": 62000,
+        "cost": null,
+        "avgMs": 8100
+      },
+      {
+        "day": "2026-11-18",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 23,
+        "errors": 3,
+        "tokens": 142600,
+        "cost": null,
+        "avgMs": 11600
+      },
+      {
+        "day": "2026-11-17",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 32,
+        "errors": 2,
+        "tokens": 198400,
+        "cost": 0.384,
+        "avgMs": 4720
+      },
+      {
+        "day": "2026-11-17",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 17,
+        "errors": 3,
+        "tokens": 105400,
+        "cost": null,
+        "avgMs": 8220
+      },
+      {
+        "day": "2026-11-17",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 30,
+        "errors": 0,
+        "tokens": 186000,
+        "cost": null,
+        "avgMs": 11720
+      },
+      {
+        "day": "2026-11-16",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 39,
+        "errors": 3,
+        "tokens": 241800,
+        "cost": 0.468,
+        "avgMs": 4840
+      },
+      {
+        "day": "2026-11-16",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 24,
+        "errors": 0,
+        "tokens": 148800,
+        "cost": null,
+        "avgMs": 8340
+      },
+      {
+        "day": "2026-11-16",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 37,
+        "errors": 1,
+        "tokens": 229400,
+        "cost": null,
+        "avgMs": 11840
+      },
+      {
+        "day": "2026-11-15",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 46,
+        "errors": 0,
+        "tokens": 285200,
+        "cost": 0.552,
+        "avgMs": 4960
+      },
+      {
+        "day": "2026-11-15",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 31,
+        "errors": 1,
+        "tokens": 192200,
+        "cost": null,
+        "avgMs": 8460
+      },
+      {
+        "day": "2026-11-15",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 4,
+        "errors": 2,
+        "tokens": 24800,
+        "cost": null,
+        "avgMs": 11960
+      },
+      {
+        "day": "2026-11-14",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 53,
+        "errors": 1,
+        "tokens": 328600,
+        "cost": 0.636,
+        "avgMs": 5080
+      },
+      {
+        "day": "2026-11-14",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 38,
+        "errors": 2,
+        "tokens": 235600,
+        "cost": null,
+        "avgMs": 8580
+      },
+      {
+        "day": "2026-11-14",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 11,
+        "errors": 3,
+        "tokens": 68200,
+        "cost": null,
+        "avgMs": 12080
+      },
+      {
+        "day": "2026-11-13",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 60,
+        "errors": 2,
+        "tokens": 372000,
+        "cost": 0.72,
+        "avgMs": 5200
+      },
+      {
+        "day": "2026-11-13",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 5,
+        "errors": 3,
+        "tokens": 31000,
+        "cost": null,
+        "avgMs": 8700
+      },
+      {
+        "day": "2026-11-13",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 18,
+        "errors": 0,
+        "tokens": 111600,
+        "cost": null,
+        "avgMs": 12200
+      },
+      {
+        "day": "2026-11-12",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 67,
+        "errors": 3,
+        "tokens": 415400,
+        "cost": 0.804,
+        "avgMs": 5320
+      },
+      {
+        "day": "2026-11-12",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 12,
+        "errors": 0,
+        "tokens": 74400,
+        "cost": null,
+        "avgMs": 8820
+      },
+      {
+        "day": "2026-11-12",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 25,
+        "errors": 1,
+        "tokens": 155000,
+        "cost": null,
+        "avgMs": 12320
+      },
+      {
+        "day": "2026-11-11",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 34,
+        "errors": 0,
+        "tokens": 210800,
+        "cost": 0.408,
+        "avgMs": 5440
+      },
+      {
+        "day": "2026-11-11",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 19,
+        "errors": 1,
+        "tokens": 117800,
+        "cost": null,
+        "avgMs": 8940
+      },
+      {
+        "day": "2026-11-11",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 32,
+        "errors": 2,
+        "tokens": 198400,
+        "cost": null,
+        "avgMs": 12440
+      },
+      {
+        "day": "2026-11-10",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 41,
+        "errors": 1,
+        "tokens": 254200,
+        "cost": 0.492,
+        "avgMs": 5560
+      },
+      {
+        "day": "2026-11-10",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 26,
+        "errors": 2,
+        "tokens": 161200,
+        "cost": null,
+        "avgMs": 9060
+      },
+      {
+        "day": "2026-11-10",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 39,
+        "errors": 3,
+        "tokens": 241800,
+        "cost": null,
+        "avgMs": 12560
+      },
+      {
+        "day": "2026-11-09",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 48,
+        "errors": 2,
+        "tokens": 297600,
+        "cost": 0.576,
+        "avgMs": 5680
+      },
+      {
+        "day": "2026-11-09",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 33,
+        "errors": 3,
+        "tokens": 204600,
+        "cost": null,
+        "avgMs": 9180
+      },
+      {
+        "day": "2026-11-09",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 6,
+        "errors": 0,
+        "tokens": 37200,
+        "cost": null,
+        "avgMs": 12680
+      },
+      {
+        "day": "2026-11-08",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 55,
+        "errors": 3,
+        "tokens": 341000,
+        "cost": 0.66,
+        "avgMs": 5800
+      },
+      {
+        "day": "2026-11-08",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 40,
+        "errors": 0,
+        "tokens": 248000,
+        "cost": null,
+        "avgMs": 9300
+      },
+      {
+        "day": "2026-11-08",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 13,
+        "errors": 1,
+        "tokens": 80600,
+        "cost": null,
+        "avgMs": 12800
+      },
+      {
+        "day": "2026-11-07",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 62,
+        "errors": 0,
+        "tokens": 384400,
+        "cost": 0.744,
+        "avgMs": 5920
+      },
+      {
+        "day": "2026-11-07",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 7,
+        "errors": 1,
+        "tokens": 43400,
+        "cost": null,
+        "avgMs": 9420
+      },
+      {
+        "day": "2026-11-07",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 20,
+        "errors": 2,
+        "tokens": 124000,
+        "cost": null,
+        "avgMs": 12920
+      },
+      {
+        "day": "2026-11-06",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 69,
+        "errors": 1,
+        "tokens": 427800,
+        "cost": 0.828,
+        "avgMs": 6040
+      },
+      {
+        "day": "2026-11-06",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 14,
+        "errors": 2,
+        "tokens": 86800,
+        "cost": null,
+        "avgMs": 9540
+      },
+      {
+        "day": "2026-11-06",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 27,
+        "errors": 3,
+        "tokens": 167400,
+        "cost": null,
+        "avgMs": 13040
+      },
+      {
+        "day": "2026-11-05",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 36,
+        "errors": 2,
+        "tokens": 223200,
+        "cost": 0.432,
+        "avgMs": 6160
+      },
+      {
+        "day": "2026-11-05",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 21,
+        "errors": 3,
+        "tokens": 130200,
+        "cost": null,
+        "avgMs": 9660
+      },
+      {
+        "day": "2026-11-05",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 34,
+        "errors": 0,
+        "tokens": 210800,
+        "cost": null,
+        "avgMs": 13160
+      },
+      {
+        "day": "2026-11-04",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 43,
+        "errors": 3,
+        "tokens": 266600,
+        "cost": 0.516,
+        "avgMs": 6280
+      },
+      {
+        "day": "2026-11-04",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 28,
+        "errors": 0,
+        "tokens": 173600,
+        "cost": null,
+        "avgMs": 9780
+      },
+      {
+        "day": "2026-11-04",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 41,
+        "errors": 1,
+        "tokens": 254200,
+        "cost": null,
+        "avgMs": 13280
+      },
+      {
+        "day": "2026-11-03",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 50,
+        "errors": 0,
+        "tokens": 310000,
+        "cost": 0.6,
+        "avgMs": 6400
+      },
+      {
+        "day": "2026-11-03",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 35,
+        "errors": 1,
+        "tokens": 217000,
+        "cost": null,
+        "avgMs": 9900
+      },
+      {
+        "day": "2026-11-03",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 8,
+        "errors": 2,
+        "tokens": 49600,
+        "cost": null,
+        "avgMs": 13400
+      },
+      {
+        "day": "2026-11-02",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 57,
+        "errors": 1,
+        "tokens": 353400,
+        "cost": 0.684,
+        "avgMs": 6520
+      },
+      {
+        "day": "2026-11-02",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 2,
+        "errors": 2,
+        "tokens": 12400,
+        "cost": null,
+        "avgMs": 10020
+      },
+      {
+        "day": "2026-11-02",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 15,
+        "errors": 3,
+        "tokens": 93000,
+        "cost": null,
+        "avgMs": 13520
+      },
+      {
+        "day": "2026-11-01",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 64,
+        "errors": 2,
+        "tokens": 396800,
+        "cost": 0.768,
+        "avgMs": 6640
+      },
+      {
+        "day": "2026-11-01",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 9,
+        "errors": 3,
+        "tokens": 55800,
+        "cost": null,
+        "avgMs": 10140
+      },
+      {
+        "day": "2026-11-01",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 22,
+        "errors": 0,
+        "tokens": 136400,
+        "cost": null,
+        "avgMs": 13640
+      },
+      {
+        "day": "2026-10-31",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 31,
+        "errors": 3,
+        "tokens": 192200,
+        "cost": 0.372,
+        "avgMs": 6760
+      },
+      {
+        "day": "2026-10-31",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 16,
+        "errors": 0,
+        "tokens": 99200,
+        "cost": null,
+        "avgMs": 10260
+      },
+      {
+        "day": "2026-10-31",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 29,
+        "errors": 1,
+        "tokens": 179800,
+        "cost": null,
+        "avgMs": 13760
+      },
+      {
+        "day": "2026-10-30",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 38,
+        "errors": 0,
+        "tokens": 235600,
+        "cost": 0.456,
+        "avgMs": 6880
+      },
+      {
+        "day": "2026-10-30",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 23,
+        "errors": 1,
+        "tokens": 142600,
+        "cost": null,
+        "avgMs": 10380
+      },
+      {
+        "day": "2026-10-30",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 36,
+        "errors": 2,
+        "tokens": 223200,
+        "cost": null,
+        "avgMs": 13880
+      },
+      {
+        "day": "2026-10-29",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 45,
+        "errors": 1,
+        "tokens": 279000,
+        "cost": 0.54,
+        "avgMs": 7000
+      },
+      {
+        "day": "2026-10-29",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 30,
+        "errors": 2,
+        "tokens": 186000,
+        "cost": null,
+        "avgMs": 10500
+      },
+      {
+        "day": "2026-10-29",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 3,
+        "errors": 3,
+        "tokens": 18600,
+        "cost": null,
+        "avgMs": 14000
+      },
+      {
+        "day": "2026-10-28",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 52,
+        "errors": 2,
+        "tokens": 322400,
+        "cost": 0.624,
+        "avgMs": 7120
+      },
+      {
+        "day": "2026-10-28",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 37,
+        "errors": 3,
+        "tokens": 229400,
+        "cost": null,
+        "avgMs": 10620
+      },
+      {
+        "day": "2026-10-28",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 10,
+        "errors": 0,
+        "tokens": 62000,
+        "cost": null,
+        "avgMs": 14120
+      },
+      {
+        "day": "2026-10-27",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 59,
+        "errors": 3,
+        "tokens": 365800,
+        "cost": 0.708,
+        "avgMs": 7240
+      },
+      {
+        "day": "2026-10-27",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 4,
+        "errors": 0,
+        "tokens": 24800,
+        "cost": null,
+        "avgMs": 10740
+      },
+      {
+        "day": "2026-10-27",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 17,
+        "errors": 1,
+        "tokens": 105400,
+        "cost": null,
+        "avgMs": 14240
+      },
+      {
+        "day": "2026-10-26",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 66,
+        "errors": 0,
+        "tokens": 409200,
+        "cost": 0.792,
+        "avgMs": 7360
+      },
+      {
+        "day": "2026-10-26",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 11,
+        "errors": 1,
+        "tokens": 68200,
+        "cost": null,
+        "avgMs": 10860
+      },
+      {
+        "day": "2026-10-26",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 24,
+        "errors": 2,
+        "tokens": 148800,
+        "cost": null,
+        "avgMs": 14360
+      },
+      {
+        "day": "2026-10-25",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 33,
+        "errors": 1,
+        "tokens": 204600,
+        "cost": 0.396,
+        "avgMs": 7480
+      },
+      {
+        "day": "2026-10-25",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 18,
+        "errors": 2,
+        "tokens": 111600,
+        "cost": null,
+        "avgMs": 10980
+      },
+      {
+        "day": "2026-10-25",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 31,
+        "errors": 3,
+        "tokens": 192200,
+        "cost": null,
+        "avgMs": 14480
+      }
+    ]
+  },
+  "errors": {
+    "items": [
+      {
+        "id": 3,
+        "userId": "00000000-0000-4000-8000-000000000003",
+        "userName": "Giáo viên 3",
+        "userEmail": "giaovien3@example.com",
+        "emptyDay": 3,
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "error": "gpt-5.5: empty content",
+        "ms": 12040,
+        "createdAt": "2026-11-23T11:21:01.524Z"
+      },
+      {
+        "id": 2,
+        "userId": "00000000-0000-4000-8000-000000000004",
+        "userEmail": "giaovien4@example.com",
+        "emptyDay": 1,
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "error": "deepseek-flash: empty content",
+        "ms": 9200,
+        "createdAt": "2026-11-23T11:20:01.524Z"
+      },
+      {
+        "id": 1,
+        "userId": null,
+        "model": "mercury-3",
+        "provider": "mercury",
+        "error": "mercury-3: quá thời gian chờ 280s",
+        "ms": 280000,
+        "createdAt": "2026-11-23T11:19:01.524Z"
+      }
+    ],
+    "freeEmpty": 3
+  },
+  "targets": {
+    "providers": [
+      {
+        "provider": "opencode",
+        "model": "gpt-5.5",
+        "defaultModel": "gpt-5.5",
+        "endpoint": "https://api.opencode.example/v1",
+        "defaultEndpoint": "https://api.opencode.example/v1",
+        "keyMask": "••••a1b2",
+        "custom": false
+      },
+      {
+        "provider": "mercury",
+        "model": "mercury-3",
+        "defaultModel": "mercury-3",
+        "endpoint": "https://api.mercury.example/v1",
+        "defaultEndpoint": "https://api.mercury.example/v1",
+        "keyMask": "••••a1b2",
+        "custom": false
+      },
+      {
+        "provider": "nightrouter",
+        "model": "deepseek-v4-flash-0731",
+        "defaultModel": "deepseek-v4-flash-0731",
+        "endpoint": "https://api.nightrouter.example/v1",
+        "defaultEndpoint": "https://api.nightrouter.example/v1",
+        "keyMask": "••••a1b2",
+        "custom": false
+      }
+    ],
+    "services": {
+      "supabase": {
+        "endpoint": "https://mock.supabase.co",
+        "keyMask": "••••9f3c"
+      },
+      "r2": {
+        "endpoint": "https://mock.r2.cloudflarestorage.com/de-ro",
+        "keyMask": "••••77de"
+      }
+    }
+  },
+  "health": {
+    "checkedAt": "2026-11-23T11:22:01.524Z",
+    "supabase": {
+      "ok": true,
+      "ms": 84
+    },
+    "r2": {
+      "ok": true,
+      "ms": 212
+    },
+    "providers": [
+      {
+        "provider": "opencode",
+        "model": "gpt-5.5",
+        "ok": true,
+        "ms": 2310
+      },
+      {
+        "provider": "mercury",
+        "model": "mercury-3",
+        "ok": true,
+        "ms": 640
+      },
+      {
+        "provider": "nightrouter",
+        "model": "deepseek-v4-flash-0731",
+        "ok": false,
+        "ms": 30000,
+        "error": "HTTP 502"
+      }
+    ]
+  },
+  "db": {
+    "name": "Primary Database",
+    "region": "ap-southeast-1",
+    "compute": "Nano",
+    "checkedAt": "2026-11-23T11:22:02.730Z",
+    "cpu": 3,
+    "ram": 61,
+    "disk": 14,
+    "connections": 11,
+    "maxConnections": 60
+  },
+  "audit": {
+    "items": [
+      {
+        "id": 3,
+        "adminId": "00000000-0000-4000-8000-000000000000",
+        "action": "users.ban",
+        "target": "00000000-0000-4000-8000-000000000007",
+        "detail": {
+          "reason": "Đăng đề rác"
+        },
+        "createdAt": "2026-11-09T08:12:00Z"
+      },
+      {
+        "id": 2,
+        "adminId": "00000000-0000-4000-8000-000000000000",
+        "action": "quota.set",
+        "target": "00000000-0000-4000-8000-000000000003",
+        "detail": {
+          "monthlyTokens": 500000
+        },
+        "createdAt": "2026-11-08T15:40:00Z"
+      },
+      {
+        "id": 1,
+        "adminId": "00000000-0000-4000-8000-000000000000",
+        "action": "users.unban",
+        "target": "00000000-0000-4000-8000-000000000009",
+        "detail": {},
+        "createdAt": "2026-11-05T10:02:00Z"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "perPage": 30
+  },
+  "payments": {
+    "page": 1,
+    "perPage": 20,
+    "total": 5,
+    "configured": true,
+    "revenue": {
+      "day": 10000,
+      "week": 60000,
+      "month": 60000,
+      "all": 110000,
+      "counts": {
+        "day": 1,
+        "week": 2,
+        "month": 2,
+        "all": 3
+      },
+      "paidCount": 3,
+      "prev": {
+        "day": {
+          "vnd": 5000,
+          "count": 1
+        },
+        "week": {
+          "vnd": 40000,
+          "count": 2
+        },
+        "month": {
+          "vnd": 0,
+          "count": 0
+        }
+      },
+      "months": [
+        {
+          "month": "2026-11",
+          "vnd": 60000,
+          "count": 2
+        },
+        {
+          "month": "2026-10",
+          "vnd": 50000,
+          "count": 1
+        }
+      ]
+    },
+    "items": [
+      {
+        "orderCode": 100007,
+        "userId": "u1",
+        "email": "giaovien1@example.com",
+        "vnd": 10000,
+        "points": 275,
+        "bonusPoints": 25,
+        "status": "paid",
+        "reference": "FT26322123456",
+        "createdAt": "2026-11-18T07:10:00Z",
+        "paidAt": "2026-11-18T07:11:30Z",
+        "attention": false
+      },
+      {
+        "orderCode": 100006,
+        "userId": "u2",
+        "email": "giaovien2@example.com",
+        "vnd": 5000,
+        "points": 131,
+        "bonusPoints": 6,
+        "status": "pending",
+        "reference": "THIEU 3000d/5000d FT26322999",
+        "createdAt": "2026-11-18T06:40:00Z",
+        "paidAt": null,
+        "attention": true
+      },
+      {
+        "orderCode": 100005,
+        "userId": "u3",
+        "email": "giaovien3@example.com",
+        "vnd": 20000,
+        "points": 575,
+        "bonusPoints": 75,
+        "status": "pending",
+        "reference": null,
+        "createdAt": "2026-11-18T05:00:00Z",
+        "paidAt": null,
+        "attention": true
+      },
+      {
+        "orderCode": 100004,
+        "userId": "u1",
+        "email": "giaovien1@example.com",
+        "vnd": 2000,
+        "points": 50,
+        "bonusPoints": 0,
+        "status": "expired",
+        "reference": null,
+        "createdAt": "2026-11-17T12:00:00Z",
+        "paidAt": null,
+        "attention": false
+      },
+      {
+        "orderCode": 100003,
+        "userId": "u4",
+        "email": "giaovien4@example.com",
+        "vnd": 50000,
+        "points": 1500,
+        "bonusPoints": 250,
+        "status": "paid",
+        "reference": "TAY sao kê FT2632100001",
+        "createdAt": "2026-11-16T09:00:00Z",
+        "paidAt": "2026-11-16T10:00:00Z",
+        "attention": false
+      }
+    ]
+  },
+  "stats": {
+    "7": {
+      "days": 7,
+      "totalUsers": 148,
+      "active7d": 46,
+      "active30d": 92,
+      "onlineCount": 4,
+      "chartDays": [
+        {
+          "day": "2026-11-17",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-18",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-19",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-20",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-21",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-22",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-23",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        }
+      ],
+      "daily": [
+        {
+          "day": "2026-11-17",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-18",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-19",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-20",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-21",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-22",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-23",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        }
+      ]
+    },
+    "30": {
+      "days": 30,
+      "totalUsers": 148,
+      "active7d": 46,
+      "active30d": 92,
+      "onlineCount": 4,
+      "chartDays": [
+        {
+          "day": "2026-10-25",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-26",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-27",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-28",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-29",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-30",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-31",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-01",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-02",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-03",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-04",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-05",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-06",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-07",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-08",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-09",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-10",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-11",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-12",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-13",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-14",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-15",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-16",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-17",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-18",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-19",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-20",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-21",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-22",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-23",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        }
+      ],
+      "daily": [
+        {
+          "day": "2026-10-25",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-26",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-27",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-28",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-29",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-30",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-31",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-01",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-02",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-03",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-04",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-05",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-06",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-07",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-08",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-09",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-10",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-11",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-12",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-13",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-14",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-15",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-16",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-17",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-18",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-19",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-20",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-21",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-22",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-23",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        }
+      ]
+    },
+    "90": {
+      "days": 90,
+      "totalUsers": 148,
+      "active7d": 46,
+      "active30d": 92,
+      "onlineCount": 4,
+      "chartDays": [
+        {
+          "day": "2026-08-26",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-08-27",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-08-28",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-08-29",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-08-30",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-08-31",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-01",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-02",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-03",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-04",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-05",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-06",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-07",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-08",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-09",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-10",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-11",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-12",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-13",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-14",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-15",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-16",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-17",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-18",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-19",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-20",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-21",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-22",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-23",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-24",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-25",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-26",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-27",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-28",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-29",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-30",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-01",
+          "newUsers": 1,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-02",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-03",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-04",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-05",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-06",
+          "newUsers": 8,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-07",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-08",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-09",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-10",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-11",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-12",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-13",
+          "newUsers": 1,
+          "newDocs": 9,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-14",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-15",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-16",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-17",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-18",
+          "newUsers": 8,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-19",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-20",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-21",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-22",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-23",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-24",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-25",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-26",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-27",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-28",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-29",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-30",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-31",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-01",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-02",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-03",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-04",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-05",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-06",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-07",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-08",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-09",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-10",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-11",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-12",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-13",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-14",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-15",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-16",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-17",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-18",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-19",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-20",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-21",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-22",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-23",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        }
+      ],
+      "daily": [
+        {
+          "day": "2026-08-26",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-08-27",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-08-28",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-08-29",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-08-30",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-08-31",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-01",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-02",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-03",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-04",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-05",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-06",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-07",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-08",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-09",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-10",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-11",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-12",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-13",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-14",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-15",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-16",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-17",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-18",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-19",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-20",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-21",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-22",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-23",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-24",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-25",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-26",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-09-27",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-28",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-09-29",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-09-30",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-01",
+          "newUsers": 1,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-02",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-03",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-04",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-05",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-06",
+          "newUsers": 8,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-07",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-08",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-09",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-10",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-11",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-12",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-13",
+          "newUsers": 1,
+          "newDocs": 9,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-14",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-15",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-16",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-17",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-18",
+          "newUsers": 8,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-19",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-20",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-21",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-22",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-23",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-24",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-25",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-26",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-27",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-28",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-10-29",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-10-30",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-10-31",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-01",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-02",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-03",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-04",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-05",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-06",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-07",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-08",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-09",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-10",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 2,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-11",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-12",
+          "newUsers": 6,
+          "newDocs": 12,
+          "newDecks": 1,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-13",
+          "newUsers": 1,
+          "newDocs": 3,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-14",
+          "newUsers": 2,
+          "newDocs": 6,
+          "newDecks": 0,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-15",
+          "newUsers": 5,
+          "newDocs": 9,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-16",
+          "newUsers": 4,
+          "newDocs": 12,
+          "newDecks": 4,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-17",
+          "newUsers": 5,
+          "newDocs": 3,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-18",
+          "newUsers": 6,
+          "newDocs": 6,
+          "newDecks": 3,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-19",
+          "newUsers": 3,
+          "newDocs": 9,
+          "newDecks": 1,
+          "newCommunityExams": 2
+        },
+        {
+          "day": "2026-11-20",
+          "newUsers": 2,
+          "newDocs": 12,
+          "newDecks": 2,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-21",
+          "newUsers": 3,
+          "newDocs": 3,
+          "newDecks": 5,
+          "newCommunityExams": 0
+        },
+        {
+          "day": "2026-11-22",
+          "newUsers": 4,
+          "newDocs": 6,
+          "newDecks": 1,
+          "newCommunityExams": 1
+        },
+        {
+          "day": "2026-11-23",
+          "newUsers": 7,
+          "newDocs": 9,
+          "newDecks": 4,
+          "newCommunityExams": 0
+        }
+      ]
+    }
+  },
+  "online": {
+    "onlineCount": 4,
+    "emails": [
+      "giaovien1@example.com",
+      "giaovien2@example.com",
+      "giaovien5@example.com",
+      "chu-app@example.com"
+    ],
+    "users": [
+      {
+        "userId": "00000000-0000-4000-8000-000000000001",
+        "email": "giaovien1@example.com",
+        "lastSeen": "2026-11-23T11:21:37.731Z"
+      },
+      {
+        "userId": "00000000-0000-4000-8000-000000000002",
+        "email": "giaovien2@example.com",
+        "lastSeen": "2026-11-23T11:21:07.731Z"
+      },
+      {
+        "userId": "00000000-0000-4000-8000-000000000005",
+        "email": "giaovien5@example.com",
+        "lastSeen": "2026-11-23T11:20:37.731Z"
+      },
+      {
+        "userId": "00000000-0000-4000-8000-000000000000",
+        "email": "chu-app@example.com",
+        "lastSeen": "2026-11-23T11:20:12.731Z"
+      }
+    ]
+  }
+}

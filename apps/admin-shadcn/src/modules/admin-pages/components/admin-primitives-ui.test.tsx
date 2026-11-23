@@ -1,12 +1,67 @@
 import { Portal } from '@admin-overlays-engine'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Dialog, DialogContent, DialogTitle } from '@workspace/ui/components/dialog'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { AdminModal } from '@/modules/admin-pages/components/admin-primitives-ui'
+import { AdminDrawer, AdminModal } from '@/modules/admin-pages/components/admin-primitives-ui'
 
 describe('admin nested Escape layers', () => {
+  it.each(['drawer', 'modal'])(
+    'keeps the %s open when Escape dismisses an unfocused sibling dialog',
+    async (kind) => {
+      const close = vi.fn()
+      function Surface() {
+        const [open, setOpen] = useState(false)
+        const [child, setChild] = useState(false)
+        const parentProps = {
+          onClose: () => {
+            close()
+            setOpen(false)
+          },
+          children: <button onClick={() => setChild(true)}>Open confirmation</button>,
+        }
+        return (
+          <>
+            <button onClick={() => setOpen(true)}>Open parent</button>
+            {open &&
+              (kind === 'drawer' ? (
+                <AdminDrawer aria-label="Parent" {...parentProps} />
+              ) : (
+                <AdminModal title="Parent" {...parentProps} />
+              ))}
+            <Dialog open={child} onOpenChange={setChild}>
+              <DialogContent>
+                <DialogTitle>Confirmation</DialogTitle>
+                <button onClick={() => setChild(false)}>Close confirmation</button>
+              </DialogContent>
+            </Dialog>
+          </>
+        )
+      }
+      const user = userEvent.setup()
+      render(<Surface />)
+      await user.click(screen.getByText('Open parent'))
+      await user.click(screen.getByText('Open confirmation'))
+      await waitFor(() =>
+        expect(screen.getByRole('dialog', { name: 'Confirmation' })).toBeVisible(),
+      )
+      ;(document.activeElement as HTMLElement).blur()
+      fireEvent.keyDown(document.body, { key: 'Escape' })
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'Confirmation' })).not.toBeInTheDocument(),
+      )
+      expect(close).not.toHaveBeenCalled()
+      await user.click(screen.getByText('Open confirmation'))
+      await user.click(screen.getByText('Close confirmation'))
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'Confirmation' })).not.toBeInTheDocument(),
+      )
+      await user.keyboard('{Escape}')
+      await waitFor(() => expect(close).toHaveBeenCalledOnce())
+    },
+  )
   it('closes only the upper portal before allowing the parent dialog to close', async () => {
     const close = vi.fn()
     function Surface() {

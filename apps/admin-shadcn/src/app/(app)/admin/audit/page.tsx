@@ -1,3 +1,10 @@
-import { WorkspaceContainer } from '@/modules/shell'
+import { Suspense } from 'react'
 
-export default WorkspaceContainer
+import { AdminContainer } from '@/modules/admin-pages'
+export default function AdminAuditPage() {
+  return (
+    <Suspense>
+      <AdminContainer section="audit" />
+    </Suspense>
+  )
+}

@@ -10,6 +10,10 @@ import {
   ContentPanelContainer,
   OverviewPanelContainer,
   UsersPanelContainer,
+  StatsPanelContainer,
+  PaymentsPanelContainer,
+  OpsPanelContainer,
+  AuditPanelContainer,
 } from '@/modules/admin-pages/containers'
 
 import type { useAdminContainer } from '@/modules/admin-pages/hooks/use-admin-container'
@@ -20,6 +24,10 @@ export function AdminUi({ me, section }: ReturnType<typeof useAdminContainer>) {
     users: translate('adminPagesCopy.users'),
     content: translate('adminPagesCopy.content'),
     bank: translate('adminPagesCopy.bank'),
+    stats: translate('adminOpsCopy.stats'),
+    payments: translate('adminOpsCopy.payments'),
+    ai: translate('adminOpsCopy.ai'),
+    audit: translate('adminOpsCopy.audit'),
   }[section]
   return (
     <div className="w-full max-w-full overflow-x-clip">
@@ -60,8 +68,16 @@ export function AdminUi({ me, section }: ReturnType<typeof useAdminContainer>) {
               <UsersPanelContainer me={me} />
             ) : section === 'content' ? (
               <ContentPanelContainer me={me} />
-            ) : (
+            ) : section === 'bank' ? (
               <BankPanelContainer me={me} />
+            ) : section === 'stats' ? (
+              <StatsPanelContainer me={me} />
+            ) : section === 'payments' ? (
+              <PaymentsPanelContainer />
+            ) : section === 'ai' ? (
+              <OpsPanelContainer me={me} />
+            ) : (
+              <AuditPanelContainer />
             )}
           </div>
         </section>
