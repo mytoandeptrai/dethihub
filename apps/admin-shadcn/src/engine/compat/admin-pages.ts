@@ -2,6 +2,7 @@ export {useNavigate,Link,Navigate,useParams,useLocation,useSearchParams} from '.
 export {PortalContainerContext} from '@/engine/components/Portal'
 export {listUsers as lib_adminApi_listUsers} from '@/engine/lib/adminApi'
 export {getAiStats as lib_adminApi_getAiStats} from '@/engine/lib/adminApi'
+export {clearAdminCache} from '@/engine/lib/adminApi'
 export {listContentExams as lib_adminContentApi_listContentExams} from '@/engine/lib/adminContentApi'
 export {listContentReports as lib_adminContentApi_listContentReports} from '@/engine/lib/adminContentApi'
 export {loadFullBank as data_bank_loadFullBank} from '@/engine/data/bank'

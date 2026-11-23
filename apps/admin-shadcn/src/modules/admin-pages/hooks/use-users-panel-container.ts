@@ -64,10 +64,9 @@ export function useUsersPanelContainer({ me: _me }: UsersPanelProps) {
       })
       setUsers(res.users)
       setTotal(res.total)
-      if (selectedUser) {
-        const updated = res.users.find((u) => u.id === selectedUser.id)
-        if (updated) setSelectedUser(updated)
-      }
+      setSelectedUser((current) =>
+        current ? (res.users.find((user) => user.id === current.id) ?? current) : null,
+      )
     } catch (error: unknown) {
       console.error(translate('adminPagesCopy.m18'), error)
       const msg = error instanceof Error ? error.message : translate('adminPagesCopy.m19')
@@ -75,7 +74,7 @@ export function useUsersPanelContainer({ me: _me }: UsersPanelProps) {
     } finally {
       setLoading(false)
     }
-  }, [debouncedSearch, page, selectedUser, listUsers])
+  }, [debouncedSearch, page, listUsers])
   useEffect(() => {
     void loadUsers()
   }, [debouncedSearch, page, loadUsers])
