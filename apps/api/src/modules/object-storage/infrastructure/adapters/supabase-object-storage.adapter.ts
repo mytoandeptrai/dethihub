@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import type {
   ObjectStoragePort,
   StoredObject,
-} from '@/modules/object-storage/application/ports/object-storage.port'
+} from '@/shared-kernel/application/ports/object-storage.port'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const isNotFound = (error: { message?: string; statusCode?: string; status?: number }): boolean =>

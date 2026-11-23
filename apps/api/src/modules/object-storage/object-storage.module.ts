@@ -1,14 +1,15 @@
 import { S3Client } from '@aws-sdk/client-s3'
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { createClient } from '@supabase/supabase-js'
 
-import { OBJECT_STORAGE } from '@/modules/object-storage/application/ports/object-storage.port'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { R2ObjectStorageAdapter } from '@/modules/object-storage/infrastructure/adapters/r2-object-storage.adapter'
 import { SupabaseObjectStorageAdapter } from '@/modules/object-storage/infrastructure/adapters/supabase-object-storage.adapter'
 
 import type { Env } from '@/app/config/env.schema'
 
+@Global() // @global-approved: storage, media and ops consume the shared object storage port
 @Module({
   providers: [
     {

@@ -9,7 +9,7 @@ import {
 import type {
   ObjectStoragePort,
   StoredObject,
-} from '@/modules/object-storage/application/ports/object-storage.port'
+} from '@/shared-kernel/application/ports/object-storage.port'
 import type { S3Client } from '@aws-sdk/client-s3'
 import type { Readable } from 'node:stream'
 

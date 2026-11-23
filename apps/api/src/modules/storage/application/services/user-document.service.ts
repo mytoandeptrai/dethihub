@@ -1,11 +1,11 @@
 import { BadGatewayException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 
-import { OBJECT_STORAGE } from '@/modules/object-storage/application/ports/object-storage.port'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { USER_DOCUMENT_REPOSITORY } from '@/modules/storage/application/ports/user-document.repository.port'
 import { documentKeyFromUrl } from '@/modules/storage/domain/policies/file-key.policy'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
-import type { ObjectStoragePort } from '@/modules/object-storage/application/ports/object-storage.port'
+import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 import type {
   StorageUsage,
   UserDocumentRecord,

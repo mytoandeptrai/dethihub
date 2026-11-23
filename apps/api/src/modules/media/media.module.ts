@@ -10,10 +10,8 @@ import { SourceVisionService } from '@/modules/media/application/services/source
 import { FileExtractorAdapter } from '@/modules/media/infrastructure/adapters/file-extractor.adapter'
 import { ImageGeneratorAdapter } from '@/modules/media/infrastructure/adapters/image-generator.adapter'
 import { MediaController } from '@/modules/media/presentation/controllers/media.controller'
-import { ObjectStorageModule } from '@/modules/object-storage/object-storage.module'
 
 @Module({
-  imports: [ObjectStorageModule],
   controllers: [MediaController],
   providers: [
     FileExtractService,

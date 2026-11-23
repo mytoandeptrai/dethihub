@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { DEFAULT_PRICING } from '@workspace/core'
 
-import { AppSettingsService } from '@/modules/app-settings/application/services/app-settings.service'
+import { APP_SETTINGS_READER } from '@/shared-kernel/application/ports/app-settings-reader.port'
 
+import type { AppSettingsReaderPort } from '@/shared-kernel/application/ports/app-settings-reader.port'
 import type { PricingConfig } from '@workspace/core'
 
 @Injectable()
 export class PricingService {
-  constructor(private readonly settings: AppSettingsService) {}
+  constructor(@Inject(APP_SETTINGS_READER) private readonly settings: AppSettingsReaderPort) {}
 
   /** The stored price list; a missing or malformed one falls back to the defaults */
   async get(): Promise<PricingConfig> {

@@ -35,6 +35,7 @@ import { FeedbackModule } from '@/modules/feedback/feedback.module'
 import { HealthModule } from '@/modules/health/health.module'
 import { MediaModule } from '@/modules/media/media.module'
 import { OpsModule } from '@/modules/ops/ops.module'
+import { ObjectStorageModule } from '@/modules/object-storage/object-storage.module'
 import { StorageModule } from '@/modules/storage/storage.module'
 import { WorkspaceModule } from '@/modules/workspace/workspace.module'
 
@@ -88,6 +89,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     }),
     HealthModule, // health check module
     CacheModule, // Redis cache
+    ObjectStorageModule,
     AccessControlModule, // authentication, platform roles, security strikes
     AppSettingsModule, // app settings and maintenance mode
     AiModule, // AI quota, credits, chat

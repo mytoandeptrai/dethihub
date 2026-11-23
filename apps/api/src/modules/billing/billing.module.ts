@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common'
 
-import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { UserDeletionListener } from '@/modules/billing/application/listeners/user-deletion.listener'
 import { PAYMENT_ADMIN_REPOSITORY } from '@/modules/billing/application/ports/payment-admin.repository.port'
 import { PAYMENT_ORDER_REPOSITORY } from '@/modules/billing/application/ports/payment-order.repository.port'
@@ -18,7 +17,6 @@ import { BillingController } from '@/modules/billing/presentation/controllers/bi
 import { PaymentAdminController } from '@/modules/billing/presentation/controllers/payment-admin.controller'
 
 @Module({
-  imports: [AppSettingsModule],
   controllers: [BillingController, PaymentAdminController],
   providers: [
     UserDeletionListener,

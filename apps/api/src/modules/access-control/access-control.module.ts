@@ -13,6 +13,7 @@ import { PlatformRoleService } from '@/modules/access-control/application/servic
 import { RoleAuthorizationService } from '@/modules/access-control/application/services/role-authorization.service'
 import { SecurityStrikeService } from '@/modules/access-control/application/services/security-strike.service'
 import { AdminAuditAdapter } from '@/modules/access-control/infrastructure/adapters/admin-audit.adapter'
+import { PlatformRoleLookupAdapter } from '@/modules/access-control/infrastructure/adapters/platform-role-lookup.adapter'
 import { JoseTokenVerifierAdapter } from '@/modules/access-control/infrastructure/adapters/jose-token-verifier.adapter'
 import { SupabaseUserProfileLookupAdapter } from '@/modules/access-control/infrastructure/adapters/supabase-user-profile-lookup.adapter'
 import { SupabaseAuthAdminAdapter } from '@/modules/access-control/infrastructure/adapters/supabase-auth-admin.adapter'
@@ -26,6 +27,7 @@ import { PresenceRepositoryImpl } from '@/modules/access-control/infrastructure/
 import { PRESENCE_REPOSITORY } from '@/modules/access-control/application/ports/presence.repository.port'
 import { MeController } from '@/modules/access-control/presentation/controllers/me.controller'
 import { ADMIN_AUDIT } from '@/shared-kernel/application/ports/admin-audit.port'
+import { PLATFORM_ROLE_LOOKUP } from '@/shared-kernel/application/ports/platform-role-lookup.port'
 import { USER_PROFILE_LOOKUP } from '@/shared-kernel/application/ports/user-profile-lookup.port'
 import { USER_DATA_REPOSITORY } from '@/modules/access-control/application/ports/user-data.repository.port'
 import { UserDeletionListener } from '@/modules/access-control/application/listeners/user-deletion.listener'
@@ -39,6 +41,7 @@ import { UserDataRepositoryImpl } from '@/modules/access-control/infrastructure/
     { provide: USER_DATA_REPOSITORY, useClass: UserDataRepositoryImpl },
     AuthenticationService,
     PlatformRoleService,
+    { provide: PLATFORM_ROLE_LOOKUP, useClass: PlatformRoleLookupAdapter },
     RoleAuthorizationService,
     SecurityStrikeService,
     AdminUserService,
@@ -55,6 +58,7 @@ import { UserDataRepositoryImpl } from '@/modules/access-control/infrastructure/
     { provide: ADMIN_AUDIT, useClass: AdminAuditAdapter },
   ],
   exports: [
+    PLATFORM_ROLE_LOOKUP,
     AuthenticationService,
     PlatformRoleService,
     RoleAuthorizationService,
