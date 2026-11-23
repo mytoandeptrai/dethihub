@@ -1,3 +1,3 @@
-import { WorkspaceContainer } from '@/modules/shell'
+import { MyDocsContainer } from '@/modules/workspace'
 
-export default WorkspaceContainer
+export default MyDocsContainer

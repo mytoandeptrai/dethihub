@@ -37,6 +37,7 @@ const nextConfig: NextConfig = {
       '@engine-dialogs': './src/engine/compat/dialogs.ts',
       '@engine-designs': './src/engine/compat/designs.ts',
       '@engine-navigation': './src/engine/compat/navigation.ts',
+      '@workspace-engine': './src/engine/compat/workspace.ts',
     },
   },
   headers() {

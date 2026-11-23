@@ -8,6 +8,7 @@
       "@engine-dialogs": ["./.engine-types/engine/compat/dialogs.d.ts"],
       "@engine-designs": ["./.engine-types/engine/compat/designs.d.ts"],
       "@engine-navigation": ["./.engine-types/engine/compat/navigation.d.ts"],
+      "@workspace-engine": ["./.engine-types/engine/compat/workspace.d.ts"],
       "@/*": [
         "./src/*"
       ],

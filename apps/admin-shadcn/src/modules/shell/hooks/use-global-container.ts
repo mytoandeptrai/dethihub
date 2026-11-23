@@ -1,6 +1,7 @@
 'use client'
 
 import { dialog, useDialogs } from '@engine-dialogs'
+import { startSync, lib_auth_currentSession as currentSession } from '@workspace-engine'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -27,6 +28,25 @@ export function usePresenceHeartbeat(userId?: string) {
   }, [userId])
 }
 
+export function useWorkspaceSync(userId?: string) {
+  useEffect(() => {
+    if (!userId) return
+    let disposed = false
+    let stop: (() => void) | undefined
+    void currentSession()
+      .then((session) => (!disposed && session?.user.id === userId ? startSync() : undefined))
+      .then((dispose) => {
+        if (disposed) dispose?.()
+        else stop = dispose
+      })
+      .catch(() => {})
+    return () => {
+      disposed = true
+      stop?.()
+    }
+  }, [userId])
+}
+
 export function useGlobalContainer() {
   const pathname = usePathname()
   const router = useRouter()
@@ -46,6 +66,7 @@ export function useGlobalContainer() {
   const [dismissed, setDismissed] = useState(true)
   const [page, setPage] = useState(0)
   usePresenceHeartbeat(session?.user.id)
+  useWorkspaceSync(session?.user.id)
   useEffect(() => {
     if (pathname !== appPaths.editor.href || blocked)
       document.documentElement.dataset.productShell = ''

@@ -1,7 +1,9 @@
 import publicCopy from './public-copy'
+import workspaceCopy from './workspace-copy'
 
 const messages = {
   publicCopy,
+  workspaceCopy,
   product: {
     studentPlay: 'Bài kiểm tra trực tuyến',
     studentQuiz: 'Làm đề',
