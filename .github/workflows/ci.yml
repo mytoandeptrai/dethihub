@@ -96,11 +96,13 @@ jobs:
         run: pnpm --filter @workspace/database db:migrate:deploy
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          DIRECT_URL: postgres://postgres:postgres@localhost:5432/postgres
 
       - name: Run E2E tests
         working-directory: apps/api
         run: pnpm test:e2e
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          DIRECT_URL: postgres://postgres:postgres@localhost:5432/postgres
           JWT_SECRET: test-secret-key-min-32-chars-for-ci
           REDIS_URL: redis://localhost:6379
