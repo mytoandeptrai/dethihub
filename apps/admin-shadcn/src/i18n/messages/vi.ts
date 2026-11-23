@@ -1,3 +1,4 @@
+import adminPagesCopy from './admin-pages-copy'
 import profileCopy from './profile-copy'
 import libraryCopy from './library-copy'
 import communityCopy from './community-copy'
@@ -12,6 +13,7 @@ const messages = {
   onlineExamsCopy,
   studentCopy,
   profileCopy,
+  adminPagesCopy,
   libraryCopy,
   communityCopy,
   product: {

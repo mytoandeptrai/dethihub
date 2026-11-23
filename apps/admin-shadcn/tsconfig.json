@@ -12,6 +12,8 @@
       "@online-exams-engine": ["./.engine-types/engine/compat/online-exams.d.ts"],
       "@student-engine": ["./.engine-types/engine/compat/student-exams.d.ts"],
       "@profile-engine": ["./.engine-types/engine/compat/profile.d.ts"],
+      "@admin-pages-engine": ["./.engine-types/engine/compat/admin-pages.d.ts"],
+      "@admin-overlays-engine": ["./.engine-types/engine/compat/admin-overlays.d.ts"],
       "@library-engine": ["./.engine-types/engine/compat/library.d.ts"],
       "@community-engine": ["./.engine-types/engine/compat/community.d.ts"],
       "@product-ui-engine": ["./.engine-types/engine/compat/product-ui.d.ts"],

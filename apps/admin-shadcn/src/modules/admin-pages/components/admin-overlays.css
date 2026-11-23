@@ -1,0 +1,25 @@
+[data-slot='dialog-overlay']:has(~ [data-admin-modal]),
+[data-slot='dialog-overlay']:has(~ [data-admin-drawer]) {
+  background: color-mix(in oklab, var(--color-ink) 40%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+[data-slot='dialog-overlay']:has(~ [data-admin-modal]) {
+  z-index: 210;
+}
+
+[data-slot='dialog-overlay']:has(~ [data-admin-drawer]) {
+  z-index: 190;
+}
+
+body:has([data-admin-drawer], [data-admin-modal])
+  [data-slot='dialog-content']:not([data-admin-modal], [data-admin-drawer]) {
+  z-index: 300;
+}
+
+body:has([data-admin-drawer], [data-admin-modal])
+  [data-slot='dialog-overlay']:has(
+    ~ [data-slot='dialog-content']:not([data-admin-modal], [data-admin-drawer])
+  ) {
+  z-index: 290;
+}

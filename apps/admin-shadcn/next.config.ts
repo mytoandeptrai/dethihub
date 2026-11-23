@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
       '@online-exams-engine': './src/engine/compat/online-exams.ts',
       '@student-engine': './src/engine/compat/student-exams.ts',
       '@profile-engine': './src/engine/compat/profile.ts',
+      '@admin-pages-engine': './src/engine/compat/admin-pages.ts',
+      '@admin-overlays-engine': './src/engine/compat/admin-overlays.ts',
       '@library-engine': './src/engine/compat/library.ts',
       '@community-engine': './src/engine/compat/community.ts',
       '@product-ui-engine': './src/engine/compat/product-ui.ts',

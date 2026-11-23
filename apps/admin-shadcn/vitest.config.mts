@@ -20,6 +20,8 @@ const sharedConfig = {
       '@online-exams-engine': fileURLToPath(new URL('./src/engine/compat/online-exams.ts', import.meta.url)),
       '@student-engine': fileURLToPath(new URL('./src/engine/compat/student-exams.ts', import.meta.url)),
       '@profile-engine': fileURLToPath(new URL('./src/engine/compat/profile.ts', import.meta.url)),
+      '@admin-pages-engine': fileURLToPath(new URL('./src/engine/compat/admin-pages.ts', import.meta.url)),
+      '@admin-overlays-engine': fileURLToPath(new URL('./src/engine/compat/admin-overlays.ts', import.meta.url)),
       '@library-engine': fileURLToPath(new URL('./src/engine/compat/library.ts', import.meta.url)),
       '@community-engine': fileURLToPath(new URL('./src/engine/compat/community.ts', import.meta.url)),
       '@product-ui-engine': fileURLToPath(new URL('./src/engine/compat/product-ui.ts', import.meta.url)),
