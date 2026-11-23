@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import { Injectable } from '@nestjs/common'
-import { Prisma, type LoginStatus } from '@workspace/database'
+import type { Prisma, LoginStatus } from '@workspace/database'
 
 import { PrismaService } from '@/app/database/prisma.service'
 
