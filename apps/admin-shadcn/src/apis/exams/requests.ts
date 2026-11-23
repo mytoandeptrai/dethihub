@@ -33,7 +33,7 @@ export async function communityExamSubmit(options: Types.CommunityExamSubmitInpu
 }
 
 export async function myExamList(options: Types.MyExamListInput) {
-  const { data } = await apiClient.GET('/api/me/exams', options)
+  const { data } = await apiClient.GET('/api/me/exams', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -43,12 +43,12 @@ export async function myExamPublish(options: Types.MyExamPublishInput) {
 }
 
 export async function myExamCount(options: Types.MyExamCountInput) {
-  const { data } = await apiClient.GET('/api/me/exams/count', options)
+  const { data } = await apiClient.GET('/api/me/exams/count', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function myExamAttemptsOf(options: Types.MyExamAttemptsOfInput) {
-  const { data } = await apiClient.GET('/api/me/exams/attempts', options)
+  const { data } = await apiClient.GET('/api/me/exams/attempts', { ...options, cache: 'no-store' })
   return data!
 }
 

@@ -31,7 +31,9 @@ function titleOf(name: string): string {
 
 export async function readImportFile(file: File, marks = false): Promise<ImportedFile> {
   if (file.size > MAX_BYTES) throw new Error('Tệp quá lớn (tối đa 12 MB).')
-  const payload = await extractAttachment(file, marks)
+  const payload = /\.(?:txt|md)$/i.test(file.name)
+    ? { text: await file.text(), kind: 'text' }
+    : await extractAttachment(file, marks)
   if (payload.kind === 'unsupported') {
     throw new Error(payload.warning ?? 'Chưa đọc được định dạng này.')
   }

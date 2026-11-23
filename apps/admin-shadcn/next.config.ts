@@ -38,6 +38,8 @@ const nextConfig: NextConfig = {
       '@engine-designs': './src/engine/compat/designs.ts',
       '@engine-navigation': './src/engine/compat/navigation.ts',
       '@workspace-engine': './src/engine/compat/workspace.ts',
+      '@online-exams-engine': './src/engine/compat/online-exams.ts',
+      '@online-exams-kernel': './src/engine/compat/online-exams-kernel.ts',
     },
   },
   headers() {

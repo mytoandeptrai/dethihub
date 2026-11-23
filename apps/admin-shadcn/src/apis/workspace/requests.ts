@@ -9,7 +9,7 @@ export async function removeWorkspaceItems(kind: Types.WorkspaceItemRemoveInput[
 }
 
 export async function workspaceItemList(options: Types.WorkspaceItemListInput) {
-  const { data } = await apiClient.GET('/api/workspace/items', options)
+  const { data } = await apiClient.GET('/api/workspace/items', { ...options, cache: 'no-store' })
   return data!
 }
 

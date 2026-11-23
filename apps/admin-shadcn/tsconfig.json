@@ -9,6 +9,8 @@
       "@engine-designs": ["./.engine-types/engine/compat/designs.d.ts"],
       "@engine-navigation": ["./.engine-types/engine/compat/navigation.d.ts"],
       "@workspace-engine": ["./.engine-types/engine/compat/workspace.d.ts"],
+      "@online-exams-engine": ["./.engine-types/engine/compat/online-exams.d.ts"],
+      "@online-exams-kernel": ["./.engine-types/engine/compat/online-exams-kernel.d.ts"],
       "@/*": [
         "./src/*"
       ],

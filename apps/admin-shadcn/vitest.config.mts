@@ -17,6 +17,8 @@ const sharedConfig = {
       '@engine-designs': fileURLToPath(new URL('./src/engine/compat/designs.ts', import.meta.url)),
       '@engine-navigation': fileURLToPath(new URL('./src/engine/compat/navigation.ts', import.meta.url)),
       '@workspace-engine': fileURLToPath(new URL('./src/engine/compat/workspace.ts', import.meta.url)),
+      '@online-exams-engine': fileURLToPath(new URL('./src/engine/compat/online-exams.ts', import.meta.url)),
+      '@online-exams-kernel': fileURLToPath(new URL('./src/engine/compat/online-exams-kernel.ts', import.meta.url)),
     },
   },
 }
