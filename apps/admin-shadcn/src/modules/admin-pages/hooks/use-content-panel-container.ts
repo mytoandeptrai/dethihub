@@ -99,10 +99,9 @@ export function useExamsTabContainer({ me }: { me: AdminMe }) {
       })
       setExams(res.exams)
       setTotal(res.total)
-      if (selectedExam) {
-        const found = res.exams.find((e) => e.id === selectedExam.id)
-        if (found) setSelectedExam(found)
-      }
+      setSelectedExam((current) =>
+        current ? (res.exams.find((exam) => exam.id === current.id) ?? current) : null,
+      )
     } catch (error: unknown) {
       console.error(translate('adminPagesCopy.m166'), error)
       const msg = error instanceof Error ? error.message : translate('adminPagesCopy.m167')
@@ -110,7 +109,7 @@ export function useExamsTabContainer({ me }: { me: AdminMe }) {
     } finally {
       setLoading(false)
     }
-  }, [debouncedSearch, statusFilter, subjectFilter, page, selectedExam, listContentExams])
+  }, [debouncedSearch, statusFilter, subjectFilter, page, listContentExams])
   useEffect(() => {
     void loadExams()
   }, [debouncedSearch, statusFilter, subjectFilter, page, loadExams])

@@ -167,6 +167,17 @@ describe('scoped admin typed API fixtures', () => {
       expect(result.current.exams.every((exam) => exam.status === 'hidden')).toBe(true),
     )
   })
+  it('refreshes selected exam data without changing the refresh callback', async () => {
+    const { result } = renderHook(() => useExamsTabContainer({ me: staff }), { wrapper })
+    await waitFor(() => expect(result.current.exams).toHaveLength(8))
+    const refresh = result.current.loadExams
+    act(() => result.current.setSelectedExam(result.current.exams[0]!))
+    fixture.data.exams[0]!.title = 'Updated fixture title'
+    clearAdminCache()
+    await act(() => result.current.loadExams())
+    expect(result.current.selectedExam?.title).toBe('Updated fixture title')
+    expect(result.current.loadExams).toBe(refresh)
+  })
   it('updates exam status and deletes the fixture exam', async () => {
     const { result } = renderHook(() => useAdminRequests(), { wrapper }),
       id = demo.exams[0]!.id

@@ -764,7 +764,11 @@ export function UsersPanelGrantCreditsModalUi(
       handleGrant,
     } = props
     return (
-      <AdminModal title={translate('adminPagesCopy.m105')} onClose={onClose} className="p-4 sm:p-6">
+      <AdminModal
+        title={translate('adminPagesCopy.m105')}
+        onClose={onClose}
+        className="max-w-[calc(100vw-2rem)] p-4 sm:max-w-lg sm:p-6"
+      >
         <div className="border-line flex items-center justify-between border-b pb-3">
           <div className="flex items-center gap-2">
             <Coins className="text-clay size-5" />
@@ -863,7 +867,14 @@ export function UsersPanelUserAvatarUi(
 ) {
   if (props.viewState === 0) {
     const { user, className } = props
-    return <Avatar src={user.avatar} name={user.name || user.email} className={className} />
+    return (
+      <Avatar
+        src={user.avatar}
+        name={user.name || user.email}
+        className={className}
+        fallbackClassName="bg-clay/10 text-clay"
+      />
+    )
   }
   return null
 }
