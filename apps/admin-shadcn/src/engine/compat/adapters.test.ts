@@ -101,6 +101,23 @@ describe('engine NestJS adapters', () => {
     expect(await adminRequest('users.list', { page: 2, perPage: 10 })).toMatchObject({ total: 1, page: 2, perPage: 10, users: [{ name: 'Cô An', avatar: '/avatar', flag: { strikes: 2, lastAt: '2026-01-01' } }] })
     await expect(adminRequest('users.ban', { userId: 'owner', hours: 24, reason: 'test' })).resolves.toEqual({ ok: true })
   })
+
+  it('reshapes the payment revenue into the totals, counts and prev the panel reads', async () => {
+    const slot = (vnd: number, count: number) => ({ vnd, count })
+    server.use(http.get(api + '/api/admin/payments', () => HttpResponse.json({
+      items: [], total: 0, configured: true,
+      revenue: { day: slot(10, 1), prevDay: slot(5, 2), week: slot(20, 3), prevWeek: slot(15, 4), month: slot(30, 5), prevMonth: slot(25, 6), all: slot(40, 7), months: [{ month: '2026-11', vnd: 30, count: 5 }] },
+    })))
+    expect(await adminRequest('payments.list', {})).toMatchObject({
+      items: [], page: 1,
+      revenue: {
+        day: 10, week: 20, month: 30, all: 40,
+        counts: { day: 1, week: 3, month: 5, all: 7 },
+        prev: { day: slot(5, 2), week: slot(15, 4), month: slot(25, 6) },
+        months: [{ month: '2026-11', vnd: 30, count: 5 }],
+      },
+    })
+  })
 })
 
 describe('workspace request contracts', () => {

@@ -56,7 +56,18 @@ export async function adminRequest(action: string, body: Record<string, unknown>
     case 'content.docs.delete': { const result = await api.storageAdminDeleteDocument({ params: { path: { id: String(body.docId) } } }); return { ...ok, r2Removed: result.fileRemoved } }
     case 'content.feedback.list': return page(await api.adminFeedbackList(query as Input.AdminFeedbackListInput), 'feedback')
     case 'content.feedback.markRead': await api.adminFeedbackMarkRead({ params: { path: { id: Number(body.feedbackId) } }, body: { read: Boolean(body.read) } }); return ok
-    case 'payments.list': return page(await api.paymentAdminList(query as Input.PaymentAdminListInput), 'items')
+    case 'payments.list': {
+      const result = await api.paymentAdminList(query as Input.PaymentAdminListInput)
+      const { day, week, month, all, prevDay, prevWeek, prevMonth, months } = result.revenue
+      const revenue = {
+        day: day.vnd, week: week.vnd, month: month.vnd, all: all.vnd,
+        counts: { day: day.count, week: week.count, month: month.count, all: all.count },
+        paidCount: all.count,
+        prev: { day: prevDay, week: prevWeek, month: prevMonth },
+        months,
+      }
+      return page({ ...result, revenue }, 'items')
+    }
     case 'payments.sync': return api.paymentAdminSync(order)
     case 'payments.credit': await api.paymentAdminCredit({ ...order, body: { note: String(body.note ?? '') } }); return ok
     case 'stats.overview': return api.adminOpsOverview(query as Input.AdminOpsOverviewInput)
