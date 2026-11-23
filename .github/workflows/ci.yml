@@ -89,8 +89,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build database package
-        run: pnpm --filter @workspace/database build
+      - name: Build API workspace dependencies
+        run: pnpm --filter @workspace/database --filter @workspace/core build
 
       - name: Apply Prisma migrations
         run: pnpm --filter @workspace/database db:migrate:deploy

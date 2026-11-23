@@ -28,6 +28,23 @@ pnpm --filter @workspace/database db:seed
 pnpm dev
 ```
 
+## API E2E prerequisites
+
+E2E tests boot the real `AppModule` with real PostgreSQL and Redis. Apply migrations to an isolated local database, then run from the repository root:
+
+```bash
+pnpm --filter @workspace/database --filter @workspace/core build
+
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres \
+DIRECT_URL=postgres://postgres:postgres@localhost:5432/postgres \
+REDIS_URL=redis://localhost:6379 \
+pnpm --filter api test:e2e
+```
+
+Only loopback database/cache URLs are accepted to prevent accidental writes to shared services. Fixture identities use a timestamp/UUID namespace; teardown removes their database rows and Redis keys. External HTTP is rejected except for an ephemeral loopback auth fixture serving JWKS and auth-directory reads. ES256 keys and the fixture service key are generated in memory. The production token verifier, auth adapters, guards, services and repositories are not replaced. No Supabase, R2, AI or Telegram secrets are needed, and no real user is created or modified. Object storage and AI operations are not exercised.
+
+The four legacy suites were excluded in `dad051a8deec597d061708a74d15d46f02624706`, the same change that unregistered `ArticleModule`, `OrderModule`, `AuthModule` and `IdentityModule` from `AppModule`. Their controller source remains as boilerplate, but `/api/articles/*`, `/api/orders/*`, `/api/auth/login` and `/api/users` are not active routes (also checked as 404s by the public E2E suite). Article/order suites are removed; auth and user-management suites now cover `/api/me` and `/api/admin/users`, including real JWT/JWKS verification, database roles/activity, empty lists, denial, validation and upstream failures. DTO validation intentionally remains 422; the public exam UUID pipe is covered as 400. No tests are excluded and zero selected tests remains a failure.
+
 ## Commands
 
 | Command          | Description                      |
