@@ -2,8 +2,8 @@ export const MAX_PDF_PAGES = 12
 export const PAGE_SIDE = 1600
 
 export async function renderPdfPages(file: File): Promise<{ pages: HTMLCanvasElement[]; total: number }> {
-  const [pdfjs, worker] = await Promise.all([import('pdfjs-dist'), import('pdfjs-dist/build/pdf.worker.min.mjs?url')])
-  pdfjs.GlobalWorkerOptions.workerSrc = worker.default
+  const pdfjs = await import('pdfjs-dist')
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
   const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) })
   try {
     const doc = await task.promise

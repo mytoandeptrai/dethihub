@@ -1,4 +1,4 @@
-import { matchPath } from 'react-router-dom'
+import { matchPath } from '@/engine/compat/router'
 import { BarChart3, BookOpen, ChartColumn, Cpu, FileText, Files, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Presentation, Upload, Users, Wallet } from 'lucide-react'
 
 export const WORKSPACE_NAV = [

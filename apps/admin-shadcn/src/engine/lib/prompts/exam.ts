@@ -2,10 +2,10 @@
  * Chữ prompt soạn đề — module thuần (không import client) để SERVER ghép system prompt từ `task: "soan-de"`.
  * Trình duyệt không còn giữ chữ này: client chỉ gửi dữ liệu người dùng (yêu cầu, tài liệu, nguồn), xem `buildExamSystem`.
  */
-import { DIFFICULTY_RULE } from '../difficulty.js'
-import { ASK_RULE, CHAT_MARKDOWN, THINK_VI } from './common.js'
-import { figureGuideFor } from './figureGuide.js'
-import { sourceSection, webSection, type SourceInput } from './sources.js'
+import { DIFFICULTY_RULE } from '../difficulty'
+import { ASK_RULE, CHAT_MARKDOWN, THINK_VI } from './common'
+import { figureGuideFor } from './figureGuide'
+import { sourceSection, webSection, type SourceInput } from './sources'
 
 /**
  * Phạm vi trả lời — áp cho cả hai chế độ. Web này là công cụ soạn đề/bài giảng;

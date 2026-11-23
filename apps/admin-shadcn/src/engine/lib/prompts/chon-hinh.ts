@@ -1,7 +1,7 @@
 /**
  * Chữ prompt chọn hình minh hoạ từ đề bài — module thuần để SERVER ghép từ `task: "chon-hinh"`.
  */
-import { FIGURE_GUIDE } from './figureGuide.js'
+import { FIGURE_GUIDE } from './figureGuide'
 
 const TOOL_SYSTEM =
   'Bạn đọc một đề bài tiếng Việt và chọn MỘT hình minh hoạ cần vẽ. Chỉ trả về MỘT object JSON, không giải thích. Các loại:\n' +

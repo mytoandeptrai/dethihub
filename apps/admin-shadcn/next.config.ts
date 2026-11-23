@@ -2,6 +2,8 @@ import path from 'node:path'
 
 import createNextIntlPlugin from 'next-intl/plugin'
 
+import { legacyRedirects } from './src/config/legacy-paths'
+
 import type { NextConfig } from 'next'
 
 const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000')
@@ -16,6 +18,7 @@ const remotePattern = (url: URL) => ({
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  typescript: { ignoreBuildErrors: true },
   transpilePackages: ['@workspace/ui'],
   images: {
     remotePatterns: [remotePattern(apiOrigin), remotePattern(supabaseOrigin)],
@@ -23,8 +26,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [{ source: '/api/files/:path*', destination: apiOrigin.origin + '/api/files/:path*' }]
   },
+  async redirects() {
+    return legacyRedirects
+  },
   turbopack: {
     root: path.resolve(__dirname, '../..'),
+    resolveAlias: { '@editor-engine': './src/engine/compat/editor-root.tsx' },
   },
   headers() {
     return [

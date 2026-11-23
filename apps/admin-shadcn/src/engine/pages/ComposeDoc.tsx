@@ -17,7 +17,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { lazyPage } from '@/engine/lib/lazyPage'
 import { useBoards } from '@/engine/store/boards'
 import { PageErrorBoundary } from '@/engine/components/PageErrorBoundary'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from '@/engine/compat/router'
 import type { Editor } from '@tiptap/core'
 import type { JSONContent } from '@tiptap/core'
 import type { Selection } from '@tiptap/pm/state'

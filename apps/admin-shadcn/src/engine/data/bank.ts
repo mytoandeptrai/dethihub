@@ -66,40 +66,11 @@ export function loadStaticBank(): Promise<BankEntry[]> {
 }
 
 async function fetchBankOverrides(timeoutMs = 4000): Promise<BankOverrideRow[] | null> {
-  const base = (
-    typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL
-      ? (import.meta.env.VITE_SUPABASE_URL as string)
-      : typeof process !== 'undefined'
-        ? process.env?.VITE_SUPABASE_URL
-        : ''
-  )?.replace(/\/+$/, '')
-
-  const key =
-    typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY
-      ? (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string)
-      : typeof process !== 'undefined'
-        ? process.env?.VITE_SUPABASE_PUBLISHABLE_KEY
-        : ''
-
-  if (!base || !key) return null
-
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-
   try {
-    const res = await fetch(`${base}/rest/v1/rpc/bank_overrides`, {
-      method: 'POST',
-      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: '{}',
-      signal: controller.signal,
-    })
-    if (!res.ok) return null
-    return (await res.json()) as BankOverrideRow[]
-  } catch {
-    return null
-  } finally {
-    clearTimeout(timer)
-  }
+    const { bankOverrides } = await import('@/apis/bank/requests')
+    const rows = await bankOverrides({ signal: AbortSignal.timeout(timeoutMs) })
+    return rows.map((row) => ({ id: row.id, data: row.data as unknown as BankEntry | null, status: row.status }))
+  } catch { return null }
 }
 
 let fullBank: Promise<BankEntry[]> | null = null

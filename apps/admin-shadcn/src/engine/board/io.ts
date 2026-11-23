@@ -43,8 +43,8 @@ export async function readImageFile(f: File, max = 1800): Promise<Picture> {
 type PdfDoc = { numPages: number; getPage: (n: number) => Promise<any>; close: () => void }
 
 export async function openPdf(f: File): Promise<PdfDoc> {
-  const [pdfjs, worker] = await Promise.all([import('pdfjs-dist'), import('pdfjs-dist/build/pdf.worker.min.mjs?url')])
-  pdfjs.GlobalWorkerOptions.workerSrc = worker.default
+  const pdfjs = await import('pdfjs-dist')
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
   const task = pdfjs.getDocument({ data: new Uint8Array(await f.arrayBuffer()) })
   const doc = await task.promise
   return { numPages: doc.numPages, getPage: (n) => doc.getPage(n), close: () => { void task.destroy() } }

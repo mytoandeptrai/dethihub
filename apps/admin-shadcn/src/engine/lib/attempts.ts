@@ -3,8 +3,7 @@
  * chỉ chủ đề đọc được. `summarize` gom các lượt làm thành thống kê cho thẻ báo cáo.
  */
 import { currentSession } from '@/engine/lib/auth'
-import { rest } from '@/engine/lib/documents'
-import { apiFetch } from '@/engine/lib/apiFetch'
+import { communityExamGate, communityExamSubmit, myExamAttemptsOf } from '@/apis/exams/requests'
 
 export interface Attempt {
   id: string
@@ -19,9 +18,6 @@ export interface Attempt {
   class_name?: string | null
   seat_no?: number | null
 }
-
-const COLUMNS = 'id,exam_id,user_id,student_name,score,max_score,duration_seconds,created_at,device_id,class_name,seat_no'
-const OLD_COLUMNS = 'id,exam_id,user_id,student_name,score,max_score,duration_seconds,created_at'
 
 const read = (k: string) => {
   try {
@@ -72,14 +68,7 @@ export const saveStudent = (s: StudentInfo) => write('dethinhbien-student', JSON
  * Chỉ để báo sớm cho học sinh; chốt thật là server khi nộp. Máy chủ chưa có hàm thì coi như đề chỉ-link, chưa nộp.
  */
 export async function examGate(examId: string): Promise<{ listed: boolean; attempted: boolean }> {
-  const s = await currentSession().catch(() => null)
-  return rest<{ listed: boolean; attempted: boolean } | null>('/rpc/exam_gate', {
-    method: 'POST',
-    token: s?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    body: { p_id: examId, p_device: deviceId() },
-  })
-    .then((r) => r ?? { listed: false, attempted: false })
-    .catch(() => ({ listed: false, attempted: false }))
+  return communityExamGate({ params: { path: { id: examId }, query: { deviceId: deviceId() } } })
 }
 
 /** Id đề trên máy chủ là uuid; đề mẫu và đề làm ở máy thì không có bài làm nào để gửi. */
@@ -94,38 +83,20 @@ export type GradeResult =
   | { hidden?: false; score: number; max: number; gradable?: number; correct?: number; key: Record<string, { answer?: string; explanation?: string; solution?: string[] }> }
 
 export async function submitAttempt(a: { examId: string; name: string; answers: Record<string, string>; seconds: number; className?: string; seat?: number }): Promise<GradeResult> {
-  const res = await apiFetch('/api/attempt', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      examId: a.examId,
-      name: a.name.trim().slice(0, 60),
-      answers: a.answers,
-      seconds: Math.max(0, Math.round(a.seconds)),
-      deviceId: deviceId(),
-      className: a.className?.trim().slice(0, 30) || undefined,
-      seat: a.seat,
-    }),
-  })
-  if (!res.ok) throw new Error(`Nộp bài lỗi ${res.status}`)
-  return (await res.json()) as GradeResult
+  return await communityExamSubmit({ params: { path: { id: a.examId } }, body: { name: a.name.trim().slice(0, 60), answers: a.answers, seconds: Math.max(0, Math.round(a.seconds)), deviceId: deviceId(), className: a.className?.trim().slice(0, 30) || undefined, seat: a.seat } }) as unknown as GradeResult
 }
 
 /** Bài làm của các đề của bạn, mới nhất trước. */
 export async function listAttempts(examIds: string[]): Promise<Attempt[]> {
-  const s = await currentSession()
-  if (!s || !examIds.length) return []
-  // đọc hết theo trang: một trần cố định sẽ âm thầm giấu bài thật khi đề bị nộp tràn
-  const q = async (cols: string) => {
-    const out: Attempt[] = []
-    for (let offset = 0; offset < 50000; offset += 1000) {
-      const rows = await rest<Attempt[]>(`/exam_attempts?exam_id=in.(${examIds.join(',')})&select=${cols}&order=created_at.desc,id.desc&limit=1000&offset=${offset}`, { token: s.access_token })
-      out.push(...rows)
-      if (rows.length < 1000) break
-    }
-    return out
-  }
-  return q(COLUMNS).catch(() => q(OLD_COLUMNS))
+  if (!examIds.length || !await currentSession()) return []
+  const out: Attempt[] = []
+  let cursor: string | undefined
+  do {
+    const page = await myExamAttemptsOf({ params: { query: { examIds, cursor, limit: 1000 } }, querySerializer: { array: { style: 'form', explode: false } } })
+    out.push(...page.items.map((row) => ({ ...row, exam_id: row.examId, user_id: row.userId as unknown as string | null, student_name: row.studentName, max_score: row.maxScore, duration_seconds: row.durationSeconds, created_at: row.createdAt, device_id: row.deviceId as unknown as string | null, class_name: row.className as unknown as string | null, seat_no: row.seatNo as unknown as number | null })))
+    cursor = page.nextCursor as unknown as string | undefined
+  } while (cursor)
+  return out
 }
 
 export interface Student {

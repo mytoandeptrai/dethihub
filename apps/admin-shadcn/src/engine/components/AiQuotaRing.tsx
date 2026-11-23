@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { apiFetch } from '@/engine/lib/apiFetch'
+import { Link } from '@/engine/compat/router'
+import { aiQuota } from '@/apis/ai/requests'
+import { currentSession } from '@/engine/lib/auth'
 import { cn } from '@/engine/lib/cn'
 import { lastAiQuota, reportQuota, TOKENS_PER_POINT, type AiQuota } from '@/engine/lib/llm'
 import { usePricingAccess } from '@/engine/lib/usePricingAccess'
@@ -36,10 +37,9 @@ export function AiQuotaRing({ className }: { className?: string }) {
   useEffect(() => {
     let alive = true
     const load = () =>
-      apiFetch('/api/quota')
-        .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d: { quota: (AiQuota & { base?: number }) | null; granted?: number; unlimited?: boolean }) => {
-          if (!alive) return
+      currentSession().then((session) => session ? aiQuota({}) : null)
+        .then((d) => {
+          if (!alive || !d) return
           if (d.unlimited) setState({ left: 0, ref: 1, unlimited: true })
           else if (d.quota) {
             setState(fromQuota(d.quota, Number(d.granted) || 0))

@@ -49,17 +49,8 @@ export function applyPricing(c: PricingConfig) {
 let loading: Promise<void> | null = null
 /** Đọc bảng giá admin đã lưu (một lần mỗi phiên); lỗi hoặc chưa có thì giữ mặc định. */
 export function loadPricing(): Promise<void> {
-  // file này server (server/payment.ts) cũng import để tính điểm: chỉ đọc import.meta.env khi gọi trên trình duyệt
-  const env = (import.meta as unknown as { env: Record<string, string> }).env
-  loading ??= fetch(`${env.VITE_SUPABASE_URL}/rest/v1/app_settings?select=value&key=eq.pricing`, {
-    headers: { apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-  })
-    .then((r) => (r.ok ? (r.json() as Promise<Array<{ value?: Partial<PricingConfig> }>>) : []))
-    .then((rows) => {
-      const v = rows[0]?.value
-      if (v && Array.isArray(v.packs) && v.packs.length > 0) applyPricing({ ...DEFAULT_PRICING, ...v } as PricingConfig)
-    })
-    .catch(() => {})
+  loading ??= import('@/apis/billing/requests').then(({ billingGetPricing }) => billingGetPricing({}))
+    .then((value) => { if (value.packs.length) applyPricing(value) }).catch(() => {})
   return loading
 }
 

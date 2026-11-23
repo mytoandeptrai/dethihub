@@ -1,106 +1,33 @@
-/**
- * Tài liệu tải lên của từng người dùng. Tệp nằm trên R2 (qua `/api/upload`), còn danh sách
- * nằm trong bảng `user_documents` của Supabase. Client chỉ đọc danh sách của mình; thêm và xoá đều qua
- * `/api/upload` (server giữ chỗ hạn mức nguyên tử, xoá cả tệp trên R2).
- */
+import * as requests from '@/apis/storage/requests'
+import { aiCreditEvents } from '@/apis/ai/requests'
 import { apiFetch } from '@/engine/lib/apiFetch'
 import { AuthError, currentSession } from '@/engine/lib/auth'
-
-const BASE = import.meta.env?.VITE_SUPABASE_URL as string
-const KEY = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string
+import type { components } from '@workspace/api-types'
 
 export const MAX_DOC_MB = 20
+export const DOC_TYPES: Record<string, string> = { 'application/pdf': 'PDF', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX' }
+export interface UserDocument { id: string; name: string; mime: string; size: number; url: string; subject: string | null; created_at: string }
+const toDocument = (row: components['schemas']['DocumentResponseDto']): UserDocument => ({ ...row, created_at: row.createdAt })
 
-/** Loại tệp nhận được và nhãn hiển thị. */
-export const DOC_TYPES: Record<string, string> = {
-  'application/pdf': 'PDF',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+export async function rest<T>(path: string, _init: { method?: string; body?: unknown; token: string; prefer?: string; signal?: AbortSignal }): Promise<T> {
+  if (path.includes('my_storage')) return await requests.storageUsage({ signal: _init.signal }) as T
+  if (path.startsWith('/ai_credit_events')) return (await aiCreditEvents({ params: { query: { limit: 20 } } })).map((row) => ({ ...row, created_at: row.createdAt })) as T
+  throw new Error('Unsupported legacy data request: ' + path)
 }
-
-export interface UserDocument {
-  id: string
-  name: string
-  mime: string
-  size: number
-  url: string
-  /** môn học; null với tài liệu tải lên trước khi có cột này */
-  subject: string | null
-  created_at: string
-}
-
-const COLUMNS = 'id,name,mime,size,url,subject,created_at'
-
-export async function rest<T>(
-  path: string,
-  init: { method?: string; body?: unknown; token: string; prefer?: string; signal?: AbortSignal },
-): Promise<T> {
-  const res = await fetch(`${BASE}/rest/v1${path}`, {
-    method: init.method ?? 'GET',
-    signal: init.signal,
-    headers: {
-      apikey: KEY,
-      Authorization: `Bearer ${init.token}`,
-      'Content-Type': 'application/json',
-      ...(init.prefer ? { Prefer: init.prefer } : {}),
-    },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-  })
-  const data = (await res.json().catch(() => null)) as { message?: string } | null
-  if (!res.ok) throw new Error(data?.message ?? `Không kết nối được máy chủ (${res.status}).`)
-  return data as T
-}
-
-function readAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('Không đọc được tệp này.'))
-    reader.readAsDataURL(file)
-  })
-}
-
-/** Danh sách tài liệu của người đang đăng nhập, mới nhất trước. */
 export async function listDocuments(): Promise<UserDocument[]> {
-  const s = await currentSession()
-  if (!s) return []
-  return rest<UserDocument[]>(`/user_documents?select=${COLUMNS}&order=created_at.desc`, { token: s.access_token })
+  if (!await currentSession()) return []
+  return (await requests.storageListDocuments({})).map(toDocument)
 }
-
-/** Tải một tệp PDF hoặc DOCX lên R2 rồi ghi một dòng vào danh sách, kèm môn nếu đã chọn. */
 export async function uploadDocument(file: File, subject: string | null): Promise<UserDocument> {
-  const s = await currentSession()
-  if (!s) throw new AuthError('Bạn cần đăng nhập để tải tài liệu.')
+  if (!await currentSession()) throw new AuthError('Bạn cần đăng nhập để tải tài liệu.')
   if (!DOC_TYPES[file.type]) throw new Error('Chỉ nhận tệp PDF hoặc Word (.docx).')
   if (file.size > MAX_DOC_MB * 1024 * 1024) throw new Error(`Tệp quá lớn (tối đa ${MAX_DOC_MB} MB).`)
-  // tài liệu tính vào dung lượng lưu trữ (migration 20261120): kiểm trước khi đẩy tệp lên kho file,
-  // để không có tệp nằm trên R2 mà dòng trong danh sách bị từ chối
-  const st = await rest<{ used: number; max: number }>('/rpc/my_storage', { method: 'POST', token: s.access_token, body: {} }).catch(() => null)
-  if (st && st.used + file.size > st.max) {
-    const mb = (n: number) => `${(n / 1048576).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} MB`
-    throw new Error(`"${file.name}" (${mb(file.size)}) vượt dung lượng còn lại (${mb(Math.max(0, st.max - st.used))} / ${mb(st.max)}). Xoá bớt tệp ở trang Hồ sơ để tải tiếp.`)
-  }
-
-  const res = await apiFetch('/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dataUrl: await readAsDataUrl(file), name: file.name, subject }),
-  })
-  const data = (await res.json().catch(() => null)) as { url?: string; doc?: UserDocument; error?: string } | null
-  if (!res.ok || !data?.url) throw new Error(data?.error ?? `Không tải được tệp (${res.status}).`)
-  // máy chủ đã tự ghi dòng danh sách với cỡ tệp thật
-  if (!data.doc) throw new Error('Máy chủ chưa ghi được tài liệu vào danh sách, thử lại sau.')
-  return data.doc
+  const usage = await requests.storageUsage({})
+  if (usage.used + file.size > usage.max) throw new Error('Tệp vượt dung lượng còn lại. Xoá bớt tệp ở trang Hồ sơ để tải tiếp.')
+  return toDocument(await requests.uploadDocumentFile(file, subject ?? undefined))
 }
-
-/** Xoá tài liệu: server xoá dòng danh sách và tệp trên R2 (trả lại dung lượng). */
 export async function deleteDocument(id: string): Promise<void> {
-  const s = await currentSession()
-  if (!s) throw new AuthError('Bạn cần đăng nhập để xóa tài liệu.')
-  const res = await apiFetch(`/api/upload?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
-  if (!res.ok) {
-    const data = (await res.json().catch(() => null)) as { error?: string } | null
-    throw new Error(data?.error ?? `Không xoá được tài liệu (${res.status}).`)
-  }
+  await requests.storageRemoveDocument({ params: { path: { id } } })
 }
 
 /**

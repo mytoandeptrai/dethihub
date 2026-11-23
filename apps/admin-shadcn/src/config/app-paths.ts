@@ -3,10 +3,21 @@ const authHref = (path: string, redirectTo?: string | null) =>
 
 export const appPaths = {
   home: { href: '/' },
+  editor: { href: '/editor' },
+  onlineExams: { href: '/online-exams', getHref: (id: string) => `/online-exams/${encodeURIComponent(id)}`, results: (id: string) => `/online-exams/${encodeURIComponent(id)}/results` },
+  play: { getHref: (id: string) => `/play/${encodeURIComponent(id)}` },
+  quiz: { getHref: (id: string) => `/quiz/${encodeURIComponent(id)}` },
+  exams: { getHref: (id: string) => `/exams/${encodeURIComponent(id)}` },
+  community: { href: '/community' },
+  myDocs: { href: '/my-docs', analytics: '/my-docs/analytics' },
+  library: { href: '/library' },
+  grading: { href: '/grading' },
+  pricing: { href: '/pricing' },
+  previewDesigns: { href: '/preview-designs' },
   profile: { href: '/profile', uploads: { href: '/profile/uploads' } },
-  admin: { href: '/admin' },
-  terms: { href: 'https://dero.id.vn/dieu-khoan' },
-  privacy: { href: 'https://dero.id.vn/quyen-rieng-tu' },
+  admin: { href: '/admin', users: '/admin/users', content: '/admin/content', bank: '/admin/bank', stats: '/admin/stats', payments: '/admin/payments', ai: '/admin/ai', audit: '/admin/audit' },
+  terms: { href: '/terms' },
+  privacy: { href: '/privacy' },
   auth: {
     login: {
       href: '/login',

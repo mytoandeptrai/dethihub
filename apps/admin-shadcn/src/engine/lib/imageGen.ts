@@ -5,7 +5,7 @@
  * lưu vào deck — PNG 1024² của model nặng ~1,2 MB, JPEG cùng cỡ ~150 KB nên
  * localStorage không bị đầy sau vài ảnh.
  */
-import { apiFetch } from '@/engine/lib/apiFetch'
+import { mediaDrawImage } from '@/apis/media/requests'
 
 const MAX_EDGE = 1280
 const JPEG_QUALITY = 0.85
@@ -72,19 +72,13 @@ async function shrink(dataUrl: string): Promise<string> {
 }
 
 export async function generateSlideImage(prompt: string): Promise<GeneratedImage> {
-  const res = await apiFetch('/api/image', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt }),
-  })
-  const body = (await res.json().catch(() => ({}))) as { dataUrl?: string; model?: string; error?: string }
-  if (!res.ok) throw new Error(body.error ?? `Tạo ảnh thất bại (${res.status})`)
+  const body = await mediaDrawImage({ body: { prompt } })
   const dataUrl = body.dataUrl ?? ''
   if (!dataUrl.startsWith('data:image/')) throw new Error('Máy chủ không trả về ảnh hợp lệ')
   try {
-    return { dataUrl: await shrink(dataUrl), model: body.model }
+    return { dataUrl: await shrink(dataUrl) }
   } catch {
-    return { dataUrl, model: body.model }
+    return { dataUrl }
   }
 }
 

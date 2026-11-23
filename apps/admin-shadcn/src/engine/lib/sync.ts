@@ -7,7 +7,9 @@
  * Sau đó mỗi thay đổi được đẩy lên sau ~1,5 giây, từng mục một request nên một mục quá lớn không chặn các mục khác.
  */
 import { currentSession, getSession } from '@/engine/lib/auth'
-import { rest } from '@/engine/lib/documents'
+import { workspaceItemList, workspaceItemSave, removeWorkspaceItems } from '@/apis/workspace/requests'
+import type { WorkspaceItemListInput } from '@/apis/workspace/types'
+type WorkspaceKind = WorkspaceItemListInput['params']['query']['kind']
 import { uploadImage } from '@/engine/lib/mediaStore'
 import { useUploads, type Upload } from '@/engine/store/uploads'
 import { useDocStore, type Deck } from '@/engine/store/docs'
@@ -117,7 +119,7 @@ const writeMeta = (kind: string, m: Meta) => {
   try {
     localStorage.setItem(metaKey(kind), JSON.stringify(m))
   } catch (err) {
-    if (import.meta.env?.DEV) console.warn('Không lưu được meta đồng bộ', kind, err)
+    if ((process.env.NODE_ENV === 'development')) console.warn('Không lưu được meta đồng bộ', kind, err)
   }
 }
 
@@ -157,7 +159,7 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
   const meta = readMeta(kind)
   const first = await currentSession({ keepOnError: true })
   if (!first || first.user.id !== owner || !active()) throw new Error('Phiên đồng bộ đã kết thúc.')
-  const remote = await rest<Row[]>(`/user_items?kind=eq.${kind}&select=id,data`, { token: first.access_token, signal })
+  const remote = await workspaceItemList({ params: { query: { kind: kind as WorkspaceKind } }, signal }) as unknown as Row[]
   if (!active()) throw new Error('Phiên đồng bộ đã kết thúc.')
 
   const ownMeta = meta?.owner === owner ? meta : null
@@ -207,13 +209,7 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
         }
         const fp = fingerprint(it)
         if (sent.get(it.id) !== fp) {
-          await rest(`/user_items?on_conflict=owner_id,kind,id`, {
-            method: 'POST',
-            token,
-            signal,
-            prefer: 'resolution=merge-duplicates,return=minimal',
-            body: { owner_id: owner, kind, id: it.id, data: it, updated_at: it.updatedAt },
-          })
+          await workspaceItemSave({ params: { path: { kind: kind as WorkspaceKind, id: it.id } }, body: { data: it as unknown as Record<string, unknown> }, signal })
           if (!active()) return false
           sent.set(it.id, fp)
         }
@@ -228,7 +224,7 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
     const gone = [...sent.keys()].filter((id) => !ids.has(id) && !unowned.has(id))
     for (const id of [...blocked.keys()]) if (id.startsWith(`${kind}:`) && !ids.has(id.slice(kind.length + 1))) noteQuota(kind, id.slice(kind.length + 1), null)
     if (gone.length && active()) {
-      await rest(`/user_items?kind=eq.${kind}&id=in.(${gone.join(',')})`, { method: 'DELETE', token, signal, prefer: 'return=minimal' })
+      await removeWorkspaceItems(kind as WorkspaceKind, gone, signal)
       if (!active()) return false
       for (const id of gone) sent.delete(id)
     }

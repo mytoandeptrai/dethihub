@@ -1,5 +1,5 @@
 /** Bảng vẽ — định nghĩa giao diện: icon, danh sách bút / hình / giấy, các nút và ô chọn nhỏ. */
-import protractorUrl from '@/engine/assets/icons/protractor.svg'
+const protractorUrl = new URL('../assets/icons/protractor.svg', import.meta.url).toString()
 import { BUCKET_D, TRASH_D } from '@/engine/components/appIcons'
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { isDarkPaper, paperBg, type Kind, type Paper, type PenKind, type Pt, type FillStyle } from './scene'

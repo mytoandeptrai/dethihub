@@ -2,7 +2,7 @@
  * Chữ prompt hướng dẫn AI vẽ hình trong đề (FIGURE_GUIDE). Module thuần (không import client) để cả trình duyệt
  * lẫn server/ ghép prompt từ cùng một nguồn.
  */
-import { CONTAINERS, OBJECTS, SCENE_OBJECTS } from '../objectsCatalog.js'
+import { CONTAINERS, OBJECTS, SCENE_OBJECTS } from '../objectsCatalog'
 
 /** danh sách loại hình AI được chọn + cấu hình từng loại; dùng chung cho "Vẽ hình minh hoạ" và AI soạn đề */
 export const FIGURE_GUIDE =

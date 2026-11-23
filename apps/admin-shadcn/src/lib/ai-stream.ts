@@ -26,7 +26,7 @@ export async function* parseEventStream(
       if (done) return
     }
   } finally {
-    await reader.cancel().catch(() => {})
+    void reader.cancel().catch(() => {})
     reader.releaseLock()
   }
 }
@@ -34,13 +34,18 @@ export async function* parseEventStream(
 export async function* streamAiChat(
   body: components['schemas']['ChatRequestDto'],
   signal?: AbortSignal,
+  retryOf?: string,
 ) {
   const response = await authenticatedFetch(env.NEXT_PUBLIC_API_URL + '/api/ai/chat', {
     method: 'POST',
     signal,
-    headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+    headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream', 'X-Ai-Retry-Of': retryOf ?? '' },
     body: JSON.stringify({ ...body, stream: true }),
   })
+  if (response.headers.get('Content-Type')?.includes('application/json')) {
+    yield { data: JSON.stringify({ ...await response.json(), type: 'done' }) }
+    return
+  }
   if (!response.body) throw new ApiClientError({ title: t('common.requestError'), status: 502 })
   yield* parseEventStream(response.body)
 }

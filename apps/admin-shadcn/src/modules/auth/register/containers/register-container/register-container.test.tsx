@@ -10,7 +10,7 @@ import { renderWithProviders } from '@/testing/render'
 it('signs up with trimmed display_name metadata and shows email confirmation', async () => {
   let submitted: Record<string, unknown> | undefined
   server.use(
-    http.post('https://test.supabase.co/auth/v1/signup', async ({ request }) => {
+    http.post('https://test.supabase.co/*/signup', async ({ request }) => {
       submitted = (await request.json()) as Record<string, unknown>
       return HttpResponse.json({ id: 'test-user', email: 'teacher@example.com', identities: [] })
     }),

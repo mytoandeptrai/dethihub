@@ -30,6 +30,17 @@ describe('ai event stream', () => {
     await expect(read([])).resolves.toEqual([])
   })
 
+  it('finishes DONE without waiting for another tee consumer to cancel', async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'))
+      },
+    })
+    const [left, right] = stream.tee()
+    await expect(Array.fromAsync(parseEventStream(left))).resolves.toEqual([])
+    await right.cancel()
+  })
+
   it('propagates reader errors', async () => {
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {

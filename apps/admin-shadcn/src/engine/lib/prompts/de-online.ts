@@ -1,8 +1,8 @@
 /**
  * Chữ prompt trợ lý AI đề online — module thuần (không import client) để SERVER ghép system prompt từ `task: "de-online"`.
  */
-import { TYPE_LABEL, type QuestionType } from '../../data/types.js'
-import { DIFFICULTY_RULE } from '../difficulty.js'
+import { TYPE_LABEL, type QuestionType } from '../../data/types'
+import { DIFFICULTY_RULE } from '../difficulty'
 
 export const AI_MAX_QUESTIONS = 30
 

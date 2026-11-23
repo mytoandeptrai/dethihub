@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/engine/compat/router'
 import type { Editor } from '@tiptap/core'
 import { Command } from 'cmdk'
 import { AlignLeft, FileText, ListTree, Search, Sparkles, Type, X } from 'lucide-react'

@@ -1,6 +1,6 @@
 import type { EssayBlock, ExamDoc, QuestionBlock, RichText } from '@/engine/data/docTypes'
 import type { Exam, Question, QuestionImage, Section, Subject } from '@/engine/data/types'
-import { formatTrueFalse, normalizeShort, parseTrueFalse } from './grading.js'
+import { formatTrueFalse, normalizeShort, parseTrueFalse } from './grading'
 
 /**
  * Chữ của một đoạn rich text cho đề tương tác: giữ công thức `$…$`, đậm/nghiêng/gạch chân

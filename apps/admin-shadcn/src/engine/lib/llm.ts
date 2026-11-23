@@ -2,7 +2,9 @@
  * Client gọi LLM qua proxy nội bộ (/api/llm).
  * Key nằm ở server, không bao giờ xuất hiện trong bundle.
  */
-import { apiFetch } from '@/engine/lib/apiFetch'
+import { streamChat } from '@/apis/ai/requests'
+import { ApiClientError } from '@/lib/api-error'
+import type { components } from '@workspace/api-types'
 export interface LlmMessage {
   role: 'system' | 'user' | 'assistant'
   content: string
@@ -48,7 +50,6 @@ export interface LlmProgress {
   text: string
 }
 
-const ENDPOINT = '/api/llm'
 
 /** Hạn mức AI server báo về (token; giao diện quy ra điểm). */
 export interface AiQuota {
@@ -97,108 +98,46 @@ export async function callLlmChecked(
 }
 
 async function callOnce(messages: LlmMessage[], opts: LlmOptions): Promise<LlmResult> {
-  let res: Response
-  try {
-    res = await apiFetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(opts.retryOf ? { 'x-ai-retry-of': opts.retryOf } : {}) },
-      signal: opts.signal,
-      body: JSON.stringify({
-        messages,
-        ...(opts.task ? { task: opts.task.name, taskInput: opts.task.input } : {}),
-        maxTokens: opts.maxTokens ?? 32000,
-        reasoningEffort: opts.reasoningEffort ?? 'max',
-        ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
-        ...(opts.webSearch ? { webSearch: true } : {}),
-        ...(opts.strong ? { strong: true } : {}),
-        ...(opts.onProgress && !opts.webSearch ? { stream: true } : {}),
-      }),
-    })
-  } catch (err) {
-    if ((err as Error)?.name === 'AbortError') throw err
-    throw new TransientLlmError((err as Error)?.message || 'Lỗi mạng khi gọi AI')
+  if (!opts.task) throw new Error('Tác vụ AI không hợp lệ.')
+  const body: components['schemas']['ChatRequestDto'] = {
+    task: opts.task.name,
+    taskInput: opts.task.input as components['schemas']['ChatRequestDto']['taskInput'],
+    messages,
+    maxTokens: opts.maxTokens ?? 32000,
+    reasoningEffort: opts.reasoningEffort ?? 'max',
+    temperature: opts.temperature,
+    webSearch: opts.webSearch,
+    strong: opts.strong,
   }
-
-  if (!res.ok) {
-    const text = await res.text()
-    let detail = text.slice(0, 500)
-    try {
-      const parsed = JSON.parse(text) as { error?: string; quota?: unknown; code?: string }
-      if (parsed.error) detail = parsed.error
-      reportQuota(parsed.quota)
-      if (res.status === 429 && parsed.code === 'quota') throw new AiQuotaError(detail)
-    } catch (e) {
-      if (e instanceof AiQuotaError) throw e
-      /* giữ raw text */
-    }
-    if (res.status >= 500) throw new TransientLlmError(detail)
-    throw new Error(detail)
-  }
-  const data = (res.headers.get('content-type') ?? '').includes('text/event-stream')
-    ? await readStream(res, opts)
-    : ((await res.json()) as LlmResult & { quota?: unknown })
-  reportQuota(data.quota)
-  if (!data.content?.trim()) {
-    throw new Error(
-      'AI không trả về nội dung (có thể do suy luận quá dài bị cắt). Hãy thử lại hoặc rút gọn yêu cầu.',
-    )
-  }
-  return data
-}
-
-/** Đọc SSE của /api/llm: `think` / `delta` / `retry` báo tiến độ, `done` là kết quả như khi gọi thường. */
-async function readStream(res: Response, opts: LlmOptions): Promise<LlmResult & { quota?: unknown }> {
-  const reader = res.body?.getReader()
-  if (!reader) throw new TransientLlmError('Không đọc được phản hồi của AI')
-  const dec = new TextDecoder()
-  let buf = ''
   let text = ''
   let thinking = ''
-  let final = null as (LlmResult & { quota?: unknown }) | null
-  const handle = (line: string) => {
-    if (!line.startsWith('data:')) return
-    let ev: { type?: string; c?: string; d?: string; error?: string; status?: number; quota?: unknown } & Partial<LlmResult>
-    try {
-      ev = JSON.parse(line.slice(5))
-    } catch {
-      return
-    }
-    if (ev.type === 'delta') {
-      text += ev.c ?? ''
-      opts.onProgress?.({ phase: 'write', thought: thinking.length, thinking, text })
-    } else if (ev.type === 'think') {
-      thinking += ev.d ?? ''
-      // suy luận đến sau khi đã có chữ (hiếm): vẫn coi là đang viết
-      opts.onProgress?.({ phase: text ? 'write' : 'think', thought: thinking.length, thinking, text })
-    } else if (ev.type === 'retry') {
-      text = ''
-      thinking = ''
-      opts.onProgress?.({ phase: 'retry', thought: 0, thinking, text })
-    } else if (ev.type === 'done') {
-      final = ev as LlmResult & { quota?: unknown }
-    } else if (ev.type === 'error') {
-      reportQuota(ev.quota)
-      const msg = ev.error || 'AI lỗi'
-      throw (ev.status ?? 500) >= 500 ? new TransientLlmError(msg) : new Error(msg)
-    }
-  }
+  let final: (LlmResult & { quota?: unknown }) | undefined
   try {
-    for (;;) {
-      const { done, value } = await reader.read()
-      if (done) break
-      buf += dec.decode(value, { stream: true })
-      let sep: number
-      while ((sep = buf.indexOf('\n\n')) >= 0) {
-        for (const line of buf.slice(0, sep).split('\n')) handle(line.trim())
-        buf = buf.slice(sep + 2)
+    for await (const event of streamChat(body, opts.signal, opts.retryOf)) {
+      const value = JSON.parse(event.data) as Partial<LlmResult> & { type?: string; c?: string; d?: string; error?: string; detail?: string; status?: number; quota?: unknown }
+      if (value.type === 'delta') {
+        text += value.c ?? ''
+        opts.onProgress?.({ phase: 'write', thought: thinking.length, thinking, text })
+      } else if (value.type === 'think') {
+        thinking += value.d ?? ''
+        opts.onProgress?.({ phase: text ? 'write' : 'think', thought: thinking.length, thinking, text })
+      } else if (value.type === 'retry') {
+        text = ''; thinking = ''
+        opts.onProgress?.({ phase: 'retry', thought: 0, thinking, text })
+      } else if (value.type === 'done') final = value as LlmResult & { quota?: unknown }
+      else if (value.type === 'error') {
+        reportQuota(value.quota)
+        throw new Error(value.detail ?? value.error ?? 'AI lỗi')
       }
     }
-  } catch (err) {
-    if ((err as Error)?.name === 'AbortError' || opts.signal?.aborted) throw err
-    if (err instanceof TransientLlmError || (err instanceof Error && !(err instanceof TypeError))) throw err
-    throw new TransientLlmError('Mất kết nối khi đang nhận câu trả lời của AI')
+  } catch (error) {
+    if (error instanceof ApiClientError && error.status === 429 && /quota/i.test(error.code ?? '')) throw new AiQuotaError(error.message)
+    if (error instanceof ApiClientError && (error.status === 0 || error.status >= 500)) throw new TransientLlmError(error.message)
+    throw error
   }
   if (!final) throw new TransientLlmError('Kết nối tới AI bị ngắt giữa chừng')
+  reportQuota(final.quota)
+  if (!final.content?.trim()) throw new Error('AI không trả về nội dung (có thể do suy luận quá dài bị cắt). Hãy thử lại hoặc rút gọn yêu cầu.')
   return final
 }
 

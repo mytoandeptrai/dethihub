@@ -10,7 +10,7 @@ import { renderWithProviders } from '@/testing/render'
 describe('login validation', () => {
   it('shows a Supabase login error verbatim for a valid form', async () => {
     server.use(
-      http.post('https://test.supabase.co/auth/v1/token', () =>
+      http.post('https://test.supabase.co/*/token', () =>
         HttpResponse.json(
           { message: 'Sai thông tin đăng nhập.', code: 'invalid_credentials' },
           { status: 400 },

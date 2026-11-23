@@ -1,5 +1,5 @@
 /**
- * Dữ liệu giả (mock) cho `src/lib/adminApi.ts` — chỉ được dynamic-import khi `import.meta.env.DEV`.
+ * Dữ liệu giả (mock) cho `src/lib/adminApi.ts` — chỉ được dynamic-import khi `(process.env.NODE_ENV === 'development')`.
  * Bản build production không nạp file này.
  */
 import type { PricingConfig } from './pricing'

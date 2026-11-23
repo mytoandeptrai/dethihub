@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/engine/compat/router'
 import type { OpenTab } from '@/engine/store/compose'
 import { cn } from '@/engine/lib/cn'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'

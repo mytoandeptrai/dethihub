@@ -4,6 +4,8 @@
  * tìm web đi qua nút "Tìm trên web" riêng). Không có nguồn — dùng kiến thức chung, phải cảnh báo.
  */
 import { apiFetch } from '@/engine/lib/apiFetch'
+import { mediaReadPages, extractFile } from '@/apis/media/requests'
+import { ApiClientError } from '@/lib/api-error'
 import { AiQuotaError, reportQuota } from '@/engine/lib/llm'
 import { MAX_PDF_PAGES, renderPdfPages } from '@/engine/lib/pdfPages'
 import { sourcePrompt as promptOf, sourceRule as ruleOf } from '@/engine/lib/prompts/sources'
@@ -91,28 +93,15 @@ export async function readVisionPages(
     const label = batch.length > 1 ? `${i + 1}-${i + batch.length}` : `${i + 1}`
     onProgress?.(`Đang đọc trang ${label}/${pages.length}…`)
     try {
-      const response = await apiFetch('/api/extract?vision=1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: batch.map((page) => page.toDataURL('image/jpeg', 0.82)) }),
-        signal,
-      })
-      const payload = (await response.json().catch(() => null)) as
-        | { text?: string; error?: string; code?: string; quota?: unknown }
-        | null
+      const payload = await mediaReadPages({ body: { images: batch.map((page) => page.toDataURL('image/jpeg', 0.82)) }, signal })
       signal?.throwIfAborted()
       reportQuota(payload?.quota)
-      if (response.status === 429 && payload?.code === 'quota') {
-        throw new AiQuotaError(payload.error || 'Bạn không đủ điểm AI để đọc PDF.')
-      }
-      if (!response.ok || typeof payload?.text !== 'string') {
-        throw new Error(payload?.error || `Không đọc được ảnh (${response.status}).`)
-      }
       const text = payload.text.trim()
       if (!text) throw new Error('Không nhận được nội dung từ ảnh.')
       texts.push(text)
     } catch (err) {
       signal?.throwIfAborted()
+      if (err instanceof ApiClientError && err.status === 429 && /quota/i.test(err.code ?? '')) throw new AiQuotaError(err.message)
       if (requireAll || err instanceof AiQuotaError) throw err
       failed.push(label)
     }
@@ -131,33 +120,12 @@ export async function readPdfByVision(file: File, onProgress?: SourceReadOptions
   return readVisionPages(pages, total, { onProgress, signal, requireAll })
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = String(reader.result ?? '')
-      resolve(result.includes(',') ? result.slice(result.indexOf(',') + 1) : result)
-    }
-    reader.onerror = () => reject(reader.error ?? new Error('Không đọc được tệp.'))
-    reader.readAsDataURL(file)
-  })
-}
-
 export async function extractAttachment(
   file: File,
   /** .docx: giữ ký tự đánh dấu chữ nổi bật (U+E000/U+E001) — dùng khi tách đề để tìm đáp án được tô/đậm */
   marks = false,
 ): Promise<{ text: string; kind?: string; slides?: string[]; images?: string[]; warning?: string }> {
-  const data = await fileToBase64(file)
-  const res = await apiFetch('/api/extract', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: file.name, data, ...(marks ? { marks } : {}) }),
-  })
-  const payload = (await res.json().catch(() => null)) as
-    | { text?: string; kind?: string; slides?: string[]; images?: string[]; warning?: string; error?: string }
-    | null
-  if (!res.ok) throw new Error(payload?.error || `Không đọc được tệp (${res.status}).`)
+  const payload = await extractFile(file, marks)
   return {
     text: payload?.text ?? '',
     kind: payload?.kind,

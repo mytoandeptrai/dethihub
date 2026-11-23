@@ -6,35 +6,13 @@
  */
 import { currentSession } from '@/engine/lib/auth'
 
-const BASE = ((import.meta.env?.VITE_SUPABASE_URL as string) ?? '').replace(/\/+$/, '')
-const KEY = (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string) ?? ''
-
 export async function pingPresence(): Promise<void> {
-  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
-    return
-  }
+  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return
   try {
-    const session = await currentSession()
-    if (!session || !session.user?.id || !session.access_token || !BASE || !KEY) {
-      return
-    }
-
-    await fetch(`${BASE}/rest/v1/presence`, {
-      method: 'POST',
-      headers: {
-        apikey: KEY,
-        Authorization: `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates,return=minimal',
-      },
-      body: JSON.stringify({
-        user_id: session.user.id,
-        last_seen: new Date().toISOString(),
-      }),
-    })
-  } catch {
-    // Lỗi thì im lặng
-  }
+    if (!await currentSession()) return
+    const { submitPresence } = await import('@/apis/presence/requests')
+    await submitPresence()
+  } catch {}
 }
 
 /**

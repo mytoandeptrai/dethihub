@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"], "@workspace/ui/*": ["../../packages/ui/src/*"] },
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "noImplicitReturns": false,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": ".engine-types",
+    "tsBuildInfoFile": "node_modules/.cache/engine.tsbuildinfo"
+  },
+  "include": ["src/engine/**/*.ts", "src/engine/**/*.tsx", "next-env.d.ts"],
+  "exclude": ["node_modules"]
+}

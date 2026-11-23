@@ -3,7 +3,7 @@
  * làm nguồn tham khảo. Chỉ chọn ở đây; nội dung được tải lúc bấm gửi (loadPickedSources).
  */
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/engine/compat/router'
 import { Check, Search, X } from 'lucide-react'
 import { Portal } from '@/engine/components/Portal'
 import { Segmented } from '@/engine/components/Segmented'

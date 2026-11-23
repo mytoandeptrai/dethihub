@@ -6,7 +6,7 @@
  * - `complaint`: nhắn kiểu "sai rồi", "không đúng"
  * Gửi lặng lẽ, lỗi thì bỏ qua.
  */
-import { apiFetch } from '@/engine/lib/apiFetch'
+import { aiFeedback } from '@/apis/ai/requests'
 
 export type AiFeedbackKind = 'up' | 'down' | 'undo' | 'resend' | 'complaint'
 export interface AiTurnInfo {
@@ -31,11 +31,7 @@ export function takeRecentAiTurn(withinMs = 120_000): AiTurnInfo | null {
 }
 
 export function reportAi(kind: AiFeedbackKind, t: AiTurnInfo, note = '') {
-  void apiFetch('/api/quota', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ kind, mode: t.mode, request: t.request, reply: t.reply, context: t.context ?? '', note }),
-  }).catch(() => {})
+  void aiFeedback({ body: { kind, mode: t.mode, request: t.request, reply: t.reply, context: t.context ?? '', note } }).catch(() => {})
 }
 
 const COMPLAINT = /(sai rồi|vẫn sai|chưa đúng|không đúng|không phải (thế|vậy|như vậy)|làm lại đi|tệ quá|chán quá|không hiểu (gì|à)|bị lỗi|hỏng rồi)/iu

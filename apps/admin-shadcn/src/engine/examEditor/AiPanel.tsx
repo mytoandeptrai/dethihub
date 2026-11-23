@@ -9,7 +9,7 @@
  *   - composer là thẻ bo 16px, Enter gửi, Shift+Enter xuống dòng, Esc để dừng.
  */
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/engine/compat/router'
 import { useSession } from '@/engine/lib/useSession'
 import { Button } from '@/engine/components/ui'
 import { IconDocExam } from '@/engine/components/docIcons'
@@ -1271,7 +1271,7 @@ function AiConversation({
         const summary = result && !failed ? result.text : undefined
         const looksJson = failed
         const text = result?.text ?? res.content
-        if (failed && import.meta.env.DEV) console.warn('[AI] JSON không áp được:', res.content)
+        if (failed && (process.env.NODE_ENV === 'development')) console.warn('[AI] JSON không áp được:', res.content)
         if (summary) rememberAiTurn({ mode, request: userTurn.text, reply: summary, context: documentDigest })
         setTurns((t) =>
           t.map((turn) =>

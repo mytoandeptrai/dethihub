@@ -8,7 +8,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".engine-types/**"],
       "env": [
         "VITE_API_URL",
         "NEXT_PUBLIC_APP_NAME",

@@ -6,6 +6,8 @@
  * - kho dùng chung trên server (id `x-<tên tiếng Anh>`): đồ vật ngoài kho có sẵn, vẽ một lần rồi lưu R2
  *   (server/figureSprite.ts); máy khách tải về, tách nền thành ảnh PNG nhỏ (`href`) rồi giữ trong bộ nhớ.
  */
+import { mediaGetFigure } from '@/apis/media/requests'
+
 export type Sprite = { w: number; h: number; ink: string; body: string; href?: undefined } | { w: number; h: number; href: string; ink?: undefined; body?: undefined }
 
 let lib: Record<string, Sprite> | null = null
@@ -58,14 +60,8 @@ async function fetchDynamic(id: string): Promise<boolean> {
   let res = await fetch(url)
   if (res.status === 404) {
     // nạp lúc cần: toolSpec (kéo theo tệp này) còn chạy trong script Node, không có phiên đăng nhập
-    const { apiFetch } = await import('./apiFetch')
-    const made = await apiFetch('/api/figure-sprite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ en: slug.replace(/-/g, ' ') }),
-    })
-    const body = (await made.json().catch(() => ({}))) as { url?: string }
-    if (!made.ok || !body.url) return false
+    const body = await mediaGetFigure({ body: { en: slug.replace(/-/g, ' ') } })
+    if (!body.url) return false
     url = body.url
     res = await fetch(url)
   }

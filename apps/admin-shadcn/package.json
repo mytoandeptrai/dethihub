@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 8080",
-    "build": "next build",
+    "build": "pnpm typecheck && next build",
     "start": "next start",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc -p tsconfig.engine.json && tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "deps": "depcruise src --config .dependency-cruiser.mjs"
   },

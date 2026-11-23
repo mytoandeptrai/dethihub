@@ -115,12 +115,12 @@ export async function listContentExams(opts: {
   page?: number
   perPage?: number
 } = {}): Promise<ContentExamPage> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockListContentExams(opts)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockListContentExams(opts)
   return post('content.exams.list', opts)
 }
 
 export async function getContentExam(examId: string): Promise<{ exam: any }> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockGetContentExam(examId)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockGetContentExam(examId)
   return post('content.exams.get', { examId })
 }
 
@@ -129,12 +129,12 @@ export async function setContentExamStatus(
   status: 'published' | 'hidden' | 'removed',
   reason?: string,
 ): Promise<{ ok: boolean }> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockSetContentExamStatus(examId, status, reason)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockSetContentExamStatus(examId, status, reason)
   return post('content.exams.setStatus', { examId, status, reason }, false)
 }
 
 export async function deleteContentExam(examId: string): Promise<{ ok: boolean }> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockDeleteContentExam(examId)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockDeleteContentExam(examId)
   return post('content.exams.delete', { examId }, false)
 }
 
@@ -143,7 +143,7 @@ export async function listContentReports(opts: {
   page?: number
   perPage?: number
 } = {}): Promise<ContentReportPage> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockListContentReports(opts)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockListContentReports(opts)
   return post('content.reports.list', opts)
 }
 
@@ -151,7 +151,7 @@ export async function resolveContentReport(
   reportId: number,
   status: 'resolved' | 'dismissed',
 ): Promise<{ ok: boolean }> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockResolveContentReport(reportId, status)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockResolveContentReport(reportId, status)
   return post('content.reports.resolve', { reportId, status }, false)
 }
 
@@ -160,12 +160,12 @@ export async function listContentDocs(opts: {
   page?: number
   perPage?: number
 } = {}): Promise<ContentDocPage> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockListContentDocs(opts)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockListContentDocs(opts)
   return post('content.docs.list', opts)
 }
 
 export async function deleteContentDoc(docId: string): Promise<{ ok: boolean; r2Removed: boolean }> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockDeleteContentDoc(docId)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockDeleteContentDoc(docId)
   return post('content.docs.delete', { docId }, false)
 }
 
@@ -174,7 +174,7 @@ export async function listContentFeedback(opts: {
   page?: number
   perPage?: number
 } = {}): Promise<ContentFeedbackPage> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockListContentFeedback(opts)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockListContentFeedback(opts)
   return post('content.feedback.list', opts)
 }
 
@@ -182,6 +182,6 @@ export async function markContentFeedbackRead(
   feedbackId: number,
   read = true,
 ): Promise<{ ok: boolean }> {
-  if (import.meta.env.DEV && isAdminMock()) return (await import('./adminContentMock')).mockMarkContentFeedbackRead(feedbackId, read)
+  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminContentMock')).mockMarkContentFeedbackRead(feedbackId, read)
   return post('content.feedback.markRead', { feedbackId, read }, false)
 }

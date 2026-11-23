@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/engine/compat/router'
 import { ChevronDown, ChevronRight, Command, Download, Eye, Save } from 'lucide-react'
 import { Button } from '@/engine/components/ui/button'
 import { Input } from '@/engine/components/ui/input'

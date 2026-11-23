@@ -112,7 +112,7 @@ function planFromRaw(raw: Record<string, unknown>): ToolPlan {
  * biểu đồ thống kê, mạch điện) và trả cấu hình dạng chữ; app tự vẽ.
  * ------------------------------------------------------------------ */
 
-export { FIGURE_GUIDE, figureGuideFor } from './prompts/figureGuide.js'
+export { FIGURE_GUIDE, figureGuideFor } from './prompts/figureGuide'
 
 export interface ToolPlan {
   doc: ToolDoc
