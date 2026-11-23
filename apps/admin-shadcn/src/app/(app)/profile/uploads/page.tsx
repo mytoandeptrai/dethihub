@@ -1,3 +1,3 @@
-import { UploadsContainer } from '@/modules/foundation'
+import {MyUploadsContainer} from '@/modules/profile'
 
-export default UploadsContainer
+export default MyUploadsContainer

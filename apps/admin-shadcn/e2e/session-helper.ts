@@ -49,5 +49,10 @@ export async function signedInState(browser: Browser, origin: string) {
   await context.storageState({ path: state })
   await chmod(state, 0o600)
   await context.close()
-  return { state, accessToken: data.session.access_token }
+  return {
+    state,
+    accessToken: data.session.access_token,
+    refreshToken: data.session.refresh_token,
+    user: data.user,
+  }
 }

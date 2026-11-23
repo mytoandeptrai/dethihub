@@ -22,7 +22,7 @@ export async function storageUploadImage(options: Types.StorageUploadImageInput)
 }
 
 export async function storageListDocuments(options: Types.StorageListDocumentsInput) {
-  const { data } = await apiClient.GET('/api/storage/documents', options)
+  const { data } = await apiClient.GET('/api/storage/documents', { ...options, cache: 'no-store' })
   return data!
 }
 
@@ -37,6 +37,6 @@ export async function storageRemoveDocument(options: Types.StorageRemoveDocument
 }
 
 export async function storageUsage(options: Types.StorageUsageInput) {
-  const { data } = await apiClient.GET('/api/storage/usage', options)
+  const { data } = await apiClient.GET('/api/storage/usage', { ...options, cache: 'no-store' })
   return data!
 }

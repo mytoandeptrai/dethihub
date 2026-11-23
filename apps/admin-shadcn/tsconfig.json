@@ -11,6 +11,10 @@
       "@workspace-engine": ["./.engine-types/engine/compat/workspace.d.ts"],
       "@online-exams-engine": ["./.engine-types/engine/compat/online-exams.d.ts"],
       "@student-engine": ["./.engine-types/engine/compat/student-exams.d.ts"],
+      "@profile-engine": ["./.engine-types/engine/compat/profile.d.ts"],
+      "@library-engine": ["./.engine-types/engine/compat/library.d.ts"],
+      "@community-engine": ["./.engine-types/engine/compat/community.d.ts"],
+      "@product-ui-engine": ["./.engine-types/engine/compat/product-ui.d.ts"],
       "@student-kernel": ["./.engine-types/engine/compat/student-kernel.d.ts"],
       "@online-exams-kernel": ["./.engine-types/engine/compat/online-exams-kernel.d.ts"],
       "@/*": [

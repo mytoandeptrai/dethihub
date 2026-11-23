@@ -1,3 +1,11 @@
-import { WorkspaceContainer } from '@/modules/shell'
+import { Suspense } from 'react'
 
-export default WorkspaceContainer
+import { CommunityContainer } from '@/modules/community'
+
+export default function CommunityPage() {
+  return (
+    <Suspense>
+      <CommunityContainer />
+    </Suspense>
+  )
+}

@@ -1,3 +1,3 @@
-import { ProfileContainer } from '@/modules/foundation'
+import {ProfileContainer} from '@/modules/profile'
 
 export default ProfileContainer

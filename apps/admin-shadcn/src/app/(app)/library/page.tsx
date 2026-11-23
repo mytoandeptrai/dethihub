@@ -1,3 +1,3 @@
-import { WorkspaceContainer } from '@/modules/shell'
+import {LibraryContainer} from '@/modules/library'
 
-export default WorkspaceContainer
+export default LibraryContainer

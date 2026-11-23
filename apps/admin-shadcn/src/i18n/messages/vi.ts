@@ -1,3 +1,6 @@
+import profileCopy from './profile-copy'
+import libraryCopy from './library-copy'
+import communityCopy from './community-copy'
 import publicCopy from './public-copy'
 import workspaceCopy from './workspace-copy'
 import studentCopy from './student-copy'
@@ -8,6 +11,9 @@ const messages = {
   workspaceCopy,
   onlineExamsCopy,
   studentCopy,
+  profileCopy,
+  libraryCopy,
+  communityCopy,
   product: {
     studentPlay: 'Bài kiểm tra trực tuyến',
     studentQuiz: 'Làm đề',

@@ -3,12 +3,15 @@ import { apiClient } from '@/lib/api-client'
 import type * as Types from './types'
 
 export async function communityExamCommunity(options: Types.CommunityExamCommunityInput) {
-  const { data } = await apiClient.GET('/api/exams/community', options)
+  const { data } = await apiClient.GET('/api/exams/community', { ...options, cache: 'no-store' })
   return data!
 }
 
 export async function communityExamAuthors(options: Types.CommunityExamAuthorsInput) {
-  const { data } = await apiClient.GET('/api/exams/community/authors', options)
+  const { data } = await apiClient.GET('/api/exams/community/authors', {
+    ...options,
+    cache: 'no-store',
+  })
   return data!
 }
 
