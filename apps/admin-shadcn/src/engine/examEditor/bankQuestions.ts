@@ -1,0 +1,66 @@
+/**
+ * Câu trong kho câu hỏi thành khối của trình soạn. Gom nhiều câu thành một khối mẫu
+ * để chèn một lần qua đường chèn chung (`insertBlockTemplate`), nên thứ tự chọn được giữ nguyên.
+ */
+import type { JSONContent } from '@tiptap/core'
+import type { BankEntry } from '@/engine/data/bank'
+import type { BlockTemplate } from './templates'
+import { figureDoc, figureImageAttrs, figureParagraph } from './toolImages'
+
+const text = (s: string): JSONContent => ({ type: 'text', text: s })
+
+/** Một câu thành khối: trắc nghiệm có phương án → khối câu trắc nghiệm; còn lại → khối tự luận. */
+function entryBlock(entry: BankEntry, seq: number): JSONContent {
+  const stamp = `${Date.now()}-${seq}`
+  const kind = entry.type === 'dung-sai' ? 'tf' : entry.type === 'tra-loi-ngan' ? 'short' : null
+  if (kind === 'short' || (entry.options?.length && (entry.type === 'trac-nghiem' || kind === 'tf'))) {
+    return {
+      type: 'examQuestion',
+      attrs: { id: `q${stamp}`, no: 1, kind },
+      content: [
+        { type: 'examQuestionPrompt', attrs: { id: `qp${stamp}` }, content: [text(entry.prompt)] },
+        ...(entry.options ?? []).map((o) => ({
+          type: 'examOption',
+          attrs: { id: `qo${stamp}-${o.key}`, label: o.key },
+          content: [text(o.text)],
+        })),
+      ],
+    }
+  }
+  return {
+    type: 'examEssay',
+    attrs: { id: `es${stamp}`, no: 1, score: entry.points },
+    content: [{ type: 'examEssayPrompt', attrs: { id: `ep${stamp}` }, content: [text(entry.prompt)] }],
+  }
+}
+
+/** Các câu đã chọn, theo đúng thứ tự chọn, thành một khối mẫu để chèn tại con trỏ. */
+export function bankSelectionTemplate(entries: BankEntry[]): BlockTemplate {
+  return {
+    id: 'bank-selection',
+    group: 'Câu hỏi',
+    label: 'Câu từ kho',
+    desc: '',
+    // câu có hình: thêm đoạn ảnh căn giữa ngay dưới câu (ảnh SVG tạm, BankModal đổi sang PNG)
+    build: () =>
+      entries.flatMap((e, i) => {
+        const doc = figureDoc(e.figure)
+        const block = entryBlock(e, i)
+        if (e.image?.src) {
+          const image = { type: 'image', attrs: { src: e.image.src, alt: e.image.alt ?? '' } }
+          if (block.type === 'examQuestion') {
+            block.content![0].content!.push(image)
+            return [block]
+          }
+          return [block, { type: 'paragraph', attrs: { textAlign: 'center' }, content: [image] }]
+        }
+        if (!doc) return [block]
+        // câu trắc nghiệm: ảnh vào cuối đề bài để nằm trước phương án A–D
+        if (block.type === 'examQuestion') {
+          block.content![0].content!.push({ type: 'image', attrs: figureImageAttrs(doc) })
+          return [block]
+        }
+        return [block, figureParagraph(doc)]
+      }),
+  }
+}

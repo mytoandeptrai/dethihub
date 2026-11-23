@@ -1,0 +1,602 @@
+/**
+ * Xuất tài liệu đề (ExamDoc) ra Word / in A4.
+ *
+ * Tách riêng khỏi `exportDocx.ts` vì file đó xuất từ mô hình `Exam` (dùng cho
+ * đề cộng đồng), còn trình soạn dùng mô hình block `ExamDoc`.
+ */
+import katex from 'katex'
+import type { BandSetup, PageNumberSetup } from './pageSetup'
+import 'katex/contrib/mhchem' // \ce{...}
+import type { ExamBlock, ExamDoc, FormatAttrs, RichText, Span } from '@/engine/data/docTypes'
+import type { SummaryAnswerData } from '@/engine/lib/shuffleExam'
+import { estimateChoiceCols } from './choiceCols'
+import { splitRichLines } from './convert'
+
+/* ------------------------------------------------------------------ *
+ * Word (.docx)
+ * ------------------------------------------------------------------ */
+
+/** Tải file .docx thật. Thư viện `docx` nạp động để không nằm trong bundle chính. */
+export async function exportDocBlocks(
+  doc: ExamDoc,
+  opts?: { landscape?: boolean; paper?: { w: number; h: number }; fileName?: string; margins?: { top: number; right: number; bottom: number; left: number }; pageNumber?: PageNumberSetup; header?: BandSetup; footer?: BandSetup },
+): Promise<void> {
+  const { buildDocxBlob } = await import('./docxBlocks')
+  const url = URL.createObjectURL(await buildDocxBlob(doc, opts))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${sanitize(opts?.fileName ?? doc.title)}.docx`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(url), 1500)
+}
+
+function sanitize(s: string): string {
+  return s.replace(/[\\/:*?"<>|]/g, '-').trim() || 'de-thi'
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
+/** Giá trị CSS lấy từ JSON đề (có thể do người khác soạn): chỉ giữ ký tự an toàn, không thoát được khỏi style="". */
+function css(v: unknown): string {
+  return String(v).replace(/[^#\w\s.,%()\-]/g, '')
+}
+
+/** Rich text → HTML có mark (`<b>/<i>/<u>/<s>/<sub>/<sup>/<span style>`). */
+function richToHtml(rt: RichText): string {
+  if (typeof rt === 'string') return textToHtml(rt)
+  return rt.map(spanToHtml).join('')
+}
+
+/** Mỗi dòng của đầu đề thành một dòng trong ô bảng (Word không cần paragraph). */
+function richLines(rt: RichText): string {
+  return splitRichLines(rt)
+    .map((line) => richToHtml(line))
+    .join('<br>')
+}
+
+/**
+ * Văn bản có công thức `$…$` / `$$…$$` → HTML. Công thức xuất bằng MathML (KaTeX) nên cửa sổ in không cần
+ * CSS/font KaTeX; Chrome và Edge vẽ MathML gốc, ra PDF đúng công thức.
+ */
+function textToHtml(text: string): string {
+  let out = ''
+  let at = 0
+  for (const m of text.matchAll(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g)) {
+    out += escapeHtml(text.slice(at, m.index))
+    out += katex.renderToString(m[1] ?? m[2], { output: 'mathml', displayMode: m[1] !== undefined, throwOnError: false })
+    at = m.index + m[0].length
+  }
+  return out + escapeHtml(text.slice(at))
+}
+
+function spanToHtml(s: Span): string {
+  if (s.image) {
+    const w = s.image.width ? ` width="${css(Math.round(s.image.width))}"` : ''
+    return `<img src="${s.image.src.replace(/"/g, '&quot;')}" alt="${escapeHtml(s.image.alt ?? '')}"${w} style="max-width:100%">`
+  }
+  let inner = textToHtml(s.text)
+  for (const m of s.marks ?? []) {
+    switch (m.type) {
+      case 'bold':
+        inner = `<b>${inner}</b>`
+        break
+      case 'italic':
+        inner = `<i>${inner}</i>`
+        break
+      case 'underline':
+        inner = `<u>${inner}</u>`
+        break
+      case 'strike':
+        inner = `<s>${inner}</s>`
+        break
+      case 'sub':
+        inner = `<sub>${inner}</sub>`
+        break
+      case 'super':
+        inner = `<sup>${inner}</sup>`
+        break
+      case 'boxed':
+        inner = `<span style="border:1px solid #000;padding:0 4px;display:inline-block">${inner}</span>`
+        break
+      case 'highlight': {
+        const c = (m.attrs?.color as string | undefined) ?? '#fff3a3'
+        inner = `<span style="background:${css(c)}">${inner}</span>`
+        break
+      }
+      case 'textStyle': {
+        const a = m.attrs ?? {}
+        const st: string[] = []
+        if (a.fontFamily) st.push(`font-family:${css(a.fontFamily)}`)
+        if (a.fontSize) st.push(`font-size:${css(a.fontSize)}`)
+        if (a.color) st.push(`color:${css(a.color)}`)
+        if (st.length) inner = `<span style="${st.join(';')}">${inner}</span>`
+        break
+      }
+    }
+  }
+  return inner
+}
+
+/** FormatAttrs → inline style cho thẻ block (align/line-height/indent/space/border/shading). */
+function formatCss(f: FormatAttrs | undefined): string {
+  if (!f) return ''
+  const st: string[] = []
+  if (f.align) st.push(`text-align:${css(f.align)}`)
+  if (f.lineHeight != null) st.push(`line-height:${css(f.lineHeight)}`)
+  if (f.indentLeft != null) st.push(`margin-left:${css(f.indentLeft)}px`)
+  if (f.indentFirstLine != null) st.push(`text-indent:${css(f.indentFirstLine)}px`)
+  if (f.spaceBefore != null) st.push(`margin-top:${css(f.spaceBefore)}px`)
+  if (f.spaceAfter != null) st.push(`margin-bottom:${css(f.spaceAfter)}px`)
+  if (f.shading) st.push(`background-color:${css(f.shading)}`)
+  if (f.borders && f.borders !== 'none') {
+    const w = '1px solid #000'
+    if (f.borders === 'box') st.push(`border:${w}`)
+    else st.push(`border-${css(f.borders)}:${w}`)
+  }
+  return st.length ? ` style="${st.join(';')}"` : ''
+}
+
+function blocksToHtml(blocks: ExamBlock[]): string {
+  // Số câu/bài lấy theo thứ tự khối, khớp với CSS counter trên màn hình:
+  // `block.no` có thể cũ sau khi chèn/xoá/sắp xếp lại câu.
+  const seq: BlockSeq = { q: 0, essay: 0 }
+  return blocks
+    .map((b, i) => {
+      if (b.type === 'question') seq.q += 1
+      if (b.type === 'essay') seq.essay += 1
+      if (b.type === 'toc') return tocHtml(blocks.slice(i + 1))
+      return blockToHtml(b, seq)
+    })
+    .join('\n')
+}
+
+/** mục lục khi in / xuất HTML: chưa biết số trang nên chỉ liệt kê đề mục */
+function tocHtml(after: ExamBlock[]): string {
+  const rows = after
+    .filter((b): b is Extract<ExamBlock, { type: 'heading' }> => b.type === 'heading')
+    .map((h) => `<p class="p" style="margin:2px 0 2px ${((h.level ?? 1) - 1) * 18}px">${richToHtml(h.text)}</p>`)
+  return `<h2 class="h1">MỤC LỤC</h2>${rows.join('')}`
+}
+
+interface BlockSeq {
+  q: number
+  essay: number
+}
+
+function blockToHtml(b: ExamBlock, seq: BlockSeq): string {
+  switch (b.type) {
+    case 'header':
+      return `<table class="hdr"><tr><td>${richLines(b.left)}</td><td>${richLines(
+        b.right,
+      )}</td></tr></table>`
+
+    case 'columns':
+      return `<table class="cols"><tr>${b.cols.map((c) => `<td style="width:${(100 / b.cols.length).toFixed(2)}%">${richLines(c)}</td>`).join('')}</tr></table>`
+
+    case 'title':
+      return `<h1 class="t"${formatCss(b.format)}>${richToHtml(b.text)}</h1>`
+
+    case 'meta':
+      return `<div class="meta">${b.rows
+        .map(([k, v]) => `<b>${escapeHtml(k)}:</b> ${richToHtml(v)}`)
+        .join(' &nbsp;•&nbsp; ')}</div>`
+
+    case 'student':
+      return `<p class="stu"${formatCss(b.format)}>${richToHtml(b.text)}</p>`
+
+    case 'heading':
+      return `<h2 class="h${b.level ?? 1}"${formatCss(b.format)}>${richToHtml(b.text)}</h2>`
+
+    case 'paragraph':
+      return `<p class="p"${formatCss(b.format)}>${richToHtml(b.text)}</p>`
+
+    case 'bullets': {
+      const tag = b.ordered ? 'ol' : 'ul'
+      return `<${tag} class="bul"${formatCss(b.format)}>${b.items
+        .map((i, n) => {
+          const lv = b.levels?.[n] ?? 0
+          return `<li${lv ? ` style="margin-left:${css(lv * 24)}px"` : ''}>${richToHtml(i)}</li>`
+        })
+        .join('')}</${tag}>`
+    }
+
+    case 'grid': {
+      const width = Math.round(100 / (b.cols || 2))
+      return (
+        '<table class="grid"><tr>' +
+        b.cells.map((c) => `<td style="width:${css(width)}%">${richToHtml(c)}</td>`).join('') +
+        '</tr></table>'
+      )
+    }
+
+    case 'question': {
+      const head = `<p class="q"${formatCss(b.format)}><b>Câu ${seq.q}.</b> ${richToHtml(b.text)}</p>`
+      // trả lời ngắn: 4 ô trống điền đáp số (khớp 4 cột trên phiếu trả lời)
+      if (b.kind === 'short') {
+        return head + '<table class="sa" cellspacing="0"><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>'
+      }
+      // đúng/sai: mỗi ý một dòng, nhãn "a)"; trắc nghiệm: 4/3/2/1 cột theo độ dài (như màn hình), nhãn "A."
+      const tf = b.kind === 'tf'
+      const cols = tf ? 1 : estimateChoiceCols(b.options.map((o) => o.text))
+      const rows = chunk(b.options, cols)
+        .map(
+          (row) =>
+            '<tr>' +
+            row
+              .map(
+                (o) =>
+                  `<td class="opt"${formatCss(o.format)}><b>${escapeHtml(o.label)}${tf ? ')' : '.'}</b> ${richToHtml(
+                    o.text,
+                  )}</td>`,
+              )
+              .join('') +
+            '</tr>',
+        )
+        .join('')
+      return head + (rows ? `<div class="opts${tf ? ' tf' : ` c${cols}`}"><table>${rows}</table></div>` : '')
+    }
+
+    case 'essay':
+      return (
+        `<p class="q"${formatCss(b.format)}><b>Bài ${seq.essay}${b.score ? ` (${escapeHtml(fmt(b.score))} điểm)` : ''}.</b> ${richToHtml(
+          b.text,
+        )}</p>` +
+        (b.sub?.length
+          ? `<div class="subs">${b.sub.map((s) => `<div class="sub">${richToHtml(s)}</div>`).join('')}</div>`
+          : '')
+      )
+
+    case 'answerKey': {
+      const rows = chunk(b.items, 10)
+      return (
+        '<table class="ak">' +
+        rows
+          .map((row) => {
+            const nos = row.map((c) => `<td>${escapeHtml(String(c.no))}</td>`).join('')
+            const ans = row.map((c) => `<td><b>${richToHtml(c.answer)}</b></td>`).join('')
+            return `<tr><th>Câu</th>${nos}</tr><tr><th>Đáp án</th>${ans}</tr>`
+          })
+          .join('') +
+        '</table>'
+      )
+    }
+
+    case 'rubric':
+      return (
+        (b.title ? `<h2 class="h2">${richToHtml(b.title)}</h2>` : '') +
+        '<ol class="rub">' +
+        b.items
+          .map((i) => `<li>${escapeHtml(i.label)} ${richToHtml(i.text)}</li>`)
+          .join('') +
+        '</ol>'
+      )
+
+    case 'pageBreak':
+      return '<div style="page-break-after:always"></div>'
+
+    case 'divider':
+      return '<hr class="hr">'
+
+    case 'table': {
+      const rowsHtml = b.rows
+        .map(
+          (row) =>
+            '<tr>' +
+            row
+              .map((c) => {
+                const tag = c.header ? 'th' : 'td'
+                const attrs = [
+                  c.colSpan && c.colSpan > 1 ? ` colspan="${c.colSpan}"` : '',
+                  c.rowSpan && c.rowSpan > 1 ? ` rowspan="${c.rowSpan}"` : '',
+                  c.align ? ` style="text-align:${css(c.align)}"` : '',
+                ].join('')
+                return `<${tag}${attrs}>${richLines(c.text)}</${tag}>`
+              })
+              .join('') +
+            '</tr>',
+        )
+        .join('')
+      return `<table class="doc-table"${formatCss(b.format)}>${rowsHtml}</table>`
+    }
+
+    default:
+      return ''
+  }
+}
+
+function chunk<T>(arr: T[], n: number): T[][] {
+  const out: T[][] = []
+  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n))
+  return out
+}
+
+function fmt(n: number): string {
+  return n.toLocaleString('vi-VN', {
+    minimumFractionDigits: n % 1 === 0 ? 0 : 1,
+    maximumFractionDigits: 1,
+  })
+}
+
+/** CSS dùng chung cho bản in (và bản HTML cũ của Word, còn dùng trong test) — một nguồn, tránh hai nơi lệch nhau. */
+const EXPORT_CSS = `
+  @page { size: A4; margin: 1.8cm 1.6cm; }
+  body { font-family: "Times New Roman", serif; font-size: 13pt; line-height: 1.5; color: #000; }
+  .hdr { width: 100%; table-layout: fixed; border: none; margin: 0 0 6px; font-weight: bold; font-size: 11.5pt; line-height: 1.5; }
+  .hdr td { border: none; vertical-align: top; text-align: center; }
+  .hdr td:first-child { width: 31%; }
+  .cols { width: 100%; table-layout: fixed; border: none; margin: 0 0 6px; }
+  .cols td { border: none; vertical-align: top; padding: 0 0.6cm 0 0; }
+  .cols td:last-child { padding-right: 0; }
+  .hdr td:last-child { width: 69%; }
+  .hdr i { font-weight: normal; }
+  .t { text-align: center; font-size: 15pt; font-weight: bold; margin: 0 0 6px; text-transform: uppercase; }
+  .meta { text-align: center; font-size: 12pt; margin: 0 0 4px; }
+  .stu { font-size: 12.5pt; margin: 8px 0 10px; }
+  .h1 { font-size: 13pt; font-weight: bold; text-align: center; margin: 16px 0 8px; text-transform: uppercase; }
+  .h2 { font-size: 12.5pt; font-weight: bold; margin: 12px 0 6px; text-transform: uppercase; }
+  .h3 { font-size: 12.5pt; font-weight: bold; margin: 10px 0 5px; }
+  .p { margin: 0 0 6px; text-align: justify; }
+  .p.it { font-style: italic; }
+  .bul { margin: 0 0 8px 24px; }
+  .grid { width: 100%; border: none; border-collapse: collapse; margin: 4px 0; }
+  .grid td { border: none; vertical-align: top; padding: 0 6px 0 0; }
+  .q { margin: 8px 0 3px; text-align: justify; }
+  .q > img:last-child { display: block; margin: 4px auto 0; }
+  /* Phương án 2 cột bằng bảng: Word không hiểu flex, dùng bảng để file Word
+     và bản in giống nhau. */
+  .opts { margin: 0 0 4px 22px; }
+  .opts table { width: 100%; border-collapse: collapse; }
+  .opts td { width: 50%; vertical-align: top; padding: 0 6px 0 0; border: none; }
+  .opts.c1 td, .opts.tf td { width: 100%; }
+  .opts.c3 td { width: 33.33%; }
+  .opts.c4 td { width: 25%; }
+  .sa { margin: 2px 0 6px 22px; border-collapse: collapse; }
+  .sa td { width: 28px; height: 28px; border: 1px solid #000; }
+  .subs { margin-left: 22px; }
+  .sub { margin: 0 0 3px; }
+  .ak { border-collapse: collapse; margin: 10px 0; font-size: 12pt; }
+  .ak td, .ak th { border: 1px solid #000; padding: 2px 6px; text-align: center; }
+  .ak th { background: #f2f2f2; }
+  .rub { margin: 0 0 8px 22px; }
+  .hr { border: 0; border-top: 1px solid #999; margin: 10px 0; }
+  @page omr { size: A4 portrait; margin: 0.4cm; }
+  .sheet-wrapper { page: omr; page-break-inside: avoid; break-inside: avoid; width: 100%; display: flex; justify-content: center; align-items: center; box-sizing: border-box; }
+  .sheet-wrapper svg { width: 100%; max-width: 202mm; max-height: 288mm; height: auto; display: block; margin: 0 auto; }
+  .summary-wrap { width: 100%; }
+  .summary-table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: 11pt; }
+  .summary-table th, .summary-table td { border: 1px solid #000; padding: 3px 5px; text-align: center; }
+  .summary-table th { background: #f2f2f2; font-weight: bold; }
+  .summary-table tr { break-inside: avoid; page-break-inside: avoid; }
+  /* công thức MathML: phân số cỡ chữ thường thay vì thu nhỏ như chỉ số */
+  math { math-style: normal; }
+`
+
+export function buildWordHtml(doc: ExamDoc): string {
+  return `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(doc.title)}</title>
+<style>
+${EXPORT_CSS}
+</style>
+</head>
+<body>
+${blocksToHtml(doc.blocks)}
+</body>
+</html>`
+}
+
+/* ------------------------------------------------------------------ *
+ * In A4
+ * ------------------------------------------------------------------ */
+
+/**
+ * Mở hộp thoại in với CSS @page A4.
+ * Nội dung in lấy từ chính tài liệu đang mở nên khớp với màn hình.
+ *
+ * `window.open` có thể bị chặn (popup blocker, hoặc trình duyệt chặn cửa
+ * sổ mới từ handler không phải thao tác trực tiếp) → trả `null`. Khi đó
+ * fallback sang iframe ẩn: in ra chính trang hiện tại, vẫn ra đúng A4 nhờ
+ * CSS @page. Không fallback thì bấm In im lặng, user tưởng nút hỏng.
+ */
+export function printDoc(doc: ExamDoc, page?: PrintPage): void {
+  printHtml(buildPrintHtml(doc, page))
+}
+
+/** khổ/lề trang lấy từ Thiết lập trang của trình soạn (cm) */
+export type PrintPage = { landscape?: boolean; paper?: { w: number; h: number }; margins?: { top: number; right: number; bottom: number; left: number }; pageNumber?: PageNumberSetup; header?: BandSetup; footer?: BandSetup }
+
+/** ghi đè @page mặc định của EXPORT_CSS bằng lề/hướng người dùng đặt */
+function pageCss(page?: PrintPage): string {
+  if (!page) return ''
+  const m = page.margins
+  const n = (v: number) => `${Math.max(0, Math.min(6, Number(v) || 0))}cm`
+  return `@page { size: ${page.paper ? `${page.paper.w}cm ${page.paper.h}cm` : `A4 ${page.landscape ? 'landscape' : 'portrait'}`};${m ? ` margin: ${n(m.top)} ${n(m.right)} ${n(m.bottom)} ${n(m.left)};` : ''} }${bandCss(page)}`
+}
+
+/**
+ * Đầu/chân trang và số trang khi in: ô lề @page (Chrome/Edge). Trình duyệt in
+ * chỉ cho đổi riêng `:first`, và không cộng/trừ được vào counter(page), nên
+ * dời số bằng counter-increment ở trang đầu: trang `from` in đúng `startAt`.
+ */
+function bandCss(page: PrintPage): string {
+  const pn = page.pageNumber
+  const css = (v: string) => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\s+/g, ' ')}"`
+  const boxes: string[] = []
+  const firsts: string[] = []
+  for (const side of ['top', 'bottom'] as const) {
+    const band = side === 'top' ? page.header : page.footer
+    for (const slot of ['left', 'center', 'right'] as const) {
+      const text = band?.text.trim() && band.align === slot ? band.text.trim() : ''
+      const num = !!pn?.show && (pn.place ?? 'bottom') === side && pn.align === slot
+      const content = (t: boolean, n: boolean) =>
+        [t && css(text), t && n && '" – "', n && 'counter(page)'].filter(Boolean).join(' ') || 'none'
+      const all = content(!!text, num)
+      if (all === 'none') continue
+      const box = `@${side}-${slot}`
+      boxes.push(`${box} { content: ${all}; font: 13px 'Times New Roman', serif; }`)
+      const first = content(!!text && !band?.skipFirst, num && pn!.from <= 1)
+      if (first !== all) firsts.push(`${box} { content: ${first}; }`)
+    }
+  }
+  const offset = pn?.show ? Math.round(pn.startAt - pn.from) : 0
+  return (boxes.length ? ` @page { ${boxes.join(' ')} }` : '') +
+    // counter-increment ở trang đầu thay cho mức +1 mặc định → các trang sau cứ +1 tiếp
+    (offset ? ` @page :first { counter-increment: page ${offset + 1}; }` : '') +
+    (firsts.length ? ` @page :first { ${firsts.join(' ')} }` : '')
+}
+
+/** In nhiều đề trong một lần (xáo đề: mỗi mã đề sang trang mới) → lưu thành một file PDF. */
+export function printDocs(docs: ExamDoc[], title: string): void {
+  const body = docs.map((d) => blocksToHtml(d.blocks)).join('<div style="page-break-after:always"></div>')
+  printHtml(`<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+<style>${EXPORT_CSS}</style></head>
+<body>${body}</body></html>`)
+}
+
+export interface PrintShuffleItem {
+  doc: ExamDoc
+  code: string
+  sheetSvg?: string
+}
+
+/** Dựng HTML cho hai bảng đáp án tổng hợp (theo đề gốc và theo từng mã đề để chấm tay). */
+export function summaryAnswersToHtml(summary: SummaryAnswerData, examTitle: string): string {
+  const codeGroups = chunk(summary.codes.map((_, i) => i), 10)
+
+  const renderGroupTables = (rows: SummaryAnswerData['byOriginal'], firstCol: string) =>
+    codeGroups
+      .map((grp) => {
+        const thCols = grp.map((ci) => `<th>Mã ${escapeHtml(summary.codes[ci])}</th>`).join('')
+        const bodyRows = rows
+          .map(
+            (r) =>
+              `<tr><td style="font-weight:bold;background:#fafafa;">Câu ${r.no}</td>` +
+              grp.map((ci) => `<td style="font-weight:bold;">${escapeHtml(r.answers[ci] || '?')}</td>`).join('') +
+              `</tr>`,
+          )
+          .join('')
+        return `<table class="summary-table"><thead><tr><th style="width:110px;">${escapeHtml(firstCol)}</th>${thCols}</tr></thead><tbody>${bodyRows}</tbody></table>`
+      })
+      .join('')
+
+  return `
+<div class="summary-wrap">
+  <h1 class="t">BẢNG ĐÁP ÁN TỔNG HỢP CÁC MÃ ĐỀ</h1>
+  <p class="p" style="text-align:center;font-style:italic;margin-bottom:14px;">${escapeHtml(examTitle)}</p>
+  <h2 class="h2">1. Bảng đáp án theo thứ tự câu đề gốc</h2>
+  ${renderGroupTables(summary.byOriginal, 'Câu (gốc)')}
+  <h2 class="h2">2. Bảng đáp án theo thứ tự câu từng mã đề (chấm tay)</h2>
+  ${renderGroupTables(summary.byVersion, 'Câu')}
+</div>`
+}
+
+/** Dựng HTML in tổng hợp: mỗi mã đề (+ phiếu trả lời nếu có), đáp án từng mã, trang cuối là bảng đáp án tổng hợp. */
+export function buildShuffledPrintHtml(
+  items: PrintShuffleItem[],
+  title: string,
+  opts: { answerDoc?: ExamDoc; summary?: SummaryAnswerData } = {},
+): string {
+  const sections: Array<{ html: string; omr?: boolean }> = []
+  for (const item of items) {
+    sections.push({ html: blocksToHtml(item.doc.blocks) })
+    if (item.sheetSvg) {
+      sections.push({ html: `<div class="sheet-wrapper">${item.sheetSvg}</div>`, omr: true })
+    }
+  }
+  if (opts.answerDoc) {
+    sections.push({ html: blocksToHtml(opts.answerDoc.blocks) })
+  }
+  if (opts.summary) {
+    sections.push({ html: summaryAnswersToHtml(opts.summary, title) })
+  }
+
+  let body = ''
+  for (let i = 0; i < sections.length; i++) {
+    if (i > 0 && !sections[i].omr && !sections[i - 1].omr) {
+      // Chuyển giữa hai phần cùng dùng @page mặc định thì chèn ngắt trang;
+      // chuyển vào/ra .sheet-wrapper (page: omr) trình duyệt tự ngắt trang nên không chèn thêm tránh trang trắng.
+      body += '<div style="page-break-after:always"></div>'
+    }
+    body += sections[i].html
+  }
+
+  return `<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+<style>${EXPORT_CSS}</style></head>
+<body>${body}</body></html>`
+}
+
+/** In toàn bộ mã đề + phiếu trả lời + đáp án + bảng tổng hợp ra PDF một lần. */
+export function printShuffledExams(
+  items: PrintShuffleItem[],
+  title: string,
+  opts: { answerDoc?: ExamDoc; summary?: SummaryAnswerData } = {},
+): void {
+  printHtml(buildShuffledPrintHtml(items, title, opts))
+}
+
+export const docFileName = (title: string) => sanitize(title)
+
+function printHtml(html: string): void {
+  const w = window.open('', '_blank', 'width=900,height=1000')
+  if (w) {
+    w.document.open()
+    w.document.write(html)
+    // gán onload TRƯỚC khi close — gán sau thì load có thể đã xong,
+    // `print()` không bao giờ chạy
+    w.onload = () => {
+      setTimeout(() => {
+        w.focus()
+        w.print()
+      }, 250)
+    }
+    w.document.close()
+    w.focus()
+    return
+  }
+  printViaHiddenFrame(html)
+}
+
+/** In bằng iframe ẩn — dùng khi `window.open` bị chặn. */
+function printViaHiddenFrame(html: string): void {
+  const frame = document.createElement('iframe')
+  frame.setAttribute('aria-hidden', 'true')
+  frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
+  document.body.appendChild(frame)
+  const cleanup = () => {
+    // đợi hộp thoại in đóng rồi mới gỡ iframe (bỏ sớm sẽ huỷ lệnh in)
+    setTimeout(() => frame.remove(), 1000)
+  }
+  const doc = frame.contentDocument
+  if (!doc) {
+    frame.remove()
+    return
+  }
+  doc.open()
+  doc.write(html)
+  doc.close()
+  frame.onload = () => {
+    setTimeout(() => {
+      try {
+        frame.contentWindow?.focus()
+        frame.contentWindow?.print()
+      } finally {
+        cleanup()
+      }
+    }, 250)
+  }
+}
+
+function buildPrintHtml(doc: ExamDoc, page?: PrintPage): string {
+  return `<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><title>${escapeHtml(doc.title)}</title>
+<style>${EXPORT_CSS}${pageCss(page)}</style></head>
+<body>${blocksToHtml(doc.blocks)}</body></html>`
+}
