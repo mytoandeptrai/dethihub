@@ -2603,7 +2603,7 @@
   .nav-search:focus-within {
     border-color: var(--color-clay-line);
     background: var(--color-surface);
-    box-shadow: 0 0 0 3px rgb(180 83 42 / 8%);
+    box-shadow: 0 0 0 3px var(--docs-brand-ghost);
   }
 
   .nav-search-input {

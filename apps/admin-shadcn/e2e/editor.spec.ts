@@ -30,10 +30,15 @@ test('editor tools, exports, slide and board surfaces', async ({ page }, info) =
   await expect(page.locator('[data-exam-node="examQuestion"]')).toHaveCount(24)
   await page.evaluate(() => document.fonts.ready)
 
-  for (const label of ['Văn bản', 'Chèn', 'Trang', 'Mục lục']) {
-    await page.getByRole('navigation', { name: 'Công cụ soạn đề' }).getByRole('button', { name: label, exact: true }).click()
-    await expect(page.locator('.exam-tool-panel')).toHaveCSS('width', '300px')
-    await page.getByRole('button', { name: 'Đóng công cụ', exact: true }).click()
+  await expect(page.locator('[data-editor-header]')).toHaveCount(0)
+  for (const label of ['Trang chủ', 'Chèn', 'Bố cục']) {
+    await page.locator('.ribbon-tabs').getByRole('tab', { name: label, exact: true }).click()
+    await expect(page.locator('.ribbon-body')).toBeVisible()
+  }
+  for (const label of ['Mục lục', 'Khối mẫu', 'Công cụ']) {
+    await page.getByRole('navigation', { name: 'Bảng điều hướng' }).getByRole('button', { name: label, exact: true }).click()
+    await expect(page.getByRole('complementary', { name: label, exact: true })).toBeVisible()
+    await page.getByRole('complementary', { name: label, exact: true }).getByRole('button', { name: 'Đóng panel', exact: true }).click()
   }
   await page.keyboard.press('Control+k')
   const palette = page.getByRole('dialog', { name: 'Lệnh soạn đề' })
@@ -51,17 +56,17 @@ test('editor tools, exports, slide and board surfaces', async ({ page }, info) =
   await page.keyboard.press('Escape')
   await page.keyboard.press('Backspace')
 
-  await page.getByRole('button', { name: 'Xuất', exact: true }).click()
+  await page.getByRole('button', { name: 'Tệp', exact: true }).click()
   const pendingDownload = page.waitForEvent('download')
-  await page.getByRole('menuitem', { name: 'Xuất Word', exact: true }).click()
+  await page.getByRole('menuitem', { name: /Xuất Word/ }).click()
   const download = await pendingDownload
   expect(download.suggestedFilename()).toMatch(/\.docx$/)
   await download.saveAs(path.join(output, 'exam.docx'))
   expect((await readFile(path.join(output, 'exam.docx'))).subarray(0, 2).toString()).toBe('PK')
 
   const pendingPopup = page.waitForEvent('popup')
-  await page.getByRole('button', { name: 'Xuất', exact: true }).click()
-  await page.getByRole('menuitem', { name: 'PDF', exact: true }).click()
+  await page.getByRole('button', { name: 'Tệp', exact: true }).click()
+  await page.getByRole('menuitem', { name: /Xuất PDF/ }).click()
   const preview = await pendingPopup
   await preview.waitForLoadState()
   await preview.evaluate(() => document.fonts.ready)

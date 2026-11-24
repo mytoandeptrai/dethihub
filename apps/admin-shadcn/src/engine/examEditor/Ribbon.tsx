@@ -28,8 +28,8 @@ import { cn } from '@/engine/lib/cn'
 import { Segmented } from '@/engine/components/Segmented'
 import { BookMarked } from 'lucide-react'
 import { MonitorPlay, ListTree, TableCellsMerge, TableCellsSplit } from 'lucide-react'
-import { FileMenu } from './FileMenu'
-import { ExamChrome, type ExamChromeOptions } from './ExamChrome'
+import { FileMenu, type FileMenuExtra } from './FileMenu'
+import { ExamCommandHost } from './ExamCommandHost'
 import type { ExamCommand } from './commands'
 import { lazyPage } from '@/engine/lib/lazyPage'
 // ngân hàng câu hỏi (kéo theo công cụ vẽ hình ~100 KB gzip) nạp khi mở
@@ -135,9 +135,9 @@ const STYLE_PRESETS: StylePreset[] = [
   { id: 'noSpacing', label: 'Không giãn', preview: { fontSize: 13, lineHeight: 1 } },
   { id: 'title', label: 'Tiêu đề', preview: { fontSize: 17, fontWeight: 700 } },
   { id: 'subtitle', label: 'Phụ đề', preview: { fontSize: 13, color: '#666' } },
-  { id: 'heading1', label: 'Tiêu đề 1', preview: { fontSize: 15, fontWeight: 700, color: '#8e3f1f' } },
-  { id: 'heading2', label: 'Tiêu đề 2', preview: { fontSize: 14, fontWeight: 700, color: '#8e3f1f' } },
-  { id: 'heading3', label: 'Tiêu đề 3', preview: { fontSize: 13, fontWeight: 700, color: '#8e3f1f' } },
+  { id: 'heading1', label: 'Tiêu đề 1', preview: { fontSize: 15, fontWeight: 700, color: 'var(--word-heading)' } },
+  { id: 'heading2', label: 'Tiêu đề 2', preview: { fontSize: 14, fontWeight: 700, color: 'var(--word-heading)' } },
+  { id: 'heading3', label: 'Tiêu đề 3', preview: { fontSize: 13, fontWeight: 700, color: 'var(--word-heading)' } },
   { id: 'quote', label: 'Trích dẫn', preview: { fontSize: 13, fontStyle: 'italic', color: '#666' } },
 ]
 
@@ -177,9 +177,9 @@ export function Ribbon({
   onFooterChange,
   onOpenNav,
   layoutMode = 'desktop',
-  chrome,
+  fileActions = [],
 }: {
-  chrome?: ExamChromeOptions
+  fileActions?: FileMenuExtra[]
   editor: Editor | null
   activeTab: string
   onTabChange: (id: string) => void
@@ -228,8 +228,10 @@ export function Ribbon({
   const [painter, setPainter] = useState(false)
   const [dialog, setDialog] = useState<'link' | 'equation' | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [revealRequest, setRevealRequest] = useState<{ tab: string } | null>(null)
 
   const handleTabChange = (id: string) => {
+    setRevealRequest(null)
     if (collapsed) setCollapsed(false)
     onTabChange(id)
   }
@@ -443,6 +445,7 @@ export function Ribbon({
       extra={[
         { label: 'Xuất PDF', hint: 'In ra hoặc lưu thành PDF', onClick: onExportPdf },
         { label: 'Làm đề tương tác', hint: 'Làm thử có đếm ngược, tự chấm', onClick: onStartQuiz, icon: <MonitorPlay className="size-4" strokeWidth={1.5} /> },
+        ...fileActions,
       ]}
     />
   )
@@ -1047,15 +1050,12 @@ export function Ribbon({
     ],
   }
 
-  const activeGroups = groupsByTab[activeTab] ?? groupsByTab.home
-
   const overlays = <>
     {editor && dialog === 'link' && <LinkDialog editor={editor} onClose={() => setDialog(null)} />}
     {editor && dialog === 'equation' && <EquationDialog editor={editor} onClose={() => setDialog(null)} />}
     {editor && bankOpen && <Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-black/20"><Spinner className="size-6" /></div>}><BankModal editor={editor} onClose={() => setBankOpen(false)} /></Suspense>}
   </>
-  if (chrome) {
-    const extra: ExamCommand[] = [
+  const extra: ExamCommand[] = [
       { id: 'file.new', label: 'Đề mới', run: onNewDoc },
       { id: 'file.import', label: 'Nhập file…', run: () => importInputRef.current?.click() },
       { id: 'file.word', label: 'Xuất Word', run: onExportWord },
@@ -1069,10 +1069,12 @@ export function Ribbon({
       { id: 'nav.tools', label: 'Đồ thị và công cụ vẽ', run: () => onOpenNav?.('tools') },
       { id: 'nav.toc', label: 'Mục lục', run: () => onOpenNav?.('toc') },
     ].map((command) => ({ ...command, family: command.id, group: command.id.startsWith('file.') ? 'Tệp' : 'Điều hướng', tab: 'Tệp' }))
-    return <><ExamChrome editor={editor} tabs={groupsByTab} options={chrome} fileMenu={fileMenuEl} extra={extra} overrides={{ 'exam.insert.table.1': () => insertExamTable(editor, 3, 3) }} />{overlays}</>
-  }
-
   return (
+    <ExamCommandHost editor={editor} tabs={groupsByTab} extra={extra} overrides={{ 'exam.insert.table.1': () => insertExamTable(editor, 3, 3) }} onReveal={(tab) => { setCollapsed(false); setRevealRequest({ tab }); onTabChange(tab) }}>
+    {(groups) => {
+      const renderedTabs = Object.fromEntries(Object.keys(groupsByTab).map((tab) => [tab, groups.filter((group) => group.tab === tab).map((group) => ({ id: group.id, label: group.label, render: () => group.content }))]))
+      const activeGroups = renderedTabs[activeTab] ?? renderedTabs.home
+      return <>
     <div
       className="ribbon"
       onMouseDown={(e) => {
@@ -1083,7 +1085,8 @@ export function Ribbon({
       {layoutMode === 'phone' ? (
         <PhoneRibbon
           fileMenu={fileMenuEl}
-          groupsByTab={groupsByTab}
+          groupsByTab={renderedTabs}
+          reveal={revealRequest}
           onSave={onSave}
           onUndo={() => chain()?.undo().run()}
           onRedo={() => chain()?.redo().run()}
@@ -1151,7 +1154,7 @@ export function Ribbon({
             <span className="ribbon-tabs-spacer" />
             <div className="ribbon-quick">
               <span className="ribbon-quick__meta">
-                {pageCount} trang{dirty ? ' · chưa lưu' : ''}
+                {pageCount} trang · {dirty ? 'Chưa lưu' : 'Đã lưu'}
               </span>
               <button
                 type="button"
@@ -1166,7 +1169,7 @@ export function Ribbon({
           </RibbonTabs>
 
           {!collapsed && (
-            layoutMode === 'tablet' ? (
+            layoutMode === 'tablet' && !revealRequest ? (
               <TabletRibbonBody activeKey={activeTab} groups={activeGroups} />
             ) : (
               <RibbonBody activeKey={activeTab}>
@@ -1184,6 +1187,9 @@ export function Ribbon({
 
       {overlays}
     </div>
+    </>
+    }}
+    </ExamCommandHost>
   )
 }
 

@@ -23,12 +23,11 @@ import type { JSONContent } from '@tiptap/core'
 import type { Selection } from '@tiptap/pm/state'
 import { pageGeometry, marginsOf, paperCm, CM, PAGE_SIZES, type PageSetup } from '@/engine/examEditor/pageSetup'
 import { Ribbon } from '@/engine/examEditor/Ribbon'
-import { EXAM_PANEL_KEY, readExamPanel, type ExamPanel } from '@/engine/examEditor/ExamChrome'
 import { TabStrip } from '@/engine/examEditor/TabStrip'
 import { EditorHeader } from '@/engine/examEditor/EditorHeader'
 import { MonitorPlay } from 'lucide-react'
 import type { SlideEditorActions } from '@/engine/examEditor/SlideEditor'
-import { docStatus } from '@/engine/lib/docStatus'
+import { DOC_STATUS_LABELS, docStatus, type DocStatus } from '@/engine/lib/docStatus'
 import { StartTab } from '@/engine/examEditor/StartTab'
 import { NavPanel, type PaneTab } from '@/engine/examEditor/NavPanel'
 import type { ToolDoc, ToolImage } from '@/engine/lib/toolSpec'
@@ -490,22 +489,18 @@ export default function ComposeDoc() {
   const startOpen = startChosen || tabs.length === 0
   // màn hẹp (tablet/điện thoại): trợ lý AI nổi đè lên trang nên mặc định đóng
   const [aiOpen, setAiOpen] = useState(() => window.innerWidth >= 1024)
-  const [examPanel, setExamPanel] = useState<ExamPanel>(readExamPanel)
+  const [navOpen, setNavOpen] = useState(false)
   const [examCommandsOpen, setExamCommandsOpen] = useState(false)
   const [examFileTarget, setExamFileTarget] = useState<HTMLSpanElement | null>(null)
-  const chooseExamPanel = useCallback((panel: ExamPanel) => {
-    setExamPanel(panel)
-    try { if (panel) localStorage.setItem(EXAM_PANEL_KEY, panel); else localStorage.removeItem(EXAM_PANEL_KEY) } catch {}
-  }, [])
   const openFind = useCallback((tab: 'find' | 'replace') => {
-    chooseExamPanel(null)
+    setNavOpen(false)
     setFindTab(tab)
-  }, [chooseExamPanel])
+  }, [])
   const [navTab, setNavTab] = useState<PaneTab>('toc')
   const openNavWithTab = useCallback((tab: PaneTab) => {
     setNavTab(tab)
-    chooseExamPanel('nav')
-  }, [chooseExamPanel])
+    setNavOpen(true)
+  }, [])
   const [zoom, setZoom] = useState(100)
   const [pageCount, setPageCount] = useState(1)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -1116,7 +1111,7 @@ export default function ComposeDoc() {
 
   return (
     <div className={cn('compose-app', isReflow && 'is-reflow')}>
-      {!startOpen && activeTab && <EditorHeader
+      {!startOpen && activeTab && activeTab.kind !== 'exam' && <EditorHeader
         key={activeTab.id}
         fileSlot={activeTab.kind !== 'board' ? setExamFileTarget : undefined}
         onCommands={activeTab.kind !== 'board' ? () => setExamCommandsOpen(true) : undefined}
@@ -1224,7 +1219,6 @@ export default function ComposeDoc() {
         </div>
       ) : (
         <>
-      <div className="compose-body exam-workspace">
       <Ribbon
         editor={editor}
         activeTab={ribbonTab}
@@ -1261,32 +1255,28 @@ export default function ComposeDoc() {
         onFooterChange={(footer) => setPageSetup((p) => ({ ...p, footer }))}
         onOpenNav={openNavWithTab}
         layoutMode={layoutMode}
-        chrome={{
-          panel: examPanel,
-          onPanel: chooseExamPanel,
-          commandOpen: examCommandsOpen,
-          onCommandOpen: setExamCommandsOpen,
-          fileTarget: examFileTarget,
-          mobile: layoutMode !== 'desktop',
-          onFind: () => openFind('find'),
-          onAi: () => setAiOpen((open) => !open),
-          nav: <div className="exam-nav-slot"><NavPanel
+        fileActions={(Object.keys(DOC_STATUS_LABELS) as DocStatus[]).map((status) => ({
+          label: `Trạng thái: ${DOC_STATUS_LABELS[status]}`,
+          hint: docStatus(savedStatus) === status ? 'Hiện tại' : 'Đổi trạng thái tài liệu',
+          onClick: () => setTabStatus(activeTab!.id, status),
+        }))}
+      />
+      <div className="compose-body">
+          <NavPanel
             doc={activeContent}
-            open={examPanel === 'nav'}
-            onOpenChange={(open) => chooseExamPanel(open ? 'nav' : null)}
+            open={navOpen}
+            onOpenChange={setNavOpen}
             onInsertTemplate={handleInsertTemplate}
             onGoToBlock={handleGoToBlock}
             onInsertPlot={(img) => void handleInsertPlot(img)}
             onInsertBlocks={handleInsertBlocks}
             examDoc={activeDoc}
             side="left"
+            isMobile={isMobile}
+            isOverlay={isTablet}
             currentTab={navTab}
             onTabChange={setNavTab}
-          /></div>,
-          navTitle: { toc: 'Mục lục', blocks: 'Khối mẫu', tools: 'Công cụ vẽ' }[navTab],
-          onNav: () => openNavWithTab('toc'),
-        }}
-      />
+          />
         {/* sân soạn (giữa) */}
         <div className="compose-center">
           {findTab && editor && (

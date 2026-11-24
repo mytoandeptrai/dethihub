@@ -267,6 +267,7 @@ const PHONE_SHEET_TABS: Array<{ id: string; label: string }> = [
 export function PhoneRibbon({
   fileMenu,
   groupsByTab,
+  reveal,
   onSave,
   onUndo,
   onRedo,
@@ -288,6 +289,7 @@ export function PhoneRibbon({
 }: {
   fileMenu: ReactNode
   groupsByTab: Record<string, RibbonGroupDef[]>
+  reveal?: { tab: string } | null
   onSave: () => void
   onUndo: () => void
   onRedo: () => void
@@ -315,6 +317,14 @@ export function PhoneRibbon({
   const colorAnim = useAnimatedPresence(openPop === 'color', 140)
   const listAnim = useAnimatedPresence(openPop === 'list', 140)
   const alignAnim = useAnimatedPresence(openPop === 'align', 140)
+
+  useEffect(() => {
+    if (reveal) {
+      setCollapsed(false)
+      setOpenPop(null)
+      setSheetTab(reveal.tab)
+    }
+  }, [reveal])
 
   useEffect(() => {
     if (sheetTab) setLastSheetTab(sheetTab)
