@@ -20,6 +20,7 @@ import Link from 'next/link'
 
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
+import { getActiveNavigationPath } from '@/modules/shell/utils/active-navigation'
 
 import type { useAppShellContainer } from '@/modules/shell/hooks'
 import type { ReactNode } from 'react'
@@ -40,6 +41,14 @@ function SidebarUi({
   onFeedbackChange,
   onSignOut,
 }: SidebarUiProps) {
+  const activePath = getActiveNavigationPath(pathname, [
+    ...[...workspace, ...explore, ...admin].map((item) => item.path),
+    appPaths.editor.href,
+    appPaths.profile.href,
+    appPaths.pricing.href,
+  ])
+  const activeClass =
+    'bg-indigo-50 text-indigo-700 before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-indigo-600 hover:bg-indigo-50'
   const linkClass = cn(
     'relative flex min-h-9 items-center gap-3 rounded-md px-3 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-100',
     compact && 'justify-center px-0',
@@ -64,7 +73,12 @@ function SidebarUi({
         {session ? (
           <button
             type="button"
-            className={cn(linkClass, 'w-full border border-slate-200 py-2 text-left')}
+            className={cn(
+              linkClass,
+              'w-full border border-slate-200 py-2 text-left',
+              activePath === appPaths.profile.href && activeClass,
+            )}
+            aria-current={activePath === appPaths.profile.href ? 'page' : undefined}
             onClick={() => onNavigate(appPaths.profile.href)}
             aria-label={t('product.account')}
           >
@@ -106,6 +120,7 @@ function SidebarUi({
         )}
         <Link
           href={appPaths.editor.href}
+          aria-current={activePath === appPaths.editor.href ? 'page' : undefined}
           className={cn(
             linkClass,
             'mt-3 justify-center bg-indigo-600 text-white shadow-sm hover:bg-indigo-700',
@@ -137,12 +152,8 @@ function SidebarUi({
                 href={item.path}
                 onClick={() => onNavigate(item.path)}
                 aria-label={item.label}
-                aria-current={pathname === item.path ? 'page' : undefined}
-                className={cn(
-                  linkClass,
-                  pathname === item.path &&
-                    'bg-indigo-50 text-indigo-700 before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-indigo-600 hover:bg-indigo-50',
-                )}
+                aria-current={activePath === item.path ? 'page' : undefined}
+                className={cn(linkClass, activePath === item.path && activeClass)}
               >
                 <item.icon className="size-4 shrink-0" />
                 {!compact && <span className="truncate">{item.label}</span>}
@@ -152,7 +163,12 @@ function SidebarUi({
         ))}
       </nav>
       <div className="space-y-1 border-t border-slate-100 p-2">
-        <Link href={appPaths.pricing.href} className={linkClass} aria-label={t('product.price')}>
+        <Link
+          href={appPaths.pricing.href}
+          className={cn(linkClass, activePath === appPaths.pricing.href && activeClass)}
+          aria-current={activePath === appPaths.pricing.href ? 'page' : undefined}
+          aria-label={t('product.price')}
+        >
           <Coins className="size-4" />
           {!compact && t('product.price')}
         </Link>
@@ -209,6 +225,10 @@ export default function AppShellUi(props: AppShellUiProps) {
     onPaletteChange,
     onNavigate,
   } = props
+  const activeMobilePath = getActiveNavigationPath(
+    pathname,
+    mobileNavigation.map((item) => item.path),
+  )
   return (
     <div className="min-h-dvh bg-slate-50/60 text-slate-800">
       <aside
@@ -287,9 +307,10 @@ export default function AppShellUi(props: AppShellUiProps) {
           <Link
             key={item.path}
             href={item.path}
+            aria-current={activeMobilePath === item.path ? 'page' : undefined}
             className={cn(
               'flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] text-slate-500',
-              pathname === item.path && 'text-indigo-600',
+              activeMobilePath === item.path && 'text-indigo-600',
             )}
           >
             <item.icon className="size-5" />
