@@ -96,6 +96,17 @@ interface Billing {
 const RETRY_WAIT_MS = 4000
 const THINK_BATCH_MS = 250
 const NEXT_MODEL_WAIT_MS = 500
+const AI_OVERLOADED = 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.'
+
+const unavailable = (billing: Billing) =>
+  new BadGatewayException({
+    code: ErrorCode.AI_UNAVAILABLE,
+    message:
+      AI_OVERLOADED +
+      (billing.receipt
+        ? ' Yêu cầu này không bị trừ điểm; chưa áp dụng hoàn điểm cho lần trước.'
+        : ''),
+  })
 
 const fail = (status: HttpStatus, code: string, message: string) =>
   new HttpException({ code, message }, status)
@@ -208,7 +219,7 @@ export class ChatService {
     release: () => Promise<void>,
     sink?: ChatSink,
   ): Promise<ChatReply> {
-    const { userId, quota, promptTokens, maxTokens } = billing
+    const { userId, promptTokens, maxTokens } = billing
     const webSearch = command.webSearch === true
 
     let providers
@@ -229,10 +240,7 @@ export class ChatService {
     }
     const targets = buildTargets(providers, { webSearch, strong: command.strong === true })
     if (targets.length === 0) {
-      throw new InternalServerErrorException({
-        code: ErrorCode.AI_UNAVAILABLE,
-        message: 'Máy chủ chưa cấu hình nhà cung cấp AI nào.',
-      })
+      throw unavailable(billing)
     }
 
     const timeoutMs = this.config.get('LLM_TIMEOUT_MS', { infer: true })
@@ -281,6 +289,7 @@ export class ChatService {
 
       for (let attempt = 0; attempt < (anthropic ? 1 : 2); attempt++) {
         if (attempt > 0 || index > 0) sink?.retry()
+        let contentSent = false
         let result
         try {
           result = await provider.complete({
@@ -290,17 +299,32 @@ export class ChatService {
             temperature: command.temperature,
             reasoningEffort,
             timeoutMs,
-            stream: sink && !webSearch ? this.#streamTo(sink) : undefined,
+            stream:
+              sink && !webSearch
+                ? this.#streamTo(sink, () => {
+                    contentSent = true
+                  })
+                : undefined,
           })
         } catch (error) {
           const failure = this.#classify(error, target.model, timeoutMs, attempt < 1)
           lastError = failure.message
+          if (contentSent) {
+            log(target, startedAt, lastError)
+            await Promise.all(logs)
+            throw unavailable(billing)
+          }
           if (!failure.retry) break
           await sleep(RETRY_WAIT_MS)
           continue
         }
 
         if (result.broken) {
+          if (contentSent) {
+            log(target, startedAt, `${target.model}: luồng trả lời bị ngắt giữa chừng`)
+            await Promise.all(logs)
+            throw unavailable(billing)
+          }
           // the provider still bills what it generated; estimate it from what arrived
           if (await this.#beyondFreeFails(userId)) {
             wasted +=
@@ -342,20 +366,31 @@ export class ChatService {
       if (index < targets.length - 1) await sleep(NEXT_MODEL_WAIT_MS)
     }
 
-    await Promise.all([wasted ? this.quotas.addUsage(userId, wasted, quota) : null, ...logs])
-    throw new BadGatewayException({
-      code: ErrorCode.AI_UNAVAILABLE,
-      message: 'Các model AI đều không phản hồi. Vui lòng thử lại sau.',
-    })
+    await Promise.all(logs)
+    throw unavailable(billing)
   }
 
-  /** Reasoning arrives a few characters at a time; it is sent in batches, and always before the answer text that follows it */
-  #streamTo(sink: ChatSink): LlmStream {
+  /** Buffer reasoning until an answer arrives, so an empty model can be replaced without leaking its output */
+  #streamTo(sink: ChatSink, onContent: () => void): LlmStream {
     let thinking = ''
+    let leading = ''
+    let answering = false
     let sentAt = 0
     return {
       onOpen: () => sink.start(),
       onDelta: ({ content, reasoning }) => {
+        if (!answering) {
+          thinking += reasoning
+          leading += content
+          if (!leading.trim()) return
+          answering = true
+          onContent()
+          if (thinking) sink.think(thinking)
+          thinking = ''
+          sink.delta(leading)
+          leading = ''
+          return
+        }
         if (reasoning) {
           thinking += reasoning
           if (Date.now() - sentAt > THINK_BATCH_MS) {

@@ -2,6 +2,7 @@ import type { LlmResult } from '@/modules/ai/application/ports/llm-provider.port
 import type { Usage } from '@/modules/ai/domain/billing'
 
 export interface Completion {
+  error?: unknown
   usage?: Usage
   choices?: {
     finish_reason?: string
@@ -10,7 +11,7 @@ export interface Completion {
       reasoning_content?: string
       annotations?: { type?: string; url_citation?: { url?: string; title?: string } }[]
     }
-    delta?: { content?: string; reasoning_content?: string }
+    delta?: { content?: string; reasoning_content?: string; reasoning?: string }
   }[]
 }
 
@@ -22,17 +23,27 @@ export class StreamFold {
   reasoning = ''
   finish: string | undefined
   usage: Usage | undefined
+  done = false
+  failed = false
 
   /** returns the text this line added, if any */
   push(line: string): Delta | null {
     const trimmed = line.trim()
-    if (!trimmed.startsWith('data:') || trimmed === 'data: [DONE]') return null
+    if (trimmed === 'data: [DONE]') {
+      this.done = true
+      return null
+    }
+    if (!trimmed.startsWith('data:')) return null
     try {
       const chunk = JSON.parse(trimmed.slice(5)) as Completion
+      if (chunk.error) {
+        this.failed = true
+        return null
+      }
       const choice = chunk.choices?.[0]
       const delta = {
         content: choice?.delta?.content ?? '',
-        reasoning: choice?.delta?.reasoning_content ?? '',
+        reasoning: choice?.delta?.reasoning_content ?? choice?.delta?.reasoning ?? '',
       }
       this.content += delta.content
       this.reasoning += delta.reasoning
@@ -50,7 +61,7 @@ export class StreamFold {
       reasoning: this.reasoning,
       usage: this.usage,
       finishReason: this.finish ?? 'unknown',
-      ...(broken ? { broken } : {}),
+      ...(broken || this.failed || (!this.finish && !this.done) ? { broken: true } : {}),
     }
   }
 }

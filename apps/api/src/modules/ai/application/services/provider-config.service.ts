@@ -45,6 +45,10 @@ const DEFAULTS: Record<ProviderName, { baseUrl: string; model: string }> = {
   anyrouter: { baseUrl: 'https://anyrouter.dev/v1', model: 'openai/gpt-6.1-terra' },
   nightrouter: { baseUrl: 'https://api.nightrouter.ai/v1', model: 'deepseek-v4-flash-0731' },
   anthropic: { baseUrl: 'https://api.anthropic.com', model: 'claude-opus-5-5' },
+  numes: { baseUrl: 'https://api.numes.ai/api/v1', model: 'deepseek/deepseek-v4.1-flash:free' },
+  crowllm: { baseUrl: 'https://crowllm.com/v1', model: 'nemotron-3.5-super-vl:free' },
+  coarena: { baseUrl: 'https://coarena.ai/api/v1', model: 'deepseek-v4-1-flash-1017' },
+  vyceai: { baseUrl: 'https://vyceai.com/v1', model: 'wave' },
 }
 
 /** Provider settings: environment, overlaid by what an admin saved (keys decrypted, endpoints limited to an allow-list) */

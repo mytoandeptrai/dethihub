@@ -6,6 +6,10 @@ export type ProviderName =
   | 'anyrouter'
   | 'nightrouter'
   | 'anthropic'
+  | 'numes'
+  | 'crowllm'
+  | 'coarena'
+  | 'vyceai'
 
 export interface ProviderSettings {
   apiKey: string
@@ -39,7 +43,7 @@ export class LlmUpstreamError extends Error {
   }
 }
 
-/** The cost-ordered chain: DeepSeek, Gemini, opencode (+fallback model), FOSTA, AnyRouter, NightRouter, Claude last. Providers without a key are skipped */
+/** Existing providers first, then Numes, CrowLLM, Coarena and VyceAI. Providers without a key are skipped */
 export function buildTargets(
   config: ProviderConfig,
   options: { webSearch: boolean; strong: boolean },
@@ -64,6 +68,10 @@ export function buildTargets(
   if (p.anyrouter) targets.push({ provider: 'anyrouter', ...p.anyrouter, stream: true })
   if (p.nightrouter) targets.push({ provider: 'nightrouter', ...p.nightrouter })
   if (p.anthropic) targets.push({ provider: 'anthropic', ...p.anthropic })
+  if (p.numes) targets.push({ provider: 'numes', ...p.numes })
+  if (p.crowllm) targets.push({ provider: 'crowllm', ...p.crowllm })
+  if (p.coarena) targets.push({ provider: 'coarena', ...p.coarena })
+  if (p.vyceai) targets.push({ provider: 'vyceai', ...p.vyceai })
 
   if (options.strong && p.deepseek && config.deepseekStrongModel) {
     targets.unshift({

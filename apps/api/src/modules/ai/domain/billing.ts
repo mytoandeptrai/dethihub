@@ -29,6 +29,8 @@ const PRICE: Record<string, [number, number, number]> = {
   anyrouter: [0.27, 0.27, 1.1],
   nightrouter: [0.27, 0.27, 1.1],
   anthropic: [3, 0.3, 15],
+  numes: [0, 0, 0],
+  crowllm: [0, 0, 0],
 }
 
 /** ~3 characters per token for Vietnamese and JSON alike, plus a per-message overhead; errs high on purpose */
