@@ -5,19 +5,17 @@ import { dialog } from '@/engine/components/Dialog'
 import { Button } from '@/engine/components/ui'
 import type { Question } from '@/engine/data/types'
 import { readImportFile } from '@/engine/lib/importFile'
-import { callLlm } from '@/engine/lib/llm'
-import { attachmentsPrompt, parseAiReply, type AiAttachment } from '@/engine/lib/onlineAi'
+import { reportQuota, TOKENS_PER_POINT } from '@/engine/lib/llm'
+import { attachmentsPrompt, parseAiReply, sanitizeAiQuestions, type AiAttachment } from '@/engine/lib/onlineAi'
 import type { OnlineMeta } from '@/engine/lib/onlineExam'
+import { AiQuestionPreview } from '@/components/ai-question-preview'
+import { useAiQuestionStream, type AiQuestionRequest } from '@/hooks/use-ai-question-stream'
+import type { GeneratedQuestion } from '@/lib/ai-question-stream'
+import { MathText } from '@/engine/components/MathText'
 
 const ACCEPT = '.docx,.pdf,.txt,.md'
 const MAX_FILES = 5
 
-/**
- * Trợ lý AI trong vùng soạn của trình tạo đề online: gõ một yêu cầu ("thêm 5 câu trắc nghiệm về đạo hàm"), AI soạn rồi
- * tự thêm thẳng vào đề. Dấu + đính kèm file (đề mẫu, bài giảng, tài liệu…) làm nguồn cho AI; các file hiện thành một chip
- * "N file đính kèm": bấm chip mở danh sách file (bỏ từng file hoặc thêm file), nút X trên chip bỏ tất cả. Chỉ có một ô nhập, không có khung hay dòng phản hồi nào bên dưới; lúc chờ thì hình trợ lý
- * chuyển sang bản động. Chỉ khi lỗi hoặc AI không soạn được câu nào mới hiện một hộp thoại.
- */
 export function OnlineAiBox({
   meta,
   questions,
@@ -32,6 +30,10 @@ export function OnlineAiBox({
   const [files, setFiles] = useState<AiAttachment[]>([])
   const [reading, setReading] = useState(false)
   const [listOpen, setListOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [inserted, setInserted] = useState(false)
+  const [version, setVersion] = useState(0)
+  const generation = useAiQuestionStream()
   const abort = useRef<AbortController | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   // lời gọi AI chạy lâu: dùng onAdd mới nhất khi xong, không phải bản lúc bấm gửi
@@ -57,40 +59,52 @@ export function OnlineAiBox({
     setReading(false)
   }
 
-  const send = async () => {
-    const text = input.trim()
-    if ((!text && !files.length) || busy || reading) return
-    const attached = files
-    setInput('')
-    setFiles([])
+  const generate = async (request?: AiQuestionRequest) => {
+    if (busy || abort.current) return
     setBusy(true)
+    setMessage('')
+    setInserted(false)
+    setVersion((current) => current + 1)
     const ctrl = new AbortController()
     abort.current = ctrl
+    ctrl.signal.addEventListener('abort', generation.stop, { once: true })
     try {
-      const res = await callLlm(
-        [{ role: 'user', content: (text || 'Dựa vào tài liệu đính kèm, soạn các câu hỏi phù hợp cho đề này.') + attachmentsPrompt(attached) }],
-        {
-          signal: ctrl.signal,
-          reasoningEffort: 'medium',
-          maxTokens: 12000,
-          task: {
-            name: 'de-online',
-            input: {
-              meta: { title: meta.title, subject: meta.subject, grade: meta.grade },
-              questions: questions.map((q) => ({ number: q.number, type: q.type, prompt: q.prompt })),
-            },
-          },
-        },
-      )
+      const res = await (request ? generation.run(request, { signal: ctrl.signal, onQuota: reportQuota }) : generation.retry())
       const { message, questions: qs } = parseAiReply(res.content)
-      if (qs.length) latest.current(qs)
-      else await dialog.alert(message || 'Bạn nói rõ số câu, dạng câu và nội dung giúp mình nhé.', { title: 'Mình chưa soạn được câu nào' })
+      if (!res.stopped && !qs.length) setMessage(message || 'Bạn nói rõ số câu, dạng câu và nội dung giúp mình nhé.')
     } catch (err) {
-      if (!ctrl.signal.aborted) await dialog.alert(err instanceof Error ? err.message : 'Không gọi được AI, thử lại sau.', { title: 'Không soạn được' })
+      if (!ctrl.signal.aborted) setMessage(err instanceof Error ? err.message : 'Không gọi được AI, thử lại sau.')
     } finally {
+      ctrl.signal.removeEventListener('abort', generation.stop)
       abort.current = null
       setBusy(false)
     }
+  }
+
+  const send = async () => {
+    const text = input.trim()
+    if ((!text && !files.length) || busy || reading) return
+    const request: AiQuestionRequest = {
+      body: {
+        task: 'de-online', stream: true, reasoningEffort: 'medium', maxTokens: 12000,
+        messages: [{ role: 'user', content: (text || 'Dựa vào tài liệu đính kèm, soạn các câu hỏi phù hợp cho đề này.') + attachmentsPrompt(files) }],
+        taskInput: {
+          meta: { title: meta.title, subject: meta.subject, grade: meta.grade },
+          questions: questions.map((q) => ({ number: q.number, type: q.type, prompt: q.prompt })),
+        } as unknown as AiQuestionRequest['body']['taskInput'],
+      },
+      total: Number(text.match(/(\d+)\s*câu/i)?.[1]) || undefined,
+    }
+    setInput('')
+    setFiles([])
+    await generate(request)
+  }
+
+  const addQuestions = (selected: GeneratedQuestion[]) => {
+    const qs = sanitizeAiQuestions(selected.map((question) => question.raw))
+    if (!qs.length) return setMessage('Bạn nói rõ số câu, dạng câu và nội dung giúp mình nhé.')
+    latest.current(qs)
+    setInserted(true)
   }
 
   const canSend = (input.trim() !== '' || files.length > 0) && !reading
@@ -202,6 +216,15 @@ export function OnlineAiBox({
           </button>
         )}
       </form>
+
+      {generation.state.questions.length > 0 || busy && generation.state.total ? (
+        <AiQuestionPreview key={version} questions={generation.state.questions} total={generation.state.total} busy={busy}
+          inserted={inserted} refundedTokens={generation.state.refundedTokens} onInsert={addQuestions}
+          onRegenerate={() => void generate()} renderText={(text) => <MathText as="span">{text}</MathText>} />
+      ) : busy ? <p role="status" className="mt-3 text-sm text-ink-3">AI đang soạn câu hỏi…</p> : null}
+      {message ? <p role="alert" className="mt-3 text-sm text-clay-deep">{message}</p> : null}
+      {generation.state.error && !busy ? <button type="button" className="mt-2 text-sm font-semibold text-clay-deep" onClick={() => void generate()}>Thử lại</button> : null}
+      {!generation.state.questions.length && generation.state.refundedTokens ? <p className="mt-2 text-sm text-sage">Đã hoàn {(generation.state.refundedTokens / TOKENS_PER_POINT).toLocaleString('vi-VN')} điểm</p> : null}
 
       {listOpen && files.length > 0 ? (
         <AttachmentsModal
