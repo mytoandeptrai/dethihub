@@ -1,11 +1,13 @@
 import { createMock } from '@golevelup/ts-vitest'
 import { HttpException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChatService } from '@/modules/ai/application/services/chat.service'
+import { estimatePromptTokens } from '@/modules/ai/domain/billing'
 import { LlmUpstreamError } from '@/modules/ai/domain/provider-chain'
 import { issueReceipt, requestHash } from '@/modules/ai/domain/receipt'
+import { OpenAiCompatibleAdapter } from '@/modules/ai/infrastructure/adapters/openai-compatible.adapter'
 
 import type { Env } from '@/app/config/env.schema'
 import type { AiCallLogRepositoryPort } from '@/modules/ai/application/ports/ai-call-log.repository.port'
@@ -35,6 +37,14 @@ const empty: LlmResult = { content: '', reasoning: 'hidden reasoning', finishRea
 const slot = { apiKey: 'test-key', baseUrl: 'https://example.com/v1', model: 'test-model' }
 const defaultProviders = { gemini: slot, numes: slot }
 
+const event = (content: string, reasoning = '', done = false) =>
+  new TextEncoder().encode(
+    `data: ${JSON.stringify({
+      choices: [{ delta: { content, reasoning }, ...(done ? { finish_reason: 'stop' } : {}) }],
+      ...(done ? { usage: success.usage } : {}),
+    })}\n\n${done ? 'data: [DONE]\n\n' : ''}`,
+  )
+
 function setup(providers: ProviderConfig['providers'] = defaultProviders) {
   const quotas = createMock<QuotaService>()
   const quota = { used: 10, limit: 100_000, scope: 'month' as const }
@@ -55,14 +65,219 @@ function setup(providers: ProviderConfig['providers'] = defaultProviders) {
   const sink = createMock<ChatSink>()
   const config = new ConfigService<Env, true>({
     LLM_TIMEOUT_MS: 250_000,
+    LLM_FIRST_ANSWER_TIMEOUT_MS: 60_000,
     STRONG_POINT_FACTOR: 3,
     AI_RECEIPT_SECRET: 'test-receipt-secret',
   })
   const service = new ChatService(quotas, configs, config, prompts, calls, openai, anthropic)
-  return { service, quotas, quota, release, calls, openai, sink }
+  return { service, quotas, quota, release, calls, openai, sink, config }
 }
 
 describe('chatService fallback and settlement', () => {
+  describe('first-answer deadline with the real streaming adapter', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+      vi.unstubAllGlobals()
+    })
+
+    it.each([false, true])(
+      'aborts reasoning-only output at 60000ms and bills only the fallback (stream=%s)',
+      async (stream) => {
+        vi.useFakeTimers()
+        const { service, openai, quotas, sink, calls } = setup()
+        const adapter = new OpenAiCompatibleAdapter()
+        openai.complete.mockImplementation((request) => adapter.complete(request))
+        let firstSignal: AbortSignal | undefined
+        const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_url, options) => {
+          if (fetchMock.mock.calls.length > 1) {
+            return new Response(event(success.content, '', true))
+          }
+          firstSignal = options?.signal ?? undefined
+          return new Response(
+            new ReadableStream({
+              start(controller) {
+                controller.enqueue(event('   ', 'reasoning is not an answer'))
+                firstSignal?.addEventListener(
+                  'abort',
+                  () => controller.error(firstSignal?.reason),
+                  { once: true },
+                )
+              },
+            }),
+          )
+        })
+        vi.stubGlobal('fetch', fetchMock)
+        const reply = service.chat(command, stream ? sink : undefined)
+        await vi.advanceTimersByTimeAsync(59_999)
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+        expect(firstSignal?.aborted).toBe(false)
+        expect(quotas.addUsage).not.toHaveBeenCalled()
+        await vi.advanceTimersByTimeAsync(1)
+        expect(fetchMock).toHaveBeenCalledTimes(2)
+        expect(firstSignal?.aborted).toBe(true)
+        expect((await reply).content).toBe(success.content)
+        expect(quotas.addUsage).toHaveBeenCalledExactlyOnceWith(
+          command.userId,
+          80,
+          expect.anything(),
+        )
+        expect(calls.log).toHaveBeenCalledWith(
+          expect.objectContaining({ ok: false, error: expect.stringContaining('60000') }),
+        )
+        expect(sink.think).not.toHaveBeenCalled()
+        expect(sink.delta.mock.calls).toEqual(stream ? [[success.content]] : [])
+        const body = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as Record<
+          string,
+          unknown
+        >
+        expect(body).toMatchObject({ reasoning_effort: 'low', stream: true })
+      },
+    )
+
+    it('lets a non-streaming client finish at 90s after answer text arrives before 60s', async () => {
+      vi.useFakeTimers()
+      const { service, openai, quotas } = setup({ coarena: slot })
+      const adapter = new OpenAiCompatibleAdapter()
+      openai.complete.mockImplementation((request) => adapter.complete(request))
+      let signal: AbortSignal | undefined
+      vi.stubGlobal(
+        'fetch',
+        vi.fn<typeof fetch>().mockImplementation(async (_url, options) => {
+          signal = options?.signal ?? undefined
+          return new Response(
+            new ReadableStream({
+              start(controller) {
+                setTimeout(() => controller.enqueue(event(success.content)), 1000)
+                setTimeout(() => {
+                  controller.enqueue(event('', '', true))
+                  controller.close()
+                }, 90_000)
+              },
+            }),
+          )
+        }),
+      )
+      const reply = service.chat(command)
+      await vi.advanceTimersByTimeAsync(60_000)
+      expect(signal?.aborted).toBe(false)
+      expect(quotas.addUsage).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect((await reply).content).toBe(success.content)
+      expect(signal?.aborted).toBe(false)
+    })
+
+    it('still aborts at the 250s absolute deadline after answer output, without splicing or charging', async () => {
+      vi.useFakeTimers()
+      const { service, openai, sink, quotas } = setup()
+      const adapter = new OpenAiCompatibleAdapter()
+      openai.complete.mockImplementation((request) => adapter.complete(request))
+      let signal: AbortSignal | undefined
+      const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_url, options) => {
+        signal = options?.signal ?? undefined
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(event(success.content))
+              signal?.addEventListener('abort', () => controller.error(signal?.reason), {
+                once: true,
+              })
+            },
+          }),
+        )
+      })
+      vi.stubGlobal('fetch', fetchMock)
+      const failure = service.chat(command, sink).catch((error: unknown) => error)
+      await vi.advanceTimersByTimeAsync(60_000)
+      expect(signal?.aborted).toBe(false)
+      expect(sink.delta).toHaveBeenCalledWith(success.content)
+      await vi.advanceTimersByTimeAsync(190_000)
+      expect(signal?.aborted).toBe(true)
+      expect(await failure).toBeInstanceOf(HttpException)
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(quotas.addUsage).not.toHaveBeenCalled()
+    })
+
+    it('gives each attempt its own deadline and leaves a fully timed-out chain uncharged', async () => {
+      vi.useFakeTimers()
+      const { service, openai, quotas, release } = setup()
+      openai.complete.mockImplementation(() => new Promise(() => {}))
+      const failure = service.chat(command).catch((error: unknown) => error)
+      await vi.advanceTimersByTimeAsync(60_000)
+      expect(openai.complete).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(59_999)
+      expect(release).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1)
+      expect(await failure).toBeInstanceOf(HttpException)
+      expect(quotas.addUsage).not.toHaveBeenCalled()
+      expect(quotas.refundReceipt).not.toHaveBeenCalled()
+      expect(release).toHaveBeenCalled()
+    })
+
+    it('does not bill an adapter that resolves a broken result synchronously on abort', async () => {
+      vi.useFakeTimers()
+      const { service, openai, quotas } = setup()
+      openai.complete
+        .mockImplementationOnce(
+          (request) =>
+            new Promise((resolve) => {
+              request.signal?.addEventListener('abort', () => resolve({ ...empty, broken: true }), {
+                once: true,
+              })
+            }),
+        )
+        .mockResolvedValue(success)
+      const reply = service.chat(command)
+      await vi.advanceTimersByTimeAsync(60_000)
+      expect((await reply).content).toBe(success.content)
+      expect(quotas.addUsage).toHaveBeenCalledExactlyOnceWith(command.userId, 80, expect.anything())
+    })
+
+    it('allows a 110s chain with a 100s per-attempt absolute deadline', async () => {
+      vi.useFakeTimers()
+      const { service, openai, config, quotas } = setup()
+      config.set('LLM_TIMEOUT_MS', 100_000)
+      openai.complete
+        .mockImplementationOnce(() => new Promise(() => {}))
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              setTimeout(() => resolve(success), 50_000)
+            }),
+        )
+      const started = Date.now()
+      const reply = service.chat(command)
+      await vi.advanceTimersByTimeAsync(110_000)
+      expect((await reply).content).toBe(success.content)
+      expect(Date.now() - started).toBe(110_000)
+      expect(openai.complete).toHaveBeenCalledTimes(2)
+      expect(quotas.addUsage).toHaveBeenCalledExactlyOnceWith(command.userId, 80, expect.anything())
+    })
+  })
+
+  it.each(['coarena', 'numes', 'crowllm', 'vyceai'] as const)(
+    'forces low reasoning effort for %s instead of the client effort',
+    async (provider) => {
+      const { service, openai } = setup({ [provider]: slot })
+      openai.complete.mockResolvedValue(success)
+      await service.chat({ ...command, reasoningEffort: 'high' })
+      expect(openai.complete.mock.calls[0]?.[0].reasoningEffort).toBe('low')
+    },
+  )
+
+  it.each([12_000, 100_000])('caps output against available quota (limit=%s)', async (limit) => {
+    const { service, openai, quota } = setup()
+    quota.limit = limit
+    openai.complete.mockResolvedValue(success)
+    await service.chat({ ...command, maxTokens: 32_000 })
+    const prompt = estimatePromptTokens([
+      { role: 'system', content: 'Test system' },
+      ...command.messages,
+    ])
+    expect(openai.complete.mock.calls[0]?.[0].maxTokens).toBe(
+      Math.min(32_000, limit - quota.used - prompt),
+    )
+  })
+
   it.each([false, true])('returns a successful first answer (stream=%s)', async (stream) => {
     const { service, openai, quotas, sink } = setup()
     openai.complete.mockResolvedValue(success)
@@ -119,7 +334,7 @@ describe('chatService fallback and settlement', () => {
       await expect(service.chat(command, stream ? sink : undefined)).rejects.toThrow(friendly)
       expect([
         ...new Set(openai.complete.mock.calls.map(([request]) => request.target.provider)),
-      ]).toEqual(['gemini', 'numes', 'crowllm', 'coarena', 'vyceai'])
+      ]).toEqual(['gemini', 'coarena', 'numes', 'crowllm', 'vyceai'])
       expect(quotas.addUsage).not.toHaveBeenCalled()
       expect(quotas.refundReceipt).not.toHaveBeenCalled()
       expect(release).toHaveBeenCalled()

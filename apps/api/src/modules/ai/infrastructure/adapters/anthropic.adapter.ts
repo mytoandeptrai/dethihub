@@ -63,8 +63,16 @@ export class AnthropicAdapter implements LlmProviderPort {
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
       },
-      { signal: AbortSignal.timeout(request.timeoutMs) },
+      {
+        signal: AbortSignal.any([
+          AbortSignal.timeout(request.timeoutMs),
+          ...(request.signal ? [request.signal] : []),
+        ]),
+      },
     )
+    stream.on('text', (text) => {
+      if (text.trim()) request.onFirstAnswer?.()
+    })
     const message = await stream.finalMessage()
 
     if (message.stop_reason === 'refusal') {

@@ -197,6 +197,10 @@ export const envSchema = z.object({
       const parsed = nonNegativeNumber(value, 250_000)
       return parsed >= 10_000 ? parsed : 250_000
     }),
+  LLM_FIRST_ANSWER_TIMEOUT_MS: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 60_000)),
   STRONG_POINT_FACTOR: z
     .string()
     .optional()

@@ -41,6 +41,8 @@ import type { AiCallLogRepositoryPort } from '@/modules/ai/application/ports/ai-
 import type {
   Citation,
   LlmProviderPort,
+  LlmRequest,
+  LlmResult,
   LlmStream,
 } from '@/modules/ai/application/ports/llm-provider.port'
 import type { TaskPromptsPort } from '@/modules/ai/application/ports/task-prompts.port'
@@ -244,6 +246,7 @@ export class ChatService {
     }
 
     const timeoutMs = this.config.get('LLM_TIMEOUT_MS', { infer: true })
+    const firstAnswerTimeoutMs = this.config.get('LLM_FIRST_ANSWER_TIMEOUT_MS', { infer: true })
     const strongFactor = this.config.get('STRONG_POINT_FACTOR', { infer: true })
     const logs: Promise<void>[] = []
     // tokens a provider billed for an attempt that gave the user nothing: charged only beyond the free allowance
@@ -284,7 +287,7 @@ export class ChatService {
       const anthropic = target.provider === 'anthropic'
       const provider = anthropic ? this.anthropic : this.openAiCompatible
       const startedAt = Date.now()
-      let reasoningEffort = command.reasoningEffort
+      let reasoningEffort = target.reasoningEffort ?? command.reasoningEffort
       let lastError: string | null = null
 
       for (let attempt = 0; attempt < (anthropic ? 1 : 2); attempt++) {
@@ -292,20 +295,24 @@ export class ChatService {
         let contentSent = false
         let result
         try {
-          result = await provider.complete({
-            target,
-            messages: command.messages,
-            maxTokens,
-            temperature: command.temperature,
-            reasoningEffort,
-            timeoutMs,
-            stream:
-              sink && !webSearch
-                ? this.#streamTo(sink, () => {
-                    contentSent = true
-                  })
-                : undefined,
-          })
+          result = await this.#complete(
+            provider,
+            {
+              target,
+              messages: command.messages,
+              maxTokens,
+              temperature: command.temperature,
+              reasoningEffort,
+              timeoutMs,
+              stream:
+                sink && !webSearch
+                  ? this.#streamTo(sink, () => {
+                      contentSent = true
+                    })
+                  : undefined,
+            },
+            firstAnswerTimeoutMs,
+          )
         } catch (error) {
           const failure = this.#classify(error, target.model, timeoutMs, attempt < 1)
           lastError = failure.message
@@ -368,6 +375,68 @@ export class ChatService {
 
     await Promise.all(logs)
     throw unavailable(billing)
+  }
+
+  /** Both deadlines restart per attempt; answering clears only the first-answer deadline. */
+  async #complete(
+    provider: LlmProviderPort,
+    request: LlmRequest,
+    firstAnswerTimeoutMs: number,
+  ): Promise<LlmResult> {
+    const controller = new AbortController()
+    let rejectDeadline: (error: Error) => void
+    const deadline = new Promise<never>((_resolve, reject) => {
+      rejectDeadline = reject
+    })
+    const expire = (error: Error) => {
+      controller.abort(error)
+      rejectDeadline(error)
+    }
+    const firstAnswerTimer = setTimeout(
+      () =>
+        expire(
+          new DOMException(
+            `first answer timeout (${firstAnswerTimeoutMs}ms)`,
+            'FirstAnswerTimeoutError',
+          ),
+        ),
+      firstAnswerTimeoutMs,
+    )
+    const absoluteTimer = setTimeout(
+      () => expire(new DOMException('Absolute attempt timeout', 'TimeoutError')),
+      request.timeoutMs,
+    )
+    const onFirstAnswer = () => {
+      clearTimeout(firstAnswerTimer)
+    }
+    const stream = request.stream
+    try {
+      const result = await Promise.race([
+        provider.complete({
+          ...request,
+          signal: controller.signal,
+          onFirstAnswer,
+          stream: stream
+            ? {
+                onOpen: () => {
+                  if (!controller.signal.aborted) stream.onOpen()
+                },
+                onDelta: (delta) => {
+                  if (controller.signal.aborted) return
+                  if (delta.content.trim()) onFirstAnswer()
+                  stream.onDelta(delta)
+                },
+              }
+            : undefined,
+        }),
+        deadline,
+      ])
+      if (controller.signal.aborted) throw controller.signal.reason
+      return result
+    } finally {
+      clearTimeout(firstAnswerTimer)
+      clearTimeout(absoluteTimer)
+    }
   }
 
   /** Buffer reasoning until an answer arrives, so an empty model can be replaced without leaking its output */
@@ -434,6 +503,9 @@ export class ChatService {
     timeoutMs: number,
     canRetry: boolean,
   ): { message: string; retry: boolean } {
+    if (error instanceof Error && error.name === 'FirstAnswerTimeoutError') {
+      return { message: `${model}: ${error.message}`, retry: false }
+    }
     if (error instanceof LlmUpstreamError) {
       if (error.status === 401 || error.status === 403) {
         return { message: `${model}: API key bị từ chối (${error.status})`, retry: false }

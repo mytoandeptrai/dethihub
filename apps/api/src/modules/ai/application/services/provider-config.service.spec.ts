@@ -16,6 +16,17 @@ function setup(env: Record<string, string> = {}) {
 }
 
 describe('providerConfigService fallback slots', () => {
+  it.each([
+    [undefined, 60_000],
+    ['', 60_000],
+    ['invalid', 60_000],
+    ['0', 60_000],
+    ['-1', 60_000],
+    ['25', 25],
+    ['120000', 120_000],
+  ])('parses first-answer timeout %s as %s milliseconds', (value, expected) => {
+    expect(envSchema.shape.LLM_FIRST_ANSWER_TIMEOUT_MS.parse(value)).toBe(expected)
+  })
   it.each(['NUMES', 'CROWLLM', 'COARENA', 'VYCEAI'])(
     'validates and loads the %s environment slot',
     async (prefix) => {

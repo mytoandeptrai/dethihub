@@ -13,9 +13,9 @@ const order: ProviderName[] = [
   'anyrouter',
   'nightrouter',
   'anthropic',
+  'coarena',
   'numes',
   'crowllm',
-  'coarena',
   'vyceai',
 ]
 
@@ -59,6 +59,21 @@ describe('ai provider chain', () => {
       ).map((target) => target.provider),
     ).toEqual(['crowllm'])
   })
+
+  it.each(['coarena', 'numes', 'crowllm', 'vyceai'] as const)(
+    'uses low-effort streaming for %s even without a client stream',
+    (provider) => {
+      const targets = buildTargets(
+        {
+          providers: {
+            [provider]: { apiKey: 'key', baseUrl: 'https://example.com', model: 'free' },
+          },
+        },
+        { webSearch: false, strong: false },
+      )
+      expect(targets[0]).toMatchObject({ effort: true, reasoningEffort: 'low', stream: true })
+    },
+  )
 
   it('retains the DeepSeek-only web-search contract', () => {
     expect(
