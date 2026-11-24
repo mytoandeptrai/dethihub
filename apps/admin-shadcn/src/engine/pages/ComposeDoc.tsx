@@ -46,6 +46,7 @@ import { docToExam } from '@/engine/lib/docToExam'
 import { examToDraft } from '@/engine/lib/onlineExam'
 import { DECK_THEMES } from '@/engine/lib/slideTheme'
 import { extractJson } from '@/engine/lib/llm'
+import { insertAiContent } from '@/lib/insert-ai-content'
 import { importedSlides, readImportFile, textToBlocks } from '@/engine/lib/importFile'
 import { IconZoomIn, IconZoomOut } from '@/engine/examEditor/icons'
 import type { ExamBlock, ExamDoc, FormatAttrs, RichText } from '@/engine/data/docTypes'
@@ -868,7 +869,7 @@ export default function ComposeDoc() {
         }
         if (action === 'append' && blocks.length) {
           const content = blocksToTipTap(blocks).content ?? []
-          editor.chain().focus().insertContentAt(editor.state.doc.content.size, content).run()
+          insertAiContent(editor, content)
           return done(`Đã thêm ${blocks.length} khối vào cuối đề.`)
         }
         if (action === 'patch' && patches.length) {

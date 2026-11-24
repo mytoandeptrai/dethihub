@@ -14,7 +14,7 @@ import { useSession } from '@/engine/lib/useSession'
 import { Button } from '@/engine/components/ui'
 import { IconDocExam } from '@/engine/components/docIcons'
 import { AiQuotaRing, TopupLink } from '@/engine/components/AiQuotaRing'
-import { AiQuotaError, callLlm, callLlmChecked, lastAiQuota, TOKENS_PER_POINT, type LlmMessage, type LlmProgress } from '@/engine/lib/llm'
+import { AiQuotaError, callLlm, callLlmChecked, lastAiQuota, reportQuota, TOKENS_PER_POINT, type LlmMessage, type LlmProgress } from '@/engine/lib/llm'
 import { khungPromptFor } from '@/engine/lib/khungPrompt'
 import {
   parseAiObject,
@@ -46,6 +46,12 @@ import { compactHistory } from '@/engine/lib/aiHistory'
 import 'katex/dist/katex.min.css'
 import { ASK_DEFAULT, AiAskPanel, askHistoryText, needsAskFirst, parseAsk, type AiAsk } from './AiAskPanel'
 import { IconClose, IconEnter, IconPaperclip, IconStop } from './icons'
+import { AiQuestionPreview } from '@/components/ai-question-preview'
+import { useAiQuestionStream } from '@/hooks/use-ai-question-stream'
+import { selectedExamPayload } from '@/lib/ai-question-stream'
+import type { AiQuestionRequest, AiQuestionState } from '@/hooks/use-ai-question-stream'
+import type { GeneratedQuestion } from '@/lib/ai-question-stream'
+import { ApiClientError } from '@/lib/api-error'
 
 type AttachKind = 'doc' | 'sheet' | 'pdf' | 'image'
 
@@ -186,6 +192,11 @@ export interface ChatTurn {
   askState?: 'open' | 'done'
   /** kết quả không áp được vào đề: yêu cầu để gửi lại bằng nút Thử lại */
   retry?: string
+  aiRequest?: AiQuestionRequest
+  generation?: AiQuestionState
+  inserted?: boolean
+  previewPayload?: string
+  generationVersion?: number
   /** người dùng đã bấm 👎 */
   vote?: 'up' | 'down'
   /** token đã tiêu cho lượt này (chênh lệch hạn mức trước / sau); không có khi không biết hạn mức */
@@ -201,6 +212,17 @@ interface ActStep {
   note?: string
   /** dòng chữ mờ chạy theo khi bước đang chạy: AI đang nghĩ gì / đang viết câu nào */
   live?: string
+}
+
+function examReview(content: string, questionCount: number): Pick<ChatTurn, 'text' | 'previewPayload'> {
+  if (questionCount > 0) return { text: '', previewPayload: undefined }
+  try {
+    const raw = extractJson<{ say?: unknown; blocks?: unknown; patch?: unknown }>(content)
+    const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
+    return { text: typeof raw.say === 'string' ? raw.say : changed ? 'Bản nháp đã sẵn sàng.' : content, previewPayload: changed ? content : undefined }
+  } catch {
+    return { text: content, previewPayload: undefined }
+  }
 }
 
 /** đóng bước đang chạy (xong / lỗi) */
@@ -772,6 +794,8 @@ function AiConversation({
     lastSaved.current = encoded
   }, [storageKey, turns])
   const [input, setInput] = useState('')
+  const [queued, setQueued] = useState<string[]>([])
+  const generation = useAiQuestionStream()
   const [files, setFiles] = useState<Attachment[]>([])
   const [refs, setRefs] = useState<AiRef[]>([])
   /** nguồn chọn trong modal "Thêm nguồn" cho lượt đang soạn */
@@ -938,7 +962,14 @@ function AiConversation({
 
   const send = useCallback(async (override?: string, opt: { strong?: boolean } = {}) => {
     const text = (override ?? input).trim()
-    if ((!text && !files.length && !refs.length && !picked.length) || busy || abortRef.current) return
+    if (!text && !files.length && !refs.length && !picked.length) return
+    if (busy || abortRef.current) {
+      if (text) {
+        setQueued((current) => [...current, text])
+        if (override == null) setInput('')
+      }
+      return
+    }
     const sentRefs = refs
     const refNote = sentRefs.length
       ? `\n\nPhần đang chọn (người dùng hỏi về phần này):\n${sentRefs.map((r) => `- ${r.label}: ${r.detail}`).join('\n')}`
@@ -1156,7 +1187,7 @@ function AiConversation({
       const ticker = examSteps ? setInterval(() => phase === 'think' && logPatch({ note: secs() }), 1000) : undefined
       let res: Awaited<ReturnType<typeof callLlm>>
       try {
-        res = await callLlm(messages, {
+        const options = {
           signal: controller.signal,
           // Soạn slide trả JSON có schema rõ ràng; reasoning 'max' chỉ làm lượt
           // dàn ý kéo dài 30–60s (dễ vượt timeout proxy) mà không nội dung hơn.
@@ -1164,7 +1195,23 @@ function AiConversation({
           onProgress,
           strong: opt.strong,
           task: mainTask,
-        })
+        }
+        if (mode === 'exam') {
+          const request: AiQuestionRequest = {
+            body: { task: mainTask.name, taskInput: mainTask.input as AiQuestionRequest['body']['taskInput'], messages, reasoningEffort: AI_EFFORT.exam, maxTokens: 32000, strong: opt.strong },
+            total: totalQ || undefined,
+          }
+          patchTurn(() => ({ aiRequest: request }))
+          const generated = await generation.run(request, {
+            signal: controller.signal, onProgress, onQuota: reportQuota,
+            onUpdate: (snapshot) => patchTurn(() => ({ generation: snapshot })),
+          })
+          if (generated.stopped) {
+            patchTurn((turn) => ({ pending: false, text: 'Đã dừng.', log: turn.log ? closeLog(turn.log, 'done') : undefined }))
+            return
+          }
+          res = generated
+        } else res = await callLlm(messages, options)
       } finally {
         clearInterval(ticker)
       }
@@ -1256,44 +1303,11 @@ function AiConversation({
         )
         onApplySlides?.(res.content)
       } else {
-        // JSON đề đã được áp vào tài liệu → hiện câu tóm tắt thay vì JSON thô;
-        // câu trả lời văn bản thường (không sửa tài liệu) giữ nguyên.
-        let result = onApplyBlocks?.(res.content)
-        // đề trả JSON hỏng (thường bị cắt cụt): hoàn token lượt đó và soạn lại đúng một lần
-        if (result?.failed && onApplyBlocks) {
-          // gọi lại bằng model mạnh hơn (lượt đầu model nhanh không làm được)
-          const again = await callLlm(messages, { signal: controller.signal, reasoningEffort: AI_EFFORT.exam, retryOf: res.receipt, strong: true, task: mainTask })
-          controller.signal.throwIfAborted()
-          result = onApplyBlocks(again.content) ?? result
-        }
-        // không áp được: hiện trong chat (kèm phần AI viết nếu đọc được) + nút Thử lại
-        const failed = !!result?.failed
-        const summary = result && !failed ? result.text : undefined
-        const looksJson = failed
-        const text = result?.text ?? res.content
-        if (failed && (process.env.NODE_ENV === 'development')) console.warn('[AI] JSON không áp được:', res.content)
-        if (summary) rememberAiTurn({ mode, request: userTurn.text, reply: summary, context: documentDigest })
-        setTurns((t) =>
-          t.map((turn) =>
-            turn.id === botId
-              ? {
-                  ...turn,
-                  text,
-                  pending: false,
-                  intent: result ? 'doc' : 'chat',
-                  ...(failed && userTurn.text ? { retry: userTurn.text } : {}),
-                  // chỉ có bước khi là lượt soạn đề; trả lời thường (không JSON) thì bỏ danh sách bước
-                  ...(turn.log
-                    ? summary
-                      ? { log: closeLog(turn.log, 'done') }
-                      : looksJson
-                        ? { log: closeLog(turn.log, 'failed') }
-                        : { log: undefined }
-                    : {}),
-                }
-              : turn,
-          ),
-        )
+        patchTurn((turn) => {
+          const hasQuestions = !!turn.generation?.questions.length
+          const review = examReview(res.content, turn.generation?.questions.length ?? 0)
+          return { ...review, pending: false, log: hasQuestions || review.previewPayload ? closeLog(turn.log ?? [], 'done') : undefined }
+        })
       }
     } catch (err) {
       const aborted = (err as Error)?.name === 'AbortError'
@@ -1308,7 +1322,8 @@ function AiConversation({
                 error: aborted
                   ? 'Đã dừng.'
                   : (err as Error)?.message || 'Không gọi được AI.',
-                ...(err instanceof AiQuotaError ? { topup: true } : {}),
+                ...(mode === 'exam' && !aborted ? { retry: userTurn.text } : {}),
+                ...(err instanceof AiQuotaError || err instanceof ApiClientError && err.status === 429 && /quota/i.test(err.code ?? '') ? { topup: true } : {}),
               }
             : turn,
         ),
@@ -1319,12 +1334,54 @@ function AiConversation({
       setBusy(false)
       abortRef.current = null
     }
-  }, [input, files, refs, picked, busy, turns, contextSummary, documentDigest, mode, onApplyBlocks, onApplySlides, slidePro, existingSlideCount, editContext, onApplyEdits, onBoardOps])
+  }, [input, files, refs, picked, busy, turns, contextSummary, documentDigest, mode, onApplyBlocks, onApplySlides, slidePro, existingSlideCount, editContext, onApplyEdits, onBoardOps, generation.run])
+
+  useEffect(() => {
+    if (busy || abortRef.current || !queued.length) return
+    const [next, ...remaining] = queued
+    setQueued(remaining)
+    void send(next)
+  }, [busy, queued, send])
+
+  const retryGeneration = async (turn: ChatTurn) => {
+    if (!turn.aiRequest || busy || abortRef.current) return
+    const request = { ...turn.aiRequest, retryOf: turn.generation?.receipt ?? turn.aiRequest.retryOf }
+    const controller = new AbortController()
+    abortRef.current = controller
+    setBusy(true)
+    const patch = (value: Partial<ChatTurn>) => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, ...value } : item))
+    patch({ pending: true, error: undefined, topup: undefined, text: '', inserted: false, previewPayload: undefined, aiRequest: request, generationVersion: (turn.generationVersion ?? 0) + 1, log: undefined })
+    try {
+      const result = await generation.run(request, { signal: controller.signal, onQuota: reportQuota,
+        onUpdate: (snapshot) => patch({ generation: snapshot }),
+      })
+      setTurns((current) => current.map((item) => item.id === turn.id ? { ...item,
+        ...examReview(result.content, item.generation?.questions.length ?? 0),
+        ...(result.stopped ? { text: 'Đã dừng.' } : {}),
+        retry: undefined,
+      } : item))
+    } catch (error) {
+      patch({ error: error instanceof Error ? error.message : 'Không gọi được AI.', retry: turn.retry ?? 'Thử lại' })
+    } finally {
+      patch({ pending: false })
+      abortRef.current = null
+      setBusy(false)
+    }
+  }
+
+  const insertQuestions = (turn: ChatTurn, questions?: GeneratedQuestion[]) => {
+    if (busy || turn.inserted) return
+    const payload = questions ? selectedExamPayload(questions, turn.generation?.blocks ?? []) : turn.previewPayload
+    if (!payload) return
+    const result = onApplyBlocks?.(payload)
+    setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, inserted: !!result && !result.failed, text: result?.text ?? '', error: result?.failed ? result.text : undefined, retry: result?.failed ? item.aiRequest?.body.messages.at(-1)?.content : undefined } : item))
+    if (result && !result.failed) rememberAiTurn({ mode, request: turn.aiRequest?.body.messages.at(-1)?.content ?? '', reply: result.text, context: documentDigest })
+  }
 
   const stop = useCallback(() => {
     abortRef.current?.abort()
-    setBusy(false)
-  }, [])
+    generation.stop()
+  }, [generation.stop])
 
   /** Lượt 2 (chặng 26b): duyệt dàn ý → sinh từng slide, chèn dần, sửa 1 lần. */
   const generateFromPlan = useCallback(
@@ -1579,7 +1636,7 @@ function AiConversation({
                 ? 'Nhờ AI gợi ý cách vẽ minh hoạ, dàn ý trình bày trên bảng, ví dụ và câu hỏi gợi mở cho bài đang giảng.'
                 : mode === 'slide'
                 ? 'Mô tả chủ đề bài giảng; AI lập dàn ý để bạn duyệt rồi viết nội dung từng slide.'
-                : 'Mô tả môn học và các ý chính, hoặc dán tài liệu tham khảo; AI sẽ viết bản nháp đầu tiên thẳng vào trang.'}
+                : 'Mô tả môn học và các ý chính, hoặc dán tài liệu tham khảo; xem bản nháp trước khi chèn vào đề.'}
             </div>
             <div className="ai-starter-list">
               {starters.map((s) => (
@@ -1607,7 +1664,7 @@ function AiConversation({
               )}
             >
               {turn.role === 'user' ? <SentAttachments turn={turn} /> : null}
-              {turn.log?.length ? <ActLog steps={turn.log} /> : null}
+              {turn.log?.length && !(turn.generation?.total && turn.generation.questions.length > 0) ? <ActLog steps={turn.log} /> : null}
               {turn.pending && !turn.text ? (
                 turn.log?.length ? null : turn.progress ? (
                   <DeckProgress {...turn.progress} />
@@ -1634,6 +1691,13 @@ function AiConversation({
                 }
                 onCancel={() => cancelPlan(turn.id)}
               />
+              {turn.generation && (turn.generation.questions.length > 0 || turn.pending && !!turn.generation.total) ? (
+                <AiQuestionPreview key={`${turn.id}-${turn.generationVersion ?? 0}`} questions={turn.generation.questions} total={turn.generation.total}
+                  busy={!!turn.pending || busy} inserted={turn.inserted} refundedTokens={turn.generation.refundedTokens}
+                  onInsert={(questions) => insertQuestions(turn, questions)} onRegenerate={() => void retryGeneration(turn)}
+                  renderText={(text) => <Markdown text={text} />} />
+              ) : null}
+              {turn.previewPayload && !turn.inserted ? <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Chèn vào đề</button> : null}
               {turn.sources?.length || turn.webSources?.length || turn.sourceNote ? <SourcesButton sources={turn.sources} web={turn.webSources} note={turn.sourceNote} /> : null}
               {turn.error ? (
                 <div className="ai-msg-error">
@@ -1641,8 +1705,9 @@ function AiConversation({
                   {turn.topup ? <TopupLink className="ml-1.5 font-semibold underline" /> : null}
                 </div>
               ) : null}
-              {turn.retry && !busy && turn.id === turns[turns.length - 1]?.id ? (
-                <button type="button" className="ai-retry" onClick={() => void send(turn.retry, { strong: true })}>
+              {!turn.generation?.questions.length && turn.generation?.refundedTokens ? <p className="ai-msg-error">Đã hoàn {(turn.generation.refundedTokens / TOKENS_PER_POINT).toLocaleString('vi-VN')} điểm</p> : null}
+              {turn.retry ? (
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => turn.aiRequest ? void retryGeneration(turn) : void send(turn.retry)}>
                   <RotateCcw size={13} /> Thử lại
                 </button>
               ) : null}

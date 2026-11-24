@@ -10,8 +10,12 @@ import type { EventSourceMessage } from 'eventsource-parser'
 
 export async function* parseEventStream(
   stream: ReadableStream<Uint8Array>,
+  signal?: AbortSignal,
 ): AsyncGenerator<EventSourceMessage> {
   const reader = stream.getReader()
+  const abort = () => { void reader.cancel().catch(() => {}) }
+  signal?.addEventListener('abort', abort, { once: true })
+  if (signal?.aborted) abort()
   const decoder = new TextDecoder()
   const events: EventSourceMessage[] = []
   const parser = createParser({ onEvent: (event) => events.push(event) })
@@ -26,6 +30,7 @@ export async function* parseEventStream(
       if (done) return
     }
   } finally {
+    signal?.removeEventListener('abort', abort)
     void reader.cancel().catch(() => {})
     reader.releaseLock()
   }
@@ -47,5 +52,5 @@ export async function* streamAiChat(
     return
   }
   if (!response.body) throw new ApiClientError({ title: t('common.requestError'), status: 502 })
-  yield* parseEventStream(response.body)
+  yield* parseEventStream(response.body, signal)
 }

@@ -68,19 +68,11 @@ export function reportQuota(q: unknown) {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent<AiQuota>('ai-quota', { detail: lastAiQuota }))
 }
 
-/** Lỗi tạm (mạng, server/gateway 5xx): lượt hỏng không bị tính token nên gọi lại luôn một lần. */
-class TransientLlmError extends Error {}
 /** Không đủ điểm AI cho yêu cầu (server trả 429 kèm code "quota"): giao diện mời nạp điểm. */
 export class AiQuotaError extends Error {}
 
 export async function callLlm(messages: LlmMessage[], opts: LlmOptions = {}): Promise<LlmResult> {
-  try {
-    return await callOnce(messages, opts)
-  } catch (err) {
-    if (!(err instanceof TransientLlmError) || opts.signal?.aborted) throw err
-    await new Promise((r) => setTimeout(r, 1500))
-    return callOnce(messages, opts)
-  }
+  return callOnce(messages, opts)
 }
 
 /**
@@ -132,10 +124,9 @@ async function callOnce(messages: LlmMessage[], opts: LlmOptions): Promise<LlmRe
     }
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 429 && /quota/i.test(error.code ?? '')) throw new AiQuotaError(error.message)
-    if (error instanceof ApiClientError && (error.status === 0 || error.status >= 500)) throw new TransientLlmError(error.message)
     throw error
   }
-  if (!final) throw new TransientLlmError('Kết nối tới AI bị ngắt giữa chừng')
+  if (!final) throw new Error('Kết nối tới AI bị ngắt giữa chừng')
   reportQuota(final.quota)
   if (!final.content?.trim()) throw new Error('AI không trả về nội dung (có thể do suy luận quá dài bị cắt). Hãy thử lại hoặc rút gọn yêu cầu.')
   return final
