@@ -7,7 +7,7 @@ import { cn } from '@/engine/lib/cn'
 import { useSlidingThumb } from './useSlidingThumb'
 
 export function SheetTabs<T extends string>({ items, value, onChange, className }: {
-  items: { id: T; label: string; icon?: ReactNode }[]
+  items: { id: T; label: string; icon?: ReactNode; testId?: string }[]
   value: T
   onChange: (id: T) => void
   className?: string
@@ -26,6 +26,7 @@ export function SheetTabs<T extends string>({ items, value, onChange, className 
       {items.map((t) => (
         <button
           key={t.id}
+          data-testid={t.testId}
           type="button"
           onClick={() => onChange(t.id)}
           aria-pressed={value === t.id}

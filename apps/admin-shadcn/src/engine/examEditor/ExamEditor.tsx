@@ -29,6 +29,7 @@ import type { Editor, JSONContent } from '@tiptap/core'
 import 'katex/dist/katex.min.css'
 import { EXAM_MARKS, EXAM_NODES, TEXT_CONTENT_NODES, BaseParagraphNode } from './schema'
 import { BLOCK_TEMPLATE_MIME } from './templates'
+import { activateInsertedBlock, INSPECTOR_TEMPLATE_MIME } from '@/modules/exam-inspector/lib/inspector-selection'
 import { createSearchPlugin } from './find'
 import { ChoiceLayoutExtension, choiceColsKey, measureChoiceColumns } from './choiceLayout'
 import { LeadImageExtension } from './leadImage'
@@ -139,6 +140,7 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
         }
         try {
           ed.chain().focus().insertContentAt(at, JSON.parse(raw)).run()
+          activateInsertedBlock(ed, at, event.dataTransfer?.getData(INSPECTOR_TEMPLATE_MIME))
         } catch {
           // payload kéo hỏng — bỏ qua, không chèn gì
         }

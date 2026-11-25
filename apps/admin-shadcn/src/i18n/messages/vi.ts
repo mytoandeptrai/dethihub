@@ -7,8 +7,10 @@ import profileCopy from './profile-copy'
 import publicCopy from './public-copy'
 import studentCopy from './student-copy'
 import workspaceCopy from './workspace-copy'
+import examInspectorCopy from './exam-inspector-copy'
 
 const messages = {
+  examInspectorCopy,
   publicCopy,
   workspaceCopy,
   onlineExamsCopy,

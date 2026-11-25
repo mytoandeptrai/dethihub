@@ -30,6 +30,9 @@ import type { SlideEditorActions } from '@/engine/examEditor/SlideEditor'
 import { DOC_STATUS_LABELS, docStatus, type DocStatus } from '@/engine/lib/docStatus'
 import { StartTab } from '@/engine/examEditor/StartTab'
 import { NavPanel, type PaneTab } from '@/engine/examEditor/NavPanel'
+import { useExamInspector } from '@/modules/exam-inspector/hooks/use-exam-inspector'
+import { InspectorPanel } from '@/modules/exam-inspector/components/inspector-panel'
+import { InspectorOverlay } from '@/modules/exam-inspector/containers/inspector-overlay'
 import type { ToolDoc, ToolImage } from '@/engine/lib/toolSpec'
 
 /** chỗ đặt đồ thị: thay ảnh cũ, hoặc chèn thành đoạn mới tại vị trí giữa hai khối */
@@ -523,6 +526,8 @@ export default function ComposeDoc() {
   )
 
   const format = useFormatState(editor)
+  const revealInspector = useCallback(() => openNavWithTab('inspector'), [openNavWithTab])
+  const inspector = useExamInspector(editor, revealInspector)
   const [pageSetup, setPageSetup] = useState<PageSetup>({ marginCm: 2, orientation: 'portrait' })
   const geo = pageGeometry(pageSetup)
   const { PAGE_W, MARGIN, MARGIN_RIGHT } = geo
@@ -1276,9 +1281,11 @@ export default function ComposeDoc() {
             isOverlay={isTablet}
             currentTab={navTab}
             onTabChange={setNavTab}
+            inspectorContent={<InspectorPanel inspector={inspector} />}
           />
         {/* sân soạn (giữa) */}
         <div className="compose-center">
+          <InspectorOverlay inspector={inspector} hidden={navOpen && (isMobile || isTablet)} />
           {findTab && editor && (
             <Suspense fallback={null}><FindPanel editor={editor} initialTab={findTab} onClose={() => setFindTab(null)} /></Suspense>
           )}
