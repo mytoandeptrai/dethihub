@@ -3,6 +3,38 @@ import { prepareAiApplication } from './aiApplication'
 import { blocksToTipTap, plainText } from './convert'
 
 describe('ai application preparation', () => {
+  it('does not give an inserted question the answer of a rewritten original in the same replacement', () => {
+    const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Câu gốc', options: [{ label: 'A', text: 'Đúng' }, { label: 'B', text: 'Sai' }] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: [{ type: 'question', text: 'Câu mới', options: ['Sai', 'Đúng'] }, { type: 'question', text: 'Câu gốc được viết lại', options: ['Đúng', 'Sai'] }] }] }, current)
+    expect(prepared.answers).toEqual([])
+    expect(prepared.answerKeyWarning).toBe(true)
+  })
+
+  it.each([false, true])('allows a structurally affected same-index question only with exact content: %s', (unchanged) => {
+    const current = blocksToTipTap([1, 2, 3].map((no) => ({ type: 'question' as const, no, text: `Câu ${no}`, options: [] })))
+    current.content?.push(...(blocksToTipTap([{ type: 'answerKey', items: [{ no: 3, answer: 'C' }] }]).content ?? []))
+    const prepared = prepareAiApplication({ patch: [
+      { id: 'k2', block: { type: 'question', text: unchanged ? 'Câu 3' : 'Câu 3 viết lại', options: [] } },
+      { id: 'k0', op: 'delete' },
+      { id: 'k1', op: 'insertBefore', block: { type: 'question', text: 'Câu mới ở trước', options: [] } },
+    ] }, current)
+    expect(prepared.answers.map((item) => plainText(item.answer))).toEqual(unchanged ? ['C'] : [])
+    expect(prepared.answerKeyWarning).toBe(!unchanged)
+  })
+
+  it('allows a same-index revision when question insertions are strictly after it', () => {
+    const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Câu gốc', options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', block: { type: 'question', text: 'Câu viết lại', options: [] } }, { id: 'k0', op: 'insertAfter', block: { type: 'question', text: 'Câu mới phía sau', options: [] } }] }, current)
+    expect(prepared.answers.map((item) => plainText(item.answer))).toEqual(['A'])
+    expect(prepared.answerKeyWarning).toBe(false)
+  })
+
+  it('does not treat changed rich-text marks as an exact content match after preceding structural changes', () => {
+    const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Trước', options: [] }, { type: 'question', no: 2, text: 'Sau', options: [] }, { type: 'answerKey', items: [{ no: 2, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', op: 'delete' }, { id: 'k1', op: 'insertBefore', block: { type: 'question', text: 'Mới', options: [] } }, { id: 'k1', block: { type: 'question', text: [{ text: 'Sau', marks: [{ type: 'bold' }] }], options: [] } }] }, current)
+    expect(prepared.answers).toEqual([])
+    expect(prepared.answerKeyWarning).toBe(true)
+  })
   it.each([
     { patch: [] },
     { patch: [{ id: 'not-an-id', block: { type: 'paragraph', text: 'Không áp dụng' } }] },

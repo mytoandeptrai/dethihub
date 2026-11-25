@@ -268,21 +268,11 @@ function sanitizePatches(raw: unknown): ExamPatch[] {
 
 function questionContentKey(node: JSONContent): string {
   const question = tipTapToBlocks({ type: 'doc', content: [node] }).find((block) => block.type === 'question')
-  if (!question) return ''
-  const content = (value: RichText) => {
-    const parts: (string | { image: string })[] = []
-    let text = ''
-    for (const span of typeof value === 'string' ? [{ text: value }] : value) {
-      text += span.text
-      if (!span.image) continue
-      if (text) parts.push(text)
-      text = ''
-      parts.push({ image: span.image.plot ?? span.image.src })
-    }
-    if (text) parts.push(text)
-    return parts
-  }
-  return JSON.stringify([question.kind ?? 'mc', content(question.text), question.options.map((option) => [option.label, content(option.text)])])
+  return question ? JSON.stringify([question.kind ?? 'mc', question.text, question.options]) : ''
+}
+
+function questionNodes(nodes: readonly JSONContent[]): JSONContent[] {
+  return nodes.flatMap((node) => [...(node.type === 'examQuestion' ? [node] : []), ...questionNodes(node.content ?? [])])
 }
 
 export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSONContent) {
@@ -307,15 +297,22 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
   if (action === 'replace') result.splice(0, result.length, ...entries(blocks))
   if (action === 'append') result.push(...entries(blocks))
   if (action === 'patch') {
-    for (const patch of patches) {
-      if (!currentDocument) { result.push(...entries(patch.blocks)); continue }
+    const applications = patches.map((patch) => ({ patch, replacements: entries(patch.blocks) }))
+    const questionChanges = applications.filter(({ patch, replacements }) => {
+      const removed = patch.op === 'replace' || patch.op === 'delete'
+        ? questionNodes(currentDocument?.content?.slice(patch.index, patch.index + 1) ?? []) : []
+      const added = questionNodes(replacements.map(({ node }) => node))
+      return added.length !== removed.length || removed.length > 1 && removed.some((node, index) => questionContentKey(node) !== questionContentKey(added[index]))
+    }).map(({ patch }) => patch.index + (patch.op === 'insertAfter' ? 1 : 0))
+    for (const { patch, replacements } of applications) {
+      if (!currentDocument) { result.push(...replacements); continue }
       const at = patch.index + (patch.op === 'insertAfter' ? 1 : 0)
-      const replacements = entries(patch.blocks)
       const previous = result[at]
       if (patch.op === 'replace' && previous?.node.type === 'examQuestion') {
         const questions = replacements.filter(({ node }) => node.type === 'examQuestion')
         const originalContent = questionContentKey(previous.node)
-        const continued = questions.find(({ node }) => questionContentKey(node) === originalContent) ?? questions[0]
+        const exact = questions.find(({ node }) => questionContentKey(node) === originalContent)
+        const continued = exact ?? (questionChanges.some((index) => index <= patch.index) ? undefined : questions[0])
         if (continued) continued.owner = previous.owner
       }
       result.splice(at, patch.op === 'replace' || patch.op === 'delete' ? 1 : 0, ...replacements)

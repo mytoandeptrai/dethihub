@@ -6,12 +6,14 @@ import { signedInState } from './session-helper'
 
 import type { components } from '@workspace/api-types'
 
-test('inserting a question leaves existing answer-key cells unchanged', async ({ browser }) => {
+for (const rewrite of [false, true]) test(`inserting a question ${rewrite ? 'with a rewritten original' : 'before the original'} leaves existing answer-key cells unchanged`, async ({ browser }) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
   const context = await browser.newContext({ storageState: auth.state })
   const page = await context.newPage()
-  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ patch: [{ id: 'k0', op: 'insertBefore', block: { type: 'question', text: '1 + 2 = ?', options: ['2', '3'] } }] }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'key-fixture' }
+  const newQuestion = { type: 'question', text: '1 + 2 = ?', options: ['2', '3'] }
+  const patch = rewrite ? { id: 'k0', blocks: [newQuestion, { type: 'question', text: 'Tính 1 + 1 = ?', options: ['2'] }] } : { id: 'k0', op: 'insertBefore', block: newQuestion }
+  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ patch: [patch] }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'key-fixture' }
   await page.route('**/api/**', (route) => {
     const pathname = new URL(route.request().url()).pathname
     return route.fulfill({ json: pathname === '/api/ai/chat' ? response : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
