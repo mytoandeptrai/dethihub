@@ -154,6 +154,21 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
+  it('preserves every header code line and edits only the first code slot', () => {
+    const { editor, entry, node, pos } = setup('header')
+    const header = node.toJSON() as JSONContent
+    const lines = header.content![0]!.content!
+    lines.splice(1, 0, { type: 'paragraph', content: [{ type: 'text', text: 'Mã đề: 101' }] })
+    lines.push({ type: 'paragraph', content: [{ type: 'text', text: 'Mã đề: 202', marks: [{ type: 'italic' }] }] })
+    editor.commands.setContent({ type: 'doc', content: [header] })
+    const original = editor.state.doc.firstChild!
+    const untouched = entry.write(editor.state.tr, pos, original, { soGiaoDuc: 'New department' }).doc.firstChild!
+    expect(untouched.child(0).childCount).toBe(5)
+    expect(untouched.child(0).lastChild!.toJSON()).toEqual(original.child(0).lastChild!.toJSON())
+    const updated = entry.write(editor.state.tr, pos, original, { maDe: '303' }).doc.firstChild!
+    expect(updated.child(0).child(1).textContent).toBe('Mã đề: 303')
+    expect(updated.child(0).lastChild!.toJSON()).toEqual(original.child(0).lastChild!.toJSON())
+  })
   it.each(['question', 'truefalse'])('rejects duplicate %s option labels', (id) => {
     const { editor, entry, node, pos } = setup(id)
     const key = id === 'question' ? 'options' : 'statements'
