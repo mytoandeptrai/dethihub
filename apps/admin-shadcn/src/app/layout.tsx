@@ -3,18 +3,37 @@ import { getMessages } from 'next-intl/server'
 
 import { appPaths } from '@/config/app-paths'
 import { env } from '@/config/env'
+import { site } from '@/config/site'
 import { t } from '@/i18n/translate'
+import { buildMetadata } from '@/lib/seo'
 
 import { AppProvider } from './provide'
 
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import '@/styles/globals.css'
 import '@/styles/product.css'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
-  title: { default: t('common.brand'), template: `%s | ${t('common.brand')}` },
-  description: t('common.description'),
+  ...buildMetadata(),
+  alternates: undefined,
+  metadataBase: new URL(site.url),
+  title: { default: site.name, template: `%s | ${site.name}` },
+  applicationName: site.name,
+  keywords: site.keywords,
+  authors: [{ name: site.name, url: site.url }],
+  creator: site.name,
+  publisher: site.name,
+  formatDetection: { telephone: false, email: false, address: false },
+  verification: { google: env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#4f46e5' },
+    { media: '(prefers-color-scheme: dark)', color: '#312e81' },
+  ],
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

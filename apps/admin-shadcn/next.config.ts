@@ -53,6 +53,11 @@ const nextConfig: NextConfig = {
   headers() {
     return [
       {
+        source:
+          '/:path(admin|editor|my-docs|online-exams|library|profile|grading|play|quiz|auth|forgot-password|reset-password)/:rest*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+      },
+      {
         source: '/(.*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
