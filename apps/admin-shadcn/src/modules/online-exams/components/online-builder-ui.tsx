@@ -49,11 +49,11 @@ import {
   PageHeader,
   PageShell,
   SiteSelect,
-  SkeletonCard,
   Toolbar,
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { OnlineBuilderModel } from '@/modules/online-exams/hooks'
 
 import type { OnlineBuilderParts } from '@/modules/online-exams/containers/online-builder-container'
@@ -70,9 +70,7 @@ export function OnlineBuilderOnlineBuilderUi(
   }
   if (props.viewState === 2)
     return (
-      <PageShell>
-        <SkeletonCard variant="exam" />
-      </PageShell>
+      <PageSkeleton variant="form" />
     )
   if (props.viewState === 3)
     return (

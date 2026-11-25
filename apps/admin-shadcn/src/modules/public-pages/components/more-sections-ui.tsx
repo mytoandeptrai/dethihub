@@ -1,4 +1,5 @@
 'use client'
+import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import { basePoints } from '@engine-pricing'
 import {
   ArrowRight,
@@ -112,7 +113,7 @@ export function PricingSectionUi({
           <p>{t('publicCopy.m130')}</p>
           <div className="home-packs" aria-live="polite" aria-busy={packs === null}>
             {packs === null ? (
-              <p role="status">{t('publicCopy.m131')}</p>
+              <LoadingRegion><CardGridSkeleton /></LoadingRegion>
             ) : packs.length === 0 ? (
               <p>{t('publicCopy.m132')}</p>
             ) : (

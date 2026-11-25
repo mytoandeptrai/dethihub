@@ -1,4 +1,5 @@
 'use client'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { DEFAULT_PACK_VND, basePoints } from '@engine-pricing'
 import { cn } from '@workspace/ui/lib/utils'
 
@@ -32,6 +33,7 @@ export default function PricingContentUi(props: ReturnType<typeof usePricingCont
     onPaid,
     PACKS,
   } = props
+  if (props.loading) return <PageSkeleton variant="cards" />
   return (
     <PageShell>
       {pricingError && <p role="alert">{pricingError}</p>}
