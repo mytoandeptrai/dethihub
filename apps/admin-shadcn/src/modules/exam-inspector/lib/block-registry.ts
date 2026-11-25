@@ -104,6 +104,15 @@ function textItems(
   items: { text: string; label?: string }[],
 ): ProseMirrorNode[] {
   const existing = children(parent).filter((node) => named(type)(node))
+  if (items.length < existing.length) {
+    let cursor = 0
+    const retained = items.map((item) => {
+      const index = existing.findIndex((node, offset) => offset >= cursor && node.textContent === item.text && (item.label === undefined || node.attrs.label === item.label))
+      cursor = index < 0 ? existing.length : index + 1
+      return index < 0 ? undefined : existing[index]
+    })
+    if (retained.every((node): node is ProseMirrorNode => node !== undefined)) return retained
+  }
   return items.map((item, index) => {
     const node = existing[index] ?? newTextNode(parent, type, '')
     return withText(

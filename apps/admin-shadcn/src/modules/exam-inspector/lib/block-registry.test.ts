@@ -154,6 +154,20 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
+  it.each([0, 1, 3])('preserves retained option nodes when removing item %i', (removed) => {
+    const { editor, entry, node, pos } = setup('question')
+    const marked = node.toJSON() as JSONContent
+    marked.content!.slice(1).forEach((option, index) => {
+      option.content![0]!.marks = [{ type: index % 2 ? 'italic' : 'bold' }]
+    })
+    editor.commands.setContent({ type: 'doc', content: [marked] })
+    const original = editor.state.doc.firstChild!
+    const values = entry.read(original) as { options: { label: string; text: string }[] }
+    const expectedNodes = Array.from({ length: 4 }, (_, index) => original.child(index + 1)).filter((_, index) => index !== removed)
+    const options = values.options.filter((_, index) => index !== removed)
+    const updated = entry.write(editor.state.tr, pos, original, { options }).doc.firstChild!
+    expectedNodes.forEach((option, index) => expect(updated.child(index + 1).toJSON()).toEqual(option.toJSON()))
+  })
   it('covers the catalog in order with Vietnamese labels and matching schema metadata', () => {
     expect(BLOCK_SCHEMAS.map(({ id, label }) => ({ id, label }))).toEqual(
       BLOCK_TEMPLATES.map(({ id, label }) => ({ id, label })),
