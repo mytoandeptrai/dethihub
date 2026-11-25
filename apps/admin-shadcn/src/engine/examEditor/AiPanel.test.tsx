@@ -23,6 +23,19 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it.each(['replace', 'append'])('previews every block applied by %s approval', async (action) => {
+    const blocks = [{ type: 'heading', text: 'Tiêu đề sẽ chèn', level: 1 }, { type: 'paragraph', text: 'Lời giải sẽ chèn' }, { type: 'divider' }, { type: 'question', no: 1, text: 'Câu hỏi sẽ chèn' }, { type: 'answerKey', items: [{ no: 1, answer: 'Đáp án sẽ chèn' }] }, { type: 'table', rows: [['Ô sẽ chèn']] }]
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action, say: 'Kiểm tra toàn bộ bản nháp', blocks }), usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    const preview = screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
+    for (const text of ['Tiêu đề sẽ chèn', 'Lời giải sẽ chèn', 'Câu hỏi sẽ chèn', 'Đáp án sẽ chèn', 'Ô sẽ chèn', 'divider']) expect(preview).toHaveTextContent(text)
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0]).blocks).toEqual(blocks)
+  })
 
   it.each([true, false])('regenerates document approval with its retry receipt (questions: %s)', async (withQuestions) => {
     const retries: (string | null)[] = []

@@ -10,6 +10,7 @@ import workspaceCopy from './workspace-copy'
 import examInspectorCopy from './exam-inspector-copy'
 
 const messages = {
+  aiReview: { title: 'Nội dung sẽ áp dụng', empty: 'Trống', count: 'Đã soạn {count}{total} câu' },
   loading: { label: 'Đang tải' },
   examInspectorCopy,
   publicCopy,
