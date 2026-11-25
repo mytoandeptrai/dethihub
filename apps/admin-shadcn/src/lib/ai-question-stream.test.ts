@@ -3,6 +3,18 @@ import { describe, expect, it } from 'vitest'
 import { parseAiDocumentReply, QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
 
 describe('question stream parser', () => {
+  it.each([
+    String.raw`{"action":"append","say":"giá $5\nNam\tThanh \"quote\" \\ \/ \u0041","blocks":[]}`,
+    String.raw`{"action":"append","blocks":[{"type":"question","text":"$x\nNam\tText\u0041\/$"}]}`,
+  ])('never rewrites valid JSON escapes after dollar signs: %s', (source) => {
+    const expected = JSON.parse(source)
+    expect(parseAiDocumentReply(source)).toEqual(expected)
+    const parser = new QuestionStreamParser()
+    for (const char of source) parser.push(char)
+    parser.finish()
+    expect(parser.blocks).toEqual(expected.blocks)
+  })
+
   it('recovers bare LaTeX escapes split across chunks in a legacy replace reply', () => {
     const source = String.raw`{"action":"replace","say":"Đề đã sẵn sàng","blocks":[{"type":"heading","text":"ĐỀ TOÁN"},{"type":"question","no":1,"text":"Tính $BH \\cdot CH$ và $\\sqrt{2}$, $\\frac{1}{2}$","options":[]}]}`.replaceAll('\\\\', '\\')
     const parser = new QuestionStreamParser()

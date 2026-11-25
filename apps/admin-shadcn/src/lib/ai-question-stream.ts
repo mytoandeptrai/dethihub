@@ -31,12 +31,13 @@ function jsonStringRepair() {
       const char = input[index]!
       if (inString && char === '\\') {
         const next = input[index + 1]
-        if (!final && (!next || inMath && /[bfnrtu]/.test(next) && input.length < index + (next === 'u' ? 6 : 3))) {
+        if (!final && (!next || next === 'u' && input.length < index + 6 || inMath && /[bfr]/.test(next) && input.length < index + 3)) {
           pending = input.slice(index)
           break
         }
-        const mathCommand = inMath && /[a-z]/i.test(next ?? '') && /[a-z]/i.test(input[index + 2] ?? '') && !(next === 'u' && /^[\da-f]{4}$/i.test(input.slice(index + 2, index + 6)))
-        output += (next && (!/["\\/bfnrtu]/.test(next) || mathCommand) ? '\\\\' : '\\') + (next ?? '')
+        const mathCommand = inMath && /[bfr]/.test(next ?? '') && /[a-z]/i.test(input[index + 2] ?? '')
+        const invalidEscape = next === 'u' ? !/^[\da-f]{4}$/i.test(input.slice(index + 2, index + 6)) : !/["\\/bfnrt]/.test(next ?? '')
+        output += (next && (invalidEscape || mathCommand) ? '\\\\' : '\\') + (next ?? '')
         index++
       } else {
         if (char === '"') { inString = !inString; inMath = false }
