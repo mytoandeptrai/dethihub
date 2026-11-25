@@ -46,8 +46,10 @@ export function InspectorOverlay({ inspector, hidden = false }: { inspector: Exa
         return true
       })
       const selection = TextSelection.findFrom(editor.state.doc.resolve(start), 1, true)
-      editor.commands.focus(selection && selection.from < active.pos + active.node.nodeSize ? selection.from : undefined)
-      return
+      if (selection && selection.from < active.pos + active.node.nodeSize) {
+        editor.commands.focus(selection.from)
+        return
+      }
     }
     inspector.reveal()
     requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-inspector-active="true"] input, [data-inspector-active="true"] textarea')?.focus())

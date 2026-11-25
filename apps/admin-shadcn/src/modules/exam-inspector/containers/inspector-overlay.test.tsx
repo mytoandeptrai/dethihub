@@ -66,6 +66,15 @@ it.each([true, false])('still reveals writable blocks (desktop=%s)', async (desk
   expect(editor.getJSON()).toEqual(before)
 })
 
+it.each(['pageBreak', 'divider', 'toc'])('reveals properties instead of focusing a replaceable %s selection', async (template) => {
+  const { editor, reveal } = setup(template, false)
+  const before = editor.getJSON()
+  await userEvent.click(screen.getByTestId('inspector-badge-edit'))
+  expect(reveal).toHaveBeenCalledOnce()
+  expect(editor.view.dom).not.toHaveFocus()
+  expect(editor.getJSON()).toEqual(before)
+})
+
 it('renders outside measured flow and hides while the mobile sheet covers the canvas', () => {
   const element = document.createElement('div')
   element.getBoundingClientRect = () => ({ top: 100, left: 100, width: 200, height: 100 }) as DOMRect
