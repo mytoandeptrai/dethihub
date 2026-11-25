@@ -1,5 +1,6 @@
 import { Extension } from '@tiptap/core'
-import { NodeSelection, Plugin, TextSelection } from '@tiptap/pm/state'
+import { NodeSelection, Plugin, Selection, TextSelection } from '@tiptap/pm/state'
+import { GapCursor } from '@tiptap/pm/gapcursor'
 import { CellSelection } from '@tiptap/pm/tables'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
@@ -24,6 +25,10 @@ function typingTail(state: EditorState) {
   return { from: doc.content.size - last.nodeSize, to: doc.content.size }
 }
 
+export function isTypingHelper(element: Element) {
+  return element.hasAttribute('data-typing-tail') || element.classList.contains('ProseMirror-gapcursor')
+}
+
 function focusBoundary(view: EditorView, pos: number, direction: -1 | 1, empty = false) {
   const { state } = view
   const $pos = state.doc.resolve(pos)
@@ -31,6 +36,9 @@ function focusBoundary(view: EditorView, pos: number, direction: -1 | 1, empty =
   const tr = state.tr
   if (adjacent?.isTextblock && (!empty || adjacent.content.size === 0)) {
     tr.setSelection(TextSelection.create(state.doc, pos + direction))
+  } else if (!empty) {
+    const gap = new GapCursor($pos).map(state.doc, tr.mapping)
+    tr.setSelection(gap instanceof GapCursor ? gap : Selection.near($pos, direction))
   } else {
     const paragraph = state.schema.nodes.paragraph
     if (!paragraph || !$pos.parent.canReplaceWith($pos.index(), $pos.index(), paragraph)) return false
@@ -58,6 +66,9 @@ function selectedObject(state: EditorState): NodeSelection | null {
 }
 
 function leaveObject(view: EditorView, direction: -1 | 1, newLine = false) {
+  if (view.state.selection instanceof GapCursor) {
+    return newLine ? focusBoundary(view, view.state.selection.from, direction, true) : false
+  }
   const selection = selectedObject(view.state)
   const { schema } = view.state
   if (!selection) return false

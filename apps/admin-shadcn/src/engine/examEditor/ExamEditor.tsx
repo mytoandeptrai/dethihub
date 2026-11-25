@@ -34,7 +34,7 @@ import { createSearchPlugin } from './find'
 import { ChoiceLayoutExtension, choiceColsKey, measureChoiceColumns } from './choiceLayout'
 import { LeadImageExtension } from './leadImage'
 import { PaginationExtension, pageGapsKey, computePagePlan } from './pagination'
-import { ObjectNavigation, focusBlankEditorArea } from './objectNavigation'
+import { ObjectNavigation, focusBlankEditorArea, isTypingHelper } from './objectNavigation'
 
 /** map rỗng dùng chung — tránh tạo Map mới mỗi lượt đo. */
 const EMPTY_GAPS = new Map<number, number>()
@@ -280,7 +280,7 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
     }
     // bỏ qua chính các widget spacer (PM render chúng thành con của .doc-content)
     const els = (Array.from(contentEl.children) as HTMLElement[]).filter(
-      (el) => !el.classList.contains('doc-page-gap') && !el.hasAttribute('data-typing-tail'),
+      (el) => !el.classList.contains('doc-page-gap') && !isTypingHelper(el),
     )
     if (els.length === 0) {
       setPageCount(1)

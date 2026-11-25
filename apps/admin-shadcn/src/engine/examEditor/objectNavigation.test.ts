@@ -5,10 +5,12 @@ import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import { TextSelection } from '@tiptap/pm/state'
+import { GapCursor } from '@tiptap/pm/gapcursor'
 import { afterEach, describe, expect, it } from 'vitest'
 import { BaseParagraphNode, EXAM_MARKS, EXAM_NODES } from './schema'
-import { ObjectNavigation } from './objectNavigation'
+import { ObjectNavigation, isTypingHelper } from './objectNavigation'
 import { tipTapToBlocks } from './convert'
+import { computePagePlan } from './pagination'
 import type { JSONContent } from '@tiptap/core'
 
 const editors: Editor[] = []
@@ -30,6 +32,24 @@ function key(editor: Editor, value: string) {
 afterEach(() => editors.splice(0).forEach((editor) => editor.destroy()))
 
 describe('object navigation', () => {
+  it.each(['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'])('does not change document or page count when navigating between objects with %s', (arrow) => {
+    const editor = setup([{ type: 'examDivider' }, { type: 'examDivider' }])
+    const before = editor.getJSON()
+    const pages = () => {
+      const blocks = Array.from(editor.view.dom.children).filter((node) => !isTypingHelper(node))
+      return computePagePlan(blocks.map((node) => node.tagName === 'P' ? 24 : 400), blocks.map(() => 0), 800, 1000, 100).pages
+    }
+    expect(pages()).toBe(1)
+    editor.commands.setNodeSelection(arrow === 'ArrowRight' || arrow === 'ArrowDown' ? 0 : 1)
+    key(editor, arrow)
+    expect(editor.getJSON()).toEqual(before)
+    expect(pages()).toBe(1)
+    expect(editor.state.selection).toBeInstanceOf(GapCursor)
+    key(editor, 'Enter')
+    expect(editor.state.selection).toBeInstanceOf(TextSelection)
+    editor.commands.insertContent('Giữa hai khối')
+    expect(editor.state.doc.child(1).textContent).toBe('Giữa hai khối')
+  })
   it.each([picture, table, { type: 'examDivider' }, { type: 'examToc' }])('keeps a single empty typing tail after a final object: $type', (block) => {
     const editor = setup([block])
     expect(editor.state.doc.lastChild?.type.name).toBe('paragraph')
@@ -52,13 +72,13 @@ describe('object navigation', () => {
     expect(editor.state.doc.child(1).textContent).toBe('Nội dung sau ảnh')
   })
 
-  it.each(['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'])('moves a selected table to a valid text cursor with %s', (arrow) => {
+  it.each(['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'])('moves a selected table to a cursor without inserting content with %s', (arrow) => {
     const editor = setup([table])
+    const before = editor.getJSON()
     editor.commands.setNodeSelection(0)
     key(editor, arrow)
-    expect(editor.state.selection).toBeInstanceOf(TextSelection)
-    expect(editor.state.selection.$from.parent.type.name).toBe('paragraph')
-    expect(editor.state.selection.$from.index(0)).toBe(['ArrowLeft', 'ArrowUp'].includes(arrow) ? 0 : 1)
+    expect(editor.getJSON()).toEqual(before)
+    expect(editor.state.selection.empty).toBe(true)
     expect(tipTapToBlocks(editor.getJSON()).filter((block) => block.type === 'table')).toHaveLength(1)
   })
 
