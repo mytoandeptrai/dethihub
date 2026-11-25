@@ -13,6 +13,7 @@ const messages = {
   aiReview: {
     noChanges: 'Không có thay đổi hợp lệ để áp dụng.',
     answerKeyWarning: 'Phản hồi chưa cập nhật bảng đáp án. Vui lòng kiểm tra lại đáp án trước khi áp dụng.',
+    extraAnswerKeyWarning: 'Phản hồi thêm bảng đáp án mới nhưng bảng đáp án cũ vẫn giữ nguyên — đề sẽ có cả hai bảng. Vui lòng kiểm tra lại trước khi áp dụng.',
     essay: 'Bài {number}.', score: '{score} điểm',
     title: 'Nội dung sẽ áp dụng', empty: 'Chưa có nội dung', count: 'Đã soạn {count}{total} câu',
     replace: 'Thay toàn bộ đề', append: 'Thêm vào cuối đề', patch: 'Sửa một phần', draft: 'Bản nháp đề thi',

@@ -11,6 +11,13 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('explains that adding an extra key leaves both answer keys in the document', () => {
+    const current = { type: 'doc', content: [{ type: 'examQuestion' }, { type: 'examAnswerKey', content: [] }] }
+    const document = { patch: [{ id: 'k0', op: 'insertBefore', blocks: [{ type: 'question', text: 'Câu mới', options: ['Sai', 'Đúng'] }, { type: 'answerKey', items: [{ no: 1, answer: 'B' }] }] }] }
+    render(<PreparedPreview document={document} prepared={prepareAiApplication(document, current)} />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Phản hồi thêm bảng đáp án mới nhưng bảng đáp án cũ vẫn giữ nguyên — đề sẽ có cả hai bảng. Vui lòng kiểm tra lại trước khi áp dụng.')
+    expect(screen.getByRole('alert')).not.toHaveTextContent('Phản hồi chưa cập nhật bảng đáp án.')
+  })
   it('renders a regenerated plotted question with only the generic missing-key warning', () => {
     const current = { type: 'doc', content: [
       { type: 'examQuestion', content: [{ type: 'examQuestionPrompt', content: [{ type: 'text', text: 'Đồ thị nào?' }, { type: 'image', attrs: { src: 'data:image/png;base64,AAAA', plot: '{"kind":"graph"}' } }] }] },

@@ -37,7 +37,9 @@ for (const scenario of ['swap', 'plot', 'extra-key']) test(`${scenario} preview 
   await page.getByLabel('Nhập yêu cầu cho AI').fill('Sửa câu hỏi trong đề Toán lớp 9')
   await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
   const preview = page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
-  await expect(preview.getByRole('alert')).toHaveText(plotted ? [] : ['Phản hồi chưa cập nhật bảng đáp án. Vui lòng kiểm tra lại đáp án trước khi áp dụng.'])
+  await expect(preview.getByRole('alert')).toHaveText(plotted ? [] : [scenario === 'extra-key'
+    ? 'Phản hồi thêm bảng đáp án mới nhưng bảng đáp án cũ vẫn giữ nguyên — đề sẽ có cả hai bảng. Vui lòng kiểm tra lại trước khi áp dụng.'
+    : 'Phản hồi chưa cập nhật bảng đáp án. Vui lòng kiểm tra lại đáp án trước khi áp dụng.'])
   await expect(preview.getByText('Đáp án đúng', { exact: true })).toHaveCount(scenario === 'swap' ? 0 : 1)
   const imageSources = await preview.locator('img').evaluateAll((images) => images.map((image) => image.getAttribute('src')))
   expect(imageSources).toEqual(plotted ? [expect.stringContaining('data:image/svg+xml')] : [])

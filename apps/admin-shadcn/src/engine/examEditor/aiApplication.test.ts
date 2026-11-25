@@ -11,9 +11,11 @@ describe('ai application preparation', () => {
     const raw = op === 'append' ? { action: 'append', blocks } : { patch: [{ id: 'k0', op, blocks }] }
     const prepared = prepareAiApplication(raw, current)
     expect(prepared.answerKeyWarning).toBe(true)
+    expect(prepared.answerKeyWarningReason).toBe('extra-key')
     expect(prepared.answers.find((item) => item.no === 1)?.answer).toBe('B')
     const withoutOldKey = prepareAiApplication(raw, blocksToTipTap([question]))
     expect(withoutOldKey.answerKeyWarning).toBe(false)
+    expect(withoutOldKey.answerKeyWarningReason).toBeUndefined()
   })
 
   it('still warns when only one of multiple original answer keys is replaced', () => {
@@ -40,6 +42,7 @@ describe('ai application preparation', () => {
     const prepared = prepareAiApplication({ action, blocks: [question], patch: [{ id: 'k0', block: question }] }, current)
     expect(prepared.answers.find((item) => item.no === (action === 'append' ? 2 : 1))).toBeUndefined()
     expect(prepared.answerKeyWarning).toBe(true)
+    expect(prepared.answerKeyWarningReason).toBe('missing-key')
     const applied = action === 'patch' ? prepared.patches[0].blocks : prepared.blocks
     expect(applied[0]).not.toHaveProperty('answer')
     expect(applied).toEqual(prepareAiApplication({ blocks: [{ ...question, answer: undefined }] }).blocks)

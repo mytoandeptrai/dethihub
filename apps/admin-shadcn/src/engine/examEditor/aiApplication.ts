@@ -336,6 +336,7 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
   existingAnswers.forEach((item) => answers.set(item.no, item))
   suppliedKeys.flatMap((block) => block.items).forEach((item) => answers.set(item.no, item))
   const answerKeyWarning = questionChanges.length > 0 && (suppliedKeys.length === 0 || remainingKeys.length > 0)
+  const answerKeyWarningReason: 'missing-key' | 'extra-key' | undefined = !answerKeyWarning ? undefined : suppliedKeys.length ? 'extra-key' : 'missing-key'
   return {
     action,
     blocks,
@@ -343,6 +344,7 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
     numbers: blocks.map((block) => numbers.get(block) ?? 0),
     answers: [...answers.values()],
     answerKeyWarning,
+    answerKeyWarningReason,
     noChanges: action === 'patch' ? patches.length === 0 : action !== 'none' && blocks.length === 0,
   }
 }
