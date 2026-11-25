@@ -1,7 +1,7 @@
 'use client'
 import { ChevronRight, Shield } from 'lucide-react'
-import Link from 'next/link'
 
+import Link from '@/components/navigation-link'
 import { SiteBadge as Badge } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { t as translate } from '@/i18n/translate-admin-ops-admin-pages'

@@ -1,8 +1,8 @@
 import { Button } from '@workspace/ui/components/button'
 import { Input } from '@workspace/ui/components/input'
 import { ArrowRight, Eye, EyeOff } from 'lucide-react'
-import Link from 'next/link'
 
+import Link from '@/components/navigation-link'
 import { FormSkeleton, LoadingRegion } from '@/components/page-skeleton'
 import { appPaths } from '@/config/app-paths'
 

@@ -1,6 +1,5 @@
 'use client'
 
-import NextLink from 'next/link'
 import {
   useParams as useNextParams,
   usePathname,
@@ -9,6 +8,7 @@ import {
 } from 'next/navigation'
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 
+import NextLink from '@/components/navigation-link'
 import { mapLegacyPath } from '@/config/legacy-paths'
 
 import type { ComponentProps } from 'react'

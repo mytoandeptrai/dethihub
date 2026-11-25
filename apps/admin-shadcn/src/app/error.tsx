@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from '@workspace/ui/components/button'
-import Link from 'next/link'
 
+import Link from '@/components/navigation-link'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
 

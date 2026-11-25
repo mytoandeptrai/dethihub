@@ -16,8 +16,8 @@ import {
   Search,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 
+import Link from '@/components/navigation-link'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
 import { getActiveNavigationPath } from '@/modules/shell/utils/active-navigation'

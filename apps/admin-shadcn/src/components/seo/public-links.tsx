@@ -1,5 +1,4 @@
-import Link from 'next/link'
-
+import Link from '@/components/navigation-link'
 import { appPaths } from '@/config/app-paths'
 
 export function PublicLinks() {

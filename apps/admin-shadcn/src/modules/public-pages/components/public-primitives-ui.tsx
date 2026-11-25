@@ -4,10 +4,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/av
 import { Button as PrimitiveButton } from '@workspace/ui/components/button'
 import { Card as PrimitiveCard } from '@workspace/ui/components/card'
 import { cn } from '@workspace/ui/lib/utils'
-import NextLink from 'next/link'
 import { Slot, Tabs as TabsPrimitive } from 'radix-ui'
 import { isValidElement } from 'react'
 
+import NextLink from '@/components/navigation-link'
 import { appPaths } from '@/config/app-paths'
 import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
