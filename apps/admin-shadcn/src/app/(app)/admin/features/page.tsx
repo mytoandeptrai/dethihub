@@ -10,3 +10,5 @@ export default function AdminFeaturesPage() {
     </Suspense>
   )
 }
+
+export const metadata = { title: 'Quản trị – Tính năng' }

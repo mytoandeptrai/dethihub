@@ -9,3 +9,5 @@ export default function AdminAuditPage() {
     </Suspense>
   )
 }
+
+export const metadata = { title: 'Quản trị – Nhật ký' }

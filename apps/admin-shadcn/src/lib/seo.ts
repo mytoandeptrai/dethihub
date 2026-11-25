@@ -14,6 +14,7 @@ export function getRobots(noIndex = false) {
 interface MetadataOptions {
   path?: string
   title?: string
+  absoluteTitle?: boolean
   description?: string
   image?: { url: string; alt: string }
   article?: { publishedTime?: string }
@@ -23,15 +24,16 @@ interface MetadataOptions {
 export function buildMetadata({
   path = '/',
   title,
+  absoluteTitle = false,
   description = site.description,
   image,
   article,
   noIndex = false,
 }: MetadataOptions = {}): Metadata {
-  const fullTitle = title ? `${title} | ${site.name}` : site.name
+  const fullTitle = title ? (absoluteTitle ? title : `${title} | ${site.name}`) : site.name
   const url = new URL(path, site.url).href
   return {
-    title: title ?? { absolute: site.name },
+    title: title ? (absoluteTitle ? { absolute: title } : title) : { absolute: site.name },
     description,
     alternates: { canonical: url },
     robots: getRobots(noIndex),

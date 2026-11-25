@@ -12,6 +12,9 @@ const sharedConfig = {
   resolve: {
     tsconfigPaths: true,
     alias: {
+      'server-only': fileURLToPath(
+        new URL('./node_modules/next/dist/compiled/server-only/empty.js', import.meta.url),
+      ),
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       '@engine-pricing': fileURLToPath(new URL('./src/engine/compat/pricing.ts', import.meta.url)),
       '@engine-dialogs': fileURLToPath(new URL('./src/engine/compat/dialogs.ts', import.meta.url)),

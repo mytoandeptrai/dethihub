@@ -9,3 +9,5 @@ export default function AdminPaymentsPage() {
     </Suspense>
   )
 }
+
+export const metadata = { title: 'Quản trị – Thanh toán' }

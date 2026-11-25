@@ -1,14 +1,18 @@
 import { JsonLd } from '@/components/seo/json-ld'
-import { buildMetadata, organizationJsonLd, webSiteJsonLd } from '@/lib/seo'
+import { organizationJsonLd, webSiteJsonLd } from '@/lib/seo'
 import { HomeContainer } from '@/modules/public-pages'
+import { faqJsonLd, softwareJsonLd } from '@/modules/public-pages/public-page-json-ld'
+import { publicPageMetadata } from '@/modules/public-pages/public-page-seo'
 
-export const metadata = buildMetadata()
+export const metadata = publicPageMetadata('home')
 
 export default function HomePage() {
   return (
     <>
       <JsonLd data={organizationJsonLd()} />
       <JsonLd data={webSiteJsonLd()} />
+      <JsonLd data={softwareJsonLd()} />
+      <JsonLd data={faqJsonLd()} />
       <HomeContainer />
     </>
   )

@@ -32,9 +32,12 @@ import { t } from '@/i18n/translate'
 
 import { decodeStudentDoc } from './student-model'
 
-import type { data_types_Exam as Exam } from '@student-engine'
+import type { data_types_Exam as Exam, data_docTypes_ExamDoc as ExamDoc } from '@student-engine'
 
-export function useExamViewContainer() {
+export function useExamViewContainer(
+  options?: { serverSummary?: boolean; initialDoc?: ExamDoc } | void,
+) {
+  const { serverSummary = false, initialDoc } = options ?? {}
   const ready = useClientReady()
   const { isLoading: authLoading } = useSession()
   const { id } = useParams<{
@@ -48,6 +51,7 @@ export function useExamViewContainer() {
     ...communityExamCommunityDocQuery({ params: { path: { id: id ?? '' } } }),
     enabled: ready && !authLoading && isRemoteExamId(id),
     select: decodeStudentDoc,
+    initialData: initialDoc ? { ...initialDoc } : undefined,
     retry: false,
     staleTime: 30_000,
   })
@@ -76,6 +80,7 @@ export function useExamViewContainer() {
   }
   return {
     viewState: 1 as const,
+    serverSummary,
     exam,
     handleInteractive,
     id,

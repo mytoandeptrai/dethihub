@@ -13,12 +13,9 @@ export async function createOgImage({
   title: string
   description?: string
 }) {
-  const [latin, extended, vietnamese, mark] = await Promise.all([
-    readFile(path.join(process.cwd(), 'src/assets/fonts/be-vietnam-pro-latin-700-normal.woff')),
-    readFile(path.join(process.cwd(), 'src/assets/fonts/be-vietnam-pro-latin-ext-700-normal.woff')),
-    readFile(
-      path.join(process.cwd(), 'src/assets/fonts/be-vietnam-pro-vietnamese-700-normal.woff'),
-    ),
+  const [regular, bold, mark] = await Promise.all([
+    readFile(path.join(process.cwd(), 'src/assets/fonts/be-vietnam-pro-400.ttf')),
+    readFile(path.join(process.cwd(), 'src/assets/fonts/be-vietnam-pro-700.ttf')),
     readFile(path.join(process.cwd(), 'public/brand/favicon.svg')),
   ])
   return new ImageResponse(
@@ -46,9 +43,18 @@ export async function createOgImage({
         <span style={{ fontSize: 28 }}>DẠY HỌC THÔNG MINH HƠN</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ fontSize: 82, lineHeight: 1.15 }}>{title}</div>
+        <div
+          style={{
+            fontSize: title.length > 65 ? 48 : title.length > 30 ? 62 : 82,
+            lineHeight: 1.2,
+          }}
+        >
+          {title}
+        </div>
         {description ? (
-          <div style={{ fontSize: 32, lineHeight: 1.5, maxWidth: 1020 }}>{description}</div>
+          <div style={{ fontSize: 32, fontWeight: 400, lineHeight: 1.5, maxWidth: 1020 }}>
+            {description}
+          </div>
         ) : null}
       </div>
       <div style={{ fontSize: 24 }}>{new URL(site.url).host}</div>
@@ -56,12 +62,10 @@ export async function createOgImage({
     {
       width: 1200,
       height: 630,
-      fonts: [latin, extended, vietnamese].map((data) => ({
-        name: 'Be Vietnam Pro',
-        data,
-        weight: 700 as const,
-        style: 'normal' as const,
-      })),
+      fonts: [
+        { name: 'Be Vietnam Pro', data: regular, weight: 400, style: 'normal' },
+        { name: 'Be Vietnam Pro', data: bold, weight: 700, style: 'normal' },
+      ],
     },
   )
 }

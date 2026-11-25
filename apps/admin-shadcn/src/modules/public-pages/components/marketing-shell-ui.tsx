@@ -4,6 +4,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { Coins, LogOut, Menu, MessageSquare, X } from 'lucide-react'
 import Image from 'next/image'
 
+import { PublicLinks } from '@/components/seo/public-links'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
 import { ContactLinks } from '@/modules/public-pages/components/contact-links-ui'
@@ -240,6 +241,7 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
 export function FooterUi({ handleOpenFeedback }: { handleOpenFeedback: () => void }) {
   return (
     <footer className="border-line mt-24 overflow-hidden border-t bg-white">
+      <PublicLinks />
       <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-x-6 gap-y-10 px-5 py-12 sm:px-6 md:gap-10 md:py-16 lg:grid-cols-4">
         <div className="col-span-2 lg:col-span-1">
           <div className="flex items-center gap-2.5">

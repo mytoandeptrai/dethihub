@@ -75,19 +75,26 @@ export function ExamViewUi(
               <ArrowLeft className="size-4" />
             </Link>
 
-            <PageHeader
-              className="mb-0 min-w-0 flex-1 basis-[calc(100%-4rem)] sm:basis-64 [&_h1]:text-base [&_h1]:leading-snug [&_header]:mb-0"
-              title={exam.title}
-              count={
-                <>
-                  {exam.sections.reduce((n, s) => n + s.questions.length, 0)}
-                  {t('studentCopy.m380')} {formatPoints(totalPoints(exam))}
-                  {t('studentCopy.m381')}
-                  {exam.durationMinutes}
-                  {t('studentCopy.m382')}
-                </>
-              }
-            />
+            {props.serverSummary ? (
+              <p className="min-w-0 flex-1 text-sm text-slate-600">
+                {exam.sections.reduce((n, s) => n + s.questions.length, 0)} câu hỏi ·{' '}
+                {exam.durationMinutes} phút
+              </p>
+            ) : (
+              <PageHeader
+                className="mb-0 min-w-0 flex-1 basis-[calc(100%-4rem)] sm:basis-64 [&_h1]:text-base [&_h1]:leading-snug [&_header]:mb-0"
+                title={exam.title}
+                count={
+                  <>
+                    {exam.sections.reduce((n, s) => n + s.questions.length, 0)}
+                    {t('studentCopy.m380')} {formatPoints(totalPoints(exam))}
+                    {t('studentCopy.m381')}
+                    {exam.durationMinutes}
+                    {t('studentCopy.m382')}
+                  </>
+                }
+              />
+            )}
 
             <Badge tone="neutral" className="hidden shrink-0 sm:inline-flex">
               {exam.subject}

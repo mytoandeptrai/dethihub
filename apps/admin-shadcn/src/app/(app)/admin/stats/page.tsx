@@ -9,3 +9,5 @@ export default function AdminStatsPage() {
     </Suspense>
   )
 }
+
+export const metadata = { title: 'Quản trị – Thống kê' }

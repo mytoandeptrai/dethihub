@@ -15,6 +15,7 @@ import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
 import { Button, Link } from '@/modules/public-pages/components/public-primitives-ui'
+import { homeFaq } from '@/modules/public-pages/home-faq'
 
 import { SectionUi } from './section-ui'
 
@@ -147,19 +148,11 @@ export function PricingSectionUi({
     </SectionUi>
   )
 }
-const FAQS = [
-  { question: t('publicCopy.m137'), answer: t('publicCopy.m138') },
-  { question: t('publicCopy.m139'), answer: t('publicCopy.m140') },
-  { question: t('publicCopy.m141'), answer: t('publicCopy.m142') },
-  { question: t('publicCopy.m143'), answer: t('publicCopy.m144') },
-  { question: t('publicCopy.m145'), answer: t('publicCopy.m146') },
-  { question: t('publicCopy.m147'), answer: t('publicCopy.m148') },
-]
 export function FaqSectionUi() {
   return (
     <SectionUi id="cau-hoi" eyebrow={t('publicCopy.m149')} title={t('publicCopy.m150')}>
       <Accordion.Root type="single" collapsible className="home-faq">
-        {FAQS.map((item, i) => (
+        {homeFaq.map((item, i) => (
           <Accordion.Item key={item.question} value={`faq-${i}`} className="home-faq-item">
             <Accordion.Header>
               <Accordion.Trigger className="home-faq-trigger">

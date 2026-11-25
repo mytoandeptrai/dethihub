@@ -9,3 +9,5 @@ export default function AdminAiPage() {
     </Suspense>
   )
 }
+
+export const metadata = { title: 'Quản trị – AI' }
