@@ -30,7 +30,7 @@ describe('stats panel loading boundaries', () => {
       if (new URL(request.url).searchParams.get('days') === '30') { held = true; await gate }
       else if (initial === 'error') return HttpResponse.json({ message: 'Stats unavailable' }, { status: 500 })
       else if (initial === 'empty') return HttpResponse.json({ ...fixture.data.stats[7], chartDays: [] })
-      return HttpResponse.json(fixture.respond('GET', request.url).json)
+      return new HttpResponse(JSON.stringify(fixture.respond('GET', request.url).json), { headers: { 'content-type': 'application/json' } })
     }), http.get('http://localhost:3000/api/admin/stats/online', () => HttpResponse.json(fixture.data.online)))
     render(<QueryClientProvider client={client}><StatsPanelContainer me={{ userId: 'fixture-staff', role: 'admin' }} /></QueryClientProvider>)
     expect(screen.getByRole('status', { name: 'Đang tải' })).toBeInTheDocument()
