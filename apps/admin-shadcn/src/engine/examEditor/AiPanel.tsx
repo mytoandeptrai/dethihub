@@ -1695,6 +1695,7 @@ function AiConversation({
               ) : null}
               {turn.previewPayload && !turn.inserted ? <div className="flex gap-2">
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Áp dụng</button>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, previewPayload: undefined, generation: undefined } : item))}>Huỷ</button>
               </div> : null}
               {turn.sources?.length || turn.webSources?.length || turn.sourceNote ? <SourcesButton sources={turn.sources} web={turn.webSources} note={turn.sourceNote} /> : null}

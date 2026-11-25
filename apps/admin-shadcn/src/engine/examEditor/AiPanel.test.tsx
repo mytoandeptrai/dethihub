@@ -23,6 +23,23 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+
+  it.each([true, false])('regenerates document approval with its retry receipt (questions: %s)', async (withQuestions) => {
+    const retries: (string | null)[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of'))
+      return HttpResponse.json({ content: JSON.stringify({ action: 'append', say: 'Bản nháp kiểm tra', blocks: withQuestions ? [{ type: 'question', no: 1, text: 'Kiểm tra' }] : [{ type: 'paragraph', text: 'Lời giải' }] }), usage: null, receipt: `receipt-${retries.length}` })
+    }))
+    render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    const retry = screen.getByRole('button', { name: 'Soạn lại' })
+    await waitFor(() => expect(retry).toBeEnabled())
+    await userEvent.click(retry)
+    await waitFor(() => expect(retries).toEqual(['', 'receipt-1']))
+    await screen.findByRole('button', { name: 'Áp dụng' })
+  })
+
   it('uses the public mascot asset in the thinking row', async () => {
     let stream!: ReadableStreamDefaultController<Uint8Array>
     server.use(http.post('http://localhost:3000/api/ai/chat', () => new HttpResponse(new ReadableStream({ start(controller) { stream = controller } }), { headers: { 'Content-Type': 'text/event-stream' } })))
