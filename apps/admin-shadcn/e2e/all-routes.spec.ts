@@ -160,7 +160,20 @@ async function isolate(context: BrowserContext) {
     const endpoint = url.pathname
     intercepted.push(method + ' ' + endpoint)
     let response: { status: number; json: unknown } = fixture.respond(method, url.href, body)
-    if (endpoint.startsWith('/api/workspace/items')) {
+    if (endpoint === '/api/admin/payments' && response.json && typeof response.json === 'object') {
+      const revenue = fixture.data.payments.revenue
+      const slots = {
+        day: { vnd: revenue.day, count: revenue.counts.day },
+        week: { vnd: revenue.week, count: revenue.counts.week },
+        month: { vnd: revenue.month, count: revenue.counts.month },
+        all: { vnd: revenue.all, count: revenue.counts.all },
+        prevDay: revenue.prev.day,
+        prevWeek: revenue.prev.week,
+        prevMonth: revenue.prev.month,
+        months: revenue.months,
+      } satisfies components['schemas']['RevenueDto']
+      response = { ...response, json: { ...response.json, revenue: slots } }
+    } else if (endpoint.startsWith('/api/workspace/items')) {
       const kind = url.searchParams.get('kind')
       const data = kind === 'doc' ? editorFixture : kind === 'online' ? online : null
       response = {
@@ -303,19 +316,34 @@ async function isolate(context: BrowserContext) {
       await page.getByText(editorFixture.title, { exact: true }).click()
       await expect(page.locator('.ProseMirror')).toBeVisible()
       await capture('editor-exam')
-      const rail = page.getByRole('navigation', { name: 'Công cụ soạn đề', exact: true })
-      for (const label of ['Văn bản', 'Chèn', 'Trang', 'Mục lục']) {
-        await rail.getByRole('button', { name: label, exact: true }).click()
-        await expect(
-          page.locator(width >= 1024 ? '.exam-tool-panel' : '.exam-tool-sheet'),
-        ).toBeVisible()
-        await capture('editor-panel-' + ['Văn bản', 'Chèn', 'Trang', 'Mục lục'].indexOf(label))
-        await (
-          width >= 1024
-            ? page.getByRole('button', { name: 'Đóng công cụ', exact: true })
-            : rail.getByRole('button', { name: label, exact: true })
-        ).click()
-        if (width < 1024) await expect(page.locator('.exam-tool-sheet')).not.toBeVisible()
+      for (const [index, label] of ['Trang chủ', 'Chèn', 'Bố cục'].entries()) {
+        if (width >= 1024) {
+          const tab = page.getByRole('tab', { name: label, exact: true })
+          await tab.click()
+          await expect(tab).toHaveAttribute('aria-selected', 'true')
+          await expect(page.locator('.ribbon-body')).toBeVisible()
+          await capture('editor-panel-' + index)
+        } else {
+          await page.getByRole('button', { name: 'Tất cả công cụ', exact: true }).click()
+          const sheet = page.getByRole('dialog', { name: 'Công cụ soạn đề', exact: true })
+          await expect(sheet).toBeVisible()
+          const tab = sheet.getByRole('button', { name: index === 0 ? 'Định dạng' : label, exact: true })
+          await tab.click()
+          await expect(tab).toHaveAttribute('aria-pressed', 'true')
+          await expect(sheet.locator('.ribbon-phone-sheet-body')).toBeVisible()
+          await capture('editor-panel-' + index)
+          await sheet.getByRole('button', { name: 'Đóng', exact: true }).click()
+          await expect(sheet).not.toBeVisible()
+        }
+      }
+      if (width < 1024) await page.getByRole('button', { name: 'Mục lục, Khối mẫu & Công cụ', exact: true }).click()
+      const navigation = width >= 1024 ? page.getByRole('navigation', { name: 'Bảng điều hướng', exact: true }) : page.getByRole('dialog', { name: 'Mục lục, Khối mẫu, Công cụ và Thuộc tính', exact: true })
+      await navigation.getByRole('button', { name: 'Mục lục', exact: true }).click()
+      await expect(page.locator('.nav-body')).toBeVisible()
+      await capture('editor-panel-3')
+      if (width < 1024) {
+        await navigation.getByRole('button', { name: 'Đóng', exact: true }).click()
+        await expect(navigation).not.toBeVisible()
       }
       await page.keyboard.press('Control+k')
       await expect(page.getByRole('dialog', { name: 'Lệnh soạn đề' })).toBeVisible()
