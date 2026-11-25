@@ -48,7 +48,7 @@ import { IconClose, IconEnter, IconPaperclip, IconStop } from './icons'
 import { AiQuestionPreview } from '@/components/ai-question-preview'
 import { AiDocumentPreview } from '@/components/ai-document-preview'
 import { useAiQuestionStream } from '@/hooks/use-ai-question-stream'
-import { parseAiDocumentReply, selectedExamPayload } from '@/lib/ai-question-stream'
+import { isAiDocumentReplyComplete, parseAiDocumentReply, selectedExamPayload } from '@/lib/ai-question-stream'
 import type { AiQuestionRequest, AiQuestionState } from '@/hooks/use-ai-question-stream'
 import type { GeneratedQuestion } from '@/lib/ai-question-stream'
 import { ApiClientError } from '@/lib/api-error'
@@ -196,6 +196,7 @@ export interface ChatTurn {
   generation?: AiQuestionState
   inserted?: boolean
   previewPayload?: string
+  incomplete?: boolean
   generationVersion?: number
   /** người dùng đã bấm 👎 */
   vote?: 'up' | 'down'
@@ -214,14 +215,17 @@ interface ActStep {
   live?: string
 }
 
-function examReview(content: string, questionCount: number): Pick<ChatTurn, 'text' | 'previewPayload'> {
+function examReview(content: string, questionCount: number, finishReason?: string | null): Pick<ChatTurn, 'text' | 'previewPayload' | 'incomplete'> {
   const raw = parseAiDocumentReply(content, extractJson)
+  if ((raw || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (finishReason === 'length' || !isAiDocumentReplyComplete(content))) {
+    return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
+  }
   if (raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || typeof raw.say === 'string')) {
     const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
     const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))
-    return { text: typeof raw.say === 'string' ? raw.say : reviewDocument ? 'Bản nháp đã sẵn sàng.' : '', previewPayload: reviewDocument ? JSON.stringify(raw) : undefined }
+    return { text: typeof raw.say === 'string' ? raw.say : reviewDocument ? 'Bản nháp đã sẵn sàng.' : '', previewPayload: reviewDocument ? JSON.stringify(raw) : undefined, incomplete: false }
   }
-  return { text: questionCount > 0 ? '' : content, previewPayload: undefined }
+  return { text: questionCount > 0 ? '' : content, previewPayload: undefined, incomplete: false }
 }
 
 /** đóng bước đang chạy (xong / lỗi) */
@@ -1182,7 +1186,7 @@ function AiConversation({
       onProgress?.({ phase: 'think', thought: 0, thinking: '', text: '' })
       // model chưa gửi gì (đang xếp hàng / suy luận không stream): số giây vẫn chạy
       const ticker = examSteps ? setInterval(() => phase === 'think' && logPatch({ note: secs() }), 1000) : undefined
-      let res: Awaited<ReturnType<typeof callLlm>>
+      let res: Awaited<ReturnType<typeof callLlm>> & { finishReason?: string | null }
       try {
         const options = {
           signal: controller.signal,
@@ -1302,7 +1306,7 @@ function AiConversation({
       } else {
         patchTurn((turn) => {
           const hasQuestions = !!turn.generation?.questions.length
-          const review = examReview(res.content, turn.generation?.questions.length ?? 0)
+          const review = examReview(res.content, turn.generation?.questions.length ?? 0, res.finishReason)
           return { ...review, pending: false, log: hasQuestions || review.previewPayload ? closeLog(turn.log ?? [], 'done') : undefined }
         })
       }
@@ -1347,13 +1351,13 @@ function AiConversation({
     abortRef.current = controller
     setBusy(true)
     const patch = (value: Partial<ChatTurn>) => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, ...value } : item))
-    patch({ pending: true, error: undefined, topup: undefined, text: '', inserted: false, previewPayload: undefined, aiRequest: request, generationVersion: (turn.generationVersion ?? 0) + 1, log: undefined })
+    patch({ pending: true, error: undefined, topup: undefined, text: '', inserted: false, previewPayload: undefined, incomplete: false, aiRequest: request, generationVersion: (turn.generationVersion ?? 0) + 1, log: undefined })
     try {
       const result = await generation.run(request, { signal: controller.signal, onQuota: reportQuota,
         onUpdate: (snapshot) => patch({ generation: snapshot }),
       })
       setTurns((current) => current.map((item) => item.id === turn.id ? { ...item,
-        ...examReview(result.content, item.generation?.questions.length ?? 0),
+        ...examReview(result.content, item.generation?.questions.length ?? 0, result.finishReason),
         ...(result.stopped ? { text: 'Đã dừng.' } : {}),
         retry: undefined,
       } : item))
@@ -1688,12 +1692,13 @@ function AiConversation({
                 }
                 onCancel={() => cancelPlan(turn.id)}
               />
-              {turn.generation && !turn.previewPayload && (turn.generation.questions.length > 0 || turn.pending && !!turn.generation.total) ? (
+              {turn.generation && !turn.previewPayload && !turn.incomplete && (turn.generation.questions.length > 0 || turn.pending && !!turn.generation.total) ? (
                 <AiQuestionPreview key={`${turn.id}-${turn.generationVersion ?? 0}`} questions={turn.generation.questions} total={turn.generation.total}
                   busy={!!turn.pending || busy} inserted={turn.inserted} reviewOnly={!!turn.previewPayload} refundedTokens={turn.generation.refundedTokens}
                   onInsert={(questions) => insertQuestions(turn, questions)} onRegenerate={() => void retryGeneration(turn)}
                   renderText={(text) => <Markdown text={text} />} />
               ) : null}
+              {turn.incomplete ? <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button> : null}
               {turn.previewPayload && !turn.inserted ? <div>
                 <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
                 <div className="flex gap-2">

@@ -106,7 +106,7 @@ export function useAiQuestionStream() {
       active.current = null
       options.signal?.removeEventListener('abort', abort)
     }
-    return { content: current.text, reasoning: thinking, usage: final?.usage ?? null, receipt: current.receipt, citations: final?.citations, stopped: current.stopped }
+    return { content: current.text, reasoning: thinking, usage: final?.usage ?? null, receipt: current.receipt, citations: final?.citations, stopped: current.stopped, finishReason: final?.finishReason }
   }, [])
 
   const retry = useCallback(() => {

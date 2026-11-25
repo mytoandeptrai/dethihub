@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseAiDocumentReply, QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
+import { isAiDocumentReplyComplete, parseAiDocumentReply, QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
 
 describe('question stream parser', () => {
+  it.each([
+    ['{"blocks":[]}', true],
+    ['{"blocks":[{"text":"literal } [ \\\" bracket"}],}', true],
+    ['{"action":"replace","blocks":[{"text":"partial"}', false],
+    ['{"action":"append","blocks":[{"text":"partial', false],
+    ['{"blocks":[]]', false],
+    ['', false],
+  ])('checks original JSON closure without accepting delimiter repair: %s', (source, expected) => {
+    expect(isAiDocumentReplyComplete(String(source))).toBe(expected)
+  })
+
   it.each([
     String.raw`{"action":"append","say":"giá $5\nNam\tThanh \"quote\" \\ \/ \u0041","blocks":[]}`,
     String.raw`{"action":"append","blocks":[{"type":"question","text":"$x\nNam\tText\u0041\/$"}]}`,

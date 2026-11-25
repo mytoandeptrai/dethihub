@@ -23,6 +23,35 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it.each(['replace', 'append'])('blocks truncated %s drafts and retries with the receipt', async (action) => {
+    let calls = 0
+    const retries: string[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      calls++
+      return HttpResponse.json({ content: calls === 1 ? `{"action":"${action}","blocks":[{"type":"question","text":"Partial question"}` : JSON.stringify({ action, blocks: [{ type: 'question', text: 'Complete question' }] }), receipt: `receipt-${calls}`, usage: null })
+    }))
+    const apply = vi.fn()
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    expect(retries).toEqual(['', 'receipt-1'])
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it('blocks length-limited replies even when their JSON delimiters are complete', async () => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason: 'length', usage: null })))
+    render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+  })
+
   it.each([
     'Giải thích về JSON: {}. Không phải bản nháp.',
     'Ví dụ {"example":"value"}. Không phải bản nháp.',

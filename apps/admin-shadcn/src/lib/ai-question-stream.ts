@@ -49,6 +49,26 @@ function jsonStringRepair() {
   }
 }
 
+export function isAiDocumentReplyComplete(content: string): boolean {
+  const start = content.indexOf('{')
+  if (start < 0) return false
+  const source = jsonStringRepair()(content.slice(start), true)
+  const stack: string[] = []
+  let quoted = false
+  for (let index = 0; index < source.length; index++) {
+    const char = source[index]
+    if (quoted && char === '\\') { index++; continue }
+    if (char === '"') { quoted = !quoted; continue }
+    if (quoted) continue
+    if (char === '{' || char === '[') stack.push(char === '{' ? '}' : ']')
+    if (char === '}' || char === ']') {
+      if (stack.pop() !== char) return false
+      if (stack.length === 0) return true
+    }
+  }
+  return false
+}
+
 export function parseAiDocumentReply(content: string, parse: (json: string) => unknown = JSON.parse): Record<string, unknown> | null {
   const first = content.indexOf('{')
   const last = content.lastIndexOf('}')
