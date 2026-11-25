@@ -1,6 +1,6 @@
 'use client'
-import { FooterUi, HeaderUi } from '@/modules/public-pages/components'
-import { useMarketingContainer } from '@/modules/public-pages/hooks'
+import { FooterUi, HeaderUi } from '@/modules/public-pages/components/marketing-shell-ui'
+import { useMarketingContainer } from '@/modules/public-pages/hooks/use-marketing-container'
 
 import type { ReactNode } from 'react'
 export default function MarketingContainer({ children }: { children: ReactNode }) {

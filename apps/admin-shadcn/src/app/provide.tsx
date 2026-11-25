@@ -5,7 +5,7 @@ import { Toaster } from '@workspace/ui/components/sonner'
 import { ThemeProvider } from 'next-themes'
 
 import { getQueryClient } from '@/lib/react-query'
-import { GlobalContainer } from '@/modules/shell'
+import GlobalContainer from '@/modules/shell/containers/global-container/global-container'
 
 export function AppProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const queryClient = getQueryClient()

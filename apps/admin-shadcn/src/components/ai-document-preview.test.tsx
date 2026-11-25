@@ -1,4 +1,4 @@
-import { prepareAiApplication } from '@product-ui-engine'
+import { prepareAiApplication } from '@editor-engine'
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
