@@ -111,6 +111,35 @@ describe('exam AI review workflow', () => {
     expect(apply).not.toHaveBeenCalled()
   })
 
+  it.each(['length', 'max_tokens'].flatMap((finishReason) => [
+    '{"action":"app',
+    '  {',
+    '```json\n{"action":"app',
+    '```json\n',
+    '```\n{"action":"app',
+    '```json\n{"action":123}\n```\n\nGiải thích bị cắt',
+  ].map((content) => ({ finishReason, content }))))('retries token-limited JSON starts with the original receipt: $finishReason $content', async ({ finishReason, content }) => {
+    const retries: string[] = []
+    const safe = { action: 'append', blocks: [{ type: 'paragraph', text: 'Lời giải hoàn chỉnh' }] }
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : JSON.stringify(safe), finishReason: retries.length === 1 ? finishReason : 'stop', receipt: 'limited-receipt' })
+    }))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(container).not.toHaveTextContent('"action"')
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Áp dụng' }))
+    expect(retries).toEqual(['', 'limited-receipt'])
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual(safe)
+  })
+
   it.each(['length', 'max_tokens'])('blocks token-limited replies even when their JSON delimiters are complete: %s', async (finishReason) => {
     server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason, usage: null })))
     render(<AiPanel onApplyBlocks={vi.fn()} />)

@@ -222,7 +222,9 @@ function examReview(content: string, questionCount: number, finishReason?: strin
     raw.action === undefined && (Array.isArray(raw.blocks) || Array.isArray(raw.patch))
   )
   const unparsedDocumentReply = !raw && /^\s*(?:```(?:json)?\s*)?\{\s*(?:"action"\s*:\s*"(?:replace|append|patch)"|"(?:blocks|patch)"\s*:\s*\[)/.test(content)
-  if ((documentReply || unparsedDocumentReply) && (['length', 'max_tokens'].includes(finishReason ?? '') || !isAiDocumentReplyComplete(content))) {
+  const tokenLimited = ['length', 'max_tokens'].includes(finishReason ?? '')
+  const jsonStart = /^\s*(?:\{|```(?:json)?(?:\s|$))/i.test(content)
+  if (tokenLimited && jsonStart || (documentReply || unparsedDocumentReply) && (tokenLimited || !isAiDocumentReplyComplete(content))) {
     return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
   }
   if (raw && documentReply) {
