@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -14,6 +14,10 @@ describe('route navigation loading coverage', () => {
   })
 
   it.each(pages)('%s has a layout-preserving segment fallback', (page) => {
-    expect(existsSync(path.join(root, path.dirname(page), 'loading.tsx'))).toBe(true)
+    const segmentFallback = existsSync(path.join(root, path.dirname(page), 'loading.tsx'))
+    const pageFallback = readFileSync(path.join(root, page), 'utf8').includes(
+      'fallback={<PageSkeleton',
+    )
+    expect(segmentFallback || pageFallback).toBe(true)
   })
 })

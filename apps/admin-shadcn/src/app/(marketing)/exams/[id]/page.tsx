@@ -1,3 +1,6 @@
+import { Suspense } from 'react'
+
+import { PageSkeleton } from '@/components/page-skeleton'
 import { JsonLd } from '@/components/seo/json-ld'
 import { site } from '@/config/site'
 import { breadcrumbJsonLd } from '@/lib/seo'
@@ -16,7 +19,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  if (isSampleExam(id)) return <ExamViewContainer />
+  if (isSampleExam(id))
+    return (
+      <Suspense fallback={<PageSkeleton variant="detail" />}>
+        <ExamViewContainer />
+      </Suspense>
+    )
   const doc = await requirePublicExam(id)
   return (
     <>
@@ -29,7 +37,9 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
         ])}
       />
       <PublicExamSummary doc={doc} />
-      <ExamViewContainer serverSummary initialDoc={doc} />
+      <Suspense fallback={<PageSkeleton variant="detail" />}>
+        <ExamViewContainer serverSummary initialDoc={doc} />
+      </Suspense>
     </>
   )
 }

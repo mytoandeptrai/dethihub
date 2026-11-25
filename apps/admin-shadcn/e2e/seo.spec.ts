@@ -91,8 +91,12 @@ test('missing exams are noindex and bundled samples remain available', async ({
   request,
 }) => {
   for (const id of ['invalid', '22222222-2222-4222-8222-222222222222']) {
-    const missing = await request.get(`/exams/${id}`, { headers: { 'user-agent': 'Bingbot' } })
-    expect(await missing.text()).toContain('NEXT_HTTP_ERROR_FALLBACK;404')
+    for (const userAgent of ['Mozilla/5.0', 'Googlebot']) {
+      const missing = await request.get(`/exams/${id}`, {
+        headers: { 'user-agent': userAgent },
+      })
+      expect(missing.status()).toBe(404)
+    }
     await page.goto(`/exams/${id}`)
     expect(
       await page
