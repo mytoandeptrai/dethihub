@@ -10,6 +10,12 @@ import { renderWithProviders } from '@/testing/render'
 
 import { StatsPanelContainer } from './stats-panel-container'
 
+import type { components } from '@workspace/api-types'
+
+type StatsOverviewResponseDto = components['schemas']['StatsOverviewResponseDto']
+type OnlineResponseDto = components['schemas']['OnlineResponseDto']
+type ProblemDetailsDto = components['schemas']['ProblemDetailsDto']
+
 vi.mock('pdfjs-dist', () => ({ GlobalWorkerOptions: {}, getDocument: vi.fn() }))
 vi.mock('@/lib/supabase/browser', () => ({ getBrowserSupabase: () => ({ auth: { getSession: async () => ({ data: { session: { access_token: 'stats-fixture', user: { id: 'fixture-staff' } } } }) } }) }))
 
@@ -25,12 +31,16 @@ describe('stats panel loading boundaries', () => {
     let release!: () => void
     let held = false
     const gate = new Promise<void>((resolve) => { release = resolve })
-    server.use(http.get('http://localhost:3000/api/admin/stats/overview', async ({ request }) => {
-      if (new URL(request.url).searchParams.get('days') === '30') { held = true; await gate }
-      else if (initial === 'error') return HttpResponse.json({ message: 'Stats unavailable' }, { status: 500 })
-      else if (initial === 'empty') return HttpResponse.json({ ...fixture.data.stats[7], chartDays: [] })
-      return new HttpResponse(JSON.stringify(fixture.respond('GET', request.url).json), { headers: { 'content-type': 'application/json' } })
-    }), http.get('http://localhost:3000/api/admin/stats/online', () => HttpResponse.json(fixture.data.online)))
+    server.use(http.get('http://localhost:3000/api/admin/stats/overview', async ({ request }): Promise<HttpResponse<StatsOverviewResponseDto | ProblemDetailsDto>> => {
+      const days = new URL(request.url).searchParams.get('days') === '30' ? 30 : 7
+      if (days === 30) { held = true; await gate }
+      else if (initial === 'error') return HttpResponse.json<ProblemDetailsDto>({ type: 'about:blank', title: 'Stats unavailable', status: 500 }, { status: 500 })
+      else if (initial === 'empty') return HttpResponse.json<StatsOverviewResponseDto>({ ...fixture.data.stats[7], chartDays: [] })
+      return HttpResponse.json<StatsOverviewResponseDto>(fixture.data.stats[days])
+    }), http.get('http://localhost:3000/api/admin/stats/online', () => HttpResponse.json<OnlineResponseDto>({
+      onlineCount: fixture.data.online.onlineCount,
+      users: fixture.data.online.users.map(({ userId, email, lastSeen }) => ({ userId, email, lastSeen, name: email, avatar: '' })),
+    })))
     const { unmount } = renderWithProviders(<StatsPanelContainer me={{ userId: 'fixture-staff', role: 'admin' }} />)
     expect(screen.getByRole('status', { name: 'Đang tải' })).toBeInTheDocument()
     const picker = await screen.findByRole('radio', { name: '30 ngày' })

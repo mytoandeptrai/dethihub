@@ -9,6 +9,11 @@ import { server } from '@/testing/msw/server'
 
 import { AiPanel } from './AiPanel'
 
+import type { components } from '@workspace/api-types'
+
+type ChatResponseDto = components['schemas']['ChatResponseDto']
+type ProblemDetailsDto = components['schemas']['ProblemDetailsDto']
+
 vi.mock('@/engine/lib/useSession', () => ({ useSession: () => null }))
 vi.mock('@/engine/lib/khungPrompt', () => ({ khungPromptFor: async () => '' }))
 vi.mock('@/engine/components/AiQuotaRing', () => ({ AiQuotaRing: () => null, TopupLink: () => null }))
@@ -20,12 +25,13 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn()
 })
 
-const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
+const chatResponse = (body: Pick<ChatResponseDto, 'content'> & Partial<ChatResponseDto>) => HttpResponse.json<ChatResponseDto>({ reasoning: '', usage: null, finishReason: 'stop', quota: null, ...body })
+const reply = () => chatResponse({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
   it('approves a complete draft after repairing a quoted interval', async () => {
     const content = '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}'
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
     const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
     render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
@@ -35,7 +41,7 @@ describe('exam AI review workflow', () => {
 
   it('still blocks a truncated draft containing a quoted interval', async () => {
     const content = '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}'
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
     const apply = vi.fn()
     render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
@@ -47,7 +53,7 @@ describe('exam AI review workflow', () => {
 
   it('infers patch action for patch-only replies and previews them before approval', async () => {
     const patch = [{ op: 'replace', id: 'b1', blocks: [{ type: 'paragraph', text: 'Đoạn đã sửa' }] }]
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ patch }), usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ patch }), usage: null })))
     const apply = vi.fn().mockReturnValue({ text: 'Đã sửa.' })
     const { container } = render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
@@ -65,7 +71,7 @@ describe('exam AI review workflow', () => {
     server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
       retries.push(request.headers.get('x-ai-retry-of') ?? '')
       calls++
-      return HttpResponse.json({ content: calls === 1 ? `{"action":"${action}","blocks":[{"type":"question","text":"Partial question"}` : JSON.stringify({ action, blocks: [{ type: 'question', text: 'Complete question' }] }), receipt: `receipt-${calls}`, usage: null })
+      return chatResponse({ content: calls === 1 ? `{"action":"${action}","blocks":[{"type":"question","text":"Partial question"}` : JSON.stringify({ action, blocks: [{ type: 'question', text: 'Complete question' }] }), receipt: `receipt-${calls}`, usage: null })
     }))
     const apply = vi.fn()
     render(<AiPanel onApplyBlocks={apply} />)
@@ -80,7 +86,7 @@ describe('exam AI review workflow', () => {
   })
 
   it.each(['length', 'max_tokens'])('blocks token-limited replies even when their JSON delimiters are complete: %s', async (finishReason) => {
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason, usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason, usage: null })))
     render(<AiPanel onApplyBlocks={vi.fn()} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByText(/Phản hồi bị cắt/)
@@ -93,7 +99,7 @@ describe('exam AI review workflow', () => {
     'Ví dụ {"example":"value"}. Không phải bản nháp.',
     'Ví dụ {"blocks":"example","action":123}. Không phải bản nháp.',
   ])('keeps explanatory prose containing non-protocol JSON: %s', async (content) => {
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
     render(<AiPanel onApplyBlocks={vi.fn()} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByText(content)
@@ -103,7 +109,7 @@ describe('exam AI review workflow', () => {
 
   it('recovers trailing commas and bare LaTeX before document approval', async () => {
     const content = String.raw`{"action":"append","say":"Bản nháp có dấu phẩy","blocks":[{"type":"paragraph","text":"$AH \\cdot CH$"},],}`.replaceAll('\\\\', '\\')
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
     const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
     const { container } = render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
@@ -116,7 +122,7 @@ describe('exam AI review workflow', () => {
 
   it.each(['replace', 'append'])('previews every block applied by %s approval', async (action) => {
     const blocks = [{ type: 'heading', text: 'Tiêu đề sẽ chèn', level: 1 }, { type: 'paragraph', text: 'Lời giải sẽ chèn' }, { type: 'divider' }, { type: 'question', no: 1, text: 'Câu hỏi sẽ chèn' }, { type: 'answerKey', items: [{ no: 1, answer: 'Đáp án sẽ chèn' }] }, { type: 'table', rows: [['Ô sẽ chèn']] }]
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action, say: 'Kiểm tra toàn bộ bản nháp', blocks }), usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ action, say: 'Kiểm tra toàn bộ bản nháp', blocks }), usage: null })))
     const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
     render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
@@ -132,7 +138,7 @@ describe('exam AI review workflow', () => {
     const retries: (string | null)[] = []
     server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
       retries.push(request.headers.get('x-ai-retry-of'))
-      return HttpResponse.json({ content: JSON.stringify({ action: 'append', say: 'Bản nháp kiểm tra', blocks: withQuestions ? [{ type: 'question', no: 1, text: 'Kiểm tra' }] : [{ type: 'paragraph', text: 'Lời giải' }] }), usage: null, receipt: `receipt-${retries.length}` })
+      return chatResponse({ content: JSON.stringify({ action: 'append', say: 'Bản nháp kiểm tra', blocks: withQuestions ? [{ type: 'question', no: 1, text: 'Kiểm tra' }] : [{ type: 'paragraph', text: 'Lời giải' }] }), usage: null, receipt: `receipt-${retries.length}` })
     }))
     render(<AiPanel onApplyBlocks={vi.fn()} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
@@ -164,7 +170,7 @@ describe('exam AI review workflow', () => {
       : [{ type: 'divider' }, { type: 'heading', text: 'LỜI GIẢI CHI TIẾT', level: 1 }, { type: 'paragraph', text }]
     const say = action === 'replace' ? 'Đề Toán đã sẵn sàng.' : 'Gửi thầy/cô lời giải chi tiết.'
     const content = JSON.stringify({ action, say, blocks }).replaceAll('\\\\', '\\')
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
     const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
     const { container } = render(<AiPanel contextSummary="Đã có đầu đề hai cột" documentDigest='{"blocks":[{"type":"header"}]}' onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề trắc nghiệm 20 câu môn Toán lớp 9 về hệ thức lượng, kèm đáp án.{Enter}')
@@ -184,7 +190,7 @@ describe('exam AI review workflow', () => {
   })
 
   it('renders generated mathematical questions with the existing math renderer', async () => {
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ blocks: [{ type: 'question', text: 'Evaluate $x^2$.' }] }), usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ blocks: [{ type: 'question', text: 'Evaluate $x^2$.' }] }), usage: null })))
     const { container } = render(<AiPanel onApplyBlocks={vi.fn()} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByLabelText('Chọn câu 1')
@@ -209,12 +215,12 @@ describe('exam AI review workflow', () => {
     let fail!: () => void
     const gate = new Promise<void>((resolve) => { fail = resolve })
     const bodies: { messages: { content: string }[] }[] = []
-    server.use(http.post('http://localhost:3000/api/ai/chat', async ({ request }) => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', async ({ request }): Promise<HttpResponse<ChatResponseDto | ProblemDetailsDto>> => {
       const body = await request.json() as typeof bodies[number]
       bodies.push(body)
       if (bodies.length === 1) {
         await gate
-        return HttpResponse.json({ title: 'Bad Gateway', status: 502, detail: 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.' }, { status: 502 })
+        return HttpResponse.json<ProblemDetailsDto>({ type: 'about:blank', title: 'Bad Gateway', status: 502, detail: 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.' }, { status: 502 })
       }
       return reply()
     }))
