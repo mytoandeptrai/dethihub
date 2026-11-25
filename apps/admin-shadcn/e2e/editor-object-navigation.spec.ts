@@ -3,18 +3,17 @@ import { expect, test } from '@playwright/test'
 import fixture from './fixtures/editor.json'
 import { signedInState } from './session-helper'
 
-import type { Editor } from '@tiptap/core'
-
 test('continue typing after an image without deleting it or adding a blank page', async ({ browser }, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
   const context = await browser.newContext({ storageState: auth.state, viewport: { width: 1440, height: 1000 } })
   const page = await context.newPage()
   const errors: string[] = []
+  let uploadUrl = '/brand/ai-static.svg'
   page.on('pageerror', (error) => errors.push(error.message))
   await page.route('**/api/**', (route) => {
     const pathname = new URL(route.request().url()).pathname
-    return route.fulfill({ json: pathname === '/api/storage/images' ? { url: '/brand/ai-static.svg' } : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
+    return route.fulfill({ json: pathname === '/api/storage/images' ? { url: uploadUrl } : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
   })
   const doc = { ...fixture, id: 'object-navigation', title: 'Tiếp tục soạn sau ảnh', blocks: [{ type: 'paragraph', text: 'Nội dung trước ảnh' }] }
   await page.addInitScript((document) => {
@@ -28,10 +27,20 @@ test('continue typing after an image without deleting it or adding a blank page'
   if (await ai.isVisible()) await ai.click()
   await editor.press('Control+End')
   await page.getByRole('tab', { name: 'Chèn', exact: true }).click()
-  const chooser = page.waitForEvent('filechooser')
-  await page.getByRole('button', { name: 'Hình ảnh', exact: true }).click()
-  await (await chooser).setFiles({ name: 'image.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64') })
   const image = editor.locator('img[data-exam-image]')
+  const insertImage = async () => {
+    const chooser = page.waitForEvent('filechooser')
+    await page.getByRole('button', { name: 'Hình ảnh', exact: true }).click()
+    await (await chooser).setFiles({ name: 'image.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64') })
+    await expect(image).toBeVisible()
+    await image.evaluate((element: HTMLImageElement) => element.decode())
+  }
+  const resetImage = async () => {
+    await editor.press('Control+a')
+    await page.keyboard.press('Backspace')
+    await insertImage()
+  }
+  await insertImage()
   await expect(image).toBeVisible()
   await image.click()
   await expect(editor.locator('.exam-image.is-selected')).toBeVisible()
@@ -46,54 +55,39 @@ test('continue typing after an image without deleting it or adding a blank page'
   await expect(image).toHaveCount(1)
   await expect(editor.locator('> p').filter({ hasText: 'Ký tự an toàn' })).toBeVisible()
 
-  await editor.evaluate((element) => {
-    const instance = (element as HTMLElement & { editor: Editor }).editor
-    instance.commands.setContent({ type: 'doc', content: [{ type: 'examParagraph', content: [{ type: 'image', attrs: { src: '/brand/ai-static.svg', width: 100 } }] }] })
-  })
-  await image.evaluate((element: HTMLImageElement) => element.decode())
-  const block = editor.locator('> [data-exam-node="examParagraph"]')
+  await resetImage()
+  const block = editor.locator('> *').filter({ has: page.locator('img[data-exam-image]') })
   const box = await image.boundingBox()
   if (!box) throw new Error('Image has no bounds')
   await page.mouse.click(box.x + box.width + 24, box.y + box.height / 2)
   await page.keyboard.type('Bên cạnh ảnh')
   await expect(editor.locator('> p').last()).toHaveText('Bên cạnh ảnh')
-  await editor.evaluate((element) => {
-    const instance = (element as HTMLElement & { editor: Editor }).editor
-    const picture = instance.state.doc.firstChild!.toJSON()
-    instance.commands.setContent({ type: 'doc', content: [picture] })
-  })
+  await resetImage()
   const imageBox = await image.boundingBox()
   if (!imageBox) throw new Error('Image has no bounds')
   await page.mouse.click(imageBox.x + 10, imageBox.y + imageBox.height + 60)
   await page.keyboard.type('Dưới nội dung')
   await expect(editor.locator('> p').last()).toHaveText('Dưới nội dung')
 
-  const height = await editor.evaluate((element) => {
+  const dimensions = await block.evaluate((element) => {
     const flow = element.closest<HTMLElement>('.doc-flow')!
     const paper = flow.parentElement!.querySelector<HTMLElement>('.doc-paper')!
     const contentHeight = Number.parseFloat(paper.style.height) - Number.parseFloat(flow.style.paddingTop) - Number.parseFloat(flow.style.paddingBottom)
-    const instance = (element as HTMLElement & { editor: Editor }).editor
-    const src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="lightblue"/></svg>')}`
-    instance.commands.setContent({ type: 'doc', content: [{ type: 'examParagraph', content: [{ type: 'image', attrs: { src, width: 100 } }] }] })
-    return contentHeight
-  })
-  await image.evaluate((element: HTMLImageElement) => element.decode())
-  await editor.evaluate((element, contentHeight) => {
-    const instance = (element as HTMLElement & { editor: Editor }).editor
+    const content = element.parentElement!
     const pictureElement = element.querySelector<HTMLImageElement>('img[data-exam-image]')!
-    const wrapper = pictureElement.closest<HTMLElement>('[data-exam-node="examParagraph"]')!
-    const k = element.getBoundingClientRect().width / (element as HTMLElement).offsetWidth
-    const overhead = (wrapper.getBoundingClientRect().height - pictureElement.getBoundingClientRect().height) / k
-    const top = (wrapper.getBoundingClientRect().top - element.getBoundingClientRect().top) / k
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="${contentHeight - top - overhead}"><rect width="100%" height="100%" fill="lightblue"/></svg>`
-    instance.commands.command(({ tr }) => { tr.setNodeMarkup(1, undefined, { ...tr.doc.nodeAt(1)!.attrs, src: `data:image/svg+xml,${encodeURIComponent(svg)}` }); return true })
-  }, height)
-  await image.evaluate((element: HTMLImageElement) => element.decode())
+    const k = content.getBoundingClientRect().width / content.offsetWidth
+    const overhead = (element.getBoundingClientRect().height - pictureElement.getBoundingClientRect().height) / k
+    const top = (element.getBoundingClientRect().top - content.getBoundingClientRect().top) / k
+    return { contentHeight, imageHeight: contentHeight - top - overhead, imageWidth: pictureElement.getBoundingClientRect().width / k }
+  })
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${dimensions.imageWidth}" height="${dimensions.imageHeight}"><rect width="100%" height="100%" fill="lightblue"/></svg>`
+  uploadUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`
+  await resetImage()
   await expect.poll(async () => block.evaluate((element) => {
     const content = element.parentElement!
     const k = content.getBoundingClientRect().width / content.offsetWidth
     return (element.getBoundingClientRect().bottom - content.getBoundingClientRect().top) / k
-  })).toBeCloseTo(height, 0)
+  })).toBeCloseTo(dimensions.contentHeight, 0)
   await expect(editor.locator('> p[data-typing-tail="true"]')).toHaveCount(1)
   await page.evaluate(() => new Promise<void>((resolve) => { requestAnimationFrame(() => requestAnimationFrame(() => resolve())) }))
   await expect(page.locator('.doc-paper')).toHaveCount(1)
