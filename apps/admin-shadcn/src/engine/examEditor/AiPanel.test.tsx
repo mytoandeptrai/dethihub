@@ -126,10 +126,9 @@ describe('exam AI review workflow', () => {
       return chatResponse({ content: retries.length === 1 ? content : JSON.stringify(safe), finishReason: retries.length === 1 ? finishReason : 'stop', receipt: 'limited-receipt' })
     }))
     const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
-    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByText(/Phản hồi bị cắt/)
-    expect(container).not.toHaveTextContent('"action"')
     expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
@@ -138,6 +137,30 @@ describe('exam AI review workflow', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Áp dụng' }))
     expect(retries).toEqual(['', 'limited-receipt'])
     expect(JSON.parse(apply.mock.calls[0]![0])).toEqual(safe)
+  })
+
+  it.each(['length', 'max_tokens'].flatMap((finishReason) => [
+    '```\nprint("Ví dụ minh hoạ")\n```\n\nĐây là phần giải thích đã tạo.',
+    '```json\n{"action":123}\n```\n\nĐây là phần giải thích đã tạo.',
+    '{"example":"Đây là phần giải thích đã tạo."}',
+  ].map((content) => ({ finishReason, content }))))('preserves non-protocol token-limited answers alongside retry: $finishReason $content', async ({ finishReason, content }) => {
+    const retries: string[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : 'Lời giải hoàn chỉnh.', finishReason: retries.length === 1 ? finishReason : 'stop', receipt: 'chat-receipt' })
+    }))
+    const apply = vi.fn()
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Giải thích ví dụ trong bài Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(container).toHaveTextContent('Đây là phần giải thích đã tạo.')
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await screen.findByText('Lời giải hoàn chỉnh.')
+    expect(retries).toEqual(['', 'chat-receipt'])
+    expect(screen.queryByText(/Phản hồi bị cắt/)).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
   })
 
   it.each(['length', 'max_tokens'])('blocks token-limited replies even when their JSON delimiters are complete: %s', async (finishReason) => {

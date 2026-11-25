@@ -225,7 +225,7 @@ function examReview(content: string, questionCount: number, finishReason?: strin
   const tokenLimited = ['length', 'max_tokens'].includes(finishReason ?? '')
   const jsonStart = /^\s*(?:\{|```(?:json)?(?:\s|$))/i.test(content)
   if (tokenLimited && jsonStart || (documentReply || unparsedDocumentReply) && (tokenLimited || !isAiDocumentReplyComplete(content))) {
-    return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
+    return { text: documentReply || unparsedDocumentReply ? '' : content, previewPayload: undefined, incomplete: true }
   }
   if (raw && documentReply) {
     if (!['replace', 'append', 'patch'].includes(String(raw.action)) && Array.isArray(raw.patch) && raw.patch.length > 0) raw.action = 'patch'
@@ -1707,7 +1707,10 @@ function AiConversation({
                   onInsert={(questions) => insertQuestions(turn, questions)} onRegenerate={() => void retryGeneration(turn)}
                   renderText={(text) => <Markdown text={text} />} />
               ) : null}
-              {turn.incomplete ? <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button> : null}
+              {turn.incomplete ? <>
+                <p className="my-2 text-sm text-ink-3">Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.</p>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
+              </> : null}
               {turn.previewPayload && !turn.inserted ? <div>
                 <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
                 <div className="flex gap-2">
