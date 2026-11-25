@@ -1,7 +1,7 @@
 import { blocksToTipTap, plainText, tipTapToBlocks } from './convert'
 import { keyIndex } from '@/engine/lib/aiDocContext'
 import { figureDoc, figureImageAttrs } from './toolImages'
-import type { ExamBlock, FormatAttrs, RichText } from '@/engine/data/docTypes'
+import type { ExamBlock, FormatAttrs, Mark, RichText, Span } from '@/engine/data/docTypes'
 import type { JSONContent } from '@tiptap/core'
 
 /** Hợp đồng AI trả về: thay cả đề / thêm cuối / sửa từng khối theo id (`k<vị trí>`). */
@@ -62,12 +62,29 @@ function expandFigures(raw: unknown): unknown {
 function sanitizeBlocks(raw: unknown): ExamBlock[] {
   if (!Array.isArray(raw)) return []
   // AI có lúc trả mảng trộn string + span; chuẩn hoá về Span[] để converter/export đọc được.
-  const rich = (v: unknown): RichText =>
-    typeof v === 'string'
-      ? v
-      : Array.isArray(v)
-        ? (v.map((s) => (typeof s === 'string' ? { text: s } : s)) as RichText)
-        : ''
+  const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
+  const markTypes = new Set(['bold', 'italic', 'underline', 'strike', 'sub', 'super', 'highlight', 'textStyle', 'boxed'])
+  const rich = (v: unknown): RichText => {
+    if (typeof v === 'string') return v
+    const spans = (Array.isArray(v) ? v : [v]).flatMap((s): Span[] => {
+      if (typeof s === 'string') return [{ text: s }]
+      if (!object(s)) return []
+      const image = object(s.image) && typeof s.image.src === 'string' && s.image.src ? s.image : undefined
+      if (typeof s.text !== 'string' && !image) return []
+      const span: Span = { text: typeof s.text === 'string' ? s.text : '' }
+      if (Array.isArray(s.marks)) span.marks = s.marks.flatMap((m): Mark[] =>
+        object(m) && typeof m.type === 'string' && markTypes.has(m.type)
+          ? [{ type: m.type as Mark['type'], ...(object(m.attrs) ? { attrs: m.attrs } : {}) }] : [])
+      if (image) span.image = {
+        src: String(image.src),
+        ...(typeof image.alt === 'string' ? { alt: image.alt } : {}),
+        ...(typeof image.width === 'number' && Number.isFinite(image.width) ? { width: image.width } : {}),
+        ...(typeof image.plot === 'string' ? { plot: image.plot } : {}),
+      }
+      return [span]
+    })
+    return spans.length ? spans : ''
+  }
   const fmt = (v: unknown): FormatAttrs | undefined =>
     v && typeof v === 'object' ? (v as FormatAttrs) : undefined
   const list = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
@@ -121,7 +138,7 @@ function sanitizeBlocks(raw: unknown): ExamBlock[] {
       case 'bullets':
         out.push({
           type: 'bullets',
-          items: list(b.items) as RichText[],
+          items: list(b.items).map(rich),
           ...(b.ordered === true ? { ordered: true } : {}),
           ...(Array.isArray(b.levels) ? { levels: b.levels.map(Number) } : {}),
           format: fmt(b.format),
@@ -131,7 +148,7 @@ function sanitizeBlocks(raw: unknown): ExamBlock[] {
         out.push({
           type: 'grid',
           cols: b.cols === 3 ? 3 : 2,
-          cells: list(b.cells) as RichText[],
+          cells: list(b.cells).map(rich),
           format: fmt(b.format),
         })
         break
@@ -169,7 +186,7 @@ function sanitizeBlocks(raw: unknown): ExamBlock[] {
           no: typeof b.no === 'number' ? b.no : 1,
           score: typeof b.score === 'number' ? b.score : 0,
           text: rich(b.text),
-          sub: Array.isArray(b.sub) ? (b.sub as RichText[]) : undefined,
+          sub: Array.isArray(b.sub) ? b.sub.map(rich) : undefined,
           format: fmt(b.format),
         })
         break
