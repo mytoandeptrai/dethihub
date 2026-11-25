@@ -4,6 +4,14 @@ import { isAiDocumentReplyComplete, parseAiDocumentReply, QuestionStreamParser, 
 
 describe('question stream parser', () => {
   it.each([
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}', true],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}', false],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp.', false],
+  ])('distinguishes quoted interval repair from missing delimiters: %s', (source, expected) => {
+    expect(isAiDocumentReplyComplete(String(source))).toBe(expected)
+  })
+
+  it.each([
     ['$' + String.raw`\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot` + '$'],
     [String.raw`\(\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot\)`],
     [String.raw`\[\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot\]`],

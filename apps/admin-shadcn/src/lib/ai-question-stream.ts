@@ -72,7 +72,14 @@ export function isAiDocumentReplyComplete(content: string): boolean {
   for (let index = 0; index < source.length; index++) {
     const char = source[index]
     if (quoted && char === '\\') { index++; continue }
-    if (char === '"') { quoted = !quoted; continue }
+    if (char === '"') {
+      if (quoted) {
+        let next = index + 1
+        while (next < source.length && /\s/.test(source[next]!)) next++
+        if (next === source.length || /[,:}\]]/.test(source[next]!)) quoted = false
+      } else quoted = true
+      continue
+    }
     if (quoted) continue
     if (char === '{' || char === '[') stack.push(char === '{' ? '}' : ']')
     if (char === '}' || char === ']') {
