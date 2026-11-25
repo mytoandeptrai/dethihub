@@ -49,12 +49,12 @@ function jsonStringRepair() {
   }
 }
 
-export function parseAiDocumentReply(content: string): Record<string, unknown> | null {
+export function parseAiDocumentReply(content: string, parse: (json: string) => unknown = JSON.parse): Record<string, unknown> | null {
   const first = content.indexOf('{')
   const last = content.lastIndexOf('}')
   if (first < 0 || last < first) return null
   try {
-    const value: unknown = JSON.parse(jsonStringRepair()(content.slice(first, last + 1), true))
+    const value: unknown = parse(jsonStringRepair()(content.slice(first, last + 1), true))
     return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null
   } catch { return null }
 }

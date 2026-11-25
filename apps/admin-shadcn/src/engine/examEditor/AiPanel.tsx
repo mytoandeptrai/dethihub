@@ -215,7 +215,7 @@ interface ActStep {
 }
 
 function examReview(content: string, questionCount: number): Pick<ChatTurn, 'text' | 'previewPayload'> {
-  const raw = parseAiDocumentReply(content)
+  const raw = parseAiDocumentReply(content, extractJson)
   if (raw) {
     const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
     const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))

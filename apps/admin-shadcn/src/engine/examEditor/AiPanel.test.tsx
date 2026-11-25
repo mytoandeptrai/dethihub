@@ -23,6 +23,19 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it('recovers trailing commas and bare LaTeX before document approval', async () => {
+    const content = String.raw`{"action":"append","say":"Bản nháp có dấu phẩy","blocks":[{"type":"paragraph","text":"$AH \\cdot CH$"},],}`.replaceAll('\\\\', '\\')
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    expect(container.textContent).not.toContain('"action"')
+    expect(screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })).toHaveTextContent('paragraph')
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual({ action: 'append', say: 'Bản nháp có dấu phẩy', blocks: [{ type: 'paragraph', text: String.raw`$AH \cdot CH$` }] })
+  })
+
   it.each(['replace', 'append'])('previews every block applied by %s approval', async (action) => {
     const blocks = [{ type: 'heading', text: 'Tiêu đề sẽ chèn', level: 1 }, { type: 'paragraph', text: 'Lời giải sẽ chèn' }, { type: 'divider' }, { type: 'question', no: 1, text: 'Câu hỏi sẽ chèn' }, { type: 'answerKey', items: [{ no: 1, answer: 'Đáp án sẽ chèn' }] }, { type: 'table', rows: [['Ô sẽ chèn']] }]
     server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action, say: 'Kiểm tra toàn bộ bản nháp', blocks }), usage: null })))
