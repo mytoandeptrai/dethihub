@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { t } from '@/i18n/translate'
 import { isAiQuestionBlock, questionText } from '@/lib/ai-question-stream'
 
@@ -79,7 +80,12 @@ function PaperBlock({
   answer?: unknown
   renderText: (text: string) => ReactNode
 }) {
-  const text = (value: unknown) => renderText(contentText(value))
+  const text = (value: unknown) => Array.isArray(value)
+    ? keyed(value).map(({ value: span, key }) => {
+        const image = record(record(span).image)
+        return <span key={key}>{renderText(contentText(span))}{typeof image.src === 'string' ? <Image unoptimized src={image.src} alt={String(image.alt ?? '')} width={Number(image.width) || 260} height={200} style={{ width: 'auto', height: 'auto' }} className="my-2 block max-h-56 max-w-full object-contain" /> : null}</span>
+      })
+    : renderText(contentText(value))
   if (block.type === 'header')
     return (
       <div className="grid grid-cols-2 gap-3 border-b border-indigo-100 pb-3 text-center text-xs font-semibold whitespace-pre-line">
@@ -100,20 +106,21 @@ function PaperBlock({
       </div>
     )
   if (isAiQuestionBlock(block)) {
-    const correct = contentText(block.answer ?? block.correctAnswer ?? block.correct ?? answer)
+    const correct = contentText(answer)
     return (
       <div className="space-y-2">
         <div>
           <span className="font-semibold">
-            {t('aiReview.question', { number: Number(block.no ?? block.number) || number })}{' '}
+            {t(block.type === 'essay' ? 'aiReview.essay' : 'aiReview.question', { number })}{' '}
           </span>
           {text(block.text ?? block.prompt)}
+          {block.type === 'essay' ? <span className="ml-2 text-xs font-medium">{t('aiReview.score', { score: Number(block.score) })}</span> : null}
         </div>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
           {list(block.options ?? block.statements).map((option, index) => {
             const item = record(option)
             const label = String(item.label ?? item.key ?? 'ABCD'[index] ?? index + 1)
-            const selected = item.correct === true || item.isCorrect === true || correct === label
+            const selected = correct === label
             return (
               <div
                 key={label}
@@ -150,7 +157,7 @@ function PaperBlock({
         {text(block.title)}
         <ul className="list-disc space-y-1 pl-4">
           {keyed(list(block.items)).map(({ value: item, key }) => (
-            <li key={key}>{text(record(item).text ?? item)}</li>
+            <li key={key}>{block.type === 'rubric' ? <b>{text(record(item).label)} </b> : null}{text(record(item).text ?? item)}</li>
           ))}
         </ul>
       </div>
@@ -191,39 +198,40 @@ function PaperBlock({
 
 export function AiDocumentPreview({
   document,
+  prepared,
   total,
   renderText = (text) => text,
 }: {
   document: Record<string, unknown>
+  prepared: {
+    action: 'replace' | 'append' | 'patch' | 'none'
+    blocks: unknown[]
+    patches: { op: 'replace' | 'insertAfter' | 'insertBefore' | 'delete'; index: number; blocks: unknown[] }[]
+  }
   questionCount?: number
   total?: number
   renderText?: (text: string) => ReactNode
 }) {
-  const patches = list(document.patch).map((patch) => record(patch))
-  const blocks = list(document.blocks).map((block) => record(block))
-  const allBlocks = [...blocks, ...patches.flatMap((patch) => list(patch.blocks).map((block) => record(block)))]
+  const patches = prepared.action === 'patch' ? prepared.patches : []
+  const blocks = prepared.action === 'append' || prepared.action === 'replace' ? prepared.blocks.map((block) => record(block)) : []
+  const allBlocks = [...blocks, ...patches.flatMap((patch) => patch.blocks.map((block) => record(block)))]
   const questionCount = allBlocks.filter((block) => isAiQuestionBlock(block)).length
   const answers = allBlocks
     .filter((block) => block.type === 'answerKey')
     .flatMap((block) => list(block.items).map((item) => record(item)))
-  const action =
-    document.action === 'append'
-      ? 'append'
-      : document.action === 'patch' || patches.length > 0
-        ? 'patch'
-        : document.action === 'replace'
-          ? 'replace'
-          : 'draft'
+  const action = prepared.action === 'none' ? 'draft' : prepared.action
   let questionNumber = 0
+  let essayNumber = 0
   const renderBlocks = (items: Record<string, unknown>[]) =>
     keyed(items).map(({ value: block, key }) => {
-      if (isAiQuestionBlock(block)) questionNumber++
+      if (block.type === 'question') questionNumber++
+      if (block.type === 'essay') essayNumber++
       return (
         <div key={key} className="min-w-0 break-words">
           <PaperBlock
             block={block}
-            number={questionNumber}
-            answer={answers.find((answer) => Number(answer.no) === Number(block.no))?.answer}
+            number={block.type === 'essay' ? essayNumber : questionNumber}
+            answer={block.type === 'question' ? answers.find((answer) => Number(answer.no) === questionNumber)?.answer : undefined}
             renderText={renderText}
           />
         </div>
@@ -259,7 +267,7 @@ export function AiDocumentPreview({
           <div key={key} className="space-y-3 border-t border-indigo-100 pt-3">
             <p className="text-ink-3 text-xs font-medium">
               {t(`aiReview.${patchLabels[patch.op as keyof typeof patchLabels] ?? 'patch'}`)}
-              {patch.id ? ` · ${String(patch.id)}` : ''}
+              {` · k${patch.index}`}
             </p>
             {renderBlocks(list(patch.blocks).map((block) => record(block)))}
           </div>

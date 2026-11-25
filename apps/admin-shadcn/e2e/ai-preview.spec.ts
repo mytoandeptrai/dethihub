@@ -29,7 +29,7 @@ test('document approval is a readable mini exam, not a JSON tree', async ({ brow
   await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
   const preview = page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
   await expect(preview).toBeVisible()
-  for (const text of ['Thay toàn bộ đề', '2 câu hỏi · 4 khối khác', 'TRƯỜNG THCS ĐỀ THI HUB', 'ĐỀ ÔN TẬP TOÁN 9', 'Họ và tên:', 'Câu 1.', 'Câu 2.', 'A.', 'B.', 'C.', 'D.', 'Đường phân cách', 'Gợi ý:']) await expect(preview).toContainText(text)
+  for (const text of ['Thay toàn bộ đề', '2 câu hỏi · 5 khối khác', 'TRƯỜNG THCS ĐỀ THI HUB', 'ĐỀ ÔN TẬP TOÁN 9', 'Họ và tên:', 'Câu 1.', 'Câu 2.', 'A.', 'B.', 'C.', 'D.', 'Đường phân cách', 'Gợi ý:']) await expect(preview).toContainText(text)
   await expect(preview.locator('.katex')).toHaveCount(1)
   await expect(preview).not.toContainText(/\b(type|label|blocks|replace|left|right)\b/)
   await expect(page.getByRole('button', { name: 'Áp dụng', exact: true })).toBeEnabled()

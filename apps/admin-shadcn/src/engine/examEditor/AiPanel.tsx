@@ -47,6 +47,7 @@ import { ASK_DEFAULT, AiAskPanel, askHistoryText, needsAskFirst, parseAsk, type 
 import { IconClose, IconEnter, IconPaperclip, IconStop } from './icons'
 import { AiQuestionPreview } from '@/components/ai-question-preview'
 import { AiDocumentPreview } from '@/components/ai-document-preview'
+import { prepareAiApplication } from './aiApplication'
 import { useAiQuestionStream } from '@/hooks/use-ai-question-stream'
 import { isAiDocumentReplyComplete, parseAiDocumentReply, selectedExamPayload } from '@/lib/ai-question-stream'
 import type { AiQuestionRequest, AiQuestionState } from '@/hooks/use-ai-question-stream'
@@ -1712,7 +1713,7 @@ function AiConversation({
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
               </> : null}
               {turn.previewPayload && !turn.inserted ? <div>
-                <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
+                <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} prepared={prepareAiApplication(parseAiDocumentReply(turn.previewPayload) ?? {})} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
                 <div className="flex gap-2">
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Áp dụng</button>
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>

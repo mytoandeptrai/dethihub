@@ -78,7 +78,7 @@ describe('exam AI review workflow', () => {
   })
 
   it('infers patch action for patch-only replies and previews them before approval', async () => {
-    const patch = [{ op: 'replace', id: 'b1', blocks: [{ type: 'paragraph', text: 'Đoạn đã sửa' }] }]
+    const patch = [{ op: 'replace', id: 'k1', blocks: [{ type: 'paragraph', text: 'Đoạn đã sửa' }] }]
     server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ patch }), usage: null })))
     const apply = vi.fn().mockReturnValue({ text: 'Đã sửa.' })
     const { container } = render(<AiPanel onApplyBlocks={apply} />)
@@ -229,7 +229,8 @@ describe('exam AI review workflow', () => {
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByRole('button', { name: 'Áp dụng' })
     const preview = screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
-    for (const text of ['Tiêu đề sẽ chèn', 'Lời giải sẽ chèn', 'Câu hỏi sẽ chèn', 'Đáp án sẽ chèn', 'Ô sẽ chèn', 'Đường phân cách']) expect(preview).toHaveTextContent(text)
+    for (const text of ['Tiêu đề sẽ chèn', 'Lời giải sẽ chèn', 'Câu hỏi sẽ chèn', 'Đáp án sẽ chèn', 'Đường phân cách']) expect(preview).toHaveTextContent(text)
+    expect(preview).not.toHaveTextContent('Ô sẽ chèn')
     expect(apply).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
     expect(JSON.parse(apply.mock.calls[0]![0]).blocks).toEqual(blocks)
