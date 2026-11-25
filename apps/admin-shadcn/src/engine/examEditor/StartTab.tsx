@@ -8,17 +8,20 @@
  * trong `useDocStore().myDocs`.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ExamDoc } from '@/engine/data/docTypes'
-import { docSize, formatBytes, useDocStore, type Deck } from '@/engine/store/docs'
-import { useComposeStore } from '@/engine/store/compose'
-import { useBoards } from '@/engine/store/boards'
-import { useSyncStatus } from '@/engine/store/syncStatus'
-import { cn } from '@/engine/lib/cn'
+
 import { dialog } from '@/engine/components/Dialog'
 import { DocIcon, IconDocExam, IconDocBoard, IconDocSlide } from '@/engine/components/docIcons'
+import { cn } from '@/engine/lib/cn'
+import { useBoards } from '@/engine/store/boards'
+import { useComposeStore } from '@/engine/store/compose'
+import { docSize, formatBytes, useDocStore, type Deck } from '@/engine/store/docs'
+import { useSyncStatus } from '@/engine/store/syncStatus'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+
 import { IconPencil, IconSearch, IconTrash } from './icons'
 import { useSlidingThumb } from './useSlidingThumb'
-import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+
+import type { ExamDoc } from '@/engine/data/docTypes'
 
 /** sub-lines của lời chào — chọn ngẫu nhiên mỗi lần mở, như bản gốc */
 const GREET_ASKS = [
@@ -143,8 +146,15 @@ export function StartTab({
 
   /** xoá có animation: giữ dòng lại 170ms rồi mới bỏ khỏi store */
   const removeItems = async (items: RecentItem[]) => {
-    const message = items.length === 1 ? `Xoá "${items[0].title}"? Thao tác này không thể hoàn tác.` : `Xoá ${items.length} tệp đã chọn? Thao tác này không thể hoàn tác.`
-    const ok = await dialog.confirm(message, { title: 'Xoá tệp', danger: true, confirmLabel: 'Xoá' })
+    const message =
+      items.length === 1
+        ? `Xoá "${items[0].title}"? Thao tác này không thể hoàn tác.`
+        : `Xoá ${items.length} tệp đã chọn? Thao tác này không thể hoàn tác.`
+    const ok = await dialog.confirm(message, {
+      title: 'Xoá tệp',
+      danger: true,
+      confirmLabel: 'Xoá',
+    })
     if (!ok) return
     const ids = items.map((it) => it.id)
     setSelected((cur) => cur.filter((id) => !ids.includes(id)))
@@ -221,7 +231,9 @@ export function StartTab({
     const from = shift && anchor.current !== null ? Math.min(anchor.current, index) : index
     const to = shift && anchor.current !== null ? Math.max(anchor.current, index) : index
     const ids = docs.slice(from, to + 1).map((d) => d.id)
-    setSelected((cur) => (checked ? [...new Set([...cur, ...ids])] : cur.filter((id) => !ids.includes(id))))
+    setSelected((cur) =>
+      checked ? [...new Set([...cur, ...ids])] : cur.filter((id) => !ids.includes(id)),
+    )
     anchor.current = index
   }
 
@@ -235,59 +247,59 @@ export function StartTab({
         <section aria-label="Bắt đầu">
           <div className="start-hero">
             <h1 className="hero-title">
-              {greeting()}.
-              <span className="hero-ask">{ask}</span>
+              {greeting()}.<span className="hero-ask">{ask}</span>
             </h1>
           </div>
 
           <div className="quick-cards">
-            {canUse('word') && <button type="button" className="quick-card" onClick={onNewDoc}>
-              <IconDocExam size={30} />
-              <span className="quick-text">
-                <span className="quick-title-row">
-                  <span className="quick-title">Đề thi</span>
-                  <span className="ai-chip">AI</span>
+            {canUse('word') && (
+              <button type="button" className="quick-card" onClick={onNewDoc}>
+                <IconDocExam size={30} />
+                <span className="quick-text">
+                  <span className="quick-title-row">
+                    <span className="quick-title">Đề thi</span>
+                    <span className="ai-chip">AI</span>
+                  </span>
+                  <span className="quick-sub">.docx</span>
                 </span>
-                <span className="quick-sub">.docx</span>
-              </span>
-            </button>}
+              </button>
+            )}
 
-            {canUse('slide') && <button
-              type="button"
-              className="quick-card"
-              onClick={onNewSlide}
-              disabled={!onNewSlide}
-            >
-              <IconDocSlide size={30} />
-              <span className="quick-text">
-                <span className="quick-title-row">
-                  <span className="quick-title">Slide</span>
-                  <span className="ai-chip">AI</span>
+            {canUse('slide') && (
+              <button
+                type="button"
+                className="quick-card"
+                onClick={onNewSlide}
+                disabled={!onNewSlide}
+              >
+                <IconDocSlide size={30} />
+                <span className="quick-text">
+                  <span className="quick-title-row">
+                    <span className="quick-title">Slide</span>
+                    <span className="ai-chip">AI</span>
+                  </span>
+                  <span className="quick-sub">.pptx</span>
                 </span>
-                <span className="quick-sub">.pptx</span>
-              </span>
-            </button>}
+              </button>
+            )}
 
-            {canUse('board') && <button type="button" className="quick-card" onClick={onNewBoard}>
-              <IconDocBoard size={30} />
-              <span className="quick-text">
-                <span className="quick-title-row">
-                  <span className="quick-title">Bảng vẽ</span>
+            {canUse('board') && (
+              <button type="button" className="quick-card" onClick={onNewBoard}>
+                <IconDocBoard size={30} />
+                <span className="quick-text">
+                  <span className="quick-title-row">
+                    <span className="quick-title">Bảng vẽ</span>
+                  </span>
+                  <span className="quick-sub">Vẽ tay, sơ đồ</span>
                 </span>
-                <span className="quick-sub">Vẽ tay, sơ đồ</span>
-              </span>
-            </button>}
+              </button>
+            )}
           </div>
         </section>
 
         <section className="recents" aria-label="Đề gần đây">
           <div className="recents-toolbar">
-            <div
-              className="filter-pills"
-              role="tablist"
-              aria-label="Lọc theo loại"
-              ref={pillsRef}
-            >
+            <div className="filter-pills" role="tablist" aria-label="Lọc theo loại" ref={pillsRef}>
               {thumb ? (
                 <span
                   className="filter-pill__thumb"
@@ -361,7 +373,12 @@ export function StartTab({
                       Chọn tất cả ({docs.length})
                     </button>
                   )}
-                  <button type="button" className="recent-bulk-btn recent-bulk-btn--danger" onClick={() => void removeItems(chosen)} disabled={chosen.length === 0}>
+                  <button
+                    type="button"
+                    className="recent-bulk-btn recent-bulk-btn--danger"
+                    onClick={() => void removeItems(chosen)}
+                    disabled={chosen.length === 0}
+                  >
                     <IconTrash size={15} />
                     Xoá
                   </button>
@@ -370,40 +387,55 @@ export function StartTab({
                   </button>
                 </div>
               ) : (
-              <div className="recent-columns">
-                <span className="recent-head-check">
-                  <input type="checkbox" checked={false} onChange={() => setSelectMode(true)} aria-label="Bật chế độ chọn" />
-                </span>
-                <span className="col-name">Tên</span>
-                <span>Vị trí</span>
-                <span className="col-sort">
-                  Sửa đổi
-                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path
-                      d="M8 3v10M4.5 9.5L8 13l3.5-3.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                <div className="recent-columns">
+                  <span className="recent-head-check">
+                    <input
+                      type="checkbox"
+                      checked={false}
+                      onChange={() => setSelectMode(true)}
+                      aria-label="Bật chế độ chọn"
                     />
-                  </svg>
-                </span>
-                <span className="col-size">Kích thước</span>
-                <span />
-              </div>
+                  </span>
+                  <span className="col-name">Tên</span>
+                  <span>Vị trí</span>
+                  <span className="col-sort">
+                    Sửa đổi
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path
+                        d="M8 3v10M4.5 9.5L8 13l3.5-3.5"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="col-size">Kích thước</span>
+                  <span />
+                </div>
               )}
               <ul className={cn('recent-list', bulkOpen && 'has-selection')}>
                 {docs.map((d, index) => (
                   <li
                     key={d.id}
-                    className={cn('recent-row-item', removing.includes(d.id) && 'is-removing', selected.includes(d.id) && 'is-selected')}
+                    className={cn(
+                      'recent-row-item',
+                      removing.includes(d.id) && 'is-removing',
+                      selected.includes(d.id) && 'is-selected',
+                    )}
                   >
                     {editing === d.id ? null : (
                       <label className="recent-check">
                         <input
                           type="checkbox"
                           checked={selected.includes(d.id)}
-                          onChange={(e) => toggleRow(index, e.target.checked, (e.nativeEvent as MouseEvent).shiftKey)}
+                          onChange={(e) =>
+                            toggleRow(
+                              index,
+                              e.target.checked,
+                              (e.nativeEvent as MouseEvent).shiftKey,
+                            )
+                          }
                           aria-label={`Chọn ${d.title}`}
                         />
                       </label>
@@ -429,7 +461,11 @@ export function StartTab({
                           }}
                         />
                         <span className="recent-path">
-                          {d.kind === 'slide' ? 'Bài giảng của tôi' : d.kind === 'board' ? 'Bảng vẽ của tôi' : 'Đề của tôi'}
+                          {d.kind === 'slide'
+                            ? 'Bài giảng của tôi'
+                            : d.kind === 'board'
+                              ? 'Bảng vẽ của tôi'
+                              : 'Đề của tôi'}
                         </span>
                         <span className="recent-time">{formatModified(d.updatedAt)}</span>
                         <span className="col-size recent-time">{formatBytes(d.size)}</span>
@@ -451,7 +487,11 @@ export function StartTab({
                           </span>
                           <span className="recent-name">{d.title}</span>
                           <span className="recent-path">
-                            {d.kind === 'slide' ? 'Bài giảng của tôi' : d.kind === 'board' ? 'Bảng vẽ của tôi' : 'Đề của tôi'}
+                            {d.kind === 'slide'
+                              ? 'Bài giảng của tôi'
+                              : d.kind === 'board'
+                                ? 'Bảng vẽ của tôi'
+                                : 'Đề của tôi'}
                           </span>
                           <span className="recent-time">{formatModified(d.updatedAt)}</span>
                           <span className="col-size recent-time">{formatBytes(d.size)}</span>

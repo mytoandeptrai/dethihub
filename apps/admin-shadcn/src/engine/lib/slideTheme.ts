@@ -31,7 +31,13 @@ function oklch(l: number, c: number, hue: number): string {
     const v = Math.max(0, Math.min(1, x))
     return v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055
   }
-  return `#${linear.map((v) => Math.round(encode(v) * 255).toString(16).padStart(2, '0')).join('')}`
+  return `#${linear
+    .map((v) =>
+      Math.round(encode(v) * 255)
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`
 }
 
 /**
@@ -59,7 +65,9 @@ function palette(hue: number, opts: { chroma?: number; dark?: boolean } = {}) {
         muted: oklch(0.46, 0.03, hue),
         accent: oklch(0.5, chroma, hue),
         secondary: oklch(0.5, 0.1, hue2),
-        chart: [0, 150, 60, -60, 210].map((d, i) => oklch(i ? 0.58 : 0.5, i ? 0.11 : chroma, hue + d)),
+        chart: [0, 150, 60, -60, 210].map((d, i) =>
+          oklch(i ? 0.58 : 0.5, i ? 0.11 : chroma, hue + d),
+        ),
       }
 }
 
@@ -264,7 +272,12 @@ const LEGACY_DECK_THEMES: DeckTheme[] = [
     borderColor: '#cbd5e1',
     fontHeading: 'Patrick Hand',
     fontBody: SANS,
-    fonts: { heading: "'Patrick Hand', 'Nunito', sans-serif", body: SANS, serif: SERIF, mono: MONO },
+    fonts: {
+      heading: "'Patrick Hand', 'Nunito', sans-serif",
+      body: SANS,
+      serif: SERIF,
+      mono: MONO,
+    },
     decor: 'grain',
     dark: false,
     tags: ['ôn tập', 'ghi chép', 'sổ tay', 'lớp học'],
@@ -286,7 +299,12 @@ const LEGACY_DECK_THEMES: DeckTheme[] = [
     borderColor: '#1e3a8a',
     fontHeading: 'Space Grotesk',
     fontBody: SANS,
-    fonts: { heading: "'Space Grotesk', 'Be Vietnam Pro', sans-serif", body: SANS, serif: SERIF, mono: MONO },
+    fonts: {
+      heading: "'Space Grotesk', 'Be Vietnam Pro', sans-serif",
+      body: SANS,
+      serif: SERIF,
+      mono: MONO,
+    },
     decor: 'none',
     dark: false,
     tags: ['thể dục', 'kỹ năng sống', 'năng động', 'hoạt động'],
@@ -396,7 +414,12 @@ const LEGACY_DECK_THEMES: DeckTheme[] = [
     borderColor: '#22d3ee',
     fontHeading: 'Space Grotesk',
     fontBody: SANS,
-    fonts: { heading: "'Space Grotesk', 'Be Vietnam Pro', sans-serif", body: SANS, serif: SERIF, mono: MONO },
+    fonts: {
+      heading: "'Space Grotesk', 'Be Vietnam Pro', sans-serif",
+      body: SANS,
+      serif: SERIF,
+      mono: MONO,
+    },
     decor: 'glow',
     dark: true,
     tags: ['vật lý', 'thiên văn', 'tin học', 'nền tối'],
@@ -594,7 +617,12 @@ const LEGACY_DECK_THEMES: DeckTheme[] = [
     borderColor: '#090d16',
     fontHeading: 'Space Grotesk',
     fontBody: SANS,
-    fonts: { heading: "'Space Grotesk', 'Be Vietnam Pro', sans-serif", body: SANS, serif: SERIF, mono: MONO },
+    fonts: {
+      heading: "'Space Grotesk', 'Be Vietnam Pro', sans-serif",
+      body: SANS,
+      serif: SERIF,
+      mono: MONO,
+    },
     decor: 'none',
     dark: false,
     tags: ['toán hình', 'mĩ thuật', 'bauhaus', 'hình học', 'kiến trúc'],
@@ -675,11 +703,19 @@ const THEME_FONT_PAIRS: Record<string, readonly [string, string]> = {
   'bao-tuong': ['Oswald', 'Source Serif 4'],
 }
 
-export function withThemeFonts(theme: DeckTheme, [heading, body]: readonly [string, string]): DeckTheme {
-  return { ...theme, fontHeading: heading, fontBody: body, fonts: { serif: SERIF, mono: MONO, ...theme.fonts, heading, body } }
+export function withThemeFonts(
+  theme: DeckTheme,
+  [heading, body]: readonly [string, string],
+): DeckTheme {
+  return {
+    ...theme,
+    fontHeading: heading,
+    fontBody: body,
+    fonts: { serif: SERIF, mono: MONO, ...theme.fonts, heading, body },
+  }
 }
 
-export const DECK_THEMES = LEGACY_DECK_THEMES.map(theme => {
+export const DECK_THEMES = LEGACY_DECK_THEMES.map((theme) => {
   const pair = THEME_FONT_PAIRS[theme.id ?? '']
   return pair ? withThemeFonts(theme, pair) : theme
 })
@@ -690,8 +726,18 @@ export const DECK_THEMES = LEGACY_DECK_THEMES.map(theme => {
  * Không nằm trong DECK_THEMES nên danh sách chọn bộ màu và prompt thường không đổi.
  */
 const PRO_FONTS = { serif: SERIF, mono: MONO, heading: 'Barlow Condensed', body: SANS }
-const proTheme = (id: string, name: string, vibe: string, accent: string, secondary: string, tags: string[]): DeckTheme => ({
-  id, name, vibe, tags,
+const proTheme = (
+  id: string,
+  name: string,
+  vibe: string,
+  accent: string,
+  secondary: string,
+  tags: string[],
+): DeckTheme => ({
+  id,
+  name,
+  vibe,
+  tags,
   pro: true,
   bg: '#ece7dc',
   fg: '#1b1a17',
@@ -712,17 +758,47 @@ const proTheme = (id: string, name: string, vibe: string, accent: string, second
   dark: false,
 })
 export const PRO_THEMES: DeckTheme[] = [
-  proTheme('tap-chi-do', 'Tạp chí đỏ', 'lịch sử, chiến tranh, xã hội, báo chí điều tra: giấy kem, mực đen, đỏ gạch', '#b3321e', '#2f6a5e', ['lịch sử', 'xã hội', 'báo chí']),
-  proTheme('tap-chi-xanh', 'Tạp chí xanh', 'khoa học, môi trường, địa lí, sức khoẻ: giấy kem, mực đen, xanh rêu', '#2b6a5c', '#b3321e', ['khoa học', 'môi trường', 'địa lí']),
-  proTheme('tap-chi-vang', 'Tạp chí vàng', 'kinh tế, công nghệ, hướng nghiệp, kỹ năng: giấy kem, mực đen, vàng nghệ', '#9a5b08', '#1f4e79', ['kinh tế', 'công nghệ', 'kỹ năng']),
-  proTheme('tap-chi-lam', 'Tạp chí lam', 'văn học, nghệ thuật, triết học, giáo dục: giấy kem, mực đen, lam chàm', '#2a4d86', '#a2492e', ['văn học', 'nghệ thuật', 'giáo dục']),
+  proTheme(
+    'tap-chi-do',
+    'Tạp chí đỏ',
+    'lịch sử, chiến tranh, xã hội, báo chí điều tra: giấy kem, mực đen, đỏ gạch',
+    '#b3321e',
+    '#2f6a5e',
+    ['lịch sử', 'xã hội', 'báo chí'],
+  ),
+  proTheme(
+    'tap-chi-xanh',
+    'Tạp chí xanh',
+    'khoa học, môi trường, địa lí, sức khoẻ: giấy kem, mực đen, xanh rêu',
+    '#2b6a5c',
+    '#b3321e',
+    ['khoa học', 'môi trường', 'địa lí'],
+  ),
+  proTheme(
+    'tap-chi-vang',
+    'Tạp chí vàng',
+    'kinh tế, công nghệ, hướng nghiệp, kỹ năng: giấy kem, mực đen, vàng nghệ',
+    '#9a5b08',
+    '#1f4e79',
+    ['kinh tế', 'công nghệ', 'kỹ năng'],
+  ),
+  proTheme(
+    'tap-chi-lam',
+    'Tạp chí lam',
+    'văn học, nghệ thuật, triết học, giáo dục: giấy kem, mực đen, lam chàm',
+    '#2a4d86',
+    '#a2492e',
+    ['văn học', 'nghệ thuật', 'giáo dục'],
+  ),
 ]
 
 /** Id catalog hợp lệ (đã đổi id cũ sang id mới), hoặc `undefined` nếu lạ. */
 export function resolveThemeId(id?: string): string | undefined {
   if (!id) return undefined
   const mapped = LEGACY_THEME_IDS[id] ?? id
-  return DECK_THEMES.some((t) => t.id === mapped) || PRO_THEMES.some((t) => t.id === mapped) ? mapped : undefined
+  return DECK_THEMES.some((t) => t.id === mapped) || PRO_THEMES.some((t) => t.id === mapped)
+    ? mapped
+    : undefined
 }
 
 /* ------------------------------------------------------------------ *
@@ -730,14 +806,22 @@ export function resolveThemeId(id?: string): string | undefined {
  * ------------------------------------------------------------------ */
 function rgb(hex: string): [number, number, number] {
   const raw = hex.replace('#', '').trim()
-  const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw
+  const full =
+    raw.length === 3
+      ? raw
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : raw
   const n = Number.parseInt(full, 16)
   if (full.length !== 6 || !Number.isFinite(n)) return [255, 255, 255]
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
 }
 
 function toHex(value: number): string {
-  return Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0')
+  return Math.max(0, Math.min(255, Math.round(value)))
+    .toString(16)
+    .padStart(2, '0')
 }
 
 /** Trộn `a` về phía `b` theo tỉ lệ 0–1 (dùng cho nền tông nhấn, màu phụ…). */
@@ -799,7 +883,9 @@ export function normalizeTheme(theme?: DeckTheme | null): ResolvedTheme {
   const sourceId = resolveThemeId(source.id)
   // Deck đã lưu có thể chỉ mang id/màu, nên giá trị suy ra phải đến từ bộ phông cũ.
   const catalog = [...LEGACY_DECK_THEMES, ...PRO_THEMES].find(
-    (t) => (sourceId && t.id === sourceId) || (t.bg && source.bg && t.bg.toLowerCase() === source.bg.toLowerCase()),
+    (t) =>
+      (sourceId && t.id === sourceId) ||
+      (t.bg && source.bg && t.bg.toLowerCase() === source.bg.toLowerCase()),
   )
   const bg = source.bg || catalog?.bg || '#ffffff'
   const fg = source.fg || catalog?.fg || readableTextOn(bg)
@@ -830,7 +916,8 @@ export function normalizeTheme(theme?: DeckTheme | null): ResolvedTheme {
     muted: source.muted ?? catalog?.muted ?? mixHex(bg, fg, 0.55),
     secondary,
     decor: source.decor ?? catalog?.decor ?? 'none',
-    chart: source.chart ?? catalog?.chart ?? [accent, secondary, mixHex(accent, fg, 0.2), mixHex(accent, bg, 0.35)],
+    chart: source.chart ??
+      catalog?.chart ?? [accent, secondary, mixHex(accent, fg, 0.2), mixHex(accent, bg, 0.35)],
     fonts,
     radius: source.radius ?? catalog?.radius ?? 12,
     shadow: source.shadow ?? catalog?.shadow ?? 'none',
@@ -842,5 +929,7 @@ export function normalizeTheme(theme?: DeckTheme | null): ResolvedTheme {
 /** Theme theo id; id lạ rơi về theme đầu tiên thay vì làm hỏng deck. */
 export function themeById(id: string): ResolvedTheme {
   const mapped = resolveThemeId(id)
-  return normalizeTheme([...DECK_THEMES, ...PRO_THEMES].find((t) => t.id === mapped) ?? DECK_THEMES[0])
+  return normalizeTheme(
+    [...DECK_THEMES, ...PRO_THEMES].find((t) => t.id === mapped) ?? DECK_THEMES[0],
+  )
 }

@@ -19,8 +19,11 @@ export function questionText(value: unknown): string {
 }
 
 function repairJsonString(source: string): string {
-  const mathRanges = [...source.matchAll(/(?<!\\)(\${1,2})[\s\S]*?\1|\\{1,2}\([\s\S]*?\\{1,2}\)|\\{1,2}\[[\s\S]*?\\{1,2}\]/g)]
-    .map((match) => [match.index, match.index + match[0].length] as const)
+  const mathRanges = [
+    ...source.matchAll(
+      /(?<!\\)(\${1,2})[\s\S]*?\1|\\{1,2}\([\s\S]*?\\{1,2}\)|\\{1,2}\[[\s\S]*?\\{1,2}\]/g,
+    ),
+  ].map((match) => [match.index, match.index + match[0].length] as const)
   let output = ''
   for (let index = 0; index < source.length; index++) {
     const char = source[index]!
@@ -29,7 +32,10 @@ function repairJsonString(source: string): string {
       const command = source.slice(index + 1).match(/^[a-zA-Z]+/)?.[0] ?? ''
       const inMath = mathRanges.some(([start, end]) => index >= start && index < end)
       const mathCommand = inMath && /^[bfnrt][a-z]+$/.test(command)
-      const invalidEscape = next === 'u' ? !/^[\da-f]{4}$/i.test(source.slice(index + 2, index + 6)) : !/["\\/bfnrt]/.test(next ?? '')
+      const invalidEscape =
+        next === 'u'
+          ? !/^[\da-f]{4}$/i.test(source.slice(index + 2, index + 6))
+          : !/["\\/bfnrt]/.test(next ?? '')
       output += (next && (invalidEscape || mathCommand) ? '\\\\' : '\\') + (next ?? '')
       index++
     } else output += char === '\n' ? '\\n' : char === '\r' ? '\\r' : char === '\t' ? '\\t' : char
@@ -94,14 +100,21 @@ export function isAiDocumentReplyComplete(content: string): boolean {
   }
 }
 
-export function parseAiDocumentReply(content: string, parse: (json: string) => unknown = JSON.parse): Record<string, unknown> | null {
+export function parseAiDocumentReply(
+  content: string,
+  parse: (json: string) => unknown = JSON.parse,
+): Record<string, unknown> | null {
   const first = content.indexOf('{')
   const last = content.lastIndexOf('}')
   if (first < 0 || last < first) return null
   try {
     const value: unknown = parse(jsonStringRepair()(content.slice(first, last + 1), true))
-    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null
-  } catch { return null }
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null
+  } catch {
+    return null
+  }
 }
 
 export function isAiQuestionBlock(block: Record<string, unknown>): boolean {
@@ -119,14 +132,20 @@ export class QuestionStreamParser {
 
   constructor() {
     this.#parser.onValue = ({ value, key, stack }) => {
-      if (!value || typeof value !== 'object' || Array.isArray(value) || typeof key !== 'number') return
+      if (!value || typeof value !== 'object' || Array.isArray(value) || typeof key !== 'number')
+        return
       const source = stack.at(-1)?.key
       const raw = value as Record<string, unknown>
       if (source === 'blocks') this.blocks.push(raw)
       if (source !== 'questions' && !(source === 'blocks' && isAiQuestionBlock(raw))) return
       const prompt = questionText(raw.prompt ?? raw.text).trim()
       if (!prompt) return
-      this.questions.push({ id: `${source}:${key}`, number: Number(raw.no ?? raw.number) || this.questions.length + 1, prompt, raw })
+      this.questions.push({
+        id: `${source}:${key}`,
+        number: Number(raw.no ?? raw.number) || this.questions.length + 1,
+        prompt,
+        raw,
+      })
     }
   }
 
@@ -139,7 +158,11 @@ export class QuestionStreamParser {
       chunk = chunk.slice(start)
       this.#started = true
     }
-    try { this.#parser.write(this.#repair(chunk)) } catch { this.#failed = true }
+    try {
+      this.#parser.write(this.#repair(chunk))
+    } catch {
+      this.#failed = true
+    }
   }
 
   finish(): void {
@@ -152,10 +175,28 @@ export class QuestionStreamParser {
   }
 }
 
-export function selectedExamPayload(questions: readonly GeneratedQuestion[], blocks: readonly Record<string, unknown>[]): string {
+export function selectedExamPayload(
+  questions: readonly GeneratedQuestion[],
+  blocks: readonly Record<string, unknown>[],
+): string {
   const numbers = new Set(questions.map((question) => question.number))
-  const answers = blocks.filter((block) => block.type === 'answerKey').flatMap((block) =>
-    Array.isArray(block.items) ? block.items.filter((item: unknown) => !!item && typeof item === 'object' && numbers.has(Number((item as Record<string, unknown>).no))) : [],
-  )
-  return JSON.stringify({ action: 'append', blocks: [...questions.map((question) => question.raw), ...(answers.length > 0 ? [{ type: 'answerKey', items: answers }] : [])] })
+  const answers = blocks
+    .filter((block) => block.type === 'answerKey')
+    .flatMap((block) =>
+      Array.isArray(block.items)
+        ? block.items.filter(
+            (item: unknown) =>
+              !!item &&
+              typeof item === 'object' &&
+              numbers.has(Number((item as Record<string, unknown>).no)),
+          )
+        : [],
+    )
+  return JSON.stringify({
+    action: 'append',
+    blocks: [
+      ...questions.map((question) => question.raw),
+      ...(answers.length > 0 ? [{ type: 'answerKey', items: answers }] : []),
+    ],
+  })
 }

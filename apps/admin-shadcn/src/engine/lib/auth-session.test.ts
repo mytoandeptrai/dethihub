@@ -63,7 +63,10 @@ describe('engine session leaf', () => {
       ) => void
       listener('SIGNED_IN', session)
       expect(leaf.getSession()?.user).toEqual({
-        id: 'test-user', email: 'teacher@example.com', name: 'Teacher', avatar: '/avatar.png',
+        id: 'test-user',
+        email: 'teacher@example.com',
+        name: 'Teacher',
+        avatar: '/avatar.png',
       })
       listener('SIGNED_OUT', null)
       expect(leaf.getSession()).toBeNull()

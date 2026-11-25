@@ -1,9 +1,9 @@
+import { communityExamGate, communityExamSubmit, myExamAttemptsOf } from '@/apis/exams/requests'
 /**
  * Bài làm của học sinh trên đề đã xuất bản (bảng `exam_attempts`). Ai mở link cũng nộp được, kể cả chưa đăng nhập;
  * chỉ chủ đề đọc được. `summarize` gom các lượt làm thành thống kê cho thẻ báo cáo.
  */
 import { currentSession } from '@/engine/lib/auth'
-import { communityExamGate, communityExamSubmit, myExamAttemptsOf } from '@/apis/exams/requests'
 
 export interface Attempt {
   id: string
@@ -80,20 +80,60 @@ export const isRemoteExamId = (id: string | undefined): id is string =>
 /** `hidden` = đề giấu đáp án và không cho xem điểm: server chỉ báo đã nộp, không có điểm / số câu đúng / đáp án */
 export type GradeResult =
   | { hidden: true; submitted: true }
-  | { hidden?: false; score: number; max: number; gradable?: number; correct?: number; key: Record<string, { answer?: string; explanation?: string; solution?: string[] }> }
+  | {
+      hidden?: false
+      score: number
+      max: number
+      gradable?: number
+      correct?: number
+      key: Record<string, { answer?: string; explanation?: string; solution?: string[] }>
+    }
 
-export async function submitAttempt(a: { examId: string; name: string; answers: Record<string, string>; seconds: number; className?: string; seat?: number }): Promise<GradeResult> {
-  return await communityExamSubmit({ params: { path: { id: a.examId } }, body: { name: a.name.trim().slice(0, 60), answers: a.answers, seconds: Math.max(0, Math.round(a.seconds)), deviceId: deviceId(), className: a.className?.trim().slice(0, 30) || undefined, seat: a.seat } }) as unknown as GradeResult
+export async function submitAttempt(a: {
+  examId: string
+  name: string
+  answers: Record<string, string>
+  seconds: number
+  className?: string
+  seat?: number
+}): Promise<GradeResult> {
+  return (await communityExamSubmit({
+    params: { path: { id: a.examId } },
+    body: {
+      name: a.name.trim().slice(0, 60),
+      answers: a.answers,
+      seconds: Math.max(0, Math.round(a.seconds)),
+      deviceId: deviceId(),
+      className: a.className?.trim().slice(0, 30) || undefined,
+      seat: a.seat,
+    },
+  })) as unknown as GradeResult
 }
 
 /** Bài làm của các đề của bạn, mới nhất trước. */
 export async function listAttempts(examIds: string[]): Promise<Attempt[]> {
-  if (!examIds.length || !await currentSession()) return []
+  if (!examIds.length || !(await currentSession())) return []
   const out: Attempt[] = []
   let cursor: string | undefined
   do {
-    const page = await myExamAttemptsOf({ params: { query: { examIds, cursor, limit: 1000 } }, querySerializer: { array: { style: 'form', explode: false } } })
-    out.push(...page.items.map((row) => ({ ...row, exam_id: row.examId, user_id: row.userId as unknown as string | null, student_name: row.studentName, max_score: row.maxScore, duration_seconds: row.durationSeconds, created_at: row.createdAt, device_id: row.deviceId as unknown as string | null, class_name: row.className as unknown as string | null, seat_no: row.seatNo as unknown as number | null })))
+    const page = await myExamAttemptsOf({
+      params: { query: { examIds, cursor, limit: 1000 } },
+      querySerializer: { array: { style: 'form', explode: false } },
+    })
+    out.push(
+      ...page.items.map((row) => ({
+        ...row,
+        exam_id: row.examId,
+        user_id: row.userId as unknown as string | null,
+        student_name: row.studentName,
+        max_score: row.maxScore,
+        duration_seconds: row.durationSeconds,
+        created_at: row.createdAt,
+        device_id: row.deviceId as unknown as string | null,
+        class_name: row.className as unknown as string | null,
+        seat_no: row.seatNo as unknown as number | null,
+      })),
+    )
     cursor = page.nextCursor as unknown as string | undefined
   } while (cursor)
   return out
@@ -130,11 +170,23 @@ export function summarize(list: Attempt[]): ExamStats {
   const by = new Map<string, Student & { pct: number }>()
   for (const a of list) {
     // một thiết bị = một học sinh; bài cũ không có id thiết bị thì gom theo tài khoản hoặc tên
-    const key = a.device_id ? `d:${a.device_id}` : a.user_id ?? `n:${a.student_name.trim().toLowerCase()}`
+    const key = a.device_id
+      ? `d:${a.device_id}`
+      : (a.user_id ?? `n:${a.student_name.trim().toLowerCase()}`)
     const pct = a.max_score > 0 ? a.score / a.max_score : 0
     const cur = by.get(key)
     if (!cur) {
-      by.set(key, { name: a.student_name.trim(), className: a.class_name ?? undefined, seat: a.seat_no ?? undefined, best: a.score, max: a.max_score, attempts: 1, seconds: a.duration_seconds, lastAt: a.created_at, pct })
+      by.set(key, {
+        name: a.student_name.trim(),
+        className: a.class_name ?? undefined,
+        seat: a.seat_no ?? undefined,
+        best: a.score,
+        max: a.max_score,
+        attempts: 1,
+        seconds: a.duration_seconds,
+        lastAt: a.created_at,
+        pct,
+      })
     } else {
       cur.attempts++
       if (pct > cur.pct || (pct === cur.pct && a.duration_seconds < cur.seconds)) {
@@ -145,7 +197,9 @@ export function summarize(list: Attempt[]): ExamStats {
       }
     }
   }
-  const students = [...by.values()].sort((x, y) => y.pct - x.pct || x.seconds - y.seconds).map(({ pct: _p, ...s }) => s)
+  const students = [...by.values()]
+    .sort((x, y) => y.pct - x.pct || x.seconds - y.seconds)
+    .map(({ pct: _p, ...s }) => s)
   const bands: ExamStats['bands'] = [0, 0, 0, 0]
   for (const s of students) bands[ten(s) < 5 ? 0 : ten(s) < 6.5 ? 1 : ten(s) < 8 ? 2 : 3]++
   return {

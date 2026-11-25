@@ -8,4 +8,4 @@ export class AdminError extends Error {
 }
 
 /** Dữ liệu giả trả sau 250ms (giống mạng thật) */
-export const wait = <T,>(v: T) => new Promise<T>((r) => setTimeout(() => r(structuredClone(v)), 250))
+export const wait = <T>(v: T) => new Promise<T>((r) => setTimeout(() => r(structuredClone(v)), 250))

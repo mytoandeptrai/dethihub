@@ -10,10 +10,10 @@ import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { examsKeys } from '@/apis/exams'
-import { useOnlineBuilderContainer } from '@/modules/online-exams/hooks/use-online-builder-container'
-import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
-import { useOnlineListContainer } from '@/modules/online-exams/hooks/use-online-list-container'
 import { OnlineBuilderContainer } from '@/modules/online-exams/containers/online-builder-container'
+import { useOnlineBuilderContainer } from '@/modules/online-exams/hooks/use-online-builder-container'
+import { useOnlineListContainer } from '@/modules/online-exams/hooks/use-online-list-container'
+import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
 import {
   usePublishedPanelContainer,
   useOnlineResultsContainer,
@@ -96,8 +96,12 @@ function localExam() {
 }
 beforeEach(() => {
   server.use(
-    http.get('http://localhost:3000/api/site/status', () => HttpResponse.json({ features: { word: true, slide: true, board: true, online: true } })),
-    http.get('http://localhost:3000/api/me', () => HttpResponse.json({ userId: 'online-user', role: 'user' })),
+    http.get('http://localhost:3000/api/site/status', () =>
+      HttpResponse.json({ features: { word: true, slide: true, board: true, online: true } }),
+    ),
+    http.get('http://localhost:3000/api/me', () =>
+      HttpResponse.json({ userId: 'online-user', role: 'user' }),
+    ),
   )
   vi.clearAllMocks()
   window.history.replaceState({}, '', '/online-exams')
@@ -382,7 +386,11 @@ describe('local online builder validation', () => {
     const item = localExam()
     route.id = item.id
     render(<OnlineBuilderContainer />, { wrapper })
-    expect(await screen.findByText('Quản trị viên đã tạm tắt tính năng này. Nội dung bạn đã tạo vẫn xem được.')).toBeVisible()
+    expect(
+      await screen.findByText(
+        'Quản trị viên đã tạm tắt tính năng này. Nội dung bạn đã tạo vẫn xem được.',
+      ),
+    ).toBeVisible()
     expect(screen.getByText('Một cộng một bằng bao nhiêu?')).toBeVisible()
     expect(screen.getByRole('button', { name: 'In / PDF' })).toBeEnabled()
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
@@ -392,7 +400,9 @@ describe('local online builder validation', () => {
     disableOnline()
     const item = localExam()
     const hook = renderHook(useOnlinePublication, { wrapper })
-    await expect(hook.result.current.publish(item, true)).rejects.toThrow('Quản trị viên đã tạm tắt')
+    await expect(hook.result.current.publish(item, true)).rejects.toThrow(
+      'Quản trị viên đã tạm tắt',
+    )
   })
   it('loads a missing local draft from an uncached workspace read before declaring it missing', async () => {
     const item = localExam()

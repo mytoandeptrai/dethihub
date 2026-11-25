@@ -1,3 +1,4 @@
+import { ChevronDown, ChevronUp, Copy, Plus } from 'lucide-react'
 /**
  * Thanh slide ở đáy trình soạn (kiểu Canva): thumbnail xếp ngang, cuộn ngang.
  * - Dấu + cuối dãy thêm slide mới.
@@ -5,12 +6,14 @@
  * - Kéo thả để đổi thứ tự, giống kéo thumbnail trước đây nhưng theo chiều ngang.
  */
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronDown, ChevronUp, Copy, Plus } from 'lucide-react'
+
 import { TrashIcon } from '@/engine/components/appIcons'
 import { cn } from '@/engine/lib/cn'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
-import type { Slide } from '@/engine/store/docs'
+
 import { useSlideViewport } from './useSlideViewport'
+
+import type { Slide } from '@/engine/store/docs'
 
 interface SlideStripProps {
   slides: Slide[]
@@ -51,7 +54,10 @@ export function SlideStrip({
   const scrollRef = useRef<HTMLDivElement>(null)
   const count = slides.length
   const { isPhone, isTablet, isCompact, isShort } = useSlideViewport()
-  const currentIdx = Math.max(0, slides.findIndex((s) => s.id === currentId))
+  const currentIdx = Math.max(
+    0,
+    slides.findIndex((s) => s.id === currentId),
+  )
 
   // slide đang chọn đổi (thêm từ Mẫu, nhân bản, AI sinh, phím mũi tên…) thì cuộn thanh tới đúng thumbnail, chỉ theo chiều ngang
   useEffect(() => {
@@ -67,20 +73,27 @@ export function SlideStrip({
 
   const thumbW = isPhone ? 'w-[96px]' : isTablet ? 'w-[108px]' : 'w-[132px]'
   const stripH = isPhone ? 'h-[88px]' : isTablet ? 'h-[108px]' : 'h-[138px]'
-  const addBtnSize = isPhone ? 'h-[54px] w-[44px]' : isTablet ? 'h-[61px] w-[48px]' : 'h-[74px] w-[60px]'
+  const addBtnSize = isPhone
+    ? 'h-[54px] w-[44px]'
+    : isTablet
+      ? 'h-[61px] w-[48px]'
+      : 'h-[74px] w-[60px]'
 
   const stripContent = (
     <div
       ref={scrollRef}
       // bánh xe chuột cuộn ngang dãy slide (nhiều slide thì không phải kéo thanh cuộn)
       onWheel={(e) => {
-        if (scrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) scrollRef.current.scrollLeft += e.deltaY
+        if (scrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX))
+          scrollRef.current.scrollLeft += e.deltaY
       }}
       className="flex min-w-0 flex-1 items-center overflow-x-auto overflow-y-hidden px-2 pb-1.5 [scrollbar-color:var(--color-ink-3)_transparent] [scrollbar-width:thin]"
     >
       {slides.map((s, i) => (
         <div key={s.id} className="flex h-full shrink-0 items-center">
-          {i > 0 && <Gap enabled={allowAdd && !isCompact} onAdd={() => onAddAt(i)} compact={isCompact} />}
+          {i > 0 && (
+            <Gap enabled={allowAdd && !isCompact} onAdd={() => onAddAt(i)} compact={isCompact} />
+          )}
           <div
             data-slide-id={s.id}
             draggable={!isPhone}
@@ -111,9 +124,11 @@ export function SlideStrip({
             }}
             className={cn('group relative shrink-0', thumbW, dragIndex === i && 'opacity-40')}
           >
-            {dropPos === i && <span className="absolute -left-1.5 bottom-0 top-0 w-1 rounded bg-clay" />}
+            {dropPos === i && (
+              <span className="bg-clay absolute top-0 bottom-0 -left-1.5 w-1 rounded" />
+            )}
             {dropPos === i + 1 && i === count - 1 && (
-              <span className="absolute -right-1.5 bottom-0 top-0 w-1 rounded bg-clay" />
+              <span className="bg-clay absolute top-0 -right-1.5 bottom-0 w-1 rounded" />
             )}
             <button
               type="button"
@@ -121,11 +136,15 @@ export function SlideStrip({
                 onSelect(s.id)
                 if (drawerOpen) setDrawerOpen(false)
               }}
-              onContextMenu={onSlideMenu ? (e) => {
-                e.preventDefault()
-                onSelect(s.id)
-                onSlideMenu(s.id, i, e)
-              } : undefined}
+              onContextMenu={
+                onSlideMenu
+                  ? (e) => {
+                      e.preventDefault()
+                      onSelect(s.id)
+                      onSlideMenu(s.id, i, e)
+                    }
+                  : undefined
+              }
               className={cn(
                 'block w-full overflow-hidden rounded-md border-2 transition-colors',
                 currentId === s.id ? 'border-clay' : 'border-line',
@@ -138,8 +157,10 @@ export function SlideStrip({
             </button>
             <div
               className={cn(
-                'absolute right-1 top-1 flex gap-0.5 transition-opacity',
-                isCompact && currentId === s.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                'absolute top-1 right-1 flex gap-0.5 transition-opacity',
+                isCompact && currentId === s.id
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100',
               )}
             >
               {allowAdd && !s.html && (
@@ -148,7 +169,7 @@ export function SlideStrip({
                   onClick={() => onDuplicate(s.id)}
                   data-tip="Nhân bản slide"
                   aria-label="Nhân bản slide"
-                  className="rounded bg-white/85 p-1 text-ink-3 hover:text-ink"
+                  className="text-ink-3 hover:text-ink rounded bg-white/85 p-1"
                 >
                   <Copy className="size-3" />
                 </button>
@@ -158,7 +179,7 @@ export function SlideStrip({
                 onClick={() => onRemove(s.id)}
                 data-tip="Xoá slide"
                 aria-label="Xoá slide"
-                className="rounded bg-white/85 p-1 text-ink-3 hover:text-clay"
+                className="text-ink-3 hover:text-clay rounded bg-white/85 p-1"
               >
                 <TrashIcon className="size-3" />
               </button>
@@ -187,7 +208,7 @@ export function SlideStrip({
           data-tip="Thêm slide"
           aria-label="Thêm slide"
           className={cn(
-            'ml-2 flex shrink-0 items-center justify-center rounded-lg border border-dashed border-line-2 text-ink-3 transition-colors hover:border-clay hover:text-clay',
+            'border-line-2 text-ink-3 hover:border-clay hover:text-clay ml-2 flex shrink-0 items-center justify-center rounded-lg border border-dashed transition-colors',
             addBtnSize,
           )}
         >
@@ -199,13 +220,17 @@ export function SlideStrip({
 
   if ((isCompact && isShort) || (isTablet && tabletCollapsed)) {
     return (
-      <div className="relative flex h-[38px] shrink-0 items-center justify-between border-t border-line bg-surface px-2.5">
+      <div className="border-line bg-surface relative flex h-[38px] shrink-0 items-center justify-between border-t px-2.5">
         <button
           type="button"
-          onClick={() => (isCompact && isShort ? setDrawerOpen((v) => !v) : setTabletCollapsed(false))}
-          className="flex min-h-[36px] items-center gap-1.5 rounded-md px-2 text-[12px] font-medium text-ink hover:bg-paper-2"
+          onClick={() =>
+            isCompact && isShort ? setDrawerOpen((v) => !v) : setTabletCollapsed(false)
+          }
+          className="text-ink hover:bg-paper-2 flex min-h-[36px] items-center gap-1.5 rounded-md px-2 text-[12px] font-medium"
         >
-          <span>Slide {count ? currentIdx + 1 : 0}/{count}</span>
+          <span>
+            Slide {count ? currentIdx + 1 : 0}/{count}
+          </span>
           <ChevronUp className={cn('size-4 transition-transform', drawerOpen && 'rotate-180')} />
         </button>
         {allowAdd && (
@@ -213,7 +238,7 @@ export function SlideStrip({
             type="button"
             onClick={() => onAddAt(count)}
             aria-label="Thêm slide"
-            className="flex min-h-[36px] items-center gap-1 rounded-md px-2 text-[12px] font-medium text-clay hover:bg-paper-2"
+            className="text-clay hover:bg-paper-2 flex min-h-[36px] items-center gap-1 rounded-md px-2 text-[12px] font-medium"
           >
             <Plus className="size-4" />
             <span>Thêm slide</span>
@@ -222,7 +247,7 @@ export function SlideStrip({
         {drawerAnim.mounted && (
           <div
             className={cn(
-              'absolute inset-x-0 bottom-full z-30 flex h-[96px] border-t border-line bg-surface shadow-[0_-8px_24px_-8px_rgb(0_0_0/0.2)]',
+              'border-line bg-surface absolute inset-x-0 bottom-full z-30 flex h-[96px] border-t shadow-[0_-8px_24px_-8px_rgb(0_0_0/0.2)]',
               drawerAnim.closing ? 'sheet-out-down' : 'sheet-in-up',
             )}
           >
@@ -234,14 +259,14 @@ export function SlideStrip({
   }
 
   return (
-    <div className={cn('flex shrink-0 border-t border-line bg-surface', stripH)}>
+    <div className={cn('border-line bg-surface flex shrink-0 border-t', stripH)}>
       {isTablet && (
         <button
           type="button"
           onClick={() => setTabletCollapsed(true)}
           data-tip="Thu gọn dải slide"
           aria-label="Thu gọn dải slide"
-          className="flex w-7 shrink-0 items-center justify-center border-r border-line text-ink-3 hover:bg-paper-2 hover:text-ink"
+          className="border-line text-ink-3 hover:bg-paper-2 hover:text-ink flex w-7 shrink-0 items-center justify-center border-r"
         >
           <ChevronDown className="size-4" />
         </button>
@@ -255,16 +280,29 @@ export function SlideStrip({
  * khe giữa hai slide: rộng để con trỏ dễ rơi vào, dấu + hiện khi dừng chuột ở khe ~0,4 s
  * (lướt qua thì không hiện); rời chuột thì ẩn ngay.
  */
-function Gap({ enabled, onAdd, compact }: { enabled: boolean; onAdd: () => void; compact?: boolean }) {
+function Gap({
+  enabled,
+  onAdd,
+  compact,
+}: {
+  enabled: boolean
+  onAdd: () => void
+  compact?: boolean
+}) {
   return (
-    <div className={cn('group/gap relative h-full shrink-0 transition-[width] duration-200 ease-out', compact ? 'w-2' : 'w-4 hover:w-14 hover:delay-[400ms]')}>
+    <div
+      className={cn(
+        'group/gap relative h-full shrink-0 transition-[width] duration-200 ease-out',
+        compact ? 'w-2' : 'w-4 hover:w-14 hover:delay-[400ms]',
+      )}
+    >
       {enabled && (
         <button
           type="button"
           onClick={onAdd}
           data-tip="Thêm slide vào đây"
           aria-label="Thêm slide vào đây"
-          className="absolute left-1/2 top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-clay text-white opacity-0 shadow transition-opacity group-hover/gap:opacity-100 group-hover/gap:delay-[400ms] focus-visible:opacity-100 focus-visible:delay-0"
+          className="bg-clay absolute top-1/2 left-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 shadow transition-opacity group-hover/gap:opacity-100 group-hover/gap:delay-[400ms] focus-visible:opacity-100 focus-visible:delay-0"
         >
           <Plus className="size-3.5" />
         </button>

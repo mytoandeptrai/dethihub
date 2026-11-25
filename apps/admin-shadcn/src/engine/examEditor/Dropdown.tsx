@@ -6,8 +6,18 @@
  * `overflow: hidden` của ribbon cắt, và hỗ trợ phím mũi tên / Enter / Esc /
  * Home / End khi trigger đang giữ focus.
  */
-import { Fragment, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  Fragment,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+
 import { cn } from '@/engine/lib/cn'
+
 import { IconCaret, IconCheck } from './icons'
 
 export interface DropdownOption<K extends string = string> {
@@ -59,7 +69,9 @@ export function Dropdown<K extends string>({
   const id = useId()
 
   const selected = options.find((o) => o.value === value)
-  useEffect(() => { if (open) onOpen?.() }, [open, onOpen])
+  useEffect(() => {
+    if (open) onOpen?.()
+  }, [open, onOpen])
 
   // neo popover theo tọa độ trigger (position: fixed) — thoát khỏi mọi
   // overflow clipping của ribbon body, đúng cách GenOffice làm với dropdown.
@@ -80,7 +92,11 @@ export function Dropdown<K extends string>({
       if (!rect) return
       const menuW = Math.min(Math.max(rect.width, 120), window.innerWidth - 16)
       const left = Math.max(8, Math.min(rect.left, window.innerWidth - menuW - 8))
-      setPopPos({ top: Math.min(rect.bottom + 4, window.innerHeight - 160), left, width: rect.width })
+      setPopPos({
+        top: Math.min(rect.bottom + 4, window.innerHeight - 160),
+        left,
+        width: rect.width,
+      })
     }
     window.addEventListener('scroll', sync, true)
     window.addEventListener('resize', sync)
@@ -190,30 +206,44 @@ export function Dropdown<K extends string>({
           id={id}
           ref={listRef}
           aria-label={ariaLabel}
-          style={{ position: 'fixed', top: popPos.top, left: popPos.left, minWidth: Math.max(popPos.width, 120) }}
+          style={{
+            position: 'fixed',
+            top: popPos.top,
+            left: popPos.left,
+            minWidth: Math.max(popPos.width, 120),
+          }}
         >
           {options.map((o, i) => (
             <Fragment key={o.value}>
-            {o.group && o.group !== options[i - 1]?.group && <div role="presentation" className="px-2 pt-2 pb-0.5 text-[10px] font-semibold text-ink-3">{o.group}</div>}
-            <div
-              role="option"
-              aria-selected={o.value === value}
-              data-active={i === active}
-              className={cn(
-                'gs-dd-item',
-                o.value === value && 'selected',
-                i === active && 'active',
-                o.disabled && 'disabled',
+              {o.group && o.group !== options[i - 1]?.group && (
+                <div
+                  role="presentation"
+                  className="text-ink-3 px-2 pt-2 pb-0.5 text-[10px] font-semibold"
+                >
+                  {o.group}
+                </div>
               )}
-              onMouseEnter={() => !o.disabled && setActive(i)}
-              onMouseDown={(e) => {
-                e.preventDefault()
-                pick(i)
-              }}
-            >
-              <span className="gs-dd-check" aria-hidden="true">{o.value === value ? <IconCheck size={13} /> : null}</span>
-              <span className="gs-dd-label">{o.render ?? o.label}</span>
-            </div>
+              <div
+                role="option"
+                aria-selected={o.value === value}
+                data-active={i === active}
+                className={cn(
+                  'gs-dd-item',
+                  o.value === value && 'selected',
+                  i === active && 'active',
+                  o.disabled && 'disabled',
+                )}
+                onMouseEnter={() => !o.disabled && setActive(i)}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  pick(i)
+                }}
+              >
+                <span className="gs-dd-check" aria-hidden="true">
+                  {o.value === value ? <IconCheck size={13} /> : null}
+                </span>
+                <span className="gs-dd-label">{o.render ?? o.label}</span>
+              </div>
             </Fragment>
           ))}
         </div>

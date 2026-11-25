@@ -70,10 +70,12 @@ export function OnlineListOnlineListUi(
           }
           description=""
           actions={
-            props.canCreate && <Button variant="primary" onClick={onCreate}>
-              <Plus className="size-4" />
-              {t('onlineExamsCopy.m80')}
-            </Button>
+            props.canCreate && (
+              <Button variant="primary" onClick={onCreate}>
+                <Plus className="size-4" />
+                {t('onlineExamsCopy.m80')}
+              </Button>
+            )
           }
         />
 
@@ -111,10 +113,12 @@ export function OnlineListOnlineListUi(
                 title={t('onlineExamsCopy.m85')}
                 description={t('onlineExamsCopy.m86')}
                 action={
-                  props.canCreate && <Button variant="clay" onClick={onCreate}>
-                    <Plus className="size-4" />
-                    {t('onlineExamsCopy.m80')}
-                  </Button>
+                  props.canCreate && (
+                    <Button variant="clay" onClick={onCreate}>
+                      <Plus className="size-4" />
+                      {t('onlineExamsCopy.m80')}
+                    </Button>
+                  )
                 }
               />
             ) : (

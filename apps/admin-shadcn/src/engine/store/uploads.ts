@@ -21,7 +21,8 @@ export const useUploads = create<UploadsState>()(
   persist(
     (set) => ({
       items: [],
-      add: (u) => set((s) => ({ items: [{ ...u, updatedAt: new Date().toISOString() }, ...s.items] })),
+      add: (u) =>
+        set((s) => ({ items: [{ ...u, updatedAt: new Date().toISOString() }, ...s.items] })),
       remove: (id) => set((s) => ({ items: s.items.filter((x) => x.id !== id) })),
       replaceAll: (items) => set({ items }),
     }),

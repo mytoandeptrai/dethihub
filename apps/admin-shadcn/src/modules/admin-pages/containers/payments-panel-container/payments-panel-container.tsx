@@ -1,5 +1,11 @@
 'use client'
-import { PaymentsPanelDeltaUi, PaymentsPanelMonthlyRevenueUi, PaymentsPanelPaymentDrawerUi, PaymentsPanelPaymentsPanelUi, PaymentsPanelRowUi } from '@/modules/admin-pages/components/payments-panel-ui'
+import {
+  PaymentsPanelDeltaUi,
+  PaymentsPanelMonthlyRevenueUi,
+  PaymentsPanelPaymentDrawerUi,
+  PaymentsPanelPaymentsPanelUi,
+  PaymentsPanelRowUi,
+} from '@/modules/admin-pages/components/payments-panel-ui'
 import { PaymentsPanelModel } from '@/modules/admin-pages/hooks'
 export function DeltaContainer(...args: Parameters<typeof PaymentsPanelModel.useDeltaContainer>) {
   const props = PaymentsPanelModel.useDeltaContainer(...args)

@@ -1,3 +1,4 @@
+import { AlertCircle, Download, RefreshCw, Sparkles } from 'lucide-react'
 /**
  * Modal công cụ "Ma trận & đặc tả":
  * - Phân loại tự động các câu hỏi bằng AI theo khung chương trình GDPT 2018 (hoặc TT 27 tiểu học).
@@ -6,11 +7,11 @@
  * - Xuất Word riêng khổ ngang hoặc chèn vào cuối đề thi.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { AlertCircle, Download, RefreshCw, Sparkles } from 'lucide-react'
-import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
-import { Button, Badge, inputClass, selectClass } from '@/engine/components/ui'
+
 import { Segmented } from '@/engine/components/Segmented'
-import { ToolShell, sectionTitle, Check } from './ToolShell'
+import { Button, Badge, inputClass, selectClass } from '@/engine/components/ui'
+import { cn } from '@/engine/lib/cn'
+import { detectSubjectAndGrade, getChaptersFor, KHUNG_SUBJECTS } from '@/engine/lib/khungPrompt'
 import {
   buildMatrixAndSpecExamDoc,
   buildMatrixData,
@@ -25,9 +26,11 @@ import {
   type MucDo,
   type QuestionClassified,
 } from '@/engine/lib/matrixExam'
-import { detectSubjectAndGrade, getChaptersFor, KHUNG_SUBJECTS } from '@/engine/lib/khungPrompt'
+
 import { exportDocBlocks } from '../exportBlocks'
-import { cn } from '@/engine/lib/cn'
+import { ToolShell, sectionTitle, Check } from './ToolShell'
+
+import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
 
 const MUC_DO_OPTIONS_SECONDARY: Array<{ key: MucDo; label: string }> = [
   { key: 'NB', label: 'Nhận biết (NB)' },
@@ -42,12 +45,13 @@ const MUC_DO_OPTIONS_PRIMARY: Array<{ key: MucDo; label: string }> = [
   { key: 'M3', label: 'Mức 3 (Vận dụng)' },
 ]
 
-const KIND_BADGES: Record<string, { label: string; tone: 'neutral' | 'clay' | 'sage' | 'honey' }> = {
-  mcq: { label: 'Trắc nghiệm', tone: 'neutral' },
-  tf: { label: 'Đúng / Sai', tone: 'clay' },
-  short: { label: 'Trả lời ngắn', tone: 'honey' },
-  essay: { label: 'Tự luận', tone: 'sage' },
-}
+const KIND_BADGES: Record<string, { label: string; tone: 'neutral' | 'clay' | 'sage' | 'honey' }> =
+  {
+    mcq: { label: 'Trắc nghiệm', tone: 'neutral' },
+    tf: { label: 'Đúng / Sai', tone: 'clay' },
+    short: { label: 'Trả lời ngắn', tone: 'honey' },
+    essay: { label: 'Tự luận', tone: 'sage' },
+  }
 
 export function MatrixModal({
   doc,
@@ -58,14 +62,21 @@ export function MatrixModal({
   onClose: () => void
   onInsertBlocks?: (blocks: ExamBlock[]) => void
 }) {
-  const detected = useMemo(() => detectSubjectAndGrade(`${doc.subject} ${doc.grade} ${doc.title}`), [doc])
+  const detected = useMemo(
+    () => detectSubjectAndGrade(`${doc.subject} ${doc.grade} ${doc.title}`),
+    [doc],
+  )
   const [subject, setSubject] = useState(detected.subject || doc.subject || 'Toán')
   const [grade, setGrade] = useState<number>(detected.grade || 12)
   const isTieuHoc = grade <= 5
 
   const [chapters, setChapters] = useState<string[]>([])
-  const [questions, setQuestions] = useState<QuestionClassified[]>(() => extractQuestionsFromDoc(doc))
-  const [scoreConfig, setScoreConfig] = useState<MatrixScoreConfig>(() => DEFAULT_SCORE_CONFIG(subject))
+  const [questions, setQuestions] = useState<QuestionClassified[]>(() =>
+    extractQuestionsFromDoc(doc),
+  )
+  const [scoreConfig, setScoreConfig] = useState<MatrixScoreConfig>(() =>
+    DEFAULT_SCORE_CONFIG(subject),
+  )
   const [separateVdc, setSeparateVdc] = useState(false)
   const [activeTab, setActiveTab] = useState<'matran' | 'dacta'>('matran')
 
@@ -99,7 +110,13 @@ export function MatrixModal({
         const chaps = await getChaptersFor(subject, grade)
         if (!active) return
         const list = chaps.length ? chaps : chapters
-        const classified = await classifyQuestionsWithAi(questions, subject, grade, list, controller.signal)
+        const classified = await classifyQuestionsWithAi(
+          questions,
+          subject,
+          grade,
+          list,
+          controller.signal,
+        )
         if (active) setQuestions(classified)
       } catch (err) {
         if (!active) return
@@ -143,7 +160,10 @@ export function MatrixModal({
     [questions, grade, separateVdc],
   )
 
-  const totalScore = useMemo(() => computeTotalScore(questions, scoreConfig), [questions, scoreConfig])
+  const totalScore = useMemo(
+    () => computeTotalScore(questions, scoreConfig),
+    [questions, scoreConfig],
+  )
   const scoreDiff = Math.abs(totalScore - 10) > 0.001
 
   // Sửa trường của 1 câu
@@ -176,7 +196,10 @@ export function MatrixModal({
         term: doc.term,
         schoolYear: doc.schoolYear,
       })
-      await exportDocBlocks(exportDoc, { landscape: true, fileName: `${doc.title} - Ma tran dac ta` })
+      await exportDocBlocks(exportDoc, {
+        landscape: true,
+        fileName: `${doc.title} - Ma tran dac ta`,
+      })
     } catch (err) {
       alert(`Lỗi xuất file Word: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
@@ -234,10 +257,10 @@ export function MatrixModal({
       </datalist>
 
       {/* Cấu hình Môn & Lớp */}
-      <section className="rounded-[8px] border border-line bg-surface p-3 shadow-xs">
+      <section className="border-line bg-surface rounded-[8px] border p-3 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-1.5 font-medium text-ink-2">
+            <label className="text-ink-2 flex items-center gap-1.5 font-medium">
               Môn:
               <select
                 value={subject}
@@ -255,7 +278,7 @@ export function MatrixModal({
               </select>
             </label>
 
-            <label className="flex items-center gap-1.5 font-medium text-ink-2">
+            <label className="text-ink-2 flex items-center gap-1.5 font-medium">
               Lớp:
               <select
                 value={grade}
@@ -276,15 +299,19 @@ export function MatrixModal({
             size="sm"
             disabled={aiBusy || questions.length === 0}
             onClick={() => void handleReclassify()}
-            className="h-8 gap-1.5 px-3 text-[12.5px] text-clay hover:text-clay-deep"
+            className="text-clay hover:text-clay-deep h-8 gap-1.5 px-3 text-[12.5px]"
           >
-            {aiBusy ? <RefreshCw className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+            {aiBusy ? (
+              <RefreshCw className="size-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="size-3.5" />
+            )}
             {aiBusy ? 'Đang phân loại…' : 'Phân loại lại AI'}
           </Button>
         </div>
 
         {!isTieuHoc && (
-          <div className="mt-2.5 border-t border-line/70 pt-2">
+          <div className="border-line/70 mt-2.5 border-t pt-2">
             <Check checked={separateVdc} onChange={setSeparateVdc}>
               Tách riêng cột Vận dụng cao (VDC) thay vì gộp vào Vận dụng (chuẩn đề 2025)
             </Check>
@@ -294,21 +321,23 @@ export function MatrixModal({
 
       {/* Cảnh báo AI lỗi nếu có */}
       {aiError && (
-        <div className="flex items-start gap-2 rounded-[6px] border border-honey-deep/20 bg-honey-soft/50 p-2.5 text-[12.5px] text-ink-2">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-honey-deep" />
+        <div className="border-honey-deep/20 bg-honey-soft/50 text-ink-2 flex items-start gap-2 rounded-[6px] border p-2.5 text-[12.5px]">
+          <AlertCircle className="text-honey-deep mt-0.5 size-4 shrink-0" />
           <div className="flex-1">
-            <span className="font-semibold text-ink">Không gọi được AI tự động:</span> {aiError}.
-            <div className="mt-0.5 text-ink-3">Bạn vẫn có thể tự chọn chủ đề và mức độ cho từng câu bên dưới.</div>
+            <span className="text-ink font-semibold">Không gọi được AI tự động:</span> {aiError}.
+            <div className="text-ink-3 mt-0.5">
+              Bạn vẫn có thể tự chọn chủ đề và mức độ cho từng câu bên dưới.
+            </div>
           </div>
         </div>
       )}
 
       {/* Cấu hình điểm từng phần */}
-      <section className="rounded-[8px] border border-line bg-surface p-3">
+      <section className="border-line bg-surface rounded-[8px] border p-3">
         <h3 className={sectionTitle}>Cấu hình thang điểm (2025)</h3>
         <div className="grid grid-cols-3 gap-2">
           {matrixData.parts.some((p) => p.id === 'mcq') && (
-            <label className="text-[12px] text-ink-3">
+            <label className="text-ink-3 text-[12px]">
               TN nhiều lựa chọn
               <div className="mt-1 flex items-center gap-1">
                 <input
@@ -317,16 +346,18 @@ export function MatrixModal({
                   min="0.1"
                   max="2"
                   value={scoreConfig.mcqPoint}
-                  onChange={(e) => setScoreConfig((c) => ({ ...c, mcqPoint: Number(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setScoreConfig((c) => ({ ...c, mcqPoint: Number(e.target.value) || 0 }))
+                  }
                   className={cn(inputClass, 'h-7 px-2 py-0.5 text-[12.5px]')}
                 />
-                <span className="text-[11px] text-ink-4">đ/câu</span>
+                <span className="text-ink-4 text-[11px]">đ/câu</span>
               </div>
             </label>
           )}
 
           {matrixData.parts.some((p) => p.id === 'tf') && (
-            <label className="text-[12px] text-ink-3">
+            <label className="text-ink-3 text-[12px]">
               Đúng - Sai
               <div className="mt-1 flex items-center gap-1">
                 <input
@@ -335,16 +366,18 @@ export function MatrixModal({
                   min="0.1"
                   max="2"
                   value={scoreConfig.tfPointPerItem}
-                  onChange={(e) => setScoreConfig((c) => ({ ...c, tfPointPerItem: Number(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setScoreConfig((c) => ({ ...c, tfPointPerItem: Number(e.target.value) || 0 }))
+                  }
                   className={cn(inputClass, 'h-7 px-2 py-0.5 text-[12.5px]')}
                 />
-                <span className="text-[11px] text-ink-4">đ/ý</span>
+                <span className="text-ink-4 text-[11px]">đ/ý</span>
               </div>
             </label>
           )}
 
           {matrixData.parts.some((p) => p.id === 'short') && (
-            <label className="text-[12px] text-ink-3">
+            <label className="text-ink-3 text-[12px]">
               Trả lời ngắn
               <div className="mt-1 flex items-center gap-1">
                 <input
@@ -353,21 +386,29 @@ export function MatrixModal({
                   min="0.1"
                   max="2"
                   value={scoreConfig.shortPoint}
-                  onChange={(e) => setScoreConfig((c) => ({ ...c, shortPoint: Number(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setScoreConfig((c) => ({ ...c, shortPoint: Number(e.target.value) || 0 }))
+                  }
                   className={cn(inputClass, 'h-7 px-2 py-0.5 text-[12.5px]')}
                 />
-                <span className="text-[11px] text-ink-4">đ/câu</span>
+                <span className="text-ink-4 text-[11px]">đ/câu</span>
               </div>
             </label>
           )}
         </div>
 
         {/* Tổng điểm báo động */}
-        <div className="mt-2.5 flex items-center justify-between border-t border-line/70 pt-2 text-[12.5px]">
-          <span className="font-medium text-ink-2">Tổng điểm đề thi:</span>
+        <div className="border-line/70 mt-2.5 flex items-center justify-between border-t pt-2 text-[12.5px]">
+          <span className="text-ink-2 font-medium">Tổng điểm đề thi:</span>
           <div className="flex items-center gap-1.5 font-bold">
-            <span className={cn('tabular-nums text-[14px]', scoreDiff ? 'text-clay' : 'text-sage-deep')}>
-              {totalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} / 10 điểm
+            <span
+              className={cn('text-[14px] tabular-nums', scoreDiff ? 'text-clay' : 'text-sage-deep')}
+            >
+              {totalScore.toLocaleString('vi-VN', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 2,
+              })}{' '}
+              / 10 điểm
             </span>
             {scoreDiff ? (
               <Badge tone="clay" className="py-0.5 text-[11px]">
@@ -386,11 +427,11 @@ export function MatrixModal({
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h3 className={sectionTitle}>Chi tiết {questions.length} câu hỏi</h3>
-          <span className="text-[11.5px] text-ink-3">Sửa ô nào thì ma trận cập nhật ngay</span>
+          <span className="text-ink-3 text-[11.5px]">Sửa ô nào thì ma trận cập nhật ngay</span>
         </div>
 
         {questions.length === 0 ? (
-          <p className="rounded-[6px] border border-line bg-paper-2 p-4 text-center text-ink-3">
+          <p className="border-line bg-paper-2 text-ink-3 rounded-[6px] border p-4 text-center">
             Đề chưa có câu hỏi nào để lập ma trận.
           </p>
         ) : (
@@ -400,16 +441,16 @@ export function MatrixModal({
               return (
                 <div
                   key={idx}
-                  className="rounded-[8px] border border-line bg-white p-2.5 shadow-xs transition-colors hover:border-ink-4"
+                  className="border-line hover:border-ink-4 rounded-[8px] border bg-white p-2.5 shadow-xs transition-colors"
                 >
                   {/* Dòng đầu: Tên câu + Badge dạng + trích đoạn + điểm */}
                   <div className="flex items-center justify-between gap-2 text-[12.5px]">
                     <div className="flex min-w-0 items-center gap-1.5">
-                      <span className="font-bold text-ink">{q.label}</span>
+                      <span className="text-ink font-bold">{q.label}</span>
                       <Badge tone={badge.tone} className="px-1.5 py-0 text-[10.5px]">
                         {badge.label}
                       </Badge>
-                      <span className="truncate text-[12px] text-ink-3" data-tip={q.textSummary}>
+                      <span className="text-ink-3 truncate text-[12px]" data-tip={q.textSummary}>
                         {q.textSummary}
                       </span>
                     </div>
@@ -423,13 +464,18 @@ export function MatrixModal({
                             min="0.25"
                             max="10"
                             value={q.score}
-                            onChange={(e) => updateQuestion(idx, { score: Number(e.target.value) || 0 })}
-                            className={cn(inputClass, 'h-6 w-14 px-1 text-right text-[12px] font-semibold')}
+                            onChange={(e) =>
+                              updateQuestion(idx, { score: Number(e.target.value) || 0 })
+                            }
+                            className={cn(
+                              inputClass,
+                              'h-6 w-14 px-1 text-right text-[12px] font-semibold',
+                            )}
                           />
-                          <span className="text-[11px] text-ink-3">đ</span>
+                          <span className="text-ink-3 text-[11px]">đ</span>
                         </div>
                       ) : (
-                        <span className="text-[11.5px] tabular-nums font-medium text-ink-3">
+                        <span className="text-ink-3 text-[11.5px] font-medium tabular-nums">
                           {q.kind === 'mcq'
                             ? `${scoreConfig.mcqPoint}đ`
                             : q.kind === 'short'
@@ -443,7 +489,7 @@ export function MatrixModal({
                   {/* Dòng 2: Chủ đề & Mức độ */}
                   <div className="mt-2 grid grid-cols-12 gap-2">
                     <div className="col-span-7">
-                      <label className="text-[11px] text-ink-3">Chủ đề (chương):</label>
+                      <label className="text-ink-3 text-[11px]">Chủ đề (chương):</label>
                       <input
                         list={datalistId}
                         value={q.chuDe}
@@ -454,16 +500,21 @@ export function MatrixModal({
                     </div>
 
                     <div className="col-span-5">
-                      <label className="text-[11px] text-ink-3">Mức độ:</label>
+                      <label className="text-ink-3 text-[11px]">Mức độ:</label>
                       {q.kind === 'tf' ? (
                         <div className="mt-0.5 grid grid-cols-4 gap-1">
                           {(['a', 'b', 'c', 'd'] as const).map((opt, optIdx) => (
                             <div key={opt} className="flex flex-col items-center">
-                              <span className="text-[9.5px] font-medium text-ink-3">{opt}</span>
+                              <span className="text-ink-3 text-[9.5px] font-medium">{opt}</span>
                               <select
                                 value={q.mucDoTf[optIdx]}
-                                onChange={(e) => updateTfLevel(idx, optIdx, e.target.value as MucDo)}
-                                className={cn(selectClass, 'h-6 w-full px-0.5 py-0 text-[10.5px] font-semibold')}
+                                onChange={(e) =>
+                                  updateTfLevel(idx, optIdx, e.target.value as MucDo)
+                                }
+                                className={cn(
+                                  selectClass,
+                                  'h-6 w-full px-0.5 py-0 text-[10.5px] font-semibold',
+                                )}
                               >
                                 {levelOptions.map((o) => (
                                   <option key={o.key} value={o.key}>
@@ -478,7 +529,10 @@ export function MatrixModal({
                         <select
                           value={q.mucDo}
                           onChange={(e) => updateQuestion(idx, { mucDo: e.target.value as MucDo })}
-                          className={cn(selectClass, 'mt-0.5 h-7 py-0 pl-2 text-[12px] font-semibold')}
+                          className={cn(
+                            selectClass,
+                            'mt-0.5 h-7 py-0 pl-2 text-[12px] font-semibold',
+                          )}
                         >
                           {levelOptions.map((o) => (
                             <option key={o.key} value={o.key}>
@@ -497,7 +551,7 @@ export function MatrixModal({
                       value={q.yeuCau}
                       onChange={(e) => updateQuestion(idx, { yeuCau: e.target.value })}
                       placeholder="Yêu cầu cần đạt: Bắt đầu bằng động từ (Nhận biết được…, Tính được…)"
-                      className={cn(inputClass, 'h-7 px-2 text-[12px] text-ink-2')}
+                      className={cn(inputClass, 'text-ink-2 h-7 px-2 text-[12px]')}
                     />
                   </div>
                 </div>
@@ -513,7 +567,7 @@ export function MatrixModal({
   const preview = (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-[8px] bg-white shadow-xs">
       {/* Thanh tab chọn xem Ma trận / Đặc tả */}
-      <div className="flex shrink-0 items-center justify-between border-b border-line px-4 py-2.5 bg-paper">
+      <div className="border-line bg-paper flex shrink-0 items-center justify-between border-b px-4 py-2.5">
         <Segmented<'matran' | 'dacta'>
           value={activeTab}
           onChange={setActiveTab}
@@ -523,10 +577,10 @@ export function MatrixModal({
             { key: 'dacta', label: 'Bản Đặc tả' },
           ]}
         />
-        <div className="flex items-center gap-2 text-[12px] text-ink-3">
+        <div className="text-ink-3 flex items-center gap-2 text-[12px]">
           <span>{questions.length} câu</span>
           <span>•</span>
-          <span className="font-semibold text-ink">{totalScore} điểm</span>
+          <span className="text-ink font-semibold">{totalScore} điểm</span>
         </div>
       </div>
 
@@ -534,39 +588,44 @@ export function MatrixModal({
       <div className="min-h-0 flex-1 overflow-auto p-4">
         {activeTab === 'matran' ? (
           <div>
-            <h4 className="mb-2 text-center text-[14px] font-bold uppercase tracking-wide text-ink">
+            <h4 className="text-ink mb-2 text-center text-[14px] font-bold tracking-wide uppercase">
               MA TRẬN ĐỀ KIỂM TRA MÔN {subject.toUpperCase()} – LỚP {grade}
             </h4>
             <div className="overflow-x-auto">
               <table className="doc-table w-full border-collapse border border-black text-center text-[12px]">
                 <thead>
                   <tr className="bg-[#f2f2f2] font-bold">
-                    <th rowSpan={2} className="border border-black p-1 w-10">
+                    <th rowSpan={2} className="w-10 border border-black p-1">
                       TT
                     </th>
-                    <th rowSpan={2} className="border border-black p-1 text-left min-w-[140px]">
+                    <th rowSpan={2} className="min-w-[140px] border border-black p-1 text-left">
                       Chủ đề / Mạch kiến thức
                     </th>
                     {matrixData.parts.map((p) => (
                       <th key={p.id} colSpan={p.levels.length} className="border border-black p-1">
                         {p.title}
-                        {p.note && <div className="text-[10.5px] font-normal text-ink-3">({p.note})</div>}
+                        {p.note && (
+                          <div className="text-ink-3 text-[10.5px] font-normal">({p.note})</div>
+                        )}
                       </th>
                     ))}
-                    <th rowSpan={2} className="border border-black p-1 w-16">
+                    <th rowSpan={2} className="w-16 border border-black p-1">
                       Tổng số câu/ý
                     </th>
-                    <th rowSpan={2} className="border border-black p-1 w-16">
+                    <th rowSpan={2} className="w-16 border border-black p-1">
                       Tổng điểm
                     </th>
-                    <th rowSpan={2} className="border border-black p-1 w-14">
+                    <th rowSpan={2} className="w-14 border border-black p-1">
                       Tỉ lệ %
                     </th>
                   </tr>
                   <tr className="bg-[#f2f2f2] font-bold">
                     {matrixData.parts.flatMap((p) =>
                       p.levels.map((l) => (
-                        <th key={`${p.id}_${l.key}`} className="border border-black p-1 text-[11px] min-w-[40px]">
+                        <th
+                          key={`${p.id}_${l.key}`}
+                          className="min-w-[40px] border border-black p-1 text-[11px]"
+                        >
                           {l.label}
                         </th>
                       )),
@@ -582,18 +641,30 @@ export function MatrixModal({
                         p.levels.map((l) => {
                           const val = r.cells[`${p.id}_${l.key}`] || 0
                           return (
-                            <td key={`${p.id}_${l.key}`} className="border border-black p-1 tabular-nums">
+                            <td
+                              key={`${p.id}_${l.key}`}
+                              className="border border-black p-1 tabular-nums"
+                            >
                               {val > 0 ? val : '-'}
                             </td>
                           )
                         }),
                       )}
-                      <td className="border border-black p-1 font-semibold tabular-nums">{r.totalCount}</td>
                       <td className="border border-black p-1 font-semibold tabular-nums">
-                        {r.totalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+                        {r.totalCount}
+                      </td>
+                      <td className="border border-black p-1 font-semibold tabular-nums">
+                        {r.totalScore.toLocaleString('vi-VN', {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 2,
+                        })}
                       </td>
                       <td className="border border-black p-1 tabular-nums">
-                        {r.percent.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
+                        {r.percent.toLocaleString('vi-VN', {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 1,
+                        })}
+                        %
                       </td>
                     </tr>
                   ))}
@@ -606,15 +677,23 @@ export function MatrixModal({
                       p.levels.map((l) => {
                         const val = matrixData.summary.partTotals[`${p.id}_${l.key}`] || 0
                         return (
-                          <td key={`${p.id}_${l.key}`} className="border border-black p-1 tabular-nums">
+                          <td
+                            key={`${p.id}_${l.key}`}
+                            className="border border-black p-1 tabular-nums"
+                          >
                             {val}
                           </td>
                         )
                       }),
                     )}
-                    <td className="border border-black p-1 tabular-nums">{matrixData.summary.grandTotalCount}</td>
                     <td className="border border-black p-1 tabular-nums">
-                      {matrixData.summary.grandTotalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+                      {matrixData.summary.grandTotalCount}
+                    </td>
+                    <td className="border border-black p-1 tabular-nums">
+                      {matrixData.summary.grandTotalScore.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 2,
+                      })}
                     </td>
                     <td className="border border-black p-1 tabular-nums">100%</td>
                   </tr>
@@ -627,15 +706,26 @@ export function MatrixModal({
                       p.levels.map((l) => {
                         const val = matrixData.summary.partScoreTotals[`${p.id}_${l.key}`] || 0
                         return (
-                          <td key={`${p.id}_${l.key}`} className="border border-black p-1 tabular-nums">
-                            {val > 0 ? val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : '-'}
+                          <td
+                            key={`${p.id}_${l.key}`}
+                            className="border border-black p-1 tabular-nums"
+                          >
+                            {val > 0
+                              ? val.toLocaleString('vi-VN', {
+                                  minimumFractionDigits: 1,
+                                  maximumFractionDigits: 2,
+                                })
+                              : '-'}
                           </td>
                         )
                       }),
                     )}
                     <td className="border border-black p-1">-</td>
                     <td className="border border-black p-1 tabular-nums">
-                      {matrixData.summary.grandTotalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+                      {matrixData.summary.grandTotalScore.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 2,
+                      })}
                     </td>
                     <td className="border border-black p-1">100%</td>
                   </tr>
@@ -648,8 +738,13 @@ export function MatrixModal({
                       p.levels.map((l) => {
                         const val = matrixData.summary.partPercentTotals[`${p.id}_${l.key}`] || 0
                         return (
-                          <td key={`${p.id}_${l.key}`} className="border border-black p-1 tabular-nums">
-                            {val > 0 ? `${val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : '-'}
+                          <td
+                            key={`${p.id}_${l.key}`}
+                            className="border border-black p-1 tabular-nums"
+                          >
+                            {val > 0
+                              ? `${val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+                              : '-'}
                           </td>
                         )
                       }),
@@ -663,13 +758,14 @@ export function MatrixModal({
             </div>
 
             {/* Tóm tắt mức độ chung */}
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 rounded-[6px] bg-paper p-2 text-[12px]">
-              <span className="font-semibold text-ink-2">Phân bổ nhận thức:</span>
+            <div className="bg-paper mt-3 flex flex-wrap items-center justify-center gap-4 rounded-[6px] p-2 text-[12px]">
+              <span className="text-ink-2 font-semibold">Phân bổ nhận thức:</span>
               {matrixData.levels.map((l) => (
                 <span key={l.key} className="flex items-center gap-1">
                   <span className="text-ink-3">{l.label}:</span>
-                  <span className="font-bold text-ink">
-                    {matrixData.summary.levelScores[l.key] ?? 0}đ ({matrixData.summary.levelPercents[l.key] ?? 0}%)
+                  <span className="text-ink font-bold">
+                    {matrixData.summary.levelScores[l.key] ?? 0}đ (
+                    {matrixData.summary.levelPercents[l.key] ?? 0}%)
                   </span>
                 </span>
               ))}
@@ -677,32 +773,32 @@ export function MatrixModal({
           </div>
         ) : (
           <div>
-            <h4 className="mb-2 text-center text-[14px] font-bold uppercase tracking-wide text-ink">
+            <h4 className="text-ink mb-2 text-center text-[14px] font-bold tracking-wide uppercase">
               BẢN ĐẶC TẢ ĐỀ KIỂM TRA MÔN {subject.toUpperCase()} – LỚP {grade}
             </h4>
             <div className="overflow-x-auto">
               <table className="doc-table w-full border-collapse border border-black text-center text-[12px]">
                 <thead>
                   <tr className="bg-[#f2f2f2] font-bold">
-                    <th rowSpan={2} className="border border-black p-1 w-10">
+                    <th rowSpan={2} className="w-10 border border-black p-1">
                       TT
                     </th>
-                    <th rowSpan={2} className="border border-black p-1 text-left w-36">
+                    <th rowSpan={2} className="w-36 border border-black p-1 text-left">
                       Chủ đề
                     </th>
-                    <th rowSpan={2} className="border border-black p-1 text-left min-w-[200px]">
+                    <th rowSpan={2} className="min-w-[200px] border border-black p-1 text-left">
                       Yêu cầu cần đạt
                     </th>
                     <th colSpan={specData.levels.length} className="border border-black p-1">
                       Số câu hỏi theo mức độ nhận thức
                     </th>
-                    <th rowSpan={2} className="border border-black p-1 min-w-[120px]">
+                    <th rowSpan={2} className="min-w-[120px] border border-black p-1">
                       Câu số
                     </th>
                   </tr>
                   <tr className="bg-[#f2f2f2] font-bold">
                     {specData.levels.map((l) => (
-                      <th key={l.key} className="border border-black p-1 text-[11px] min-w-[40px]">
+                      <th key={l.key} className="min-w-[40px] border border-black p-1 text-[11px]">
                         {l.label}
                       </th>
                     ))}
@@ -718,7 +814,10 @@ export function MatrixModal({
                             <td rowSpan={rowCount} className="border border-black p-1 font-bold">
                               {t.stt}
                             </td>
-                            <td rowSpan={rowCount} className="border border-black p-1 text-left font-medium">
+                            <td
+                              rowSpan={rowCount}
+                              className="border border-black p-1 text-left font-medium"
+                            >
                               {t.chuDe}
                             </td>
                           </>
@@ -732,7 +831,7 @@ export function MatrixModal({
                             </td>
                           )
                         })}
-                        <td className="border border-black p-1 text-center font-medium text-ink-2">
+                        <td className="text-ink-2 border border-black p-1 text-center font-medium">
                           {it.questionRefs || '-'}
                         </td>
                       </tr>

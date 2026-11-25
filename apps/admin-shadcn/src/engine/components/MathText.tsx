@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import { renderMath } from '@/engine/lib/math'
+
 import { cn } from '@/engine/lib/cn'
+import { renderMath } from '@/engine/lib/math'
 
 /**
  * Renders text that may contain `$...$` / `$$...$$` LaTeX.
@@ -17,11 +18,5 @@ export function MathText({
   style?: React.CSSProperties
 }) {
   const html = useMemo(() => renderMath(children), [children])
-  return (
-    <As
-      className={cn(className)}
-      style={style}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  )
+  return <As className={cn(className)} style={style} dangerouslySetInnerHTML={{ __html: html }} />
 }

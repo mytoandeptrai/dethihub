@@ -1,3 +1,18 @@
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronsDown,
+  ChevronsUp,
+  Copy,
+  Layers,
+  Lock,
+  LockOpen,
+  Palette,
+  SlidersHorizontal,
+  MessageSquarePlus,
+  Sparkles,
+  Type,
+} from 'lucide-react'
 /**
  * Thanh công cụ nổi trên phần tử đang chọn: những thao tác hay dùng nhất ngay gần chỗ đang sửa,
  * để người mới không phải tìm trên ribbon. Đặt trong `.slide-stage__inner` (cùng kích thước khung slide),
@@ -5,15 +20,18 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, ChevronUp, ChevronsDown, ChevronsUp, Copy, Layers, Lock, LockOpen, Palette, SlidersHorizontal, MessageSquarePlus, Sparkles, Type } from 'lucide-react'
-import { TrashIcon } from '@/engine/components/appIcons'
-import type { SlideElement } from '@/engine/store/docs'
-import { REWRITE_PRESETS } from '@/engine/lib/slideRewrite'
-import { graphicById, graphicMainColor } from '@/engine/lib/slideGraphics'
-import { SlideTextEffectsTool } from './SlideTextEffectsTool'
-import { ColorPalette } from './ColorPalette'
 
-const POPOVER = 'absolute top-full z-10 mt-1.5 rounded-lg border border-line bg-surface p-2 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]'
+import { TrashIcon } from '@/engine/components/appIcons'
+import { graphicById, graphicMainColor } from '@/engine/lib/slideGraphics'
+import { REWRITE_PRESETS } from '@/engine/lib/slideRewrite'
+
+import { ColorPalette } from './ColorPalette'
+import { SlideTextEffectsTool } from './SlideTextEffectsTool'
+
+import type { SlideElement } from '@/engine/store/docs'
+
+const POPOVER =
+  'absolute top-full z-10 mt-1.5 rounded-lg border border-line bg-surface p-2 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]'
 
 /** Nút màu: bấm mở bảng màu (màu của bộ màu + màu phổ biến + chọn màu tuỳ ý). */
 function ColorTool({
@@ -37,12 +55,15 @@ function ColorTool({
         data-tip={title}
         aria-label={title}
         aria-expanded={open}
-        className={`flex size-7 flex-col items-center justify-center gap-0.5 rounded-md text-ink-2 transition-colors hover:bg-paper-2 ${open ? 'bg-paper-2' : ''}`}
+        className={`text-ink-2 hover:bg-paper-2 flex size-7 flex-col items-center justify-center gap-0.5 rounded-md transition-colors ${open ? 'bg-paper-2' : ''}`}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((v) => !v)}
       >
         <Palette className="size-3.5" />
-        <span className="h-[3px] w-4 rounded-full border border-black/10" style={{ background: value }} />
+        <span
+          className="h-[3px] w-4 rounded-full border border-black/10"
+          style={{ background: value }}
+        />
       </button>
       {open && (
         <div className={`${POPOVER} ${right ? 'right-0' : 'left-0'}`}>
@@ -72,8 +93,12 @@ const TYPE_LABEL: Record<string, string> = {
 /** nhãn ngắn của một phần tử trong danh sách lớp: chữ thì lấy vài chữ đầu, đồ hoạ thì lấy tên */
 function layerLabel(el: SlideElement): string {
   if (el.type === 'graphic') return graphicById(el.graphicId)?.name ?? 'Đồ hoạ'
-  const text = (el.text ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  if ((el.type === 'text' || el.type === 'shape') && text) return text.length > 22 ? `${text.slice(0, 22)}…` : text
+  const text = (el.text ?? '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if ((el.type === 'text' || el.type === 'shape') && text)
+    return text.length > 22 ? `${text.slice(0, 22)}…` : text
   return TYPE_LABEL[el.type] ?? 'Phần tử'
 }
 
@@ -137,13 +162,39 @@ function LayerTool({
   }
   const atTop = index >= count - 1
   const atBottom = index <= 0
-  const items: Array<{ action: 'front' | 'back' | 'forward' | 'backward'; label: string; icon: React.ReactNode; disabled: boolean }> = [
-    { action: 'front', label: 'Đưa lên trên cùng', icon: <ChevronsUp className="size-3.5" />, disabled: atTop },
-    { action: 'forward', label: 'Lên một lớp', icon: <ChevronUp className="size-3.5" />, disabled: atTop },
-    { action: 'backward', label: 'Xuống một lớp', icon: <ChevronDown className="size-3.5" />, disabled: atBottom },
-    { action: 'back', label: 'Đưa xuống dưới cùng', icon: <ChevronsDown className="size-3.5" />, disabled: atBottom },
+  const items: Array<{
+    action: 'front' | 'back' | 'forward' | 'backward'
+    label: string
+    icon: React.ReactNode
+    disabled: boolean
+  }> = [
+    {
+      action: 'front',
+      label: 'Đưa lên trên cùng',
+      icon: <ChevronsUp className="size-3.5" />,
+      disabled: atTop,
+    },
+    {
+      action: 'forward',
+      label: 'Lên một lớp',
+      icon: <ChevronUp className="size-3.5" />,
+      disabled: atTop,
+    },
+    {
+      action: 'backward',
+      label: 'Xuống một lớp',
+      icon: <ChevronDown className="size-3.5" />,
+      disabled: atBottom,
+    },
+    {
+      action: 'back',
+      label: 'Đưa xuống dưới cùng',
+      icon: <ChevronsDown className="size-3.5" />,
+      disabled: atBottom,
+    },
   ]
-  const itemCls = 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12.5px] text-ink-2 hover:bg-paper-2 disabled:opacity-35 disabled:hover:bg-transparent'
+  const itemCls =
+    'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12.5px] text-ink-2 hover:bg-paper-2 disabled:opacity-35 disabled:hover:bg-transparent'
   return (
     <div className="relative">
       <button
@@ -153,7 +204,7 @@ function LayerTool({
         aria-label="Lớp"
         aria-expanded={open}
         disabled={count < 2}
-        className={`flex size-7 items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-paper-2 disabled:opacity-30 ${open ? 'bg-paper-2' : ''}`}
+        className={`text-ink-2 hover:bg-paper-2 flex size-7 items-center justify-center rounded-md transition-colors disabled:opacity-30 ${open ? 'bg-paper-2' : ''}`}
         onMouseDown={(e) => e.preventDefault()}
         onClick={toggle}
       >
@@ -164,11 +215,17 @@ function LayerTool({
           <div
             ref={menuRef}
             role="menu"
-            className="layer-menu fixed z-[200] flex flex-col rounded-lg border border-line bg-surface p-1 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]"
-            style={{ left: pos.left, top: pos.top, bottom: pos.bottom, width: LAYER_MENU.w, maxHeight: `min(${LAYER_MENU.max}px, calc(100vh - 16px))` }}
+            className="layer-menu border-line bg-surface fixed z-[200] flex flex-col rounded-lg border p-1 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]"
+            style={{
+              left: pos.left,
+              top: pos.top,
+              bottom: pos.bottom,
+              width: LAYER_MENU.w,
+              maxHeight: `min(${LAYER_MENU.max}px, calc(100vh - 16px))`,
+            }}
             onMouseDown={(e) => e.preventDefault()}
           >
-            <div className="px-2 pb-1 pt-0.5 text-[11.5px] text-ink-3">
+            <div className="text-ink-3 px-2 pt-0.5 pb-1 text-[11.5px]">
               Lớp {index + 1}/{count}
             </div>
             {items.map((it) => (
@@ -187,21 +244,23 @@ function LayerTool({
                 {it.label}
               </button>
             ))}
-            <div className="mx-1 my-1 border-t border-line" />
-            <div className="px-2 pb-1 text-[11.5px] text-ink-3">Chọn lớp (trên → dưới)</div>
+            <div className="border-line mx-1 my-1 border-t" />
+            <div className="text-ink-3 px-2 pb-1 text-[11.5px]">Chọn lớp (trên → dưới)</div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               {[...elements].reverse().map((e) => (
                 <button
                   key={e.id}
                   type="button"
                   role="menuitem"
-                  className={`${itemCls} ${e.id === selectedId ? 'bg-paper-2 font-semibold text-clay' : ''}`}
+                  className={`${itemCls} ${e.id === selectedId ? 'bg-paper-2 text-clay font-semibold' : ''}`}
                   onClick={() => {
                     setPos(null)
                     onSelect(e.id)
                   }}
                 >
-                  <span className="shrink-0 text-[11px] font-normal text-ink-3">{TYPE_LABEL[e.type] ?? 'Đồ hoạ'}</span>
+                  <span className="text-ink-3 shrink-0 text-[11px] font-normal">
+                    {TYPE_LABEL[e.type] ?? 'Đồ hoạ'}
+                  </span>
                   <span className="truncate">{layerLabel(e)}</span>
                 </button>
               ))}
@@ -258,37 +317,53 @@ function ShapeStyleTool({
   const opacity = Math.round((el.opacity ?? 1) * 100)
   // hình bị cắt (sao, tim, tam giác, mũi tên) cắt luôn bóng đổ nên không hiện mục bóng cho chúng
   const plain = el.type !== 'shape' // đồ hoạ/icon: chỉ có độ trong suốt
-  const clipped = el.shape === 'star' || el.shape === 'heart' || el.shape === 'triangle' || el.shape === 'arrow'
+  const clipped =
+    el.shape === 'star' || el.shape === 'heart' || el.shape === 'triangle' || el.shape === 'arrow'
   const shadow = el.shadowLevel ?? (el.shadow ? 2 : 0)
   return (
     <div className="relative">
       <button
         type="button"
-        data-tip={plain ? 'Độ trong suốt' : isLine ? 'Độ dày, đầu mũi tên' : 'Viền, độ trong suốt, bóng đổ'}
+        data-tip={
+          plain ? 'Độ trong suốt' : isLine ? 'Độ dày, đầu mũi tên' : 'Viền, độ trong suốt, bóng đổ'
+        }
         aria-label="Kiểu hình"
         aria-expanded={open}
-        className={`flex size-7 items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-paper-2 ${open ? 'bg-paper-2' : ''}`}
+        className={`text-ink-2 hover:bg-paper-2 flex size-7 items-center justify-center rounded-md transition-colors ${open ? 'bg-paper-2' : ''}`}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((v) => !v)}
       >
         <SlidersHorizontal className="size-3.5" />
       </button>
       {open && (
-        <div className={`${POPOVER} ${right ? 'right-0' : 'left-0'} ${plain ? 'w-[196px]' : 'w-[240px]'} text-[12px] text-ink-2`} onMouseDown={(e) => e.target instanceof HTMLInputElement || e.preventDefault()}>
+        <div
+          className={`${POPOVER} ${right ? 'right-0' : 'left-0'} ${plain ? 'w-[196px]' : 'w-[240px]'} text-ink-2 text-[12px]`}
+          onMouseDown={(e) => e.target instanceof HTMLInputElement || e.preventDefault()}
+        >
           {plain ? null : isLine ? (
             <>
               <div className="mb-1 font-semibold">Độ dày</div>
               <div className="flex gap-1">
                 {LINE_WIDTHS.map((b) => (
-                  <button key={b.value} type="button" className={chip((el.border ?? 4) === b.value)} onClick={() => onUpdate({ border: b.value })}>
+                  <button
+                    key={b.value}
+                    type="button"
+                    className={chip((el.border ?? 4) === b.value)}
+                    onClick={() => onUpdate({ border: b.value })}
+                  >
                     {b.label}
                   </button>
                 ))}
               </div>
-              <div className="mb-1 mt-3 font-semibold">Đầu mũi tên</div>
+              <div className="mt-3 mb-1 font-semibold">Đầu mũi tên</div>
               <div className="flex gap-1">
                 {ARROWS.map((a) => (
-                  <button key={a.value} type="button" className={chip((el.lineArrow ?? 'none') === a.value)} onClick={() => onUpdate({ lineArrow: a.value })}>
+                  <button
+                    key={a.value}
+                    type="button"
+                    className={chip((el.lineArrow ?? 'none') === a.value)}
+                    onClick={() => onUpdate({ lineArrow: a.value })}
+                  >
                     {a.label}
                   </button>
                 ))}
@@ -299,14 +374,23 @@ function ShapeStyleTool({
               <div className="mb-1 font-semibold">Viền</div>
               <div className="flex gap-1">
                 {BORDER_WIDTHS.map((b) => (
-                  <button key={b.value} type="button" className={chip(width === b.value)} onClick={() => onUpdate({ border: b.value })}>
+                  <button
+                    key={b.value}
+                    type="button"
+                    className={chip(width === b.value)}
+                    onClick={() => onUpdate({ border: b.value })}
+                  >
                     {b.label}
                   </button>
                 ))}
               </div>
               {width > 0 && (
                 <div className="mt-2">
-                  <ColorPalette value={el.borderColor ?? '#111827'} themeColors={themeColors} onPick={(borderColor) => onUpdate({ borderColor })} />
+                  <ColorPalette
+                    value={el.borderColor ?? '#111827'}
+                    themeColors={themeColors}
+                    onPick={(borderColor) => onUpdate({ borderColor })}
+                  />
                 </div>
               )}
             </>
@@ -327,10 +411,15 @@ function ShapeStyleTool({
           </label>
           {!plain && !isLine && !clipped && (
             <>
-              <div className="mb-1 mt-3 font-semibold">Bóng đổ</div>
+              <div className="mt-3 mb-1 font-semibold">Bóng đổ</div>
               <div className="flex gap-1">
                 {SHADOW_LEVELS.map((l) => (
-                  <button key={l.value} type="button" className={chip(shadow === l.value)} onClick={() => onUpdate({ shadowLevel: l.value })}>
+                  <button
+                    key={l.value}
+                    type="button"
+                    className={chip(shadow === l.value)}
+                    onClick={() => onUpdate({ shadowLevel: l.value })}
+                  >
                     {l.label}
                   </button>
                 ))}
@@ -408,154 +497,228 @@ export function SelectionToolbar({
   const alignEnd = el.x > 62
   const style: React.CSSProperties = {
     position: 'absolute',
-    ...(alignEnd ? { right: `${Math.max(100 - (el.x + el.w), 0)}%` } : { left: `${Math.max(el.x, 0)}%` }),
+    ...(alignEnd
+      ? { right: `${Math.max(100 - (el.x + el.w), 0)}%` }
+      : { left: `${Math.max(el.x, 0)}%` }),
     // phần tử phủ gần kín slide: không có chỗ trên/dưới, đặt thanh vào trong sát mép trên
-    top: covers ? '10px' : above ? `calc(${el.y}% - ${rotTop ? 76 : 44}px)` : `calc(${el.y + height}% + 8px)`,
+    top: covers
+      ? '10px'
+      : above
+        ? `calc(${el.y}% - ${rotTop ? 76 : 44}px)`
+        : `calc(${el.y + height}% + 8px)`,
     zIndex: 50,
   }
-  const btn = 'flex size-7 items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-paper-2 disabled:opacity-30'
+  const btn =
+    'flex size-7 items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-paper-2 disabled:opacity-30'
   // giữ vùng chọn/ô nhập chữ: bấm nút không làm mất focus
   const keep = (e: React.MouseEvent) => e.preventDefault()
   const tool = (title: string, onClick: () => void, icon: React.ReactNode, active = false) => (
-    <button type="button" data-tip={title} aria-label={title} className={`${btn} ${active ? 'bg-paper-2 text-clay' : ''}`} onMouseDown={keep} onClick={onClick}>
+    <button
+      type="button"
+      data-tip={title}
+      aria-label={title}
+      className={`${btn} ${active ? 'bg-paper-2 text-clay' : ''}`}
+      onMouseDown={keep}
+      onClick={onClick}
+    >
       {icon}
     </button>
   )
-  const sep = <span className="mx-0.5 h-4 w-px bg-line" aria-hidden="true" />
+  const sep = <span className="bg-line mx-0.5 h-4 w-px" aria-hidden="true" />
 
   // ô hỏi AI mở dưới phần tử (không che chữ đang sửa); phần tử gần đáy thì mở phía trên thanh
   const popStyle: React.CSSProperties =
     el.y + height > 70
-      ? { position: 'absolute', left: style.left, right: style.right, bottom: `calc(${100 - el.y}% + ${rotTop ? 84 : 52}px)`, zIndex: 51 }
-      : { position: 'absolute', left: style.left, right: style.right, top: `calc(${el.y + height}% + 10px)`, zIndex: 51 }
+      ? {
+          position: 'absolute',
+          left: style.left,
+          right: style.right,
+          bottom: `calc(${100 - el.y}% + ${rotTop ? 84 : 52}px)`,
+          zIndex: 51,
+        }
+      : {
+          position: 'absolute',
+          left: style.left,
+          right: style.right,
+          top: `calc(${el.y + height}% + 10px)`,
+          zIndex: 51,
+        }
 
   return (
     <>
-    <div
-      role="toolbar"
-      aria-label="Định dạng nhanh"
-      className="slide-sel-toolbar flex items-center gap-0.5 rounded-lg border border-line bg-surface p-1 shadow-[0_4px_16px_-4px_rgba(35,32,28,0.25)]"
-      style={style}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {onAskChat && (
-        <>
-          <button
-            type="button"
-            data-tip="Đính kèm phần tử này vào khung chat Trợ lý AI"
-            aria-label="Đưa vào chat"
-            className="flex h-7 shrink-0 items-center whitespace-nowrap gap-1 rounded-md px-2 text-[12px] font-semibold text-clay transition-colors hover:bg-paper-2"
-            onMouseDown={keep}
-            onClick={onAskChat}
-          >
-            <MessageSquarePlus className="size-3.5" />
-            Đưa vào chat
-          </button>
-          {sep}
-        </>
-      )}
-      {isText && onAskAi && (
-        <>
-          <button
-            type="button"
-            data-tip="Nhờ AI sửa ô chữ này"
-            aria-label="Hỏi AI"
-            aria-expanded={askOpen}
-            className={`flex h-7 shrink-0 items-center whitespace-nowrap gap-1 rounded-md px-2 text-[12px] font-semibold text-clay transition-colors hover:bg-paper-2 ${askOpen ? 'bg-paper-2' : ''}`}
-            onMouseDown={keep}
-            onClick={() => setAskOpen((v) => !v)}
-          >
-            <Sparkles className="size-3.5" />
-            Hỏi AI
-          </button>
-          {sep}
-        </>
-      )}
-      {(isText || (el.type === 'shape' && el.text?.trim() && el.shape !== 'line')) && (
-        <SlideTextEffectsTool el={el} accent={accent} onUpdate={onUpdate} />
-      )}
-      {el.type === 'shape' && el.shape !== 'line' && (
-        <>
-          {tool(el.text?.trim() ? 'Sửa chữ trong hình' : 'Thêm chữ vào hình', () => onEditText?.(), <Type className="size-3.5" />, Boolean(el.text?.trim()))}
-          {sep}
-        </>
-      )}
-      {el.type === 'shape' && (
-        <>
-          <ColorTool right={right} title="Màu tô" value={el.fill ?? accent} themeColors={[accent, fg]} onPick={(fill) => onUpdate({ fill })} />
-          <ShapeStyleTool right={right} el={el} themeColors={[accent, fg]} onUpdate={onUpdate} />
-          {sep}
-        </>
-      )}
-      {el.type === 'graphic' && (
-        <>
-          <ColorTool right={right} title="Màu nét" value={el.textColor ?? fg} themeColors={[fg, accent]} onPick={(textColor) => onUpdate({ textColor })} />
-          <ColorTool right={right} title="Màu chủ đạo" value={el.fill ?? graphicMainColor(el.graphicId)} themeColors={[accent, fg]} onPick={(fill) => onUpdate({ fill })} />
-        </>
-      )}
-      {el.type === 'icon' && <ColorTool right={right} title="Màu icon" value={el.textColor ?? accent} themeColors={[accent, fg]} onPick={(textColor) => onUpdate({ textColor })} />}
-      {(el.type === 'graphic' || el.type === 'icon') && (
-        <>
-          <ShapeStyleTool right={right} el={el} themeColors={[accent, fg]} onUpdate={onUpdate} />
-          {sep}
-        </>
-      )}
-      {tool('Nhân đôi (Ctrl+D)', onDuplicate, <Copy className="size-3.5" />)}
-      <LayerTool elements={elements} selectedId={el.id} onArrange={onArrange} onSelect={onSelectLayer} />
-      {tool(el.locked ? 'Mở khoá (Ctrl+Shift+L)' : 'Khoá vị trí (Ctrl+Shift+L)', () => onUpdate({ locked: el.locked ? undefined : true }), el.locked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />, Boolean(el.locked))}
-      {!el.locked && tool('Xoá', onDelete, <TrashIcon className="size-3.5" />)}
-    </div>
-    {askOpen && isText && (
       <div
-        role="dialog"
-        aria-label="Hỏi AI"
-        className="w-[300px] rounded-lg border border-line bg-surface p-2.5 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]"
-        style={popStyle}
+        role="toolbar"
+        aria-label="Định dạng nhanh"
+        className="slide-sel-toolbar border-line bg-surface flex items-center gap-0.5 rounded-lg border p-1 shadow-[0_4px_16px_-4px_rgba(35,32,28,0.25)]"
+        style={style}
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') setAskOpen(false)
-        }}
       >
-        <div className="flex flex-wrap gap-1.5">
-          {REWRITE_PRESETS.map((p) => (
+        {onAskChat && (
+          <>
             <button
-              key={p.label}
               type="button"
-              disabled={busy}
-              onClick={() => void send(p.ask)}
-              className="rounded-full border border-line px-2.5 py-1 text-[12px] text-ink-2 transition-colors hover:border-clay hover:text-clay disabled:opacity-40"
+              data-tip="Đính kèm phần tử này vào khung chat Trợ lý AI"
+              aria-label="Đưa vào chat"
+              className="text-clay hover:bg-paper-2 flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-[12px] font-semibold whitespace-nowrap transition-colors"
+              onMouseDown={keep}
+              onClick={onAskChat}
             >
-              {p.label}
+              <MessageSquarePlus className="size-3.5" />
+              Đưa vào chat
             </button>
-          ))}
-        </div>
-        <form
-          className="mt-2 flex gap-1.5"
-          onSubmit={(e) => {
-            e.preventDefault()
-            void send(ask)
+            {sep}
+          </>
+        )}
+        {isText && onAskAi && (
+          <>
+            <button
+              type="button"
+              data-tip="Nhờ AI sửa ô chữ này"
+              aria-label="Hỏi AI"
+              aria-expanded={askOpen}
+              className={`text-clay hover:bg-paper-2 flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-[12px] font-semibold whitespace-nowrap transition-colors ${askOpen ? 'bg-paper-2' : ''}`}
+              onMouseDown={keep}
+              onClick={() => setAskOpen((v) => !v)}
+            >
+              <Sparkles className="size-3.5" />
+              Hỏi AI
+            </button>
+            {sep}
+          </>
+        )}
+        {(isText || (el.type === 'shape' && el.text?.trim() && el.shape !== 'line')) && (
+          <SlideTextEffectsTool el={el} accent={accent} onUpdate={onUpdate} />
+        )}
+        {el.type === 'shape' && el.shape !== 'line' && (
+          <>
+            {tool(
+              el.text?.trim() ? 'Sửa chữ trong hình' : 'Thêm chữ vào hình',
+              () => onEditText?.(),
+              <Type className="size-3.5" />,
+              Boolean(el.text?.trim()),
+            )}
+            {sep}
+          </>
+        )}
+        {el.type === 'shape' && (
+          <>
+            <ColorTool
+              right={right}
+              title="Màu tô"
+              value={el.fill ?? accent}
+              themeColors={[accent, fg]}
+              onPick={(fill) => onUpdate({ fill })}
+            />
+            <ShapeStyleTool right={right} el={el} themeColors={[accent, fg]} onUpdate={onUpdate} />
+            {sep}
+          </>
+        )}
+        {el.type === 'graphic' && (
+          <>
+            <ColorTool
+              right={right}
+              title="Màu nét"
+              value={el.textColor ?? fg}
+              themeColors={[fg, accent]}
+              onPick={(textColor) => onUpdate({ textColor })}
+            />
+            <ColorTool
+              right={right}
+              title="Màu chủ đạo"
+              value={el.fill ?? graphicMainColor(el.graphicId)}
+              themeColors={[accent, fg]}
+              onPick={(fill) => onUpdate({ fill })}
+            />
+          </>
+        )}
+        {el.type === 'icon' && (
+          <ColorTool
+            right={right}
+            title="Màu icon"
+            value={el.textColor ?? accent}
+            themeColors={[accent, fg]}
+            onPick={(textColor) => onUpdate({ textColor })}
+          />
+        )}
+        {(el.type === 'graphic' || el.type === 'icon') && (
+          <>
+            <ShapeStyleTool right={right} el={el} themeColors={[accent, fg]} onUpdate={onUpdate} />
+            {sep}
+          </>
+        )}
+        {tool('Nhân đôi (Ctrl+D)', onDuplicate, <Copy className="size-3.5" />)}
+        <LayerTool
+          elements={elements}
+          selectedId={el.id}
+          onArrange={onArrange}
+          onSelect={onSelectLayer}
+        />
+        {tool(
+          el.locked ? 'Mở khoá (Ctrl+Shift+L)' : 'Khoá vị trí (Ctrl+Shift+L)',
+          () => onUpdate({ locked: el.locked ? undefined : true }),
+          el.locked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />,
+          Boolean(el.locked),
+        )}
+        {!el.locked && tool('Xoá', onDelete, <TrashIcon className="size-3.5" />)}
+      </div>
+      {askOpen && isText && (
+        <div
+          role="dialog"
+          aria-label="Hỏi AI"
+          className="border-line bg-surface w-[300px] rounded-lg border p-2.5 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]"
+          style={popStyle}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setAskOpen(false)
           }}
         >
-          <input
-            autoFocus
-            value={ask}
-            disabled={busy}
-            onChange={(e) => setAsk(e.target.value)}
-            placeholder="Hoặc gõ yêu cầu của bạn…"
-            className="min-w-0 flex-1 rounded-md border border-line px-2 py-1.5 text-[12.5px] outline-none focus:border-clay"
-          />
-          <button type="submit" disabled={busy || !ask.trim()} className="rounded-md bg-clay px-3 text-[12.5px] font-semibold text-white disabled:opacity-40">
-            Gửi
-          </button>
-        </form>
-        {busy && <div className="mt-2 text-[12px] text-ink-3">AI đang viết…</div>}
-        {error && (
-          <div role="alert" className="mt-2 rounded-md bg-clay-tint px-2 py-1.5 text-[12px] leading-snug text-clay-deep">
-            {error}
+          <div className="flex flex-wrap gap-1.5">
+            {REWRITE_PRESETS.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                disabled={busy}
+                onClick={() => void send(p.ask)}
+                className="border-line text-ink-2 hover:border-clay hover:text-clay rounded-full border px-2.5 py-1 text-[12px] transition-colors disabled:opacity-40"
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
-        )}
-      </div>
-    )}
+          <form
+            className="mt-2 flex gap-1.5"
+            onSubmit={(e) => {
+              e.preventDefault()
+              void send(ask)
+            }}
+          >
+            <input
+              autoFocus
+              value={ask}
+              disabled={busy}
+              onChange={(e) => setAsk(e.target.value)}
+              placeholder="Hoặc gõ yêu cầu của bạn…"
+              className="border-line focus:border-clay min-w-0 flex-1 rounded-md border px-2 py-1.5 text-[12.5px] outline-none"
+            />
+            <button
+              type="submit"
+              disabled={busy || !ask.trim()}
+              className="bg-clay rounded-md px-3 text-[12.5px] font-semibold text-white disabled:opacity-40"
+            >
+              Gửi
+            </button>
+          </form>
+          {busy && <div className="text-ink-3 mt-2 text-[12px]">AI đang viết…</div>}
+          {error && (
+            <div
+              role="alert"
+              className="bg-clay-tint text-clay-deep mt-2 rounded-md px-2 py-1.5 text-[12px] leading-snug"
+            >
+              {error}
+            </div>
+          )}
+        </div>
+      )}
     </>
   )
 }

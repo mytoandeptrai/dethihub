@@ -5,11 +5,28 @@ import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { NavPanel } from './NavPanel'
 
 beforeAll(() => {
-  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
-  window.matchMedia ??= vi.fn().mockReturnValue({ matches: true, addEventListener() {}, removeEventListener() {} })
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  )
+  window.matchMedia ??= vi
+    .fn()
+    .mockReturnValue({ matches: true, addEventListener() {}, removeEventListener() {} })
 })
 
-const props = { doc: { type: 'doc', content: [] }, open: true, onOpenChange: vi.fn(), onInsertTemplate: vi.fn(), onGoToBlock: vi.fn(), onInsertPlot: vi.fn(), inspectorContent: <p>Inspector content</p> }
+const props = {
+  doc: { type: 'doc', content: [] },
+  open: true,
+  onOpenChange: vi.fn(),
+  onInsertTemplate: vi.fn(),
+  onGoToBlock: vi.fn(),
+  onInsertPlot: vi.fn(),
+  inspectorContent: <p>Inspector content</p>,
+}
 
 describe('inspector navigation', () => {
   it('adds the desktop tab and renders inspector content', () => {
@@ -31,6 +48,9 @@ describe('inspector navigation', () => {
     expect(source).toHaveAttribute('draggable', 'true')
     const dataTransfer = { setData: vi.fn(), effectAllowed: '' }
     fireEvent.dragStart(source, { dataTransfer })
-    expect(dataTransfer.setData).toHaveBeenCalledWith('application/x-exam-block', expect.stringContaining('examHeader'))
+    expect(dataTransfer.setData).toHaveBeenCalledWith(
+      'application/x-exam-block',
+      expect.stringContaining('examHeader'),
+    )
   })
 })

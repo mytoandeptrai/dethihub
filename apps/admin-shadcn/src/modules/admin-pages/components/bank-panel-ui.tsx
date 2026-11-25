@@ -1,5 +1,4 @@
 'use client'
-import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import {
   data_bankLevel_LEVEL_LABEL as LEVEL_LABEL,
   data_types_GRADES as METADATA_GRADES,
@@ -27,6 +26,7 @@ import {
 import Image from 'next/image'
 
 import { MathText, QuestionImageField } from '@/components/online-exams-kernel'
+import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import {
   SiteBadge as Badge,
   SiteButton as Button,
@@ -345,7 +345,9 @@ export function BankPanelBankPanelUi(
         </Toolbar>
 
         {loading ? (
-          <LoadingRegion><CardGridSkeleton /></LoadingRegion>
+          <LoadingRegion>
+            <CardGridSkeleton />
+          </LoadingRegion>
         ) : filteredItems.length === 0 ? (
           <EmptyState
             icon={<BookOpen className="text-ink-4 size-8" />}

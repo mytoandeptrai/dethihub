@@ -1,10 +1,10 @@
 'use client'
-import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import dynamic from 'next/dynamic'
 
+import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import { t } from '@/i18n/translate'
-import { Card } from '@/modules/public-pages/components/public-primitives-ui'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
+import { Card } from '@/modules/public-pages/components/public-primitives-ui'
 
 import type { useDesignsContainer } from '@/modules/public-pages/hooks'
 const SlideThumb = dynamic(() => import('@engine-designs').then((m) => m.SlideThumb), {
@@ -30,7 +30,9 @@ export default function PreviewDesignsUi({
           description=""
         />
         {!ready && (
-          <LoadingRegion><CardGridSkeleton /></LoadingRegion>
+          <LoadingRegion>
+            <CardGridSkeleton />
+          </LoadingRegion>
         )}
         {error && <p role="alert">{t('common.networkError')}</p>}
 

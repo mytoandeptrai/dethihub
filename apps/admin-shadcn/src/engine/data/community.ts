@@ -79,7 +79,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: '$10$' },
             ],
             answer: 'C',
-            explanation: '$\\dfrac{\\sqrt{50}}{\\sqrt{2}} = \\sqrt{\\dfrac{50}{2}} = \\sqrt{25} = 5$.',
+            explanation:
+              '$\\dfrac{\\sqrt{50}}{\\sqrt{2}} = \\sqrt{\\dfrac{50}{2}} = \\sqrt{25} = 5$.',
             points: 0.25,
           },
           {
@@ -155,7 +156,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: '$-\\dfrac{1}{3}$' },
             ],
             answer: 'D',
-            explanation: 'Hai đường thẳng vuông góc có tích hai hệ số góc bằng $-1$: $3 \\cdot k = -1$.',
+            explanation:
+              'Hai đường thẳng vuông góc có tích hai hệ số góc bằng $-1$: $3 \\cdot k = -1$.',
             points: 0.25,
           },
           {
@@ -170,15 +172,15 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: '$(-\\infty; +\\infty)$' },
             ],
             answer: 'A',
-            explanation: 'Trên khoảng bên trái trục tung, $x$ tăng thì $x^2$ giảm nên hàm số nghịch biến.',
+            explanation:
+              'Trên khoảng bên trái trục tung, $x$ tăng thì $x^2$ giảm nên hàm số nghịch biến.',
             points: 0.25,
           },
           {
             id: 'ct-toan-9-2026-s1-q11',
             number: 11,
             type: 'trac-nghiem',
-            prompt:
-              'Giao điểm của hai đường thẳng $y = x + 2$ và $y = -2x + 1$ có tọa độ:',
+            prompt: 'Giao điểm của hai đường thẳng $y = x + 2$ và $y = -2x + 1$ có tọa độ:',
             options: [
               { key: 'A', text: '$(1; 3)$' },
               { key: 'B', text: '$(-1; 1)$' },
@@ -202,15 +204,15 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: '$1$' },
             ],
             answer: 'C',
-            explanation: '$\\Delta = (-2)^2 - 4 \\cdot 1 \\cdot 5 = -16 < 0$ nên phương trình vô nghiệm.',
+            explanation:
+              '$\\Delta = (-2)^2 - 4 \\cdot 1 \\cdot 5 = -16 < 0$ nên phương trình vô nghiệm.',
             points: 0.25,
           },
           {
             id: 'ct-toan-9-2026-s1-q13',
             number: 13,
             type: 'trac-nghiem',
-            prompt:
-              'Hệ phương trình gồm hai phương trình $x + y = 5$ và $x - y = 1$ có nghiệm là:',
+            prompt: 'Hệ phương trình gồm hai phương trình $x + y = 5$ và $x - y = 1$ có nghiệm là:',
             options: [
               { key: 'A', text: '$(3; 2)$' },
               { key: 'B', text: '$(2; 3)$' },
@@ -357,10 +359,11 @@ export const COMMUNITY_EXAMS: Exam[] = [
             type: 'tu-luan',
             prompt:
               "Cho hai đường thẳng $(d): y = -2x + 5$ và $(d'): y = 3x - 1$. a) Tìm tọa độ giao điểm $I$ của $(d)$ và $(d')$. b) Viết phương trình đường thẳng $(d'')$ đi qua $I$ và song song với trục hoành.",
-            answer: "$I\\left(\\dfrac{6}{5};\\dfrac{13}{5}\\right)$ và $(d''): y = \\dfrac{13}{5}$.",
+            answer:
+              "$I\\left(\\dfrac{6}{5};\\dfrac{13}{5}\\right)$ và $(d''): y = \\dfrac{13}{5}$.",
             solution: [
               'Giao điểm thỏa mãn: $-2x + 5 = 3x - 1 \\Rightarrow 5x = 6 \\Rightarrow x = \\dfrac{6}{5}$.',
-              "Thay vào $(d)$: $y = -2 \\cdot \\dfrac{6}{5} + 5 = \\dfrac{13}{5}$, suy ra $I\\left(\\dfrac{6}{5};\\dfrac{13}{5}\\right)$.",
+              'Thay vào $(d)$: $y = -2 \\cdot \\dfrac{6}{5} + 5 = \\dfrac{13}{5}$, suy ra $I\\left(\\dfrac{6}{5};\\dfrac{13}{5}\\right)$.',
               'Đường thẳng song song với trục hoành có dạng $y = c$, tức hệ số góc bằng $0$.',
               "Do $(d'')$ đi qua $I$ nên $c = \\dfrac{13}{5}$, vậy $(d''): y = \\dfrac{13}{5}$.",
             ],
@@ -544,7 +547,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: '$e^{-\\cos x} + C$' },
             ],
             answer: 'B',
-            explanation: "$(\\cos x)' = -\\sin x$ nên $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.",
+            explanation:
+              "$(\\cos x)' = -\\sin x$ nên $\\int \\sin x\\,\\mathrm{d}x = -\\cos x + C$.",
             points: 0.5,
           },
           {
@@ -612,8 +616,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             solution: [
               'Điều kiện xác định: $x + 1 \\ne 0 \\Rightarrow x \\ne -1$, suy ra $D = \\mathbb{R} \\setminus \\{-1\\}$.',
               "Áp dụng công thức đạo hàm của thương: $y' = \\dfrac{2(x + 1) - (2x - 1)}{(x + 1)^2}$.",
-              'Tử số: $2x + 2 - 2x + 1 = 3$, suy ra $y\' = \\dfrac{3}{(x + 1)^2}$.',
-              'Vì $3 > 0$ và $(x + 1)^2 > 0$ với mọi $x \\ne -1$ nên $y\' > 0$ trên $D$, hàm số đồng biến trên mỗi khoảng $(-\\infty; -1)$ và $(-1; +\\infty)$.',
+              "Tử số: $2x + 2 - 2x + 1 = 3$, suy ra $y' = \\dfrac{3}{(x + 1)^2}$.",
+              "Vì $3 > 0$ và $(x + 1)^2 > 0$ với mọi $x \\ne -1$ nên $y' > 0$ trên $D$, hàm số đồng biến trên mỗi khoảng $(-\\infty; -1)$ và $(-1; +\\infty)$.",
             ],
             explanation:
               'Tính đạo hàm theo công thức thương và luôn kèm điều kiện xác định khi mẫu chứa biểu thức tuyến tính của $x$.',
@@ -623,7 +627,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             id: 'ct-toan-12-2026-s2-q2',
             number: 2,
             type: 'tu-luan',
-            prompt: 'Tính tích phân $\\displaystyle I = \\int_0^1 \\dfrac{x^3 + 1}{x + 1}\\,\\mathrm{d}x$.',
+            prompt:
+              'Tính tích phân $\\displaystyle I = \\int_0^1 \\dfrac{x^3 + 1}{x + 1}\\,\\mathrm{d}x$.',
             answer: '$I = \\dfrac{5}{6}$.',
             solution: [
               'Phân tích nhân tử: $x^3 + 1 = (x + 1)(x^2 - x + 1)$ với $x \\ne -1$.',
@@ -641,8 +646,7 @@ export const COMMUNITY_EXAMS: Exam[] = [
             type: 'tu-luan',
             prompt:
               'Tìm giá trị lớn nhất của hàm số $f(x) = x - \\dfrac{1}{x}$ trên đoạn $[1; 2]$.',
-            answer:
-              'Giá trị lớn nhất là $\\dfrac{3}{2}$, đạt tại $x = 2$.',
+            answer: 'Giá trị lớn nhất là $\\dfrac{3}{2}$, đạt tại $x = 2$.',
             solution: [
               'Hàm số xác định với $x \\ne 0$, nên trên đoạn $[1; 2]$ hàm số xác định liên tục.',
               "$f'(x) = 1 + \\dfrac{1}{x^2} > 0$ với mọi $x \\in [1; 2]$, do đó $f$ đồng biến trên đoạn này.",
@@ -722,7 +726,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: '$60\,\text{kg/m}^3$' },
             ],
             answer: 'A',
-            explanation: '$\rho = \dfrac{m}{V} = \dfrac{1{,}8}{3 \cdot 10^{-3}} = 600\,\text{kg/m}^3$.',
+            explanation:
+              '$\rho = \dfrac{m}{V} = \dfrac{1{,}8}{3 \cdot 10^{-3}} = 600\,\text{kg/m}^3$.',
             points: 0.5,
           },
           {
@@ -886,7 +891,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             type: 'tu-luan',
             prompt:
               'Một ô tô khởi hành từ trạng thái đứng yên trên đường thẳng với gia tốc không đổi $a = 2\,\text{m/s}^2$. a) Tính vận tốc của ô tô sau $10\,\text{s}$. b) Tính quãng đường ô tô đi được trong $10\,\text{s}$ đầu. c) Tính quãng đường ô tô đi được trong $5\,\text{s}$ đầu.',
-            answer: 'a) $v = 20\,\text{m/s}$; b) $s_{10} = 100\,\text{m}$; c) $s_{5} = 25\,\text{m}$.',
+            answer:
+              'a) $v = 20\,\text{m/s}$; b) $s_{10} = 100\,\text{m}$; c) $s_{5} = 25\,\text{m}$.',
             solution: [
               'Áp dụng công thức vận tốc: $v = v_0 + at = 0 + 2 \cdot 10 = 20\,\text{m/s}$.',
               'Quãng đường trong $10\,\text{s}$ đầu: $s = v_0t + \dfrac{1}{2}at^2 = 0 + \dfrac{1}{2} \cdot 2 \cdot 10^2 = 100\,\text{m}$.',
@@ -903,7 +909,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             type: 'tu-luan',
             prompt:
               'Một vật có khối lượng $m = 5\,\text{kg}$ nằm trên mặt phẳng ngang, có hệ số ma sát $\mu = 0{,}2$. Người ta kéo vật bằng lực ngang $F = 20\,\text{N}$ (lấy $g = 10\,\text{m/s}^2$). a) Tính lực ma sát. b) Tính gia tốc của vật. c) Sau $5\,\text{s}$ vật có vận tốc và quãng đường bao nhiêu?',
-            answer: 'a) $f = 10\,\text{N}$; b) $a = 2\,\text{m/s}^2$; c) $v = 10\,\text{m/s}$ và $s = 25\,\text{m}$.',
+            answer:
+              'a) $f = 10\,\text{N}$; b) $a = 2\,\text{m/s}^2$; c) $v = 10\,\text{m/s}$ và $s = 25\,\text{m}$.',
             solution: [
               'Lực ma sát: $f = \mu N = \mu mg = 0{,}2 \cdot 5 \cdot 10 = 10\,\text{N}$.',
               'Lực tổng hợp theo phương ngang: $F_{t} = F - f = 20 - 10 = 10\,\text{N}$.',
@@ -917,7 +924,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
         ],
       },
     ],
-  },  {
+  },
+  {
     id: 'ct-hoahoc-8-2026',
     title: 'Đề thi môn Hoá học lớp 8 học kỳ II năm học 2025 - 2026',
     subject: 'Hoá học',
@@ -1123,9 +1131,18 @@ export const COMMUNITY_EXAMS: Exam[] = [
             prompt:
               'Nhiệt lượng riêng của nước là $4200\,\text{J/(kg}\cdot{}^\circ\text{C)}$. Ý nghĩa của câu này là:',
             options: [
-              { key: 'A', text: 'Nóng $1\,\text{kg}$ nước lên $1^\circ\text{C}$ cần $4200\,\text{J}$' },
-              { key: 'B', text: 'Nóng $1\,\text{kg}$ nước lên $10^\circ\text{C}$ cần $4200\,\text{J}$' },
-              { key: 'C', text: 'Nóng $4200\,\text{kg}$ nước lên $1^\circ\text{C}$ cần $1\,\text{J}$' },
+              {
+                key: 'A',
+                text: 'Nóng $1\,\text{kg}$ nước lên $1^\circ\text{C}$ cần $4200\,\text{J}$',
+              },
+              {
+                key: 'B',
+                text: 'Nóng $1\,\text{kg}$ nước lên $10^\circ\text{C}$ cần $4200\,\text{J}$',
+              },
+              {
+                key: 'C',
+                text: 'Nóng $4200\,\text{kg}$ nước lên $1^\circ\text{C}$ cần $1\,\text{J}$',
+              },
               { key: 'D', text: 'Làm $1\,\text{kg}$ nước đông đá cần $4200\,\text{J}$' },
             ],
             answer: 'A',
@@ -1177,7 +1194,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
         ],
       },
     ],
-  },  {
+  },
+  {
     id: 'ct-nguvan-9-2026',
     title: 'Đề thi môn Ngữ văn lớp 9 học kỳ II năm học 2025 - 2026',
     subject: 'Ngữ văn',
@@ -1317,7 +1335,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
         ],
       },
     ],
-  },  {
+  },
+  {
     id: 'ct-tienganh-8-2026',
     title: 'Đề thi môn Tiếng Anh lớp 8 học kỳ II năm học 2025 - 2026',
     subject: 'Tiếng Anh',
@@ -1342,7 +1361,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             id: 'ct-tienganh-8-2026-s1-q1',
             number: 1,
             type: 'trac-nghiem',
-            prompt: 'Choose the word whose underlined part is pronounced differently from the others:',
+            prompt:
+              'Choose the word whose underlined part is pronounced differently from the others:',
             options: [
               { key: 'A', text: 'c<u>a</u>ke' },
               { key: 'B', text: 'n<u>a</u>me' },
@@ -1358,7 +1378,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             id: 'ct-tienganh-8-2026-s1-q2',
             number: 2,
             type: 'trac-nghiem',
-            prompt: 'Choose the word whose underlined part is pronounced differently from the others:',
+            prompt:
+              'Choose the word whose underlined part is pronounced differently from the others:',
             options: [
               { key: 'A', text: 'b<u>o</u>ok' },
               { key: 'B', text: 'c<u>o</u>ok' },
@@ -1478,8 +1499,7 @@ export const COMMUNITY_EXAMS: Exam[] = [
               { key: 'D', text: "can't" },
             ],
             answer: 'B',
-            explanation:
-              '"Shouldn\'t" expresses advice against doing something that is dangerous.',
+            explanation: '"Shouldn\'t" expresses advice against doing something that is dangerous.',
             points: 0.5,
           },
           {
@@ -1534,7 +1554,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             id: 'ct-tienganh-8-2026-s1-q13',
             number: 13,
             type: 'trac-nghiem',
-            prompt: 'Choose the correct passive voice: People build many wooden houses in this village.',
+            prompt:
+              'Choose the correct passive voice: People build many wooden houses in this village.',
             options: [
               { key: 'A', text: 'Many wooden houses are built in this village.' },
               { key: 'B', text: 'Many wooden houses were built in this village.' },
@@ -1606,7 +1627,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
         ],
       },
     ],
-  },  {
+  },
+  {
     id: 'ct-lichsu-8-2026',
     title: 'Đề thi môn Lịch sử lớp 8 học kỳ II năm học 2025 - 2026',
     subject: 'Lịch sử',
@@ -1745,7 +1767,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
         ],
       },
     ],
-  },  {
+  },
+  {
     id: 'ct-tinhoc-7-2026',
     title: 'Đề thi môn Tin học lớp 7 học kỳ II năm học 2025 - 2026',
     subject: 'Tin học',
@@ -1898,7 +1921,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             id: 'ct-tinhoc-7-2026-s1-q9',
             number: 9,
             type: 'trac-nghiem',
-            prompt: 'Trong phần mềm soạn thảo văn bản, thao tác "cắt" (cut) nội dung được thực hiện bằng:',
+            prompt:
+              'Trong phần mềm soạn thảo văn bản, thao tác "cắt" (cut) nội dung được thực hiện bằng:',
             options: [
               { key: 'A', text: 'Tổ hợp phím Ctrl + X' },
               { key: 'B', text: 'Tổ hợp phím Ctrl + C' },
@@ -1930,7 +1954,8 @@ export const COMMUNITY_EXAMS: Exam[] = [
             id: 'ct-tinhoc-7-2026-s1-q11',
             number: 11,
             type: 'trac-nghiem',
-            prompt: 'Một tệp tin có tên "Bai tap.docx" được lưu trong ổ đĩa D. Ký hiệu đầy đủ của đường dẫn tới tệp đó là:',
+            prompt:
+              'Một tệp tin có tên "Bai tap.docx" được lưu trong ổ đĩa D. Ký hiệu đầy đủ của đường dẫn tới tệp đó là:',
             options: [
               { key: 'A', text: 'D:\\Bai tap.docx' },
               { key: 'B', text: 'D:/Bai tap.docx' },
@@ -1948,7 +1973,10 @@ export const COMMUNITY_EXAMS: Exam[] = [
             type: 'trac-nghiem',
             prompt: 'Câu nào nói đúng về thư mục "Tài liệu" (Documents)?',
             options: [
-              { key: 'A', text: 'Là nơi lưu trữ các tệp văn bản, hình ảnh, âm thanh do người dùng tạo' },
+              {
+                key: 'A',
+                text: 'Là nơi lưu trữ các tệp văn bản, hình ảnh, âm thanh do người dùng tạo',
+              },
               { key: 'B', text: 'Là nơi lưu trữ chương trình đang chạy' },
               { key: 'C', text: 'Chỉ chứa các tệp có tên tiếng Anh' },
               { key: 'D', text: 'Không thể sao chép hay di chuyển tệp trong đó' },

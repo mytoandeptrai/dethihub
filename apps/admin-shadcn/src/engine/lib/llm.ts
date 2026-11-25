@@ -4,6 +4,7 @@
  */
 import { streamChat } from '@/apis/ai/requests'
 import { ApiClientError } from '@/lib/api-error'
+
 import type { components } from '@workspace/api-types'
 export interface LlmMessage {
   role: 'system' | 'user' | 'assistant'
@@ -50,7 +51,6 @@ export interface LlmProgress {
   text: string
 }
 
-
 /** Hạn mức AI server báo về (token; giao diện quy ra điểm). */
 export interface AiQuota {
   used: number
@@ -59,13 +59,15 @@ export interface AiQuota {
 }
 /** 1 điểm AI = 1.000 token (khớp TOKENS_PER_POINT ở server/aiQuota.ts) */
 export const TOKENS_PER_POINT = 1000
-export const aiPointsLeft = (q: AiQuota) => Math.max(0, Math.floor((q.limit - q.used) / TOKENS_PER_POINT))
+export const aiPointsLeft = (q: AiQuota) =>
+  Math.max(0, Math.floor((q.limit - q.used) / TOKENS_PER_POINT))
 /** Lần báo gần nhất + sự kiện `ai-quota` để giao diện cập nhật. */
 export let lastAiQuota: AiQuota | null = null
 export function reportQuota(q: unknown) {
   if (!q || typeof q !== 'object' || typeof (q as AiQuota).limit !== 'number') return
   lastAiQuota = q as AiQuota
-  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent<AiQuota>('ai-quota', { detail: lastAiQuota }))
+  if (typeof window !== 'undefined')
+    window.dispatchEvent(new CustomEvent<AiQuota>('ai-quota', { detail: lastAiQuota }))
 }
 
 /** Không đủ điểm AI cho yêu cầu (server trả 429 kèm code "quota"): giao diện mời nạp điểm. */
@@ -106,15 +108,29 @@ async function callOnce(messages: LlmMessage[], opts: LlmOptions): Promise<LlmRe
   let final: (LlmResult & { quota?: unknown }) | undefined
   try {
     for await (const event of streamChat(body, opts.signal, opts.retryOf)) {
-      const value = JSON.parse(event.data) as Partial<LlmResult> & { type?: string; c?: string; d?: string; error?: string; detail?: string; status?: number; quota?: unknown }
+      const value = JSON.parse(event.data) as Partial<LlmResult> & {
+        type?: string
+        c?: string
+        d?: string
+        error?: string
+        detail?: string
+        status?: number
+        quota?: unknown
+      }
       if (value.type === 'delta') {
         text += value.c ?? ''
         opts.onProgress?.({ phase: 'write', thought: thinking.length, thinking, text })
       } else if (value.type === 'think') {
         thinking += value.d ?? ''
-        opts.onProgress?.({ phase: text ? 'write' : 'think', thought: thinking.length, thinking, text })
+        opts.onProgress?.({
+          phase: text ? 'write' : 'think',
+          thought: thinking.length,
+          thinking,
+          text,
+        })
       } else if (value.type === 'retry') {
-        text = ''; thinking = ''
+        text = ''
+        thinking = ''
         opts.onProgress?.({ phase: 'retry', thought: 0, thinking, text })
       } else if (value.type === 'done') final = value as LlmResult & { quota?: unknown }
       else if (value.type === 'error') {
@@ -123,12 +139,16 @@ async function callOnce(messages: LlmMessage[], opts: LlmOptions): Promise<LlmRe
       }
     }
   } catch (error) {
-    if (error instanceof ApiClientError && error.status === 429 && /quota/i.test(error.code ?? '')) throw new AiQuotaError(error.message)
+    if (error instanceof ApiClientError && error.status === 429 && /quota/i.test(error.code ?? ''))
+      throw new AiQuotaError(error.message)
     throw error
   }
   if (!final) throw new Error('Kết nối tới AI bị ngắt giữa chừng')
   reportQuota(final.quota)
-  if (!final.content?.trim()) throw new Error('AI không trả về nội dung (có thể do suy luận quá dài bị cắt). Hãy thử lại hoặc rút gọn yêu cầu.')
+  if (!final.content?.trim())
+    throw new Error(
+      'AI không trả về nội dung (có thể do suy luận quá dài bị cắt). Hãy thử lại hoặc rút gọn yêu cầu.',
+    )
   return final
 }
 

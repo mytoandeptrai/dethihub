@@ -69,14 +69,21 @@ export function parseScene(text: string): { pts: Map<string, P>; cmds: Cmd[] } {
   const cmds: Cmd[] = []
   const lines = text.split('\n')
   // lượt 1: điểm (để lệnh viết trước điểm vẫn đọc được)
-  const pointRe = new RegExp(String.raw`([A-Z_][A-Za-z0-9_']*)\s*\(\s*${NUM}\s*;\s*${NUM}\s*\)`, 'g')
+  const pointRe = new RegExp(
+    String.raw`([A-Z_][A-Za-z0-9_']*)\s*\(\s*${NUM}\s*;\s*${NUM}\s*\)`,
+    'g',
+  )
   lines.forEach((l) => {
     for (const m of l.matchAll(pointRe)) pts.set(m[1], [toNum(m[2]), toNum(m[3])])
   })
   if (pts.size < 2) throw new Error('Cần ít nhất 2 điểm, vd. A(0; 0) B(4; 0)')
   lines.forEach((raw, idx) => {
     const line = idx + 1
-    const l = raw.replace(pointRe, '').trim().replace(/^[,;]+|[,;]+$/g, '').trim()
+    const l = raw
+      .replace(pointRe, '')
+      .trim()
+      .replace(/^[,;]+|[,;]+$/g, '')
+      .trim()
     if (!l) return
     const quoted = l.match(/"([^"]*)"|“([^”]*)”/)
     const q = quoted ? (quoted[1] ?? quoted[2] ?? '') : ''
@@ -98,7 +105,8 @@ export function parseScene(text: string): { pts: Map<string, P>; cmds: Cmd[] } {
       // vật chưa có trong kho: bỏ dòng này, phần hình học vẫn vẽ (đừng để cả hình hỏng vì một hình minh hoạ)
       const id = resolveSpriteId(spr[1])
       const n = splitNames(spr[2], pts, line)
-      if (n.length > 2) throw new Error(`Dòng ${line}: hình vật cần 1 điểm (đặt tại) hoặc 2 điểm (chân, đỉnh)`)
+      if (n.length > 2)
+        throw new Error(`Dòng ${line}: hình vật cần 1 điểm (đặt tại) hoặc 2 điểm (chân, đỉnh)`)
       if (id) cmds.push({ t: 'sprite', id, name: spr[1], a: n[0], b: n[1] })
     } else if (m && /^(kích thước|kt)$/.test(kw)) {
       const [a, b] = two(m[2])
@@ -132,18 +140,28 @@ export function parseScene(text: string): { pts: Map<string, P>; cmds: Cmd[] } {
   return { pts, cmds }
 }
 
-export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderSceneSvg(
+  spec: SceneSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const { pts, cmds } = parseScene(spec.text)
   const px = [...pts.values()].map((p) => p[0])
   const py = [...pts.values()].map((p) => p[1])
   // cạnh của góc mà AI quên vẽ (thiếu "đất AB"…) thì tự vẽ, không thì cung góc lơ lửng
   const drawn = (a: string, b: string) =>
     cmds.some((c) =>
-      (c.t === 'seg' || c.t === 'ground') ? (c.a === a && c.b === b) || (c.a === b && c.b === a)
-      : c.t === 'poly' && c.names.some((n, i) => { const m = c.names[(i + 1) % c.names.length]; return (n === a && m === b) || (n === b && m === a) }))
+      c.t === 'seg' || c.t === 'ground'
+        ? (c.a === a && c.b === b) || (c.a === b && c.b === a)
+        : c.t === 'poly' &&
+          c.names.some((n, i) => {
+            const m = c.names[(i + 1) % c.names.length]
+            return (n === a && m === b) || (n === b && m === a)
+          }),
+    )
   for (const c of [...cmds]) {
     if (c.t !== 'angle' && c.t !== 'right') continue
-    for (const x of [c.a, c.b]) if (!drawn(c.o, x)) cmds.push({ t: 'seg', a: c.o, b: x, dashed: false })
+    for (const x of [c.a, c.b])
+      if (!drawn(c.o, x)) cmds.push({ t: 'seg', a: c.o, b: x, dashed: false })
   }
   // thang (vật nghiêng) mà AI quên vẽ tường: đỉnh thang nằm thẳng trên một điểm có tên ở mặt đất → tự dựng tường + góc vuông,
   // không thì thang dựa vào khoảng không
@@ -154,11 +172,20 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
       if (c.t !== 'sprite' || c.id !== 'ladder' || !c.b) continue
       const foot = pts.get(c.a)!
       const top = pts.get(c.b)!
-      const base = [...pts].find(([nm, p]) => nm !== c.a && nm !== c.b && !nm.startsWith('_') && Math.abs(p[0] - top[0]) <= tol && Math.abs(p[1] - foot[1]) <= tol && top[1] > p[1])
+      const base = [...pts].find(
+        ([nm, p]) =>
+          nm !== c.a &&
+          nm !== c.b &&
+          !nm.startsWith('_') &&
+          Math.abs(p[0] - top[0]) <= tol &&
+          Math.abs(p[1] - foot[1]) <= tol &&
+          top[1] > p[1],
+      )
       if (!base) continue
       const [w] = base
       if (!drawn(w, c.b)) cmds.push({ t: 'ground', a: w, b: c.b, wall: true })
-      if (!cmds.some((g) => g.t === 'right' && g.o === w)) cmds.push({ t: 'right', a: c.a, o: w, b: c.b })
+      if (!cmds.some((g) => g.t === 'right' && g.o === w))
+        cmds.push({ t: 'right', a: c.a, o: w, b: c.b })
     }
   }
   // nhiều góc chung một đỉnh (vd. góc nâng 40° và 50° cùng nhìn từ D): góc nhỏ ở trong, góc lớn ở ngoài, bán kính tăng dần
@@ -173,12 +200,15 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
   }
   const ring = new Map<Cmd, number>()
   for (const o of new Set(cmds.flatMap((g) => (g.t === 'angle' ? [g.o] : [])))) {
-    const group = cmds.filter((g): g is Extract<Cmd, { t: 'angle' }> => g.t === 'angle' && g.o === o)
+    const group = cmds.filter(
+      (g): g is Extract<Cmd, { t: 'angle' }> => g.t === 'angle' && g.o === o,
+    )
     group.sort((x, y) => angleSize(x) - angleSize(y)).forEach((g, i) => ring.set(g, i))
   }
 
   // hình vật: hình chữ nhật (đơn vị của hình) — chân giữa cạnh dưới, xoay theo hướng chân → đỉnh
-  const ptSpan = Math.max(Math.max(...py) - Math.min(...py), (Math.max(...px) - Math.min(...px)) * 0.5) || 1
+  const ptSpan =
+    Math.max(Math.max(...py) - Math.min(...py), (Math.max(...px) - Math.min(...px)) * 0.5) || 1
   // tâm các điểm có tên (điểm ẩn "_" thường là mép mặt đất kéo dài, không tính)
   const named = [...pts].filter(([nm]) => !nm.startsWith('_')).map(([, p]) => p)
   const ptCx = named.reduce((s, p) => s + p[0], 0) / (named.length || 1)
@@ -204,8 +234,12 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
         const my = (foot[1] + top[1]) / 2 - ptCy
         let sgn = mx * n[0] + my * n[1] >= 0 ? 1 : -1
         // có góc ở chân/đỉnh vật nhận đoạn này làm cạnh: lệch về phía không có góc, kẻo thân vật đè cung góc
-        const ang = cmds.find((g): g is Extract<Cmd, { t: 'angle' }> =>
-          g.t === 'angle' && (g.o === c.a || g.o === c.b) && [g.a, g.b].includes(g.o === c.a ? c.b! : c.a))
+        const ang = cmds.find(
+          (g): g is Extract<Cmd, { t: 'angle' }> =>
+            g.t === 'angle' &&
+            (g.o === c.a || g.o === c.b) &&
+            [g.a, g.b].includes(g.o === c.a ? c.b! : c.a),
+        )
         if (ang) {
           const o = pts.get(ang.o)!
           const other = pts.get(ang.a === (ang.o === c.a ? c.b : c.a) ? ang.b : ang.a)!
@@ -243,7 +277,8 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
   const cy = [...pts.values()].reduce((s, p) => s + S(p)[1], 0) / pts.size
 
   let b = `<defs><marker id="scarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111"/></marker></defs>`
-  const line = (p: P, q: P, extra = '') => `<path d="M${f1(p[0])} ${f1(p[1])}L${f1(q[0])} ${f1(q[1])}" stroke="#111" fill="none" ${extra}/>`
+  const line = (p: P, q: P, extra = '') =>
+    `<path d="M${f1(p[0])} ${f1(p[1])}L${f1(q[0])} ${f1(q[1])}" stroke="#111" fill="none" ${extra}/>`
   const text = (x: number, y: number, s: string, anchor = 'middle', size = 15, lbl?: string) =>
     `<text x="${f1(x)}" y="${f1(y)}" ${FAM} font-size="${size}"${lbl ? ` data-lbl="${lbl}"` : ''} text-anchor="${anchor}">${esc(s)}</text>`
   /** pháp tuyến đơn vị của PQ hướng ra xa tâm hình */
@@ -295,16 +330,27 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
 
   for (const c of cmds) {
     if (c.t === 'poly') {
-      const d = c.names.map((n, i) => `${i ? 'L' : 'M'}${f1(at(n)[0])} ${f1(at(n)[1])}`).join('') + 'Z'
+      const d =
+        c.names.map((n, i) => `${i ? 'L' : 'M'}${f1(at(n)[0])} ${f1(at(n)[1])}`).join('') + 'Z'
       b += `<path d="${d}" stroke="#111" fill="none" stroke-width="1.6" stroke-linejoin="round"/>`
     } else if (c.t === 'seg') {
-      b += line(at(c.a), at(c.b), c.dashed ? 'stroke-width="1.2" stroke-dasharray="5 4"' : 'stroke-width="1.6"')
+      b += line(
+        at(c.a),
+        at(c.b),
+        c.dashed ? 'stroke-width="1.2" stroke-dasharray="5 4"' : 'stroke-width="1.6"',
+      )
     } else if (c.t === 'right') {
       const o = at(c.o)
       const ua = at(c.a)
       const ub = at(c.b)
-      const da: P = [(ua[0] - o[0]) / (Math.hypot(ua[0] - o[0], ua[1] - o[1]) || 1), (ua[1] - o[1]) / (Math.hypot(ua[0] - o[0], ua[1] - o[1]) || 1)]
-      const db: P = [(ub[0] - o[0]) / (Math.hypot(ub[0] - o[0], ub[1] - o[1]) || 1), (ub[1] - o[1]) / (Math.hypot(ub[0] - o[0], ub[1] - o[1]) || 1)]
+      const da: P = [
+        (ua[0] - o[0]) / (Math.hypot(ua[0] - o[0], ua[1] - o[1]) || 1),
+        (ua[1] - o[1]) / (Math.hypot(ua[0] - o[0], ua[1] - o[1]) || 1),
+      ]
+      const db: P = [
+        (ub[0] - o[0]) / (Math.hypot(ub[0] - o[0], ub[1] - o[1]) || 1),
+        (ub[1] - o[1]) / (Math.hypot(ub[0] - o[0], ub[1] - o[1]) || 1),
+      ]
       const s = 10
       const p1: P = [o[0] + da[0] * s, o[1] + da[1] * s]
       const p2: P = [p1[0] + db[0] * s, p1[1] + db[1] * s]
@@ -327,7 +373,14 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
       if (c.text) {
         const mid = a1 + d / 2
         const rl = r + 14
-        b += text(o[0] + rl * Math.cos(mid), o[1] + rl * Math.sin(mid) + 5, c.text, 'middle', 14, `ang:${c.a}${c.o}${c.b}`)
+        b += text(
+          o[0] + rl * Math.cos(mid),
+          o[1] + rl * Math.sin(mid) + 5,
+          c.text,
+          'middle',
+          14,
+          `ang:${c.a}${c.o}${c.b}`,
+        )
       }
     } else if (c.t === 'dim') {
       const p = at(c.a)
@@ -337,13 +390,28 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
       const p2: P = [p[0] + n[0] * off, p[1] + n[1] * off]
       const q2: P = [q[0] + n[0] * off, q[1] + n[1] * off]
       // vạch gióng
-      b += line([p[0] + n[0] * 4, p[1] + n[1] * 4], [p[0] + n[0] * (off + 5), p[1] + n[1] * (off + 5)], 'stroke-width="0.8"')
-      b += line([q[0] + n[0] * 4, q[1] + n[1] * 4], [q[0] + n[0] * (off + 5), q[1] + n[1] * (off + 5)], 'stroke-width="0.8"')
+      b += line(
+        [p[0] + n[0] * 4, p[1] + n[1] * 4],
+        [p[0] + n[0] * (off + 5), p[1] + n[1] * (off + 5)],
+        'stroke-width="0.8"',
+      )
+      b += line(
+        [q[0] + n[0] * 4, q[1] + n[1] * 4],
+        [q[0] + n[0] * (off + 5), q[1] + n[1] * (off + 5)],
+        'stroke-width="0.8"',
+      )
       b += line(p2, q2, 'stroke-width="1" marker-start="url(#scarr)" marker-end="url(#scarr)"')
       if (c.text) {
         const mx = (p2[0] + q2[0]) / 2 + n[0] * 12
         const my = (p2[1] + q2[1]) / 2 + n[1] * 12 + 5
-        b += text(mx, my, c.text, Math.abs(n[0]) > 0.7 ? (n[0] > 0 ? 'start' : 'end') : 'middle', 14, `dim:${c.a}${c.b}`)
+        b += text(
+          mx,
+          my,
+          c.text,
+          Math.abs(n[0]) > 0.7 ? (n[0] > 0 ? 'start' : 'end') : 'middle',
+          14,
+          `dim:${c.a}${c.b}`,
+        )
       }
     } else if (c.t === 'label') {
       const p = at(c.a)
@@ -351,13 +419,21 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
       let n = outward(p, q)
       // vật nghiêng nằm dọc đoạn này (thang) lệch ra phía ngoài: ghi nhãn phía trong cho khỏi đè hình
       const alongSeg = (s: (typeof sprites)[number]) =>
-        s.c.b !== undefined && ((s.c.a === c.a && s.c.b === c.b) || (s.c.a === c.b && s.c.b === c.a))
+        s.c.b !== undefined &&
+        ((s.c.a === c.a && s.c.b === c.b) || (s.c.a === c.b && s.c.b === c.a))
       // vật lệch ra ngoài (thang, toà nhà): nhãn sang phía trong; vật đặt giữa (cây, cột): nhãn ra ngoài, quá bề rộng vật
       const along = sprites.find(alongSeg)
       let off = 14
       if (along?.shifted) n = [-n[0], -n[1]]
       else if (along) off += along.hw * k
-      b += text((p[0] + q[0]) / 2 + n[0] * off, (p[1] + q[1]) / 2 + n[1] * off + 5, c.text, Math.abs(n[0]) > 0.7 ? (n[0] > 0 ? 'start' : 'end') : 'middle', 15, `lbl:${c.a}${c.b}`)
+      b += text(
+        (p[0] + q[0]) / 2 + n[0] * off,
+        (p[1] + q[1]) / 2 + n[1] * off + 5,
+        c.text,
+        Math.abs(n[0]) > 0.7 ? (n[0] > 0 ? 'start' : 'end') : 'middle',
+        15,
+        `lbl:${c.a}${c.b}`,
+      )
     }
   }
 
@@ -379,13 +455,16 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
       const p3: P = [o[0] + db[0] * 10, o[1] + db[1] * 10]
       const p2: P = [p1[0] + db[0] * 10, p1[1] + db[1] * 10]
       segs.push([p1, p2], [p2, p3])
-    }
-    else if (c.t === 'poly') c.names.forEach((n, i) => segs.push([at(n), at(c.names[(i + 1) % c.names.length])]))
+    } else if (c.t === 'poly')
+      c.names.forEach((n, i) => segs.push([at(n), at(c.names[(i + 1) % c.names.length])]))
     else if (c.t === 'dim') {
       const p = at(c.a)
       const q = at(c.b)
       const n = outward(p, q)
-      segs.push([[p[0] + n[0] * 18, p[1] + n[1] * 18], [q[0] + n[0] * 18, q[1] + n[1] * 18]])
+      segs.push([
+        [p[0] + n[0] * 18, p[1] + n[1] * 18],
+        [q[0] + n[0] * 18, q[1] + n[1] * 18],
+      ])
     }
   }
   // khung hình vật (người, cột cờ…): nhãn điểm né ra, không đè lên hình
@@ -396,7 +475,10 @@ export function renderSceneSvg(spec: SceneSpec, desc: string): { svg: string; wi
   const distSeg = (x: number, y: number, [p, q]: [P, P]) => {
     const dx = q[0] - p[0]
     const dy = q[1] - p[1]
-    const t = Math.max(0, Math.min(1, ((x - p[0]) * dx + (y - p[1]) * dy) / (dx * dx + dy * dy || 1)))
+    const t = Math.max(
+      0,
+      Math.min(1, ((x - p[0]) * dx + (y - p[1]) * dy) / (dx * dx + dy * dy || 1)),
+    )
     return Math.hypot(x - p[0] - t * dx, y - p[1] - t * dy)
   }
   const placed: P[] = []
@@ -505,8 +587,14 @@ export const SCENE_HELP = [
     items: [
       { code: 'hình cây AB', what: 'Cây đứng từ chân A lên ngọn B (cao đúng AB)' },
       { code: 'hình cái thang CB', what: 'Thang dọc đoạn CB, xoay theo độ nghiêng' },
-      { code: 'hình người A', what: 'Người đứng tại A; có: toà nhà, cột cờ, hải đăng, thuyền, ô tô…' },
-      { code: 'hình en:teapot A', what: 'Vật chưa có trong kho: tên tiếng Anh, vẽ thêm một lần (tốn điểm lần đầu)' },
+      {
+        code: 'hình người A',
+        what: 'Người đứng tại A; có: toà nhà, cột cờ, hải đăng, thuyền, ô tô…',
+      },
+      {
+        code: 'hình en:teapot A',
+        what: 'Vật chưa có trong kho: tên tiếng Anh, vẽ thêm một lần (tốn điểm lần đầu)',
+      },
     ],
   },
 ]

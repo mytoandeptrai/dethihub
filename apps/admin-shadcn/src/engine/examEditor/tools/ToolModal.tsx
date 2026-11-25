@@ -1,46 +1,58 @@
+import { Geo2dModal, Geo3dModal } from './GeometryModal'
+import { GraphToolModal } from './GraphToolModal'
+import { NumberLineModal, TreeModal, TrigModal, VennModal, GroupedModal } from './MoreToolModals'
+import { GasModal, SceneModal } from './MoreToolModals'
+import {
+  ChemGraphModal,
+  CircuitModal,
+  ElectronModal,
+  InclineModal,
+  MotionModal,
+  StructModal,
+  OxyModal,
+  SignTableModal,
+  StatsModal,
+  TableModal,
+} from './MoreToolModals'
+import { ChemEqModal } from './MoreToolModals'
+import { PhaseModal } from './MoreToolModals'
+import { OscModal } from './MoreToolModals'
+import { LensModal } from './MoreToolModals'
+import { PedigreeModal } from './MoreToolModals'
+import { PunnettModal } from './MoreToolModals'
+import { FoodWebModal } from './MoreToolModals'
+import { FieldModal } from './MoreToolModals'
+import { ClockModal, ObjectsModal } from './objectsModals'
+import { VarTableModal } from './VarTableModal'
+
+import type { ChemGraphSpec, ElectronSpec, StructSpec } from '@/engine/lib/chem'
+import type { ChemEqSpec } from '@/engine/lib/chemEq'
+import type { CircuitSpec } from '@/engine/lib/circuit'
+import type { FieldSpec } from '@/engine/lib/field'
+import type { FoodWebSpec } from '@/engine/lib/foodweb'
+import type { GasSpec } from '@/engine/lib/gas'
+import type { Geo2dSpec, Geo3dSpec } from '@/engine/lib/geometry'
+import type { GroupedSpec } from '@/engine/lib/grouped'
+import type { LensSpec } from '@/engine/lib/lens'
+import type { NumberLineSpec, TreeSpec, TrigSpec, VennSpec } from '@/engine/lib/mathExtra'
+import type { ClockSpec, ObjectsSpec } from '@/engine/lib/objects'
+import type { OscSpec } from '@/engine/lib/oscillation'
+import type { OxySpec } from '@/engine/lib/oxy'
+import type { PedigreeSpec } from '@/engine/lib/pedigree'
+import type { PhaseSpec } from '@/engine/lib/phaseChange'
+import type { InclineSpec, MotionSpec } from '@/engine/lib/physics'
+import type { PlotSpec } from '@/engine/lib/plot'
+import type { PunnettSpec } from '@/engine/lib/punnett'
+import type { SceneSpec } from '@/engine/lib/scene'
+import type { SignTableSpec } from '@/engine/lib/signTable'
+import type { StatsSpec } from '@/engine/lib/stats'
+import type { TableSpec } from '@/engine/lib/table'
 /**
  * Mở đúng modal của công cụ theo `kind`. `initial` là cấu hình cũ (nhấp đúp ảnh
  * để sửa, hoặc AI điền sẵn).
  */
 import type { ToolDoc, ToolImage, ToolKind } from '@/engine/lib/toolSpec'
-import type { PlotSpec } from '@/engine/lib/plot'
 import type { VarTableSpec } from '@/engine/lib/varTable'
-import type { Geo2dSpec, Geo3dSpec } from '@/engine/lib/geometry'
-import { GraphToolModal } from './GraphToolModal'
-import { VarTableModal } from './VarTableModal'
-import { Geo2dModal, Geo3dModal } from './GeometryModal'
-import { NumberLineModal, TreeModal, TrigModal, VennModal, GroupedModal } from './MoreToolModals'
-import type { NumberLineSpec, TreeSpec, TrigSpec, VennSpec } from '@/engine/lib/mathExtra'
-import type { GroupedSpec } from '@/engine/lib/grouped'
-import { GasModal, SceneModal } from './MoreToolModals'
-import type { SceneSpec } from '@/engine/lib/scene'
-import type { GasSpec } from '@/engine/lib/gas'
-import { ChemGraphModal, CircuitModal, ElectronModal, InclineModal, MotionModal, StructModal, OxyModal, SignTableModal, StatsModal, TableModal } from './MoreToolModals'
-import type { TableSpec } from '@/engine/lib/table'
-import type { InclineSpec, MotionSpec } from '@/engine/lib/physics'
-import type { ChemGraphSpec, ElectronSpec, StructSpec } from '@/engine/lib/chem'
-import type { SignTableSpec } from '@/engine/lib/signTable'
-import type { OxySpec } from '@/engine/lib/oxy'
-import type { StatsSpec } from '@/engine/lib/stats'
-import type { CircuitSpec } from '@/engine/lib/circuit'
-import { ChemEqModal } from './MoreToolModals'
-import type { ChemEqSpec } from '@/engine/lib/chemEq'
-import { PhaseModal } from './MoreToolModals'
-import type { PhaseSpec } from '@/engine/lib/phaseChange'
-import { OscModal } from './MoreToolModals'
-import type { OscSpec } from '@/engine/lib/oscillation'
-import { LensModal } from './MoreToolModals'
-import type { LensSpec } from '@/engine/lib/lens'
-import { PedigreeModal } from './MoreToolModals'
-import type { PedigreeSpec } from '@/engine/lib/pedigree'
-import { PunnettModal } from './MoreToolModals'
-import type { PunnettSpec } from '@/engine/lib/punnett'
-import { FoodWebModal } from './MoreToolModals'
-import type { FoodWebSpec } from '@/engine/lib/foodweb'
-import { FieldModal } from './MoreToolModals'
-import type { FieldSpec } from '@/engine/lib/field'
-import { ClockModal, ObjectsModal } from './objectsModals'
-import type { ClockSpec, ObjectsSpec } from '@/engine/lib/objects'
 
 export function ToolModal({
   kind,

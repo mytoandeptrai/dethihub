@@ -1,5 +1,9 @@
 import { t } from '@/i18n/translate'
-import type { lib_attempts_Attempt as Attempt, lib_community_CommunityRow as CommunityRow } from '@online-exams-engine'
+
+import type {
+  lib_attempts_Attempt as Attempt,
+  lib_community_CommunityRow as CommunityRow,
+} from '@online-exams-engine'
 
 export const PAGE = 12
 

@@ -1,15 +1,18 @@
+import { TextSelection } from '@tiptap/pm/state'
 /**
  * Thanh "Tìm và thay thế" nổi ở góc trên bên phải vùng soạn — kiểu Ctrl+F của Google Docs:
  * không phủ nền tối, không che trang; ↑/↓ (Enter / Shift+Enter) nhảy kết quả và tự cuộn tới;
  * bấm nút ⇄ để mở hàng Thay thế.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Editor } from '@tiptap/core'
-import { TextSelection } from '@tiptap/pm/state'
+
+import { Checkbox } from '@/engine/components/ui'
+import { cn } from '@/engine/lib/cn'
+
 import { createSearchPlugin, findMatches, searchPluginKey, type SearchQuery } from './find'
 import { IconChevronDown, IconChevronUp, IconClose, IconReplace } from './icons'
-import { cn } from '@/engine/lib/cn'
-import { Checkbox } from '@/engine/components/ui'
+
+import type { Editor } from '@tiptap/core'
 
 export function FindPanel({
   editor,
@@ -42,7 +45,10 @@ export function FindPanel({
     (matches: Array<{ from: number; to: number }>, query: SearchQuery, i: number) => {
       if (!editor) return
       let tr = editor.state.tr.setMeta(searchPluginKey, { query, matches, active: i })
-      if (i >= 0) tr = tr.setSelection(TextSelection.near(editor.state.doc.resolve(matches[i].from))).scrollIntoView()
+      if (i >= 0)
+        tr = tr
+          .setSelection(TextSelection.near(editor.state.doc.resolve(matches[i].from)))
+          .scrollIntoView()
       editor.view.dispatch(tr)
       setCount({ active: i, total: matches.length })
     },
@@ -74,7 +80,11 @@ export function FindPanel({
     const m = s && s.active >= 0 ? s.matches[s.active] : null
     if (!m) return
     // không focus vào trang: con trỏ ở lại ô Thay bằng để bấm Enter thay tiếp
-    editor.chain().deleteRange({ from: m.from, to: m.to }).insertContentAt(m.from, replacement).run()
+    editor
+      .chain()
+      .deleteRange({ from: m.from, to: m.to })
+      .insertContentAt(m.from, replacement)
+      .run()
     setVersion((v) => v + 1)
   }, [editor, replacement])
 
@@ -98,13 +108,14 @@ export function FindPanel({
     'h-9 w-full min-w-0 rounded-[6px] border border-line-2 bg-white px-3 text-[13.5px] text-ink placeholder:text-ink-4 focus:border-clay focus:outline-none focus:ring-2 focus:ring-clay/15'
   const iconBtn =
     'grid h-8 w-8 shrink-0 place-items-center rounded-[6px] text-ink-2 hover:bg-sunken hover:text-ink disabled:opacity-35 disabled:hover:bg-transparent'
-  const textBtn = 'h-9 shrink-0 rounded-[6px] border border-line-2 bg-white px-3 text-[13px] font-medium text-ink hover:bg-sunken disabled:opacity-40'
+  const textBtn =
+    'h-9 shrink-0 rounded-[6px] border border-line-2 bg-white px-3 text-[13px] font-medium text-ink hover:bg-sunken disabled:opacity-40'
 
   return (
     <div
       role="search"
       aria-label="Tìm và thay thế"
-      className="absolute right-4 top-3 z-30 w-[min(400px,calc(100%-32px))] rounded-[10px] border border-line bg-surface p-2.5 shadow-lift"
+      className="border-line bg-surface shadow-lift absolute top-3 right-4 z-30 w-[min(400px,calc(100%-32px))] rounded-[10px] border p-2.5"
       onKeyDown={(e) => {
         if (e.key === 'Escape') onClose()
       }}
@@ -125,14 +136,33 @@ export function FindPanel({
               }
             }}
           />
-          <span className={cn('tnum pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[12px]', count.total ? 'text-ink-3' : 'text-ink-4')}>
+          <span
+            className={cn(
+              'tnum pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[12px]',
+              count.total ? 'text-ink-3' : 'text-ink-4',
+            )}
+          >
             {counter}
           </span>
         </div>
-        <button type="button" className={iconBtn} onClick={() => gotoMatch(-1)} disabled={!count.total} data-tip="Kết quả trước (Shift+Enter)" aria-label="Kết quả trước">
+        <button
+          type="button"
+          className={iconBtn}
+          onClick={() => gotoMatch(-1)}
+          disabled={!count.total}
+          data-tip="Kết quả trước (Shift+Enter)"
+          aria-label="Kết quả trước"
+        >
           <IconChevronUp size={16} />
         </button>
-        <button type="button" className={iconBtn} onClick={() => gotoMatch(1)} disabled={!count.total} data-tip="Kết quả sau (Enter)" aria-label="Kết quả sau">
+        <button
+          type="button"
+          className={iconBtn}
+          onClick={() => gotoMatch(1)}
+          disabled={!count.total}
+          data-tip="Kết quả sau (Enter)"
+          aria-label="Kết quả sau"
+        >
           <IconChevronDown size={16} />
         </button>
         <button
@@ -145,7 +175,13 @@ export function FindPanel({
         >
           <IconReplace size={16} />
         </button>
-        <button type="button" className={iconBtn} onClick={onClose} data-tip="Đóng (Esc)" aria-label="Đóng">
+        <button
+          type="button"
+          className={iconBtn}
+          onClick={onClose}
+          data-tip="Đóng (Esc)"
+          aria-label="Đóng"
+        >
           <IconClose size={15} />
         </button>
       </div>
@@ -165,7 +201,12 @@ export function FindPanel({
               }
             }}
           />
-          <button type="button" className={textBtn} onClick={replaceCurrent} disabled={!count.total}>
+          <button
+            type="button"
+            className={textBtn}
+            onClick={replaceCurrent}
+            disabled={!count.total}
+          >
             Thay
           </button>
           <button type="button" className={textBtn} onClick={replaceAll} disabled={!count.total}>
@@ -174,7 +215,7 @@ export function FindPanel({
         </div>
       )}
 
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 px-0.5 text-[12.5px] text-ink-3">
+      <div className="text-ink-3 mt-2 flex flex-wrap gap-x-4 gap-y-1 px-0.5 text-[12.5px]">
         <Checkbox checked={matchCase} onChange={setMatchCase} className="gap-1.5">
           Phân biệt hoa/thường
         </Checkbox>

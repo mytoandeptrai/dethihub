@@ -1,3 +1,4 @@
+import { regionsOf } from './regionFill'
 /**
  * Bảng vẽ — dựng hình của công cụ vẽ (SVG từ `renderTool`) thành phần tử gốc của bảng:
  * đường / mũi tên / hình tròn / chữ có chỉ số, gom thành một nhóm giữ ToolDoc để bấm đúp sửa lại.
@@ -6,10 +7,27 @@
  * (vùng tô bằng pattern + mask như miền gạch của biểu đồ Ven) thì cắt riêng phần đó thành ảnh nhỏ.
  * Chạy trên trình duyệt: cần DOM để lấy ma trận biến đổi, độ dài đường cong và kiểu đã tính.
  */
-import { DEFAULT_STYLE, measureText, newId, newSeed, type El, type Pt, type StrokeStyle } from './scene'
-import { regionsOf } from './regionFill'
+import {
+  DEFAULT_STYLE,
+  measureText,
+  newId,
+  newSeed,
+  type El,
+  type Pt,
+  type StrokeStyle,
+} from './scene'
 
-const SKIP = new Set(['defs', 'marker', 'pattern', 'clipPath', 'mask', 'desc', 'style', 'title', 'metadata'])
+const SKIP = new Set([
+  'defs',
+  'marker',
+  'pattern',
+  'clipPath',
+  'mask',
+  'desc',
+  'style',
+  'title',
+  'metadata',
+])
 /** bước lấy mẫu đường cong (đơn vị SVG) */
 const STEP = 2.5
 
@@ -44,7 +62,8 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
   const vb = svg.viewBox.baseVal
   const vw = vb && vb.width ? vb.width : svg.width.baseVal.value
   const vh = vb && vb.height ? vb.height : svg.height.baseVal.value
-  const vx = vb?.x ?? 0, vy = vb?.y ?? 0
+  const vx = vb?.x ?? 0,
+    vy = vb?.y ?? 0
   const k = o.width / vw
   const rootInv = svg.getScreenCTM()?.inverse()
   /** ma trận từ hệ toạ độ của phần tử sang toạ độ viewBox */
@@ -61,15 +80,28 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
   const out: El[] = []
   const group = newId()
   const base = (): El => ({
-    ...DEFAULT_STYLE, id: newId(), seed: newSeed(), kind: 'line', x: 0, y: 0, w: 0, h: 0, angle: 0, ver: 0,
-    roughness: 0, groupId: group,
+    ...DEFAULT_STYLE,
+    id: newId(),
+    seed: newSeed(),
+    kind: 'line',
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+    angle: 0,
+    ver: 0,
+    roughness: 0,
+    groupId: group,
   })
 
   const walk = (node: Element) => {
     for (const el of Array.from(node.children)) {
       const tag = el.tagName
       if (SKIP.has(tag)) continue
-      if (tag === 'g' || tag === 'a') { walk(el); continue }
+      if (tag === 'g' || tag === 'a') {
+        walk(el)
+        continue
+      }
       const g = el as SVGGraphicsElement
       const cs = getComputedStyle(g)
       if (cs.display === 'none' || cs.visibility === 'hidden') continue
@@ -77,8 +109,13 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
       if (needsImage(svg, g, cs)) {
         // thử dựng thành mảng tô (vùng có lỗ) bằng cách dò miền; không được mới cắt ảnh
         const reg = maskedRegions(g, cs)
-        if (reg) { out.push(...reg); continue }
-        const im = imagePiece(g, svgText, vx, vy, vw, vh); if (im) out.push(finishImage(im)); continue
+        if (reg) {
+          out.push(...reg)
+          continue
+        }
+        const im = imagePiece(g, svgText, vx, vy, vw, vh)
+        if (im) out.push(finishImage(im))
+        continue
       }
       const m = ctm(g)
       const sw = parseFloat(cs.strokeWidth) || 1
@@ -96,26 +133,61 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
       }
       if (!stroke && !fill && tag !== 'text') continue
       const clip = clipRect(g, ctm, toBoard)
-      if (tag === 'text') { out.push(...textEls(g as SVGTextElement, cs, m)); continue }
+      if (tag === 'text') {
+        out.push(...textEls(g as SVGTextElement, cs, m))
+        continue
+      }
       if (tag === 'rect') {
         const r = g as SVGRectElement
-        const x = r.x.baseVal.value, y = r.y.baseVal.value, w = r.width.baseVal.value, h = r.height.baseVal.value
+        const x = r.x.baseVal.value,
+          y = r.y.baseVal.value,
+          w = r.width.baseVal.value,
+          h = r.height.baseVal.value
         // nền trắng phủ cả hình: bỏ
-        if (!stroke && fill && /^#?f{3,6}$|white|rgb\(255, 255, 255\)/i.test(fill) && w >= vw * 0.95 && h >= vh * 0.95) continue
-        poly(roundRect(x, y, w, h, r.rx.baseVal.value, r.ry.baseVal.value).map(([a, b]) => toBoard(m, a, b)), style, null)
+        if (
+          !stroke &&
+          fill &&
+          /^#?f{3,6}$|white|rgb\(255, 255, 255\)/i.test(fill) &&
+          w >= vw * 0.95 &&
+          h >= vh * 0.95
+        )
+          continue
+        poly(
+          roundRect(x, y, w, h, r.rx.baseVal.value, r.ry.baseVal.value).map(([a, b]) =>
+            toBoard(m, a, b),
+          ),
+          style,
+          null,
+        )
         continue
       }
       if (tag === 'circle' || tag === 'ellipse') {
         const c = g as SVGCircleElement & SVGEllipseElement
-        const cx = c.cx.baseVal.value, cy = c.cy.baseVal.value
+        const cx = c.cx.baseVal.value,
+          cy = c.cy.baseVal.value
         const rx = tag === 'circle' ? c.r.baseVal.value : c.rx.baseVal.value
         const ry = tag === 'circle' ? c.r.baseVal.value : c.ry.baseVal.value
         if (!m.b && !m.c && !clip) {
-          const [x1, y1] = toBoard(m, cx - rx, cy - ry), [x2, y2] = toBoard(m, cx + rx, cy + ry)
-          out.push({ ...base(), ...style, kind: 'ellipse', x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1), h: Math.abs(y2 - y1) })
+          const [x1, y1] = toBoard(m, cx - rx, cy - ry),
+            [x2, y2] = toBoard(m, cx + rx, cy + ry)
+          out.push({
+            ...base(),
+            ...style,
+            kind: 'ellipse',
+            x: Math.min(x1, x2),
+            y: Math.min(y1, y2),
+            w: Math.abs(x2 - x1),
+            h: Math.abs(y2 - y1),
+          })
         } else {
           const n = 48
-          const pts = Array.from({ length: n + 1 }, (_, i) => toBoard(m, cx + rx * Math.cos((i / n) * 2 * Math.PI), cy + ry * Math.sin((i / n) * 2 * Math.PI)))
+          const pts = Array.from({ length: n + 1 }, (_, i) =>
+            toBoard(
+              m,
+              cx + rx * Math.cos((i / n) * 2 * Math.PI),
+              cy + ry * Math.sin((i / n) * 2 * Math.PI),
+            ),
+          )
           poly(pts, style, clip)
         }
         continue
@@ -124,7 +196,16 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
       let subs: { pts: Pt[]; closed: boolean; straight: boolean }[] = []
       if (tag === 'line') {
         const l = g as SVGLineElement
-        subs = [{ pts: [[l.x1.baseVal.value, l.y1.baseVal.value], [l.x2.baseVal.value, l.y2.baseVal.value]], closed: false, straight: true }]
+        subs = [
+          {
+            pts: [
+              [l.x1.baseVal.value, l.y1.baseVal.value],
+              [l.x2.baseVal.value, l.y2.baseVal.value],
+            ],
+            closed: false,
+            straight: true,
+          },
+        ]
       } else if (tag === 'polyline' || tag === 'polygon') {
         const pts = Array.from((g as SVGPolylineElement).points).map((p) => [p.x, p.y] as Pt)
         if (tag === 'polygon' && pts.length) pts.push(pts[0])
@@ -141,19 +222,37 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
       })
       // đầu mũi tên: dựng đúng hình marker của SVG (tam giác tô đặc…) tại đầu / cuối / đỉnh giữa
       const mk = (v: string) => (v && v !== 'none' ? markerOf(svg, v) : null)
-      const mStart = mk(cs.markerStart), mMid = mk(cs.markerMid), mEnd = mk(cs.markerEnd)
+      const mStart = mk(cs.markerStart),
+        mMid = mk(cs.markerMid),
+        mEnd = mk(cs.markerEnd)
       const live = subs.filter((s) => s.pts.length > 1)
-      const first = live[0], last = live[live.length - 1]
+      const first = live[0],
+        last = live[live.length - 1]
       const ang = (a: Pt, b: Pt) => Math.atan2(b[1] - a[1], b[0] - a[0])
-      if (mStart && first) placeMarker(mStart, first.pts[0], ang(first.pts[0], first.pts[1]), true, sw, m, stroke)
-      if (mEnd && last) { const p = last.pts, n = p.length; placeMarker(mEnd, p[n - 1], ang(p[n - 2], p[n - 1]), false, sw, m, stroke) }
-      if (mMid) for (const s of live) {
-        if (!s.straight) continue
-        for (let i = 1; i < s.pts.length - 1; i++) {
-          const a = ang(s.pts[i - 1], s.pts[i]), b = ang(s.pts[i], s.pts[i + 1])
-          placeMarker(mMid, s.pts[i], Math.atan2(Math.sin(a) + Math.sin(b), Math.cos(a) + Math.cos(b)), false, sw, m, stroke)
-        }
+      if (mStart && first)
+        placeMarker(mStart, first.pts[0], ang(first.pts[0], first.pts[1]), true, sw, m, stroke)
+      if (mEnd && last) {
+        const p = last.pts,
+          n = p.length
+        placeMarker(mEnd, p[n - 1], ang(p[n - 2], p[n - 1]), false, sw, m, stroke)
       }
+      if (mMid)
+        for (const s of live) {
+          if (!s.straight) continue
+          for (let i = 1; i < s.pts.length - 1; i++) {
+            const a = ang(s.pts[i - 1], s.pts[i]),
+              b = ang(s.pts[i], s.pts[i + 1])
+            placeMarker(
+              mMid,
+              s.pts[i],
+              Math.atan2(Math.sin(a) + Math.sin(b), Math.cos(a) + Math.cos(b)),
+              false,
+              sw,
+              m,
+              stroke,
+            )
+          }
+        }
     }
   }
 
@@ -191,7 +290,9 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
         const lit = shapes.map((s) => /^(#f{3}|#f{6}|white)$/i.test(s.getAttribute('fill') ?? ''))
         tests.push((x, y) => {
           let on = false
-          shapes.forEach((s, i) => { if (inFill(s as SVGGeometryElement, ei, x, y)) on = lit[i] })
+          shapes.forEach((s, i) => {
+            if (inFill(s as SVGGeometryElement, ei, x, y)) on = lit[i]
+          })
           return on
         })
       }
@@ -199,17 +300,32 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
     // khung dò: khung bao của phần tử (toạ độ viewBox)
     const b = g.getBBox()
     const m = ctm(g)
-    const cs4 = [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]]
-      .map(([x, y]) => new DOMPoint(x, y).matrixTransform(m))
-    const X0 = Math.min(...cs4.map((p) => p.x)), Y0 = Math.min(...cs4.map((p) => p.y))
-    const X1 = Math.max(...cs4.map((p) => p.x)), Y1 = Math.max(...cs4.map((p) => p.y))
-    const regs = regionsOf((x, y) => tests.every((t) => t(x, y)), X0, Y0, X1, Y1, Math.max(0.5, (X1 - X0) / 400))
+    const cs4 = [
+      [b.x, b.y],
+      [b.x + b.width, b.y],
+      [b.x, b.y + b.height],
+      [b.x + b.width, b.y + b.height],
+    ].map(([x, y]) => new DOMPoint(x, y).matrixTransform(m))
+    const X0 = Math.min(...cs4.map((p) => p.x)),
+      Y0 = Math.min(...cs4.map((p) => p.y))
+    const X1 = Math.max(...cs4.map((p) => p.x)),
+      Y1 = Math.max(...cs4.map((p) => p.y))
+    const regs = regionsOf(
+      (x, y) => tests.every((t) => t(x, y)),
+      X0,
+      Y0,
+      X1,
+      Y1,
+      Math.max(0.5, (X1 - X0) / 400),
+    )
     if (!regs.length) return []
     const B = (p: Pt): Pt => [o.x + (p[0] - vx) * k, o.y + (p[1] - vy) * k]
     return regs.map(({ outer, holes }) => {
       const rings = [outer, ...holes].map((r) => r.map(B))
-      const xs = rings[0].map((p) => p[0]), ys = rings[0].map((p) => p[1])
-      const x = Math.min(...xs), y = Math.min(...ys)
+      const xs = rings[0].map((p) => p[0]),
+        ys = rings[0].map((p) => p[1])
+      const x = Math.min(...xs),
+        y = Math.min(...ys)
       const points: Pt[] = []
       const starts: number[] = []
       rings.forEach((r, i) => {
@@ -217,46 +333,88 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
         points.push(...[...r, r[0]].map(([a, c]) => [a - x, c - y] as Pt))
       })
       return {
-        ...base(), kind: 'freedraw', x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y,
-        points, pen: 'ball', region: true, holes: starts.length ? starts : undefined,
-        stroke: 'transparent', strokeWidth: 1, fill: color, fillStyle: hatch ? 'hachure' : 'solid',
+        ...base(),
+        kind: 'freedraw',
+        x,
+        y,
+        w: Math.max(...xs) - x,
+        h: Math.max(...ys) - y,
+        points,
+        pen: 'ball',
+        region: true,
+        holes: starts.length ? starts : undefined,
+        stroke: 'transparent',
+        strokeWidth: 1,
+        fill: color,
+        fillStyle: hatch ? 'hachure' : 'solid',
       } as El
     })
   }
 
   /** vẽ một marker tại điểm p (toạ độ phần tử), hướng theo góc a */
-  const placeMarker = (mk: Marker, p: Pt, a: number, atStart: boolean, sw: number, m: DOMMatrix, stroke: string | null) => {
-    const rot = mk.orient === 'auto-start-reverse' && atStart ? a + Math.PI : mk.orient === 'auto' || mk.orient === 'auto-start-reverse' ? a : (parseFloat(mk.orient) || 0) * Math.PI / 180
+  const placeMarker = (
+    mk: Marker,
+    p: Pt,
+    a: number,
+    atStart: boolean,
+    sw: number,
+    m: DOMMatrix,
+    stroke: string | null,
+  ) => {
+    const rot =
+      mk.orient === 'auto-start-reverse' && atStart
+        ? a + Math.PI
+        : mk.orient === 'auto' || mk.orient === 'auto-start-reverse'
+          ? a
+          : ((parseFloat(mk.orient) || 0) * Math.PI) / 180
     const u = mk.userSpace ? 1 : sw
-    const cos = Math.cos(rot), sin = Math.sin(rot)
+    const cos = Math.cos(rot),
+      sin = Math.sin(rot)
     const map = ([x, y]: Pt): Pt => {
-      const dx = (x - mk.refX) * mk.sx * u, dy = (y - mk.refY) * mk.sy * u
+      const dx = (x - mk.refX) * mk.sx * u,
+        dy = (y - mk.refY) * mk.sy * u
       return toBoard(m, p[0] + dx * cos - dy * sin, p[1] + dx * sin + dy * cos)
     }
     for (const sh of mk.shapes) {
       const fillC = sh.fill === 'context-stroke' ? stroke : sh.fill
       const strokeC = sh.stroke === 'context-stroke' ? stroke : sh.stroke
       if (!fillC && !strokeC) continue
-      poly(sh.pts.map(map), {
-        fill: fillC ?? 'transparent', stroke: strokeC ?? 'transparent', fillStyle: 'solid',
-        strokeWidth: strokeC ? Math.max(0.5, sh.sw * mk.sx * u * scaleOf(m)) : 1, strokeStyle: 'solid',
-      }, null)
+      poly(
+        sh.pts.map(map),
+        {
+          fill: fillC ?? 'transparent',
+          stroke: strokeC ?? 'transparent',
+          fillStyle: 'solid',
+          strokeWidth: strokeC ? Math.max(0.5, sh.sw * mk.sx * u * scaleOf(m)) : 1,
+          strokeStyle: 'solid',
+        },
+        null,
+      )
     }
   }
 
   /** đường nhiều điểm (đã ở toạ độ bảng); cắt theo khung clip nếu có */
   const poly = (pts: Pt[], style: Partial<El>, clip: [number, number, number, number] | null) => {
     if (pts.length < 2) return
-    const closed = pts.length > 3 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01
+    const closed =
+      pts.length > 3 &&
+      Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01
     const runs = clip && !closed ? clipPolyline(pts, clip) : [pts]
     for (const run of runs) {
       if (run.length < 2) continue
       if (closed) run[run.length - 1] = [run[0][0], run[0][1]]
-      const xs = run.map((p) => p[0]), ys = run.map((p) => p[1])
-      const x = Math.min(...xs), y = Math.min(...ys)
+      const xs = run.map((p) => p[0]),
+        ys = run.map((p) => p[1])
+      const x = Math.min(...xs),
+        y = Math.min(...ys)
       out.push({
-        ...base(), ...style, kind: 'line', x, y,
-        w: Math.max(...xs) - x, h: Math.max(...ys) - y,
+        ...base(),
+        ...style,
+        kind: 'line',
+        x,
+        y,
+        w: Math.max(...xs) - x,
+        h: Math.max(...ys) - y,
         points: run.map(([a, b]) => [a - x, b - y] as Pt),
       })
     }
@@ -283,22 +441,47 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
     const angle = Math.atan2(m.b, m.a)
     const k2 = align === 'center' ? 0.5 : align === 'right' ? 1 : 0
     // khung chữ của bảng: mép trên cách chân chữ ≈ 1 cỡ chữ (xem drawElement: textBaseline top + lề 0,125)
-    let x = ax - w * k2, y = ay - fontSize
+    let x = ax - w * k2,
+      y = ay - fontSize
     if (angle) {
       // xoay quanh tâm khung: dời tâm về đúng chỗ sau khi xoay quanh điểm neo
-      const cx = w * (0.5 - k2), cy = h / 2 - fontSize
-      const rx = cx * Math.cos(angle) - cy * Math.sin(angle), ry = cx * Math.sin(angle) + cy * Math.cos(angle)
-      x = ax + rx - w / 2; y = ay + ry - h / 2
+      const cx = w * (0.5 - k2),
+        cy = h / 2 - fontSize
+      const rx = cx * Math.cos(angle) - cy * Math.sin(angle),
+        ry = cx * Math.sin(angle) + cy * Math.cos(angle)
+      x = ax + rx - w / 2
+      y = ay + ry - h / 2
     }
-    return [{
-      ...base(), kind: 'text', x, y, w, h, angle, text, fontSize, align: align === 'left' ? undefined : align,
-      font, italic: italic || undefined, bold: bold || undefined, stroke: paint(cs.fill) ?? '#111', fill: 'transparent', strokeWidth: 1,
-    }]
+    return [
+      {
+        ...base(),
+        kind: 'text',
+        x,
+        y,
+        w,
+        h,
+        angle,
+        text,
+        fontSize,
+        align: align === 'left' ? undefined : align,
+        font,
+        italic: italic || undefined,
+        bold: bold || undefined,
+        stroke: paint(cs.fill) ?? '#111',
+        fill: 'transparent',
+        strokeWidth: 1,
+      },
+    ]
   }
 
   const finishImage = (im: { src: string; x: number; y: number; w: number; h: number }): El => ({
-    ...base(), kind: 'image', src: im.src,
-    x: o.x + (im.x - vx) * k, y: o.y + (im.y - vy) * k, w: im.w * k, h: im.h * k,
+    ...base(),
+    kind: 'image',
+    src: im.src,
+    x: o.x + (im.x - vx) * k,
+    y: o.y + (im.y - vy) * k,
+    w: im.w * k,
+    h: im.h * k,
   })
 
   walk(svg)
@@ -307,7 +490,12 @@ function convert(svg: SVGSVGElement, svgText: string, o: ImportOpts): El[] {
 }
 
 interface Marker {
-  refX: number; refY: number; sx: number; sy: number; orient: string; userSpace: boolean
+  refX: number
+  refY: number
+  sx: number
+  sy: number
+  orient: string
+  userSpace: boolean
   shapes: { pts: Pt[]; fill: string | null; stroke: string | null; sw: number }[]
 }
 const markerCache = new WeakMap<Element, Marker | null>()
@@ -318,28 +506,52 @@ function markerOf(svg: SVGSVGElement, ref: string): Marker | null {
   if (!el || el.tagName !== 'marker') return null
   if (markerCache.has(el)) return markerCache.get(el)!
   const mk = el as SVGMarkerElement
-  const mw = mk.markerWidth.baseVal.value || 3, mh = mk.markerHeight.baseVal.value || 3
+  const mw = mk.markerWidth.baseVal.value || 3,
+    mh = mk.markerHeight.baseVal.value || 3
   const vb = mk.viewBox.baseVal
   const s = vb && vb.width && vb.height ? Math.min(mw / vb.width, mh / vb.height) : 1
   const shapes: Marker['shapes'] = []
   for (const c of Array.from(mk.children)) {
     const cs = getComputedStyle(c)
-    const raw = (v: string, attr: string | null) => (attr === 'context-stroke' ? 'context-stroke' : paint(v))
-    const sh = { fill: raw(cs.fill, c.getAttribute('fill')), stroke: raw(cs.stroke, c.getAttribute('stroke')), sw: parseFloat(cs.strokeWidth) || 1 }
-    if (c.tagName === 'path') for (const sp of pathPoints(c as SVGPathElement)) shapes.push({ ...sh, pts: sp.pts })
+    const raw = (v: string, attr: string | null) =>
+      attr === 'context-stroke' ? 'context-stroke' : paint(v)
+    const sh = {
+      fill: raw(cs.fill, c.getAttribute('fill')),
+      stroke: raw(cs.stroke, c.getAttribute('stroke')),
+      sw: parseFloat(cs.strokeWidth) || 1,
+    }
+    if (c.tagName === 'path')
+      for (const sp of pathPoints(c as SVGPathElement)) shapes.push({ ...sh, pts: sp.pts })
     else if (c.tagName === 'polygon' || c.tagName === 'polyline') {
       const pts = Array.from((c as SVGPolygonElement).points).map((p) => [p.x, p.y] as Pt)
       if (c.tagName === 'polygon' && pts.length) pts.push(pts[0])
       shapes.push({ ...sh, pts })
     } else if (c.tagName === 'circle') {
       const ci = c as SVGCircleElement
-      const cx = ci.cx.baseVal.value, cy = ci.cy.baseVal.value, r = ci.r.baseVal.value
-      shapes.push({ ...sh, pts: Array.from({ length: 25 }, (_, i) => [cx + r * Math.cos((i / 24) * 2 * Math.PI), cy + r * Math.sin((i / 24) * 2 * Math.PI)] as Pt) })
+      const cx = ci.cx.baseVal.value,
+        cy = ci.cy.baseVal.value,
+        r = ci.r.baseVal.value
+      shapes.push({
+        ...sh,
+        pts: Array.from(
+          { length: 25 },
+          (_, i) =>
+            [
+              cx + r * Math.cos((i / 24) * 2 * Math.PI),
+              cy + r * Math.sin((i / 24) * 2 * Math.PI),
+            ] as Pt,
+        ),
+      })
     }
   }
   const v: Marker = {
-    refX: mk.refX.baseVal.value, refY: mk.refY.baseVal.value, sx: s, sy: s,
-    orient: el.getAttribute('orient') ?? '0', userSpace: el.getAttribute('markerUnits') === 'userSpaceOnUse', shapes,
+    refX: mk.refX.baseVal.value,
+    refY: mk.refY.baseVal.value,
+    sx: s,
+    sy: s,
+    orient: el.getAttribute('orient') ?? '0',
+    userSpace: el.getAttribute('markerUnits') === 'userSpaceOnUse',
+    shapes,
   }
   markerCache.set(el, v)
   return v
@@ -370,7 +582,10 @@ function paint(v: string): string | null {
 /** mẫu nét đứt của SVG (đơn vị SVG) → đơn vị bảng */
 function dashArr(v: string, k: number): number[] | undefined {
   if (!v || v === 'none') return undefined
-  const a = v.split(/[\s,]+/).map(parseFloat).filter((n) => Number.isFinite(n) && n >= 0)
+  const a = v
+    .split(/[\s,]+/)
+    .map(parseFloat)
+    .filter((n) => Number.isFinite(n) && n >= 0)
   if (!a.length || a.every((n) => !n)) return undefined
   return (a.length % 2 ? [...a, ...a] : a).map((n) => Math.max(0.5, n * k))
 }
@@ -383,7 +598,8 @@ function dashOf(v: string, sw: number): StrokeStyle {
 
 /** phần tử phải cắt thành ảnh: nền pattern, có mask, hoặc clip không phải hình chữ nhật */
 function needsImage(svg: SVGSVGElement, g: SVGGraphicsElement, cs: CSSStyleDeclaration) {
-  if ((cs.fill.startsWith('url(') && !hatchOf(svg, cs.fill)) || cs.stroke.startsWith('url(')) return true
+  if ((cs.fill.startsWith('url(') && !hatchOf(svg, cs.fill)) || cs.stroke.startsWith('url('))
+    return true
   for (let e: Element | null = g; e && e.tagName !== 'svg'; e = e.parentElement) {
     if (e.getAttribute('mask')) return true
     const cp = e.getAttribute('clip-path')
@@ -411,7 +627,8 @@ function clipRect(
     const r = clipRectOf(e)
     if (!r) continue
     const m = ctm(e as SVGGraphicsElement)
-    const a = toBoard(m, r[0], r[1]), b = toBoard(m, r[0] + r[2], r[1] + r[3])
+    const a = toBoard(m, r[0], r[1]),
+      b = toBoard(m, r[0] + r[2], r[1] + r[3])
     return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]
   }
   return null
@@ -422,20 +639,54 @@ function clipPolyline(pts: Pt[], [x1, y1, x2, y2]: [number, number, number, numb
   const runs: Pt[][] = []
   let cur: Pt[] = []
   for (let i = 0; i < pts.length - 1; i++) {
-    const [ax, ay] = pts[i], [bx, by] = pts[i + 1]
-    const dx = bx - ax, dy = by - ay
-    let t0 = 0, t1 = 1, ok = true
-    for (const [p, q] of [[-dx, ax - x1], [dx, x2 - ax], [-dy, ay - y1], [dy, y2 - ay]]) {
-      if (p === 0) { if (q < 0) { ok = false; break } continue }
+    const [ax, ay] = pts[i],
+      [bx, by] = pts[i + 1]
+    const dx = bx - ax,
+      dy = by - ay
+    let t0 = 0,
+      t1 = 1,
+      ok = true
+    for (const [p, q] of [
+      [-dx, ax - x1],
+      [dx, x2 - ax],
+      [-dy, ay - y1],
+      [dy, y2 - ay],
+    ]) {
+      if (p === 0) {
+        if (q < 0) {
+          ok = false
+          break
+        }
+        continue
+      }
       const r = q / p
-      if (p < 0) { if (r > t1) { ok = false; break } if (r > t0) t0 = r }
-      else { if (r < t0) { ok = false; break } if (r < t1) t1 = r }
+      if (p < 0) {
+        if (r > t1) {
+          ok = false
+          break
+        }
+        if (r > t0) t0 = r
+      } else {
+        if (r < t0) {
+          ok = false
+          break
+        }
+        if (r < t1) t1 = r
+      }
     }
-    if (!ok) { if (cur.length) runs.push(cur); cur = []; continue }
-    const a: Pt = [ax + dx * t0, ay + dy * t0], b: Pt = [ax + dx * t1, ay + dy * t1]
+    if (!ok) {
+      if (cur.length) runs.push(cur)
+      cur = []
+      continue
+    }
+    const a: Pt = [ax + dx * t0, ay + dy * t0],
+      b: Pt = [ax + dx * t1, ay + dy * t1]
     if (!cur.length) cur.push(a)
     cur.push(b)
-    if (t1 < 1) { runs.push(cur); cur = [] }
+    if (t1 < 1) {
+      runs.push(cur)
+      cur = []
+    }
   }
   if (cur.length) runs.push(cur)
   return runs
@@ -450,7 +701,8 @@ function pathPoints(p: SVGPathElement): { pts: Pt[]; closed: boolean; straight: 
   }))
   // tách đoạn con theo M/m; theo dõi điểm hiện tại để đoạn con có cong dựng lại thành path tuyệt đối riêng
   const out: { pts: Pt[]; closed: boolean; straight: boolean }[] = []
-  let cx = 0, cy = 0
+  let cx = 0,
+    cy = 0
   let sub: { start: Pt; pts: Pt[]; curved: string; bent: boolean; closed: boolean } | null = null
   const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path')
   p.parentNode!.appendChild(tmp)
@@ -463,7 +715,10 @@ function pathPoints(p: SVGPathElement): { pts: Pt[]; closed: boolean; straight: 
       const total = tmp.getTotalLength()
       const n = Math.max(2, Math.ceil(total / STEP))
       pts = []
-      for (let i = 0; i <= n; i++) { const q = tmp.getPointAtLength((total * i) / n); pts.push([q.x, q.y]) }
+      for (let i = 0; i <= n; i++) {
+        const q = tmp.getPointAtLength((total * i) / n)
+        pts.push([q.x, q.y])
+      }
     }
     if (sub.closed && pts.length > 2) pts.push([pts[0][0], pts[0][1]])
     pts = dedupe(pts)
@@ -477,9 +732,13 @@ function pathPoints(p: SVGPathElement): { pts: Pt[]; closed: boolean; straight: 
       if (C === 'M') {
         flush()
         for (let i = 0; i + 1 < n.length; i += 2) {
-          cx = (rel ? cx : 0) + n[i]; cy = (rel ? cy : 0) + n[i + 1]
+          cx = (rel ? cx : 0) + n[i]
+          cy = (rel ? cy : 0) + n[i + 1]
           if (!i) sub = { start: [cx, cy], pts: [[cx, cy]], curved: '', bent: false, closed: false }
-          else { sub!.pts.push([cx, cy]); sub!.curved += ` L${cx} ${cy}` }
+          else {
+            sub!.pts.push([cx, cy])
+            sub!.curved += ` L${cx} ${cy}`
+          }
         }
         continue
       }
@@ -495,8 +754,10 @@ function pathPoints(p: SVGPathElement): { pts: Pt[]; closed: boolean; straight: 
       if (C === 'L' || C === 'H' || C === 'V') {
         const step = C === 'L' ? 2 : 1
         for (let i = 0; i + step - 1 < n.length; i += step) {
-          if (C === 'L') { cx = (rel ? cx : 0) + n[i]; cy = (rel ? cy : 0) + n[i + 1] }
-          else if (C === 'H') cx = (rel ? cx : 0) + n[i]
+          if (C === 'L') {
+            cx = (rel ? cx : 0) + n[i]
+            cy = (rel ? cy : 0) + n[i + 1]
+          } else if (C === 'H') cx = (rel ? cx : 0) + n[i]
           else cy = (rel ? cy : 0) + n[i]
           s.pts.push([cx, cy])
           s.curved += ` L${cx} ${cy}`
@@ -508,12 +769,19 @@ function pathPoints(p: SVGPathElement): { pts: Pt[]; closed: boolean; straight: 
       for (let i = 0; i + per - 1 < n.length; i += per) {
         const g = n.slice(i, i + per)
         if (rel) {
-          if (C === 'A') { g[5] += cx; g[6] += cy }
-          else for (let j = 0; j < per; j += 2) { g[j] += cx; g[j + 1] += cy }
+          if (C === 'A') {
+            g[5] += cx
+            g[6] += cy
+          } else
+            for (let j = 0; j < per; j += 2) {
+              g[j] += cx
+              g[j + 1] += cy
+            }
         }
         s.bent = true
         s.curved += ` ${C}${g.join(' ')}`
-        cx = g[per - 2]; cy = g[per - 1]
+        cx = g[per - 2]
+        cy = g[per - 1]
       }
     }
     flush()
@@ -525,13 +793,25 @@ function pathPoints(p: SVGPathElement): { pts: Pt[]; closed: boolean; straight: 
 
 /** hình chữ nhật bo góc → các điểm (cung góc lấy mẫu) */
 function roundRect(x: number, y: number, w: number, h: number, rx0: number, ry0: number): Pt[] {
-  let rx = rx0 || ry0, ry = ry0 || rx0
-  rx = Math.min(rx, w / 2); ry = Math.min(ry, h / 2)
-  if (!(rx > 0 && ry > 0)) return [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]]
+  let rx = rx0 || ry0,
+    ry = ry0 || rx0
+  rx = Math.min(rx, w / 2)
+  ry = Math.min(ry, h / 2)
+  if (!(rx > 0 && ry > 0))
+    return [
+      [x, y],
+      [x + w, y],
+      [x + w, y + h],
+      [x, y + h],
+      [x, y],
+    ]
   const pts: Pt[] = []
   const n = 6
   const corner = (cx: number, cy: number, a0: number) => {
-    for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * Math.PI / 2; pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]) }
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + ((i / n) * Math.PI) / 2
+      pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)])
+    }
   }
   corner(x + w - rx, y + ry, -Math.PI / 2)
   corner(x + w - rx, y + h - ry, 0)
@@ -547,7 +827,8 @@ function dedupe(pts: Pt[]): Pt[] {
 
 /** mọi chữ cái (không tính chỉ số) đều nằm trong tspan nghiêng: V₁, p₁ = p₃, T (phút) không tính */
 function lettersItalic(t: SVGTextElement): boolean {
-  let it = 0, up = 0
+  let it = 0,
+    up = 0
   for (const n of Array.from(t.childNodes)) {
     const letters = (n.textContent ?? '').replace(/[^\p{L}]/gu, '').length
     if (!letters) continue
@@ -561,9 +842,13 @@ function lettersItalic(t: SVGTextElement): boolean {
 /** nội dung chữ → cú pháp chữ của bảng: tspan cỡ nhỏ lệch lên = ^{..}, lệch xuống = _{..}; ký tự _ ^ gốc được thoát */
 function textMarkup(t: SVGTextElement, fs0: number, mixed: boolean): string {
   const esc = (s: string) => s.replace(/[_^]/g, (c) => '\\' + c)
-  let out = '', off = 0
+  let out = '',
+    off = 0
   for (const n of Array.from(t.childNodes)) {
-    if (n.nodeType === 3) { out += esc(n.textContent ?? ''); continue }
+    if (n.nodeType === 3) {
+      out += esc(n.textContent ?? '')
+      continue
+    }
     if (!(n instanceof SVGTSpanElement)) continue
     const dy = n.dy.baseVal.numberOfItems ? n.dy.baseVal.getItem(0).value : 0
     off += dy
@@ -571,7 +856,8 @@ function textMarkup(t: SVGTextElement, fs0: number, mixed: boolean): string {
     const fs = parseFloat(getComputedStyle(n).fontSize) || fs0
     let s = esc(n.textContent ?? '')
     // dòng trộn đứng + nghiêng: tspan nghiêng có chữ cái → \it{..}
-    if (mixed && /\p{L}/u.test(s) && getComputedStyle(n).fontStyle === 'italic') s = String.raw`\it{` + s + '}'
+    if (mixed && /\p{L}/u.test(s) && getComputedStyle(n).fontStyle === 'italic')
+      s = String.raw`\it{` + s + '}'
     const small = fs < fs0 * 0.9
     if (bs === 'super' || (small && off < -0.5)) out += `^{${s}}`
     else if (bs === 'sub' || (small && off > 0.5)) out += `_{${s}}`
@@ -581,13 +867,26 @@ function textMarkup(t: SVGTextElement, fs0: number, mixed: boolean): string {
 }
 
 /** cắt một phần tử thành ảnh SVG nhỏ, giữ nguyên defs (pattern, clip, mask) */
-function imagePiece(g: SVGGraphicsElement, svgText: string, vx: number, vy: number, vw: number, vh: number) {
+function imagePiece(
+  g: SVGGraphicsElement,
+  svgText: string,
+  vx: number,
+  vy: number,
+  vw: number,
+  vh: number,
+) {
   let b: DOMRect
-  try { b = g.getBBox() } catch { return null }
+  try {
+    b = g.getBBox()
+  } catch {
+    return null
+  }
   if (!b.width && !b.height) return null
   // khung trong toạ độ viewBox (phần tử trong nhóm có biến đổi thì lấy cả hình cho chắc)
-  const x = Math.max(vx, b.x - 2), y = Math.max(vy, b.y - 2)
-  const w = Math.min(vx + vw, b.x + b.width + 2) - x, h = Math.min(vy + vh, b.y + b.height + 2) - y
+  const x = Math.max(vx, b.x - 2),
+    y = Math.max(vy, b.y - 2)
+  const w = Math.min(vx + vw, b.x + b.width + 2) - x,
+    h = Math.min(vy + vh, b.y + b.height + 2) - y
   if (w <= 0 || h <= 0) return null
   const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml')
   const root = doc.documentElement
@@ -599,7 +898,10 @@ function imagePiece(g: SVGGraphicsElement, svgText: string, vx: number, vy: numb
   }
   let cur: Element = root
   keepPath.add(cur)
-  for (const i of path) { cur = cur.children[i]; keepPath.add(cur) }
+  for (const i of path) {
+    cur = cur.children[i]
+    keepPath.add(cur)
+  }
   const prune = (node: Element) => {
     for (const c of Array.from(node.children)) {
       if (SKIP.has(c.tagName)) continue

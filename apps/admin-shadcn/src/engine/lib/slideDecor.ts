@@ -41,13 +41,21 @@ export const DECOR_KITS: DecorKit[] = [
     id: 'hinh-hoc',
     name: 'Hình học',
     vibe: 'toán, tin học, khoa học, phong cách hiện đại',
-    pieces: { corner: 'orn-cum-hinh-hoc', accent: 'orn-cum-cham-bi', celebrate: 'orn-vong-tron-long' },
+    pieces: {
+      corner: 'orn-cum-hinh-hoc',
+      accent: 'orn-cum-cham-bi',
+      celebrate: 'orn-vong-tron-long',
+    },
   },
   {
     id: 'lap-lanh',
     name: 'Lấp lánh',
     vibe: 'lễ hội, tổng kết, khen thưởng, truyền cảm hứng',
-    pieces: { corner: 'orn-cum-sao-lap-lanh', accent: 'orn-lap-lanh', celebrate: 'orn-co-duoi-nheo' },
+    pieces: {
+      corner: 'orn-cum-sao-lap-lanh',
+      accent: 'orn-lap-lanh',
+      celebrate: 'orn-co-duoi-nheo',
+    },
   },
   {
     id: 'toi-gian',
@@ -86,31 +94,31 @@ export interface DecorAnchor {
  */
 export const DECOR_ANCHORS: Record<string, DecorAnchor[]> = {
   // phía trên panel hình (panel từ y 20) · góc dưới trái, dưới phụ đề
-  title: [
+  'title': [
     { role: 'celebrate', at: 'tr', w: 11, h: 13 },
     { role: 'corner', at: 'bl', w: 13, h: 15 },
   ],
-  section: [
+  'section': [
     { role: 'accent', at: 'tr', w: 6, h: 10 },
     { role: 'corner', at: 'br', w: 13, h: 20 },
   ],
-  statement: [
+  'statement': [
     { role: 'accent', at: 'tr', w: 8, h: 12 },
     { role: 'corner', at: 'bl', w: 10.5, h: 17 },
   ],
-  closing: [
+  'closing': [
     { role: 'celebrate', at: 'tl', w: 12, h: 22 },
     { role: 'corner', at: 'br', w: 11, h: 20 },
   ],
-  quote: [{ role: 'corner', at: 'br', w: 12, h: 20 }],
+  'quote': [{ role: 'corner', at: 'br', w: 12, h: 20 }],
   // khe giữa tiêu đề và panel nội dung, mép phải
-  bullets: [{ role: 'accent', at: { x: 88.5, y: 30.5 }, w: 5, h: 10 }],
-  cards: [{ role: 'accent', at: { x: 89, y: 24 }, w: 4.5, h: 10 }],
+  'bullets': [{ role: 'accent', at: { x: 88.5, y: 30.5 }, w: 5, h: 10 }],
+  'cards': [{ role: 'accent', at: { x: 89, y: 24 }, w: 4.5, h: 10 }],
   'two-column': [{ role: 'corner', at: 'br', w: 9, h: 14 }],
-  agenda: [{ role: 'corner', at: 'br', w: 7, h: 10 }],
-  stats: [{ role: 'corner', at: 'br', w: 8, h: 13 }],
-  timeline: [{ role: 'corner', at: 'br', w: 8, h: 8.5 }],
-  cycle: [{ role: 'corner', at: 'br', w: 11, h: 18 }],
+  'agenda': [{ role: 'corner', at: 'br', w: 7, h: 10 }],
+  'stats': [{ role: 'corner', at: 'br', w: 8, h: 13 }],
+  'timeline': [{ role: 'corner', at: 'br', w: 8, h: 8.5 }],
+  'cycle': [{ role: 'corner', at: 'br', w: 11, h: 18 }],
 }
 
 /** Bộ mặc định khi dàn ý không chọn (hoặc deck cũ): theo phong cách, rồi theo môn. */

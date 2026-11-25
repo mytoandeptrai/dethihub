@@ -1,14 +1,27 @@
+import { CheckCheck, Copy } from 'lucide-react'
 /** Hộp công cụ Sinh: phả hệ, Punnett, lưới thức ăn. */
 import { useMemo, useState } from 'react'
-import { CheckCheck, Copy } from 'lucide-react'
-import { cn } from '@/engine/lib/cn'
+
 import { inputClass } from '@/engine/components/ui'
-import { type ToolDoc } from '@/engine/lib/toolSpec'
-import { Check, ToolShell, sectionTitle } from './ToolShell'
+import { cn } from '@/engine/lib/cn'
+import {
+  DEFAULT_FOODWEB_CHAIN,
+  DEFAULT_FOODWEB_GRASSLAND,
+  FOODWEB_HELP,
+  type FoodWebSpec,
+} from '@/engine/lib/foodweb'
 import { PEDIGREE_SAMPLE, PEDIGREE_SAMPLE_TWINS, type PedigreeSpec } from '@/engine/lib/pedigree'
-import { PUNNETT_DEFAULT, exportPunnettToText, parsePunnettCross, type GeneTrait, type PunnettSpec } from '@/engine/lib/punnett'
-import { DEFAULT_FOODWEB_CHAIN, DEFAULT_FOODWEB_GRASSLAND, FOODWEB_HELP, type FoodWebSpec } from '@/engine/lib/foodweb'
+import {
+  PUNNETT_DEFAULT,
+  exportPunnettToText,
+  parsePunnettCross,
+  type GeneTrait,
+  type PunnettSpec,
+} from '@/engine/lib/punnett'
+import { type ToolDoc } from '@/engine/lib/toolSpec'
+
 import { type Props, type HelpGroups, useRender, TextBlock } from './toolModalKit'
+import { Check, ToolShell, sectionTitle } from './ToolShell'
 
 const PEDIGREE_HELP: HelpGroups = [
   {
@@ -53,24 +66,27 @@ export function PedigreeModal({ initial, submitLabel, onClose, onInsert }: Props
   const set = (p: Partial<PedigreeSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'pedigree', spec }), [spec])
   const { preview, error } = useRender(doc)
-  const errs = [...(error ? [error] : []), ...(preview?.errors ?? []).map((e) => `Dòng ${e.line}: ${e.msg}`)]
+  const errs = [
+    ...(error ? [error] : []),
+    ...(preview?.errors ?? []).map((e) => `Dòng ${e.line}: ${e.msg}`),
+  ]
 
   const inputs = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[12.5px] font-medium text-ink">Mẫu phả hệ</span>
+        <span className="text-ink text-[12.5px] font-medium">Mẫu phả hệ</span>
         <div className="flex gap-1.5">
           <button
             type="button"
             onClick={() => set({ text: PEDIGREE_SAMPLE })}
-            className="rounded-[5px] border border-line bg-surface px-2 py-1 text-[11.5px] text-ink-2 hover:bg-sunken hover:text-ink"
+            className="border-line bg-surface text-ink-2 hover:bg-sunken hover:text-ink rounded-[5px] border px-2 py-1 text-[11.5px]"
           >
             Mẫu 3 thế hệ
           </button>
           <button
             type="button"
             onClick={() => set({ text: PEDIGREE_SAMPLE_TWINS })}
-            className="rounded-[5px] border border-line bg-surface px-2 py-1 text-[11.5px] text-ink-2 hover:bg-sunken hover:text-ink"
+            className="border-line bg-surface text-ink-2 hover:bg-sunken hover:text-ink rounded-[5px] border px-2 py-1 text-[11.5px]"
           >
             Mẫu sinh đôi
           </button>
@@ -90,7 +106,7 @@ export function PedigreeModal({ initial, submitLabel, onClose, onInsert }: Props
         <Check checked={spec.legend !== false} onChange={(legend) => set({ legend })}>
           Hiện khung chú thích kí hiệu
         </Check>
-        <div className="flex items-center gap-2 pt-1 text-[12.5px] text-ink-2">
+        <div className="text-ink-2 flex items-center gap-2 pt-1 text-[12.5px]">
           <span>Kiểu mang gen:</span>
           {(
             [
@@ -105,7 +121,7 @@ export function PedigreeModal({ initial, submitLabel, onClose, onInsert }: Props
               className={cn(
                 'rounded-[5px] border px-2 py-0.5 text-[12px] transition-colors',
                 (spec.carrierStyle ?? 'half') === val
-                  ? 'border-clay bg-clay-tint font-medium text-clay'
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
                   : 'border-line text-ink-3 hover:border-ink-4',
               )}
             >
@@ -163,7 +179,9 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
   const pill = (on: boolean) =>
     cn(
       'rounded-[6px] border px-2.5 py-1 text-[12px] transition-colors',
-      on ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+      on
+        ? 'border-clay bg-clay-tint text-clay font-medium'
+        : 'border-line text-ink-2 hover:border-ink-4',
     )
 
   const updateTrait = (gene: string, patch: Partial<GeneTrait>) => {
@@ -201,9 +219,13 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
               type="button"
               onClick={handleCopyText}
               data-tip="Sao chép toàn bộ kết quả dạng văn bản"
-              className="inline-flex items-center gap-1 rounded-[6px] border border-line bg-surface px-2 py-0.5 text-[11.5px] text-ink-2 hover:border-ink-4 hover:text-ink"
+              className="border-line bg-surface text-ink-2 hover:border-ink-4 hover:text-ink inline-flex items-center gap-1 rounded-[6px] border px-2 py-0.5 text-[11.5px]"
             >
-              {copied ? <CheckCheck className="size-3 text-emerald-600" /> : <Copy className="size-3" />}
+              {copied ? (
+                <CheckCheck className="size-3 text-emerald-600" />
+              ) : (
+                <Copy className="size-3" />
+              )}
               {copied ? 'Đã chép' : 'Chép text'}
             </button>
           </div>
@@ -228,7 +250,9 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
               onClick={() => set({ cross: p.cross })}
               className={cn(
                 'rounded-[6px] border px-2 py-0.5 text-[11.5px] transition-colors',
-                spec.cross.trim() === p.cross ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line bg-white text-ink-2 hover:border-ink-4',
+                spec.cross.trim() === p.cross
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4 bg-white',
               )}
             >
               {p.label}
@@ -240,16 +264,25 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
       <section>
         <h3 className={sectionTitle}>Hiển thị các phần</h3>
         <div className="grid grid-cols-2 gap-2">
-          <Check checked={spec.showGametes ?? true} onChange={(showGametes) => set({ showGametes })}>
+          <Check
+            checked={spec.showGametes ?? true}
+            onChange={(showGametes) => set({ showGametes })}
+          >
             Giao tử (GP)
           </Check>
           <Check checked={spec.showGrid ?? true} onChange={(showGrid) => set({ showGrid })}>
             Khung Punnett
           </Check>
-          <Check checked={spec.showGenotypeRatio ?? true} onChange={(showGenotypeRatio) => set({ showGenotypeRatio })}>
+          <Check
+            checked={spec.showGenotypeRatio ?? true}
+            onChange={(showGenotypeRatio) => set({ showGenotypeRatio })}
+          >
             Tỉ lệ kiểu gen
           </Check>
-          <Check checked={spec.showPhenotypeRatio ?? true} onChange={(showPhenotypeRatio) => set({ showPhenotypeRatio })}>
+          <Check
+            checked={spec.showPhenotypeRatio ?? true}
+            onChange={(showPhenotypeRatio) => set({ showPhenotypeRatio })}
+          >
             Tỉ lệ kiểu hình
           </Check>
         </div>
@@ -261,7 +294,10 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
           <Check checked={spec.blankGrid ?? false} onChange={(blankGrid) => set({ blankGrid })}>
             Để trống cho học sinh điền
           </Check>
-          <Check checked={spec.colorByPhenotype ?? true} onChange={(colorByPhenotype) => set({ colorByPhenotype })}>
+          <Check
+            checked={spec.colorByPhenotype ?? true}
+            onChange={(colorByPhenotype) => set({ colorByPhenotype })}
+          >
             Tô màu ô theo kiểu hình
           </Check>
         </div>
@@ -278,9 +314,9 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
               const isNonComplete = dom === 'incomplete' || dom === 'codominant'
 
               return (
-                <div key={g} className="rounded-[8px] border border-line bg-surface p-2.5">
+                <div key={g} className="border-line bg-surface rounded-[8px] border p-2.5">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="font-serif text-[13px] font-bold text-ink">Gen {g}</span>
+                    <span className="text-ink font-serif text-[13px] font-bold">Gen {g}</span>
                     <div className="flex gap-1">
                       <button
                         type="button"
@@ -308,7 +344,7 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
 
                   <div className="grid grid-cols-2 gap-2 text-[12px]">
                     <div>
-                      <span className="mb-0.5 block text-ink-3">Kiểu hình trội</span>
+                      <span className="text-ink-3 mb-0.5 block">Kiểu hình trội</span>
                       <input
                         type="text"
                         value={phenos[0] || ''}
@@ -323,7 +359,7 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
                       />
                     </div>
                     <div>
-                      <span className="mb-0.5 block text-ink-3">Kiểu hình lặn</span>
+                      <span className="text-ink-3 mb-0.5 block">Kiểu hình lặn</span>
                       <input
                         type="text"
                         value={isNonComplete ? phenos[2] || '' : phenos[1] || ''}
@@ -341,14 +377,18 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
 
                   {isNonComplete && (
                     <div className="mt-2 text-[12px]">
-                      <span className="mb-0.5 block text-ink-3">
+                      <span className="text-ink-3 mb-0.5 block">
                         {dom === 'incomplete' ? 'Kiểu hình trung gian' : 'Kiểu hình đồng trội'}
                       </span>
                       <input
                         type="text"
                         value={phenos[1] || ''}
                         onChange={(e) => {
-                          const next: [string, string, string] = [phenos[0] || '', e.target.value, phenos[2] || '']
+                          const next: [string, string, string] = [
+                            phenos[0] || '',
+                            e.target.value,
+                            phenos[2] || '',
+                          ]
                           updateTrait(g, { phenotypes: next })
                         }}
                         placeholder="vd. Hoa hồng, Nhóm máu AB"
@@ -373,7 +413,7 @@ export function PunnettModal({ initial, submitLabel, onClose, onInsert }: Props<
           value={spec.fontSize ?? 14}
           onChange={(e) => set({ fontSize: Number(e.target.value) })}
           aria-label="Cỡ chữ bảng Punnett"
-          className="w-full accent-clay"
+          className="accent-clay w-full"
         />
       </section>
     </>
@@ -424,14 +464,14 @@ export function FoodWebModal({ initial, submitLabel, onClose, onInsert }: Props<
             <button
               type="button"
               onClick={() => setSpec(DEFAULT_FOODWEB_GRASSLAND)}
-              className="rounded-[6px] border border-line px-2 py-0.5 text-[12px] text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+              className="border-line text-ink-2 hover:border-ink-4 hover:text-ink rounded-[6px] border px-2 py-0.5 text-[12px] transition-colors"
             >
               Lưới đồng cỏ (8 loài)
             </button>
             <button
               type="button"
               onClick={() => setSpec(DEFAULT_FOODWEB_CHAIN)}
-              className="rounded-[6px] border border-line px-2 py-0.5 text-[12px] text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+              className="border-line text-ink-2 hover:border-ink-4 hover:text-ink rounded-[6px] border px-2 py-0.5 text-[12px] transition-colors"
             >
               Chuỗi đơn (4 loài)
             </button>
@@ -467,7 +507,7 @@ export function FoodWebModal({ initial, submitLabel, onClose, onInsert }: Props<
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
                 (spec.direction ?? 'bottom-up') === id
-                  ? 'border-clay bg-clay-tint font-medium text-clay'
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
                   : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
@@ -494,7 +534,7 @@ export function FoodWebModal({ initial, submitLabel, onClose, onInsert }: Props<
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
                 (spec.nodeStyle ?? 'box') === id
-                  ? 'border-clay bg-clay-tint font-medium text-clay'
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
                   : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
@@ -509,7 +549,10 @@ export function FoodWebModal({ initial, submitLabel, onClose, onInsert }: Props<
         <Check checked={spec.showLevels ?? false} onChange={(showLevels) => set({ showLevels })}>
           Hiện nhãn bậc dinh dưỡng (SV sản xuất, SV tiêu thụ...)
         </Check>
-        <Check checked={spec.connectDecomposers ?? true} onChange={(connectDecomposers) => set({ connectDecomposers })}>
+        <Check
+          checked={spec.connectDecomposers ?? true}
+          onChange={(connectDecomposers) => set({ connectDecomposers })}
+        >
           Nối mũi tên từ các loài tới sinh vật phân giải
         </Check>
       </section>

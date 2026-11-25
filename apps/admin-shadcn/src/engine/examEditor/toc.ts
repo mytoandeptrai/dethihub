@@ -6,9 +6,11 @@
  * bước trang và cách đánh số trang do ExamEditor ghi vào `editor.storage.examToc`.
  */
 import { Node, mergeAttributes, type Editor } from '@tiptap/core'
-import type { Transaction } from '@tiptap/pm/state'
-import { pageGapsKey } from './pagination'
+
 import { pageNumberAt, type PageNumberSetup } from './pageSetup'
+import { pageGapsKey } from './pagination'
+
+import type { Transaction } from '@tiptap/pm/state'
 
 export interface TocStorage {
   /** PAGE_H + PAGE_GAP (px gốc, chưa thu phóng) */
@@ -16,7 +18,12 @@ export interface TocStorage {
   pageNumber?: PageNumberSetup
 }
 
-interface Entry { text: string; level: number; pos: number; page: number | null }
+interface Entry {
+  text: string
+  level: number
+  pos: number
+  page: number | null
+}
 
 function entries(editor: Editor): Entry[] {
   const st = (editor.storage as unknown as Record<string, TocStorage>).examToc
@@ -62,7 +69,10 @@ export const TocNode = Node.create<Record<string, never>, TocStorage>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-exam-node': 'examToc', class: 'exam-toc' })]
+    return [
+      'div',
+      mergeAttributes(HTMLAttributes, { 'data-exam-node': 'examToc', 'class': 'exam-toc' }),
+    ]
   },
 
   addNodeView() {
@@ -107,7 +117,11 @@ export const TocNode = Node.create<Record<string, never>, TocStorage>({
                 row.addEventListener('mousedown', (ev) => ev.preventDefault())
                 row.addEventListener('click', () => {
                   // đặt con trỏ trước rồi mới cuộn: focus của editor có thể tự cuộn về chỗ cũ
-                  editor.chain().setTextSelection(e.pos + 1).focus(undefined, { scrollIntoView: false }).run()
+                  editor
+                    .chain()
+                    .setTextSelection(e.pos + 1)
+                    .focus(undefined, { scrollIntoView: false })
+                    .run()
                   requestAnimationFrame(() => {
                     const target = editor.view.nodeDOM(e.pos) as HTMLElement | null
                     target?.scrollIntoView({ block: 'start' })
@@ -115,14 +129,24 @@ export const TocNode = Node.create<Record<string, never>, TocStorage>({
                 })
                 return row
               })
-            : [Object.assign(document.createElement('div'), { className: 'exam-toc__empty', textContent: 'Chưa có đề mục nào sau mục lục.' })]),
+            : [
+                Object.assign(document.createElement('div'), {
+                  className: 'exam-toc__empty',
+                  textContent: 'Chưa có đề mục nào sau mục lục.',
+                }),
+              ]),
         )
       }
       const schedule = () => {
         if (!raf) raf = requestAnimationFrame(render)
       }
       const onTr = ({ transaction }: { transaction: Transaction }) => {
-        if (transaction.docChanged || transaction.getMeta(pageGapsKey) || transaction.getMeta('tocRefresh')) schedule()
+        if (
+          transaction.docChanged ||
+          transaction.getMeta(pageGapsKey) ||
+          transaction.getMeta('tocRefresh')
+        )
+          schedule()
       }
       editor.on('transaction', onTr)
       schedule()
@@ -130,7 +154,8 @@ export const TocNode = Node.create<Record<string, never>, TocStorage>({
       return {
         dom,
         ignoreMutation: () => true,
-        stopEvent: (ev) => ev.target instanceof HTMLElement && !!ev.target.closest('.exam-toc__row'),
+        stopEvent: (ev) =>
+          ev.target instanceof HTMLElement && !!ev.target.closest('.exam-toc__row'),
         destroy: () => {
           editor.off('transaction', onTr)
           if (raf) cancelAnimationFrame(raf)

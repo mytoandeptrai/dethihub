@@ -30,7 +30,9 @@ function isolate(section: Element) {
 
 /** Tách tệp HTML của AI thành danh sách tài liệu HTML một-slide (rỗng nếu không có section.slide). */
 export function splitHtmlDeck(html: string): string[] {
-  const count = new DOMParser().parseFromString(html, 'text/html').querySelectorAll('section.slide').length
+  const count = new DOMParser()
+    .parseFromString(html, 'text/html')
+    .querySelectorAll('section.slide').length
   const out: string[] = []
   for (let i = 0; i < count; i++) {
     // parse lại cho mỗi slide: tránh clone, mỗi bản được cắt tỉa độc lập

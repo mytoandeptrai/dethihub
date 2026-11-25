@@ -14,10 +14,7 @@
             "CTST": "Bài 1. Kính trọng người có công với gia đình, dòng họ",
             "CD": "Bài 1. Tự hào về truyền thống gia đình, dòng họ"
           },
-          "khai_niem": [
-            "truyền thống gia đình, dòng họ",
-            "kính trọng tổ tiên"
-          ],
+          "khai_niem": ["truyền thống gia đình, dòng họ", "kính trọng tổ tiên"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -39,9 +36,7 @@
             "Trình bày kỉ niệm, thành tích gắn với truyền thống gia đình",
             "Có hành động giữ gìn và phát huy truyền thống gia đình, dòng họ"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kĩ năng kể chuyện, trình bày trước lớp (Tiếng Việt 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Kĩ năng kể chuyện, trình bày trước lớp (Tiếng Việt 6)"],
           "chua_duoc_dung": [
             "Quy định pháp luật về di sản thừa kế (Luật Dân sự 2015 — đã học ở lớp 11 KTPL)",
             "Nghĩa vụ cấp dưỡng chi tiết theo Bộ luật Dân sự (lớp 11)"
@@ -62,11 +57,7 @@
             "CTST": "Bài 2. Sống có lòng nhân ái",
             "CD": "Bài 2. Yêu thương con người"
           },
-          "khai_niem": [
-            "lòng yêu thương con người",
-            "cảm thông, chia sẻ",
-            "từ thiện"
-          ],
+          "khai_niem": ["lòng yêu thương con người", "cảm thông, chia sẻ", "từ thiện"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Trẻ em",
@@ -81,9 +72,7 @@
             "Nêu ý nghĩa và cách thể hiện sự yêu thương phù hợp",
             "Tham gia hoạt động thiện nguyện phù hợp lứa tuổi"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: cách kể chuyện cảm động"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: cách kể chuyện cảm động"],
           "chua_duoc_dung": [
             "Quy định về đăng kí tổ chức từ thiện (Nghị định 93/2021 — chỉ nêu khái quát)",
             "Quy định pháp luật về tổ chức hoạt động từ thiện (chỉ nêu khái quát)"
@@ -104,19 +93,14 @@
             "CTST": "Bài 4. Siêng năng, kiên trì",
             "CD": "Bài 3. Siêng năng, kiên trì"
           },
-          "khai_niem": [
-            "siêng năng",
-            "kiên trì"
-          ],
+          "khai_niem": ["siêng năng", "kiên trì"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu biểu hiện của người siêng năng, kiên trì",
             "Phân tích ý nghĩa của sự chăm chỉ, bền bỉ trong học tập và cuộc sống",
             "Hình thành thói quen học tập, rèn luyện bền bỉ"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: câu chuyện, thành ngữ — tục ngữ liên quan"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: câu chuyện, thành ngữ — tục ngữ liên quan"],
           "chua_duoc_dung": [
             "Quản lí thời gian nâng cao (kĩ năng sống lớp 9)",
             "Khoa học hành vi (ngoài chương trình)"
@@ -137,11 +121,7 @@
             "CTST": "Bài 3. Trung thực",
             "CD": "Bài 4. Tôn trọng sự thật"
           },
-          "khai_niem": [
-            "sự thật",
-            "trung thực",
-            "dối trá"
-          ],
+          "khai_niem": ["sự thật", "trung thực", "dối trá"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Giáo dục",
@@ -156,9 +136,7 @@
             "Nhận biết hành vi không trung thực trong học tập, đời sống",
             "Có thái độ và hành vi trung thực trong các tình huống"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: cách đánh giá hành vi nhân vật"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: cách đánh giá hành vi nhân vật"],
           "chua_duoc_dung": [
             "Hậu quả pháp lí của hành vi gian lận thi cử theo Điều 341 BLHS (chỉ nêu khái quát)",
             "Đạo đức báo chí, thông tin đại chúng (ngoài chương trình)"
@@ -179,19 +157,14 @@
             "CTST": "Bài 6. Tự lập",
             "CD": "Bài 5. Tự lập"
           },
-          "khai_niem": [
-            "tự lập",
-            "tự phục vụ"
-          ],
+          "khai_niem": ["tự lập", "tự phục vụ"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu biểu hiện của người có lối sống tự lập",
             "Phân tích ý nghĩa của tự lập đối với bản thân",
             "Luyện tập những việc làm thể hiện sự tự lập trong học tập và sinh hoạt"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: lập dàn ý trình bày ý kiến"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: lập dàn ý trình bày ý kiến"],
           "chua_duoc_dung": [
             "Kĩ năng quản lí tài chính cá nhân nâng cao (lớp 8, 9)",
             "Tâm lí tuổi dậy thì sâu (lớp 8)"
@@ -212,20 +185,14 @@
             "CTST": "Bài 5. Tự nhận thức và tôn trọng bản thân",
             "CD": "Bài 6. Tự nhận thức bản thân"
           },
-          "khai_niem": [
-            "tự nhận thức",
-            "điểm mạnh",
-            "điểm còn hạn chế"
-          ],
+          "khai_niem": ["tự nhận thức", "điểm mạnh", "điểm còn hạn chế"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu các cách tự nhận thức bản thân (tự đánh giá, lắng nghe nhận xét)",
             "Chỉ ra điểm mạnh, điểm hạn chế của bản thân",
             "Đề xuất phương hướng phấn đấu cụ thể"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: cách trình bày ý kiến về bản thân"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: cách trình bày ý kiến về bản thân"],
           "chua_duoc_dung": [
             "Trắc nghiệm tâm lí chuyên sâu, MBTI (ngoài chương trình — không dùng để phân loại học sinh)"
           ],
@@ -245,11 +212,7 @@
             "CTST": "Bài 8. Ứng xử phù hợp trong gia đình",
             "CD": "Bài 7. Ứng xử phù hợp trong gia đình"
           },
-          "khai_niem": [
-            "quan hệ gia đình",
-            "lễ phép",
-            "thể hiện tình cảm"
-          ],
+          "khai_niem": ["quan hệ gia đình", "lễ phép", "thể hiện tình cảm"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Hôn nhân và gia đình",
@@ -287,11 +250,7 @@
             "CTST": "Bài 9. Ứng xử phù hợp ở trường học",
             "CD": "Bài 8. Ứng xử phù hợp ở trường THCS"
           },
-          "khai_niem": [
-            "văn hóa ứng xử học đường",
-            "tôn trọng thầy cô",
-            "tình bạn lành mạnh"
-          ],
+          "khai_niem": ["văn hóa ứng xử học đường", "tôn trọng thầy cô", "tình bạn lành mạnh"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Giáo dục",
@@ -306,9 +265,7 @@
             "Xây dựng tình bạn lành mạnh, đoàn kết giúp đỡ bạn",
             "Nhận biết và tránh hành vi gây tổn thương bạn bè"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: giao tiếp trong trường học (kĩ năng nói và nghe)"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: giao tiếp trong trường học (kĩ năng nói và nghe)"],
           "chua_duoc_dung": [
             "Nội dung phòng chống bạo lực học đường chuyên sâu (lớp 7)",
             "Quy chế khen thưởng – kỉ luật chi tiết theo thông tư (chỉ nêu)"
@@ -329,11 +286,7 @@
             "CTST": "Bài 10. Công dân nước CHXHCN Việt Nam",
             "CD": "Bài 9. Công dân nước CHXHCN Việt Nam"
           },
-          "khai_niem": [
-            "công dân",
-            "quyền công dân",
-            "nghĩa vụ công dân"
-          ],
+          "khai_niem": ["công dân", "quyền công dân", "nghĩa vụ công dân"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -355,9 +308,7 @@
             "Kể tên một số quyền và nghĩa vụ cơ bản của công dân nhỏ tuổi theo Hiến pháp",
             "Có ý thức thực hiện quyền và nghĩa vụ phù hợp lứa tuổi"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 6: đọc hiểu văn bản nghị luận đơn giản"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 6: đọc hiểu văn bản nghị luận đơn giản"],
           "chua_duoc_dung": [
             "Danh mục đầy đủ các quyền dân sự — chính trị và cơ chế bảo vệ quyền (KTPL lớp 10)",
             "Sự khác nhau công dân — người — thường trú nhân chi tiết (chỉ nêu khái niệm công dân)"
@@ -388,19 +339,14 @@
             "CTST": "Bài 1. Quê hương — nơi bắt đầu cuộc đời",
             "CD": "Bài 1. Tự hào về truyền thống quê hương"
           },
-          "khai_niem": [
-            "quê hương",
-            "truyền thống quê hương"
-          ],
+          "khai_niem": ["quê hương", "truyền thống quê hương"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu truyền thống tốt đẹp của quê hương (văn hóa, lịch sử, lao động)",
             "Trình bày niềm tự hào về quê hương",
             "Có hành động góp phần xây dựng quê hương"
           ],
-          "kien_thuc_duoc_dung": [
-            "Tiếng Việt 7: văn miêu tả quê hương"
-          ],
+          "kien_thuc_duoc_dung": ["Tiếng Việt 7: văn miêu tả quê hương"],
           "chua_duoc_dung": [
             "Địa lí kinh tế quê hương chi tiết (phân môn Địa lí)",
             "Chính sách phát triển quê hương theo nghị quyết (ngoài chương trình)"
@@ -421,10 +367,7 @@
             "CTST": "Bài 2. Tự hào về truyền thống quê hương, đất nước",
             "CD": "Bài 2. Tự hào về truyền thống quốc gia, dân tộc"
           },
-          "khai_niem": [
-            "truyền thống quốc gia, dân tộc",
-            "lòng yêu nước"
-          ],
+          "khai_niem": ["truyền thống quốc gia, dân tộc", "lòng yêu nước"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -439,9 +382,7 @@
             "Trình bày niềm tự hào về thành tựu đất nước",
             "Có hành động góp phần giữ gìn truyền thống dân tộc"
           ],
-          "kien_thuc_duoc_dung": [
-            "Lịch sử 7: truyền thống đấu tranh bảo vệ đất nước"
-          ],
+          "kien_thuc_duoc_dung": ["Lịch sử 7: truyền thống đấu tranh bảo vệ đất nước"],
           "chua_duoc_dung": [
             "Chi tiết thành tựu kinh tế chính trị hiện đại (thuộc KTPL 12, Địa lí 11)",
             "Quan hệ quốc tế, đối ngoại chi tiết (lớp 12)"
@@ -462,10 +403,7 @@
             "CTST": "Bài 5. Tự giác học tập, rèn luyện",
             "CD": "Bài 3. Tự giác tích cực học tập, rèn luyện"
           },
-          "khai_niem": [
-            "tự giác",
-            "chủ động học tập"
-          ],
+          "khai_niem": ["tự giác", "chủ động học tập"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Giáo dục",
@@ -480,9 +418,7 @@
             "Phân tích lợi ích của việc học tập tự giác",
             "Lập kế hoạch và thực hiện học tập tự giác"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kĩ năng lập kế hoạch cơ bản (GDCD 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Kĩ năng lập kế hoạch cơ bản (GDCD 6)"],
           "chua_duoc_dung": [
             "Quản lí thời gian hiệu quả chi tiết (lớp 9)",
             "Khoa học học tập (ngoài chương trình)"
@@ -503,10 +439,7 @@
             "CTST": "Bài 7. Giữ gìn và phát huy bản sắc văn hóa dân tộc",
             "CD": "Bài 4. Góp phần giữ gìn bản sắc văn hóa dân tộc"
           },
-          "khai_niem": [
-            "bản sắc văn hóa dân tộc",
-            "hội nhập"
-          ],
+          "khai_niem": ["bản sắc văn hóa dân tộc", "hội nhập"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -521,9 +454,7 @@
             "Phân tích sự lựa chọn tiếp thu văn hóa nước ngoài phù hợp",
             "Có hành động góp phần bảo vệ bản sắc văn hóa"
           ],
-          "kien_thuc_duoc_dung": [
-            "Lịch sử 7: văn hóa dân tộc qua các thời kì"
-          ],
+          "kien_thuc_duoc_dung": ["Lịch sử 7: văn hóa dân tộc qua các thời kì"],
           "chua_duoc_dung": [
             "Chiến lược phát triển văn hóa quốc gia chi tiết (ngoài chương trình)",
             "Luật Di sản văn hóa sâu (chỉ nêu ở Bài 5)"
@@ -544,11 +475,7 @@
             "CTST": "Bài 8. Bảo tồn di sản văn hóa",
             "CD": "Bài 5. Bảo tồn di sản văn hóa"
           },
-          "khai_niem": [
-            "di sản văn hóa",
-            "di sản vật thể",
-            "di sản phi vật thể"
-          ],
+          "khai_niem": ["di sản văn hóa", "di sản vật thể", "di sản phi vật thể"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Di sản văn hóa",
@@ -563,9 +490,7 @@
             "Nêu ý nghĩa của việc bảo tồn di sản",
             "Có hành động giữ gìn, quảng bá di sản phù hợp"
           ],
-          "kien_thuc_duoc_dung": [
-            "Lịch sử 7: các di sản lịch sử Việt Nam"
-          ],
+          "kien_thuc_duoc_dung": ["Lịch sử 7: các di sản lịch sử Việt Nam"],
           "chua_duoc_dung": [
             "Kĩ thuật trùng tu di tích chuyên sâu (ngành di sản)",
             "Quy chế quản lí di sản chi tiết theo nghị định (chỉ nêu)"
@@ -586,19 +511,14 @@
             "CTST": "Bài 10. Cách ứng phó với căng thẳng",
             "CD": "Bài 6. Ứng phó với căng thẳng"
           },
-          "khai_niem": [
-            "căng thẳng (stress)",
-            "ứng phó (coping)"
-          ],
+          "khai_niem": ["căng thẳng (stress)", "ứng phó (coping)"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nhận biết biểu hiện của căng thẳng (cơ thể, cảm xúc, hành vi)",
             "Nêu nguyên nhân căng thẳng ở học sinh",
             "Vận dụng biện pháp ứng phó: chia sẻ, thư giãn, lập kế hoạch, tìm hỗ trợ"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 6: tự nhận thức bản thân"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 6: tự nhận thức bản thân"],
           "chua_duoc_dung": [
             "Kĩ thuật trị liệu tâm lí chuyên sâu (chỉ nêu việc tìm chuyên gia)",
             "Thuốc an thần, liệu pháp y tế (y học — ngoài chương trình)"
@@ -619,10 +539,7 @@
             "CTST": "Bài 9. Phòng, chống bạo lực học đường",
             "CD": "Bài 7. Phòng, chống bạo lực học đường"
           },
-          "khai_niem": [
-            "bạo lực học đường",
-            "bắt nạt trực tuyến (cyberbullying)"
-          ],
+          "khai_niem": ["bạo lực học đường", "bắt nạt trực tuyến (cyberbullying)"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Trẻ em",
@@ -643,9 +560,7 @@
             "Nêu hậu quả của bạo lực học đường",
             "Biện pháp phòng tránh và cách xử lí khi gặp/bị bạo lực học đường"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 6: ứng xử ở trường THCS"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 6: ứng xử ở trường THCS"],
           "chua_duoc_dung": [
             "Trách nhiệm hình sự của người dưới 18 tuổi theo BLHS (chỉ nêu khái quát)",
             "Quy trình xử lí vụ việc bạo lực học đường của nhà trường (thông tư 24)"
@@ -666,11 +581,7 @@
             "CTST": "Bài 12. Quản lí tiền",
             "CD": "Bài 8. Quản lí tiền"
           },
-          "khai_niem": [
-            "thu nhập",
-            "chi tiêu",
-            "tiết kiệm"
-          ],
+          "khai_niem": ["thu nhập", "chi tiêu", "tiết kiệm"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu nguồn thu, các khoản chi thường gặp của học sinh",
@@ -701,11 +612,7 @@
             "CTST": "Bài 11. Phòng, chống tệ nạn xã hội",
             "CD": "Bài 9. Phòng, chống tệ nạn xã hội"
           },
-          "khai_niem": [
-            "tệ nạn xã hội",
-            "ma túy",
-            "thuốc lá điện tử"
-          ],
+          "khai_niem": ["tệ nạn xã hội", "ma túy", "thuốc lá điện tử"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Phòng, chống ma túy",
@@ -727,9 +634,7 @@
             "Nêu hậu quả của tệ nạn xã hội với cá nhân, gia đình, xã hội",
             "Biện pháp phòng tránh và cách xử lí khi bị lôi kéo"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 7: bạo lực học đường (mối liên hệ với tệ nạn)"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 7: bạo lực học đường (mối liên hệ với tệ nạn)"],
           "chua_duoc_dung": [
             "Danh mục chất ma túy và hình phạt chi tiết theo BLHS (chỉ nêu khái quát)",
             "Quy trình cai nghiện (y tế)"
@@ -750,22 +655,15 @@
             "CTST": "Bài 13. Tự chủ cá nhân",
             "CD": "Bài 10. Tự chủ cá nhân"
           },
-          "khai_niem": [
-            "tự chủ",
-            "tự đánh giá"
-          ],
+          "khai_niem": ["tự chủ", "tự đánh giá"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu biểu hiện của người có năng lực tự chủ",
             "Phân tích ý nghĩa của tự chủ khi đứng trước cám dỗ, áp lực bạn bè",
             "Luyện tập ra quyết định dựa trên suy xét riêng"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 6: tự lập, tự nhận thức bản thân"
-          ],
-          "chua_duoc_dung": [
-            "Tâm lí học lựa chọn, từ chối chuyên sâu (ngoài chương trình)"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 6: tự lập, tự nhận thức bản thân"],
+          "chua_duoc_dung": ["Tâm lí học lựa chọn, từ chối chuyên sâu (ngoài chương trình)"],
           "dang_bai_dien_hinh": [
             "Tình huống áp lực đám đông — lựa chọn hành vi tự chủ",
             "Đánh giá mức độ tự chủ của nhân vật"
@@ -793,9 +691,7 @@
             "CTST": "Bài 1. Tự hào về truyền thống dân tộc",
             "CD": "Bài 1. Tự hào về truyền thống dân tộc Việt Nam"
           },
-          "khai_niem": [
-            "truyền thống dân tộc"
-          ],
+          "khai_niem": ["truyền thống dân tộc"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -810,9 +706,7 @@
             "Liên hệ trách nhiệm thế hệ trẻ giữ gìn truyền thống",
             "Có hành động cụ thể phát huy truyền thống"
           ],
-          "kien_thuc_duoc_dung": [
-            "Lịch sử 8: truyền thống đấu tranh thời kì cận đại"
-          ],
+          "kien_thuc_duoc_dung": ["Lịch sử 8: truyền thống đấu tranh thời kì cận đại"],
           "chua_duoc_dung": [
             "Chính sách dân tộc chi tiết theo nghị quyết (KTPL lớp 12)",
             "Thành tựu kinh tế chi tiết theo ngành (Địa lí 11)"
@@ -833,10 +727,7 @@
             "CTST": "Bài 3. Tôn trọng sự đa dạng của các dân tộc Việt Nam",
             "CD": "Bài 2. Tôn trọng sự đa dạng các dân tộc"
           },
-          "khai_niem": [
-            "đa dạng dân tộc",
-            "bình đẳng dân tộc"
-          ],
+          "khai_niem": ["đa dạng dân tộc", "bình đẳng dân tộc"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -858,9 +749,7 @@
             "Phân tích ý nghĩa của sự tôn trọng đa dạng",
             "Ứng xử bình đẳng, tôn trọng bạn bè thuộc các dân tộc"
           ],
-          "kien_thuc_duoc_dung": [
-            "Địa lí 8 (phân môn Địa lí): các dân tộc Việt Nam"
-          ],
+          "kien_thuc_duoc_dung": ["Địa lí 8 (phân môn Địa lí): các dân tộc Việt Nam"],
           "chua_duoc_dung": [
             "Chính sách dân tộc theo nghị quyết chi tiết (KTPL lớp 12)",
             "Quy định vùng đồng bào dân tộc thiểu số đặc biệt khó khăn (chỉ nêu)"
@@ -881,11 +770,7 @@
             "CTST": "Bài 6. Lao động có kĩ năng, cần cù, sáng tạo",
             "CD": "Bài 3. Lao động cần cù, sáng tạo"
           },
-          "khai_niem": [
-            "lao động",
-            "cần cù",
-            "sáng tạo"
-          ],
+          "khai_niem": ["lao động", "cần cù", "sáng tạo"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -924,10 +809,7 @@
             "CTST": "Bài 7. Bảo vệ lẽ phải",
             "CD": "Bài 4. Bảo vệ lẽ phải"
           },
-          "khai_niem": [
-            "lẽ phải",
-            "bất công"
-          ],
+          "khai_niem": ["lẽ phải", "bất công"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Trẻ em",
@@ -942,9 +824,7 @@
             "Phân tích ý nghĩa của việc bảo vệ lẽ phải",
             "Ứng xử phù hợp khi chứng kiến hành vi trái lẽ phải (an toàn là chính)"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 6: tôn trọng sự thật"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 6: tôn trọng sự thật"],
           "chua_duoc_dung": [
             "Cướp of property, cáo buộc sai sự thật theo BLHS chi tiết (chỉ nêu khái quát)",
             "Quy trình tố giác tội phạm (KTPL lớp 10)"
@@ -965,11 +845,7 @@
             "CTST": "Bài 10. Bảo vệ môi trường",
             "CD": "Bài 5. Bảo vệ môi trường và tài nguyên thiên nhiên"
           },
-          "khai_niem": [
-            "môi trường",
-            "tài nguyên thiên nhiên",
-            "phát triển bền vững"
-          ],
+          "khai_niem": ["môi trường", "tài nguyên thiên nhiên", "phát triển bền vững"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Bảo vệ môi trường",
@@ -1008,19 +884,14 @@
             "CTST": "Bài 11. Xác định mục tiêu cá nhân",
             "CD": "Bài 6. Xác định mục tiêu cá nhân"
           },
-          "khai_niem": [
-            "mục tiêu",
-            "kế hoạch cá nhân"
-          ],
+          "khai_niem": ["mục tiêu", "kế hoạch cá nhân"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu ý nghĩa của việc xác định mục tiêu cá nhân",
             "Xác định mục tiêu ngắn hạn, dài hạn phù hợp với bản thân",
             "Lập kế hoạch hành động để thực hiện mục tiêu"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 6: tự nhận thức bản thân; GDCD 7: tự giác học tập"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 6: tự nhận thức bản thân; GDCD 7: tự giác học tập"],
           "chua_duoc_dung": [
             "Lý thuyết mục tiêu SMART chi tiết (mức gợi ý dùng khung Smart là đủ)",
             "Định hướng nghề nghiệp sâu (lớp 9)"
@@ -1041,10 +912,7 @@
             "CTST": "Bài 13. Phòng, chống bạo lực gia đình",
             "CD": "Bài 7. Phòng, chống bạo lực gia đình"
           },
-          "khai_niem": [
-            "bạo lực gia đình",
-            "nạn nhân bạo lực gia đình"
-          ],
+          "khai_niem": ["bạo lực gia đình", "nạn nhân bạo lực gia đình"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Phòng, chống bạo lực gia đình (sửa đổi)",
@@ -1059,9 +927,7 @@
             "Nêu hậu quả của bạo lực gia đình",
             "Biện pháp phòng tránh và cách xử lí khi xảy ra bạo lực gia đình (báo người lớn, gọi 111)"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 7: phòng chống bạo lực học đường (so sánh)"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 7: phòng chống bạo lực học đường (so sánh)"],
           "chua_duoc_dung": [
             "Trách nhiệm hình sự hành vi bạo lực gia đình chi tiết theo BLHS (chỉ nêu khái quát)",
             "Quy trình lập hồ sơ nạn nhân (nghị định chi tiết)"
@@ -1082,21 +948,14 @@
             "CTST": "Bài 14. Lập kế hoạch chi tiêu",
             "CD": "Bài 8. Lập kế hoạch chi tiêu"
           },
-          "khai_niem": [
-            "kế hoạch chi tiêu",
-            "ngân sách",
-            "tiết kiệm"
-          ],
+          "khai_niem": ["kế hoạch chi tiêu", "ngân sách", "tiết kiệm"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu nguyên tắc lập kế hoạch chi tiêu (thu — chi — tiết kiệm)",
             "Lập kế hoạch chi tiêu tuần/tháng với khoản tiền cho trước",
             "Nhận biết hành vi chi tiêu hợp lí và lãng phí"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 8: phép tính phần trăm, lập bảng",
-            "GDCD 7: quản lí tiền"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 8: phép tính phần trăm, lập bảng", "GDCD 7: quản lí tiền"],
           "chua_duoc_dung": [
             "Quản lí tài chính cá nhân chuyên sâu (ngân sách 50/30/20 — mức gợi ý)",
             "Hình thức tiết kiệm ngân hàng chi tiết (KTPL 10)"
@@ -1117,11 +976,7 @@
             "CTST": "Bài 15. Phòng ngừa tai nạn vũ khí, cháy nổ và các chất độc hại",
             "CD": "Bài 9. Phòng ngừa tai nạn vũ khí, cháy nổ"
           },
-          "khai_niem": [
-            "vũ khí, vật liệu nổ",
-            "chất độc hại",
-            "an toàn cháy nổ"
-          ],
+          "khai_niem": ["vũ khí, vật liệu nổ", "chất độc hại", "an toàn cháy nổ"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Quản lí, sử dụng vũ khí, vật liệu nổ và công cụ hỗ trợ",
@@ -1143,9 +998,7 @@
             "Nêu cách phòng ngừa tai nạn do vũ khí, cháy nổ, chất độc (pháo, hóa chất gia dụng)",
             "Kĩ năng xử lí khi xảy ra cháy, nổ: báo 114, thoát hiểm, không dập điện bằng nước"
           ],
-          "kien_thuc_duoc_dung": [
-            "KHTN 8: chất độc hại (hoá chất)"
-          ],
+          "kien_thuc_duoc_dung": ["KHTN 8: chất độc hại (hoá chất)"],
           "chua_duoc_dung": [
             "Phân loại chất nổ quân sự chi tiết (an ninh — chỉ nêu)",
             "Kỹ năng PCCC chuyên sâu dùng bình chữa cháy theo loại đám cháy (mức nêu cơ bản)"
@@ -1176,9 +1029,7 @@
             "CTST": "Bài 1. Sống có lí tưởng",
             "CD": "Bài 1. Sống có lí tưởng"
           },
-          "khai_niem": [
-            "lí tưởng sống"
-          ],
+          "khai_niem": ["lí tưởng sống"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -1193,10 +1044,7 @@
             "Phân tích lí tưởng sống đúng đắn của thanh niên Việt Nam",
             "Xây dựng lí tưởng sống phù hợp cho bản thân"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 8: mục tiêu cá nhân",
-            "Lịch sử 9: truyền thống cách mạng"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 8: mục tiêu cá nhân", "Lịch sử 9: truyền thống cách mạng"],
           "chua_duoc_dung": [
             "Lí tưởng xã hội chủ nghĩa chi tiết theo lập luận chính trị nâng cao (nội dung KTPL 12)",
             "Triết học nhân sinh quan (đại học)"
@@ -1217,19 +1065,14 @@
             "CTST": "Bài 2. Khoan dung",
             "CD": "Bài 2. Khoan dung"
           },
-          "khai_niem": [
-            "khoan dung",
-            "bao dung"
-          ],
+          "khai_niem": ["khoan dung", "bao dung"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu khái niệm khoan dung và biểu hiện của người biết khoan dung",
             "Phân tích ý nghĩa của khoan dung trong quan hệ con người",
             "Phân biệt khoan dung với bao che cho cái sai; ứng xử khoan dung trong tình huống"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 6: tôn trọng sự thật, ứng xử gia đình"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 6: tôn trọng sự thật, ứng xử gia đình"],
           "chua_duoc_dung": [
             "Khoan dung tôn giáo ở mức pháp lí chi tiết (KTPL)",
             "Khoa học tâm lí hòa giải xung đột (ngoài chương trình)"
@@ -1250,10 +1093,7 @@
             "CTST": "Bài 3. Tích cực tham gia các hoạt động cộng đồng",
             "CD": "Bài 3. Tích cực tham gia hoạt động cộng đồng"
           },
-          "khai_niem": [
-            "cộng đồng",
-            "hoạt động cộng đồng"
-          ],
+          "khai_niem": ["cộng đồng", "hoạt động cộng đồng"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Thanh niên",
@@ -1268,10 +1108,7 @@
             "Phân tích ý nghĩa của hoạt động cộng đồng",
             "Đề xuất và tham gia hoạt động cộng đồng ở địa phương"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 8: bảo vệ môi trường",
-            "Hoạt động trải nghiệm 9"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 8: bảo vệ môi trường", "Hoạt động trải nghiệm 9"],
           "chua_duoc_dung": [
             "Chính sách xã hội chi tiết theo nghị quyết (KTPL 12)",
             "Quản lí tổ chức xã hội theo pháp luật (chỉ nêu)"
@@ -1292,10 +1129,7 @@
             "CTST": "Bài 5. Sống khách quan, công bằng",
             "CD": "Bài 4. Khách quan và công bằng"
           },
-          "khai_niem": [
-            "khách quan",
-            "công bằng"
-          ],
+          "khai_niem": ["khách quan", "công bằng"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -1310,12 +1144,8 @@
             "Phân tích ý nghĩa của sự khách quan, công bằng trong học tập và cuộc sống",
             "Ứng xử khách quan, công bằng khi đánh giá người và việc"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 8: bảo vệ lẽ phải"
-          ],
-          "chua_duoc_dung": [
-            "Bình đẳng pháp lí chi tiết theo BLDS, Kinh tế pháp luật (lớp 10)"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 8: bảo vệ lẽ phải"],
+          "chua_duoc_dung": ["Bình đẳng pháp lí chi tiết theo BLDS, Kinh tế pháp luật (lớp 10)"],
           "dang_bai_dien_hinh": [
             "Tình huống đánh giá bạn thiếu khách quan — lựa chọn cách xử lí",
             "Nhận xét tính công bằng của quy định lớp học"
@@ -1332,10 +1162,7 @@
             "CTST": "Bài 4. Bảo vệ hòa bình",
             "CD": "Bài 5. Bảo vệ hòa bình"
           },
-          "khai_niem": [
-            "hòa bình",
-            "hợp tác quốc tế"
-          ],
+          "khai_niem": ["hòa bình", "hợp tác quốc tế"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Hiến pháp nước CHXHCN Việt Nam",
@@ -1350,9 +1177,7 @@
             "Nêu trách nhiệm của bản thân trong việc giữ gìn hòa bình",
             "Ủng hộ các hoạt động hợp tác quốc tế, hữu nghị"
           ],
-          "kien_thuc_duoc_dung": [
-            "Lịch sử 9: hai cuộc chiến tranh thế giới, Liên Hợp Quốc"
-          ],
+          "kien_thuc_duoc_dung": ["Lịch sử 9: hai cuộc chiến tranh thế giới, Liên Hợp Quốc"],
           "chua_duoc_dung": [
             "Luật quốc tế về hòa bình, vũ khí hủy diệt (đại học)",
             "Đối ngoại quốc phòng chi tiết (lớp 12)"
@@ -1373,20 +1198,14 @@
             "CTST": "Bài 6. Quản lí thời gian",
             "CD": "Bài 6. Quản lí thời gian hiệu quả"
           },
-          "khai_niem": [
-            "quản lí thời gian",
-            "mục tiêu",
-            "ưu tiên"
-          ],
+          "khai_niem": ["quản lí thời gian", "mục tiêu", "ưu tiên"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu lợi ích của việc quản lí thời gian",
             "Lập và thực hiện thời gian biểu khoa học cho học sinh lớp 9",
             "Điều chỉnh kế hoạch khi tình huống thay đổi"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 7: tự giác học tập; Toán 9: đọc biểu đồ"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 7: tự giác học tập; Toán 9: đọc biểu đồ"],
           "chua_duoc_dung": [
             "Kĩ thuật quản lí thời gian chuyên sâu (GTD, Pomodoro nâng cao — chỉ gợi ý)"
           ],
@@ -1406,20 +1225,14 @@
             "CTST": "Bài 7. Thích ứng với thay đổi",
             "CD": "Bài 7. Thích ứng với thay đổi"
           },
-          "khai_niem": [
-            "thay đổi",
-            "thích ứng",
-            "linh hoạt"
-          ],
+          "khai_niem": ["thay đổi", "thích ứng", "linh hoạt"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu các thay đổi thường gặp ở tuổi 15 (học tập, cơ thể, quan hệ, môi trường)",
             "Phân tích cách thích ứng tích cực với thay đổi",
             "Vận dụng khi chuyển trường, chuyển cấp, thay đổi hoàn cảnh"
           ],
-          "kien_thuc_duoc_dung": [
-            "GDCD 7: ứng phó căng thẳng"
-          ],
+          "kien_thuc_duoc_dung": ["GDCD 7: ứng phó căng thẳng"],
           "chua_duoc_dung": [
             "Tâm lí phát triển tuổi dậy thì chuyên sâu (KHTN 8 ở mức nêu)",
             "Khủng hoảng tâm lí tuổi vị thành niên (chỉ nêu)"
@@ -1483,11 +1296,7 @@
             "CTST": "Bài 9. Làm việc có năng suất, chất lượng, hiệu quả",
             "CD": "Bài 9. Làm việc có năng suất, chất lượng, hiệu quả"
           },
-          "khai_niem": [
-            "năng suất",
-            "chất lượng",
-            "hiệu quả"
-          ],
+          "khai_niem": ["năng suất", "chất lượng", "hiệu quả"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Lao động",
@@ -1610,11 +1419,7 @@
           "tong_diem": 4
         }
       ],
-      "pham_vi": [
-        "gdcd6-ung-xu-gia-dinh",
-        "gdcd6-ung-xu-truong-hoc",
-        "gdcd6-cong-dan-vn"
-      ],
+      "pham_vi": ["gdcd6-ung-xu-gia-dinh", "gdcd6-ung-xu-truong-hoc", "gdcd6-cong-dan-vn"],
       "ti_le_muc_do": "NB 40%, TH 40%, VD 20%"
     },
     {
@@ -1853,11 +1658,7 @@
           "tong_diem": 6
         }
       ],
-      "pham_vi": [
-        "gdcd6-ung-xu-gia-dinh",
-        "gdcd6-ung-xu-truong-hoc",
-        "gdcd6-cong-dan-vn"
-      ],
+      "pham_vi": ["gdcd6-ung-xu-gia-dinh", "gdcd6-ung-xu-truong-hoc", "gdcd6-cong-dan-vn"],
       "ti_le_muc_do": "NB 50%, TH 30%, VD 20%"
     },
     {

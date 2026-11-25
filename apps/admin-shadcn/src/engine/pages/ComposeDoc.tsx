@@ -1,3 +1,7 @@
+import { MonitorPlay } from 'lucide-react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { useLocation, useNavigate } from '@/engine/compat/router'
 /**
  * Trang Soạn đề — trình soạn đề thi kiểu tài liệu (GenOffice-style).
  *
@@ -13,55 +17,61 @@
  *   └────────┴───────────────────────────────┴─────────────────┘
  */
 import { dialog } from '@/engine/components/Dialog'
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { PageErrorBoundary } from '@/engine/components/PageErrorBoundary'
+import { EditorHeader } from '@/engine/examEditor/EditorHeader'
+import { NavPanel, type PaneTab } from '@/engine/examEditor/NavPanel'
+import {
+  pageGeometry,
+  marginsOf,
+  paperCm,
+  CM,
+  PAGE_SIZES,
+  type PageSetup,
+} from '@/engine/examEditor/pageSetup'
+import { Ribbon } from '@/engine/examEditor/Ribbon'
+import { StartTab } from '@/engine/examEditor/StartTab'
+import { TabStrip } from '@/engine/examEditor/TabStrip'
+import { DOC_STATUS_LABELS, docStatus, type DocStatus } from '@/engine/lib/docStatus'
 import { lazyPage } from '@/engine/lib/lazyPage'
 import { useBoards } from '@/engine/store/boards'
-import { PageErrorBoundary } from '@/engine/components/PageErrorBoundary'
-import { useLocation, useNavigate } from '@/engine/compat/router'
+import { InspectorPanel } from '@/modules/exam-inspector/components/inspector-panel'
+import { InspectorOverlay } from '@/modules/exam-inspector/containers/inspector-overlay'
+import { useExamInspector } from '@/modules/exam-inspector/hooks/use-exam-inspector'
+
+import type { SlideEditorActions } from '@/engine/examEditor/SlideEditor'
+import type { ToolDoc, ToolImage } from '@/engine/lib/toolSpec'
 import type { Editor } from '@tiptap/core'
 import type { JSONContent } from '@tiptap/core'
 import type { Selection } from '@tiptap/pm/state'
-import { pageGeometry, marginsOf, paperCm, CM, PAGE_SIZES, type PageSetup } from '@/engine/examEditor/pageSetup'
-import { Ribbon } from '@/engine/examEditor/Ribbon'
-import { TabStrip } from '@/engine/examEditor/TabStrip'
-import { EditorHeader } from '@/engine/examEditor/EditorHeader'
-import { MonitorPlay } from 'lucide-react'
-import type { SlideEditorActions } from '@/engine/examEditor/SlideEditor'
-import { DOC_STATUS_LABELS, docStatus, type DocStatus } from '@/engine/lib/docStatus'
-import { StartTab } from '@/engine/examEditor/StartTab'
-import { NavPanel, type PaneTab } from '@/engine/examEditor/NavPanel'
-import { useExamInspector } from '@/modules/exam-inspector/hooks/use-exam-inspector'
-import { InspectorPanel } from '@/modules/exam-inspector/components/inspector-panel'
-import { InspectorOverlay } from '@/modules/exam-inspector/containers/inspector-overlay'
-import type { ToolDoc, ToolImage } from '@/engine/lib/toolSpec'
 
 /** chỗ đặt đồ thị: thay ảnh cũ, hoặc chèn thành đoạn mới tại vị trí giữa hai khối */
 type PlotTarget = { replace: number } | { after: number }
-import { insertBlockTemplate, type BlockTemplate } from '@/engine/examEditor/templates'
-import { AiDock, Ruler, useViewportSize } from '@/engine/examEditor/Layout'
+import { appPaths } from '@/config/app-paths'
+import { emptyDoc } from '@/engine/data/docTypes'
+import { prepareAiApplication, type AiExamEnvelope } from '@/engine/examEditor/aiApplication'
 import { tipTapToBlocks, blocksToTipTap, plainText } from '@/engine/examEditor/convert'
 import { useFormatState, applyFormatAttrs } from '@/engine/examEditor/formatState'
-import { useComposeStore } from '@/engine/store/compose'
-import { useDocStore } from '@/engine/store/docs'
-import { useOnline } from '@/engine/store/online'
-import { docToExam } from '@/engine/lib/docToExam'
-import { examToDraft } from '@/engine/lib/onlineExam'
-import { DECK_THEMES } from '@/engine/lib/slideTheme'
-import { extractJson } from '@/engine/lib/llm'
-import { insertAiContent } from '@/lib/insert-ai-content'
-import { prepareAiApplication, type AiExamEnvelope } from '@/engine/examEditor/aiApplication'
-import { importedSlides, readImportFile, textToBlocks } from '@/engine/lib/importFile'
 import { IconZoomIn, IconZoomOut } from '@/engine/examEditor/icons'
-import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
-import { emptyDoc } from '@/engine/data/docTypes'
-import { cn } from '@/engine/lib/cn'
+import { AiDock, Ruler, useViewportSize } from '@/engine/examEditor/Layout'
+import { insertBlockTemplate, type BlockTemplate } from '@/engine/examEditor/templates'
 import { attachToAi } from '@/engine/lib/aiAttach'
 import { blockKey, blocksText, focusNote, type AiApplyResult } from '@/engine/lib/aiDocContext'
 import { reportAi, takeRecentAiTurn } from '@/engine/lib/aiFeedback'
-import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
-import type { Feature } from '@/modules/feature-access/hooks/use-feature-access'
+import { cn } from '@/engine/lib/cn'
+import { docToExam } from '@/engine/lib/docToExam'
+import { importedSlides, readImportFile, textToBlocks } from '@/engine/lib/importFile'
+import { extractJson } from '@/engine/lib/llm'
+import { examToDraft } from '@/engine/lib/onlineExam'
+import { DECK_THEMES } from '@/engine/lib/slideTheme'
+import { useComposeStore } from '@/engine/store/compose'
+import { useDocStore } from '@/engine/store/docs'
+import { useOnline } from '@/engine/store/online'
+import { insertAiContent } from '@/lib/insert-ai-content'
 import { FeatureNotice } from '@/modules/feature-access/components/feature-notice'
-import { appPaths } from '@/config/app-paths'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+
+import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
+import type { Feature } from '@/modules/feature-access/hooks/use-feature-access'
 
 const SESSION_KEY = 'dethinhbien-compose-session'
 const MOBILE_VIEW_KEY = 'dethinhbien-mobile-view'
@@ -101,16 +111,28 @@ function restoreSession() {
 const loadSlideEditor = () => import('@/engine/examEditor/SlideEditor')
 const BoardEditor = lazyPage(() => import('@/engine/pages/Board'))
 // trình soạn văn bản (TipTap) và trợ lý AI (kéo theo dữ liệu slide) tải sau: tab bảng vẽ/slide không cần chờ
-const ExamEditor = lazyPage(() => import('@/engine/examEditor/ExamEditor').then((m) => ({ default: m.ExamEditor })))
-const FindPanel = lazyPage(() => import('@/engine/examEditor/FindPanel').then((m) => ({ default: m.FindPanel })))
-const DocSelectionAi = lazyPage(() => import('@/engine/examEditor/DocSelectionAi').then((m) => ({ default: m.DocSelectionAi })))
-const ToolModal = lazyPage(() => import('@/engine/examEditor/tools/ToolModal').then((m) => ({ default: m.ToolModal })))
+const ExamEditor = lazyPage(() =>
+  import('@/engine/examEditor/ExamEditor').then((m) => ({ default: m.ExamEditor })),
+)
+const FindPanel = lazyPage(() =>
+  import('@/engine/examEditor/FindPanel').then((m) => ({ default: m.FindPanel })),
+)
+const DocSelectionAi = lazyPage(() =>
+  import('@/engine/examEditor/DocSelectionAi').then((m) => ({ default: m.DocSelectionAi })),
+)
+const ToolModal = lazyPage(() =>
+  import('@/engine/examEditor/tools/ToolModal').then((m) => ({ default: m.ToolModal })),
+)
 
 /**
  * Công cụ vẽ hình (toolSpec ~100 KB gzip: hình học, mạch điện, phả hệ…) nạp sau, không chặn lúc mở trang.
  * Tải sẵn ngay khi trình soạn sẵn sàng (xem effect gọi `loadTools`), nên lúc AI trả đề có hình thì đã có.
  */
-type ToolMods = { ti: typeof import('@/engine/examEditor/toolImages'); ts: typeof import('@/engine/lib/toolSpec'); plot: typeof import('@/engine/lib/plot') }
+type ToolMods = {
+  ti: typeof import('@/engine/examEditor/toolImages')
+  ts: typeof import('@/engine/lib/toolSpec')
+  plot: typeof import('@/engine/lib/plot')
+}
 let toolsLoading: Promise<ToolMods> | null = null
 const loadTools = (): Promise<ToolMods> =>
   (toolsLoading ??= Promise.all([
@@ -119,45 +141,61 @@ const loadTools = (): Promise<ToolMods> =>
     import('@/engine/lib/plot'),
     // kho hình đồ vật (tranh đếm tiểu học): phải có trước khi vẽ, kẻo hình ra ô trống
     import('@/engine/lib/figureSprites').then((m) => m.loadSprites()),
-  ]).then(
-    ([ti, ts, plot]) => ({ ti, ts, plot }),
-  ))
-const AiPanel = lazyPage(() => import('@/engine/examEditor/AiPanel').then((m) => ({ default: m.AiPanel })))
+  ]).then(([ti, ts, plot]) => ({ ti, ts, plot })))
+const AiPanel = lazyPage(() =>
+  import('@/engine/examEditor/AiPanel').then((m) => ({ default: m.AiPanel })),
+)
 const SlideEditor = lazyPage(() => loadSlideEditor().then((m) => ({ default: m.SlideEditor })))
-const SlideReadOnly = lazyPage(() => import('@/engine/examEditor/slide-read-only').then((module) => ({ default: module.SlideReadOnly })))
+const SlideReadOnly = lazyPage(() =>
+  import('@/engine/examEditor/slide-read-only').then((module) => ({
+    default: module.SlideReadOnly,
+  })),
+)
 
 /** khung giữ chỗ lúc trình soạn slide chưa tải xong: có sẵn thanh ribbon + vùng slide mờ, không để trắng phía trên */
 /** khung chờ của bảng vẽ: thanh công cụ, hàng tuỳ chọn, mặt bảng */
 function BoardSkeleton() {
   return (
     // cùng màu, cùng chiều cao với thanh công cụ thật của BoardEditor (bg-surface, h-12 + h-11, một đường kẻ dưới)
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white" aria-busy="true" aria-label="Đang tải bảng vẽ">
-      <div className="shrink-0 animate-pulse border-b border-line bg-surface">
-      <div className="flex h-12 items-end gap-2 px-3 pb-1">
-        <div className="mb-0.5 size-7 rounded-md bg-line/70" />
-        <div className="mb-0.5 size-7 rounded-md bg-line/70" />
-        <span className="mb-1.5 h-5 w-px bg-line" />
-        <div className="flex h-[38px] items-center gap-1.5 rounded-[10px] bg-sunken px-[3px]">
-          {[52, 50, 54, 52, 50, 46, 48].map((w, i) => <div key={i} className="h-6 rounded-[7px] bg-line/80" style={{ width: w }} />)}
+    <div
+      className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
+      aria-busy="true"
+      aria-label="Đang tải bảng vẽ"
+    >
+      <div className="border-line bg-surface shrink-0 animate-pulse border-b">
+        <div className="flex h-12 items-end gap-2 px-3 pb-1">
+          <div className="bg-line/70 mb-0.5 size-7 rounded-md" />
+          <div className="bg-line/70 mb-0.5 size-7 rounded-md" />
+          <span className="bg-line mb-1.5 h-5 w-px" />
+          <div className="bg-sunken flex h-[38px] items-center gap-1.5 rounded-[10px] px-[3px]">
+            {[52, 50, 54, 52, 50, 46, 48].map((w, i) => (
+              <div key={i} className="bg-line/80 h-6 rounded-[7px]" style={{ width: w }} />
+            ))}
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            {[60, 76, 72, 28, 44].map((w, i) => (
+              <div key={i} className="bg-line/70 h-6 rounded-[7px]" style={{ width: w }} />
+            ))}
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          {[60, 76, 72, 28, 44].map((w, i) => <div key={i} className="h-6 rounded-[7px] bg-line/70" style={{ width: w }} />)}
+        <div className="flex h-11 items-center gap-2 px-3 pb-1">
+          <div className="bg-line h-2.5 w-8 rounded" />
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="bg-line/80 size-5 rounded-full" />
+          ))}
+          <div className="bg-line mx-2 h-5 w-px" />
+          <div className="bg-line h-2.5 w-10 rounded" />
+          {[6, 8, 10, 12, 14, 16].map((d, i) => (
+            <div key={i} className="bg-line/80 rounded-full" style={{ width: d, height: d }} />
+          ))}
         </div>
-      </div>
-      <div className="flex h-11 items-center gap-2 px-3 pb-1">
-        <div className="h-2.5 w-8 rounded bg-line" />
-        {Array.from({ length: 6 }, (_, i) => <div key={i} className="size-5 rounded-full bg-line/80" />)}
-        <div className="mx-2 h-5 w-px bg-line" />
-        <div className="h-2.5 w-10 rounded bg-line" />
-        {[6, 8, 10, 12, 14, 16].map((d, i) => <div key={i} className="rounded-full bg-line/80" style={{ width: d, height: d }} />)}
-      </div>
       </div>
       {/* mặt bảng: trắng như bảng thật, vài khối mờ thay cho nội dung đang tải */}
       <div className="relative min-h-0 flex-1 animate-pulse bg-white">
-        <div className="absolute left-[12%] top-[18%] h-24 w-40 rounded-lg bg-sunken" />
-        <div className="absolute left-[38%] top-[30%] h-3 w-56 rounded-full bg-sunken" />
-        <div className="absolute left-[40%] top-[38%] h-3 w-40 rounded-full bg-sunken" />
-        <div className="absolute right-[14%] top-[22%] size-28 rounded-full bg-sunken/70" />
+        <div className="bg-sunken absolute top-[18%] left-[12%] h-24 w-40 rounded-lg" />
+        <div className="bg-sunken absolute top-[30%] left-[38%] h-3 w-56 rounded-full" />
+        <div className="bg-sunken absolute top-[38%] left-[40%] h-3 w-40 rounded-full" />
+        <div className="bg-sunken/70 absolute top-[22%] right-[14%] size-28 rounded-full" />
       </div>
     </div>
   )
@@ -165,23 +203,30 @@ function BoardSkeleton() {
 
 function SlideEditorSkeleton() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col animate-pulse">
-      <div className="flex h-[34px] items-end gap-5 border-b border-line bg-paper px-4 pb-2">
-        {[44, 52, 40, 60, 48].map((w, i) => <div key={i} className="h-2.5 rounded bg-line" style={{ width: w }} />)}
+    <div className="flex min-h-0 flex-1 animate-pulse flex-col">
+      <div className="border-line bg-paper flex h-[34px] items-end gap-5 border-b px-4 pb-2">
+        {[44, 52, 40, 60, 48].map((w, i) => (
+          <div key={i} className="bg-line h-2.5 rounded" style={{ width: w }} />
+        ))}
       </div>
-      <div className="flex h-[88px] items-center gap-3 border-b border-line bg-paper px-4">
-        {Array.from({ length: 9 }, (_, i) => <div key={i} className="size-12 rounded-lg bg-line/70" />)}
+      <div className="border-line bg-paper flex h-[88px] items-center gap-3 border-b px-4">
+        {Array.from({ length: 9 }, (_, i) => (
+          <div key={i} className="bg-line/70 size-12 rounded-lg" />
+        ))}
       </div>
-      <div className="flex min-h-0 flex-1 gap-4 bg-canvas p-4">
+      <div className="bg-canvas flex min-h-0 flex-1 gap-4 p-4">
         <div className="hidden w-[180px] flex-col gap-3 md:flex">
-          {[0, 1, 2].map((i) => <div key={i} className="aspect-video rounded-md bg-line/60" />)}
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="bg-line/60 aspect-video rounded-md" />
+          ))}
         </div>
-        <div className="flex flex-1 items-center justify-center"><div className="aspect-video w-full max-w-[880px] rounded-lg bg-line/50" /></div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="bg-line/50 aspect-video w-full max-w-[880px] rounded-lg" />
+        </div>
       </div>
     </div>
   )
 }
-
 
 /** Bản chữ của các khối (khi không áp được vào đề thì hiện trong chat để giáo viên vẫn dùng được). */
 function blocksPlain(blocks: ExamBlock[]): string {
@@ -196,8 +241,10 @@ function blocksPlain(blocks: ExamBlock[]): string {
     } else if (b.type === 'heading' || b.type === 'title') lines.push(`**${plainText(b.text)}**`)
     else if (b.type === 'paragraph' || b.type === 'student') lines.push(plainText(b.text))
     else if (b.type === 'bullets') for (const it of b.items) lines.push(`- ${plainText(it)}`)
-    else if (b.type === 'answerKey') lines.push(b.items.map((it) => `${it.no}. ${plainText(it.answer)}`).join('; '))
-    else if (b.type === 'rubric') for (const it of b.items) lines.push(`${it.label} ${plainText(it.text)}`)
+    else if (b.type === 'answerKey')
+      lines.push(b.items.map((it) => `${it.no}. ${plainText(it.answer)}`).join('; '))
+    else if (b.type === 'rubric')
+      for (const it of b.items) lines.push(`${it.label} ${plainText(it.text)}`)
   }
   return lines.filter((l) => l.trim()).join('\n\n')
 }
@@ -206,12 +253,14 @@ function blocksPlain(blocks: ExamBlock[]): string {
 function nodeText(node: JSONContent): string {
   if (node.type === 'text') return node.text ?? ''
   // công thức nằm ở attrs, không có node text: thiếu nhánh này thì AI thấy "Giải hệ phương trình … là" mà mất hệ phương trình
-  if (node.type === 'inlineMath' || node.type === 'blockMath') return `$${String(node.attrs?.latex ?? '')}$`
+  if (node.type === 'inlineMath' || node.type === 'blockMath')
+    return `$${String(node.attrs?.latex ?? '')}$`
   if (node.type === 'image') return '[hình]'
   return (node.content ?? []).map(nodeText).join(' ')
 }
 
-const featureForKind = (kind?: string): Feature => kind === 'slide' ? 'slide' : kind === 'board' ? 'board' : 'word'
+const featureForKind = (kind?: string): Feature =>
+  kind === 'slide' ? 'slide' : kind === 'board' ? 'board' : 'word'
 
 export default function ComposeDoc() {
   const access = useFeatureAccess()
@@ -255,10 +304,13 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     updateDeck,
   } = useComposeStore()
 
-  const saveTab = useCallback((id: string) => {
-    const tab = useComposeStore.getState().tabs.find((value) => value.id === id)
-    if (tab && accessRef.current.canUse(featureForKind(tab.kind))) persistTab(id)
-  }, [persistTab])
+  const saveTab = useCallback(
+    (id: string) => {
+      const tab = useComposeStore.getState().tabs.find((value) => value.id === id)
+      if (tab && accessRef.current.canUse(featureForKind(tab.kind))) persistTab(id)
+    },
+    [persistTab],
+  )
   const saveDoc = saveTab
   const saveAll = useCallback(() => {
     for (const tab of useComposeStore.getState().tabs) if (tab.dirty) saveTab(tab.id)
@@ -269,9 +321,17 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
   // tab khởi động (trang bắt đầu) hiện thay cho sân soạn khi được chọn
   // trang khác đã mở sẵn một tab (vd. Lưu vào trình soạn thảo ở trang xem đề) thì vào thẳng tab đó
   // create: trang chủ bấm "Mở bảng vẽ" / "Mở ngay" (Slide) → mở thẳng một slide / bảng vẽ trống
-  const { state: navState } = useLocation() as { state: { openTab?: boolean; open?: { kind: 'exam' | 'slide' | 'board'; id: string }; create?: 'slide' | 'board' } | null }
+  const { state: navState } = useLocation() as {
+    state: {
+      openTab?: boolean
+      open?: { kind: 'exam' | 'slide' | 'board'; id: string }
+      create?: 'slide' | 'board'
+    } | null
+  }
   // F5 không về màn Bắt đầu: phiên (tab đang mở, tab đang xem) giữ trong sessionStorage — xem effect khôi phục bên dưới
-  const [startChosen, setStartOpen] = useState(() => (navState?.openTab || requestedCreation ? false : (readSession()?.start ?? true)))
+  const [startChosen, setStartOpen] = useState(() =>
+    navState?.openTab || requestedCreation ? false : (readSession()?.start ?? true),
+  )
   // không còn tab nào (mới vào trang, hoặc vừa đóng tab cuối) thì luôn ở màn Bắt đầu
   const startOpen = startChosen || tabs.length === 0
   // màn hẹp (tablet/điện thoại): trợ lý AI nổi đè lên trang nên mặc định đóng
@@ -326,7 +386,8 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     const want = navState?.open
     if (want) {
       const { myDocs, myDecks } = useDocStore.getState()
-      if (want.kind === 'board') newBoard(want.id, useBoards.getState().items.find((b) => b.id === want.id)?.title)
+      if (want.kind === 'board')
+        newBoard(want.id, useBoards.getState().items.find((b) => b.id === want.id)?.title)
       else if (want.kind === 'slide') {
         const deck = myDecks.find((d) => d.id === want.id)
         if (deck) openDeck(deck)
@@ -352,7 +413,10 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     // trước khi khôi phục xong chưa có tab — đừng ghi đè phiên cũ bằng danh sách rỗng
     if (!restoredRef.current) return
     try {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ids: sessionTabs.map((t) => t.id), active: activeId, start: startOpen }))
+      sessionStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({ ids: sessionTabs.map((t) => t.id), active: activeId, start: startOpen }),
+      )
     } catch {
       /* chỉ là tiện ích */
     }
@@ -400,9 +464,9 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
       if (!accessRef.current.canUse('word')) return
       if (reuseEmpty) {
         // chỉ dùng lại tab ĐỀ trống — tab slide/bảng vẽ không có `contents` nên trước đây bị coi nhầm là đề trống
-        const only = tabs.length === 1 && tabs[0].kind !== 'slide' && tabs[0].kind !== 'board' ? tabs[0] : null
-        const empty =
-          only && !only.dirty && (contents[only.id]?.content?.length ?? 0) === 0
+        const only =
+          tabs.length === 1 && tabs[0].kind !== 'slide' && tabs[0].kind !== 'board' ? tabs[0] : null
+        const empty = only && !only.dirty && (contents[only.id]?.content?.length ?? 0) === 0
         if (empty) {
           setActive(only.id)
           setStartOpen(false)
@@ -442,13 +506,14 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
       const type = node.type ?? ''
       if (type === 'paragraph' && !node.content?.length) continue
       const id = blockKey(index)
-      const shortType = type.startsWith('exam')
-        ? type[4].toLowerCase() + type.slice(5)
-        : type
+      const shortType = type.startsWith('exam') ? type[4].toLowerCase() + type.slice(5) : type
       // 320 ký tự: câu hỏi kèm công thức + 4 phương án vẫn đủ để AI viết lời giải / sửa đúng chỗ
       const text = nodeText(node).replace(/\s+/g, ' ').trim().slice(0, 320)
       // số câu: giáo viên nói "câu 4" thì AI phải biết khối nào là câu 4 (trước đây thiếu → sửa nhầm câu 1)
-      const no = (type === 'examQuestion' || type === 'examEssay') && node.attrs?.no != null ? ` ${type === 'examEssay' ? 'Bài' : 'Câu'} ${node.attrs.no}` : ''
+      const no =
+        (type === 'examQuestion' || type === 'examEssay') && node.attrs?.no != null
+          ? ` ${type === 'examEssay' ? 'Bài' : 'Câu'} ${node.attrs.no}`
+          : ''
       lines.push(`- [${id}] ${shortType}${no}${text ? `: ${text}` : ''}`)
       if (lines.length >= 80) {
         lines.push('… (còn nữa)')
@@ -470,12 +535,15 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     editor?.setEditable(!readOnly)
   }, [editor, readOnly])
   const slideActions = useRef<SlideEditorActions>(null)
-  const savedStatus = useDocStore((s) => activeTab?.kind === 'slide'
-    ? s.myDecks.find((d) => d.id === activeId)?.status
-    : s.myDocs.find((d) => d.id === activeId)?.status)
+  const savedStatus = useDocStore((s) =>
+    activeTab?.kind === 'slide'
+      ? s.myDecks.find((d) => d.id === activeId)?.status
+      : s.myDocs.find((d) => d.id === activeId)?.status,
+  )
 
   // Ctrl/Cmd+F: Tìm, Ctrl/Cmd+H: Thay thế (như Word/Docs) — chỉ ở tab đề thi, thay ô tìm của trình duyệt
-  const docTabOpen = !startOpen && !!editor && activeTab?.kind !== 'slide' && activeTab?.kind !== 'board'
+  const docTabOpen =
+    !startOpen && !!editor && activeTab?.kind !== 'slide' && activeTab?.kind !== 'board'
   useEffect(() => {
     if (!docTabOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -517,7 +585,14 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
   const handleExportWord = useCallback(async () => {
     if (!activeDoc) return
     const { exportDocBlocks } = await import('@/engine/examEditor/exportBlocks') // xuất Word nạp lúc bấm
-    await exportDocBlocks(activeDoc, { landscape: pageSetup.orientation === 'landscape', paper: paperCm(pageSetup), margins: marginsOf(pageSetup), pageNumber: pageSetup.pageNumber, header: pageSetup.header, footer: pageSetup.footer })
+    await exportDocBlocks(activeDoc, {
+      landscape: pageSetup.orientation === 'landscape',
+      paper: paperCm(pageSetup),
+      margins: marginsOf(pageSetup),
+      pageNumber: pageSetup.pageNumber,
+      header: pageSetup.header,
+      footer: pageSetup.footer,
+    })
   }, [activeDoc, pageSetup])
 
   /**
@@ -529,7 +604,9 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     if (!activeDoc) return
     const exam = docToExam(activeDoc, `doc-${activeDoc.id}`)
     if (!exam.sections.some((s) => s.questions.length)) {
-      await dialog.alert('Thêm câu trắc nghiệm hoặc tự luận trước nhé.', { title: 'Đề chưa có câu hỏi nào để chuyển' })
+      await dialog.alert('Thêm câu trắc nghiệm hoặc tự luận trước nhé.', {
+        title: 'Đề chưa có câu hỏi nào để chuyển',
+      })
       return
     }
     const online = useOnline.getState()
@@ -537,12 +614,15 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     // đóng hộp bằng Esc hay bấm ra ngoài thì mở bản đã chỉnh, không mất gì
     const redo =
       prev &&
-      (await dialog.confirm('Bản đã chỉnh đáp án, giải thích, cài đặt được giữ nếu bạn mở lại. Chuyển lại từ đầu thì bản đó bị thay.', {
-        title: 'Đề này đã được chuyển sang Tạo đề online',
-        confirmLabel: 'Chuyển lại từ đầu',
-        cancelLabel: 'Mở bản đã chỉnh',
-        danger: true,
-      }))
+      (await dialog.confirm(
+        'Bản đã chỉnh đáp án, giải thích, cài đặt được giữ nếu bạn mở lại. Chuyển lại từ đầu thì bản đó bị thay.',
+        {
+          title: 'Đề này đã được chuyển sang Tạo đề online',
+          confirmLabel: 'Chuyển lại từ đầu',
+          cancelLabel: 'Mở bản đã chỉnh',
+          danger: true,
+        },
+      ))
     if (prev && !redo) {
       navigate(`/tao-de-online/${prev.id}`)
       return
@@ -556,12 +636,24 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     async (file: File) => {
       // .docx đọc trên trình duyệt để giữ định dạng; .doc/.xlsx… vẫn qua server lấy chữ
       const isDocx = /\.docx$/i.test(file.name)
-      const data = isDocx ? { title: file.name.replace(/\.[^.]+$/, '').trim().slice(0, 120) || 'Tài liệu nhập', text: '' } : await readImportFile(file)
-      const imported = isDocx ? await (await import('@/engine/lib/docxImport')).docxImport(file) : null
+      const data = isDocx
+        ? {
+            title:
+              file.name
+                .replace(/\.[^.]+$/, '')
+                .trim()
+                .slice(0, 120) || 'Tài liệu nhập',
+            text: '',
+          }
+        : await readImportFile(file)
+      const imported = isDocx
+        ? await (await import('@/engine/lib/docxImport')).docxImport(file)
+        : null
       const blocks = imported ? imported.blocks : textToBlocks(data.text)
       // lề và hướng trang theo tệp Word (khổ giấy vẫn A4)
       const page = imported?.page
-      if (page) setPageSetup((p) => ({ ...p, margins: page.margins, orientation: page.orientation }))
+      if (page)
+        setPageSetup((p) => ({ ...p, margins: page.margins, orientation: page.orientation }))
       if (!blocks.length) throw new Error('Tệp không có nội dung văn bản để nhập.')
       const id = newDoc()
       renameTab(id, data.title)
@@ -590,7 +682,16 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
 
   const handlePrint = useCallback(() => {
     if (!activeDoc) return
-    void import('@/engine/examEditor/exportBlocks').then(({ printDoc }) => printDoc(activeDoc, { landscape: pageSetup.orientation === 'landscape', paper: paperCm(pageSetup), margins: marginsOf(pageSetup), pageNumber: pageSetup.pageNumber, header: pageSetup.header, footer: pageSetup.footer }))
+    void import('@/engine/examEditor/exportBlocks').then(({ printDoc }) =>
+      printDoc(activeDoc, {
+        landscape: pageSetup.orientation === 'landscape',
+        paper: paperCm(pageSetup),
+        margins: marginsOf(pageSetup),
+        pageNumber: pageSetup.pageNumber,
+        header: pageSetup.header,
+        footer: pageSetup.footer,
+      }),
+    )
   }, [activeDoc, pageSetup])
 
   /**
@@ -623,20 +724,33 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
         // AI trả lời tự do — không phải JSON thì bỏ qua, người dùng đọc trong panel
         return looksJson ? { text: FAIL_JSON, failed: true } : undefined
       }
-      if (!raw || typeof raw !== 'object') return looksJson ? { text: FAIL_JSON, failed: true } : undefined
+      if (!raw || typeof raw !== 'object')
+        return looksJson ? { text: FAIL_JSON, failed: true } : undefined
 
       const say = typeof raw.say === 'string' ? raw.say.trim().slice(0, 1200) : ''
       const { blocks, patches, action, noChanges } = prepareAiApplication(raw, editor.getJSON())
       if (noChanges) return { text: 'Không có thay đổi hợp lệ để áp dụng.', failed: true }
-      const hasPlot = (list: ExamBlock[]) => list.some((b) => (b.type === 'paragraph' || b.type === 'question') && Array.isArray(b.text) && b.text.some((s) => s.image?.plot))
+      const hasPlot = (list: ExamBlock[]) =>
+        list.some(
+          (b) =>
+            (b.type === 'paragraph' || b.type === 'question') &&
+            Array.isArray(b.text) &&
+            b.text.some((s) => s.image?.plot),
+        )
       if (hasPlot(blocks) || patches.some((p) => hasPlot(p.blocks)))
         setTimeout(() => void loadTools().then(({ ti }) => ti.pngifyToolImages(editor)), 0)
-      const warn = typeof raw.warning === 'string' && raw.warning.trim() ? `\n\nLưu ý: ${raw.warning.trim().slice(0, 300)}` : ''
+      const warn =
+        typeof raw.warning === 'string' && raw.warning.trim()
+          ? `\n\nLưu ý: ${raw.warning.trim().slice(0, 300)}`
+          : ''
       const done = (line: string) => ({ text: `${say ? `${say}\n\n` : ''}${line}${warn}` })
       // phần AI viết mà không áp được: hiện thành chữ trong chat
       const fallback = (why: string): AiApplyResult => {
         const plain = blocksPlain([...blocks, ...patches.flatMap((p) => p.blocks)])
-        return { text: `${say ? `${say}\n\n` : ''}${why}${plain ? `\n\n${plain}` : ''}`, failed: true }
+        return {
+          text: `${say ? `${say}\n\n` : ''}${why}${plain ? `\n\n${plain}` : ''}`,
+          failed: true,
+        }
       }
       try {
         if (action === 'replace' && blocks.length) {
@@ -648,7 +762,8 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
           editor.commands.setTextSelection(Sel.near(editor.state.doc.resolve(1)).from)
           const name = typeof raw.name === 'string' ? raw.name.trim().slice(0, 120) : ''
           const tab = useComposeStore.getState().tabs.find((t) => t.id === activeId)
-          if (name && tab && (!tab.title.trim() || tab.title === 'Đề thi mới')) renameTab(activeId, name)
+          if (name && tab && (!tab.title.trim() || tab.title === 'Đề thi mới'))
+            renameTab(activeId, name)
           return done(`Đã soạn xong đề (${blocks.length} khối).`)
         }
         if (action === 'append' && blocks.length) {
@@ -664,7 +779,9 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
             let from = 0
             for (let i = 0; i < p.index; i++) from += tr.doc.child(i).nodeSize
             const to = from + tr.doc.child(p.index).nodeSize
-            const nodes = (blocksToTipTap(p.blocks).content ?? []).map((j) => state.schema.nodeFromJSON(j))
+            const nodes = (blocksToTipTap(p.blocks).content ?? []).map((j) =>
+              state.schema.nodeFromJSON(j),
+            )
             if (p.op === 'delete') {
               tr.delete(from, to)
               stat.del++
@@ -716,11 +833,7 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
       const tipTapDoc = blocksToTipTap(newBlocks)
       const nodes = tipTapDoc.content ?? []
       if (!nodes.length) return
-      editor
-        .chain()
-        .focus('end')
-        .insertContentAt(editor.state.doc.content.size, nodes)
-        .run()
+      editor.chain().focus('end').insertContentAt(editor.state.doc.content.size, nodes).run()
     },
     [editor],
   )
@@ -740,14 +853,25 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
         const doc = ts.readToolDoc(img.svg)
         const plot = JSON.stringify(doc)
         const look = ti.TOOL_DOC_IMAGE[doc?.kind ?? 'graph']
-        const attrs = { src, alt: look.alt, width: ti.toolImageWidth(doc?.kind ?? 'graph', img.width), plot }
+        const attrs = {
+          src,
+          alt: look.alt,
+          width: ti.toolImageWidth(doc?.kind ?? 'graph', img.width),
+          plot,
+        }
         const node = target && 'replace' in target ? editor.state.doc.nodeAt(target.replace) : null
         if (target && 'replace' in target && node?.type.name === 'image') {
-          editor.view.dispatch(editor.state.tr.setNodeMarkup(target.replace, undefined, { ...node.attrs, src, plot }))
+          editor.view.dispatch(
+            editor.state.tr.setNodeMarkup(target.replace, undefined, { ...node.attrs, src, plot }),
+          )
         } else if (target && 'after' in target && target.after <= editor.state.doc.content.size) {
           editor
             .chain()
-            .insertContentAt(target.after, { type: 'paragraph', attrs: { textAlign: 'center' }, content: [{ type: 'image', attrs }] })
+            .insertContentAt(target.after, {
+              type: 'paragraph',
+              attrs: { textAlign: 'center' },
+              content: [{ type: 'image', attrs }],
+            })
             .setNodeSelection(target.after + 1)
             .scrollIntoView()
             .run()
@@ -792,7 +916,11 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
         if (i === index) pos = offset
       })
       if (pos < 0) return
-      editor.chain().focus().setTextSelection(pos + 1).run()
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(pos + 1)
+        .run()
 
       // cuộn khối đó vào 1/3 chiều cao vùng nhìn
       const dom = editor.view.dom as HTMLElement
@@ -829,7 +957,11 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
   const isPhone = viewport.w > 0 && viewport.w < 640
   const isTablet = viewport.w >= 640 && viewport.w < 1024
   const isMobile = isPhone
-  const layoutMode: 'desktop' | 'tablet' | 'phone' = isPhone ? 'phone' : isTablet ? 'tablet' : 'desktop'
+  const layoutMode: 'desktop' | 'tablet' | 'phone' = isPhone
+    ? 'phone'
+    : isTablet
+      ? 'tablet'
+      : 'desktop'
 
   const [mobileView, setMobileView] = useState<'reflow' | 'paged'>(() => {
     try {
@@ -880,7 +1012,7 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
     })
   }, [])
 
-  const effectiveZoom = isReflow ? 100 : (autoFit ? Math.floor(fitScale * 100) : zoom)
+  const effectiveZoom = isReflow ? 100 : autoFit ? Math.floor(fitScale * 100) : zoom
   const effectiveScale = isReflow ? 1 : effectiveZoom / 100
 
   // trên màn hình hẹp, ưu tiên sân soạn: tự thu gọn panel bên
@@ -890,32 +1022,66 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
 
   return (
     <div className={cn('compose-app', isReflow && 'is-reflow')}>
-      {!startOpen && activeTab && access.isDisabled(activeFeature) && <FeatureNotice banner staff={access.isStaff} />}
-      {!startOpen && activeTab && (activeTab.kind !== 'exam' || readOnly) && <EditorHeader
-        key={activeTab.id}
-        fileSlot={activeTab.kind !== 'board' ? setExamFileTarget : undefined}
-        onCommands={activeTab.kind !== 'board' ? () => setExamCommandsOpen(true) : undefined}
-        title={activeTab.title}
-        dirty={activeTab.dirty}
-        readOnly={readOnly}
-        status={docStatus(savedStatus ?? activeDeck?.status)}
-        onRename={(title) => renameTab(activeTab.id, title)}
-        onStatusChange={activeTab.kind === 'board' ? undefined : (status) => setTabStatus(activeTab.id, status)}
-        onSave={activeTab.kind === 'slide' ? handleSaveSlide : handleSave}
-        onPreview={activeTab.kind === 'board' || readOnly && activeTab.kind !== 'slide' || !access.canUse('online') && activeTab.kind === 'exam' ? undefined : activeTab.kind === 'slide' ? () => slideActions.current?.present() : handleStartQuiz}
-        previewLabel={activeTab.kind === 'slide' ? 'Trình chiếu' : 'Làm đề tương tác'}
-        previewEmphasis={activeTab.kind === 'slide'}
-        previewIcon={activeTab.kind === 'slide' ? undefined : <MonitorPlay className="size-4" strokeWidth={1.5} />}
-        exports={activeTab.kind === 'board' ? [] : activeTab.kind === 'slide'
-          ? activeDeck?.format === 'html' ? [] : [
-            { label: 'Xuất PPTX', onSelect: () => { void slideActions.current?.exportPptx() } },
-            { label: 'PDF', onSelect: () => slideActions.current?.exportPdf() },
-          ]
-          : [
-            { label: 'Xuất Word', onSelect: () => { void handleExportWord() } },
-            { label: 'PDF', onSelect: handlePrint },
-          ]}
-      />}
+      {!startOpen && activeTab && access.isDisabled(activeFeature) && (
+        <FeatureNotice banner staff={access.isStaff} />
+      )}
+      {!startOpen && activeTab && (activeTab.kind !== 'exam' || readOnly) && (
+        <EditorHeader
+          key={activeTab.id}
+          fileSlot={activeTab.kind !== 'board' ? setExamFileTarget : undefined}
+          onCommands={activeTab.kind !== 'board' ? () => setExamCommandsOpen(true) : undefined}
+          title={activeTab.title}
+          dirty={activeTab.dirty}
+          readOnly={readOnly}
+          status={docStatus(savedStatus ?? activeDeck?.status)}
+          onRename={(title) => renameTab(activeTab.id, title)}
+          onStatusChange={
+            activeTab.kind === 'board' ? undefined : (status) => setTabStatus(activeTab.id, status)
+          }
+          onSave={activeTab.kind === 'slide' ? handleSaveSlide : handleSave}
+          onPreview={
+            activeTab.kind === 'board' ||
+            (readOnly && activeTab.kind !== 'slide') ||
+            (!access.canUse('online') && activeTab.kind === 'exam')
+              ? undefined
+              : activeTab.kind === 'slide'
+                ? () => slideActions.current?.present()
+                : handleStartQuiz
+          }
+          previewLabel={activeTab.kind === 'slide' ? 'Trình chiếu' : 'Làm đề tương tác'}
+          previewEmphasis={activeTab.kind === 'slide'}
+          previewIcon={
+            activeTab.kind === 'slide' ? undefined : (
+              <MonitorPlay className="size-4" strokeWidth={1.5} />
+            )
+          }
+          exports={
+            activeTab.kind === 'board'
+              ? []
+              : activeTab.kind === 'slide'
+                ? activeDeck?.format === 'html'
+                  ? []
+                  : [
+                      {
+                        label: 'Xuất PPTX',
+                        onSelect: () => {
+                          void slideActions.current?.exportPptx()
+                        },
+                      },
+                      { label: 'PDF', onSelect: () => slideActions.current?.exportPdf() },
+                    ]
+                : [
+                    {
+                      label: 'Xuất Word',
+                      onSelect: () => {
+                        void handleExportWord()
+                      },
+                    },
+                    { label: 'PDF', onSelect: handlePrint },
+                  ]
+          }
+        />
+      )}
       {/* ---------- tab strip nhiều đề — trên cùng như GenOffice ---------- */}
       <div className="compose-tabbar">
         <TabStrip
@@ -981,256 +1147,295 @@ function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }
       ) : activeTab?.kind === 'board' ? (
         <div className="compose-body">
           <PageErrorBoundary resetKey={activeTab.id}>
-          <Suspense fallback={<BoardSkeleton />}>
-            <BoardEditor key={`${activeTab.id}:${readOnly}`} id={activeTab.id} readOnly={readOnly} />
-          </Suspense>
+            <Suspense fallback={<BoardSkeleton />}>
+              <BoardEditor
+                key={`${activeTab.id}:${readOnly}`}
+                id={activeTab.id}
+                readOnly={readOnly}
+              />
+            </Suspense>
           </PageErrorBoundary>
         </div>
       ) : activeDeck ? (
         /* ---------- tab slide: trình soạn trình chiếu dùng chung với /soan-slide ---------- */
         <div className="compose-body">
           <PageErrorBoundary resetKey={activeDeck.id}>
-          <Suspense fallback={<SlideEditorSkeleton />}>
-          {readOnly ? <SlideReadOnly deck={activeDeck} actionsRef={slideActions} /> : <SlideEditor
-            fileTarget={examFileTarget}
-            commandOpen={examCommandsOpen}
-            onCommandOpen={setExamCommandsOpen}
-            actionsRef={slideActions}
-            deck={activeDeck}
-            updateDeck={(patch) => updateDeck(activeDeck.id, patch)}
-            onSave={handleSaveSlide}
-            onNewDeck={newSlide}
-            onImportFile={handleImportSlides}
-          />}
-          </Suspense>
+            <Suspense fallback={<SlideEditorSkeleton />}>
+              {readOnly ? (
+                <SlideReadOnly deck={activeDeck} actionsRef={slideActions} />
+              ) : (
+                <SlideEditor
+                  fileTarget={examFileTarget}
+                  commandOpen={examCommandsOpen}
+                  onCommandOpen={setExamCommandsOpen}
+                  actionsRef={slideActions}
+                  deck={activeDeck}
+                  updateDeck={(patch) => updateDeck(activeDeck.id, patch)}
+                  onSave={handleSaveSlide}
+                  onNewDeck={newSlide}
+                  onImportFile={handleImportSlides}
+                />
+              )}
+            </Suspense>
           </PageErrorBoundary>
         </div>
       ) : (
         <>
-      {!readOnly && <Ribbon
-        editor={editor}
-        activeTab={ribbonTab}
-        onTabChange={setRibbonTab}
-        onNewDoc={() => newDocAndOpen(false)}
-        onImportFile={handleImportExam}
-        onSave={handleSave}
-        onPrint={handlePrint}
-        onExportWord={handleExportWord}
-        onExportPdf={handlePrint}
-        onStartQuiz={handleStartQuiz}
-        dirty={activeTab?.dirty ?? false}
-        pageCount={pageCount}
-        zoom={effectiveZoom}
-        onZoomChange={setZoomManual}
-        format={format}
-        onFind={() => openFind('find')}
-        onReplace={() => openFind('replace')}
-        margins={marginsOf(pageSetup)}
-        onMarginsChange={(margins) => setPageSetup((p) => ({ ...p, margins }))}
-        orientation={pageSetup.orientation}
-        onOrientationChange={(o) => setPageSetup((p) => ({ ...p, orientation: o }))}
-        pageSize={pageSetup.size ?? 'A4'}
-        onPageSizeChange={(size) => setPageSetup((p) => ({ ...p, size }))}
-        pageColor={pageSetup.pageColor}
-        onPageColorChange={(c) => setPageSetup((p) => ({ ...p, pageColor: c }))}
-        pageBorder={pageSetup.pageBorder}
-        onPageBorderChange={(w) => setPageSetup((p) => ({ ...p, pageBorder: w }))}
-        pageNumber={pageSetup.pageNumber}
-        onPageNumberChange={(pn) => setPageSetup((p) => ({ ...p, pageNumber: pn }))}
-        header={pageSetup.header}
-        footer={pageSetup.footer}
-        onHeaderChange={(header) => setPageSetup((p) => ({ ...p, header }))}
-        onFooterChange={(footer) => setPageSetup((p) => ({ ...p, footer }))}
-        onOpenNav={openNavWithTab}
-        layoutMode={layoutMode}
-        fileActions={(Object.keys(DOC_STATUS_LABELS) as DocStatus[]).map((status) => ({
-          label: `Trạng thái: ${DOC_STATUS_LABELS[status]}`,
-          hint: docStatus(savedStatus) === status ? 'Hiện tại' : 'Đổi trạng thái tài liệu',
-          onClick: () => setTabStatus(activeTab!.id, status),
-        }))}
-      />}
-      <div className="compose-body">
-          {!readOnly && <NavPanel
-            doc={activeContent}
-            open={navOpen}
-            onOpenChange={setNavOpen}
-            onInsertTemplate={handleInsertTemplate}
-            onGoToBlock={handleGoToBlock}
-            onInsertPlot={(img) => void handleInsertPlot(img)}
-            onInsertBlocks={handleInsertBlocks}
-            examDoc={activeDoc}
-            side="left"
-            isMobile={isMobile}
-            isOverlay={isTablet}
-            currentTab={navTab}
-            onTabChange={setNavTab}
-            inspectorContent={<InspectorPanel inspector={inspector} />}
-          />}
-        {/* sân soạn (giữa) */}
-        <div className="compose-center">
-          {!readOnly && <InspectorOverlay inspector={inspector} hidden={navOpen && (isMobile || isTablet)} />}
-          {!readOnly && findTab && editor && (
-            <Suspense fallback={null}><FindPanel editor={editor} initialTab={findTab} onClose={() => setFindTab(null)} /></Suspense>
+          {!readOnly && (
+            <Ribbon
+              editor={editor}
+              activeTab={ribbonTab}
+              onTabChange={setRibbonTab}
+              onNewDoc={() => newDocAndOpen(false)}
+              onImportFile={handleImportExam}
+              onSave={handleSave}
+              onPrint={handlePrint}
+              onExportWord={handleExportWord}
+              onExportPdf={handlePrint}
+              onStartQuiz={handleStartQuiz}
+              dirty={activeTab?.dirty ?? false}
+              pageCount={pageCount}
+              zoom={effectiveZoom}
+              onZoomChange={setZoomManual}
+              format={format}
+              onFind={() => openFind('find')}
+              onReplace={() => openFind('replace')}
+              margins={marginsOf(pageSetup)}
+              onMarginsChange={(margins) => setPageSetup((p) => ({ ...p, margins }))}
+              orientation={pageSetup.orientation}
+              onOrientationChange={(o) => setPageSetup((p) => ({ ...p, orientation: o }))}
+              pageSize={pageSetup.size ?? 'A4'}
+              onPageSizeChange={(size) => setPageSetup((p) => ({ ...p, size }))}
+              pageColor={pageSetup.pageColor}
+              onPageColorChange={(c) => setPageSetup((p) => ({ ...p, pageColor: c }))}
+              pageBorder={pageSetup.pageBorder}
+              onPageBorderChange={(w) => setPageSetup((p) => ({ ...p, pageBorder: w }))}
+              pageNumber={pageSetup.pageNumber}
+              onPageNumberChange={(pn) => setPageSetup((p) => ({ ...p, pageNumber: pn }))}
+              header={pageSetup.header}
+              footer={pageSetup.footer}
+              onHeaderChange={(header) => setPageSetup((p) => ({ ...p, header }))}
+              onFooterChange={(footer) => setPageSetup((p) => ({ ...p, footer }))}
+              onOpenNav={openNavWithTab}
+              layoutMode={layoutMode}
+              fileActions={(Object.keys(DOC_STATUS_LABELS) as DocStatus[]).map((status) => ({
+                label: `Trạng thái: ${DOC_STATUS_LABELS[status]}`,
+                hint: docStatus(savedStatus) === status ? 'Hiện tại' : 'Đổi trạng thái tài liệu',
+                onClick: () => setTabStatus(activeTab!.id, status),
+              }))}
+            />
           )}
-          <div className="compose-scroll" ref={stageRef}>
-            {/* `zoom` (không phải transform) để thước kẻ và trang giấy co cùng
-                tỉ lệ và container vẫn đúng bề rộng — giống GenOffice `.doc-zoom`. */}
-            <div
-              className={cn('compose-canvas anim-tab-in', isReflow && 'is-reflow')}
-              key={activeId ?? 'none'}
-              style={{ zoom: isReflow ? 1 : effectiveScale, ['--page-zoom' as string]: isReflow ? 1 : effectiveScale }}
-            >
-              {!readOnly && !isReflow && (
-                <Ruler
-                  width={PAGE_W}
-                  margin={MARGIN}
-                  marginRight={MARGIN_RIGHT}
-                  indentLeft={format.indentLeft}
-                  indentFirstLine={format.indentFirstLine}
-                  onIndentChange={(patch) => {
-                    if (editor) applyFormatAttrs(editor, patch)
-                  }}
-                  onMarginChange={(px, side) =>
-                    setPageSetup((p) => ({ ...p, margins: { ...marginsOf(p), [side]: Math.round((px / CM) * 10) / 10 } }))
-                  }
+          <div className="compose-body">
+            {!readOnly && (
+              <NavPanel
+                doc={activeContent}
+                open={navOpen}
+                onOpenChange={setNavOpen}
+                onInsertTemplate={handleInsertTemplate}
+                onGoToBlock={handleGoToBlock}
+                onInsertPlot={(img) => void handleInsertPlot(img)}
+                onInsertBlocks={handleInsertBlocks}
+                examDoc={activeDoc}
+                side="left"
+                isMobile={isMobile}
+                isOverlay={isTablet}
+                currentTab={navTab}
+                onTabChange={setNavTab}
+                inspectorContent={<InspectorPanel inspector={inspector} />}
+              />
+            )}
+            {/* sân soạn (giữa) */}
+            <div className="compose-center">
+              {!readOnly && (
+                <InspectorOverlay
+                  inspector={inspector}
+                  hidden={navOpen && (isMobile || isTablet)}
                 />
               )}
-              <Suspense fallback={null}>
-                <ExamEditor
+              {!readOnly && findTab && editor && (
+                <Suspense fallback={null}>
+                  <FindPanel
+                    editor={editor}
+                    initialTab={findTab}
+                    onClose={() => setFindTab(null)}
+                  />
+                </Suspense>
+              )}
+              <div className="compose-scroll" ref={stageRef}>
+                {/* `zoom` (không phải transform) để thước kẻ và trang giấy co cùng
+                tỉ lệ và container vẫn đúng bề rộng — giống GenOffice `.doc-zoom`. */}
+                <div
+                  className={cn('compose-canvas anim-tab-in', isReflow && 'is-reflow')}
                   key={activeId ?? 'none'}
-                  content={activeContent}
-                  onChange={onChange}
-                  onReady={handleEditorReady}
-                  pageSetup={pageSetup}
-                  readOnly={readOnly}
-                  isReflow={isReflow}
+                  style={{
+                    zoom: isReflow ? 1 : effectiveScale,
+                    ['--page-zoom' as string]: isReflow ? 1 : effectiveScale,
+                  }}
+                >
+                  {!readOnly && !isReflow && (
+                    <Ruler
+                      width={PAGE_W}
+                      margin={MARGIN}
+                      marginRight={MARGIN_RIGHT}
+                      indentLeft={format.indentLeft}
+                      indentFirstLine={format.indentFirstLine}
+                      onIndentChange={(patch) => {
+                        if (editor) applyFormatAttrs(editor, patch)
+                      }}
+                      onMarginChange={(px, side) =>
+                        setPageSetup((p) => ({
+                          ...p,
+                          margins: { ...marginsOf(p), [side]: Math.round((px / CM) * 10) / 10 },
+                        }))
+                      }
+                    />
+                  )}
+                  <Suspense fallback={null}>
+                    <ExamEditor
+                      key={activeId ?? 'none'}
+                      content={activeContent}
+                      onChange={onChange}
+                      onReady={handleEditorReady}
+                      pageSetup={pageSetup}
+                      readOnly={readOnly}
+                      isReflow={isReflow}
+                    />
+                  </Suspense>
+                </div>
+              </div>
+
+              {/* thanh trạng thái */}
+              <div className="status-bar">
+                <div className="status-left">
+                  <span className="status-item">{pageCount} trang</span>
+                  {/* chỉ khổ + hướng; số đo lề để trong tooltip cho thanh trạng thái gọn */}
+                  <span
+                    className="status-item"
+                    data-tip={(() => {
+                      const m = marginsOf(pageSetup)
+                      const f = (n: number) => n.toLocaleString('vi-VN')
+                      return m.top === m.bottom && m.left === m.right && m.top === m.left
+                        ? `Lề ${f(m.top)} cm`
+                        : `Lề trên ${f(m.top)}, dưới ${f(m.bottom)}, trái ${f(m.left)}, phải ${f(m.right)} cm`
+                    })()}
+                  >
+                    {PAGE_SIZES[pageSetup.size ?? 'A4'].label}{' '}
+                    {pageSetup.orientation === 'landscape' ? 'ngang' : 'dọc'}
+                  </span>
+                  <span className="status-item">{activeTab?.dirty ? 'Chưa lưu' : 'Đã lưu'}</span>
+                </div>
+                <div className="status-right">
+                  {isMobile ? (
+                    <button
+                      type="button"
+                      className="mobile-view-toggle-btn"
+                      onClick={toggleMobileView}
+                      data-tip={
+                        isReflow
+                          ? 'Chuyển sang xem trang A4'
+                          : 'Chuyển sang dàn trang theo màn hình'
+                      }
+                    >
+                      {isReflow ? 'Xem trang A4' : 'Dàn trang'}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="zoom-btn"
+                        onClick={() => setZoomManual(Math.max(50, effectiveZoom - 10))}
+                        aria-label="Thu nhỏ"
+                        disabled={effectiveZoom <= 50}
+                      >
+                        <IconZoomOut size={14} />
+                      </button>
+                      <span className="tnum">{effectiveZoom}%</span>
+                      <button
+                        type="button"
+                        className="zoom-btn"
+                        onClick={() => setZoomManual(Math.min(200, effectiveZoom + 10))}
+                        aria-label="Phóng to"
+                        disabled={effectiveZoom >= 200}
+                      >
+                        <IconZoomIn size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* nav pane (phải) */}
+            <Suspense fallback={null}>
+              {!readOnly && (
+                <DocSelectionAi
+                  editor={editor}
+                  context={activeDoc ? `đề "${activeDoc.title}"` : undefined}
+                  onInsertPlot={(img, after) => void handleInsertPlot(img, { after })}
+                  onEditPlot={(doc, after) => setPlotEdit({ doc, target: { after } })}
+                  onAskChat={(text) => {
+                    const t = text.trim()
+                    // gửi kèm nguyên văn đầy đủ các khối chứa phần đang bôi đen (công thức, phương án, hình) để AI sửa đúng chỗ
+                    let full = ''
+                    if (editor && !editor.isDestroyed) {
+                      const { from, to } = editor.state.selection
+                      const doc = editor.state.doc
+                      const idx: number[] = []
+                      let pos = 0
+                      for (let i = 0; i < doc.childCount; i++) {
+                        const end = pos + doc.child(i).nodeSize
+                        if (end > from && pos < Math.max(to, from + 1)) idx.push(i)
+                        pos = end
+                      }
+                      full = blocksText(editor.getJSON(), idx.slice(0, 8))
+                    }
+                    attachToAi('exam', [
+                      {
+                        id: `sel-${t.length}-${t.slice(0, 40)}`,
+                        label: `“${t.length > 26 ? `${t.slice(0, 26)}…` : t}”`,
+                        detail: `đoạn đang bôi đen trong đề: "${t.slice(0, 2000)}"${full ? `\nNguyên văn khối chứa đoạn này (JSON đầy đủ, dùng đúng id trong ngoặc vuông khi patch):\n${full}` : ''}`,
+                      },
+                    ])
+                    setAiOpen(true)
+                  }}
+                />
+              )}
+            </Suspense>
+            {!readOnly && plotEdit && (
+              <Suspense fallback={null}>
+                <ToolModal
+                  kind={plotEdit.doc.kind}
+                  initial={plotEdit.doc.spec}
+                  submitLabel={'after' in plotEdit.target ? 'Chèn hình' : undefined}
+                  onClose={() => setPlotEdit(null)}
+                  onInsert={(img) => {
+                    void handleInsertPlot(img, plotEdit.target)
+                    setPlotEdit(null)
+                  }}
                 />
               </Suspense>
-            </div>
+            )}
+            {/* AI dock (phải, như soạn slide) */}
+            {!readOnly && (
+              <AiDock open={aiOpen} onToggle={() => setAiOpen((v) => !v)} width={360} side="right">
+                <Suspense fallback={null}>
+                  <AiPanel
+                    attachKey="exam"
+                    historyKey={activeDoc?.id}
+                    onApplyBlocks={handleAiResult}
+                    documentDigest={documentDigest}
+                    currentDocument={activeContent}
+                    focusFor={(request) => focusNote(activeContent, request)}
+                    contextSummary={
+                      activeDoc
+                        ? `đề đang soạn: "${activeDoc.title}", ${activeDoc.blocks.length} khối`
+                        : undefined
+                    }
+                  />
+                </Suspense>
+              </AiDock>
+            )}
           </div>
-
-          {/* thanh trạng thái */}
-          <div className="status-bar">
-            <div className="status-left">
-              <span className="status-item">{pageCount} trang</span>
-              {/* chỉ khổ + hướng; số đo lề để trong tooltip cho thanh trạng thái gọn */}
-              <span
-                className="status-item"
-                data-tip={(() => {
-                  const m = marginsOf(pageSetup)
-                  const f = (n: number) => n.toLocaleString('vi-VN')
-                  return m.top === m.bottom && m.left === m.right && m.top === m.left
-                    ? `Lề ${f(m.top)} cm`
-                    : `Lề trên ${f(m.top)}, dưới ${f(m.bottom)}, trái ${f(m.left)}, phải ${f(m.right)} cm`
-                })()}
-              >
-                {PAGE_SIZES[pageSetup.size ?? 'A4'].label} {pageSetup.orientation === 'landscape' ? 'ngang' : 'dọc'}
-              </span>
-              <span className="status-item">{activeTab?.dirty ? 'Chưa lưu' : 'Đã lưu'}</span>
-            </div>
-            <div className="status-right">
-              {isMobile ? (
-                <button
-                  type="button"
-                  className="mobile-view-toggle-btn"
-                  onClick={toggleMobileView}
-                  data-tip={isReflow ? 'Chuyển sang xem trang A4' : 'Chuyển sang dàn trang theo màn hình'}
-                >
-                  {isReflow ? 'Xem trang A4' : 'Dàn trang'}
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className="zoom-btn"
-                    onClick={() => setZoomManual(Math.max(50, effectiveZoom - 10))}
-                    aria-label="Thu nhỏ"
-                    disabled={effectiveZoom <= 50}
-                  >
-                    <IconZoomOut size={14} />
-                  </button>
-                  <span className="tnum">{effectiveZoom}%</span>
-                  <button
-                    type="button"
-                    className="zoom-btn"
-                    onClick={() => setZoomManual(Math.min(200, effectiveZoom + 10))}
-                    aria-label="Phóng to"
-                    disabled={effectiveZoom >= 200}
-                  >
-                    <IconZoomIn size={14} />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* nav pane (phải) */}
-        <Suspense fallback={null}>
-        {!readOnly && <DocSelectionAi
-          editor={editor}
-          context={activeDoc ? `đề "${activeDoc.title}"` : undefined}
-          onInsertPlot={(img, after) => void handleInsertPlot(img, { after })}
-          onEditPlot={(doc, after) => setPlotEdit({ doc, target: { after } })}
-          onAskChat={(text) => {
-            const t = text.trim()
-            // gửi kèm nguyên văn đầy đủ các khối chứa phần đang bôi đen (công thức, phương án, hình) để AI sửa đúng chỗ
-            let full = ''
-            if (editor && !editor.isDestroyed) {
-              const { from, to } = editor.state.selection
-              const doc = editor.state.doc
-              const idx: number[] = []
-              let pos = 0
-              for (let i = 0; i < doc.childCount; i++) {
-                const end = pos + doc.child(i).nodeSize
-                if (end > from && pos < Math.max(to, from + 1)) idx.push(i)
-                pos = end
-              }
-              full = blocksText(editor.getJSON(), idx.slice(0, 8))
-            }
-            attachToAi('exam', [{
-              id: `sel-${t.length}-${t.slice(0, 40)}`,
-              label: `“${t.length > 26 ? `${t.slice(0, 26)}…` : t}”`,
-              detail: `đoạn đang bôi đen trong đề: "${t.slice(0, 2000)}"${full ? `\nNguyên văn khối chứa đoạn này (JSON đầy đủ, dùng đúng id trong ngoặc vuông khi patch):\n${full}` : ''}`,
-            }])
-            setAiOpen(true)
-          }}
-        />}
-        </Suspense>
-        {!readOnly && plotEdit && (
-          <Suspense fallback={null}>
-          <ToolModal
-            kind={plotEdit.doc.kind}
-            initial={plotEdit.doc.spec}
-            submitLabel={'after' in plotEdit.target ? 'Chèn hình' : undefined}
-            onClose={() => setPlotEdit(null)}
-            onInsert={(img) => {
-              void handleInsertPlot(img, plotEdit.target)
-              setPlotEdit(null)
-            }}
-          />
-          </Suspense>
-        )}
-        {/* AI dock (phải, như soạn slide) */}
-        {!readOnly && <AiDock open={aiOpen} onToggle={() => setAiOpen((v) => !v)} width={360} side="right">
-          <Suspense fallback={null}>
-          <AiPanel
-            attachKey="exam"
-            historyKey={activeDoc?.id}
-            onApplyBlocks={handleAiResult}
-            documentDigest={documentDigest}
-            currentDocument={activeContent}
-            focusFor={(request) => focusNote(activeContent, request)}
-            contextSummary={
-              activeDoc
-                ? `đề đang soạn: "${activeDoc.title}", ${activeDoc.blocks.length} khối`
-                : undefined
-            }
-          />
-          </Suspense>
-        </AiDock>}
-
-      </div>
         </>
       )}
     </div>

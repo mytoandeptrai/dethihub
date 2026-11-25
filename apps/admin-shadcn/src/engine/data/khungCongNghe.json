@@ -1462,10 +1462,7 @@
             "CTST": "(đối chiếu mục lục)",
             "CD": "(đối chiếu mục lục)"
           },
-          "cac_bai": [
-            "Bài 15. Khái quát về cơ khí động lực",
-            "Bài 16. Ngành nghề cơ khí động lực"
-          ],
+          "cac_bai": ["Bài 15. Khái quát về cơ khí động lực", "Bài 16. Ngành nghề cơ khí động lực"],
           "yeu_cau_can_dat": [
             "Trình bày được khái niệm, cấu tạo chung và vai trò của cơ khí động lực",
             "Kể được tên một số máy, phương tiện sử dụng cơ khí động lực",
@@ -1932,11 +1929,7 @@
             "CTST": "(đối chiếu mục lục)",
             "CD": "(đối chiếu mục lục)"
           },
-          "cac_bai": [
-            "Bài 11. An toàn điện",
-            "Bài 12. Tiết kiệm điện năng",
-            "Tổng kết chương IV"
-          ],
+          "cac_bai": ["Bài 11. An toàn điện", "Bài 12. Tiết kiệm điện năng", "Tổng kết chương IV"],
           "yeu_cau_can_dat": [
             "Trình bày được nguyên nhân, tác hại của tai nạn điện và các biện pháp an toàn điện",
             "Trình bày được các bước sơ cứu người bị điện giật",
@@ -2520,98 +2513,70 @@
       "ten": "Đề kiểm tra giữa học kì 1 lớp 6",
       "lop": 6,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn6-nha-o",
-        "cn6-bao-quan-che-bien-thuc-pham"
-      ],
+      "pham_vi": ["cn6-nha-o", "cn6-bao-quan-che-bien-thuc-pham"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Giữa học kì 1 thường chỉ ra tới Chương I và đầu Chương II (Bài 4)."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 1 lớp 6",
       "lop": 6,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn6-nha-o",
-        "cn6-bao-quan-che-bien-thuc-pham"
-      ],
+      "pham_vi": ["cn6-nha-o", "cn6-bao-quan-che-bien-thuc-pham"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 2 lớp 6",
       "lop": 6,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn6-trang-phuc-thoi-trang",
-        "cn6-do-dung-dien-trong-gia-dinh"
-      ],
+      "pham_vi": ["cn6-trang-phuc-thoi-trang", "cn6-do-dung-dien-trong-gia-dinh"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Trọng tâm học kì 2, có thể lồng 1-2 câu ôn tập học kì 1."
     },
     {
       "ten": "Đề kiểm tra giữa học kì 1 lớp 7",
       "lop": 7,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn7-trong-trot"
-      ],
+      "pham_vi": ["cn7-trong-trot"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 1 lớp 7",
       "lop": 7,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn7-trong-trot",
-        "cn7-lam-nghiep"
-      ],
+      "pham_vi": ["cn7-trong-trot", "cn7-lam-nghiep"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 2 lớp 7",
       "lop": 7,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn7-chan-nuoi",
-        "cn7-thuy-san"
-      ],
+      "pham_vi": ["cn7-chan-nuoi", "cn7-thuy-san"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Trọng tâm học kì 2, có thể lồng 1-2 câu ôn tập học kì 1."
     },
     {
       "ten": "Đề kiểm tra giữa học kì 1 lớp 8",
       "lop": 8,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn8-ve-ki-thuat"
-      ],
+      "pham_vi": ["cn8-ve-ki-thuat"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Bài tập vẽ hình chiếu và đọc bản vẽ phải kèm hình vẽ trong đề."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 1 lớp 8",
       "lop": 8,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn8-ve-ki-thuat",
-        "cn8-co-khi"
-      ],
+      "pham_vi": ["cn8-ve-ki-thuat", "cn8-co-khi"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Bài tập vẽ hình chiếu và đọc bản vẽ phải kèm hình vẽ trong đề."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 2 lớp 8",
       "lop": 8,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn8-an-toan-dien",
-        "cn8-ki-thuat-dien",
-        "cn8-thiet-ke-ki-thuat"
-      ],
+      "pham_vi": ["cn8-an-toan-dien", "cn8-ki-thuat-dien", "cn8-thiet-ke-ki-thuat"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Trọng tâm học kì 2, có thể lồng 1-2 câu ôn tập học kì 1."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 1 lớp 9",
       "lop": 9,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn9-dinh-huong-nghe-nghiep"
-      ],
+      "pham_vi": ["cn9-dinh-huong-nghe-nghiep"],
       "cau_truc": "Trắc nghiệm khách quan 40% (8 câu) + tự luận 60% (3 câu). Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
@@ -2629,39 +2594,28 @@
       "ten": "Đề kiểm tra giữa học kì 1 lớp 10 (Công nghiệp)",
       "lop": 10,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn10-dai-cuong-ve-cong-nghe",
-        "cn10-ve-ki-thuat"
-      ],
+      "pham_vi": ["cn10-dai-cuong-ve-cong-nghe", "cn10-ve-ki-thuat"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Một số trường dùng 100% trắc nghiệm theo 3 dạng thức của đề thi tốt nghiệp."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 1 lớp 10 (Công nghiệp)",
       "lop": 10,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn10-dai-cuong-ve-cong-nghe",
-        "cn10-ve-ki-thuat"
-      ],
+      "pham_vi": ["cn10-dai-cuong-ve-cong-nghe", "cn10-ve-ki-thuat"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Bài tập vẽ và đọc bản vẽ phải kèm hình vẽ trong đề."
     },
     {
       "ten": "Đề kiểm tra cuối học kì 2 lớp 10 (Công nghiệp)",
       "lop": 10,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn10-thiet-ke-ki-thuat"
-      ],
+      "pham_vi": ["cn10-thiet-ke-ki-thuat"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%. Trọng tâm học kì 2, có thể lồng 1-2 câu ôn tập học kì 1."
     },
     {
       "ten": "Đề kiểm tra giữa học kì 1 lớp 10 (Nông nghiệp)",
       "lop": 10,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn10-gioi-thieu-chung-ve-trong-trot",
-        "cn10-dat-trong"
-      ],
+      "pham_vi": ["cn10-gioi-thieu-chung-ve-trong-trot", "cn10-dat-trong"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
@@ -2692,10 +2646,7 @@
       "ten": "Đề kiểm tra giữa học kì 1 lớp 11 (Công nghiệp)",
       "lop": 11,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn11-gioi-thieu-chung-ve-co-khi-che-tao",
-        "cn11-vat-lieu-co-khi"
-      ],
+      "pham_vi": ["cn11-gioi-thieu-chung-ve-co-khi-che-tao", "cn11-vat-lieu-co-khi"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
@@ -2725,10 +2676,7 @@
       "ten": "Đề kiểm tra giữa học kì 1 lớp 11 (Nông nghiệp)",
       "lop": 11,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn11-gioi-thieu-chung-ve-chan-nuoi",
-        "cn11-cong-nghe-giong-vat-nuoi"
-      ],
+      "pham_vi": ["cn11-gioi-thieu-chung-ve-chan-nuoi", "cn11-cong-nghe-giong-vat-nuoi"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {
@@ -2757,10 +2705,7 @@
       "ten": "Đề kiểm tra giữa học kì 1 lớp 12 (Công nghiệp)",
       "lop": 12,
       "thoi_gian_phut": 45,
-      "pham_vi": [
-        "cn12-gioi-thieu-chung-ve-ki-thuat-dien",
-        "cn12-he-thong-dien-quoc-gia"
-      ],
+      "pham_vi": ["cn12-gioi-thieu-chung-ve-ki-thuat-dien", "cn12-he-thong-dien-quoc-gia"],
       "cau_truc": "Trắc nghiệm khách quan 70% (nhiều lựa chọn + đúng/sai) + tự luận 30%. Mức độ: nhận biết 40%, thông hiểu 30%, vận dụng 30%."
     },
     {

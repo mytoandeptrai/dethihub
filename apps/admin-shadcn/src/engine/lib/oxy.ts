@@ -30,7 +30,10 @@ type V = [number, number]
 
 /** "2x - 3y + 1" → [a, b, c]; null nếu không phải bậc nhất */
 function linear(src: string): [number, number, number] | null {
-  const s = src.replace(/\s+/g, '').replace(/[−–]/g, '-').replace(/,/g, '.')
+  const s = src
+    .replace(/\s+/g, '')
+    .replace(/[−–]/g, '-')
+    .replace(/,/g, '.')
   if (!s) return [0, 0, 0]
   const terms = s.match(/[+-]?[^+-]+/g)
   if (!terms || terms.join('') !== s) return null
@@ -40,7 +43,11 @@ function linear(src: string): [number, number, number] | null {
   for (const t of terms) {
     const m = /^([+-]?)(\d*\.?\d*(?:\/\d+(?:\.\d+)?)?)\*?([xy]?)$/.exec(t)
     if (!m || (!m[2] && !m[3])) return null
-    let k = m[2] ? (m[2].includes('/') ? Number(m[2].split('/')[0]) / Number(m[2].split('/')[1]) : Number(m[2])) : 1
+    let k = m[2]
+      ? m[2].includes('/')
+        ? Number(m[2].split('/')[0]) / Number(m[2].split('/')[1])
+        : Number(m[2])
+      : 1
     if (!Number.isFinite(k)) return null
     if (m[1] === '-') k = -k
     if (m[3] === 'x') a += k
@@ -51,7 +58,10 @@ function linear(src: string): [number, number, number] | null {
 }
 
 function num(s: string): number | null {
-  const t = s.trim().replace(/[−–]/g, '-').replace(',', '.')
+  const t = s
+    .trim()
+    .replace(/[−–]/g, '-')
+    .replace(',', '.')
   const m = /^(-?\d*\.?\d+)(?:\/(\d+(?:\.\d+)?))?$/.exec(t)
   if (!m) return null
   return m[2] ? Number(m[1]) / Number(m[2]) : Number(m[1])
@@ -70,7 +80,10 @@ type Item =
   | { t: 'curve'; src: string; label?: string }
   | { t: 'ineq'; a: number; b: number; c: number; strict: boolean }
 
-export function parseOxy(text: string): { items: Item[]; errors: Array<{ line: number; msg: string }> } {
+export function parseOxy(text: string): {
+  items: Item[]
+  errors: Array<{ line: number; msg: string }>
+} {
   const items: Item[] = []
   const errors: Array<{ line: number; msg: string }> = []
   const pts = new Map<string, V>()
@@ -79,7 +92,11 @@ export function parseOxy(text: string): { items: Item[]; errors: Array<{ line: n
 
   text.split('\n').forEach((raw, i) => {
     const line = i + 1
-    const s = raw.replace(/[−–]/g, '-').replace(/[≤⩽]/g, '<=').replace(/[≥⩾]/g, '>=').trim()
+    const s = raw
+      .replace(/[−–]/g, '-')
+      .replace(/[≤⩽]/g, '<=')
+      .replace(/[≥⩾]/g, '>=')
+      .trim()
     if (!s || s.startsWith('//')) return
     const err = (msg: string) => errors.push({ line, msg })
     const getPt = (n: string) => {
@@ -126,7 +143,9 @@ export function parseOxy(text: string): { items: Item[]; errors: Array<{ line: n
     if (circ) {
       const rest = circ[1]
       const name = /\b([A-Z][0-9]*'*)\b/.exec(rest)?.[1]
-      const nums = (rest.replace(/[A-Z][0-9]*'*/g, ' ').match(/-?\d+(?:[.,]\d+)?(?:\/\d+)?/g) ?? []).map((x) => num(x)!)
+      const nums = (
+        rest.replace(/[A-Z][0-9]*'*/g, ' ').match(/-?\d+(?:[.,]\d+)?(?:\/\d+)?/g) ?? []
+      ).map((x) => num(x)!)
       let c: V | undefined
       let r: number | undefined
       if (name) {
@@ -136,7 +155,8 @@ export function parseOxy(text: string): { items: Item[]; errors: Array<{ line: n
         c = [nums[0], nums[1]]
         r = nums[2]
       }
-      if (!c || r === undefined || !(r > 0)) return err('ví dụ: đường tròn (I; 2) hoặc đường tròn (1; 2) 3')
+      if (!c || r === undefined || !(r > 0))
+        return err('ví dụ: đường tròn (I; 2) hoặc đường tròn (1; 2) 3')
       items.push({ t: 'circle', c, r })
       return
     }
@@ -193,13 +213,18 @@ export function parseOxy(text: string): { items: Item[]; errors: Array<{ line: n
     }
     // đoạn: AB, BC, CA (thêm "đứt")
     const dashed = /(^|\s)đứt$/.test(lower)
-    const groups = s.replace(/\s*đứt$/i, '').split(/[\s,;]+/).filter(Boolean)
+    const groups = s
+      .replace(/\s*đứt$/i, '')
+      .split(/[\s,;]+/)
+      .filter(Boolean)
     for (const g of groups) {
       const ns = g.match(/[A-Z][0-9]*'*/g) ?? []
-      if (ns.join('') !== g || ns.length < 2) return err(`không hiểu "${g}" — bấm dấu ? để xem các lệnh`)
+      if (ns.join('') !== g || ns.length < 2)
+        return err(`không hiểu "${g}" — bấm dấu ? để xem các lệnh`)
       const ps = ns.map(getPt)
       if (ps.some((p) => !p)) return
-      for (let k = 0; k + 1 < ps.length; k++) items.push({ t: 'seg', a: ps[k]!, b: ps[k + 1]!, dashed })
+      for (let k = 0; k + 1 < ps.length; k++)
+        items.push({ t: 'seg', a: ps[k]!, b: ps[k + 1]!, dashed })
     }
   })
   return { items, errors }
@@ -215,11 +240,11 @@ function curveAnchor(src: string, bounds: OxyBounds, fixed: Partial<OxyBounds>):
   let best: V | undefined
   let distance = Infinity
   for (let k = 0; k <= 8 && !best; k++) {
-    const extra = width * (2 ** k - 1) / 2
+    const extra = (width * (2 ** k - 1)) / 2
     const left = fixed.xMin ?? xMin - extra
     const right = fixed.xMax ?? xMax + extra
     for (let i = 0; i <= 40; i++) {
-      const x = left + (right - left) * i / 40
+      const x = left + ((right - left) * i) / 40
       const y = f(x)
       if (!Number.isFinite(y)) continue
       const d = Math.max(yMin - y, y - yMax, 0)
@@ -233,10 +258,18 @@ function curveAnchor(src: string, bounds: OxyBounds, fixed: Partial<OxyBounds>):
   return best
 }
 
-export function fitOxyBounds(text: string, bounds: Partial<OxyBounds>): OxyBounds & Pick<OxySpec, 'autoScale'> {
+export function fitOxyBounds(
+  text: string,
+  bounds: Partial<OxyBounds>,
+): OxyBounds & Pick<OxySpec, 'autoScale'> {
   const { xMin, xMax, yMin, yMax } = bounds
   if (xMin !== undefined && xMax !== undefined && yMin !== undefined && yMax !== undefined) {
-    return { xMin, xMax: xMax > xMin ? xMax : xMin + 10, yMin, yMax: yMax > yMin ? yMax : yMin + 10 }
+    return {
+      xMin,
+      xMax: xMax > xMin ? xMax : xMin + 10,
+      yMin,
+      yMax: yMax > yMin ? yMax : yMin + 10,
+    }
   }
   const xs: number[] = []
   const ys: number[] = []
@@ -273,7 +306,12 @@ export function fitOxyBounds(text: string, bounds: Partial<OxyBounds>): OxyBound
   const fit = () => {
     const [left, right] = fitAutoBounds(xMin, xMax, [-5, 5], xs)
     const [bottom, top] = fitAutoBounds(yMin, yMax, [-5, 5], ys)
-    return { xMin: left, xMax: right > left ? right : left + 10, yMin: bottom, yMax: top > bottom ? top : bottom + 10 }
+    return {
+      xMin: left,
+      xMax: right > left ? right : left + 10,
+      yMin: bottom,
+      yMax: top > bottom ? top : bottom + 10,
+    }
   }
   const initial = fit()
   for (const src of curves) {
@@ -281,7 +319,9 @@ export function fitOxyBounds(text: string, bounds: Partial<OxyBounds>): OxyBound
     if (anchor) include(anchor)
   }
   const fitted = curves.length ? fit() : initial
-  return Math.max(fitted.xMax - fitted.xMin, fitted.yMax - fitted.yMin) > 40 ? { ...fitted, autoScale: true } : fitted
+  return Math.max(fitted.xMax - fitted.xMin, fitted.yMax - fitted.yMin) > 40
+    ? { ...fitted, autoScale: true }
+    : fitted
 }
 
 /* ------------------------------------------------------------------ *
@@ -292,7 +332,11 @@ const FAM = `font-family="'Times New Roman',serif"`
 const FONT = `${FAM} font-size="16"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f1 = (n: number) => n.toFixed(1)
-const fmt = (n: number) => (Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100).replace('.', ',')).replace('-', '−')
+const fmt = (n: number) =>
+  (Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100).replace('.', ',')).replace(
+    '-',
+    '−',
+  )
 
 /** cắt đa giác lồi theo nửa mặt phẳng a x + b y + c >= 0 (Sutherland–Hodgman) */
 function clipHalf(poly: V[], a: number, b: number, c: number): V[] {
@@ -304,7 +348,7 @@ function clipHalf(poly: V[], a: number, b: number, c: number): V[] {
     const vp = val(p)
     const vq = val(q)
     if (vp >= 0) out.push(p)
-    if ((vp >= 0) !== (vq >= 0)) {
+    if (vp >= 0 !== vq >= 0) {
       const t = vp / (vp - vq)
       out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t])
     }
@@ -312,7 +356,10 @@ function clipHalf(poly: V[], a: number, b: number, c: number): V[] {
   return out
 }
 
-export function renderOxySvg(spec: OxySpec, desc: string): { svg: string; width: number; height: number; errors: Array<{ line: number; msg: string }> } {
+export function renderOxySvg(
+  spec: OxySpec,
+  desc: string,
+): { svg: string; width: number; height: number; errors: Array<{ line: number; msg: string }> } {
   const { items, errors } = parseOxy(spec.items)
   const xMin = Math.min(spec.xMin, -0.5)
   const xMax = Math.max(spec.xMax, 0.5)
@@ -340,38 +387,55 @@ export function renderOxySvg(spec: OxySpec, desc: string): { svg: string; width:
   // lưới
   if (spec.grid) {
     let g = ''
-    for (let x = Math.ceil(xMin / tickStep) * tickStep; x <= xMax; x += tickStep) g += `M${f1(X(x))} ${f1(Y(yMin))}V${f1(Y(yMax))}`
-    for (let y = Math.ceil(yMin / tickStep) * tickStep; y <= yMax; y += tickStep) g += `M${f1(X(xMin))} ${f1(Y(y))}H${f1(X(xMax))}`
+    for (let x = Math.ceil(xMin / tickStep) * tickStep; x <= xMax; x += tickStep)
+      g += `M${f1(X(x))} ${f1(Y(yMin))}V${f1(Y(yMax))}`
+    for (let y = Math.ceil(yMin / tickStep) * tickStep; y <= yMax; y += tickStep)
+      g += `M${f1(X(xMin))} ${f1(Y(y))}H${f1(X(xMax))}`
     back.push(`<path d="${g}" stroke="#d6d6d6" stroke-width="0.8"/>`)
   }
   // miền gạch bỏ (phần không thoả từng bất phương trình)
   for (const it of items) {
     if (it.t !== 'ineq') continue
     const bad = clipHalf(box, it.a, it.b, it.c) // a x + b y + c >= 0 là phần bị loại
-    if (bad.length >= 3) back.push(`<path d="M${bad.map(S).join('L')}Z" fill="url(#oxyhatch)" stroke="none"/>`)
+    if (bad.length >= 3)
+      back.push(`<path d="M${bad.map(S).join('L')}Z" fill="url(#oxyhatch)" stroke="none"/>`)
   }
   // trục
   // mũi tên vượt vạch cuối 22px, tên trục đặt ở đầu mũi tên → không dính số cuối trục
   const ax = `M${f1(X(xMin))} ${f1(Y(0))}H${f1(X(xMax) + 22)}`
   out.push(`<path d="${ax}" stroke="#222" stroke-width="1.2" marker-end="url(#oxyarr)"/>`)
-  out.push(`<path d="M${f1(X(0))} ${f1(Y(yMin))}V${f1(Y(yMax) - 22)}" stroke="#222" stroke-width="1.2" marker-end="url(#oxyarr)"/>`)
+  out.push(
+    `<path d="M${f1(X(0))} ${f1(Y(yMin))}V${f1(Y(yMax) - 22)}" stroke="#222" stroke-width="1.2" marker-end="url(#oxyarr)"/>`,
+  )
   // chữ (tên trục, số) vẽ SAU các đường cong để nét không đè lên chữ
   const labels: string[] = []
-  labels.push(`<text x="${f1(X(xMax) + 16)}" y="${f1(Y(0) + 17)}" ${FONT} font-style="italic" data-lbl="ax:x">x</text>`)
-  labels.push(`<text x="${f1(X(0) - 8)}" y="${f1(Y(yMax) - 12)}" ${FONT} font-style="italic" text-anchor="end" data-lbl="ax:y">y</text>`)
-  labels.push(`<text x="${f1(X(0) - 13)}" y="${f1(Y(0) + 16)}" ${FONT} font-style="italic" data-lbl="ax:O">O</text>`)
+  labels.push(
+    `<text x="${f1(X(xMax) + 16)}" y="${f1(Y(0) + 17)}" ${FONT} font-style="italic" data-lbl="ax:x">x</text>`,
+  )
+  labels.push(
+    `<text x="${f1(X(0) - 8)}" y="${f1(Y(yMax) - 12)}" ${FONT} font-style="italic" text-anchor="end" data-lbl="ax:y">y</text>`,
+  )
+  labels.push(
+    `<text x="${f1(X(0) - 13)}" y="${f1(Y(0) + 16)}" ${FONT} font-style="italic" data-lbl="ax:O">O</text>`,
+  )
   // vạch chia + số
   const step = spec.autoScale ? tickStep : unit < 20 ? 2 : 1
   let ticks = ''
   for (let x = Math.ceil(xMin / tickStep) * tickStep; x <= xMax; x += tickStep) {
     if (x === 0) continue
     ticks += `M${f1(X(x))} ${f1(Y(0) - 3)}v6`
-    if (spec.numbers && x % step === 0) labels.push(`<text x="${f1(X(x))}" y="${f1(Y(0) + 17)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="x:${x}">${fmt(x)}</text>`)
+    if (spec.numbers && x % step === 0)
+      labels.push(
+        `<text x="${f1(X(x))}" y="${f1(Y(0) + 17)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="x:${x}">${fmt(x)}</text>`,
+      )
   }
   for (let y = Math.ceil(yMin / tickStep) * tickStep; y <= yMax; y += tickStep) {
     if (y === 0) continue
     ticks += `M${f1(X(0) - 3)} ${f1(Y(y))}h6`
-    if (spec.numbers && y % step === 0) labels.push(`<text x="${f1(X(0) - 7)}" y="${f1(Y(y) + 4.5)}" ${FAM} font-size="13" text-anchor="end" data-lbl="y:${y}">${fmt(y)}</text>`)
+    if (spec.numbers && y % step === 0)
+      labels.push(
+        `<text x="${f1(X(0) - 7)}" y="${f1(Y(y) + 4.5)}" ${FAM} font-size="13" text-anchor="end" data-lbl="y:${y}">${fmt(y)}</text>`,
+      )
   }
   out.push(`<path d="${ticks}" stroke="#222" stroke-width="1"/>`)
 
@@ -387,22 +451,37 @@ export function renderOxySvg(spec: OxySpec, desc: string): { svg: string; width:
         const p = xs[0]
         const q = xs[xs.length - 1]
         const dashed = it.t === 'ineq' ? it.strict : it.dashed
-        draw.push(`<path d="M${S(p)}L${S(q)}" stroke="#222" stroke-width="1.5"${dashed ? ' stroke-dasharray="6 4"' : ''}/>`)
-        if (it.t === 'line' && it.label) draw.push(`<text x="${f1(X(q[0]) - 4)}" y="${f1(Y(q[1]) - 6)}" ${FONT} font-style="italic" text-anchor="end" data-lbl="cv:${ii}">${esc(it.label)}</text>`)
+        draw.push(
+          `<path d="M${S(p)}L${S(q)}" stroke="#222" stroke-width="1.5"${dashed ? ' stroke-dasharray="6 4"' : ''}/>`,
+        )
+        if (it.t === 'line' && it.label)
+          draw.push(
+            `<text x="${f1(X(q[0]) - 4)}" y="${f1(Y(q[1]) - 6)}" ${FONT} font-style="italic" text-anchor="end" data-lbl="cv:${ii}">${esc(it.label)}</text>`,
+          )
       }
     } else if (it.t === 'seg') {
-      draw.push(`<path d="M${S(it.a)}L${S(it.b)}" stroke="#222" stroke-width="1.5"${it.dashed ? ' stroke-dasharray="6 4"' : ''}/>`)
+      draw.push(
+        `<path d="M${S(it.a)}L${S(it.b)}" stroke="#222" stroke-width="1.5"${it.dashed ? ' stroke-dasharray="6 4"' : ''}/>`,
+      )
     } else if (it.t === 'vec') {
-      draw.push(`<path d="M${S(it.a)}L${S(it.b)}" stroke="#222" stroke-width="1.6" marker-end="url(#oxyarr)"/>`)
+      draw.push(
+        `<path d="M${S(it.a)}L${S(it.b)}" stroke="#222" stroke-width="1.6" marker-end="url(#oxyarr)"/>`,
+      )
       if (it.label) {
         const m: V = [(it.a[0] + it.b[0]) / 2, (it.a[1] + it.b[1]) / 2]
         const lx = X(m[0]) - 10
         const ly = Y(m[1]) - 8
-        draw.push(`<text x="${f1(lx)}" y="${f1(ly)}" ${FONT} font-style="italic" text-anchor="middle" data-lbl="cv:${ii}">${esc(it.label)}</text>`)
-        draw.push(`<path d="M${f1(lx - 5)} ${f1(ly - 14)}h10" stroke="#222" stroke-width="1" marker-end="url(#oxyarrs)"/>`)
+        draw.push(
+          `<text x="${f1(lx)}" y="${f1(ly)}" ${FONT} font-style="italic" text-anchor="middle" data-lbl="cv:${ii}">${esc(it.label)}</text>`,
+        )
+        draw.push(
+          `<path d="M${f1(lx - 5)} ${f1(ly - 14)}h10" stroke="#222" stroke-width="1" marker-end="url(#oxyarrs)"/>`,
+        )
       }
     } else if (it.t === 'circle') {
-      draw.push(`<circle cx="${f1(X(it.c[0]))}" cy="${f1(Y(it.c[1]))}" r="${f1(it.r * unit)}" fill="none" stroke="#222" stroke-width="1.5"/>`)
+      draw.push(
+        `<circle cx="${f1(X(it.c[0]))}" cy="${f1(Y(it.c[1]))}" r="${f1(it.r * unit)}" fill="none" stroke="#222" stroke-width="1.5"/>`,
+      )
     } else if (it.t === 'curve') {
       const f = parseExpr(it.src)
       let d = ''
@@ -422,7 +501,10 @@ export function renderOxySvg(spec: OxySpec, desc: string): { svg: string; width:
         if (y >= yMin && y <= yMax) last = [x, y]
       }
       draw.push(`<path d="${d}" fill="none" stroke="#222" stroke-width="1.6"/>`)
-      if (it.label && last) draw.push(`<text x="${f1(X(last[0]) - 6)}" y="${f1(Y(last[1]) + 2)}" ${FONT} font-style="italic" text-anchor="end" data-lbl="cv:${ii}">${esc(it.label)}</text>`)
+      if (it.label && last)
+        draw.push(
+          `<text x="${f1(X(last[0]) - 6)}" y="${f1(Y(last[1]) + 2)}" ${FONT} font-style="italic" text-anchor="end" data-lbl="cv:${ii}">${esc(it.label)}</text>`,
+        )
     }
   }
   // điểm (trên cùng) + nét chiếu xuống trục
@@ -430,14 +512,24 @@ export function renderOxySvg(spec: OxySpec, desc: string): { svg: string; width:
     if (it.t !== 'point') continue
     const [x, y] = it.p
     if (it.proj) {
-      draw.push(`<path d="M${S(it.p)}L${f1(X(x))} ${f1(Y(0))}M${S(it.p)}L${f1(X(0))} ${f1(Y(y))}" stroke="#222" stroke-width="1" stroke-dasharray="4 3"/>`)
-      if (!spec.numbers || !Number.isInteger(x)) draw.push(`<text x="${f1(X(x))}" y="${f1(Y(0) + (y >= 0 ? 17 : -6))}" ${FAM} font-size="13" text-anchor="middle" data-lbl="x:${Math.round(x * 1000) / 1000}">${fmt(x)}</text>`)
-      if (!spec.numbers || !Number.isInteger(y)) draw.push(`<text x="${f1(X(0) + (x >= 0 ? -7 : 7))}" y="${f1(Y(y) + 4.5)}" ${FAM} font-size="13" text-anchor="${x >= 0 ? 'end' : 'start'}" data-lbl="y:${Math.round(y * 1000) / 1000}">${fmt(y)}</text>`)
+      draw.push(
+        `<path d="M${S(it.p)}L${f1(X(x))} ${f1(Y(0))}M${S(it.p)}L${f1(X(0))} ${f1(Y(y))}" stroke="#222" stroke-width="1" stroke-dasharray="4 3"/>`,
+      )
+      if (!spec.numbers || !Number.isInteger(x))
+        draw.push(
+          `<text x="${f1(X(x))}" y="${f1(Y(0) + (y >= 0 ? 17 : -6))}" ${FAM} font-size="13" text-anchor="middle" data-lbl="x:${Math.round(x * 1000) / 1000}">${fmt(x)}</text>`,
+        )
+      if (!spec.numbers || !Number.isInteger(y))
+        draw.push(
+          `<text x="${f1(X(0) + (x >= 0 ? -7 : 7))}" y="${f1(Y(y) + 4.5)}" ${FAM} font-size="13" text-anchor="${x >= 0 ? 'end' : 'start'}" data-lbl="y:${Math.round(y * 1000) / 1000}">${fmt(y)}</text>`,
+        )
     }
     if (it.name === 'O' && x === 0 && y === 0) continue
     draw.push(`<circle cx="${f1(X(x))}" cy="${f1(Y(y))}" r="2.6" fill="#222"/>`)
     const dx = x >= 0 ? 7 : -7
-    draw.push(`<text x="${f1(X(x) + dx)}" y="${f1(Y(y) - 7)}" ${FONT} font-style="italic" text-anchor="${x >= 0 ? 'start' : 'end'}" data-lbl="pt:${esc(it.name)}">${esc(it.name)}</text>`)
+    draw.push(
+      `<text x="${f1(X(x) + dx)}" y="${f1(Y(y) - 7)}" ${FONT} font-style="italic" text-anchor="${x >= 0 ? 'start' : 'end'}" data-lbl="pt:${esc(it.name)}">${esc(it.name)}</text>`,
+    )
   }
 
   const svg =

@@ -2,8 +2,9 @@
  * Cảnh báo đề thiếu đáp án: trước khi học sinh bấm "Làm đề", và trước khi người đăng đăng đề.
  */
 import { dialog } from '@/engine/components/Dialog'
-import type { Exam } from '@/engine/data/types'
 import { gradableMax, missingKeyCount } from '@/engine/lib/grading'
+
+import type { Exam } from '@/engine/data/types'
 
 const allQuestions = (exam: Exam) => exam.sections.flatMap((s) => s.questions)
 
@@ -12,19 +13,25 @@ export async function confirmQuizWithoutKey(exam: Exam): Promise<boolean> {
   const qs = allQuestions(exam)
   if (!qs.length) return true
   if (gradableMax(qs) <= 0) {
-    return dialog.confirm('Đề này chưa có đáp án nên bài làm sẽ không được chấm điểm. Em vẫn làm được và tự đối chiếu sau khi nộp.', {
-      title: 'Đề chưa có đáp án',
-      confirmLabel: 'Vẫn làm đề',
-      cancelLabel: 'Thôi',
-    })
+    return dialog.confirm(
+      'Đề này chưa có đáp án nên bài làm sẽ không được chấm điểm. Em vẫn làm được và tự đối chiếu sau khi nộp.',
+      {
+        title: 'Đề chưa có đáp án',
+        confirmLabel: 'Vẫn làm đề',
+        cancelLabel: 'Thôi',
+      },
+    )
   }
   const missing = missingKeyCount(qs)
   if (!missing) return true
-  return dialog.confirm(`${missing} câu trong đề chưa có đáp án, các câu đó sẽ không được tính điểm.`, {
-    title: 'Đề thiếu đáp án',
-    confirmLabel: 'Vẫn làm đề',
-    cancelLabel: 'Thôi',
-  })
+  return dialog.confirm(
+    `${missing} câu trong đề chưa có đáp án, các câu đó sẽ không được tính điểm.`,
+    {
+      title: 'Đề thiếu đáp án',
+      confirmLabel: 'Vẫn làm đề',
+      cancelLabel: 'Thôi',
+    },
+  )
 }
 
 /** Người đăng sắp đăng đề: còn câu thiếu đáp án thì nhắc (vẫn cho đăng). Trả false nếu muốn quay lại sửa. */

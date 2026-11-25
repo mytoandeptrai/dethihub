@@ -114,6 +114,8 @@ export interface ProPhoto {
 export async function loadProPhoto(description: string | undefined): Promise<ProPhoto | null> {
   if (!description?.trim()) return null
   const prompt = buildPhotoPrompt(description)
-  const generated = await queueImage(() => generateSlideImage(prompt).catch(() => generateSlideImage(prompt)))
+  const generated = await queueImage(() =>
+    generateSlideImage(prompt).catch(() => generateSlideImage(prompt)),
+  )
   return { dataUrl: generated.dataUrl, credit: 'Ảnh minh hoạ do AI tạo' }
 }

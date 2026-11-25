@@ -4,16 +4,28 @@
  */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
+
 import { emptyDoc, uid } from '@/engine/data/docTypes'
-import { DECK_THEMES } from '@/engine/lib/slideTheme'
 import { chatHistoryKey, removeChatHistory } from '@/engine/lib/aiChatHistory'
 import { docStatus, type DocStatus } from '@/engine/lib/docStatus'
+import { DECK_THEMES } from '@/engine/lib/slideTheme'
+
+import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
 
 /* ------------------------------------------------------------------ *
  * Slide
  * ------------------------------------------------------------------ */
-export type SlideElType = 'text' | 'shape' | 'image' | 'icon' | 'graphic' | 'table' | 'chart' | 'formula' | 'connector' | 'video'
+export type SlideElType =
+  | 'text'
+  | 'shape'
+  | 'image'
+  | 'icon'
+  | 'graphic'
+  | 'table'
+  | 'chart'
+  | 'formula'
+  | 'connector'
+  | 'video'
 
 export interface SlideElement {
   id: string
@@ -151,7 +163,15 @@ export interface Deck {
   updatedAt: string
 }
 
-export type ThemeDecor = 'none' | 'dots' | 'grid' | 'waves' | 'confetti' | 'grain' | 'glow' | 'frame'
+export type ThemeDecor =
+  | 'none'
+  | 'dots'
+  | 'grid'
+  | 'waves'
+  | 'confetti'
+  | 'grain'
+  | 'glow'
+  | 'frame'
 
 export interface DeckFonts {
   heading: string
@@ -274,20 +294,22 @@ export const useDocStore = create<DocStore>()(
       newDoc: () => set({ doc: emptyDoc() }),
 
       updateDoc: (patch) =>
-        set((s) => (s.doc ? { doc: { ...s.doc, ...patch, updatedAt: new Date().toISOString() } } : s)),
+        set((s) =>
+          s.doc ? { doc: { ...s.doc, ...patch, updatedAt: new Date().toISOString() } } : s,
+        ),
 
       updateBlock: (index, patch) =>
         set((s) => {
           if (!s.doc) return s
-          const blocks = s.doc.blocks.map((b, i) => (i === index ? ({ ...b, ...patch } as ExamBlock) : b))
+          const blocks = s.doc.blocks.map((b, i) =>
+            i === index ? ({ ...b, ...patch } as ExamBlock) : b,
+          )
           return { doc: { ...s.doc, blocks, updatedAt: new Date().toISOString() } }
         }),
 
       replaceBlocks: (blocks) =>
         set((s) =>
-          s.doc
-            ? { doc: { ...s.doc, blocks, updatedAt: new Date().toISOString() } }
-            : s,
+          s.doc ? { doc: { ...s.doc, blocks, updatedAt: new Date().toISOString() } } : s,
         ),
 
       insertBlock: (index, block) =>
@@ -337,7 +359,9 @@ export const useDocStore = create<DocStore>()(
 
       renameDoc: (id, title) =>
         set((s) => ({
-          myDocs: s.myDocs.map((d) => (d.id === id ? { ...d, title, updatedAt: new Date().toISOString() } : d)),
+          myDocs: s.myDocs.map((d) =>
+            d.id === id ? { ...d, title, updatedAt: new Date().toISOString() } : d,
+          ),
           doc: s.doc?.id === id ? { ...s.doc, title } : s.doc,
         })),
 
@@ -348,7 +372,9 @@ export const useDocStore = create<DocStore>()(
           const patch = { status: docStatus(value), updatedAt: new Date().toISOString() }
           const doc = { ...source, ...patch }
           return {
-            myDocs: s.myDocs.some((d) => d.id === id) ? s.myDocs.map((d) => d.id === id ? doc : d) : [doc, ...s.myDocs],
+            myDocs: s.myDocs.some((d) => d.id === id)
+              ? s.myDocs.map((d) => (d.id === id ? doc : d))
+              : [doc, ...s.myDocs],
             doc: s.doc?.id === id ? { ...s.doc, ...patch } : s.doc,
           }
         }),
@@ -366,9 +392,7 @@ export const useDocStore = create<DocStore>()(
 
       updateDeck: (patch) =>
         set((s) =>
-          s.deck
-            ? { deck: { ...s.deck, ...patch, updatedAt: new Date().toISOString() } }
-            : s,
+          s.deck ? { deck: { ...s.deck, ...patch, updatedAt: new Date().toISOString() } } : s,
         ),
 
       saveDeck: () =>
@@ -403,14 +427,18 @@ export const useDocStore = create<DocStore>()(
           const patch = { status: docStatus(value), updatedAt: new Date().toISOString() }
           const deck = { ...source, ...patch }
           return {
-            myDecks: s.myDecks.some((d) => d.id === id) ? s.myDecks.map((d) => d.id === id ? deck : d) : [deck, ...s.myDecks],
+            myDecks: s.myDecks.some((d) => d.id === id)
+              ? s.myDecks.map((d) => (d.id === id ? deck : d))
+              : [deck, ...s.myDecks],
             deck: s.deck?.id === id ? { ...s.deck, ...patch } : s.deck,
           }
         }),
 
       renameDeck: (id, title) =>
         set((s) => ({
-          myDecks: s.myDecks.map((d) => (d.id === id ? { ...d, title, updatedAt: new Date().toISOString() } : d)),
+          myDecks: s.myDecks.map((d) =>
+            d.id === id ? { ...d, title, updatedAt: new Date().toISOString() } : d,
+          ),
           deck: s.deck?.id === id ? { ...s.deck, title } : s.deck,
         })),
     }),

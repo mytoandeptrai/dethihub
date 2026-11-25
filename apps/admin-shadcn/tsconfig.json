@@ -19,12 +19,8 @@
       "@product-ui-engine": ["./.engine-types/engine/compat/product-ui.d.ts"],
       "@student-kernel": ["./.engine-types/engine/compat/student-kernel.d.ts"],
       "@online-exams-kernel": ["./.engine-types/engine/compat/online-exams-kernel.d.ts"],
-      "@/*": [
-        "./src/*"
-      ],
-      "@workspace/ui/*": [
-        "../../packages/ui/src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@workspace/ui/*": ["../../packages/ui/src/*"]
     },
     "target": "esnext",
     "esModuleInterop": true,
@@ -43,11 +39,7 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo",
-    "lib": [
-      "esnext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["esnext", "DOM", "DOM.Iterable"],
     "module": "preserve",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -67,9 +59,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules",
-    "src/engine",
-    ".engine-types"
-  ]
+  "exclude": ["node_modules", "src/engine", ".engine-types"]
 }

@@ -1,9 +1,10 @@
+import { isAdminMock, post, wait } from './adminApi'
+
 /**
  * Client trang Admin giai đoạn 4 (Ngân hàng). Xem docs/prompt-admin-bank.md.
  * Gọi server bằng `post(action, body, read)` từ './adminApi'; dữ liệu giả khi `isAdminMock()` (dùng `wait`).
  */
 import type { BankEntry } from '@/engine/data/bank'
-import { isAdminMock, post, wait } from './adminApi'
 
 export interface BankQuestionRow {
   id: string
@@ -79,7 +80,8 @@ const MOCK_OVERRIDES: BankQuestionRow[] = [
       subject: 'Vật lí',
       grades: ['Lớp 10'],
       type: 'trac-nghiem',
-      prompt: 'Một chất điểm chuyển động thẳng đều với vận tốc $v = 10\\text{ m/s}$. Quãng đường chất điểm đi được sau $5\\text{ s}$ là:',
+      prompt:
+        'Một chất điểm chuyển động thẳng đều với vận tốc $v = 10\\text{ m/s}$. Quãng đường chất điểm đi được sau $5\\text{ s}$ là:',
       options: [
         { key: 'A', text: '$20\\text{ m}$' },
         { key: 'B', text: '$50\\text{ m}$' },
@@ -87,7 +89,8 @@ const MOCK_OVERRIDES: BankQuestionRow[] = [
         { key: 'D', text: '$2\\text{ m}$' },
       ],
       answer: 'B',
-      explanation: 'Quãng đường đi được trong chuyển động thẳng đều: $s = v \\cdot t = 10 \\cdot 5 = 50\\text{ m}$.',
+      explanation:
+        'Quãng đường đi được trong chuyển động thẳng đều: $s = v \\cdot t = 10 \\cdot 5 = 50\\text{ m}$.',
       points: 0.25,
       tags: ['chuyển động thẳng đều', 'NB'],
       variable: true,

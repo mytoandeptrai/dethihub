@@ -23,7 +23,8 @@ export function parseSlideVideo(raw: string | undefined): SlideVideo | null {
   let yt: string | null = null
   if (host === 'youtu.be') yt = url.pathname.slice(1).split('/')[0]
   else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-    yt = url.searchParams.get('v') ?? (/^\/(embed|shorts|live)\/([^/]+)/.exec(url.pathname)?.[2] ?? null)
+    yt =
+      url.searchParams.get('v') ?? /^\/(embed|shorts|live)\/([^/]+)/.exec(url.pathname)?.[2] ?? null
   }
   if (yt && /^[\w-]{6,20}$/.test(yt)) {
     const t = url.searchParams.get('t') ?? url.searchParams.get('start')
@@ -38,9 +39,19 @@ export function parseSlideVideo(raw: string | undefined): SlideVideo | null {
     }
   }
 
-  const vimeo = host === 'vimeo.com' || host === 'player.vimeo.com' ? /(\d{5,})/.exec(url.pathname)?.[1] : undefined
-  if (vimeo) return { kind: 'vimeo', id: vimeo, embed: `https://player.vimeo.com/video/${vimeo}`, link: `https://vimeo.com/${vimeo}` }
+  const vimeo =
+    host === 'vimeo.com' || host === 'player.vimeo.com'
+      ? /(\d{5,})/.exec(url.pathname)?.[1]
+      : undefined
+  if (vimeo)
+    return {
+      kind: 'vimeo',
+      id: vimeo,
+      embed: `https://player.vimeo.com/video/${vimeo}`,
+      link: `https://vimeo.com/${vimeo}`,
+    }
 
-  if (url.protocol === 'https:' && /\.(mp4|webm|ogg|ogv|mov)$/i.test(url.pathname)) return { kind: 'file', url: url.href, link: url.href }
+  if (url.protocol === 'https:' && /\.(mp4|webm|ogg|ogv|mov)$/i.test(url.pathname))
+    return { kind: 'file', url: url.href, link: url.href }
   return null
 }

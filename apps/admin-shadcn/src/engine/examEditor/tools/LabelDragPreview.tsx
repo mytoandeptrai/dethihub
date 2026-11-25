@@ -1,3 +1,4 @@
+import { Move, RotateCcw } from 'lucide-react'
 /**
  * Khung xem trước cho phép kéo nhãn (khi nút "Di chuyển nhãn" đang bật):
  * SVG hiện inline (dangerouslySetInnerHTML, không phải <img>) để bắt được
@@ -6,8 +7,9 @@
  * vẽ lại). Toạ độ chuột đổi ra đơn vị viewBox giống toVb của PickPreview.
  */
 import { useMemo, useRef, type ReactNode } from 'react'
-import { Move, RotateCcw } from 'lucide-react'
+
 import { cn } from '@/engine/lib/cn'
+
 import type { ToolImage } from '@/engine/lib/toolSpec'
 
 const n1 = (v: number) => Math.round(v * 10) / 10
@@ -31,15 +33,22 @@ function LabelBar({
   const hasExtra = Boolean(modeExtra || extra)
   const btnCls = hasExtra ? 'gap-1 px-1.5 py-1 text-[11.5px]' : 'gap-1.5 px-2 py-1 text-[12.5px]'
   return (
-    <div className={cn('flex shrink-0 flex-wrap items-center justify-center', hasExtra ? 'gap-1' : 'gap-1.5')}>
+    <div
+      className={cn(
+        'flex shrink-0 flex-wrap items-center justify-center',
+        hasExtra ? 'gap-1' : 'gap-1.5',
+      )}
+    >
       <button
         type="button"
         aria-pressed={on}
         onClick={onToggle}
         className={cn(
-          'flex items-center whitespace-nowrap rounded-[6px] border transition-colors',
+          'flex items-center rounded-[6px] border whitespace-nowrap transition-colors',
           btnCls,
-          on ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+          on
+            ? 'border-clay bg-clay-tint text-clay font-medium'
+            : 'border-line text-ink-2 hover:border-ink-4',
         )}
       >
         <Move className="size-3.5" /> Di chuyển nhãn
@@ -51,7 +60,7 @@ function LabelBar({
         disabled={!has}
         data-tip="Xoá mọi vị trí nhãn đã kéo"
         className={cn(
-          'flex items-center whitespace-nowrap rounded-[6px] border border-line text-ink-2 transition-colors hover:border-ink-4 disabled:pointer-events-none disabled:opacity-40',
+          'border-line text-ink-2 hover:border-ink-4 flex items-center rounded-[6px] border whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-40',
           btnCls,
         )}
       >
@@ -73,10 +82,21 @@ function LabelDragPreview({
   onChange: (pos: Record<string, [number, number]>) => void
 }) {
   const box = useRef<HTMLDivElement>(null)
-  const drag = useRef<{ id: string; el: SVGTextElement; baseTransform: string; sx: number; sy: number; ox: number; oy: number } | null>(null)
+  const drag = useRef<{
+    id: string
+    el: SVGTextElement
+    baseTransform: string
+    sx: number
+    sy: number
+    ox: number
+    oy: number
+  } | null>(null)
   const vb = [...img.svg.matchAll(/viewBox="([-\d.]+) ([-\d.]+) ([-\d.]+) ([-\d.]+)"/g)][0]
   const [minX, minY, w, h] = vb ? vb.slice(1).map(Number) : [0, 0, img.width, img.height]
-  const html = useMemo(() => img.svg.replace(/<svg[^>]*>/, (m) => m + '<style>text[data-lbl]{cursor:move}</style>'), [img.svg])
+  const html = useMemo(
+    () => img.svg.replace(/<svg[^>]*>/, (m) => m + '<style>text[data-lbl]{cursor:move}</style>'),
+    [img.svg],
+  )
 
   const toVb = (e: { clientX: number; clientY: number }) => {
     const r = box.current!.getBoundingClientRect()
@@ -94,10 +114,13 @@ function LabelDragPreview({
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 items-center justify-center" style={{ containerType: 'size' }}>
+    <div
+      className="flex min-h-0 w-full flex-1 items-center justify-center"
+      style={{ containerType: 'size' }}
+    >
       <div
         ref={box}
-        className="relative select-none touch-none [&_svg]:block [&_svg]:h-full [&_svg]:w-full [&_svg]:rounded-[4px] [&_svg]:border [&_svg]:border-line [&_svg]:bg-white"
+        className="[&_svg]:border-line relative touch-none select-none [&_svg]:block [&_svg]:h-full [&_svg]:w-full [&_svg]:rounded-[4px] [&_svg]:border [&_svg]:bg-white"
         style={{ aspectRatio: `${w} / ${h}`, width: `min(100cqw, 100cqh * ${w / h})` }}
         dangerouslySetInnerHTML={{ __html: html }}
         onPointerDown={(e) => {
@@ -184,11 +207,20 @@ export function LabelPreview({
   const has = Boolean(labelPos && Object.keys(labelPos).length)
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-      <LabelBar on={move} has={has} onToggle={onToggle} onReset={() => onChange(undefined)} modeExtra={modeExtra} extra={extraBar} />
+      <LabelBar
+        on={move}
+        has={has}
+        onToggle={onToggle}
+        onReset={() => onChange(undefined)}
+        modeExtra={modeExtra}
+        extra={extraBar}
+      />
       {move ? (
         <LabelDragPreview img={img} labelPos={labelPos} onChange={onChange} />
       ) : (
-        <div className="flex min-h-0 w-full flex-1 items-center justify-center">{previewOverride ?? fallback}</div>
+        <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+          {previewOverride ?? fallback}
+        </div>
       )}
     </div>
   )

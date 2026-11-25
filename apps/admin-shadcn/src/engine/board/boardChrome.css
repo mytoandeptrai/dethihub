@@ -1,8 +1,38 @@
-.board-editor>div:first-child{background:#fff;border-color:#e2e8f0;box-shadow:0 1px 3px #0f172a05}
-.board-editor button{transition:background-color .15s ease,color .15s ease}
-.board-editor button[aria-pressed=true]{color:#4f46e5;background:#eef2ff}
-.board-editor button:focus-visible{outline:2px solid #818cf8;outline-offset:2px}
-.board-editor .bg-sunken{background:#f1f5f9}.board-editor .text-clay{color:#4f46e5}.board-editor .border-line{border-color:#e2e8f0}
-.board-editor .rounded-full{border-radius:9px}
-.board-editor .accent-\[\#b4532a\]{accent-color:#4f46e5}
-@media(prefers-reduced-motion:reduce){.board-editor button{transition:none}}
+.board-editor > div:first-child {
+  background: #fff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px #0f172a05;
+}
+.board-editor button {
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.board-editor button[aria-pressed='true'] {
+  color: #4f46e5;
+  background: #eef2ff;
+}
+.board-editor button:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+.board-editor .bg-sunken {
+  background: #f1f5f9;
+}
+.board-editor .text-clay {
+  color: #4f46e5;
+}
+.board-editor .border-line {
+  border-color: #e2e8f0;
+}
+.board-editor .rounded-full {
+  border-radius: 9px;
+}
+.board-editor .accent-\[\#b4532a\] {
+  accent-color: #4f46e5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-editor button {
+    transition: none;
+  }
+}

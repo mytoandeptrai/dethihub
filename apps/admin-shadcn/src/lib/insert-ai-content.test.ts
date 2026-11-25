@@ -9,7 +9,13 @@ describe('ai insertion history', () => {
     const editor = new Editor({ extensions: [StarterKit], content: '<p>Original</p>' })
     editor.commands.insertContent('Earlier typing')
     const before = editor.getJSON()
-    insertAiContent(editor, [1, 2].map((number) => ({ type: 'paragraph', content: [{ type: 'text', text: `Question ${number}` }] })))
+    insertAiContent(
+      editor,
+      [1, 2].map((number) => ({
+        type: 'paragraph',
+        content: [{ type: 'text', text: `Question ${number}` }],
+      })),
+    )
     expect(editor.getText()).toContain('Question 2')
     editor.commands.undo()
     expect(editor.getJSON()).toEqual(before)

@@ -46,7 +46,10 @@ export interface DeOnlineInput {
 
 /** Lời dặn hệ thống kèm tóm tắt đề đang soạn (môn, lớp, số câu theo dạng, vài câu gần nhất) để AI soạn tiếp đúng ngữ cảnh. */
 export function buildDeOnlineSystem({ meta, questions }: DeOnlineInput): string {
-  const counts = ONLINE_TYPES.map((t) => `${questions.filter((q) => (q.type === 'tu-luan-dong' ? 'tu-luan' : q.type) === t).length} ${TYPE_LABEL[t].toLowerCase()}`).join(', ')
+  const counts = ONLINE_TYPES.map(
+    (t) =>
+      `${questions.filter((q) => (q.type === 'tu-luan-dong' ? 'tu-luan' : q.type) === t).length} ${TYPE_LABEL[t].toLowerCase()}`,
+  ).join(', ')
   const recent = questions
     .slice(-8)
     .map((q) => `${q.number}. ${clip(q.prompt, 90)}`)
@@ -56,6 +59,8 @@ export function buildDeOnlineSystem({ meta, questions }: DeOnlineInput): string 
     '\n\n' +
     DIFFICULTY_RULE +
     `\nĐề đang soạn: "${(meta.title ?? '').trim() || 'chưa đặt tên'}" · môn ${meta.subject} · ${meta.grade}. ` +
-    (questions.length ? `Hiện có ${questions.length} câu (${counts}).\nCác câu gần nhất:\n${recent}` : 'Chưa có câu nào.')
+    (questions.length
+      ? `Hiện có ${questions.length} câu (${counts}).\nCác câu gần nhất:\n${recent}`
+      : 'Chưa có câu nào.')
   )
 }

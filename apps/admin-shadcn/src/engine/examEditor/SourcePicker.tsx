@@ -1,27 +1,29 @@
+import { Check, Search, X } from 'lucide-react'
 /**
  * Modal "Thêm nguồn" của trợ lý AI: chọn đề của tôi, đề cộng đồng hoặc tệp trong kho tài liệu
  * làm nguồn tham khảo. Chỉ chọn ở đây; nội dung được tải lúc bấm gửi (loadPickedSources).
  */
 import { useEffect, useMemo, useState } from 'react'
+
 import { Link } from '@/engine/compat/router'
-import { Check, Search, X } from 'lucide-react'
 import { Portal } from '@/engine/components/Portal'
 import { Segmented } from '@/engine/components/Segmented'
 import { Button, inputClass } from '@/engine/components/ui'
-import { useDocStore } from '@/engine/store/docs'
-import { useComposeStore } from '@/engine/store/compose'
+import { cn } from '@/engine/lib/cn'
 import { listCommunityDocs, type CommunityRow } from '@/engine/lib/community'
 import { DOC_TYPES, listDocuments, type UserDocument } from '@/engine/lib/documents'
-import { useSession } from '@/engine/lib/useSession'
 import { MAX_PICKED, pickedKey, type PickedSource } from '@/engine/lib/sources'
-import { cn } from '@/engine/lib/cn'
+import { useSession } from '@/engine/lib/useSession'
+import { useComposeStore } from '@/engine/store/compose'
+import { useDocStore } from '@/engine/store/docs'
 
 type Tab = 'mine' | 'community' | 'library'
 
 /** danh sách tải từ máy chủ: undefined = chưa tải, null = đang tải */
 type Remote<T> = { rows?: T[] | null; error?: string }
 
-const metaOf = (...parts: Array<string | null | undefined>) => parts.filter((p) => p && p.trim()).join(' · ')
+const metaOf = (...parts: Array<string | null | undefined>) =>
+  parts.filter((p) => p && p.trim()).join(' · ')
 
 export function SourcePicker({
   value,
@@ -55,13 +57,23 @@ export function SourcePicker({
       setCommunity({ rows: null })
       listCommunityDocs()
         .then((rows) => setCommunity({ rows }))
-        .catch((err) => setCommunity({ rows: [], error: err instanceof Error ? err.message : 'Không tải được đề cộng đồng.' }))
+        .catch((err) =>
+          setCommunity({
+            rows: [],
+            error: err instanceof Error ? err.message : 'Không tải được đề cộng đồng.',
+          }),
+        )
     }
     if (tab === 'library' && session && library.rows === undefined) {
       setLibrary({ rows: null })
       listDocuments()
         .then((rows) => setLibrary({ rows }))
-        .catch((err) => setLibrary({ rows: [], error: err instanceof Error ? err.message : 'Không tải được kho tài liệu.' }))
+        .catch((err) =>
+          setLibrary({
+            rows: [],
+            error: err instanceof Error ? err.message : 'Không tải được kho tài liệu.',
+          }),
+        )
     }
   }, [tab, session, community.rows, library.rows])
 
@@ -69,7 +81,12 @@ export function SourcePicker({
     () => ({
       mine: myDocs
         .filter((d) => d.id !== activeId && (d.kind ?? 'exam') === 'exam' && d.blocks.length > 0)
-        .map((d) => ({ kind: 'mine', id: d.id, name: d.title.trim() || 'Đề chưa đặt tên', meta: metaOf(d.subject, d.grade) })),
+        .map((d) => ({
+          kind: 'mine',
+          id: d.id,
+          name: d.title.trim() || 'Đề chưa đặt tên',
+          meta: metaOf(d.subject, d.grade),
+        })),
       community:
         community.rows === null || community.rows === undefined
           ? null
@@ -97,7 +114,9 @@ export function SourcePicker({
   const needle = q.trim().toLowerCase()
   // kho tài liệu cần đăng nhập: chưa đăng nhập thì coi như danh sách rỗng để hiện lời mời đăng nhập, không quay vòng tải
   const list = tab === 'library' && !session ? [] : options[tab]
-  const shown = list?.filter((o) => !needle || `${o.name} ${o.meta ?? ''}`.toLowerCase().includes(needle)) ?? null
+  const shown =
+    list?.filter((o) => !needle || `${o.name} ${o.meta ?? ''}`.toLowerCase().includes(needle)) ??
+    null
   const chosen = new Set(picked.map(pickedKey))
   const full = picked.length >= MAX_PICKED
   const countOf = (t: Tab) => picked.filter((p) => p.kind === t).length
@@ -120,11 +139,14 @@ export function SourcePicker({
         <div className="space-y-3 text-center">
           <p>Đăng nhập để dùng tài liệu bạn đã tải lên.</p>
           <Link to="/dang-nhap" className="inline-block">
-            <Button variant="outline" size="sm">Đăng nhập</Button>
+            <Button variant="outline" size="sm">
+              Đăng nhập
+            </Button>
           </Link>
         </div>
       )
-    const err = tab === 'community' ? community.error : tab === 'library' ? library.error : undefined
+    const err =
+      tab === 'community' ? community.error : tab === 'library' ? library.error : undefined
     if (err) return <p className="text-red-600">{err}</p>
     if (needle) return <p>Không có mục nào khớp “{q.trim()}”.</p>
     if (tab === 'mine') return <p>Chưa có đề nào khác đề đang mở.</p>
@@ -132,7 +154,10 @@ export function SourcePicker({
     return (
       <div className="space-y-3 text-center">
         <p>Kho tài liệu đang trống.</p>
-        <Link to="/kho-tai-lieu" className="inline-block text-clay underline-offset-2 hover:underline">
+        <Link
+          to="/kho-tai-lieu"
+          className="text-clay inline-block underline-offset-2 hover:underline"
+        >
           Tải tài liệu lên
         </Link>
       </div>
@@ -142,27 +167,27 @@ export function SourcePicker({
   return (
     <Portal>
       <div
-        className="fixed inset-0 z-[80] flex items-end justify-center bg-ink/40 backdrop-blur-sm sm:items-center sm:px-5"
+        className="bg-ink/40 fixed inset-0 z-[80] flex items-end justify-center backdrop-blur-sm sm:items-center sm:px-5"
         onClick={onClose}
       >
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Thêm nguồn cho trợ lý AI"
-          className="anim-pop flex max-h-[min(640px,92dvh)] w-full flex-col rounded-t-[12px] bg-surface shadow-float sm:max-w-[560px] sm:rounded-[8px]"
+          className="anim-pop bg-surface shadow-float flex max-h-[min(640px,92dvh)] w-full flex-col rounded-t-[12px] sm:max-w-[560px] sm:rounded-[8px]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6 sm:pt-6">
             <div className="min-w-0">
-              <h2 className="font-display text-[20px] font-semibold text-ink">Thêm nguồn</h2>
-              <p className="mt-1 text-[13.5px] text-ink-3">
+              <h2 className="font-display text-ink text-[20px] font-semibold">Thêm nguồn</h2>
+              <p className="text-ink-3 mt-1 text-[13.5px]">
                 AI sẽ bám theo các nguồn này khi soạn. Chọn tối đa {MAX_PICKED} nguồn.
               </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sunken text-ink-3 transition-colors hover:text-ink"
+              className="bg-sunken text-ink-3 hover:text-ink flex size-9 shrink-0 items-center justify-center rounded-full transition-colors"
               aria-label="Đóng"
             >
               <X className="size-4" />
@@ -171,10 +196,18 @@ export function SourcePicker({
 
           <div className="space-y-3 px-5 pt-4 sm:px-6">
             <div className="overflow-x-auto">
-              <Segmented value={tab} options={tabs} onChange={(t) => { setTab(t); setQ('') }} label="Loại nguồn" />
+              <Segmented
+                value={tab}
+                options={tabs}
+                onChange={(t) => {
+                  setTab(t)
+                  setQ('')
+                }}
+                label="Loại nguồn"
+              />
             </div>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-4" />
+              <Search className="text-ink-4 pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -189,11 +222,13 @@ export function SourcePicker({
             {shown === null ? (
               <ul className="space-y-1 px-2 py-1" aria-label="Đang tải">
                 {[0, 1, 2, 3].map((i) => (
-                  <li key={i} className="h-[52px] animate-pulse rounded-[6px] bg-sunken/70" />
+                  <li key={i} className="bg-sunken/70 h-[52px] animate-pulse rounded-[6px]" />
                 ))}
               </ul>
             ) : shown.length === 0 ? (
-              <div className="flex h-full min-h-[200px] items-center justify-center px-4 text-center text-[14px] text-ink-3">{empty}</div>
+              <div className="text-ink-3 flex h-full min-h-[200px] items-center justify-center px-4 text-center text-[14px]">
+                {empty}
+              </div>
             ) : (
               <ul className="py-1">
                 {shown.map((o) => {
@@ -223,8 +258,15 @@ export function SourcePicker({
                           {on ? <Check className="size-3" strokeWidth={3} /> : null}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[14px] font-medium text-ink" data-tip={o.name}>{o.name}</span>
-                          {o.meta ? <span className="block truncate text-[12px] text-ink-3">{o.meta}</span> : null}
+                          <span
+                            className="text-ink block truncate text-[14px] font-medium"
+                            data-tip={o.name}
+                          >
+                            {o.name}
+                          </span>
+                          {o.meta ? (
+                            <span className="text-ink-3 block truncate text-[12px]">{o.meta}</span>
+                          ) : null}
                         </span>
                       </button>
                     </li>
@@ -234,12 +276,14 @@ export function SourcePicker({
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-line px-5 py-4 sm:px-6">
-            <span className="text-[13px] text-ink-3">
+          <div className="border-line flex items-center justify-between gap-3 border-t px-5 py-4 sm:px-6">
+            <span className="text-ink-3 text-[13px]">
               {picked.length ? `Đã chọn ${picked.length}/${MAX_PICKED}` : 'Chưa chọn nguồn nào'}
             </span>
             <div className="flex shrink-0 items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={onClose}>Huỷ</Button>
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                Huỷ
+              </Button>
               <Button variant="clay" size="sm" onClick={() => onDone(picked)}>
                 {value.length ? 'Cập nhật nguồn' : 'Thêm nguồn'}
               </Button>

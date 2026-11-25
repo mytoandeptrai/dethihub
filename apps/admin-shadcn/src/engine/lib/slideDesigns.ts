@@ -1,4 +1,3 @@
-import type { DeckTheme, Slide, SlideTone } from '@/engine/store/docs'
 import {
   composeLayout,
   defaultTone,
@@ -7,8 +6,10 @@ import {
   type SlideLayoutContent,
   type SlideLayoutId,
 } from './slideLayouts'
-import { themeById, withThemeFonts } from './slideTheme'
 import { applySkin, skinById } from './slideSkins'
+import { themeById, withThemeFonts } from './slideTheme'
+
+import type { DeckTheme, Slide, SlideTone } from '@/engine/store/docs'
 
 export interface SlideDesign {
   id: string // 'thanh-lich', 'tre-trung'…
@@ -135,7 +136,11 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'CÙNG SUY NGHĨ NHÉ',
           title: 'Đố Bạn Biết?',
           body: 'Tại sao các loài động vật lại có hình dáng và màu sắc lông khác nhau?',
-          items: ['Ngụy trang tránh kẻ thù', 'Thích nghi với khí hậu sống', 'Tìm kiếm thức ăn dễ dàng hơn'],
+          items: [
+            'Ngụy trang tránh kẻ thù',
+            'Thích nghi với khí hậu sống',
+            'Tìm kiếm thức ăn dễ dàng hơn',
+          ],
         },
       },
       {
@@ -169,7 +174,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           question: 'Loài thú nào sau đây bơi lội giỏi nhất dưới đại dương?',
           options: ['Hươu cao cổ', 'Cá voi xanh', 'Gấu trúc', 'Sóc túi'],
           answer: 'Cá voi xanh',
-          explanation: 'Cá voi xanh là loài thú có vú lớn nhất hành tinh và bơi lội rất cừ dưới nước!',
+          explanation:
+            'Cá voi xanh là loài thú có vú lớn nhất hành tinh và bơi lội rất cừ dưới nước!',
         },
       },
       {
@@ -254,9 +260,17 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           title: 'Va Chạm Đàn Hồi & Va Chạm Mềm',
           leftTitle: 'Va Chạm Đàn Hồi',
-          left: ['Động năng bảo toàn tuyệt đối', 'Các vật tách rời sau tương tác', 'Không sinh nhiệt lượng hao phí'],
+          left: [
+            'Động năng bảo toàn tuyệt đối',
+            'Các vật tách rời sau tương tác',
+            'Không sinh nhiệt lượng hao phí',
+          ],
           rightTitle: 'Va Chạm Mềm',
-          right: ['Động năng chuyển thành nội năng', 'Các vật dính liền cùng vận tốc', 'Cơ năng tổng cộng bị giảm sút'],
+          right: [
+            'Động năng chuyển thành nội năng',
+            'Các vật dính liền cùng vận tốc',
+            'Cơ năng tổng cộng bị giảm sút',
+          ],
         },
       },
       {
@@ -264,10 +278,17 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           kicker: 'CÂU HỎI TRẮC NGHIỆM',
-          question: 'Khi một vật ném thẳng đứng lên cao, đại lượng nào sau đây không đổi (bỏ qua sức cản)?',
-          options: ['Động năng của vật', 'Thế năng trọng trường', 'Cơ năng toàn phần', 'Vận tốc tức thời'],
+          question:
+            'Khi một vật ném thẳng đứng lên cao, đại lượng nào sau đây không đổi (bỏ qua sức cản)?',
+          options: [
+            'Động năng của vật',
+            'Thế năng trọng trường',
+            'Cơ năng toàn phần',
+            'Vận tốc tức thời',
+          ],
           answer: 'Cơ năng toàn phần',
-          explanation: 'Chỉ có thế năng và động năng chuyển hoá lẫn nhau; cơ năng toàn phần được bảo toàn.',
+          explanation:
+            'Chỉ có thế năng và động năng chuyển hoá lẫn nhau; cơ năng toàn phần được bảo toàn.',
         },
       },
       {
@@ -371,7 +392,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'cong-nghe',
     name: 'Công nghệ tối màu',
-    description: 'Hiện đại, tương phản cao, chuyên nghiệp; hợp Tin học, Công nghệ, AI và Lập trình.',
+    description:
+      'Hiện đại, tương phản cao, chuyên nghiệp; hợp Tin học, Công nghệ, AI và Lập trình.',
     themeId: 'dem-xanh',
     decorKit: 'hinh-hoc',
     stylePack: 'keynote',
@@ -473,7 +495,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'co-dien',
     name: 'Cổ điển giấy ấm',
-    description: 'Trầm ấm, hoài niệm, trang nhã; hợp Ngữ văn, Lịch sử, Giáo dục công dân và Văn hoá.',
+    description:
+      'Trầm ấm, hoài niệm, trang nhã; hợp Ngữ văn, Lịch sử, Giáo dục công dân và Văn hoá.',
     themeId: 'giay-am',
     decorKit: 'hoa-diu',
     stylePack: 'editorial',
@@ -494,7 +517,11 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'CẢM NHẬN ĐẦU GIỜ',
           title: 'Tiếng Hát Từ Cội Nguồn',
           body: 'Ca dao là tấm gương phản chiếu tâm hồn bình dị, lạc quan mà sâu sắc của người lao động qua ngàn đời.',
-          items: ['Tình cảm gia đình, cha mẹ', 'Tình yêu đôi lứa trong sáng', 'Tình yêu xóm làng, đất nước'],
+          items: [
+            'Tình cảm gia đình, cha mẹ',
+            'Tình yêu đôi lứa trong sáng',
+            'Tình yêu xóm làng, đất nước',
+          ],
         },
       },
       {
@@ -560,7 +587,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'vui-nhon',
     name: 'Vui nhộn hoạt hình',
-    description: 'Rực rỡ, lấp lánh, sinh động; hợp giờ sinh hoạt, trò chơi học tập, khởi động đầu giờ.',
+    description:
+      'Rực rỡ, lấp lánh, sinh động; hợp giờ sinh hoạt, trò chơi học tập, khởi động đầu giờ.',
     themeId: 'vang-nang',
     decorKit: 'lap-lanh',
     stylePack: 'classroom',
@@ -705,10 +733,12 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'LUYỆN TẬP NHANH',
-          question: 'Kết quả của phép tính $\\tfrac{2}{3} \\times \\tfrac{9}{4}$ sau khi rút gọn là bao nhiêu?',
+          question:
+            'Kết quả của phép tính $\\tfrac{2}{3} \\times \\tfrac{9}{4}$ sau khi rút gọn là bao nhiêu?',
           options: ['$\\tfrac{3}{2}$', '$\\tfrac{18}{12}$', '$\\tfrac{1}{2}$', '$\\tfrac{2}{3}$'],
           answer: '$\\tfrac{3}{2}$',
-          explanation: 'Ta có $\\tfrac{2 \\times 9}{3 \\times 4} = \\tfrac{18}{12} = \\tfrac{3}{2}$ (chia cả tử và mẫu cho 6).',
+          explanation:
+            'Ta có $\\tfrac{2 \\times 9}{3 \\times 4} = \\tfrac{18}{12} = \\tfrac{3}{2}$ (chia cả tử và mẫu cho 6).',
         },
       },
       {
@@ -733,7 +763,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'pastel-mam-non',
     name: 'Pastel Mầm Non',
-    description: 'Nền kem ấm, hồng – xanh ngọc – vàng bơ bo tròn mềm mại, thân thiện cho mầm non và tiểu học.',
+    description:
+      'Nền kem ấm, hồng – xanh ngọc – vàng bơ bo tròn mềm mại, thân thiện cho mầm non và tiểu học.',
     themeId: 'pastel-mam-non',
     decorKit: 'hoa-diu',
     stylePack: 'classroom',
@@ -819,7 +850,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'bien-xanh',
     name: 'Biển Xanh Mát',
-    description: 'Nền xanh băng dịu mắt, điểm nhấn đại dương và san hô rõ ràng cho khoa học tự nhiên, địa lý.',
+    description:
+      'Nền xanh băng dịu mắt, điểm nhấn đại dương và san hô rõ ràng cho khoa học tự nhiên, địa lý.',
     themeId: 'bien-xanh',
     decorKit: 'la-xanh',
     stylePack: 'bento',
@@ -906,7 +938,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'so-tay-o-li',
     name: 'Sổ Tay Ô Li',
-    description: 'Giấy kẻ sổ tay mộc mạc với dòng lề đỏ, phù hợp ghi chép bài tập, ôn luyện và hướng dẫn.',
+    description:
+      'Giấy kẻ sổ tay mộc mạc với dòng lề đỏ, phù hợp ghi chép bài tập, ôn luyện và hướng dẫn.',
     themeId: 'so-tay-o-li',
     decorKit: 've-tay',
     stylePack: 'classroom',
@@ -975,7 +1008,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Ghi chú bên lề',
-          quote: 'Một lập luận hay không nằm ở số lượng chữ nhiều, mà ở sự chính xác của từng lý lẽ.',
+          quote:
+            'Một lập luận hay không nằm ở số lượng chữ nhiều, mà ở sự chính xác của từng lý lẽ.',
           author: 'Mẹo phòng thi • Ghi vào sổ tay',
         },
       },
@@ -992,7 +1026,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'cam-nang-dong',
     name: 'Cam Năng Động',
-    description: 'Nền kem sáng kết hợp cam đất và chàm đậm đầy sức sống cho STEM, dự án nhóm và khởi động.',
+    description:
+      'Nền kem sáng kết hợp cam đất và chàm đậm đầy sức sống cho STEM, dự án nhóm và khởi động.',
     themeId: 'cam-nang-dong',
     decorKit: 'hinh-hoc',
     stylePack: 'bold',
@@ -1039,15 +1074,9 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'Tối ưu lực đẩy',
           title: 'Kiểm Soát Độ Bám Và Ma Sát',
           leftTitle: 'Tăng độ bám bánh sau',
-          left: [
-            'Quấn vòng cao su mỏng quanh mép bánh.',
-            'Truyền lực kéo ổn định không trượt.',
-          ],
+          left: ['Quấn vòng cao su mỏng quanh mép bánh.', 'Truyền lực kéo ổn định không trượt.'],
           rightTitle: 'Giảm ma sát trục quay',
-          right: [
-            'Luồn trục tre qua ống hút nhựa trơn.',
-            'Giữ hai bánh thẳng hàng và song song.',
-          ],
+          right: ['Luồn trục tre qua ống hút nhựa trơn.', 'Giữ hai bánh thẳng hàng và song song.'],
         },
       },
       {
@@ -1076,7 +1105,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'lich-su-co',
     name: 'Lịch Sử Cổ Điển',
-    description: 'Giấy da ngà cổ điển với đỏ son và vàng đồng trang nghiêm cho lịch sử, văn học và di sản.',
+    description:
+      'Giấy da ngà cổ điển với đỏ son và vàng đồng trang nghiêm cho lịch sử, văn học và di sản.',
     themeId: 'lich-su-co',
     decorKit: 'toi-gian',
     stylePack: 'editorial',
@@ -1151,7 +1181,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Di Sản Tiếp Nối Ngàn Năm',
-          subtitle: 'Đọc thêm tư liệu Chiếu dời đô và chuẩn bị câu hỏi thảo luận về Hội nghị Diên Hồng.',
+          subtitle:
+            'Đọc thêm tư liệu Chiếu dời đô và chuẩn bị câu hỏi thảo luận về Hội nghị Diên Hồng.',
         },
       },
     ],
@@ -1159,7 +1190,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'phong-thi-nghiem',
     name: 'Phòng Thí Nghiệm',
-    description: 'Nền trắng xanh kỹ thuật với tiêu đề monospace rõ ràng cho hoá học, sinh học và thực hành.',
+    description:
+      'Nền trắng xanh kỹ thuật với tiêu đề monospace rõ ràng cho hoá học, sinh học và thực hành.',
     themeId: 'phong-thi-nghiem',
     decorKit: 'hinh-hoc',
     stylePack: 'consulting',
@@ -1245,7 +1277,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'bac-au-toi-gian',
     name: 'Bắc Âu Tối Giản',
-    description: 'Nền xám tuyết tinh gọn với xanh slate và nhấn rỉ sét hiện đại cho thuyết trình chuyên đề.',
+    description:
+      'Nền xám tuyết tinh gọn với xanh slate và nhấn rỉ sét hiện đại cho thuyết trình chuyên đề.',
     themeId: 'bac-au-toi-gian',
     decorKit: 'toi-gian',
     stylePack: 'editorial',
@@ -1280,10 +1313,7 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'Trước và sau khi chỉnh',
           title: 'Biến Đoạn Văn Dài Thành Điểm Nhấn Trực Quan',
           leftTitle: 'Cách trình bày cũ',
-          left: [
-            'Sao chép nguyên 12 dòng từ báo cáo.',
-            'Người nghe vừa đọc vừa mất tập trung.',
-          ],
+          left: ['Sao chép nguyên 12 dòng từ báo cáo.', 'Người nghe vừa đọc vừa mất tập trung.'],
           rightTitle: 'Cách trình bày tối giản',
           right: [
             'Chọn 3 cụm từ khoá kèm một số liệu đối chứng.',
@@ -1309,7 +1339,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Góc nhìn thiết kế',
-          quote: 'Sự đơn giản là loại bỏ những chi tiết thừa để phần quan trọng nhất được cất tiếng.',
+          quote:
+            'Sự đơn giản là loại bỏ những chi tiết thừa để phần quan trọng nhất được cất tiếng.',
           author: 'Nguyên tắc Thiết kế Bắc Âu',
         },
       },
@@ -1326,7 +1357,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'hoa-si-mau-nuoc',
     name: 'Hoạ Sĩ Màu Nước',
-    description: 'Giấy vẽ màu kem nhẹ với sắc tím oải hương và đất nung nghệ thuật cho văn học, mỹ thuật.',
+    description:
+      'Giấy vẽ màu kem nhẹ với sắc tím oải hương và đất nung nghệ thuật cho văn học, mỹ thuật.',
     themeId: 'hoa-si-mau-nuoc',
     decorKit: 'hoa-diu',
     stylePack: 'editorial',
@@ -1365,10 +1397,7 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
             'Tạo cảm giác khoảng lùi xa cho bầu trời.',
           ],
           rightTitle: 'Gam đất nung làm điểm tụ',
-          right: [
-            'Đặt nét cam đất vào khu vực trung tâm.',
-            'Giúp bức tranh có điểm nhấn ấm áp.',
-          ],
+          right: ['Đặt nét cam đất vào khu vực trung tâm.', 'Giúp bức tranh có điểm nhấn ấm áp.'],
         },
       },
       {
@@ -1376,7 +1405,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           kicker: 'Cảm hứng sáng tác',
-          quote: 'Màu sắc là phím đàn, đôi mắt là chiếc búa, còn tâm hồn là cây dương cầm với muôn dây rung.',
+          quote:
+            'Màu sắc là phím đàn, đôi mắt là chiếc búa, còn tâm hồn là cây dương cầm với muôn dây rung.',
           author: 'Wassily Kandinsky',
         },
       },
@@ -1406,7 +1436,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'vu-tru',
     name: 'Vũ Trụ Đêm',
-    description: 'Nền tối sâu thăm thẳm với sắc tím thiên hà và xanh cực quang nổi bật cho thiên văn, công nghệ.',
+    description:
+      'Nền tối sâu thăm thẳm với sắc tím thiên hà và xanh cực quang nổi bật cho thiên văn, công nghệ.',
     themeId: 'vu-tru',
     decorKit: 'lap-lanh',
     stylePack: 'keynote',
@@ -1417,7 +1448,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Thiên Văn Học • Hành Trình Khám Phá',
           title: 'Hệ Mặt Trời Và Những Hành Tinh Đá Khí',
-          subtitle: 'Quan sát cấu trúc, quỹ đạo và đặc điểm khí quyển của tám hành tinh quay quanh Mặt Trời.',
+          subtitle:
+            'Quan sát cấu trúc, quỹ đạo và đặc điểm khí quyển của tám hành tinh quay quanh Mặt Trời.',
         },
       },
       {
@@ -1427,9 +1459,18 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'Quy mô thiên hà',
           title: 'Những Con Số Khó Hình Dung Trong Vũ Trụ',
           stats: [
-            { value: '150 triệu km', label: 'Khoảng cách trung bình từ Trái Đất tới Mặt Trời (1 AU)' },
-            { value: '8 phút 20 giây', label: 'Thời gian ánh sáng Mặt Trời truyền tới bề mặt Trái Đất' },
-            { value: '8 hành tinh', label: 'Gồm 4 hành tinh đất đá vòng trong và 4 hành tinh khí khổng lồ' },
+            {
+              value: '150 triệu km',
+              label: 'Khoảng cách trung bình từ Trái Đất tới Mặt Trời (1 AU)',
+            },
+            {
+              value: '8 phút 20 giây',
+              label: 'Thời gian ánh sáng Mặt Trời truyền tới bề mặt Trái Đất',
+            },
+            {
+              value: '8 hành tinh',
+              label: 'Gồm 4 hành tinh đất đá vòng trong và 4 hành tinh khí khổng lồ',
+            },
           ],
         },
       },
@@ -1493,7 +1534,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'rung-dem',
     name: 'Rừng Đêm',
-    description: 'Nền xanh rừng thẳm tĩnh lặng với sắc lá sáng và vàng rêu ấm áp cho sinh thái, văn hoá.',
+    description:
+      'Nền xanh rừng thẳm tĩnh lặng với sắc lá sáng và vàng rêu ấm áp cho sinh thái, văn hoá.',
     themeId: 'rung-dem',
     decorKit: 'la-xanh',
     stylePack: 'keynote',
@@ -1558,7 +1600,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Thông điệp bảo tồn',
-          quote: 'Rừng không chỉ là tập hợp những thân cây, mà là một mạng lưới sự sống nương tựa vào nhau.',
+          quote:
+            'Rừng không chỉ là tập hợp những thân cây, mà là một mạng lưới sự sống nương tựa vào nhau.',
           author: 'Tài liệu Sinh thái học Rừng',
         },
       },
@@ -1567,7 +1610,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Chung Tay Giữ Màu Xanh Đại Ngàn',
-          subtitle: 'Tìm hiểu một vườn quốc gia gần nơi em sinh sống và chia sẻ vào tiết sinh hoạt tới.',
+          subtitle:
+            'Tìm hiểu một vườn quốc gia gần nơi em sinh sống và chia sẻ vào tiết sinh hoạt tới.',
         },
       },
     ],
@@ -1575,7 +1619,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'bac-ha',
     name: 'Bạc Hà Xanh Mát',
-    description: 'Nền trắng ngà ánh lục bạc hà, điểm nhấn xanh lá đậm thanh lọc, tươi mới cho Sinh học và KHTN.',
+    description:
+      'Nền trắng ngà ánh lục bạc hà, điểm nhấn xanh lá đậm thanh lọc, tươi mới cho Sinh học và KHTN.',
     themeId: 'bac-ha',
     decorKit: 'la-xanh',
     stylePack: 'bento',
@@ -1586,7 +1631,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Sinh Học Lớp 10 • Chương III',
           title: 'Quang Hợp & Sự Sống Trên Hành Tinh Xanh',
-          subtitle: 'Khám phá cơ chế hấp thu năng lượng ánh sáng và chuyển hoá carbon kỳ diệu của lục lạp.',
+          subtitle:
+            'Khám phá cơ chế hấp thu năng lượng ánh sáng và chuyển hoá carbon kỳ diệu của lục lạp.',
         },
       },
       {
@@ -1662,7 +1708,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'hong-dao',
     name: 'Hồng Đào Dịu Êm',
-    description: 'Nền kem đào êm ái, sắc san hô và đỏ ấm nồng nàn, cảm xúc cho Ngữ văn và Kỹ năng sống.',
+    description:
+      'Nền kem đào êm ái, sắc san hô và đỏ ấm nồng nàn, cảm xúc cho Ngữ văn và Kỹ năng sống.',
     themeId: 'hong-dao',
     decorKit: 'hoa-diu',
     stylePack: 'editorial',
@@ -1673,7 +1720,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Kỹ Năng Sống • Chuyên Đề 4',
           title: 'Nghệ Thuật Lắng Nghe & Thấu Cảm',
-          subtitle: 'Kết nối trái tim bằng sự hiện diện chân thành, ánh mắt tin cậy và lời nói ấm áp.',
+          subtitle:
+            'Kết nối trái tim bằng sự hiện diện chân thành, ánh mắt tin cậy và lời nói ấm áp.',
         },
       },
       {
@@ -1728,7 +1776,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Thông điệp yêu thương',
-          quote: 'Lắng nghe chân thành là món quà vô giá và dịu dàng nhất mà một người có thể trao tặng cho người khác.',
+          quote:
+            'Lắng nghe chân thành là món quà vô giá và dịu dàng nhất mà một người có thể trao tặng cho người khác.',
           author: 'Tâm lý học Ứng dụng',
         },
       },
@@ -1737,7 +1786,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Mở Rộng Trái Tim Lắng Nghe',
-          subtitle: 'Hãy dành 10 phút tối nay để lắng nghe câu chuyện của một người thân yêu quanh bạn.',
+          subtitle:
+            'Hãy dành 10 phút tối nay để lắng nghe câu chuyện của một người thân yêu quanh bạn.',
         },
       },
     ],
@@ -1745,7 +1795,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'oai-huong',
     name: 'Oải Hương Tím Nhạt',
-    description: 'Sắc tím oải hương mơ màng, tím than thanh lịch và thi vị, phù hợp cho Âm nhạc, Mĩ thuật và Thơ ca.',
+    description:
+      'Sắc tím oải hương mơ màng, tím than thanh lịch và thi vị, phù hợp cho Âm nhạc, Mĩ thuật và Thơ ca.',
     themeId: 'oai-huong',
     decorKit: 'hoa-diu',
     stylePack: 'editorial',
@@ -1756,7 +1807,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Âm Nhạc & Mĩ Thuật • Lớp 8',
           title: 'Giai Điệu Cổ Điển & Sắc Màu Hội Hoạ',
-          subtitle: 'Sự giao thoa diệu kỳ giữa tiết tấu âm thanh và ngôn ngữ đường nét trong không gian nghệ thuật.',
+          subtitle:
+            'Sự giao thoa diệu kỳ giữa tiết tấu âm thanh và ngôn ngữ đường nét trong không gian nghệ thuật.',
         },
       },
       {
@@ -1765,7 +1817,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Nguyên lý đồng điệu',
           title: 'Khi Âm Thanh Chuyển Hoá Thành Màu Sắc',
-          subtitle: 'Mỗi nốt nhạc ngân vang gợi lên một sắc thái thị giác phong phú trong tâm trí người thưởng thức.',
+          subtitle:
+            'Mỗi nốt nhạc ngân vang gợi lên một sắc thái thị giác phong phú trong tâm trí người thưởng thức.',
           bullets: [
             'Cao độ và sắc độ: Nốt cao mang ánh sáng trong trẻo, nốt trầm mang sắc màu đậm sâu bí ẩn.',
             'Tiết tấu và nhịp điệu: Tiết tấu dồn dập tạo nên những đường nét góc cạnh, tiết tấu êm dịu tạo đường cong uốn lượn.',
@@ -1811,7 +1864,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Cảm hứng sáng tạo',
-          quote: 'Màu sắc là phím đàn, đôi mắt là búa gõ, tâm hồn là cây đàn dương cầm muôn điệu rung lên theo từng xúc cảm.',
+          quote:
+            'Màu sắc là phím đàn, đôi mắt là búa gõ, tâm hồn là cây đàn dương cầm muôn điệu rung lên theo từng xúc cảm.',
           author: 'Wassily Kandinsky',
         },
       },
@@ -1820,7 +1874,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Nuôi Dưỡng Tâm Hồn Yêu Nghệ Thuật',
-          subtitle: 'Hãy thả mình vào một bản nhạc giao hưởng êm dịu khi vẽ bức tranh tuần này của em.',
+          subtitle:
+            'Hãy thả mình vào một bản nhạc giao hưởng êm dịu khi vẽ bức tranh tuần này của em.',
         },
       },
     ],
@@ -1828,7 +1883,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'cat-vang',
     name: 'Cát Vàng Sa Mạc',
-    description: 'Sắc be cát sa mạc mộc mạc, điểm nhấn nâu đất và xanh ô liu bền vững cho Địa lí, Du lịch và Lịch sử.',
+    description:
+      'Sắc be cát sa mạc mộc mạc, điểm nhấn nâu đất và xanh ô liu bền vững cho Địa lí, Du lịch và Lịch sử.',
     themeId: 'cat-vang',
     decorKit: 'toi-gian',
     stylePack: 'consulting',
@@ -1839,7 +1895,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Địa Lý Tự Nhiên • Thế Giới',
           title: 'Cảnh Quan Sa Mạc & Sự Thích Nghi Sinh Học',
-          subtitle: 'Khám phá những vùng đất khô hạn nhất hành tinh và sức sống phi thường của sinh quyển.',
+          subtitle:
+            'Khám phá những vùng đất khô hạn nhất hành tinh và sức sống phi thường của sinh quyển.',
         },
       },
       {
@@ -1907,7 +1964,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Hành Động Chống Sa Mạc Hoá',
-          subtitle: 'Trồng cây gây rừng chắn cát là sứ mệnh bảo vệ đất đai cho các thế hệ tương lai.',
+          subtitle:
+            'Trồng cây gây rừng chắn cát là sứ mệnh bảo vệ đất đai cho các thế hệ tương lai.',
         },
       },
     ],
@@ -1915,7 +1973,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'chanh-tuoi',
     name: 'Chanh Tươi Sôi Nổi',
-    description: 'Nền vàng chanh ánh trắng tươi mát, xanh lá sinh động, kích thích sự hứng khởi cho Tiểu học và Trò chơi.',
+    description:
+      'Nền vàng chanh ánh trắng tươi mát, xanh lá sinh động, kích thích sự hứng khởi cho Tiểu học và Trò chơi.',
     themeId: 'chanh-tuoi',
     decorKit: 'lap-lanh',
     stylePack: 'classroom',
@@ -1926,7 +1985,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Toán Vui Lớp 3 • Tuần 15',
           title: 'Vương Quốc Số Học & Những Phép Tính Vui',
-          subtitle: 'Cùng tham gia hành trình giải đố thông minh để chinh phục kho báu tri thức toán học.',
+          subtitle:
+            'Cùng tham gia hành trình giải đố thông minh để chinh phục kho báu tri thức toán học.',
         },
       },
       {
@@ -1994,7 +2054,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Chúc Mừng Các Bạn Nhỏ Xuất Sắc!',
-          subtitle: 'Về nhà hãy đố bố mẹ những câu đố toán học vui nhộn hôm nay chúng mình đã học nhé.',
+          subtitle:
+            'Về nhà hãy đố bố mẹ những câu đố toán học vui nhộn hôm nay chúng mình đã học nhé.',
         },
       },
     ],
@@ -2002,7 +2063,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'bau-troi',
     name: 'Bầu Trời Xanh Trong',
-    description: 'Sắc xanh thiên thanh bao la, cụm mây trắng êm đềm, tạo không gian thoáng đãng cho Khoa học và Vật lí.',
+    description:
+      'Sắc xanh thiên thanh bao la, cụm mây trắng êm đềm, tạo không gian thoáng đãng cho Khoa học và Vật lí.',
     themeId: 'bau-troi',
     decorKit: 'toi-gian',
     stylePack: 'keynote',
@@ -2013,7 +2075,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Vật Lý Khí Quyển • KHTN Lớp 8',
           title: 'Khí Quyển Trái Đất & Hiện Tượng Quang Học',
-          subtitle: 'Giải mã màu xanh của vòm trời, ánh hoàng hôn rực rỡ và những dải cầu vồng sau mưa.',
+          subtitle:
+            'Giải mã màu xanh của vòm trời, ánh hoàng hôn rực rỡ và những dải cầu vồng sau mưa.',
         },
       },
       {
@@ -2022,7 +2085,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Cấu trúc khí quyển',
           title: 'Các Tầng Không Gian Bao Bọc Địa Cầu',
-          subtitle: 'Lớp vỏ khí quyển giữ nhiệt độ ôn hoà và bảo vệ mọi sự sống trước bức xạ vũ trụ.',
+          subtitle:
+            'Lớp vỏ khí quyển giữ nhiệt độ ôn hoà và bảo vệ mọi sự sống trước bức xạ vũ trụ.',
           bullets: [
             'Tầng đối lưu (0–12 km): Nơi diễn ra mọi hiện tượng thời tiết mưa, nắng, gió bão và mây trôi.',
             'Tầng bình lưu (12–50 km): Chứa tầng ozone quý giá hấp thụ tia cực tím nguy hại từ Mặt Trời.',
@@ -2081,7 +2145,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Chung Tay Giữ Bầu Trời Trong Lành',
-          subtitle: 'Giảm khí thải carbon là hành động thiết thực gìn giữ màu xanh bao la cho tương lai.',
+          subtitle:
+            'Giảm khí thải carbon là hành động thiết thực gìn giữ màu xanh bao la cho tương lai.',
         },
       },
     ],
@@ -2089,7 +2154,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'bao-tuong',
     name: 'Báo Tường Xã Luận',
-    description: 'Phong cách báo in truyền thống, tiêu đề có chân đĩnh đạc, viền kép và điểm đỏ cho Lịch sử, GDCD và Sự kiện.',
+    description:
+      'Phong cách báo in truyền thống, tiêu đề có chân đĩnh đạc, viền kép và điểm đỏ cho Lịch sử, GDCD và Sự kiện.',
     themeId: 'bao-tuong',
     decorKit: 'toi-gian',
     stylePack: 'editorial',
@@ -2100,7 +2166,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Chuyên Đề Lịch Sử • Số Đặc Biệt',
           title: 'Ký Ức Lịch Sử & Tinh Thần Độc Lập Dân Tộc',
-          subtitle: 'Những trang sử vàng chói lọi và bài học về ý chí tự lực, kiên cường bảo vệ non sông.',
+          subtitle:
+            'Những trang sử vàng chói lọi và bài học về ý chí tự lực, kiên cường bảo vệ non sông.',
         },
       },
       {
@@ -2109,7 +2176,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Mốc son thời đại',
           title: 'Những Trang Sử Vàng Dân Tộc Khắc Ghi',
-          subtitle: 'Ba chặng đường vẻ vang khẳng định chủ quyền và vị thế đất nước trên trường quốc tế.',
+          subtitle:
+            'Ba chặng đường vẻ vang khẳng định chủ quyền và vị thế đất nước trên trường quốc tế.',
           bullets: [
             'Cách mạng Tháng Tám 1945: Khúc ca quật khởi giành chính quyền về tay nhân dân cả nước.',
             'Chiến thắng Điện Biên Phủ 1954: Mốc son lừng lẫy năm châu, chấn động địa cầu mở ra kỷ nguyên mới.',
@@ -2155,7 +2223,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Xã luận trang nhất',
-          quote: 'Không có gì quý hơn độc lập, tự do. Nước Việt Nam là một, dân tộc Việt Nam là một. Sông có thể cạn, núi có thể mòn, song chân lý ấy không bao giờ thay đổi.',
+          quote:
+            'Không có gì quý hơn độc lập, tự do. Nước Việt Nam là một, dân tộc Việt Nam là một. Sông có thể cạn, núi có thể mòn, song chân lý ấy không bao giờ thay đổi.',
           author: 'Chủ tịch Hồ Chí Minh',
         },
       },
@@ -2164,7 +2233,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Viết Tiếp Truyền Thống Yêu Nước Hôm Nay',
-          subtitle: 'Mỗi học sinh nỗ lực rèn đức luyện tài chính là đóng góp thiết thực xây dựng quê hương.',
+          subtitle:
+            'Mỗi học sinh nỗ lực rèn đức luyện tài chính là đóng góp thiết thực xây dựng quê hương.',
         },
       },
     ],
@@ -2172,7 +2242,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'hinh-hoc-mau',
     name: 'Hình Học Bauhaus',
-    description: 'Khối tròn, vuông, thoi màu sắc cơ bản tương phản mạnh kiểu Bauhaus, độc đáo cho Hình học và Kiến trúc.',
+    description:
+      'Khối tròn, vuông, thoi màu sắc cơ bản tương phản mạnh kiểu Bauhaus, độc đáo cho Hình học và Kiến trúc.',
     themeId: 'hinh-hoc-mau',
     decorKit: 'toi-gian',
     stylePack: 'bold',
@@ -2183,7 +2254,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Toán Hình & Mĩ Thuật • Lớp 9',
           title: 'Ngôn Ngữ Hình Khối & Tỉ Lệ Vàng Kiến Trúc',
-          subtitle: 'Ứng dụng hình học phẳng vào thiết kế công trình, đồ hoạ hiện đại và thị giác thị dân.',
+          subtitle:
+            'Ứng dụng hình học phẳng vào thiết kế công trình, đồ hoạ hiện đại và thị giác thị dân.',
         },
       },
       {
@@ -2192,7 +2264,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Nguyên lý tạo hình',
           title: 'Ba Trụ Cột Của Thiết Kế Bauhaus',
-          subtitle: 'Trường phái nghệ thuật kết hợp hoàn hảo giữa công năng sử dụng và vẻ đẹp hình khối thuần khiết.',
+          subtitle:
+            'Trường phái nghệ thuật kết hợp hoàn hảo giữa công năng sử dụng và vẻ đẹp hình khối thuần khiết.',
           bullets: [
             'Công năng định hình hình thể: Loại bỏ các chi tiết rườm rà, tập trung vào cấu trúc sử dụng tối ưu.',
             'Màu sắc cơ bản: Khai thác sức mạnh thị giác của bộ ba màu đỏ, vàng, xanh cobalt nguyên bản.',
@@ -2240,7 +2313,10 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'Hằng số hình học',
           title: 'Tỉ Lệ Vàng Trong Tự Nhiên & Thiết Kế',
           stats: [
-            { value: '1.618', label: 'Hằng số Phi (φ) định hình tỉ lệ vàng chuẩn mực trong nghệ thuật' },
+            {
+              value: '1.618',
+              label: 'Hằng số Phi (φ) định hình tỉ lệ vàng chuẩn mực trong nghệ thuật',
+            },
             { value: '90°', label: 'Góc vuông định hình cấu trúc chịu lực và mặt bằng kiến trúc' },
             { value: '360°', label: 'Chu kỳ trọn vẹn của hình tròn và không gian đa chiều' },
           ],
@@ -2251,7 +2327,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Sáng Tạo Không Giới Hạn Cùng Hình Khối',
-          subtitle: 'Hãy thử phác thảo một mẫu logo ứng dụng chỉ từ ba hình khối cơ bản trong tuần này.',
+          subtitle:
+            'Hãy thử phác thảo một mẫu logo ứng dụng chỉ từ ba hình khối cơ bản trong tuần này.',
         },
       },
     ],
@@ -2259,7 +2336,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'bang-trang',
     name: 'Bảng Trắng Giảng Đường',
-    description: 'Mô phỏng mặt bảng trắng hiện đại, nét bút dạ xanh – đỏ sinh động, thân thuộc trong tiết học hằng ngày.',
+    description:
+      'Mô phỏng mặt bảng trắng hiện đại, nét bút dạ xanh – đỏ sinh động, thân thuộc trong tiết học hằng ngày.',
     themeId: 'bang-trang',
     decorKit: 'toi-gian',
     stylePack: 'classroom',
@@ -2270,7 +2348,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Phương Pháp Học Tập • Tiết 5',
           title: 'Sơ Đồ Tư Duy & Kỹ Thuật Ghi Nhớ Nhanh',
-          subtitle: 'Tối ưu hoá hiệu suất tiếp thu bài học bằng bút dạ màu sắc và từ khoá trực quan.',
+          subtitle:
+            'Tối ưu hoá hiệu suất tiếp thu bài học bằng bút dạ màu sắc và từ khoá trực quan.',
         },
       },
       {
@@ -2279,7 +2358,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Bốn bước cơ bản',
           title: 'Cách Vẽ Bản Đồ Tư Duy Hiệu Quả',
-          subtitle: 'Chuyển đổi những trang sách dày đặc chữ thành bức tranh kiến thức sinh động và dễ nhớ.',
+          subtitle:
+            'Chuyển đổi những trang sách dày đặc chữ thành bức tranh kiến thức sinh động và dễ nhớ.',
           bullets: [
             'Chủ đề trung tâm: Đặt chủ đề bài học ở chính giữa trang với hình vẽ nổi bật và màu sắc bắt mắt.',
             'Nhánh chính cấp 1: Vẽ các đường cong đậm toả ra các hướng đại diện cho các luận điểm lớn.',
@@ -2327,9 +2407,18 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
           kicker: 'Nghiên cứu não bộ',
           title: 'Hiệu Quả Tiếp Thu Hình Ảnh Trực Quan',
           stats: [
-            { value: '60.000x', label: 'Tốc độ não bộ xử lý hình ảnh nhanh hơn ký tự văn bản đơn thuần' },
-            { value: '80%', label: 'Lượng kiến thức được ghi nhớ lâu dài khi học kèm hình ảnh minh hoạ' },
-            { value: '20 phút', label: 'Thời gian lý tưởng để hoàn thiện một sơ đồ tư duy ôn tập bài giảng' },
+            {
+              value: '60.000x',
+              label: 'Tốc độ não bộ xử lý hình ảnh nhanh hơn ký tự văn bản đơn thuần',
+            },
+            {
+              value: '80%',
+              label: 'Lượng kiến thức được ghi nhớ lâu dài khi học kèm hình ảnh minh hoạ',
+            },
+            {
+              value: '20 phút',
+              label: 'Thời gian lý tưởng để hoàn thiện một sơ đồ tư duy ôn tập bài giảng',
+            },
           ],
         },
       },
@@ -2346,7 +2435,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
   {
     id: 'tet-xuan',
     name: 'Tết Xuân Truyền Thống',
-    description: 'Sắc đỏ son may mắn, vàng kim ấm áp trên nền kem lễ hội, rộn ràng phong vị Tết Nguyên Đán và mùa xuân.',
+    description:
+      'Sắc đỏ son may mắn, vàng kim ấm áp trên nền kem lễ hội, rộn ràng phong vị Tết Nguyên Đán và mùa xuân.',
     themeId: 'tet-xuan',
     decorKit: 'lap-lanh',
     stylePack: 'editorial',
@@ -2357,7 +2447,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Văn Hoá Truyền Thống • Mùa Xuân',
           title: 'Phong Vị Tết Cổ Truyền & Nét Đẹp Văn Hoá Việt',
-          subtitle: 'Ý nghĩa phong tục ngày Tết Nguyên Đán, mâm ngũ quả, câu đối đỏ và sự sum vầy gia đình ấm áp.',
+          subtitle:
+            'Ý nghĩa phong tục ngày Tết Nguyên Đán, mâm ngũ quả, câu đối đỏ và sự sum vầy gia đình ấm áp.',
         },
       },
       {
@@ -2366,7 +2457,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         content: {
           kicker: 'Phong tục nghìn năm',
           title: 'Ba Nét Đẹp Ngày Tết Không Thể Phai Mờ',
-          subtitle: 'Những giá trị tinh thần thiêng liêng gắn kết các thế hệ người Việt trong dịp Tết sum vầy.',
+          subtitle:
+            'Những giá trị tinh thần thiêng liêng gắn kết các thế hệ người Việt trong dịp Tết sum vầy.',
           bullets: [
             'Bữa cơm tất niên chiều 30: Thời khắc mọi thành viên sum họp quanh mâm cơm, sẻ chia một năm đã qua.',
             'Phong tục chúc Tết & mừng tuổi: Trao nhau những phong bao lì xì đỏ thắm cùng lời chúc vạn sự như ý.',
@@ -2412,7 +2504,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'theme',
         content: {
           kicker: 'Hơi thở mùa xuân',
-          quote: 'Tết là nơi để trở về, là lúc những người con xa xứ tìm về bên bếp lửa gia đình, cảm nhận trọn vẹn tình thân sau bao tháng ngày bôn ba.',
+          quote:
+            'Tết là nơi để trở về, là lúc những người con xa xứ tìm về bên bếp lửa gia đình, cảm nhận trọn vẹn tình thân sau bao tháng ngày bôn ba.',
           author: 'Giai phẩm Mùa Xuân',
         },
       },
@@ -2421,7 +2514,8 @@ export const SLIDE_DESIGNS: SlideDesign[] = [
         tone: 'soft',
         content: {
           title: 'Kính Chúc Năm Mới An Khang Thịnh Vượng!',
-          subtitle: 'Cùng gửi những lời chúc tốt đẹp nhất tới thầy cô giáo, bạn bè và toàn thể gia đình yêu thương.',
+          subtitle:
+            'Cùng gửi những lời chúc tốt đẹp nhất tới thầy cô giáo, bạn bè và toàn thể gia đình yêu thương.',
         },
       },
     ],
@@ -2440,9 +2534,15 @@ const DESIGN_FONT_PAIRS: Record<string, readonly [string, string]> = {
   'bang-trang': ['Lexend', 'Be Vietnam Pro'],
 }
 
-export function designTheme(design: SlideDesign, palette: DeckTheme = themeById(design.themeId)): DeckTheme {
+export function designTheme(
+  design: SlideDesign,
+  palette: DeckTheme = themeById(design.themeId),
+): DeckTheme {
   const original = themeById(design.themeId)
-  return withThemeFonts(palette, DESIGN_FONT_PAIRS[design.id] ?? [original.fontHeading, original.fontBody])
+  return withThemeFonts(
+    palette,
+    DESIGN_FONT_PAIRS[design.id] ?? [original.fontHeading, original.fontBody],
+  )
 }
 
 export function buildDesignSlides(design: SlideDesign, overrideTheme?: DeckTheme): Slide[] {

@@ -100,7 +100,13 @@ const construct: typeof construct0 = (t, k, o) => {
   lastErrors = c.errors
   return c
 }
-type GeoImage = { svg: string; width: number; height: number; errors?: Array<{ line: number; msg: string }>; pick?: GeoPick }
+type GeoImage = {
+  svg: string
+  width: number
+  height: number
+  errors?: Array<{ line: number; msg: string }>
+  pick?: GeoPick
+}
 
 type P2 = [number, number]
 type P3 = [number, number, number]
@@ -124,13 +130,29 @@ export const GEO3D_SHAPES: Array<{ id: Geo3dShape; label: string; names: string[
   { id: 'pyramid3', label: 'Hình chóp S.ABC', names: ['S', 'A', 'B', 'C', 'H'] },
   { id: 'pyramid3-sa', label: 'Chóp S.ABC, SA ⊥ (ABC)', names: ['S', 'A', 'B', 'C'] },
   { id: 'pyramid3-regular', label: 'Chóp tam giác đều S.ABC', names: ['S', 'A', 'B', 'C', 'O'] },
-  { id: 'pyramid4', label: 'Chóp S.ABCD đáy hình bình hành', names: ['S', 'A', 'B', 'C', 'D', 'O'] },
+  {
+    id: 'pyramid4',
+    label: 'Chóp S.ABCD đáy hình bình hành',
+    names: ['S', 'A', 'B', 'C', 'D', 'O'],
+  },
   { id: 'pyramid4-sa', label: 'Chóp S.ABCD, SA ⊥ (ABCD)', names: ['S', 'A', 'B', 'C', 'D', 'O'] },
-  { id: 'pyramid4-regular', label: 'Chóp tứ giác đều S.ABCD', names: ['S', 'A', 'B', 'C', 'D', 'O'] },
+  {
+    id: 'pyramid4-regular',
+    label: 'Chóp tứ giác đều S.ABCD',
+    names: ['S', 'A', 'B', 'C', 'D', 'O'],
+  },
   { id: 'tetrahedron', label: 'Tứ diện ABCD', names: ['A', 'B', 'C', 'D'] },
   { id: 'prism3', label: "Lăng trụ đứng ABC.A'B'C'", names: ['A', 'B', 'C', "A'", "B'", "C'"] },
-  { id: 'box', label: "Hình hộp chữ nhật ABCD.A'B'C'D'", names: ['A', 'B', 'C', 'D', "A'", "B'", "C'", "D'"] },
-  { id: 'cube', label: "Hình lập phương ABCD.A'B'C'D'", names: ['A', 'B', 'C', 'D', "A'", "B'", "C'", "D'"] },
+  {
+    id: 'box',
+    label: "Hình hộp chữ nhật ABCD.A'B'C'D'",
+    names: ['A', 'B', 'C', 'D', "A'", "B'", "C'", "D'"],
+  },
+  {
+    id: 'cube',
+    label: "Hình lập phương ABCD.A'B'C'D'",
+    names: ['A', 'B', 'C', 'D', "A'", "B'", "C'", "D'"],
+  },
   { id: 'cone', label: 'Hình nón', names: ['S', 'O', 'A'] },
   { id: 'cylinder', label: 'Hình trụ', names: ['O', "O'", 'A'] },
   { id: 'sphere', label: 'Mặt cầu', names: ['O'] },
@@ -219,7 +241,12 @@ function label(p: P2, name: string, center: P2, dist = 15): string {
 const dot = (p: P2) => `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="2.2" fill="${STROKE}"/>`
 
 /** khung SVG bao trọn nội dung (+ lề) */
-function frame(parts: string[], pts: P2[], desc: string, extra = 0): { svg: string; width: number; height: number } {
+function frame(
+  parts: string[],
+  pts: P2[],
+  desc: string,
+  extra = 0,
+): { svg: string; width: number; height: number } {
   const xs = pts.map((p) => p[0])
   const ys = pts.map((p) => p[1])
   const pad = 34 + extra
@@ -290,33 +317,80 @@ function shape2d(shape: Geo2dShape): P2[] {
   // toạ độ màn hình (y hướng xuống), đơn vị px
   switch (shape) {
     case 'triangle':
-      return [[150, 40], [40, 260], [330, 260]]
+      return [
+        [150, 40],
+        [40, 260],
+        [330, 260],
+      ]
     case 'right-triangle':
       // vuông tại A (đỉnh đầu), cạnh huyền BC nằm ngang: AB:AC = 3:4, đường cao AH rơi vào trong BC
-      return [[155.2, 116.4], [40, 270], [360, 270]]
+      return [
+        [155.2, 116.4],
+        [40, 270],
+        [360, 270],
+      ]
     case 'isosceles':
-      return [[200, 30], [80, 280], [320, 280]]
+      return [
+        [200, 30],
+        [80, 280],
+        [320, 280],
+      ]
     case 'equilateral': {
       const s = 280
-      return [[200, 270 - (s * Math.sqrt(3)) / 2], [200 - s / 2, 270], [200 + s / 2, 270]]
+      return [
+        [200, 270 - (s * Math.sqrt(3)) / 2],
+        [200 - s / 2, 270],
+        [200 + s / 2, 270],
+      ]
     }
     // tứ giác: A trên-trái, đi theo chiều kim đồng hồ (hình bình hành: A dưới-trái như SGK)
     case 'square':
-      return [[60, 50], [300, 50], [300, 290], [60, 290]]
+      return [
+        [60, 50],
+        [300, 50],
+        [300, 290],
+        [60, 290],
+      ]
     case 'rectangle':
-      return [[40, 40], [380, 40], [380, 220], [40, 220]]
+      return [
+        [40, 40],
+        [380, 40],
+        [380, 220],
+        [40, 220],
+      ]
     case 'parallelogram':
-      return [[40, 230], [320, 230], [400, 50], [120, 50]]
+      return [
+        [40, 230],
+        [320, 230],
+        [400, 50],
+        [120, 50],
+      ]
     case 'rhombus':
-      return [[60, 160], [210, 260], [360, 160], [210, 60]]
+      return [
+        [60, 160],
+        [210, 260],
+        [360, 160],
+        [210, 60],
+      ]
     case 'trapezoid':
-      return [[110, 60], [290, 60], [380, 240], [30, 240]]
+      return [
+        [110, 60],
+        [290, 60],
+        [380, 240],
+        [30, 240],
+      ]
     case 'circle':
-      return [[200, 160], [200 + 130 * Math.cos(-0.5), 160 + 130 * Math.sin(-0.5)]]
+      return [
+        [200, 160],
+        [200 + 130 * Math.cos(-0.5), 160 + 130 * Math.sin(-0.5)],
+      ]
     case 'inscribed-triangle': {
       const c: P2 = [200, 170]
       const r = 140
-      const at = (deg: number): P2 => [c[0] + r * Math.cos((deg * Math.PI) / 180), c[1] + r * Math.sin((deg * Math.PI) / 180)]
+      const at = (deg: number): P2 => [
+        c[0] + r * Math.cos((deg * Math.PI) / 180),
+        c[1] + r * Math.sin((deg * Math.PI) / 180),
+      ]
       return [at(-100), at(150), at(25), c]
     }
     case 'free':
@@ -368,7 +442,10 @@ export function fixRightAngleCoords(spec: Geo2dSpec): Geo2dSpec {
     const text = new Map<string, string>()
     for (const m of extras.matchAll(both)) if (!text.has(m[2])) text.set(m[2], m[3])
     if (!text.has(at) || !text.has(other)) continue
-    extras = extras.replace(both, (_, pre: string, n: string) => `${pre}${n}(${text.get(n === at ? other : at)})`)
+    extras = extras.replace(
+      both,
+      (_, pre: string, n: string) => `${pre}${n}(${text.get(n === at ? other : at)})`,
+    )
   }
   return extras === spec.extras ? spec : { ...spec, extras }
 }
@@ -383,7 +460,8 @@ function renderGeo2d(spec: Geo2dSpec, desc: string) {
       return { svg, width: 320, height: 240 }
     }
     const boundPts: P2[] = c.points.map((q) => q.p as P2)
-    for (const ci of c.circles) boundPts.push([ci.c[0] - ci.r, ci.c[1] - ci.r], [ci.c[0] + ci.r, ci.c[1] + ci.r])
+    for (const ci of c.circles)
+      boundPts.push([ci.c[0] - ci.r, ci.c[1] - ci.r], [ci.c[0] + ci.r, ci.c[1] + ci.r])
     const xs = boundPts.map((p) => p[0])
     const ys = boundPts.map((p) => p[1])
     const minX = Math.min(...xs)
@@ -399,7 +477,10 @@ function renderGeo2d(spec: Geo2dSpec, desc: string) {
     const toPx = (v: P2): P2 => [(v[0] - minX) * scale, (maxY - v[1]) * scale]
     const visPts = c.points.filter((q) => !q.hidden).map((q) => toPx(q.p as P2))
     const center: P2 = visPts.length
-      ? mul(visPts.reduce((s, p) => add(s, p), [0, 0] as P2), 1 / visPts.length)
+      ? mul(
+          visPts.reduce((s, p) => add(s, p), [0, 0] as P2),
+          1 / visPts.length,
+        )
       : [0, 0]
     const parts: string[] = []
     const all: P2[] = [...visPts]
@@ -440,24 +521,49 @@ function renderGeo2d(spec: Geo2dSpec, desc: string) {
     const [o, a] = pts
     const all: P2[] = [...pts]
     const r = len(sub(a, o))
-    parts.push(`<circle cx="${f1(o[0])}" cy="${f1(o[1])}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.6"/>`)
-    parts.push(seg(o, a, false, 1.3), dot(o), dot(a), label(o, names[0] ?? 'O', add(o, [-1, -1])), label(a, names[1] ?? '', o))
+    parts.push(
+      `<circle cx="${f1(o[0])}" cy="${f1(o[1])}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.6"/>`,
+    )
+    parts.push(
+      seg(o, a, false, 1.3),
+      dot(o),
+      dot(a),
+      label(o, names[0] ?? 'O', add(o, [-1, -1])),
+      label(a, names[1] ?? '', o),
+    )
     all.push([o[0] - r, o[1] - r], [o[0] + r, o[1] + r])
     know(names[0] ?? 'O', ptsMath[0])
     know(names[1], ptsMath[1])
     if (names[1]) pairs.push([names[0] ?? 'O', names[1]])
     const c = construct(spec.extras ?? '', known)
-    renderExtras2d(c, known, baseNames, o, parts, all, pairs, undefined, toPx, TEMPLATE_SCALE, false)
+    renderExtras2d(
+      c,
+      known,
+      baseNames,
+      o,
+      parts,
+      all,
+      pairs,
+      undefined,
+      toPx,
+      TEMPLATE_SCALE,
+      false,
+    )
     return frame(parts, all, desc)
   }
 
   const poly = spec.shape === 'inscribed-triangle' ? pts.slice(0, 3) : pts
   const polyMath = spec.shape === 'inscribed-triangle' ? ptsMath.slice(0, 3) : ptsMath
   const centerPts = overridden ? poly : pts
-  const center: P2 = mul(centerPts.reduce((s, p) => add(s, p), [0, 0] as P2), 1 / centerPts.length)
+  const center: P2 = mul(
+    centerPts.reduce((s, p) => add(s, p), [0, 0] as P2),
+    1 / centerPts.length,
+  )
   const all: P2[] = [...(overridden ? poly : pts)]
   const d = poly.map((p, i) => `${i ? 'L' : 'M'}${f1(p[0])} ${f1(p[1])}`).join('') + 'Z'
-  parts.push(`<path d="${d}" fill="none" stroke="${STROKE}" stroke-width="1.6" stroke-linejoin="round"/>`)
+  parts.push(
+    `<path d="${d}" fill="none" stroke="${STROKE}" stroke-width="1.6" stroke-linejoin="round"/>`,
+  )
 
   const isTri = poly.length === 3
   const [A, B, C] = poly
@@ -466,7 +572,9 @@ function renderGeo2d(spec: Geo2dSpec, desc: string) {
     const o = circumcenter(A, B, C)
     const r = len(sub(A, o))
     if (Number.isFinite(r) && Number.isFinite(o[0]) && Number.isFinite(o[1])) {
-      parts.push(`<circle cx="${f1(o[0])}" cy="${f1(o[1])}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.4"/>`)
+      parts.push(
+        `<circle cx="${f1(o[0])}" cy="${f1(o[1])}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.4"/>`,
+      )
       parts.push(dot(o), label(o, names[3] ?? 'O', add(o, [0, -1]), 14))
       know(names[3] ?? 'O', toMath(o))
       all.push([o[0] - r, o[1] - r], [o[0] + r, o[1] + r])
@@ -500,7 +608,8 @@ function renderGeo2d(spec: Geo2dSpec, desc: string) {
     }
   }
   if (spec.marks) {
-    if (spec.shape === 'right-triangle' && (!overridden || isNearRight(A, B, C))) parts.push(rightMark(A, B, C))
+    if (spec.shape === 'right-triangle' && (!overridden || isNearRight(A, B, C)))
+      parts.push(rightMark(A, B, C))
     if (spec.shape === 'isosceles') parts.push(tick(A, B), tick(A, C))
     if (spec.shape === 'equilateral') parts.push(tick(A, B), tick(B, C), tick(C, A))
     if (spec.shape === 'square' || spec.shape === 'rectangle') {
@@ -542,7 +651,9 @@ function renderExtras2d(
   const allSegPairs = [...pairs, ...c.segs.map((g) => [g.a, g.b] as [string, string]), ...extSegs]
     .filter(([a, b]) => a && b && !isHidden(a) && !isHidden(b) && every.has(a) && every.has(b))
     .map(([a, b]) => ({ a, b }))
-  const origins = [...new Set([...baseNames, ...c.coords])].filter((n) => !isHidden(n) && every.has(n))
+  const origins = [...new Set([...baseNames, ...c.coords])].filter(
+    (n) => !isHidden(n) && every.has(n),
+  )
   lastPick = {
     points: [...every]
       .filter(([name]) => !isHidden(name))
@@ -568,14 +679,18 @@ function renderExtras2d(
   for (const ci of c.circles) {
     const [x, y] = toPx(ci.c as P2)
     const r = ci.r * scale
-    parts.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.4"/>`)
+    parts.push(
+      `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.4"/>`,
+    )
     all.push([x - r, y - r], [x + r, y + r])
   }
 
   // đoạn kéo dài (~15% khung hình hiện tại)
   const figXs = all.length ? all.map((p) => p[0]) : [0]
   const figYs = all.length ? all.map((p) => p[1]) : [0]
-  const extDist = 0.15 * Math.max(Math.max(...figXs) - Math.min(...figXs), Math.max(...figYs) - Math.min(...figYs), 200)
+  const extDist =
+    0.15 *
+    Math.max(Math.max(...figXs) - Math.min(...figXs), Math.max(...figYs) - Math.min(...figYs), 200)
   const freeSegsPx: Array<[P2, P2]> = []
   for (const e of c.extends) {
     const pa = at(e.a)
@@ -604,7 +719,9 @@ function renderExtras2d(
     const base = sub(tip, mul(d, 11))
     const l = add(base, mul(n, 4.2))
     const rr = add(base, mul(n, -4.2))
-    parts.push(`<path d="M${f1(tip[0])} ${f1(tip[1])}L${f1(l[0])} ${f1(l[1])}L${f1(rr[0])} ${f1(rr[1])}Z" fill="${STROKE}" stroke="none"/>`)
+    parts.push(
+      `<path d="M${f1(tip[0])} ${f1(tip[1])}L${f1(l[0])} ${f1(l[1])}L${f1(rr[0])} ${f1(rr[1])}Z" fill="${STROKE}" stroke="none"/>`,
+    )
     if (v.name) {
       // tên vectơ (vd u) đặt giữa đoạn, phía ngoài hình, có mũi tên nhỏ phía trên chữ
       const side = outward2(pa, pb, center, false)
@@ -653,9 +770,14 @@ function renderExtras2d(
     all.push(t2, q2, p2, p3)
     if (dm.text) {
       // chữ đặt ngoài đường kích thước (phía xa hình), không đè lên nét đứt — như hình SGK
-      const m = add(mid(p2, p3), mul(n, Math.abs(n[1]) > 0.7 ? 13 : Math.max(18, dm.text.length * 4.5)))
+      const m = add(
+        mid(p2, p3),
+        mul(n, Math.abs(n[1]) > 0.7 ? 13 : Math.max(18, dm.text.length * 4.5)),
+      )
       const estW = Math.max(18, dm.text.length * 8)
-      parts.push(`<text x="${f1(m[0])}" y="${f1(m[1] + 5)}" ${LABEL_FONT} text-anchor="middle" data-lbl="dim:${esc(dm.a + dm.b)}">${richTextToSvg(dm.text)}</text>`)
+      parts.push(
+        `<text x="${f1(m[0])}" y="${f1(m[1] + 5)}" ${LABEL_FONT} text-anchor="middle" data-lbl="dim:${esc(dm.a + dm.b)}">${richTextToSvg(dm.text)}</text>`,
+      )
       all.push([m[0] - estW / 2, m[1] - 10], [m[0] + estW / 2, m[1] + 10])
       placedLabels.push(m)
     }
@@ -671,7 +793,9 @@ function renderExtras2d(
     const dist = Math.abs(n[0]) > 0.7 ? 10 : n[1] < -0.5 ? 10 : 16
     const lx = m[0] + n[0] * dist
     const ly = m[1] + n[1] * dist + (Math.abs(n[0]) > 0.7 ? 5 : n[1] < -0.5 ? 0 : 4)
-    parts.push(`<text x="${f1(lx)}" y="${f1(ly)}" ${LABEL_FONT} text-anchor="${anchor}" data-lbl="seg:${esc(lb.a + lb.b)}">${richTextToSvg(lb.text)}</text>`)
+    parts.push(
+      `<text x="${f1(lx)}" y="${f1(ly)}" ${LABEL_FONT} text-anchor="${anchor}" data-lbl="seg:${esc(lb.a + lb.b)}">${richTextToSvg(lb.text)}</text>`,
+    )
     const estW = Math.max(18, lb.text.length * 8)
     const x0 = anchor === 'end' ? lx - estW : anchor === 'middle' ? lx - estW / 2 : lx - 4
     const x1 = anchor === 'start' ? lx + estW : anchor === 'middle' ? lx + estW / 2 : lx + 4
@@ -695,16 +819,23 @@ function renderExtras2d(
         const ux = Math.cos(a)
         const uy = Math.sin(a)
         const cand: P2 = [p[0] + ux * 15, p[1] + uy * 15]
-        const segD = freeSegsPx.length ? Math.min(...freeSegsPx.map(([u, v]) => distToSeg(cand, u, v))) : 20
-        const lblD = placedLabels.length ? Math.min(...placedLabels.map((pl) => len(sub(cand, pl)))) : 30
-        const score = Math.min(segD, 18) + Math.min(lblD, 24) * 0.6 + (ux * outDir[0] + uy * outDir[1]) * 3
+        const segD = freeSegsPx.length
+          ? Math.min(...freeSegsPx.map(([u, v]) => distToSeg(cand, u, v)))
+          : 20
+        const lblD = placedLabels.length
+          ? Math.min(...placedLabels.map((pl) => len(sub(cand, pl))))
+          : 30
+        const score =
+          Math.min(segD, 18) + Math.min(lblD, 24) * 0.6 + (ux * outDir[0] + uy * outDir[1]) * 3
         if (score > bestScore + 1e-6) {
           bestScore = score
           best = cand
         }
       }
       placedLabels.push(best)
-      parts.push(`<text x="${f1(best[0])}" y="${f1(best[1] + 6)}" ${FONT} text-anchor="middle" data-lbl="pt:${esc(q.name)}">${esc(q.name)}</text>`)
+      parts.push(
+        `<text x="${f1(best[0])}" y="${f1(best[1] + 6)}" ${FONT} text-anchor="middle" data-lbl="pt:${esc(q.name)}">${esc(q.name)}</text>`,
+      )
       all.push([best[0] - 8, best[1] - 8], [best[0] + 8, best[1] + 8])
     }
   }
@@ -726,10 +857,16 @@ function proj(p: P3): P2 {
 const D: P3 = [-K * Math.cos(ANG), 1, -K * Math.sin(ANG)]
 
 const sub3 = (a: P3, b: P3): P3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-const cross = (a: P3, b: P3): P3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+const cross = (a: P3, b: P3): P3 => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+]
 const dot3 = (a: P3, b: P3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 const avg3 = (ps: P3[]): P3 => {
-  const s = ps.reduce((acc, p) => [acc[0] + p[0], acc[1] + p[1], acc[2] + p[2]] as P3, [0, 0, 0] as P3)
+  const s = ps.reduce((acc, p) => [acc[0] + p[0], acc[1] + p[1], acc[2] + p[2]] as P3, [
+    0, 0, 0,
+  ] as P3)
   return [s[0] / ps.length, s[1] / ps.length, s[2] / ps.length]
 }
 
@@ -758,19 +895,46 @@ function solid(spec: Geo3dSpec): Solid {
       let C: P3 = [1.9, 0.9, 0]
       if (spec.shape === 'pyramid3-regular') {
         const r = 1
-        const at = (deg: number): P3 => [1 + r * Math.cos((deg * Math.PI) / 180), 0.9 + r * Math.sin((deg * Math.PI) / 180) * 1.2, 0]
+        const at = (deg: number): P3 => [
+          1 + r * Math.cos((deg * Math.PI) / 180),
+          0.9 + r * Math.sin((deg * Math.PI) / 180) * 1.2,
+          0,
+        ]
         A = at(180)
         B = at(-60)
         C = at(60)
       }
       const G = avg3([A, B, C])
-      const S: P3 = spec.shape === 'pyramid3-sa' ? [A[0], A[1], h] : spec.shape === 'pyramid3-regular' ? [G[0], G[1], h] : [0.95, 0.55, h]
+      const S: P3 =
+        spec.shape === 'pyramid3-sa'
+          ? [A[0], A[1], h]
+          : spec.shape === 'pyramid3-regular'
+            ? [G[0], G[1], h]
+            : [0.95, 0.55, h]
       const foot3: P3 = [S[0], S[1], 0]
       const pts = [S, A, B, C, foot3]
-      const extra: Array<[number, number]> = spec.height && spec.shape !== 'pyramid3-sa' ? [[0, 4]] : []
+      const extra: Array<[number, number]> =
+        spec.height && spec.shape !== 'pyramid3-sa' ? [[0, 4]] : []
       const right: Array<[number, number, number]> =
-        spec.shape === 'pyramid3-sa' ? [[1, 0, 2], [1, 0, 3]] : spec.height ? [[4, 0, 2]] : []
-      return { pts, faces: [[1, 2, 3], [0, 1, 2], [0, 2, 3], [0, 3, 1]], extra, right }
+        spec.shape === 'pyramid3-sa'
+          ? [
+              [1, 0, 2],
+              [1, 0, 3],
+            ]
+          : spec.height
+            ? [[4, 0, 2]]
+            : []
+      return {
+        pts,
+        faces: [
+          [1, 2, 3],
+          [0, 1, 2],
+          [0, 2, 3],
+          [0, 3, 1],
+        ],
+        extra,
+        right,
+      }
     }
     case 'pyramid4':
     case 'pyramid4-sa':
@@ -790,15 +954,43 @@ function solid(spec: Geo3dSpec): Solid {
       if (spec.diagonals) extra.push([1, 3], [2, 4])
       if (spec.height && spec.shape !== 'pyramid4-sa') extra.push([0, 5])
       const right: Array<[number, number, number]> =
-        spec.shape === 'pyramid4-sa' ? [[1, 0, 2], [1, 0, 4]] : spec.height ? [[5, 0, 2]] : []
-      return { pts, faces: [[1, 2, 3, 4], [0, 1, 2], [0, 2, 3], [0, 3, 4], [0, 4, 1]], extra, right }
+        spec.shape === 'pyramid4-sa'
+          ? [
+              [1, 0, 2],
+              [1, 0, 4],
+            ]
+          : spec.height
+            ? [[5, 0, 2]]
+            : []
+      return {
+        pts,
+        faces: [
+          [1, 2, 3, 4],
+          [0, 1, 2],
+          [0, 2, 3],
+          [0, 3, 4],
+          [0, 4, 1],
+        ],
+        extra,
+        right,
+      }
     }
     case 'tetrahedron': {
       const A: P3 = [0, 0.9, 0]
       const B: P3 = [0.75, 0, 0]
       const C: P3 = [1.9, 0.9, 0]
       const Dt: P3 = [0.95, 0.55, h]
-      return { pts: [A, B, C, Dt], faces: [[0, 1, 2], [3, 0, 1], [3, 1, 2], [3, 2, 0]], extra: [], right: [] }
+      return {
+        pts: [A, B, C, Dt],
+        faces: [
+          [0, 1, 2],
+          [3, 0, 1],
+          [3, 1, 2],
+          [3, 2, 0],
+        ],
+        extra: [],
+        right: [],
+      }
     }
     case 'prism3': {
       const A: P3 = [0, 0.9, 0]
@@ -807,7 +999,13 @@ function solid(spec: Geo3dSpec): Solid {
       const up = (p: P3): P3 => [p[0], p[1], h]
       return {
         pts: [A, B, C, up(A), up(B), up(C)],
-        faces: [[0, 1, 2], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]],
+        faces: [
+          [0, 1, 2],
+          [3, 4, 5],
+          [0, 1, 4, 3],
+          [1, 2, 5, 4],
+          [2, 0, 3, 5],
+        ],
         extra: [],
         right: spec.marks ? [[0, 3, 1]] : [],
       }
@@ -817,12 +1015,29 @@ function solid(spec: Geo3dSpec): Solid {
       const w = spec.shape === 'cube' ? 1.4 : 1.9
       const dep = spec.shape === 'cube' ? 1.4 : 1.3
       const hh = spec.shape === 'cube' ? 1.4 : 1.1 * spec.tall
-      const base: P3[] = [[0, 0, 0], [w, 0, 0], [w, dep, 0], [0, dep, 0]]
+      const base: P3[] = [
+        [0, 0, 0],
+        [w, 0, 0],
+        [w, dep, 0],
+        [0, dep, 0],
+      ]
       const top = base.map((p) => [p[0], p[1], hh] as P3)
-      const extra: Array<[number, number]> = spec.diagonals ? [[0, 2], [1, 3]] : []
+      const extra: Array<[number, number]> = spec.diagonals
+        ? [
+            [0, 2],
+            [1, 3],
+          ]
+        : []
       return {
         pts: [...base, ...top],
-        faces: [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]],
+        faces: [
+          [0, 1, 2, 3],
+          [4, 5, 6, 7],
+          [0, 1, 5, 4],
+          [1, 2, 6, 5],
+          [2, 3, 7, 6],
+          [3, 0, 4, 7],
+        ],
         extra,
         right: [],
       }
@@ -902,11 +1117,22 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
   // điểm phụ của mẫu (chân đường cao H, tâm đáy O) tính lại theo các đỉnh đã ghi đè nếu không bị đặt toạ độ riêng
   if (overridden) {
     if (spec.shape === 'pyramid3' && !overriddenIdx.has(4)) {
-      s.pts[4] = footPlane3(s.pts[0], s.pts[1], s.pts[2], s.pts[3]) ?? [s.pts[0][0], s.pts[0][1], s.pts[1][2]]
+      s.pts[4] = footPlane3(s.pts[0], s.pts[1], s.pts[2], s.pts[3]) ?? [
+        s.pts[0][0],
+        s.pts[0][1],
+        s.pts[1][2],
+      ]
     } else if (spec.shape === 'pyramid3-regular' && !overriddenIdx.has(4)) {
       s.pts[4] = avg3([s.pts[1], s.pts[2], s.pts[3]])
-    } else if ((spec.shape === 'pyramid4' || spec.shape === 'pyramid4-sa' || spec.shape === 'pyramid4-regular') && !overriddenIdx.has(5)) {
-      s.pts[5] = intersectLines3(s.pts[1], s.pts[3], s.pts[2], s.pts[4]) ?? avg3([s.pts[1], s.pts[2], s.pts[3], s.pts[4]])
+    } else if (
+      (spec.shape === 'pyramid4' ||
+        spec.shape === 'pyramid4-sa' ||
+        spec.shape === 'pyramid4-regular') &&
+      !overriddenIdx.has(5)
+    ) {
+      s.pts[5] =
+        intersectLines3(s.pts[1], s.pts[3], s.pts[2], s.pts[4]) ??
+        avg3([s.pts[1], s.pts[2], s.pts[3], s.pts[4]])
     }
   }
   // dựng thêm: điểm mới nối vào cuối danh sách đỉnh, đoạn mới thành đoạn phụ
@@ -935,7 +1161,9 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
     s.ticks = c.equals.map((grp) => grp.map(([a, b]) => [idx(a), idx(b)] as [number, number]))
     fills = c.fills
   }
-  const center = avg3(s.pts.slice(0, Math.max(3, s.faces.flat().reduce((m, i) => Math.max(m, i), 0) + 1)))
+  const center = avg3(
+    s.pts.slice(0, Math.max(3, s.faces.flat().reduce((m, i) => Math.max(m, i), 0) + 1)),
+  )
   // pháp tuyến hướng ra ngoài của từng mặt + mặt đó có nhìn thấy không
   const visible = s.faces.map((f) => {
     const [a, b, c] = f.map((i) => s.pts[i])
@@ -958,15 +1186,25 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
   {
     const pts = new Map<string, P2>()
     s.pts.forEach((_, i) => names[i] && !pts.has(names[i]) && pts.set(names[i], P[i]))
-    const segs = [...edges.values()].map((e) => [e.a, e.b]).concat(s.extra).map(([a, b]) => ({ a: names[a], b: names[b] })).filter((g) => g.a && g.b)
-    const tris = s.faces.filter((f) => f.length === 3).map((f) => f.map((i) => names[i])).filter((t) => t.every(Boolean))
+    const segs = [...edges.values()]
+      .map((e) => [e.a, e.b])
+      .concat(s.extra)
+      .map(([a, b]) => ({ a: names[a], b: names[b] }))
+      .filter((g) => g.a && g.b)
+    const tris = s.faces
+      .filter((f) => f.length === 3)
+      .map((f) => f.map((i) => names[i]))
+      .filter((t) => t.every(Boolean))
     const baseOrigins = [...faceIdx].map((i) => names[i]).filter(Boolean)
-    const origins = [...new Set([...baseOrigins, ...coordNames])].filter((n) => !isHidden(n) && pts.has(n))
+    const origins = [...new Set([...baseOrigins, ...coordNames])].filter(
+      (n) => !isHidden(n) && pts.has(n),
+    )
     let base: string[] | undefined
     let top: string[] | undefined
     let footOf: { foot: string; apex: string } | undefined
     if (spec.shape.startsWith('pyramid3')) base = [names[1], names[2], names[3]].filter(Boolean)
-    else if (spec.shape.startsWith('pyramid4')) base = [names[1], names[2], names[3], names[4]].filter(Boolean)
+    else if (spec.shape.startsWith('pyramid4'))
+      base = [names[1], names[2], names[3], names[4]].filter(Boolean)
     else if (spec.shape === 'tetrahedron') base = [names[0], names[1], names[2]].filter(Boolean)
     else if (spec.shape === 'prism3') {
       base = [names[0], names[1], names[2]].filter(Boolean)
@@ -979,7 +1217,9 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
       footOf = { foot: names[4], apex: names[0] }
     }
     lastPick = {
-      points: [...pts].filter(([name]) => !isHidden(name)).map(([name, p]) => ({ name, x: p[0], y: p[1], v: s.pts[names.indexOf(name)] })),
+      points: [...pts]
+        .filter(([name]) => !isHidden(name))
+        .map(([name, p]) => ({ name, x: p[0], y: p[1], v: s.pts[names.indexOf(name)] })),
       segs: segs.filter((g) => !isHidden(g.a) && !isHidden(g.b)),
       tris,
       origins,
@@ -991,19 +1231,34 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
   const parts: string[] = []
   const idxOf = (n: string) => names.indexOf(n)
   for (const f of fills) {
-    const d = f.map((n, k) => `${k ? 'L' : 'M'}${f1(P[idxOf(n)][0])} ${f1(P[idxOf(n)][1])}`).join('') + 'Z'
+    const d =
+      f.map((n, k) => `${k ? 'L' : 'M'}${f1(P[idxOf(n)][0])} ${f1(P[idxOf(n)][1])}`).join('') + 'Z'
     parts.push(`<path d="${d}" fill="${FILL}" fill-opacity="0.1" stroke="none"/>`)
   }
   if (spec.circumsphere) {
     // đường viền cầu bao trọn các đỉnh (phép chiếu xiên không giữ tròn → lấy bán kính theo hình chiếu)
     const c = proj(avg3(s.pts.slice(0, nBase)))
     const r = Math.max(...P.slice(0, nBase).map((p) => len(sub(p, c)))) + 4
-    parts.push(`<circle cx="${f1(c[0])}" cy="${f1(c[1])}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.4"/>`, ellipse(c, r, r * 0.3, true))
+    parts.push(
+      `<circle cx="${f1(c[0])}" cy="${f1(c[1])}" r="${f1(r)}" fill="none" stroke="${STROKE}" stroke-width="1.4"/>`,
+      ellipse(c, r, r * 0.3, true),
+    )
     P.push([c[0] - r, c[1] - r], [c[0] + r, c[1] + r])
   }
   for (const e of edges.values()) parts.push(seg(P[e.a], P[e.b], !e.vis))
   for (const [a, b] of s.extra) {
-    const onVisible = s.faces.some((f, fi) => visible[fi] && onFace(s.pts[a], f.map((i) => s.pts[i])) && onFace(s.pts[b], f.map((i) => s.pts[i])))
+    const onVisible = s.faces.some(
+      (f, fi) =>
+        visible[fi] &&
+        onFace(
+          s.pts[a],
+          f.map((i) => s.pts[i]),
+        ) &&
+        onFace(
+          s.pts[b],
+          f.map((i) => s.pts[i]),
+        ),
+    )
     parts.push(seg(P[a], P[b], forced.get(`${a}-${b}`) ?? !onVisible, 1.3))
   }
   s.right.forEach(([at, u, v], k) => {
@@ -1019,7 +1274,10 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
   s.extra.flat().forEach((i) => used.add(i))
   for (let i = nBase; i < s.pts.length; i++) if (!isHidden(names[i])) used.add(i) // điểm dựng thêm luôn ghi tên
   // nhãn đỉnh: thử 8 hướng quanh đỉnh, lấy chỗ cách xa mọi nét vẽ (và nhãn đã đặt) nhất
-  const segs: Array<[P2, P2]> = [...[...edges.values()].map((e) => [P[e.a], P[e.b]] as [P2, P2]), ...s.extra.map(([a, b]) => [P[a], P[b]] as [P2, P2])]
+  const segs: Array<[P2, P2]> = [
+    ...[...edges.values()].map((e) => [P[e.a], P[e.b]] as [P2, P2]),
+    ...s.extra.map(([a, b]) => [P[a], P[b]] as [P2, P2]),
+  ]
   const placed: P2[] = []
   s.pts.forEach((_, i) => {
     if (!used.has(i)) return
@@ -1032,7 +1290,10 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
     for (let k = 0; k < 8; k++) {
       const a = (k * Math.PI) / 4
       const q = add(P[i], [Math.cos(a) * r, Math.sin(a) * r])
-      const score = Math.min(...segs.map(([u, v]) => distToSeg(q, u, v)), ...placed.map((p) => len(sub(q, p)) * 0.8))
+      const score = Math.min(
+        ...segs.map(([u, v]) => distToSeg(q, u, v)),
+        ...placed.map((p) => len(sub(q, p)) * 0.8),
+      )
       if (score > bestScore + 0.5) {
         bestScore = score
         best = q
@@ -1040,7 +1301,10 @@ function renderSolid(spec: Geo3dSpec, desc: string) {
     }
     placed.push(best)
     const name = names[i] ?? ''
-    if (name) parts.push(`<text x="${f1(best[0])}" y="${f1(best[1] + 6)}" ${FONT} text-anchor="middle" data-lbl="pt:${esc(name)}">${esc(name)}</text>`)
+    if (name)
+      parts.push(
+        `<text x="${f1(best[0])}" y="${f1(best[1] + 6)}" ${FONT} text-anchor="middle" data-lbl="pt:${esc(name)}">${esc(name)}</text>`,
+      )
   })
   return frame(parts, P, desc)
 }
@@ -1064,7 +1328,12 @@ function renderRound(spec: Geo3dSpec, desc: string) {
   const pts: P2[] = []
   if (spec.shape === 'sphere') {
     const o: P2 = [0, 0]
-    parts.push(`<circle cx="0" cy="0" r="${R}" fill="none" stroke="${STROKE}" stroke-width="1.6"/>`, ellipse(o, R, ry, true), dot(o), label(o, n[0] ?? 'O', [-1, -1], 14))
+    parts.push(
+      `<circle cx="0" cy="0" r="${R}" fill="none" stroke="${STROKE}" stroke-width="1.6"/>`,
+      ellipse(o, R, ry, true),
+      dot(o),
+      label(o, n[0] ?? 'O', [-1, -1], 14),
+    )
     pts.push([-R, -R], [R, R])
     return frame(parts, pts, desc)
   }
@@ -1082,9 +1351,19 @@ function renderRound(spec: Geo3dSpec, desc: string) {
   }
   // trụ
   const T: P2 = [0, -H]
-  parts.push(ellipse(O, R, ry, true), ellipse(T, R, ry, false), seg([-R, 0], [-R, -H]), seg([R, 0], [R, -H]))
+  parts.push(
+    ellipse(O, R, ry, true),
+    ellipse(T, R, ry, false),
+    seg([-R, 0], [-R, -H]),
+    seg([R, 0], [R, -H]),
+  )
   if (spec.height) parts.push(seg(O, T, true, 1.3), seg(O, A, true, 1.3))
-  parts.push(dot(O), dot(T), label(O, n[0] ?? 'O', [10, -10], 14), label(T, n[1] ?? "O'", [10, 10], 14))
+  parts.push(
+    dot(O),
+    dot(T),
+    label(O, n[0] ?? 'O', [10, -10], 14),
+    label(T, n[1] ?? "O'", [10, 10], 14),
+  )
   if (spec.height) parts.push(label(A, n[2] ?? 'A', [0, -10], 15))
   pts.push([-R, -H - ry], [R, ry])
   return frame(parts, pts, desc)
@@ -1094,7 +1373,8 @@ export function renderGeo3dSvg(spec: Geo3dSpec, desc: string): GeoImage {
   lastErrors = []
   lastPick = { points: [], segs: [], tris: [] }
   const isRound = spec.shape === 'cone' || spec.shape === 'cylinder' || spec.shape === 'sphere'
-  if (isRound && spec.extras?.trim()) lastErrors = [{ line: 0, msg: 'nón, trụ, cầu chưa dựng thêm được' }]
+  if (isRound && spec.extras?.trim())
+    lastErrors = [{ line: 0, msg: 'nón, trụ, cầu chưa dựng thêm được' }]
   const img = isRound ? renderRound(spec, desc) : renderSolid(spec, desc)
   return { ...img, errors: lastErrors, pick: lastPick }
 }

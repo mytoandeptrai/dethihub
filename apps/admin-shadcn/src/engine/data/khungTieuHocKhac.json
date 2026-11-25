@@ -87,9 +87,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd1-tu-cham-soc-ban-than",
-          "kien_thuc_duoc_dung": [
-            "Cơ thể em (Tự nhiên và Xã hội 1, Chủ đề 5)"
-          ],
+          "kien_thuc_duoc_dung": ["Cơ thể em (Tự nhiên và Xã hội 1, Chủ đề 5)"],
           "luu_y_ra_de": "Đề chỉ hỏi hành vi tự chăm sóc ở mức trong sách; không hỏi kiến thức y tế.",
           "ten": "Chủ đề 1. Tự chăm sóc bản thân",
           "ten_theo_sach": {
@@ -103,9 +101,7 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 5. Gia đình của em"
-          ],
+          "cac_bai": ["Bài 5. Gia đình của em"],
           "chua_duoc_dung": [
             "Quan tâm, chăm sóc người thân trong gia đình (Chủ đề 3)",
             "Quê hương em (Đạo đức 2)"
@@ -117,9 +113,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd1-yeu-thuong-gia-dinh",
-          "kien_thuc_duoc_dung": [
-            "Gia đình (Tự nhiên và Xã hội 1, Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Gia đình (Tự nhiên và Xã hội 1, Chủ đề 1)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi ở mức kể về gia đình của em.",
           "ten": "Chủ đề 2. Yêu thương gia đình",
           "ten_theo_sach": {
@@ -127,9 +121,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Yêu thương gia đình"
           },
-          "yeu_cau_can_dat": [
-            "Kể được về gia đình của em và thể hiện yêu thương gia đình"
-          ]
+          "yeu_cau_can_dat": ["Kể được về gia đình của em và thể hiện yêu thương gia đình"]
         },
         {
           "cac_bai": [
@@ -138,9 +130,7 @@
             "Bài 8. Quan tâm, chăm sóc cha mẹ",
             "Bài 9. Chăm sóc, giúp đỡ em nhỏ"
           ],
-          "chua_duoc_dung": [
-            "Kính trọng thầy giáo, cô giáo và yêu quý bạn bè (Đạo đức 2)"
-          ],
+          "chua_duoc_dung": ["Kính trọng thầy giáo, cô giáo và yêu quý bạn bè (Đạo đức 2)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -148,9 +138,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd1-quan-tam-cham-soc-nguoi-than",
-          "kien_thuc_duoc_dung": [
-            "Yêu thương gia đình (Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Yêu thương gia đình (Chủ đề 2)"],
           "luu_y_ra_de": "Đề chỉ hỏi hành vi lễ phép, quan tâm, chăm sóc ở mức trong sách.",
           "ten": "Chủ đề 3. Quan tâm, chăm sóc người thân trong gia đình",
           "ten_theo_sach": {
@@ -172,10 +160,7 @@
             "Bài 13. Giữ gìn tài sản của trường, lớp",
             "Bài 14. Giữ vệ sinh trường, lớp"
           ],
-          "chua_duoc_dung": [
-            "Quý trọng thời gian (Đạo đức 2)",
-            "Bảo vệ của công (Đạo đức 4)"
-          ],
+          "chua_duoc_dung": ["Quý trọng thời gian (Đạo đức 2)", "Bảo vệ của công (Đạo đức 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -183,9 +168,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd1-thuc-hien-noi-quy-truong-lop",
-          "kien_thuc_duoc_dung": [
-            "Trường học (Tự nhiên và Xã hội 1, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Trường học (Tự nhiên và Xã hội 1, Chủ đề 2)"],
           "luu_y_ra_de": "Đề chỉ hỏi hành vi thực hiện nội quy ở mức trong sách.",
           "ten": "Chủ đề 4. Thực hiện nội quy trường, lớp",
           "ten_theo_sach": {
@@ -200,14 +183,8 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 15. Gọn gàng, ngăn nắp",
-            "Bài 16. Học tập, sinh hoạt đúng giờ"
-          ],
-          "chua_duoc_dung": [
-            "Quý trọng thời gian (Đạo đức 2)",
-            "Lập kế hoạch cá nhân (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 15. Gọn gàng, ngăn nắp", "Bài 16. Học tập, sinh hoạt đúng giờ"],
+          "chua_duoc_dung": ["Quý trọng thời gian (Đạo đức 2)", "Lập kế hoạch cá nhân (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -215,9 +192,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd1-sinh-hoat-nen-nep",
-          "kien_thuc_duoc_dung": [
-            "Thực hiện nội quy trường, lớp (Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Thực hiện nội quy trường, lớp (Chủ đề 4)"],
           "luu_y_ra_de": "Bài 16: nguồn thư viện ghi 'Học tập, sinh hoạt động giờ' (lỗi OCR), o-study ghi 'đúng giờ' - đã ghi 'đúng giờ'.",
           "ten": "Chủ đề 5. Sinh hoạt nền nếp",
           "ten_theo_sach": {
@@ -225,10 +200,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 5. Sinh hoạt nền nếp"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được gọn gàng, ngăn nắp",
-            "Nêu được học tập, sinh hoạt đúng giờ"
-          ]
+          "yeu_cau_can_dat": ["Nêu được gọn gàng, ngăn nắp", "Nêu được học tập, sinh hoạt đúng giờ"]
         },
         {
           "cac_bai": [
@@ -236,10 +208,7 @@
             "Bài 18. Tự giác tham gia các hoạt động ở trường",
             "Bài 19. Tự giác làm việc nhà"
           ],
-          "chua_duoc_dung": [
-            "Ham học hỏi (Đạo đức 3)",
-            "Tích cực hoàn thành nhiệm vụ (Đạo đức 3)"
-          ],
+          "chua_duoc_dung": ["Ham học hỏi (Đạo đức 3)", "Tích cực hoàn thành nhiệm vụ (Đạo đức 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -282,9 +251,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd1-that-tha",
-          "kien_thuc_duoc_dung": [
-            "Tự giác làm việc của mình (Chủ đề 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Tự giác làm việc của mình (Chủ đề 6)"],
           "luu_y_ra_de": "Bài 21: nguồn thư viện ghi 'đồ của nguời khác' (lỗi gõ), đã sửa thành 'người'.",
           "ten": "Chủ đề 7. Thật thà",
           "ten_theo_sach": {
@@ -308,10 +275,7 @@
             "Bài 29. Phòng tránh ngộ độc thực phẩm",
             "Bài 30. Phòng, tránh xâm hại"
           ],
-          "chua_duoc_dung": [
-            "Tìm kiếm sự hỗ trợ (Đạo đức 2)",
-            "Phòng, tránh xâm hại (Đạo đức 5)"
-          ],
+          "chua_duoc_dung": ["Tìm kiếm sự hỗ trợ (Đạo đức 2)", "Phòng, tránh xâm hại (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -368,9 +332,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh1-gia-dinh",
-          "kien_thuc_duoc_dung": [
-            "Gia đình của em (mẫu giáo, đời sống hằng ngày)"
-          ],
+          "kien_thuc_duoc_dung": ["Gia đình của em (mẫu giáo, đời sống hằng ngày)"],
           "luu_y_ra_de": "Bài 4: SGV và giáo án ghi 'An toàn khi sử dụng đồ dùng trong nhà', VBT ghi 'An toàn khi sử dụng đồ trong nhà' - lấy theo SGV.",
           "ten": "Chủ đề 1. Gia đình",
           "ten_theo_sach": {
@@ -391,10 +353,7 @@
             "Bài 8. Cùng vui ở trường",
             "Bài 9. Ôn tập chủ đề Trường học"
           ],
-          "chua_duoc_dung": [
-            "Ngày hội đọc sách (lớp 2)",
-            "Truyền thống trường em (lớp 3)"
-          ],
+          "chua_duoc_dung": ["Ngày hội đọc sách (lớp 2)", "Truyền thống trường em (lớp 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -403,9 +362,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh1-truong-hoc",
-          "kien_thuc_duoc_dung": [
-            "Gia đình (Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Gia đình (Chủ đề 1)"],
           "luu_y_ra_de": "Bài 9: sytu.vn ghi 'Ôn tập chủ đề Trường học sinh' (lỗi OCR), VBT ghi đúng 'Ôn tập chủ đề Trường học'.",
           "ten": "Chủ đề 2. Trường học",
           "ten_theo_sach": {
@@ -439,10 +396,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh1-cong-dong-dia-phuong",
-          "kien_thuc_duoc_dung": [
-            "Gia đình (Chủ đề 1)",
-            "Trường học (Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Gia đình (Chủ đề 1)", "Trường học (Chủ đề 2)"],
           "luu_y_ra_de": "Bài 12: 'Vui đón tết' (VBT) so với 'Vui đón Tết' (SGV), chỉ khác viết hoa chữ 'Tết'.",
           "ten": "Chủ đề 3. Cộng đồng địa phương",
           "ten_theo_sach": {
@@ -477,9 +431,7 @@
           ],
           "hoc_ky": 2,
           "id": "tnxh1-thuc-vat-va-dong-vat",
-          "kien_thuc_duoc_dung": [
-            "Cộng đồng địa phương (Chủ đề 3)"
-          ],
+          "kien_thuc_duoc_dung": ["Cộng đồng địa phương (Chủ đề 3)"],
           "luu_y_ra_de": "Tên Chủ đề 4 trên sytu.vn ghi 'NỘI DUNG THỰC VẬT VÀ ĐỘNG VẬT' - chữ 'NỘI DUNG' là lỗi OCR, tên đúng là 'THỰC VẬT VÀ ĐỘNG VẬT'.",
           "ten": "Chủ đề 4. Thực vật và động vật",
           "ten_theo_sach": {
@@ -514,10 +466,7 @@
           ],
           "hoc_ky": 2,
           "id": "tnxh1-con-nguoi-va-suc-khoe",
-          "kien_thuc_duoc_dung": [
-            "Thực vật và động vật (Chủ đề 4)",
-            "Gia đình (Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Thực vật và động vật (Chủ đề 4)", "Gia đình (Chủ đề 1)"],
           "luu_y_ra_de": "Bài 22: SGV ghi 'Ăn, Uống hằng ngày', VBT ghi 'Ăn uống hàng ngày' (không dấu phẩy, 'hàng' thay 'hằng') - lấy theo SGV.",
           "ten": "Chủ đề 5. Con người và sức khỏe",
           "ten_theo_sach": {
@@ -537,10 +486,7 @@
             "Bài 27. Thời tiết luôn thay đổi",
             "Bài 28. Ôn tập chủ đề Trái Đất và bầu trời"
           ],
-          "chua_duoc_dung": [
-            "Các mùa trong năm (lớp 2)",
-            "Trái Đất và các đới khí hậu (lớp 3)"
-          ],
+          "chua_duoc_dung": ["Các mùa trong năm (lớp 2)", "Trái Đất và các đới khí hậu (lớp 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -560,10 +506,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 6. Trái Đất và bầu trời"
           },
-          "yeu_cau_can_dat": [
-            "Khám phá được bầu trời",
-            "Nêu được thời tiết luôn thay đổi"
-          ]
+          "yeu_cau_can_dat": ["Khám phá được bầu trời", "Nêu được thời tiết luôn thay đổi"]
         }
       ],
       "ghi_chu_chua_chac": [
@@ -580,10 +523,7 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Vẻ đẹp quê hương em",
-            "Bài 2. Em yêu quê hương"
-          ],
+          "cac_bai": ["Bài 1. Vẻ đẹp quê hương em", "Bài 2. Em yêu quê hương"],
           "chua_duoc_dung": [
             "Em yêu Tổ quốc Việt Nam (Đạo đức 3)",
             "Địa phương em (Lịch sử và Địa lí 4)"
@@ -595,9 +535,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd2-que-huong-em",
-          "kien_thuc_duoc_dung": [
-            "Yêu thương gia đình (Đạo đức 1, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Yêu thương gia đình (Đạo đức 1, Chủ đề 2)"],
           "luu_y_ra_de": "Đề chỉ hỏi ở mức cảm nhận vẻ đẹp quê hương; không hỏi địa danh cụ thể ngoài sách.",
           "ten": "Chủ đề 1. Quê hương em",
           "ten_theo_sach": {
@@ -605,18 +543,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 1. Quê hương em"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được vẻ đẹp quê hương em và thể hiện yêu quê hương"
-          ]
+          "yeu_cau_can_dat": ["Nêu được vẻ đẹp quê hương em và thể hiện yêu quê hương"]
         },
         {
-          "cac_bai": [
-            "Bài 3. Kính trọng thầy giáo, cô giáo",
-            "Bài 4. Yêu quý bạn bè"
-          ],
-          "chua_duoc_dung": [
-            "Thiết lập và duy trì quan hệ bạn bè (Đạo đức 4)"
-          ],
+          "cac_bai": ["Bài 3. Kính trọng thầy giáo, cô giáo", "Bài 4. Yêu quý bạn bè"],
+          "chua_duoc_dung": ["Thiết lập và duy trì quan hệ bạn bè (Đạo đức 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -635,15 +566,10 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Kính trọng thầy giáo, cô giáo và yêu quý bạn bè"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được kính trọng thầy giáo, cô giáo",
-            "Nêu được yêu quý bạn bè"
-          ]
+          "yeu_cau_can_dat": ["Nêu được kính trọng thầy giáo, cô giáo", "Nêu được yêu quý bạn bè"]
         },
         {
-          "cac_bai": [
-            "Bài 5. Quý trọng thời gian"
-          ],
+          "cac_bai": ["Bài 5. Quý trọng thời gian"],
           "chua_duoc_dung": [
             "Sinh hoạt nền nếp (Đạo đức 1, Chủ đề 5)",
             "Lập kế hoạch cá nhân (Đạo đức 5)"
@@ -666,18 +592,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 3. Quý trọng thời gian"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được quý trọng thời gian"
-          ]
+          "yeu_cau_can_dat": ["Nêu được quý trọng thời gian"]
         },
         {
-          "cac_bai": [
-            "Bài 6. Nhận lỗi và sửa lỗi"
-          ],
-          "chua_duoc_dung": [
-            "Biết nhận lỗi (Đạo đức 1, Chủ đề 7)",
-            "Giữ lời hứa (Đạo đức 3)"
-          ],
+          "cac_bai": ["Bài 6. Nhận lỗi và sửa lỗi"],
+          "chua_duoc_dung": ["Biết nhận lỗi (Đạo đức 1, Chủ đề 7)", "Giữ lời hứa (Đạo đức 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -685,9 +604,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd2-nhan-loi-va-sua-loi",
-          "kien_thuc_duoc_dung": [
-            "Thật thà (Đạo đức 1, Chủ đề 7)"
-          ],
+          "kien_thuc_duoc_dung": ["Thật thà (Đạo đức 1, Chủ đề 7)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; theo kế hoạch dạy học, Bài 6 dạy tuần 12-13 (HK1).",
           "ten": "Chủ đề 4. Nhận lỗi và sửa lỗi",
           "ten_theo_sach": {
@@ -695,15 +612,10 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Nhận lỗi và sửa lỗi"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được nhận lỗi và sửa lỗi"
-          ]
+          "yeu_cau_can_dat": ["Nêu được nhận lỗi và sửa lỗi"]
         },
         {
-          "cac_bai": [
-            "Bài 7. Bảo quản đồ dùng cá nhân",
-            "Bài 8. Bảo quản đồ dùng gia đình"
-          ],
+          "cac_bai": ["Bài 7. Bảo quản đồ dùng cá nhân", "Bài 8. Bảo quản đồ dùng gia đình"],
           "chua_duoc_dung": [
             "Tôn trọng tài sản của người khác (Đạo đức 4)",
             "Bảo vệ của công (Đạo đức 4)"
@@ -715,9 +627,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd2-bao-quan-do-dung",
-          "kien_thuc_duoc_dung": [
-            "Giữ gìn tài sản của trường, lớp (Đạo đức 1, Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Giữ gìn tài sản của trường, lớp (Đạo đức 1, Chủ đề 4)"],
           "luu_y_ra_de": "Theo kế hoạch dạy học, Bài 7-8 mỗi bài 2 tiết, khoảng tuần 14-17 (HK1).",
           "ten": "Chủ đề 5. Bảo quản đồ dùng cá nhân và gia đình",
           "ten_theo_sach": {
@@ -731,13 +641,8 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 9. Cảm xúc của em",
-            "Bài 10. Kiềm chế cảm xúc tiêu cực"
-          ],
-          "chua_duoc_dung": [
-            "Khám phá bản thân (Đạo đức 3)"
-          ],
+          "cac_bai": ["Bài 9. Cảm xúc của em", "Bài 10. Kiềm chế cảm xúc tiêu cực"],
+          "chua_duoc_dung": ["Khám phá bản thân (Đạo đức 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -745,9 +650,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd2-the-hien-cam-xuc-ban-than",
-          "kien_thuc_duoc_dung": [
-            "Thật thà (Đạo đức 1, Chủ đề 7)"
-          ],
+          "kien_thuc_duoc_dung": ["Thật thà (Đạo đức 1, Chủ đề 7)"],
           "luu_y_ra_de": "Đề chỉ hỏi nhận biết cảm xúc và kiềm chế cảm xúc tiêu cực ở mức trong sách.",
           "ten": "Chủ đề 6. Thể hiện cảm xúc bản thân",
           "ten_theo_sach": {
@@ -755,10 +658,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 6. Thể hiện cảm xúc bản thân"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được cảm xúc của em",
-            "Nêu được cách kiềm chế cảm xúc tiêu cực"
-          ]
+          "yeu_cau_can_dat": ["Nêu được cảm xúc của em", "Nêu được cách kiềm chế cảm xúc tiêu cực"]
         },
         {
           "cac_bai": [
@@ -766,9 +666,7 @@
             "Bài 12. Tìm kiếm sự hỗ trợ khi ở trường",
             "Bài 13. Tìm kiếm sự hỗ trợ ở nơi công cộng"
           ],
-          "chua_duoc_dung": [
-            "Phòng, tránh xâm hại (Đạo đức 5)"
-          ],
+          "chua_duoc_dung": ["Phòng, tránh xâm hại (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -776,9 +674,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd2-tim-kiem-su-ho-tro",
-          "kien_thuc_duoc_dung": [
-            "Phòng, tránh tai nạn, thương tích (Đạo đức 1, Chủ đề 8)"
-          ],
+          "kien_thuc_duoc_dung": ["Phòng, tránh tai nạn, thương tích (Đạo đức 1, Chủ đề 8)"],
           "luu_y_ra_de": "Bài 13: loigiaihay ghi 'Tìm kiếm sự hỗ trợ ở nơi công cộng', danh sách VBT trên tech12h ghi thiếu chữ 'ở' - ghi theo loigiaihay. Tech12h có chỗ gõ sai 'Tìm kiếm sự hổ trợ khi ở nhà' - lỗi chính tả của nguồn, tên đúng là 'hỗ trợ'.",
           "ten": "Chủ đề 7. Tìm kiếm sự hỗ trợ",
           "ten_theo_sach": {
@@ -842,9 +738,7 @@
             "Bài 4. Giữ sạch nhà ở",
             "Bài 5. Ôn tập chủ đề Gia đình"
           ],
-          "chua_duoc_dung": [
-            "Họ hàng và những ngày kỉ niệm của gia đình (lớp 3)"
-          ],
+          "chua_duoc_dung": ["Họ hàng và những ngày kỉ niệm của gia đình (lớp 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -853,9 +747,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh2-gia-dinh",
-          "kien_thuc_duoc_dung": [
-            "Gia đình (Tự nhiên và Xã hội 1, Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Gia đình (Tự nhiên và Xã hội 1, Chủ đề 1)"],
           "luu_y_ra_de": "Đề chỉ hỏi ở mức kể, mô tả về gia đình; không hỏi nghề nghiệp ngoài sách.",
           "ten": "Chủ đề 1. Gia đình",
           "ten_theo_sach": {
@@ -877,9 +769,7 @@
             "Bài 9. Giữ vệ sinh trường học",
             "Bài 10. Ôn tập chủ đề Trường học"
           ],
-          "chua_duoc_dung": [
-            "Truyền thống trường em (lớp 3)"
-          ],
+          "chua_duoc_dung": ["Truyền thống trường em (lớp 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -888,9 +778,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh2-truong-hoc",
-          "kien_thuc_duoc_dung": [
-            "Trường học (Tự nhiên và Xã hội 1, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Trường học (Tự nhiên và Xã hội 1, Chủ đề 2)"],
           "luu_y_ra_de": "Đề chỉ hỏi nội dung trong sách; không hỏi hoạt động ngoài nhà trường.",
           "ten": "Chủ đề 2. Trường học",
           "ten_theo_sach": {
@@ -959,9 +847,7 @@
           ],
           "hoc_ky": 2,
           "id": "tnxh2-thuc-vat-va-dong-vat",
-          "kien_thuc_duoc_dung": [
-            "Thực vật và động vật (Tự nhiên và Xã hội 1, Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Thực vật và động vật (Tự nhiên và Xã hội 1, Chủ đề 4)"],
           "luu_y_ra_de": "Ranh giới học kì chưa xác thực: không tìm được PPCT chính thức cho lớp 2; có bằng chứng gián tiếp cho thấy ranh giới HK1/HK2 không cắt gọn ở hết Chủ đề 3 - bài giảng Bài 16 trên lop2.edu.vn ghi ngày dạy 22/12/2022 và 26/12/2022 (cuối tháng 12, vẫn trong HK1). Khung này xếp Chủ đề 4 vào HK2 theo mẫu lớp 1 và ghi chú điểm chưa chắc này.",
           "ten": "Chủ đề 4. Thực vật và động vật",
           "ten_theo_sach": {
@@ -1021,10 +907,7 @@
             "Bài 30. Luyện tập ứng phó với thiên tai",
             "Bài 31. Ôn tập chủ đề Trái Đất và bầu trời"
           ],
-          "chua_duoc_dung": [
-            "Trái Đất và các đới khí hậu (lớp 3)",
-            "Bề mặt Trái Đất (lớp 3)"
-          ],
+          "chua_duoc_dung": ["Trái Đất và các đới khí hậu (lớp 3)", "Bề mặt Trái Đất (lớp 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -1119,9 +1002,7 @@
           ],
           "hoc_ky": 2,
           "id": "cn3-thu-cong-ki-thuat",
-          "kien_thuc_duoc_dung": [
-            "Công nghệ và đời sống (Phần 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Công nghệ và đời sống (Phần 1)"],
           "luu_y_ra_de": "Một nguồn (sytu.vn) ghi tên Phần 2 là 'Thủ công kĩ thuật tri thức' - gần chắc là lỗi OCR, vì tailieumoi, tech12h, hoatieu đều ghi 'Thủ công kĩ thuật'.",
           "ten": "Phần 2. Thủ công kĩ thuật",
           "ten_theo_sach": {
@@ -1148,13 +1029,8 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Chào cờ và hát Quốc ca",
-            "Bài 2. Tự hào Tổ quốc Việt Nam"
-          ],
-          "chua_duoc_dung": [
-            "Biết ơn những người có công với quê hương, đất nước (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 1. Chào cờ và hát Quốc ca", "Bài 2. Tự hào Tổ quốc Việt Nam"],
+          "chua_duoc_dung": ["Biết ơn những người có công với quê hương, đất nước (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1162,9 +1038,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd3-em-yeu-to-quoc-viet-nam",
-          "kien_thuc_duoc_dung": [
-            "Quê hương em (Đạo đức 2, Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Quê hương em (Đạo đức 2, Chủ đề 1)"],
           "luu_y_ra_de": "Bài 1: có nguồn viết 'hát quốc ca' (thường), có nguồn viết 'hát Quốc ca' (hoa) - ghi 'Quốc ca' theo tailieuhoctap.",
           "ten": "Chủ đề 1. Em yêu Tổ quốc Việt Nam",
           "ten_theo_sach": {
@@ -1172,15 +1046,10 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 1. Em yêu Tổ quốc Việt Nam"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được chào cờ và hát Quốc ca",
-            "Nêu được tự hào Tổ quốc Việt Nam"
-          ]
+          "yeu_cau_can_dat": ["Nêu được chào cờ và hát Quốc ca", "Nêu được tự hào Tổ quốc Việt Nam"]
         },
         {
-          "cac_bai": [
-            "Bài 3. Quan tâm hàng xóm láng giềng"
-          ],
+          "cac_bai": ["Bài 3. Quan tâm hàng xóm láng giềng"],
           "chua_duoc_dung": [
             "Quan tâm, chăm sóc người thân trong gia đình (Đạo đức 1, Chủ đề 3)",
             "Cộng đồng địa phương (Tự nhiên và Xã hội 3)"
@@ -1192,9 +1061,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd3-quan-tam-hang-xom-lang-gieng",
-          "kien_thuc_duoc_dung": [
-            "Yêu thương gia đình (Đạo đức 1, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Yêu thương gia đình (Đạo đức 1, Chủ đề 2)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi hành vi quan tâm hàng xóm láng giềng ở mức trong sách.",
           "ten": "Chủ đề 2. Quan tâm hàng xóm láng giềng",
           "ten_theo_sach": {
@@ -1202,17 +1069,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Quan tâm hàng xóm láng giềng"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được quan tâm hàng xóm láng giềng"
-          ]
+          "yeu_cau_can_dat": ["Nêu được quan tâm hàng xóm láng giềng"]
         },
         {
-          "cac_bai": [
-            "Bài 4. Ham học hỏi"
-          ],
-          "chua_duoc_dung": [
-            "Tích cực hoàn thành nhiệm vụ (Chủ đề 5)"
-          ],
+          "cac_bai": ["Bài 4. Ham học hỏi"],
+          "chua_duoc_dung": ["Tích cực hoàn thành nhiệm vụ (Chủ đề 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1220,9 +1081,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd3-ham-hoc-hoi",
-          "kien_thuc_duoc_dung": [
-            "Tự giác học tập (Đạo đức 1, Chủ đề 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Tự giác học tập (Đạo đức 1, Chủ đề 6)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi hành vi ham học hỏi ở mức trong sách.",
           "ten": "Chủ đề 3. Ham học hỏi",
           "ten_theo_sach": {
@@ -1230,17 +1089,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 3. Ham học hỏi"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được ham học hỏi"
-          ]
+          "yeu_cau_can_dat": ["Nêu được ham học hỏi"]
         },
         {
-          "cac_bai": [
-            "Bài 5. Giữ lời hứa"
-          ],
-          "chua_duoc_dung": [
-            "Bảo vệ cái đúng, cái tốt (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 5. Giữ lời hứa"],
+          "chua_duoc_dung": ["Bảo vệ cái đúng, cái tốt (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1259,17 +1112,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Giữ lời hứa"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được giữ lời hứa"
-          ]
+          "yeu_cau_can_dat": ["Nêu được giữ lời hứa"]
         },
         {
-          "cac_bai": [
-            "Bài 6. Tích cực hoàn thành nhiệm vụ"
-          ],
-          "chua_duoc_dung": [
-            "Yêu lao động (Đạo đức 4)"
-          ],
+          "cac_bai": ["Bài 6. Tích cực hoàn thành nhiệm vụ"],
+          "chua_duoc_dung": ["Yêu lao động (Đạo đức 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1288,17 +1135,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 5. Tích cực hoàn thành nhiệm vụ"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được tích cực hoàn thành nhiệm vụ"
-          ]
+          "yeu_cau_can_dat": ["Nêu được tích cực hoàn thành nhiệm vụ"]
         },
         {
-          "cac_bai": [
-            "Bài 7. Khám phá bản thân"
-          ],
-          "chua_duoc_dung": [
-            "Lập kế hoạch cá nhân (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 7. Khám phá bản thân"],
+          "chua_duoc_dung": ["Lập kế hoạch cá nhân (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1306,9 +1147,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd3-kham-pha-ban-than",
-          "kien_thuc_duoc_dung": [
-            "Thể hiện cảm xúc bản thân (Đạo đức 2, Chủ đề 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Thể hiện cảm xúc bản thân (Đạo đức 2, Chủ đề 6)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi khám phá bản thân ở mức trong sách.",
           "ten": "Chủ đề 6. Khám phá bản thân",
           "ten_theo_sach": {
@@ -1316,17 +1155,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 6. Khám phá bản thân"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được khám phá bản thân"
-          ]
+          "yeu_cau_can_dat": ["Nêu được khám phá bản thân"]
         },
         {
-          "cac_bai": [
-            "Bài 8. Xử lí bất hòa với bạn bè"
-          ],
-          "chua_duoc_dung": [
-            "Thiết lập và duy trì quan hệ bạn bè (Đạo đức 4)"
-          ],
+          "cac_bai": ["Bài 8. Xử lí bất hòa với bạn bè"],
+          "chua_duoc_dung": ["Thiết lập và duy trì quan hệ bạn bè (Đạo đức 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1334,9 +1167,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd3-xu-li-bat-hoa-voi-ban-be",
-          "kien_thuc_duoc_dung": [
-            "Yêu quý bạn bè (Đạo đức 2, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Yêu quý bạn bè (Đạo đức 2, Chủ đề 2)"],
           "luu_y_ra_de": "Bài 8: có nguồn ghi 'bất hoà', có nguồn ghi 'bất hòa' - ghi 'hòa' theo tech12h.",
           "ten": "Chủ đề 7. Xử lí bất hòa với bạn bè",
           "ten_theo_sach": {
@@ -1344,18 +1175,14 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 7. Xử lí bất hòa với bạn bè"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được cách xử lí bất hòa với bạn bè"
-          ]
+          "yeu_cau_can_dat": ["Nêu được cách xử lí bất hòa với bạn bè"]
         },
         {
           "cac_bai": [
             "Bài 9. Đi bộ an toàn",
             "Bài 10. An toàn khi tham gia các phương tiện giao thông"
           ],
-          "chua_duoc_dung": [
-            "Tuân thủ quy định nơi công cộng (Đạo đức 2, Chủ đề 8)"
-          ],
+          "chua_duoc_dung": ["Tuân thủ quy định nơi công cộng (Đạo đức 2, Chủ đề 8)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1412,9 +1239,7 @@
           ],
           "hoc_ky": 1,
           "id": "tin3-may-tinh-va-em",
-          "kien_thuc_duoc_dung": [
-            "Nhận biết thông tin quanh em (Tự nhiên và Xã hội 1-2)"
-          ],
+          "kien_thuc_duoc_dung": ["Nhận biết thông tin quanh em (Tự nhiên và Xã hội 1-2)"],
           "luu_y_ra_de": "Bài 2: dùng 'Xử lí thông tin' theo chính tả SGK (một số nguồn ghi 'Xử lý').",
           "ten": "Chủ đề 1. Máy tính và em",
           "ten_theo_sach": {
@@ -1430,9 +1255,7 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 6. Khám phá thông tin trên Internet"
-          ],
+          "cac_bai": ["Bài 6. Khám phá thông tin trên Internet"],
           "chua_duoc_dung": [
             "Tìm kiếm thông tin trên Internet (Chủ đề 3)",
             "Thông tin trên trang web (Tin học 4)",
@@ -1445,9 +1268,7 @@
           ],
           "hoc_ky": 1,
           "id": "tin3-mang-may-tinh-va-internet",
-          "kien_thuc_duoc_dung": [
-            "Máy tính và em (Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Máy tính và em (Chủ đề 1)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi ở mức khám phá thông tin trên Internet, không hỏi kĩ thuật tìm kiếm nâng cao.",
           "ten": "Chủ đề 2. Mạng máy tính và Internet",
           "ten_theo_sach": {
@@ -1455,9 +1276,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Mạng máy tính và Internet"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được Internet giúp khám phá thông tin"
-          ]
+          "yeu_cau_can_dat": ["Nêu được Internet giúp khám phá thông tin"]
         },
         {
           "cac_bai": [
@@ -1496,9 +1315,7 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 10. Bảo vệ thông tin khi dùng máy tính"
-          ],
+          "cac_bai": ["Bài 10. Bảo vệ thông tin khi dùng máy tính"],
           "chua_duoc_dung": [
             "Sử dụng phần mềm khi được phép (Tin học 4)",
             "Bản quyền nội dung thông tin (Tin học 5)"
@@ -1521,9 +1338,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Đạo đức, pháp luật và văn hóa trong môi trường số"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được cách bảo vệ thông tin khi dùng máy tính"
-          ]
+          "yeu_cau_can_dat": ["Nêu được cách bảo vệ thông tin khi dùng máy tính"]
         },
         {
           "cac_bai": [
@@ -1578,10 +1393,7 @@
           ],
           "hoc_ky": 2,
           "id": "tin3-giai-quyet-van-de",
-          "kien_thuc_duoc_dung": [
-            "Máy tính và em (Chủ đề 1)",
-            "Tin học ứng dụng (Chủ đề 5)"
-          ],
+          "kien_thuc_duoc_dung": ["Máy tính và em (Chủ đề 1)", "Tin học ứng dụng (Chủ đề 5)"],
           "luu_y_ra_de": "Bài 14 giữ dấu '?' theo SGK (một số nguồn bỏ dấu '?'). Đề chỉ hỏi ở mức mô tả các bước thực hiện công việc, không yêu cầu viết chương trình.",
           "ten": "Chủ đề 6. Giải quyết vấn đề với sự trợ giúp của máy tính",
           "ten_theo_sach": {
@@ -1614,9 +1426,7 @@
             "Bài 3. Vệ sinh xung quanh nhà",
             "Bài 4. Ôn tập chủ đề Gia đình"
           ],
-          "chua_duoc_dung": [
-            "Địa phương em (Lịch sử và Địa lí 4)"
-          ],
+          "chua_duoc_dung": ["Địa phương em (Lịch sử và Địa lí 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -1625,9 +1435,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh3-gia-dinh",
-          "kien_thuc_duoc_dung": [
-            "Gia đình (Tự nhiên và Xã hội 1, 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Gia đình (Tự nhiên và Xã hội 1, 2)"],
           "luu_y_ra_de": "Bài 2: tech12h ghi 'Phòng tránh hỏa hoạn', timdapan/kenhgiaovien ghi 'Phòng tránh hoả hoạn' (cùng một từ, khác kiểu đặt dấu) - đã dùng 'hỏa hoạn' theo tech12h.",
           "ten": "Chủ đề 1. Gia đình",
           "ten_theo_sach": {
@@ -1648,9 +1456,7 @@
             "Bài 7. Giữ an toàn và vệ sinh ở trường",
             "Bài 8. Ôn tập chủ đề Trường học"
           ],
-          "chua_duoc_dung": [
-            "Địa phương em (Lịch sử và Địa lí 4)"
-          ],
+          "chua_duoc_dung": ["Địa phương em (Lịch sử và Địa lí 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -1659,9 +1465,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh3-truong-hoc",
-          "kien_thuc_duoc_dung": [
-            "Trường học (Tự nhiên và Xã hội 1, 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Trường học (Tự nhiên và Xã hội 1, 2)"],
           "luu_y_ra_de": "Đề chỉ hỏi nội dung trong sách; không hỏi hoạt động ngoài nhà trường.",
           "ten": "Chủ đề 2. Trường học",
           "ten_theo_sach": {
@@ -1694,9 +1498,7 @@
           ],
           "hoc_ky": 1,
           "id": "tnxh3-cong-dong-dia-phuong",
-          "kien_thuc_duoc_dung": [
-            "Cộng đồng địa phương (Tự nhiên và Xã hội 1, 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Cộng đồng địa phương (Tự nhiên và Xã hội 1, 2)"],
           "luu_y_ra_de": "Bài 11: tech12h ghi 'Di tích lịch sử, văn hóa và cảnh quan thiên nhiên'; kenhgiaovien ghi 'Di tích lịch sử - văn hoá và cảnh quan thiên nhiên' (gạch ngang, 'hoá'); hoatieu.vn ghi gọn 'Di tích lịch sử và cảnh quan thiên nhiên' (thiếu cụm 'văn hóa') - đã lấy theo tech12h, nên đối chiếu lại với SGK in.",
           "ten": "Chủ đề 3. Cộng đồng địa phương",
           "ten_theo_sach": {
@@ -1730,9 +1532,7 @@
           ],
           "hoc_ky": 2,
           "id": "tnxh3-thuc-vat-va-dong-vat",
-          "kien_thuc_duoc_dung": [
-            "Thực vật và động vật (Tự nhiên và Xã hội 1, 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Thực vật và động vật (Tự nhiên và Xã hội 1, 2)"],
           "luu_y_ra_de": "Đề chỉ hỏi bộ phận và chức năng ở mức trong sách; không hỏi tên khoa học.",
           "ten": "Chủ đề 4. Thực vật và động vật",
           "ten_theo_sach": {
@@ -1794,9 +1594,7 @@
             "Bài 29. Mặt Trời, Trái Đất, Mặt Trăng",
             "Bài 30. Ôn tập chủ đề Trái Đất và bầu trời"
           ],
-          "chua_duoc_dung": [
-            "Đất nước và con người Việt Nam (Lịch sử và Địa lí 5)"
-          ],
+          "chua_duoc_dung": ["Đất nước và con người Việt Nam (Lịch sử và Địa lí 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -1845,10 +1643,7 @@
             "Bài 5. Trồng hoa, cây cảnh trong chậu",
             "Bài 6. Chăm sóc hoa, cây cảnh trong chậu"
           ],
-          "chua_duoc_dung": [
-            "Thủ công kĩ thuật (Phần 2)",
-            "Vai trò của công nghệ (Công nghệ 5)"
-          ],
+          "chua_duoc_dung": ["Thủ công kĩ thuật (Phần 2)", "Vai trò của công nghệ (Công nghệ 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -1926,12 +1721,8 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Biết ơn người lao động"
-          ],
-          "chua_duoc_dung": [
-            "Biết ơn những người có công với quê hương, đất nước (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 1. Biết ơn người lao động"],
+          "chua_duoc_dung": ["Biết ơn những người có công với quê hương, đất nước (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1939,9 +1730,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd4-biet-on-nguoi-lao-dong",
-          "kien_thuc_duoc_dung": [
-            "Yêu thương gia đình (Đạo đức 1, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Yêu thương gia đình (Đạo đức 1, Chủ đề 2)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi hành vi biết ơn người lao động ở mức trong sách.",
           "ten": "Chủ đề 1. Biết ơn người lao động",
           "ten_theo_sach": {
@@ -1949,17 +1738,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 1. Biết ơn người lao động"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được biết ơn người lao động"
-          ]
+          "yeu_cau_can_dat": ["Nêu được biết ơn người lao động"]
         },
         {
-          "cac_bai": [
-            "Bài 2. Cảm thông, giúp đỡ người gặp khó khăn"
-          ],
-          "chua_duoc_dung": [
-            "Quan tâm hàng xóm láng giềng (Đạo đức 3, Chủ đề 2)"
-          ],
+          "cac_bai": ["Bài 2. Cảm thông, giúp đỡ người gặp khó khăn"],
+          "chua_duoc_dung": ["Quan tâm hàng xóm láng giềng (Đạo đức 3, Chủ đề 2)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -1977,17 +1760,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Cảm thông, giúp đỡ người gặp khó khăn"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được cảm thông, giúp đỡ người gặp khó khăn"
-          ]
+          "yeu_cau_can_dat": ["Nêu được cảm thông, giúp đỡ người gặp khó khăn"]
         },
         {
-          "cac_bai": [
-            "Bài 3. Yêu lao động"
-          ],
-          "chua_duoc_dung": [
-            "Vượt qua khó khăn (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 3. Yêu lao động"],
+          "chua_duoc_dung": ["Vượt qua khó khăn (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2006,17 +1783,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 3. Yêu lao động"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được yêu lao động"
-          ]
+          "yeu_cau_can_dat": ["Nêu được yêu lao động"]
         },
         {
-          "cac_bai": [
-            "Bài 4. Tôn trọng tài sản của người khác"
-          ],
-          "chua_duoc_dung": [
-            "Bảo vệ của công (Chủ đề 5)"
-          ],
+          "cac_bai": ["Bài 4. Tôn trọng tài sản của người khác"],
+          "chua_duoc_dung": ["Bảo vệ của công (Chủ đề 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2035,17 +1806,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Tôn trọng tài sản của người khác"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được tôn trọng tài sản của người khác"
-          ]
+          "yeu_cau_can_dat": ["Nêu được tôn trọng tài sản của người khác"]
         },
         {
-          "cac_bai": [
-            "Bài 5. Bảo vệ của công"
-          ],
-          "chua_duoc_dung": [
-            "Bảo vệ môi trường sống (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 5. Bảo vệ của công"],
+          "chua_duoc_dung": ["Bảo vệ môi trường sống (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2064,18 +1829,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 5. Bảo vệ của công"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được bảo vệ của công"
-          ]
+          "yeu_cau_can_dat": ["Nêu được bảo vệ của công"]
         },
         {
-          "cac_bai": [
-            "Bài 6. Thiết lập quan hệ bạn bè",
-            "Bài 7. Duy trì quan hệ bạn bè"
-          ],
-          "chua_duoc_dung": [
-            "Xử lí bất hòa với bạn bè (Đạo đức 3, Chủ đề 7)"
-          ],
+          "cac_bai": ["Bài 6. Thiết lập quan hệ bạn bè", "Bài 7. Duy trì quan hệ bạn bè"],
+          "chua_duoc_dung": ["Xử lí bất hòa với bạn bè (Đạo đức 3, Chủ đề 7)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2100,12 +1858,8 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 8. Quý trọng đồng tiền"
-          ],
-          "chua_duoc_dung": [
-            "Sử dụng tiền hợp lí (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 8. Quý trọng đồng tiền"],
+          "chua_duoc_dung": ["Sử dụng tiền hợp lí (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2113,9 +1867,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd4-quy-trong-dong-tien",
-          "kien_thuc_duoc_dung": [
-            "Bảo quản đồ dùng cá nhân và gia đình (Đạo đức 2, Chủ đề 5)"
-          ],
+          "kien_thuc_duoc_dung": ["Bảo quản đồ dùng cá nhân và gia đình (Đạo đức 2, Chủ đề 5)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi hành vi quý trọng đồng tiền ở mức trong sách.",
           "ten": "Chủ đề 7. Quý trọng đồng tiền",
           "ten_theo_sach": {
@@ -2123,17 +1875,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 7. Quý trọng đồng tiền"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được quý trọng đồng tiền"
-          ]
+          "yeu_cau_can_dat": ["Nêu được quý trọng đồng tiền"]
         },
         {
-          "cac_bai": [
-            "Bài 9. Quyền và bổn phận của trẻ em"
-          ],
-          "chua_duoc_dung": [
-            "Phòng, tránh xâm hại (Đạo đức 5)"
-          ],
+          "cac_bai": ["Bài 9. Quyền và bổn phận của trẻ em"],
+          "chua_duoc_dung": ["Phòng, tránh xâm hại (Đạo đức 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2141,9 +1887,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd4-quyen-va-bon-phan-cua-tre-em",
-          "kien_thuc_duoc_dung": [
-            "Tuân thủ quy định nơi công cộng (Đạo đức 2, Chủ đề 8)"
-          ],
+          "kien_thuc_duoc_dung": ["Tuân thủ quy định nơi công cộng (Đạo đức 2, Chủ đề 8)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi quyền và bổn phận của trẻ em ở mức trong sách.",
           "ten": "Chủ đề 8. Quyền và bổn phận của trẻ em",
           "ten_theo_sach": {
@@ -2151,9 +1895,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 8. Quyền và bổn phận của trẻ em"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được quyền và bổn phận của trẻ em"
-          ]
+          "yeu_cau_can_dat": ["Nêu được quyền và bổn phận của trẻ em"]
         }
       ],
       "ghi_chu_chua_chac": [
@@ -2388,10 +2130,7 @@
           ],
           "hoc_ky": 2,
           "id": "kh4-sinh-vat-va-moi-truong",
-          "kien_thuc_duoc_dung": [
-            "Thực vật và động vật (Chủ đề 3)",
-            "Nấm (Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Thực vật và động vật (Chủ đề 3)", "Nấm (Chủ đề 4)"],
           "luu_y_ra_de": "Chuỗi thức ăn chỉ ở mức đơn giản (sinh vật sản xuất - sinh vật tiêu thụ); không hỏi lưới thức ăn.",
           "ten": "Chủ đề 6. Sinh vật và môi trường",
           "ten_theo_sach": {
@@ -2416,13 +2155,8 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Làm quen với phương tiện học tập môn Lịch sử và Địa lí"
-          ],
-          "chua_duoc_dung": [
-            "Nội dung các vùng miền (Chủ đề 2-6)",
-            "Đọc bản đồ ở mức nâng cao"
-          ],
+          "cac_bai": ["Bài 1. Làm quen với phương tiện học tập môn Lịch sử và Địa lí"],
+          "chua_duoc_dung": ["Nội dung các vùng miền (Chủ đề 2-6)", "Đọc bản đồ ở mức nâng cao"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Nối ý ở hai cột",
@@ -2430,9 +2164,7 @@
           ],
           "hoc_ky": 1,
           "id": "lsdl4-mo-dau",
-          "kien_thuc_duoc_dung": [
-            "Địa phương em (Tự nhiên và Xã hội 1-3)"
-          ],
+          "kien_thuc_duoc_dung": ["Địa phương em (Tự nhiên và Xã hội 1-3)"],
           "luu_y_ra_de": "Bài mở đầu làm quen với bản đồ, lược đồ, tranh ảnh, bảng số liệu; đề chỉ hỏi ở mức nhận biết.",
           "ten": "Mở đầu",
           "ten_theo_sach": {
@@ -2497,10 +2229,7 @@
           ],
           "hoc_ky": 1,
           "id": "lsdl4-trung-du-va-mien-nui-bac-bo",
-          "kien_thuc_duoc_dung": [
-            "Địa phương em (Chủ đề 1)",
-            "Mở đầu: phương tiện học tập"
-          ],
+          "kien_thuc_duoc_dung": ["Địa phương em (Chủ đề 1)", "Mở đầu: phương tiện học tập"],
           "luu_y_ra_de": "Bài 7 Đền Hùng và lễ giỗ Tổ Hùng Vương là bài lịch sử trong chủ đề vùng miền; đề không hỏi ngày giỗ Tổ bằng số liệu chi tiết ngoài sách.",
           "ten": "Chủ đề 2. Trung du và miền núi Bắc Bộ",
           "ten_theo_sach": {
@@ -2603,10 +2332,7 @@
             "Bài 22. Một số nét văn hoá và truyền thống yêu nước, cách mạng của đồng bào Tây Nguyên",
             "Bài 23. Lễ hội Cồng chiêng Tây Nguyên"
           ],
-          "chua_duoc_dung": [
-            "Nam Bộ (Chủ đề 6)",
-            "Lịch sử dân tộc ở mức chi tiết (lớp 5)"
-          ],
+          "chua_duoc_dung": ["Nam Bộ (Chủ đề 6)", "Lịch sử dân tộc ở mức chi tiết (lớp 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -2616,10 +2342,7 @@
           ],
           "hoc_ky": 2,
           "id": "lsdl4-tay-nguyen",
-          "kien_thuc_duoc_dung": [
-            "Duyên hải miền Trung (Chủ đề 4)",
-            "Đồng bằng Bắc Bộ (Chủ đề 3)"
-          ],
+          "kien_thuc_duoc_dung": ["Duyên hải miền Trung (Chủ đề 4)", "Đồng bằng Bắc Bộ (Chủ đề 3)"],
           "luu_y_ra_de": "Bài 22: thứ tự cụm từ 'yêu nước, cách mạng' theo tài liệu NXB và trang giải tech12h; một số nguồn đảo thứ tự - đã dùng theo NXB.",
           "ten": "Chủ đề 5. Tây Nguyên",
           "ten_theo_sach": {
@@ -2656,10 +2379,7 @@
           ],
           "hoc_ky": 2,
           "id": "lsdl4-nam-bo",
-          "kien_thuc_duoc_dung": [
-            "Tây Nguyên (Chủ đề 5)",
-            "Duyên hải miền Trung (Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Tây Nguyên (Chủ đề 5)", "Duyên hải miền Trung (Chủ đề 4)"],
           "luu_y_ra_de": "Bài 26: trang giải tech12h ghi 'truyền thống yêu nước, cách mạng của đồng bào Nam Bộ', trang giáo án tech12h ghi 'truyền thống cách mạng, yêu nước của vùng Nam Bộ' - đã dùng theo trang giải (nhất quán với Bài 22). Lưu ý: trang giáo án của tech12h liệt kê nhầm 'Bài 27: Phòng tránh đuối nước' (đó là Bài 27 của Khoa học 4); Bài 27 đúng là 'Thành phố Hồ Chí Minh'.",
           "ten": "Chủ đề 6. Nam Bộ",
           "ten_theo_sach": {
@@ -2691,10 +2411,7 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Phần cứng và phần mềm máy tính",
-            "Bài 2. Gõ bàn phím đúng cách"
-          ],
+          "cac_bai": ["Bài 1. Phần cứng và phần mềm máy tính", "Bài 2. Gõ bàn phím đúng cách"],
           "chua_duoc_dung": [
             "Em có thể làm gì với máy tính (Tin học 5)",
             "Lập trình trực quan (Chủ đề 6)"
@@ -2708,9 +2425,7 @@
           ],
           "hoc_ky": 1,
           "id": "tin4-may-tinh-va-em",
-          "kien_thuc_duoc_dung": [
-            "Máy tính và em (Tin học 3, Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Máy tính và em (Tin học 3, Chủ đề 1)"],
           "luu_y_ra_de": "Phân biệt phần cứng và phần mềm qua ví dụ; đề không hỏi tên chi tiết linh kiện.",
           "ten": "Chủ đề 1. Máy tính và em",
           "ten_theo_sach": {
@@ -2724,9 +2439,7 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 3. Thông tin trên trang web"
-          ],
+          "cac_bai": ["Bài 3. Thông tin trên trang web"],
           "chua_duoc_dung": [
             "Tìm kiếm thông tin trên website (Tin học 5)",
             "Bản quyền nội dung thông tin (Tin học 5)"
@@ -2738,9 +2451,7 @@
           ],
           "hoc_ky": 1,
           "id": "tin4-mang-may-tinh-va-internet",
-          "kien_thuc_duoc_dung": [
-            "Khám phá thông tin trên Internet (Tin học 3, Chủ đề 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Khám phá thông tin trên Internet (Tin học 3, Chủ đề 2)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; mục lục SGK ghi 'Thông tin trên trang web' (web thường), một số PPCT viết 'trang Web' (hoa W).",
           "ten": "Chủ đề 2. Mạng máy tính và Internet",
           "ten_theo_sach": {
@@ -2748,9 +2459,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Mạng máy tính và Internet"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được thông tin trên trang web"
-          ]
+          "yeu_cau_can_dat": ["Nêu được thông tin trên trang web"]
         },
         {
           "cac_bai": [
@@ -2786,12 +2495,8 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 6. Sử dụng phần mềm khi được phép"
-          ],
-          "chua_duoc_dung": [
-            "Bản quyền nội dung thông tin (Tin học 5)"
-          ],
+          "cac_bai": ["Bài 6. Sử dụng phần mềm khi được phép"],
+          "chua_duoc_dung": ["Bản quyền nội dung thông tin (Tin học 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -2799,9 +2504,7 @@
           ],
           "hoc_ky": 1,
           "id": "tin4-dao-duc-phap-luat",
-          "kien_thuc_duoc_dung": [
-            "Bảo vệ thông tin khi dùng máy tính (Tin học 3, Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Bảo vệ thông tin khi dùng máy tính (Tin học 3, Chủ đề 4)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; tên Chủ đề 4: SGK ghi 'văn hóa', một số PPCT ghi 'văn hoá'.",
           "ten": "Chủ đề 4. Đạo đức, pháp luật và văn hóa trong môi trường số",
           "ten_theo_sach": {
@@ -2809,9 +2512,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Đạo đức, pháp luật và văn hóa trong môi trường số"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được chỉ sử dụng phần mềm khi được phép"
-          ]
+          "yeu_cau_can_dat": ["Nêu được chỉ sử dụng phần mềm khi được phép"]
         },
         {
           "cac_bai": [
@@ -2912,10 +2613,7 @@
             "Bài 5. Sử dụng điện thoại",
             "Bài 6. Sử dụng tủ lạnh"
           ],
-          "chua_duoc_dung": [
-            "Thủ công kĩ thuật (Phần 2)",
-            "Vẽ kĩ thuật (Công nghệ 8)"
-          ],
+          "chua_duoc_dung": ["Thủ công kĩ thuật (Phần 2)", "Vẽ kĩ thuật (Công nghệ 8)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -2924,9 +2622,7 @@
           ],
           "hoc_ky": 1,
           "id": "cn5-cong-nghe-va-doi-song",
-          "kien_thuc_duoc_dung": [
-            "Công nghệ và đời sống (Công nghệ 3, 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Công nghệ và đời sống (Công nghệ 3, 4)"],
           "luu_y_ra_de": "Đề không hỏi về thiết kế sản phẩm ở mức kĩ thuật chi tiết; chỉ ở mức tìm hiểu và mô tả theo sách.",
           "ten": "Phần 1. Công nghệ và đời sống",
           "ten_theo_sach": {
@@ -2947,9 +2643,7 @@
             "Bài 8. Mô hình máy phát điện gió",
             "Bài 9. Mô hình điện mặt trời"
           ],
-          "chua_duoc_dung": [
-            "Năng lượng tái tạo ở mức chi tiết (THCS)"
-          ],
+          "chua_duoc_dung": ["Năng lượng tái tạo ở mức chi tiết (THCS)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -2988,12 +2682,8 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Biết ơn những người có công với quê hương, đất nước"
-          ],
-          "chua_duoc_dung": [
-            "Em yêu Tổ quốc Việt Nam (Đạo đức 3, Chủ đề 1)"
-          ],
+          "cac_bai": ["Bài 1. Biết ơn những người có công với quê hương, đất nước"],
+          "chua_duoc_dung": ["Em yêu Tổ quốc Việt Nam (Đạo đức 3, Chủ đề 1)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3012,17 +2702,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 1. Biết ơn những người có công với quê hương, đất nước"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được biết ơn những người có công với quê hương, đất nước"
-          ]
+          "yeu_cau_can_dat": ["Nêu được biết ơn những người có công với quê hương, đất nước"]
         },
         {
-          "cac_bai": [
-            "Bài 2. Tôn trọng sự khác biệt của người khác"
-          ],
-          "chua_duoc_dung": [
-            "Tôn trọng tài sản của người khác (Đạo đức 4, Chủ đề 4)"
-          ],
+          "cac_bai": ["Bài 2. Tôn trọng sự khác biệt của người khác"],
+          "chua_duoc_dung": ["Tôn trọng tài sản của người khác (Đạo đức 4, Chủ đề 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3030,9 +2714,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd5-ton-trong-su-khac-biet",
-          "kien_thuc_duoc_dung": [
-            "Thiết lập và duy trì quan hệ bạn bè (Đạo đức 4, Chủ đề 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Thiết lập và duy trì quan hệ bạn bè (Đạo đức 4, Chủ đề 6)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi hành vi tôn trọng sự khác biệt ở mức trong sách.",
           "ten": "Chủ đề 2. Tôn trọng sự khác biệt của người khác",
           "ten_theo_sach": {
@@ -3040,17 +2722,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Tôn trọng sự khác biệt của người khác"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được tôn trọng sự khác biệt của người khác"
-          ]
+          "yeu_cau_can_dat": ["Nêu được tôn trọng sự khác biệt của người khác"]
         },
         {
-          "cac_bai": [
-            "Bài 3. Vượt qua khó khăn"
-          ],
-          "chua_duoc_dung": [
-            "Yêu lao động (Đạo đức 4, Chủ đề 3)"
-          ],
+          "cac_bai": ["Bài 3. Vượt qua khó khăn"],
+          "chua_duoc_dung": ["Yêu lao động (Đạo đức 4, Chủ đề 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3058,9 +2734,7 @@
           ],
           "hoc_ky": 1,
           "id": "dd5-vuot-qua-kho-khan",
-          "kien_thuc_duoc_dung": [
-            "Tích cực hoàn thành nhiệm vụ (Đạo đức 3, Chủ đề 5)"
-          ],
+          "kien_thuc_duoc_dung": ["Tích cực hoàn thành nhiệm vụ (Đạo đức 3, Chủ đề 5)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi hành vi vượt qua khó khăn ở mức trong sách.",
           "ten": "Chủ đề 3. Vượt qua khó khăn",
           "ten_theo_sach": {
@@ -3068,17 +2742,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 3. Vượt qua khó khăn"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được vượt qua khó khăn"
-          ]
+          "yeu_cau_can_dat": ["Nêu được vượt qua khó khăn"]
         },
         {
-          "cac_bai": [
-            "Bài 4. Bảo vệ cái đúng, cái tốt"
-          ],
-          "chua_duoc_dung": [
-            "Giữ lời hứa (Đạo đức 3, Chủ đề 4)"
-          ],
+          "cac_bai": ["Bài 4. Bảo vệ cái đúng, cái tốt"],
+          "chua_duoc_dung": ["Giữ lời hứa (Đạo đức 3, Chủ đề 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3097,17 +2765,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Bảo vệ cái đúng, cái tốt"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được bảo vệ cái đúng, cái tốt"
-          ]
+          "yeu_cau_can_dat": ["Nêu được bảo vệ cái đúng, cái tốt"]
         },
         {
-          "cac_bai": [
-            "Bài 5. Bảo vệ môi trường sống"
-          ],
-          "chua_duoc_dung": [
-            "Tác động của con người và biện pháp bảo vệ môi trường (Khoa học 5)"
-          ],
+          "cac_bai": ["Bài 5. Bảo vệ môi trường sống"],
+          "chua_duoc_dung": ["Tác động của con người và biện pháp bảo vệ môi trường (Khoa học 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3126,17 +2788,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 5. Bảo vệ môi trường sống"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được bảo vệ môi trường sống"
-          ]
+          "yeu_cau_can_dat": ["Nêu được bảo vệ môi trường sống"]
         },
         {
-          "cac_bai": [
-            "Bài 6. Lập kế hoạch cá nhân"
-          ],
-          "chua_duoc_dung": [
-            "Quý trọng thời gian (Đạo đức 2, Chủ đề 3)"
-          ],
+          "cac_bai": ["Bài 6. Lập kế hoạch cá nhân"],
+          "chua_duoc_dung": ["Quý trọng thời gian (Đạo đức 2, Chủ đề 3)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3155,14 +2811,10 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 6. Lập kế hoạch cá nhân"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được lập kế hoạch cá nhân"
-          ]
+          "yeu_cau_can_dat": ["Nêu được lập kế hoạch cá nhân"]
         },
         {
-          "cac_bai": [
-            "Bài 7. Phòng, tránh xâm hại"
-          ],
+          "cac_bai": ["Bài 7. Phòng, tránh xâm hại"],
           "chua_duoc_dung": [
             "Tìm kiếm sự hỗ trợ (Đạo đức 2, Chủ đề 7)",
             "Phòng tránh bị xâm hại (Khoa học 5)"
@@ -3185,17 +2837,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 7. Phòng, tránh xâm hại"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được cách phòng, tránh xâm hại"
-          ]
+          "yeu_cau_can_dat": ["Nêu được cách phòng, tránh xâm hại"]
         },
         {
-          "cac_bai": [
-            "Bài 8. Sử dụng tiền hợp lí"
-          ],
-          "chua_duoc_dung": [
-            "Quý trọng đồng tiền (Đạo đức 4, Chủ đề 7)"
-          ],
+          "cac_bai": ["Bài 8. Sử dụng tiền hợp lí"],
+          "chua_duoc_dung": ["Quý trọng đồng tiền (Đạo đức 4, Chủ đề 7)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3203,9 +2849,7 @@
           ],
           "hoc_ky": 2,
           "id": "dd5-su-dung-tien-hop-li",
-          "kien_thuc_duoc_dung": [
-            "Quý trọng đồng tiền (Đạo đức 4, Chủ đề 7)"
-          ],
+          "kien_thuc_duoc_dung": ["Quý trọng đồng tiền (Đạo đức 4, Chủ đề 7)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi sử dụng tiền hợp lí ở mức trong sách.",
           "ten": "Chủ đề 8. Sử dụng tiền hợp lí",
           "ten_theo_sach": {
@@ -3213,9 +2857,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 8. Sử dụng tiền hợp lí"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được sử dụng tiền hợp lí"
-          ]
+          "yeu_cau_can_dat": ["Nêu được sử dụng tiền hợp lí"]
         }
       ],
       "ghi_chu_chua_chac": [
@@ -3335,10 +2977,7 @@
           ],
           "hoc_ky": 1,
           "id": "kh5-thuc-vat-va-dong-vat",
-          "kien_thuc_duoc_dung": [
-            "Thực vật và động vật (Khoa học 4, Chủ đề 3)",
-            "Chất (Chủ đề 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Thực vật và động vật (Khoa học 4, Chủ đề 3)", "Chất (Chủ đề 1)"],
           "luu_y_ra_de": "Sinh sản chỉ ở mức nhận biết qua ví dụ trong sách; không hỏi cơ chế thụ phấn, thụ tinh chi tiết.",
           "ten": "Chủ đề 3. Thực vật và động vật",
           "ten_theo_sach": {
@@ -3699,10 +3338,7 @@
           ],
           "hoc_ky": 2,
           "id": "lsdl5-chung-tay-xay-dung-the-gioi",
-          "kien_thuc_duoc_dung": [
-            "Tìm hiểu thế giới (Chủ đề 5)",
-            "Các nước láng giềng (Chủ đề 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Tìm hiểu thế giới (Chủ đề 5)", "Các nước láng giềng (Chủ đề 4)"],
           "luu_y_ra_de": "Bài 28: bảng PPCT ghi 2 tiết + 1 tiết kiểm tra cuối HK2, ghi chú trong cùng tài liệu nói Bài 28 giữ 3 tiết liên tiếp như SGV - mâu thuẫn nội bộ nguồn, cần đối chiếu sách giáo viên.",
           "ten": "Chủ đề 6. Chung tay xây dựng thế giới",
           "ten_theo_sach": {
@@ -3734,9 +3370,7 @@
     {
       "chuong": [
         {
-          "cac_bai": [
-            "Bài 1. Em có thể làm gì với máy tính"
-          ],
+          "cac_bai": ["Bài 1. Em có thể làm gì với máy tính"],
           "chua_duoc_dung": [
             "Tìm kiếm thông tin trên website (Chủ đề 2)",
             "Cấu trúc tuần tự, lặp, rẽ nhánh (Chủ đề 6)"
@@ -3748,9 +3382,7 @@
           ],
           "hoc_ky": 1,
           "id": "tin5-may-tinh-va-em",
-          "kien_thuc_duoc_dung": [
-            "Máy tính và em (Tin học 3, 4)"
-          ],
+          "kien_thuc_duoc_dung": ["Máy tính và em (Tin học 3, 4)"],
           "luu_y_ra_de": "Chủ đề chỉ có 1 bài; đề chỉ hỏi ở mức kể được những việc có thể làm với máy tính.",
           "ten": "Chủ đề 1. Máy tính và em",
           "ten_theo_sach": {
@@ -3758,14 +3390,10 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 1. Máy tính và em"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được em có thể làm gì với máy tính"
-          ]
+          "yeu_cau_can_dat": ["Nêu được em có thể làm gì với máy tính"]
         },
         {
-          "cac_bai": [
-            "Bài 2. Tìm kiếm thông tin trên website"
-          ],
+          "cac_bai": ["Bài 2. Tìm kiếm thông tin trên website"],
           "chua_duoc_dung": [
             "Tìm kiếm thông tin trong giải quyết vấn đề (Chủ đề 3)",
             "Bản quyền nội dung thông tin (Chủ đề 4)"
@@ -3788,18 +3416,11 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 2. Mạng máy tính và internet"
           },
-          "yeu_cau_can_dat": [
-            "Tìm kiếm được thông tin trên website"
-          ]
+          "yeu_cau_can_dat": ["Tìm kiếm được thông tin trên website"]
         },
         {
-          "cac_bai": [
-            "Bài 3. Tìm kiếm thông tin trong giải quyết vấn đề",
-            "Bài 4. Cây thư mục"
-          ],
-          "chua_duoc_dung": [
-            "Bản quyền nội dung thông tin (Chủ đề 4)"
-          ],
+          "cac_bai": ["Bài 3. Tìm kiếm thông tin trong giải quyết vấn đề", "Bài 4. Cây thư mục"],
+          "chua_duoc_dung": ["Bản quyền nội dung thông tin (Chủ đề 4)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -3825,12 +3446,8 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 5. Bản quyền nội dung thông tin"
-          ],
-          "chua_duoc_dung": [
-            "Sử dụng phần mềm đồ họa tạo sản phẩm số (Chủ đề 5)"
-          ],
+          "cac_bai": ["Bài 5. Bản quyền nội dung thông tin"],
+          "chua_duoc_dung": ["Sử dụng phần mềm đồ họa tạo sản phẩm số (Chủ đề 5)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Trả lời câu hỏi ngắn",
@@ -3849,9 +3466,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 4. Đạo đức, pháp luật và văn hóa trong môi trường số"
           },
-          "yeu_cau_can_dat": [
-            "Nêu được bản quyền nội dung thông tin"
-          ]
+          "yeu_cau_can_dat": ["Nêu được bản quyền nội dung thông tin"]
         },
         {
           "cac_bai": [
@@ -3862,9 +3477,7 @@
             "Bài 9A. Sử dụng phần mềm đồ họa tạo sản phẩm số",
             "Bài 9B. Thực hành tạo đồ dùng gia đình theo video hướng dẫn"
           ],
-          "chua_duoc_dung": [
-            "Cấu trúc tuần tự, lặp, rẽ nhánh (Chủ đề 6)"
-          ],
+          "chua_duoc_dung": ["Cấu trúc tuần tự, lặp, rẽ nhánh (Chủ đề 6)"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -3901,9 +3514,7 @@
             "Bài 15. Sử dụng biểu thức trong chương trình",
             "Bài 16. Từ kịch bản đến chương trình"
           ],
-          "chua_duoc_dung": [
-            "Lập trình ở THCS"
-          ],
+          "chua_duoc_dung": ["Lập trình ở THCS"],
           "dang_bai_dien_hinh": [
             "Trắc nghiệm chọn đáp án đúng",
             "Điền từ vào chỗ trống",
@@ -4409,11 +4020,7 @@
   "danh_gia_khong_dinh_ki": [
     {
       "mon": "Tự nhiên và Xã hội",
-      "lop": [
-        1,
-        2,
-        3
-      ],
+      "lop": [1, 2, 3],
       "cach_danh_gia": "Không có bài kiểm tra định kì theo Thông tư 27/2020 (Điều 7 không liệt kê môn này trong 7 môn có bài kiểm tra định kì). Đánh giá định kì bằng nhận xét theo 3 mức Hoàn thành tốt / Hoàn thành / Chưa hoàn thành vào giữa học kì 1, cuối học kì 1, giữa học kì 2 và cuối năm, căn cứ quá trình đánh giá thường xuyên: giáo viên quan sát, vấn đáp, viết nhận xét vào vở hoặc sản phẩm học tập của học sinh; học sinh tự nhận xét và tham gia nhận xét sản phẩm của bạn, nhóm bạn.",
       "vi_du_cong_cu": [
         "Quan sát kèm thang đo 3 mức (vd: Bài 3 lớp 1 Nhận biết các vật xung quanh: chỉ, nói tên và chức năng các giác quan)",
@@ -4426,13 +4033,7 @@
     },
     {
       "mon": "Đạo đức",
-      "lop": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
+      "lop": [1, 2, 3, 4, 5],
       "cach_danh_gia": "Không có bài kiểm tra định kì theo Thông tư 27/2020 (Điều 7 không liệt kê môn này trong 7 môn có bài kiểm tra định kì). Đánh giá định kì bằng nhận xét theo 3 mức Hoàn thành tốt / Hoàn thành / Chưa hoàn thành vào giữa học kì 1, cuối học kì 1, giữa học kì 2 và cuối năm, căn cứ quá trình đánh giá thường xuyên: giáo viên quan sát thái độ, hành vi trong giờ học, giờ chơi, hoạt động tập thể và giao tiếp ứng xử; viết nhận xét vào vở hoặc sản phẩm học tập; học sinh tự đánh giá và đánh giá đồng đẳng.",
       "vi_du_cong_cu": [
         "Quan sát quá trình: thái độ, hành vi trong giờ học, giờ chơi, giờ ăn/nghỉ trưa, thư viện, hoạt động tập thể/xã hội, giao tiếp ứng xử với bạn bè, thầy cô, người thân",

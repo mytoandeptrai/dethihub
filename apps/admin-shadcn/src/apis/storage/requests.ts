@@ -13,7 +13,10 @@ export function uploadDocumentFile(file: File, subject?: string) {
   form.set('file', file)
   form.set('name', file.name)
   if (subject) form.set('subject', subject)
-  return storageUploadDocument({ body: { file: file.name, name: file.name, subject }, bodySerializer: () => form })
+  return storageUploadDocument({
+    body: { file: file.name, name: file.name, subject },
+    bodySerializer: () => form,
+  })
 }
 
 export async function storageUploadImage(options: Types.StorageUploadImageInput) {

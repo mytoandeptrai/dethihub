@@ -402,10 +402,10 @@ describe('community view, saving and reports', () => {
           ? `${api}/exams/${studentRemoteId}/play`
           : `${api}/exams/community/${studentRemoteId}`
       server.use(http.get(path, () => HttpResponse.json(endpoint === 'play' ? { doc: {} } : {})))
-      const { result } = renderHook<ReturnType<typeof useOnlineOpenContainer> | ReturnType<typeof useExamViewContainer>, void>(
-        endpoint === 'play' ? useOnlineOpenContainer : useExamViewContainer,
-        { wrapper },
-      )
+      const { result } = renderHook<
+        ReturnType<typeof useOnlineOpenContainer> | ReturnType<typeof useExamViewContainer>,
+        void
+      >(endpoint === 'play' ? useOnlineOpenContainer : useExamViewContainer, { wrapper })
       await waitFor(() =>
         expect(result.current).toMatchObject({
           viewState: 0,

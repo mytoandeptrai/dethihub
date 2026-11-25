@@ -1,3 +1,3 @@
-import {LibraryContainer} from '@/modules/library'
+import { LibraryContainer } from '@/modules/library'
 
 export default LibraryContainer

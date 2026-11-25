@@ -1,28 +1,36 @@
+import rough from 'roughjs'
+
+import { drawElement, drawPaper } from './render'
+
 /**
  * Bảng vẽ — chèn ảnh / trang PDF từ máy, xuất PNG / PDF (chia trang A4).
  * PDF xuất tự ghi (mỗi trang một ảnh JPEG), không cần thư viện; đọc PDF dùng pdfjs-dist (nạp lười).
  */
 import type { Bounds, El, Paper } from './scene'
-import { drawElement, drawPaper } from './render'
-import rough from 'roughjs'
 
 /* ---------------- nhập ---------------- */
 
-export interface Picture { src: string; w: number; h: number }
+export interface Picture {
+  src: string
+  w: number
+  h: number
+}
 
-const loadImg = (src: string) => new Promise<HTMLImageElement>((ok, fail) => {
-  const img = new Image()
-  img.onload = () => ok(img)
-  img.onerror = () => fail(new Error('Không đọc được ảnh'))
-  img.src = src
-})
+const loadImg = (src: string) =>
+  new Promise<HTMLImageElement>((ok, fail) => {
+    const img = new Image()
+    img.onload = () => ok(img)
+    img.onerror = () => fail(new Error('Không đọc được ảnh'))
+    img.src = src
+  })
 
-const readDataUrl = (f: Blob) => new Promise<string>((ok, fail) => {
-  const r = new FileReader()
-  r.onload = () => ok(String(r.result))
-  r.onerror = () => fail(r.error)
-  r.readAsDataURL(f)
-})
+const readDataUrl = (f: Blob) =>
+  new Promise<string>((ok, fail) => {
+    const r = new FileReader()
+    r.onload = () => ok(String(r.result))
+    r.onerror = () => fail(r.error)
+    r.readAsDataURL(f)
+  })
 
 /** ảnh từ máy; ảnh quá to thì thu về cạnh dài `max` px (bảng lưu trong localStorage, dung lượng có hạn) */
 export async function readImageFile(f: File, max = 1800): Promise<Picture> {
@@ -44,10 +52,19 @@ type PdfDoc = { numPages: number; getPage: (n: number) => Promise<any>; close: (
 
 export async function openPdf(f: File): Promise<PdfDoc> {
   const pdfjs = await import('pdfjs-dist')
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString()
   const task = pdfjs.getDocument({ data: new Uint8Array(await f.arrayBuffer()) })
   const doc = await task.promise
-  return { numPages: doc.numPages, getPage: (n) => doc.getPage(n), close: () => { void task.destroy() } }
+  return {
+    numPages: doc.numPages,
+    getPage: (n) => doc.getPage(n),
+    close: () => {
+      void task.destroy()
+    },
+  }
 }
 
 /** khổ trang theo điểm PDF (1/72 inch) */
@@ -57,7 +74,12 @@ export async function pdfPageSize(doc: PdfDoc, n: number): Promise<{ w: number; 
 }
 
 /** một trang PDF thành ảnh rộng `width` px */
-export async function renderPdfPage(doc: PdfDoc, n: number, width: number, type: 'image/jpeg' | 'image/png' = 'image/jpeg'): Promise<Picture> {
+export async function renderPdfPage(
+  doc: PdfDoc,
+  n: number,
+  width: number,
+  type: 'image/jpeg' | 'image/png' = 'image/jpeg',
+): Promise<Picture> {
   const page = await doc.getPage(n)
   const base = page.getViewport({ scale: 1 })
   const vp = page.getViewport({ scale: width / base.width })
@@ -77,11 +99,19 @@ export type ExportBg = 'paper' | 'white' | 'none'
 
 /** đợi mọi ảnh trong bảng nạp xong (xuất ngay sau khi mở bảng thì ảnh có thể chưa kịp nạp) */
 async function preload(els: El[]) {
-  await Promise.all(els.filter((e) => e.kind === 'image' && e.src).map((e) => loadImg(e.src!).catch(() => null)))
+  await Promise.all(
+    els.filter((e) => e.kind === 'image' && e.src).map((e) => loadImg(e.src!).catch(() => null)),
+  )
 }
 
 /** vẽ các hình trong vùng `b` (toạ độ bảng) ra canvas, `scale` px mỗi đơn vị */
-export async function renderRegion(els: El[], b: Bounds, scale: number, bg: ExportBg, paper: Paper): Promise<HTMLCanvasElement> {
+export async function renderRegion(
+  els: El[],
+  b: Bounds,
+  scale: number,
+  bg: ExportBg,
+  paper: Paper,
+): Promise<HTMLCanvasElement> {
   await preload(els)
   const [x1, y1, x2, y2] = b
   const c = document.createElement('canvas')
@@ -93,7 +123,8 @@ export async function renderRegion(els: El[], b: Bounds, scale: number, bg: Expo
     ctx.fillRect(0, 0, c.width, c.height)
   }
   ctx.setTransform(scale, 0, 0, scale, -x1 * scale, -y1 * scale)
-  if (bg === 'paper') drawPaper(ctx, paper, { zoom: scale, scrollX: -x1, scrollY: -y1 }, c.width, c.height)
+  if (bg === 'paper')
+    drawPaper(ctx, paper, { zoom: scale, scrollX: -x1, scrollY: -y1 }, c.width, c.height)
   const rc = rough.canvas(c)
   for (const e of els) drawElement(ctx, rc, e)
   return c
@@ -110,11 +141,13 @@ export function download(url: string, name: string) {
 }
 
 export function savePng(c: HTMLCanvasElement, name: string) {
-  return new Promise<void>((ok, fail) => c.toBlob((b) => {
-    if (!b) return fail(new Error('Không tạo được ảnh (vùng quá lớn?)'))
-    download(URL.createObjectURL(b), name)
-    ok()
-  }, 'image/png'))
+  return new Promise<void>((ok, fail) =>
+    c.toBlob((b) => {
+      if (!b) return fail(new Error('Không tạo được ảnh (vùng quá lớn?)'))
+      download(URL.createObjectURL(b), name)
+      ok()
+    }, 'image/png'),
+  )
 }
 
 /** A4 theo điểm PDF (1/72 inch) */
@@ -128,7 +161,8 @@ const MARGIN = 28
 export function canvasToA4Pdf(c: HTMLCanvasElement): Blob {
   const landscape = c.width > c.height
   const [pw, ph] = landscape ? [A4[1], A4[0]] : A4
-  const iw = pw - MARGIN * 2, ih = ph - MARGIN * 2
+  const iw = pw - MARGIN * 2,
+    ih = ph - MARGIN * 2
   // không phóng ảnh nhỏ quá cỡ thật (96 dpi → 0,75 pt/px)
   const k = Math.min(iw / c.width, 0.75 * 2)
   const sliceH = Math.max(1, Math.floor(ih / k))
@@ -143,7 +177,17 @@ export function canvasToA4Pdf(c: HTMLCanvasElement): Blob {
     sc.fillRect(0, 0, s.width, s.height)
     sc.drawImage(c, 0, y, c.width, h, 0, 0, c.width, h)
     const dh = h * k
-    pages.push({ jpg: jpegBytes(s), w: s.width, h, pw, ph, x: MARGIN, y: ph - MARGIN - dh, dw: c.width * k, dh })
+    pages.push({
+      jpg: jpegBytes(s),
+      w: s.width,
+      h,
+      pw,
+      ph,
+      x: MARGIN,
+      y: ph - MARGIN - dh,
+      dw: c.width * k,
+      dh,
+    })
   }
   return buildPdf(pages)
 }
@@ -157,11 +201,33 @@ function jpegBytes(c: HTMLCanvasElement) {
 
 /** PDF theo trang gốc: mỗi canvas phủ kín một trang khổ `pw`×`ph` điểm */
 export function pagesToPdf(items: { c: HTMLCanvasElement; pw: number; ph: number }[]): Blob {
-  return buildPdf(items.map(({ c, pw, ph }) => ({ jpg: jpegBytes(c), w: c.width, h: c.height, pw, ph, x: 0, y: 0, dw: pw, dh: ph })))
+  return buildPdf(
+    items.map(({ c, pw, ph }) => ({
+      jpg: jpegBytes(c),
+      w: c.width,
+      h: c.height,
+      pw,
+      ph,
+      x: 0,
+      y: 0,
+      dw: pw,
+      dh: ph,
+    })),
+  )
 }
 
 /** PDF tối giản: mỗi trang một ảnh JPEG (DCTDecode) đặt tại (x, y) điểm, tính từ góc dưới-trái */
-type PdfImagePage = { jpg: Uint8Array; w: number; h: number; pw: number; ph: number; x: number; y: number; dw: number; dh: number }
+type PdfImagePage = {
+  jpg: Uint8Array
+  w: number
+  h: number
+  pw: number
+  ph: number
+  x: number
+  y: number
+  dw: number
+  dh: number
+}
 function buildPdf(pages: PdfImagePage[]): Blob {
   const enc = new TextEncoder()
   const parts: Uint8Array[] = []
@@ -175,20 +241,32 @@ function buildPdf(pages: PdfImagePage[]): Blob {
   const n = pages.length
   // 1 catalog, 2 pages, rồi mỗi trang 3 đối tượng: page, content, image
   const total = 2 + n * 3
-  const obj = (i: number) => { offsets[i] = len; push(`${i} 0 obj\n`) }
+  const obj = (i: number) => {
+    offsets[i] = len
+    push(`${i} 0 obj\n`)
+  }
   push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n')
-  obj(1); push('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n')
+  obj(1)
+  push('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n')
   const kids = pages.map((_, i) => `${3 + i * 3} 0 R`).join(' ')
-  obj(2); push(`<< /Type /Pages /Kids [${kids}] /Count ${n} >>\nendobj\n`)
+  obj(2)
+  push(`<< /Type /Pages /Kids [${kids}] /Count ${n} >>\nendobj\n`)
   const f = (v: number) => v.toFixed(2)
   pages.forEach((p, i) => {
-    const pg = 3 + i * 3, ct = pg + 1, im = pg + 2
+    const pg = 3 + i * 3,
+      ct = pg + 1,
+      im = pg + 2
     obj(pg)
-    push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(p.pw)} ${f(p.ph)}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${ct} 0 R >>\nendobj\n`)
+    push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(p.pw)} ${f(p.ph)}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${ct} 0 R >>\nendobj\n`,
+    )
     const stream = `q ${f(p.dw)} 0 0 ${f(p.dh)} ${f(p.x)} ${f(p.y)} cm /Im${i} Do Q`
-    obj(ct); push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj\n`)
+    obj(ct)
+    push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj\n`)
     obj(im)
-    push(`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpg.length} >>\nstream\n`)
+    push(
+      `<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpg.length} >>\nstream\n`,
+    )
     push(p.jpg)
     push('\nendstream\nendobj\n')
   })

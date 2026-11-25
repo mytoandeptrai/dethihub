@@ -1,3 +1,7 @@
+import { activateInsertedBlock } from '@/modules/exam-inspector/lib/inspector-selection'
+
+import { getTopBlock, syncDomSelection } from './formatState'
+
 /**
  * Các khối mẫu dùng nhanh khi soạn đề.
  *
@@ -7,8 +11,6 @@
  */
 import type { Editor, JSONContent } from '@tiptap/core'
 import type { Node as PMNode } from '@tiptap/pm/model'
-import { getTopBlock, syncDomSelection } from './formatState'
-import { activateInsertedBlock } from '@/modules/exam-inspector/lib/inspector-selection'
 
 export type TplGroup = 'Đầu đề' | 'Câu hỏi' | 'Nội dung' | 'Bố cục'
 
@@ -88,9 +90,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
               line('KỲ THI …'),
               line('NĂM HỌC 20… – 20…'),
               line('Môn thi: …'),
-              line('Thời gian làm bài: 90 phút (không kể thời gian phát đề)', [
-                { type: 'italic' },
-              ]),
+              line('Thời gian làm bài: 90 phút (không kể thời gian phát đề)', [{ type: 'italic' }]),
             ],
           },
         ],
@@ -218,7 +218,11 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
       type: 'examQuestion',
       attrs: { id: `q${Date.now()}`, no: 1, kind: 'tf' },
       content: [
-        { type: 'examQuestionPrompt', attrs: { id: 'qp' }, content: [t('Nội dung câu hỏi. Trong mỗi ý a), b), c), d), chọn đúng hoặc sai.')] },
+        {
+          type: 'examQuestionPrompt',
+          attrs: { id: 'qp' },
+          content: [t('Nội dung câu hỏi. Trong mỗi ý a), b), c), d), chọn đúng hoặc sai.')],
+        },
         { type: 'examOption', attrs: { id: 'qo0', label: 'a' }, content: [t('Mệnh đề a')] },
         { type: 'examOption', attrs: { id: 'qo1', label: 'b' }, content: [t('Mệnh đề b')] },
         { type: 'examOption', attrs: { id: 'qo2', label: 'c' }, content: [t('Mệnh đề c')] },
@@ -235,7 +239,11 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
       type: 'examQuestion',
       attrs: { id: `q${Date.now()}`, no: 1, kind: 'short' },
       content: [
-        { type: 'examQuestionPrompt', attrs: { id: 'qp' }, content: [t('Nội dung câu hỏi. Đáp án là một số, tối đa 4 ký tự.')] },
+        {
+          type: 'examQuestionPrompt',
+          attrs: { id: 'qp' },
+          content: [t('Nội dung câu hỏi. Đáp án là một số, tối đa 4 ký tự.')],
+        },
       ],
     }),
   },
@@ -444,10 +452,9 @@ export function examFooterPos(doc: PMNode, place: 'student' | 'footer'): number 
     }
     if (node.type.name === 'examHeader' && !afterHeader) {
       afterHeader = offset + node.nodeSize
-      thptQG =
-        /THPT\s+QUỐC\s+GIA|TỐT\s+NGHIỆP\s+(?:THPT|TRUNG\s+HỌC\s+PHỔ\s+THÔNG)/i.test(
-          node.textContent,
-        )
+      thptQG = /THPT\s+QUỐC\s+GIA|TỐT\s+NGHIỆP\s+(?:THPT|TRUNG\s+HỌC\s+PHỔ\s+THÔNG)/i.test(
+        node.textContent,
+      )
     }
   })
   let pos = boundary
@@ -469,10 +476,20 @@ export function insertBlockTemplate(editor: Editor, tpl: BlockTemplate): void {
   const json = tpl.build()
   const { doc } = editor.state
 
-  if (doc.childCount === 1 && doc.firstChild?.type.name === 'paragraph' && doc.firstChild.content.size === 0) {
+  if (
+    doc.childCount === 1 &&
+    doc.firstChild?.type.name === 'paragraph' &&
+    doc.firstChild.content.size === 0
+  ) {
     // thay toàn bộ doc (giống insertExamFooter của bản gốc) — insertContentAt
     // với range 0..size vẫn để sót paragraph rỗng phía sau
-    editor.chain().setContent({ type: 'doc', content: Array.isArray(json) ? json : [json] }, { emitUpdate: true }).run()
+    editor
+      .chain()
+      .setContent(
+        { type: 'doc', content: Array.isArray(json) ? json : [json] },
+        { emitUpdate: true },
+      )
+      .run()
     // Select the template anchor after replacing the empty document.
     activateInsertedBlock(editor, 0, tpl.id)
     editor.commands.focus()
@@ -500,6 +517,10 @@ export function insertBlockTemplate(editor: Editor, tpl: BlockTemplate): void {
     activateInsertedBlock(editor, target.pos, tpl.id)
     return
   }
-  editor.chain().focus().insertContentAt(target.pos + target.node.nodeSize, json).run()
+  editor
+    .chain()
+    .focus()
+    .insertContentAt(target.pos + target.node.nodeSize, json)
+    .run()
   activateInsertedBlock(editor, target.pos + target.node.nodeSize, tpl.id)
 }

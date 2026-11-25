@@ -3,9 +3,10 @@
  * Tương tự `ribbon-format-state.ts` của GenOffice nhưng thu gọn cho schema đề thi.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+import type { FormatAttrs } from '@/engine/data/docTypes'
 import type { Editor } from '@tiptap/core'
 import type { Node as PMNode } from '@tiptap/pm/model'
-import type { FormatAttrs } from '@/engine/data/docTypes'
 
 export interface FormatState {
   bold: boolean
@@ -90,8 +91,13 @@ export function computeFormatState(editor: Editor): FormatState {
         ? 'right'
         : editor.isActive({ textAlign: 'justify' })
           ? 'justify'
-          : (pa.textAlign as FormatState['align']) ?? (pa.align as FormatState['align']) ?? 'left',
-    lineHeight: num((editor.getAttributes('textStyle') as Record<string, unknown>).lineHeight ?? pa.lineHeight, 1.5),
+          : ((pa.textAlign as FormatState['align']) ??
+            (pa.align as FormatState['align']) ??
+            'left'),
+    lineHeight: num(
+      (editor.getAttributes('textStyle') as Record<string, unknown>).lineHeight ?? pa.lineHeight,
+      1.5,
+    ),
     dir: (pa.dir as FormatState['dir']) ?? 'ltr',
     indentLeft: num(pa.indentLeft, 0),
     indentFirstLine: num(pa.indentFirstLine, 0),

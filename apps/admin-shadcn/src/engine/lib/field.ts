@@ -1,3 +1,5 @@
+import { ARROW, FAM, esc, f1, wrap } from './physics'
+
 /**
  * Đường sức điện trường và từ trường (Vật lí 11):
  * - 1 điện tích điểm, 2 điện tích (tích phân số RK4 theo định luật Coulomb), bản tụ phẳng.
@@ -6,7 +8,6 @@
  * - Tách hàm tính đường sức `fieldLines(spec)` khỏi `renderFieldSvg` để kiểm tra bằng số.
  */
 import type { LabelPos } from './toolSpec'
-import { ARROW, FAM, esc, f1, wrap } from './physics'
 
 export type FieldScene =
   | { type: 'charge'; sign: '+' | '-' }
@@ -258,7 +259,12 @@ export function fieldLines(spec: FieldSpec): FieldPolyline[] {
           if (towardPos && Math.abs(Math.sin(a)) < 0.7) continue
           const start = { x: negX + rStart * Math.cos(a), y: rStart * Math.sin(a) }
           const poly = traceRK4(start, -1, fn, { stopCenters: [{ x: posX, y: 0, r: rStop }] })
-          const endsAtPos = Math.hypot(poly.points[poly.points.length - 1].x - posX, poly.points[poly.points.length - 1].y) <= rStop + 0.05
+          const endsAtPos =
+            Math.hypot(
+              poly.points[poly.points.length - 1].x - posX,
+              poly.points[poly.points.length - 1].y,
+            ) <=
+            rStop + 0.05
           if (!endsAtPos) {
             poly.points.reverse()
             out.push(poly)
@@ -268,7 +274,13 @@ export function fieldLines(spec: FieldSpec): FieldPolyline[] {
         // Đường trục ngoài đi vào điện tích âm
         const outerX = negX > 0 ? X_LIM : -X_LIM
         const endX = negX > 0 ? negX + rStop : negX - rStop
-        out.push({ points: [{ x: outerX, y: 0 }, { x: 0.5 * (outerX + endX), y: 0 }, { x: endX, y: 0 }] })
+        out.push({
+          points: [
+            { x: outerX, y: 0 },
+            { x: 0.5 * (outerX + endX), y: 0 },
+            { x: endX, y: 0 },
+          ],
+        })
       }
       return out
     }
@@ -278,7 +290,13 @@ export function fieldLines(spec: FieldSpec): FieldPolyline[] {
       const ySpan = 1.05
       for (let i = 0; i < N; i++) {
         const y = N === 1 ? 0 : -ySpan + (2 * ySpan * i) / (N - 1)
-        out.push({ points: [{ x: -1.12, y }, { x: 0, y }, { x: 1.12, y }] })
+        out.push({
+          points: [
+            { x: -1.12, y },
+            { x: 0, y },
+            { x: 1.12, y },
+          ],
+        })
       }
       return out
     }
@@ -310,7 +328,18 @@ export function fieldLines(spec: FieldSpec): FieldPolyline[] {
       // Đường sức thẳng dọc trục vòng dây (y = 0)
       const dir = sc.current === 'ccw' ? 1 : -1
       out.push({
-        points: dir > 0 ? [{ x: -2.1, y: 0 }, { x: 0, y: 0 }, { x: 2.1, y: 0 }] : [{ x: 2.1, y: 0 }, { x: 0, y: 0 }, { x: -2.1, y: 0 }],
+        points:
+          dir > 0
+            ? [
+                { x: -2.1, y: 0 },
+                { x: 0, y: 0 },
+                { x: 2.1, y: 0 },
+              ]
+            : [
+                { x: 2.1, y: 0 },
+                { x: 0, y: 0 },
+                { x: -2.1, y: 0 },
+              ],
       })
       const a = 0.72
       const rings = Math.max(2, Math.min(5, Math.floor(N / 2)))
@@ -318,9 +347,21 @@ export function fieldLines(spec: FieldSpec): FieldPolyline[] {
       for (let k = 0; k < rings; k++) {
         const offset = 0.16 + 0.13 * k
         // Nửa trên quanh (0, a)
-        out.push(traceRK4({ x: 0, y: a - offset }, 1, fn, { step: 0.025, maxSteps: 600, stopNearStart: true }))
+        out.push(
+          traceRK4({ x: 0, y: a - offset }, 1, fn, {
+            step: 0.025,
+            maxSteps: 600,
+            stopNearStart: true,
+          }),
+        )
         // Nửa dưới quanh (0, -a)
-        out.push(traceRK4({ x: 0, y: -a + offset }, 1, fn, { step: 0.025, maxSteps: 600, stopNearStart: true }))
+        out.push(
+          traceRK4({ x: 0, y: -a + offset }, 1, fn, {
+            step: 0.025,
+            maxSteps: 600,
+            stopNearStart: true,
+          }),
+        )
       }
       return out
     }
@@ -347,15 +388,12 @@ function barLikeFieldLines(
   const dir = northSide === 'left' ? -1 : 1 // bên trong đi từ S -> N (nên nếu N ở trái thì bên trong đi sang trái: -1)
   const M = 48
 
-  const mapPt = (u: number, v: number): FieldPoint => (orient === 'h' ? { x: u, y: v } : { x: v, y: -u })
+  const mapPt = (u: number, v: number): FieldPoint =>
+    orient === 'h' ? { x: u, y: v } : { x: v, y: -u }
 
   // Đường trục chính đi qua tâm: đi từ S -> N rồi ra ngoài
   out.push({
-    points: [
-      mapPt(-dir * 2.15, 0),
-      mapPt(0, 0),
-      mapPt(dir * 2.15, 0),
-    ],
+    points: [mapPt(-dir * 2.15, 0), mapPt(0, 0), mapPt(dir * 2.15, 0)],
   })
 
   const pairs = Math.max(2, Math.min(6, Math.floor(N / 2)))
@@ -388,7 +426,11 @@ function barLikeFieldLines(
 }
 
 /** Tính vectơ trường chuẩn hoá tại điểm M(x, y) để vẽ mũi tên probe. */
-export function fieldVectorAt(scene: FieldScene, x: number, y: number): { vx: number; vy: number } | null {
+export function fieldVectorAt(
+  scene: FieldScene,
+  x: number,
+  y: number,
+): { vx: number; vy: number } | null {
   let fx = 0
   let fy = 0
   switch (scene.type) {
@@ -547,7 +589,10 @@ function drawFieldPolyline(poly: FieldPolyline, showArrows: boolean): string {
   return b
 }
 
-export function renderFieldSvg(spec: FieldSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderFieldSvg(
+  spec: FieldSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const lines = fieldLines(spec)
   const sc = spec.scene
   let b = ARROW
@@ -560,7 +605,12 @@ export function renderFieldSvg(spec: FieldSpec, desc: string): { svg: string; wi
   // 2. Vẽ vật nguồn tạo trường + nhãn theo SGK
   switch (sc.type) {
     case 'charge': {
-      b += drawCharge(sx(0), sy(0), sc.sign, spec.labels ? (sc.sign === '+' ? 'q > 0' : 'q < 0') : undefined)
+      b += drawCharge(
+        sx(0),
+        sy(0),
+        sc.sign,
+        spec.labels ? (sc.sign === '+' ? 'q > 0' : 'q < 0') : undefined,
+      )
       if (spec.labels) b += drawVectorLabel(sx(1.68), sy(1.25), 'E')
       break
     }
@@ -592,7 +642,8 @@ export function renderFieldSvg(spec: FieldSpec, desc: string): { svg: string; wi
     }
 
     case 'wire': {
-      b += sc.current === 'out' ? drawDotSymbol(sx(0), sy(0), 11) : drawCrossSymbol(sx(0), sy(0), 11)
+      b +=
+        sc.current === 'out' ? drawDotSymbol(sx(0), sy(0), 11) : drawCrossSymbol(sx(0), sy(0), 11)
       if (spec.labels) {
         b += `<text x="${f1(sx(0) + 18)}" y="${f1(sy(0) + 5)}" ${FAM} font-size="15" font-style="italic">I</text>`
         b += drawVectorLabel(sx(1.75), sy(1.25), 'B')

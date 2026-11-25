@@ -32,7 +32,11 @@ const mappings = [
   ['/admin/nhat-ky/:path*', appPaths.admin.audit + '/:path*'],
 ] as const
 
-export const legacyRedirects = mappings.map(([source, destination]) => ({ source, destination, permanent: true }))
+export const legacyRedirects = mappings.map(([source, destination]) => ({
+  source,
+  destination,
+  permanent: true,
+}))
 
 export function mapLegacyPath(href: string): string {
   if (!href.startsWith('/') || href.startsWith('//')) return href
@@ -42,7 +46,9 @@ export function mapLegacyPath(href: string): string {
     const pattern = source.replace(/\/:path\*$/, '(?:/(.*))?').replaceAll(':id', '([^/]+)')
     const match = pathname.match(new RegExp('^' + pattern + '/?$'))
     if (!match) continue
-    const target = destination.replace(':id', match[1] ?? '').replace('/:path*', match[1] ? '/' + match[1] : '')
+    const target = destination
+      .replace(':id', match[1] ?? '')
+      .replace('/:path*', match[1] ? '/' + match[1] : '')
     return target + (suffix < 0 ? '' : href.slice(suffix))
   }
   return href

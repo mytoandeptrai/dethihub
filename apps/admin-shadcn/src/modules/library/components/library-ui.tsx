@@ -142,13 +142,13 @@ export function LibraryDocumentsUi(
             busy && 'pointer-events-none opacity-60',
           )}
         >
-          <span className="flex size-11 items-center justify-center rounded-full bg-sunken text-ink-2">
+          <span className="bg-sunken text-ink-2 flex size-11 items-center justify-center rounded-full">
             <Upload className="size-5" />
           </span>
-          <p className="text-[15px] font-semibold text-ink">
+          <p className="text-ink text-[15px] font-semibold">
             {busy ? t('libraryCopy.m454') : t('libraryCopy.m455')}
           </p>
-          <p className="text-[13px] text-ink-3">
+          <p className="text-ink-3 text-[13px]">
             {t('libraryCopy.m456')}
             {MAX_DOC_MB}
             {t('libraryCopy.m457')}
@@ -165,7 +165,7 @@ export function LibraryDocumentsUi(
         </div>
 
         {error ? (
-          <p role="alert" className="mt-4 text-[13.5px] font-medium text-clay-deep">
+          <p role="alert" className="text-clay-deep mt-4 text-[13.5px] font-medium">
             {error}
           </p>
         ) : null}
@@ -201,16 +201,16 @@ export function LibraryDocGridUi(
     return (
       <div>
         <Toolbar className="justify-between">
-          <p className="text-[13px] text-ink-3">
-            <span className="tnum font-bold text-ink">{shown.length}</span>
+          <p className="text-ink-3 text-[13px]">
+            <span className="tnum text-ink font-bold">{shown.length}</span>
             {t('libraryCopy.m458')}
             {sample ? (
-              <span className="ml-2 font-semibold text-honey">{t('libraryCopy.m459')}</span>
+              <span className="text-honey ml-2 font-semibold">{t('libraryCopy.m459')}</span>
             ) : null}
           </p>
           <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
             <div className="relative min-w-[200px] flex-1 sm:w-[260px] sm:flex-none">
-              <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-4" />
+              <Search className="text-ink-4 pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -262,11 +262,11 @@ export function LibraryDocumentCardUi(
     return (
       <Card
         asChild
-        className="flex min-w-0 flex-col rounded-xl p-5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lift motion-reduce:transform-none motion-reduce:transition-none"
+        className="hover:shadow-lift flex min-w-0 flex-col rounded-xl p-5 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
       >
         <li>
           <div className="flex items-start justify-between gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-clay-tint text-clay">
+            <span className="bg-clay-tint text-clay flex size-10 shrink-0 items-center justify-center rounded-[8px]">
               <FileText className="size-5" />
             </span>
             <div className="flex flex-wrap items-center justify-end gap-1.5">
@@ -278,11 +278,11 @@ export function LibraryDocumentCardUi(
 
           <p
             data-tip={doc.name}
-            className="mt-4 line-clamp-2 font-display text-[16px] font-semibold leading-snug tracking-[-0.01em] text-ink"
+            className="font-display text-ink mt-4 line-clamp-2 text-[16px] leading-snug font-semibold tracking-[-0.01em]"
           >
             {doc.name}
           </p>
-          <p className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-ink-3 tnum">
+          <p className="text-ink-3 tnum mt-2 flex items-center gap-1.5 text-[12px] font-medium">
             <Clock className="size-3.5" />
             {formatDate(doc.created_at)}
             {t('libraryCopy.m130')}
@@ -291,7 +291,7 @@ export function LibraryDocumentCardUi(
 
           <div className="mt-auto flex items-center gap-2 pt-5">
             {sample ? (
-              <span className="inline-flex h-9 flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-[6px] bg-sunken text-[13px] font-semibold text-ink-4">
+              <span className="bg-sunken text-ink-4 inline-flex h-9 flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-[6px] text-[13px] font-semibold">
                 <ExternalLink className="size-3.5" />
                 {t('libraryCopy.m5')}
               </span>
@@ -299,7 +299,7 @@ export function LibraryDocumentCardUi(
               <button
                 type="button"
                 onClick={open}
-                className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[6px] bg-sunken text-[13px] font-semibold text-ink transition-colors hover:bg-veil"
+                className="bg-sunken text-ink hover:bg-veil inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[6px] text-[13px] font-semibold transition-colors"
               >
                 <ExternalLink className="size-3.5" />
                 {t('libraryCopy.m5')}

@@ -12,7 +12,7 @@ const USER_PER_HOUR = 10
 const GUEST_PER_HOUR = 60
 
 const LIMIT_MESSAGE = {
-  busy: 'Bạn gửi quá nhanh, thử lại sau giây lát.',
+  'busy': 'Bạn gửi quá nhanh, thử lại sau giây lát.',
   'user-limit': 'Bạn gửi góp ý nhiều quá, thử lại sau ít phút.',
   'guest-limit': 'Hệ thống đang nhận nhiều góp ý, thử lại sau.',
 } as const

@@ -81,7 +81,9 @@ export interface LensCalc {
 export function fmtLensNum(n: number): string {
   if (Math.abs(n) < 1e-9) return '0'
   const r = Math.round(n * 100) / 100
-  return String(Math.abs(r) < 1e-9 ? 0 : r).replace('.', ',').replace('-', '−')
+  return String(Math.abs(r) < 1e-9 ? 0 : r)
+    .replace('.', ',')
+    .replace('-', '−')
 }
 
 /** Tính toán vị trí, độ phóng đại, tính chất ảnh từ LensSpec. */
@@ -488,9 +490,29 @@ function dimBarSvg(x1: number, x2: number, y: number, yAxis: number, label: stri
 }
 
 /** Vẽ SVG sơ đồ tạo ảnh qua thấu kính mỏng. */
-export function renderLensSvg(spec: LensSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderLensSvg(
+  spec: LensSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const g = computeLensGeometry(spec)
-  const { width: W, height: H, y0, xO, lensTopY, lensBotY, A, B, F, FPrime, F2, F2Prime, APrime, BPrime, drawnImage, calc } = g
+  const {
+    width: W,
+    height: H,
+    y0,
+    xO,
+    lensTopY,
+    lensBotY,
+    A,
+    B,
+    F,
+    FPrime,
+    F2,
+    F2Prime,
+    APrime,
+    BPrime,
+    drawnImage,
+    calc,
+  } = g
 
   const names = {
     A: spec.names?.A?.trim() || 'A',
@@ -547,7 +569,13 @@ export function renderLensSvg(spec: LensSpec, desc: string): { svg: string; widt
     dx?: number
   }
   const axisLabels: AxisLabel[] = [
-    { x: xO, text: names.O, side: 'below', anchor: g.dir === 1 ? 'end' : 'start', dx: g.dir === 1 ? -5 : 5 },
+    {
+      x: xO,
+      text: names.O,
+      side: 'below',
+      anchor: g.dir === 1 ? 'end' : 'start',
+      dx: g.dir === 1 ? -5 : 5,
+    },
     { x: A.x, text: names.A, side: 'below', anchor: 'middle' },
   ]
   for (const pt of focalTicks) {

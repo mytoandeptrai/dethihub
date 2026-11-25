@@ -14,7 +14,9 @@ export const FIGURE_GUIDE =
   '5) Hình học phẳng: {"kind":"geo2d","shape":"triangle|right-triangle|isosceles|equilateral|square|rectangle|parallelogram|trapezoid|rhombus|circle|inscribed-triangle|free","names":["A","B","C"],"altitude":false,"median":false,"diagonals":false,"circumcircle":false,"extras":"mỗi dòng một lệnh dựng thêm"}. ' +
   'Mẫu "free" (tự do theo toạ độ, "names":[]): trong "extras" (cũng dùng được cho các mẫu) hỗ trợ "A(0; 4)" / "M(2,5; 0)", "nhãn AB \\"4 km\\"", "kích thước BC \\"7 km\\"" (thêm trên/dưới/trái/phải), "đường BC kéo dài", "tia BC", "vectơ AB, AD" (mũi tên từ A tới B; bài vectơ, quy tắc hình bình hành / ba điểm thì vẽ các vectơ đề nhắc tới), "vectơ AC \\"u\\"" (vectơ có tên riêng). Toạ độ phải khớp đề: "vuông tại A" thì góc vuông nằm ở chính điểm A (vd A(0; 0) B(0; 3) C(4; 0)), góc đề cho (vd góc B = 60°) phải đúng số đo trên hình; tam giác vuông không cần toạ độ riêng thì dùng mẫu right-triangle (vuông tại đỉnh đầu của "names").\n' +
   '5b) Hình thực tế nét đơn (thang dựa tường, gấp giấy, đo chiều cao qua góc nhìn, mảnh vườn…): {"kind":"scene","text":"mỗi dòng một lệnh"}. Lệnh: "A(0; 0) B(4; 0) C(0; 3)" khai báo điểm (y hướng lên; tên bắt đầu _ thì ẩn nhãn, nối điểm ẩn bằng gạch: _G-_K); "AB, BC" đoạn; "ABCD" đa giác; "đứt MN" nét đứt; "kích thước AB \"15 cm\"" mũi tên kích thước; "góc ABC \"60°\"" cung góc tại B; "vuông ABC" góc vuông tại B; "nhãn AB \"?\"" chữ cạnh đoạn; "đất AB" / "tường AB" gạch chéo; "hình <vật> AB" vẽ hình vật đứng từ chân A lên đỉnh B (cao đúng AB, xoay theo AB — thang dựa tường đặt dọc đoạn thang), "hình <vật> A" đặt vật đứng tại A. Vật có sẵn: ' +
-  SCENE_OBJECTS.map((id) => OBJECTS[id]).filter(Boolean).join(', ') +
+  SCENE_OBJECTS.map((id) => OBJECTS[id])
+    .filter(Boolean)
+    .join(', ') +
   '; vật khác ghi "hình en:<tên tiếng Anh> A". Bài có cây, người, toà nhà, cột cờ, thang, thuyền… thì NÊN thêm hình vật cho dễ hình dung; đoạn đo vẫn vẽ như thường.Toạ độ gần đúng tỉ lệ số liệu đề, nhưng đoạn quá ngắn so với hình (chiều cao mắt 1,5 m bên khoảng cách 50 m…) thì vẽ to hơn tỉ lệ cho dễ nhìn; cạnh/góc đã biết dùng kích thước hoặc nhãn; cạnh cần tìm ghi \"?\" hoặc chữ, KHÔNG ghi đáp số. Góc tạo với mặt đất/tường thì PHẢI có \\"đất\\"/\\"tường\\" qua đỉnh góc làm cạnh thứ hai; đỉnh góc là chân vật (góc ở A khi \\"hình cái thang AB\\").\n' +
   '6) Hình không gian: {"kind":"geo3d","shape":"pyramid3|pyramid3-sa|pyramid3-regular|pyramid4|pyramid4-sa|pyramid4-regular|tetrahedron|prism3|box|cube|cone|cylinder|sphere","names":["S","A","B","C","D"],"height":true,"diagonals":false,"circumsphere":false,"extras":"mỗi dòng một lệnh dựng thêm"}. "circumsphere": true vẽ mặt cầu ngoại tiếp khối (hộp, lập phương, chóp/lăng trụ đều); trong "extras" có thể đặt/đổi toạ độ 3D dạng "S(1; 0,5; 2)". ' +
   'Lệnh dựng thêm (5 và 6; không dùng cho nón, trụ, cầu): "M = trung điểm SC", "N = SB 1/3", "O = AC cắt BD", "H = hình chiếu S lên (ABCD)", "K = hình chiếu A lên SB", "G = trọng tâm ABC", "O = tâm ngoại tiếp ABC", "đường cao AH", "trung tuyến AM", "MN" (nối), "đứt MN". Đề gọi tên điểm nào (trung điểm, giao điểm, tâm I…) thì PHẢI dựng điểm đó cho hiện trên hình.\n' +
@@ -40,19 +42,28 @@ export const FIGURE_GUIDE =
   '24) Bảng lai Punnett (Sinh học 9 & 12): {"kind":"punnett","cross":"AaBb x Aabb"}. Tối đa 3 cặp gen phân li độc lập (khung tối đa 8x8), hỗ trợ gen liên kết giới tính (XAXa x XaY), trội không hoàn toàn, tên kiểu hình, để trống (blankGrid: true).\n' +
   '25) Chuỗi và lưới thức ăn (Sinh học): {"kind":"foodweb","text":"Cỏ -> Thỏ, Chuột\\nThỏ, Chuột -> Cáo\\nVi sinh vật: phân giải","direction":"bottom-up|left-right","nodeStyle":"box|text","showLevels":true|false,"connectDecomposers":true|false}. Mũi tên -> chỉ chiều năng lượng (thức ăn -> vật ăn); máy tự xếp bậc dinh dưỡng từ dưới lên. Dùng [A] hoặc ?A để ẩn tên loài làm câu hỏi.\n' +
   '27) Tranh đếm đồ vật (Toán tiểu học: đếm, cộng trừ, chia đều, nhân): {"kind":"objects","groups":[{"container":"basket","item":"apple","each":5,"count":3}]}. Mỗi nhóm: "count" đồ chứa giống nhau, mỗi cái có đúng "each" đồ vật; bỏ "container" thì vẽ "count" nhóm đồ vật rời, mỗi nhóm "each" cái; "label" (tuỳ chọn) ghi số trên đồ chứa, vd túi ghi "10" ("each": 0 nếu chỉ cần đồ chứa có nhãn). Tối đa 4 nhóm, mỗi đồ chứa tối đa 20 vật. Số trên hình phải khớp đề. CHỈ dùng id có sẵn — đồ vật: ' +
-  Object.entries(OBJECTS).map(([id, name]) => `${id} (${name})`).join(', ') +
+  Object.entries(OBJECTS)
+    .map(([id, name]) => `${id} (${name})`)
+    .join(', ') +
   '; đồ chứa: ' +
-  Object.entries(CONTAINERS).map(([id, c]) => `${id} (${c.name}${c.placement === 'label' ? ', chỉ để ghi số' : ''})`).join(', ') +
+  Object.entries(CONTAINERS)
+    .map(([id, c]) => `${id} (${c.name}${c.placement === 'label' ? ', chỉ để ghi số' : ''})`)
+    .join(', ') +
   '. Vật không có trong danh sách: "item" ghi tên tiếng Việt và thêm "en" là tên tiếng Anh 1–3 từ không dấu (vd {"item":"ấm trà","en":"teapot","each":4,"count":1}); app tự vẽ thêm. Đồ chứa chỉ dùng id trong danh sách.\n' +
   '28) Đồng hồ kim: {"kind":"clock","hour":8,"minute":15}. Câu hỏi đọc giờ thì KHÔNG ghi đáp án ra chữ cạnh hình.\n' +
   '26) Đường sức điện trường / từ trường (Vật lí 11):{"kind":"field","scene":{"type":"two-charges","signs":["+","-"],"ratio":1},"lines":8,"showArrows":true,"labels":true}. scene.type: "charge" (sign:"+"|"-"), "two-charges" (signs:["+"|"-","+"|"-"], ratio), "plates", "wire" (current:"out"|"in"), "wire-side" (current:"up"|"down"), "loop" (current:"cw"|"ccw"), "solenoid" (current:"left"|"right"), "magnet" (orient:"h"|"v"). Tuỳ chọn probe:{"x":0,"y":0.6,"vector":"E"|"B"}.\n' +
-
   'Biểu thức dùng biến x, ^ cho luỹ thừa, sqrt(), ln, sin, cos; nhân ngầm được (2x).'
 
 /** loại hình hợp từng môn (số mục trong FIGURE_GUIDE) — đề một môn khỏi phải gửi cả hướng dẫn mạch điện, phả hệ… */
 const FIGURE_BY_SUBJECT: Array<[RegExp, string[]]> = [
-  [/to[aá]n/i, ['1', '2', '3', '4', '5', '5b', '6', '7', '8', '9', '10', '11', '11b', '18', '27', '28']],
-  [/v[aậ]t\s*l[ií]|m[oô]n\s*l[ý]/i, ['1', '4', '5b', '7', '12', '13', '14', '15b', '18', '20', '21', '22', '26']],
+  [
+    /to[aá]n/i,
+    ['1', '2', '3', '4', '5', '5b', '6', '7', '8', '9', '10', '11', '11b', '18', '27', '28'],
+  ],
+  [
+    /v[aậ]t\s*l[ií]|m[oô]n\s*l[ý]/i,
+    ['1', '4', '5b', '7', '12', '13', '14', '15b', '18', '20', '21', '22', '26'],
+  ],
   [/ho[aá]\s*h[oọ]c|m[oô]n\s*ho[aá]/i, ['7', '15', '16', '17', '18', '19']],
   [/sinh\s*h[oọ]c|m[oô]n\s*sinh/i, ['7', '18', '23', '24', '25']],
   [/[đd][iị]a\s*l[ií]/i, ['7', '18']],
@@ -63,7 +74,8 @@ const FIGURE_BY_SUBJECT: Array<[RegExp, string[]]> = [
  * Môn không có hình (Văn, Sử, ngoại ngữ…) vẫn trả đủ: hiếm khi dùng, không đáng rủi ro đoán sai.
  */
 /** đề từ lớp 6 trở lên: không cần tranh đếm (27), đồng hồ kim (28) — hai mục dành cho tiểu học, dài ~3.000 ký tự */
-const UPPER_GRADE = /l[ớo]p\s*(?:[6-9]|1[0-2])(?!\d)|thcs|thpt|t[ốo]t\s*nghi[ệe]p|tuy[ểe]n\s*sinh|[đd][ạa]i\s*h[ọo]c/i
+const UPPER_GRADE =
+  /l[ớo]p\s*(?:[6-9]|1[0-2])(?!\d)|thcs|thpt|t[ốo]t\s*nghi[ệe]p|tuy[ểe]n\s*sinh|[đd][ạa]i\s*h[ọo]c/i
 const PRIMARY_ONLY = new Set(['27', '28'])
 
 export function figureGuideFor(request: string): string {

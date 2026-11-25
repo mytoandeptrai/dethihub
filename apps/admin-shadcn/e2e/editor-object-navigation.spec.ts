@@ -3,21 +3,45 @@ import { expect, test } from '@playwright/test'
 import fixture from './fixtures/editor.json'
 import { signedInState } from './session-helper'
 
-test('continue typing after an image without deleting it or adding a blank page', async ({ browser }, testInfo) => {
+test('continue typing after an image without deleting it or adding a blank page', async ({
+  browser,
+}, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
-  const context = await browser.newContext({ storageState: auth.state, viewport: { width: 1440, height: 1000 } })
+  const context = await browser.newContext({
+    storageState: auth.state,
+    viewport: { width: 1440, height: 1000 },
+  })
   const page = await context.newPage()
   const errors: string[] = []
   let uploadUrl = '/brand/ai-static.svg'
   page.on('pageerror', (error) => errors.push(error.message))
   await page.route('**/api/**', (route) => {
     const pathname = new URL(route.request().url()).pathname
-    return route.fulfill({ json: pathname === '/api/storage/images' ? { url: uploadUrl } : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
+    return route.fulfill({
+      json:
+        pathname === '/api/storage/images'
+          ? { url: uploadUrl }
+          : pathname === '/api/me'
+            ? { userId: auth.user.id, role: 'user' }
+            : pathname === '/api/site/status'
+              ? { maintenance: false }
+              : pathname === '/api/ai/quota'
+                ? { used: 0, limit: 100, credits: 100 }
+                : [],
+    })
   })
-  const doc = { ...fixture, id: 'object-navigation', title: 'Tiếp tục soạn sau ảnh', blocks: [{ type: 'paragraph', text: 'Nội dung trước ảnh' }] }
+  const doc = {
+    ...fixture,
+    id: 'object-navigation',
+    title: 'Tiếp tục soạn sau ảnh',
+    blocks: [{ type: 'paragraph', text: 'Nội dung trước ảnh' }],
+  }
   await page.addInitScript((document) => {
-    localStorage.setItem('soandethi-docs', JSON.stringify({ state: { myDocs: [document], myDecks: [] }, version: 0 }))
+    localStorage.setItem(
+      'soandethi-docs',
+      JSON.stringify({ state: { myDocs: [document], myDecks: [] }, version: 0 }),
+    )
   }, doc)
   await page.goto(`${origin}/editor`)
   await page.getByText(doc.title, { exact: true }).click()
@@ -31,7 +55,16 @@ test('continue typing after an image without deleting it or adding a blank page'
   const insertImage = async () => {
     const chooser = page.waitForEvent('filechooser')
     await page.getByRole('button', { name: 'Hình ảnh', exact: true }).click()
-    await (await chooser).setFiles({ name: 'image.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64') })
+    await (
+      await chooser
+    ).setFiles({
+      name: 'image.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        'base64',
+      ),
+    })
     await expect(image).toBeVisible()
     await image.evaluate((element: HTMLImageElement) => element.decode())
   }
@@ -72,27 +105,47 @@ test('continue typing after an image without deleting it or adding a blank page'
   const dimensions = await block.evaluate((element) => {
     const flow = element.closest<HTMLElement>('.doc-flow')!
     const paper = flow.parentElement!.querySelector<HTMLElement>('.doc-paper')!
-    const contentHeight = Number.parseFloat(paper.style.height) - Number.parseFloat(flow.style.paddingTop) - Number.parseFloat(flow.style.paddingBottom)
+    const contentHeight =
+      Number.parseFloat(paper.style.height) -
+      Number.parseFloat(flow.style.paddingTop) -
+      Number.parseFloat(flow.style.paddingBottom)
     const content = element.parentElement!
     const pictureElement = element.querySelector<HTMLImageElement>('img[data-exam-image]')!
     const k = content.getBoundingClientRect().width / content.offsetWidth
-    const overhead = (element.getBoundingClientRect().height - pictureElement.getBoundingClientRect().height) / k
+    const overhead =
+      (element.getBoundingClientRect().height - pictureElement.getBoundingClientRect().height) / k
     const top = (element.getBoundingClientRect().top - content.getBoundingClientRect().top) / k
-    return { contentHeight, imageHeight: contentHeight - top - overhead, imageWidth: pictureElement.getBoundingClientRect().width / k }
+    return {
+      contentHeight,
+      imageHeight: contentHeight - top - overhead,
+      imageWidth: pictureElement.getBoundingClientRect().width / k,
+    }
   })
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${dimensions.imageWidth}" height="${dimensions.imageHeight}"><rect width="100%" height="100%" fill="lightblue"/></svg>`
   uploadUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`
   await resetImage()
-  await expect.poll(async () => block.evaluate((element) => {
-    const content = element.parentElement!
-    const k = content.getBoundingClientRect().width / content.offsetWidth
-    return (element.getBoundingClientRect().bottom - content.getBoundingClientRect().top) / k
-  })).toBeCloseTo(dimensions.contentHeight, 0)
+  await expect
+    .poll(async () =>
+      block.evaluate((element) => {
+        const content = element.parentElement!
+        const k = content.getBoundingClientRect().width / content.offsetWidth
+        return (element.getBoundingClientRect().bottom - content.getBoundingClientRect().top) / k
+      }),
+    )
+    .toBeCloseTo(dimensions.contentHeight, 0)
   await expect(editor.locator('> p[data-typing-tail="true"]')).toHaveCount(1)
-  await page.evaluate(() => new Promise<void>((resolve) => { requestAnimationFrame(() => requestAnimationFrame(() => resolve())) }))
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      }),
+  )
   await expect(page.locator('.doc-paper')).toHaveCount(1)
   await expect(editor.locator('.doc-page-gap')).toHaveCount(0)
-  await page.screenshot({ path: testInfo.outputPath('editor-object-navigation.png'), fullPage: true })
+  await page.screenshot({
+    path: testInfo.outputPath('editor-object-navigation.png'),
+    fullPage: true,
+  })
   expect(errors).toEqual([])
   await context.close()
 })

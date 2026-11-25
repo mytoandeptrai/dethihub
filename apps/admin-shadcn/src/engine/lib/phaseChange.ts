@@ -9,7 +9,10 @@ const FAM = `font-family="'Times New Roman',serif"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f1 = (n: number) => Math.round(n * 10) / 10
 const cleanZero = (n: number) => (Math.abs(n) < 1e-9 ? 0 : n)
-const fmt = (n: number) => String(Math.round(cleanZero(n) * 1000) / 1000).replace('.', ',').replace('-', '−')
+const fmt = (n: number) =>
+  String(Math.round(cleanZero(n) * 1000) / 1000)
+    .replace('.', ',')
+    .replace('-', '−')
 const ARROW = `<defs><marker id="phasearr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111"/></marker></defs>`
 const SUB = '₀₁₂₃₄₅₆₇₈₉'
 
@@ -74,7 +77,9 @@ function parseCoord(raw: string, axisLabel: string): { value: number; symbol?: s
   const vRight = parseNum(right)
   if (vLeft !== null) return { value: vLeft, symbol: right }
   if (vRight !== null) return { value: vRight, symbol: left }
-  throw new Error(`Toạ độ "${raw.trim()}" ở ${axisLabel} cần gồm một số và một kí hiệu, vd. "60 = T_1"`)
+  throw new Error(
+    `Toạ độ "${raw.trim()}" ở ${axisLabel} cần gồm một số và một kí hiệu, vd. "60 = T_1"`,
+  )
 }
 
 export function parsePhasePoints(text: string): PhasePoint[] {
@@ -116,17 +121,21 @@ export function parsePhasePoints(text: string): PhasePoint[] {
       ySymbol: cy.symbol,
     })
   }
-  if (out.length < 2) throw new Error('Cần ít nhất 2 điểm dạng (thời gian; nhiệt độ), vd. (0; -20) (4; 0)')
+  if (out.length < 2)
+    throw new Error('Cần ít nhất 2 điểm dạng (thời gian; nhiệt độ), vd. (0; -20) (4; 0)')
   return out
 }
 
 function applySubscripts(escaped: string): string {
-  return escaped.replace(/_\{([^{}]+)\}|_([\p{L}\p{N}]+)/gu, (_, braced?: string, plain?: string) => {
-    const subTxt = braced ?? plain ?? ''
-    return /^\d+$/.test(subTxt)
-      ? [...subTxt].map((c) => SUB[Number(c)]).join('')
-      : `<tspan baseline-shift="sub" font-size="70%">${subTxt}</tspan>`
-  })
+  return escaped.replace(
+    /_\{([^{}]+)\}|_([\p{L}\p{N}]+)/gu,
+    (_, braced?: string, plain?: string) => {
+      const subTxt = braced ?? plain ?? ''
+      return /^\d+$/.test(subTxt)
+        ? [...subTxt].map((c) => SUB[Number(c)]).join('')
+        : `<tspan baseline-shift="sub" font-size="70%">${subTxt}</tspan>`
+    },
+  )
 }
 
 function formatSymbol(raw: string): string {
@@ -197,7 +206,10 @@ interface XTick {
   lx: number
 }
 
-export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderPhaseSvg(
+  spec: PhaseSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const pts = parsePhasePoints(spec.points)
   const yMin = Math.min(...pts.map((p) => p.y))
   const yMax = Math.max(...pts.map((p) => p.y))
@@ -243,7 +255,8 @@ export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; wi
 
   const xRightVal = xMax * (willExtend ? 1.26 : 1.14)
   const X = (t: number) => left + (t / xRightVal) * (right - left)
-  const Y = (v: number) => (yMax > yBase ? bottom - ((v - yBase) / (yMax - yBase)) * (bottom - plotTop) : bottom)
+  const Y = (v: number) =>
+    yMax > yBase ? bottom - ((v - yBase) / (yMax - yBase)) * (bottom - plotTop) : bottom
 
   // tính vị trí và giãn nhãn trục dọc nếu quá sát
   const yTicks: YTick[] = yTickMeta.map((t) => {
@@ -253,7 +266,8 @@ export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; wi
   const minYGap = 14
   const yLo = top + 4
   const yHi = bottom + 4.5
-  const pinnedBottom = yBase < 0 && yTicks.length > 0 && Math.abs(yTicks[yTicks.length - 1].v - yBase) < 1e-9
+  const pinnedBottom =
+    yBase < 0 && yTicks.length > 0 && Math.abs(yTicks[yTicks.length - 1].v - yBase) < 1e-9
   for (let pass = 0; pass < 24; pass++) {
     for (let i = 0; i < yTicks.length - 1; i++) {
       const gap = yTicks[i + 1].ly - yTicks[i].ly
@@ -330,7 +344,8 @@ export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; wi
   for (const t of xTicks) {
     b += `<path d="M${f1(t.trueX)} ${bottom - 3}V${bottom + 3}" stroke="#111"/>`
     const shifted = Math.abs(t.lx - t.trueX) > 2.5
-    if (shifted) b += `<path d="M${f1(t.trueX)} ${bottom + 3}L${f1(t.lx)} ${bottom + 7}" stroke="#111" stroke-width="0.7"/>`
+    if (shifted)
+      b += `<path d="M${f1(t.trueX)} ${bottom + 3}L${f1(t.lx)} ${bottom + 7}" stroke="#111" stroke-width="0.7"/>`
     b += `<text x="${f1(t.lx)}" y="${bottom + (shifted ? 20 : 18)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="x:${Math.round(t.v * 1000) / 1000}">${t.htmlLabel}</text>`
   }
 
@@ -339,7 +354,8 @@ export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; wi
     const isBase = Math.abs(t.v - yBase) < 1e-9
     if (!isBase) b += `<path d="M${left - 3} ${f1(t.trueY)}H${left + 3}" stroke="#111"/>`
     const shifted = Math.abs(t.ly - (t.trueY + 4.5)) > 3
-    if (shifted) b += `<path d="M${left - 3} ${f1(t.trueY)}L${left - 8} ${f1(t.ly - 4)}" stroke="#111" stroke-width="0.7"/>`
+    if (shifted)
+      b += `<path d="M${left - 3} ${f1(t.trueY)}L${left - 8} ${f1(t.ly - 4)}" stroke="#111" stroke-width="0.7"/>`
     b += `<text x="${left - (shifted ? 10 : 7)}" y="${f1(t.ly)}" ${FAM} font-size="13" text-anchor="end" data-lbl="y:${Math.round(t.v * 1000) / 1000}">${t.htmlLabel}</text>`
   }
 
@@ -390,7 +406,14 @@ export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; wi
     const [px, py] = coords[i]
     if (spec.dots) b += `<circle cx="${f1(px)}" cy="${f1(py)}" r="2.8" fill="#111"/>`
 
-    const cands: Array<{ lx: number; ly: number; anchor: 'start' | 'middle' | 'end'; cx: number; cy: number; bias: number }> =
+    const cands: Array<{
+      lx: number
+      ly: number
+      anchor: 'start' | 'middle' | 'end'
+      cx: number
+      cy: number
+      bias: number
+    }> =
       px - left < 12
         ? [{ lx: px + 8, ly: py - 7, anchor: 'start', cx: px + 14, cy: py - 11, bias: 0 }]
         : [
@@ -403,8 +426,10 @@ export function renderPhaseSvg(spec: PhaseSpec, desc: string): { svg: string; wi
     let bestScore = -Infinity
     for (const c of cands) {
       let minD = Math.max(0, c.cx - left)
-      if (i > 0) minD = Math.min(minD, distToSeg(c.cx, c.cy, coords[i - 1][0], coords[i - 1][1], px, py))
-      if (i + 1 < coords.length) minD = Math.min(minD, distToSeg(c.cx, c.cy, px, py, coords[i + 1][0], coords[i + 1][1]))
+      if (i > 0)
+        minD = Math.min(minD, distToSeg(c.cx, c.cy, coords[i - 1][0], coords[i - 1][1], px, py))
+      if (i + 1 < coords.length)
+        minD = Math.min(minD, distToSeg(c.cx, c.cy, px, py, coords[i + 1][0], coords[i + 1][1]))
       const score = minD + c.bias
       if (score > bestScore) {
         bestScore = score

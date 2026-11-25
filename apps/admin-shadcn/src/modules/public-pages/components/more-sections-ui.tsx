@@ -1,5 +1,4 @@
 'use client'
-import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import { basePoints } from '@engine-pricing'
 import {
   ArrowRight,
@@ -12,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Accordion } from 'radix-ui'
 
+import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
 import { Button, Link } from '@/modules/public-pages/components/public-primitives-ui'
@@ -113,7 +113,9 @@ export function PricingSectionUi({
           <p>{t('publicCopy.m130')}</p>
           <div className="home-packs" aria-live="polite" aria-busy={packs === null}>
             {packs === null ? (
-              <LoadingRegion><CardGridSkeleton /></LoadingRegion>
+              <LoadingRegion>
+                <CardGridSkeleton />
+              </LoadingRegion>
             ) : packs.length === 0 ? (
               <p>{t('publicCopy.m132')}</p>
             ) : (

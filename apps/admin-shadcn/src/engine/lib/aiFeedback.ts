@@ -31,14 +31,30 @@ export function takeRecentAiTurn(withinMs = 120_000): AiTurnInfo | null {
 }
 
 export function reportAi(kind: AiFeedbackKind, t: AiTurnInfo, note = '') {
-  void aiFeedback({ body: { kind, mode: t.mode, request: t.request, reply: t.reply, context: t.context ?? '', note } }).catch(() => {})
+  void aiFeedback({
+    body: {
+      kind,
+      mode: t.mode,
+      request: t.request,
+      reply: t.reply,
+      context: t.context ?? '',
+      note,
+    },
+  }).catch(() => {})
 }
 
-const COMPLAINT = /(sai rồi|vẫn sai|chưa đúng|không đúng|không phải (thế|vậy|như vậy)|làm lại đi|tệ quá|chán quá|không hiểu (gì|à)|bị lỗi|hỏng rồi)/iu
+const COMPLAINT =
+  /(sai rồi|vẫn sai|chưa đúng|không đúng|không phải (thế|vậy|như vậy)|làm lại đi|tệ quá|chán quá|không hiểu (gì|à)|bị lỗi|hỏng rồi)/iu
 /** tin nhắn kiểu "sai rồi" */
 export const looksLikeComplaint = (text: string) => COMPLAINT.test(text)
 
-const words = (s: string) => new Set(s.toLowerCase().normalize('NFC').match(/[\p{L}\p{N}]+/gu) ?? [])
+const words = (s: string) =>
+  new Set(
+    s
+      .toLowerCase()
+      .normalize('NFC')
+      .match(/[\p{L}\p{N}]+/gu) ?? [],
+  )
 /** yêu cầu gần giống lượt trước (gửi lại vì lượt trước không như ý) */
 export function nearlySame(a: string, b: string): boolean {
   const x = words(a)

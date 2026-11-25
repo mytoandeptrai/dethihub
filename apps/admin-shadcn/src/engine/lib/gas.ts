@@ -8,7 +8,10 @@
 const FAM = `font-family="'Times New Roman',serif"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f1 = (n: number) => Math.round(n * 10) / 10
-const fmt = (n: number) => String(Math.round(n * 1000) / 1000).replace('.', ',').replace('-', '−')
+const fmt = (n: number) =>
+  String(Math.round(n * 1000) / 1000)
+    .replace('.', ',')
+    .replace('-', '−')
 const ARROW = `<defs><marker id="gasarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111"/></marker></defs>`
 
 export type GasAxes = 'pV' | 'pT' | 'VT'
@@ -53,14 +56,18 @@ export function parseGasStates(text: string): Map<string, [number, number]> {
   let end = 0
   const checkGap = (gap: string) => {
     const invalid = gap.replace(/^[\s;,]+/, '').trim()
-    if (invalid) throw new Error(`Sai cú pháp trạng thái "${invalid.split('\n')[0].trim()}". Viết dạng "1: (2; 3)"`)
+    if (invalid)
+      throw new Error(
+        `Sai cú pháp trạng thái "${invalid.split('\n')[0].trim()}". Viết dạng "1: (2; 3)"`,
+      )
   }
   for (const m of text.matchAll(re)) {
     checkGap(text.slice(end, m.index))
     end = m.index + m[0].length
     const x = toNum(m[2])
     const y = toNum(m[3])
-    if (!Number.isFinite(x) || !Number.isFinite(y)) throw new Error(`Trạng thái ${m[1]} có toạ độ ngoài phạm vi số`)
+    if (!Number.isFinite(x) || !Number.isFinite(y))
+      throw new Error(`Trạng thái ${m[1]} có toạ độ ngoài phạm vi số`)
     if (x < 0 || y < 0) throw new Error(`Trạng thái ${m[1]}: p, V, T phải không âm`)
     if (out.has(m[1])) throw new Error(`Trạng thái ${m[1]} được khai báo nhiều lần`)
     out.set(m[1], [x, y])
@@ -96,7 +103,10 @@ export function parseGasProcesses(
     const procRaw = (bar >= 0 ? m[3].slice(0, bar) : m[3]).trim()
     const label = (bar >= 0 ? m[3].slice(bar + 1) : '').trim()
     const kind = procRaw ? processOf(procRaw) : 'line'
-    if (!kind) throw new Error(`Quá trình ${m[1]}-${m[2]}: chỉ nhận đẳng nhiệt, đẳng tích, đẳng áp hoặc thẳng`)
+    if (!kind)
+      throw new Error(
+        `Quá trình ${m[1]}-${m[2]}: chỉ nhận đẳng nhiệt, đẳng tích, đẳng áp hoặc thẳng`,
+      )
     out.push(label ? { from: m[1], to: m[2], kind, label } : { from: m[1], to: m[2], kind })
   }
   return out
@@ -104,13 +114,24 @@ export function parseGasProcesses(
 
 /** tên trục ngang/dọc theo hệ trục */
 function axisVars(axes: GasAxes): { x: 'V' | 'T'; y: 'p' | 'V' } {
-  return axes === 'pV' ? { x: 'V', y: 'p' } : axes === 'pT' ? { x: 'T', y: 'p' } : { x: 'T', y: 'V' }
+  return axes === 'pV'
+    ? { x: 'V', y: 'p' }
+    : axes === 'pT'
+      ? { x: 'T', y: 'p' }
+      : { x: 'T', y: 'V' }
 }
 
-const near = (a: number, b: number) => Math.abs(a - b) <= 0.03 * Math.max(Math.abs(a), Math.abs(b), 1e-9)
+const near = (a: number, b: number) =>
+  Math.abs(a - b) <= 0.03 * Math.max(Math.abs(a), Math.abs(b), 1e-9)
 
 /** điểm trên đường đi của quá trình (toạ độ số liệu) + có nằm trên đường qua O không */
-function processPath(axes: GasAxes, kind: GasProcess, A: [number, number], B: [number, number], label: string): { pts: Array<[number, number]>; throughOrigin: boolean } {
+function processPath(
+  axes: GasAxes,
+  kind: GasProcess,
+  A: [number, number],
+  B: [number, number],
+  label: string,
+): { pts: Array<[number, number]>; throughOrigin: boolean } {
   const straight = { pts: [A, B], throughOrigin: false }
   const fail = (why: string) => {
     throw new Error(`Quá trình ${label} (${GAS_PROCESS_LABEL[kind]}): ${why}`)
@@ -164,7 +185,8 @@ function processPath(axes: GasAxes, kind: GasProcess, A: [number, number], B: [n
 }
 
 const SUB = '₀₁₂₃₄₅₆₇₈₉'
-const sub = (name: string) => (/^\d+$/.test(name) ? [...name].map((c) => SUB[Number(c)]).join('') : name)
+const sub = (name: string) =>
+  /^\d+$/.test(name) ? [...name].map((c) => SUB[Number(c)]).join('') : name
 const formatProcLabel = (raw: string) =>
   esc(raw).replace(/_\{([^{}]+)\}|_([\p{L}\p{N}]+)/gu, (_, braced?: string, plain?: string) => {
     const s = braced ?? plain ?? ''
@@ -174,14 +196,23 @@ const formatProcLabel = (raw: string) =>
 export function defaultGasProcesses(states: Map<string, [number, number]>): string {
   // Thiếu danh sách quá trình: nối thẳng theo thứ tự khai báo, không suy đoán loại quá trình.
   const names = [...states.keys()]
-  return names.slice(1).map((to, i) => `${names[i]}-${to}: thẳng`).join('\n')
+  return names
+    .slice(1)
+    .map((to, i) => `${names[i]}-${to}: thẳng`)
+    .join('\n')
 }
 
-export function renderGasSvg(spec: GasSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderGasSvg(
+  spec: GasSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const states = parseGasStates(spec.states)
   const procs = parseGasProcesses(spec.processes ?? defaultGasProcesses(states), states)
   const { x: xv, y: yv } = axisVars(spec.axes)
-  const paths = procs.map((p) => ({ ...p, ...processPath(spec.axes, p.kind, states.get(p.from)!, states.get(p.to)!, `${p.from}-${p.to}`) }))
+  const paths = procs.map((p) => ({
+    ...p,
+    ...processPath(spec.axes, p.kind, states.get(p.from)!, states.get(p.to)!, `${p.from}-${p.to}`),
+  }))
 
   const all = [...states.values(), ...paths.flatMap((p) => p.pts)]
   const xMax = Math.max(...all.map((p) => p[0])) * 1.18 || 1
@@ -195,7 +226,8 @@ export function renderGasSvg(spec: GasSpec, desc: string): { svg: string; width:
   const X = (v: number) => left + (v / xMax) * (right - left)
   const Y = (v: number) => bottom - (v / yMax) * (bottom - top)
   const unit = (u: string) => (u.trim() ? ` (${esc(u.trim())})` : '')
-  const unitOf = (v: 'p' | 'V' | 'T') => (v === 'p' ? spec.pUnit : v === 'V' ? spec.vUnit : spec.tUnit) ?? ''
+  const unitOf = (v: 'p' | 'V' | 'T') =>
+    (v === 'p' ? spec.pUnit : v === 'V' ? spec.vUnit : spec.tUnit) ?? ''
 
   let b = ARROW
   // trục
@@ -237,8 +269,10 @@ export function renderGasSvg(spec: GasSpec, desc: string): { svg: string; width:
   // gióng
   if (spec.dashed)
     for (const [x, y] of states.values()) {
-      if (x > 0) b += `<path d="M${f1(X(x))} ${f1(Y(y))}V${bottom}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
-      if (y > 0) b += `<path d="M${left} ${f1(Y(y))}H${f1(X(x))}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
+      if (x > 0)
+        b += `<path d="M${f1(X(x))} ${f1(Y(y))}V${bottom}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
+      if (y > 0)
+        b += `<path d="M${left} ${f1(Y(y))}H${f1(X(x))}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
     }
 
   // kéo dài về O
@@ -259,7 +293,8 @@ export function renderGasSvg(spec: GasSpec, desc: string): { svg: string; width:
     if (spec.arrows) {
       const n = p.pts.length
       const i = Math.max(1, Math.floor(n / 2))
-      const a = n === 2 ? [(p.pts[0][0] + p.pts[1][0]) / 2, (p.pts[0][1] + p.pts[1][1]) / 2] : p.pts[i]
+      const a =
+        n === 2 ? [(p.pts[0][0] + p.pts[1][0]) / 2, (p.pts[0][1] + p.pts[1][1]) / 2] : p.pts[i]
       const prev = n === 2 ? p.pts[0] : p.pts[i - 1]
       const ax = X(a[0])
       const ay = Y(a[1])

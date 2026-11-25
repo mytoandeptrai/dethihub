@@ -37,10 +37,13 @@ export const LeadImageExtension = Extension.create({
               // nhãn đặt sau dãy ảnh đầu
               let at = pos + 1
               node.forEach((child, offset) => {
-                if (at === pos + 1 + offset && child.type.name === 'image') at = pos + 1 + offset + child.nodeSize
+                if (at === pos + 1 + offset && child.type.name === 'image')
+                  at = pos + 1 + offset + child.nodeSize
               })
               const kind = node.type.name === 'examQuestionPrompt' ? 'q' : 'e'
-              decos.push(Decoration.widget(at, () => label(kind), { side: -1, key: `lead-${kind}` }))
+              decos.push(
+                Decoration.widget(at, () => label(kind), { side: -1, key: `lead-${kind}` }),
+              )
               return false
             })
             return DecorationSet.create(state.doc, decos)

@@ -8,7 +8,14 @@ import { ExamCommandHost } from './ExamCommandHost'
 
 const scroll = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
 beforeAll(() => {
-  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  )
   Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: vi.fn() })
 })
 afterAll(() => {
@@ -20,7 +27,17 @@ afterAll(() => {
 describe('exam command host', () => {
   it('runs keyboard palette commands without mounting a tool rail', async () => {
     const run = vi.fn()
-    render(<ExamCommandHost editor={null} tabs={{}} extra={[{ id: 'save', family: 'file', label: 'Lưu đề', group: 'Tệp', tab: 'Tệp', run }]} overrides={{}} onReveal={vi.fn()}>{() => <p>Ribbon content</p>}</ExamCommandHost>)
+    render(
+      <ExamCommandHost
+        editor={null}
+        tabs={{}}
+        extra={[{ id: 'save', family: 'file', label: 'Lưu đề', group: 'Tệp', tab: 'Tệp', run }]}
+        overrides={{}}
+        onReveal={vi.fn()}
+      >
+        {() => <p>Ribbon content</p>}
+      </ExamCommandHost>,
+    )
     expect(screen.getByText('Ribbon content')).toBeVisible()
     expect(screen.queryByRole('navigation', { name: 'Công cụ soạn đề' })).not.toBeInTheDocument()
     await userEvent.keyboard('{Control>}k{/Control}')
@@ -34,9 +51,44 @@ describe('exam command host', () => {
     const clicked = vi.fn()
     function Harness() {
       const [tab, setTab] = useState('home')
-      return <ExamCommandHost editor={null} tabs={{ insert: [{ id: 'media', label: 'Hình', render: () => <button data-command="image" title="Ảnh" onClick={(event: MouseEvent) => { event.preventDefault(); clicked() }}>Ảnh</button> }] }} extra={[]} overrides={{}} onReveal={setTab}>
-        {(groups) => <div data-testid="ribbon" data-tab={tab}>{groups.filter((group) => group.tab === tab).map((group) => <div key={group.id}>{group.content}</div>)}</div>}
-      </ExamCommandHost>
+      return (
+        <ExamCommandHost
+          editor={null}
+          tabs={{
+            insert: [
+              {
+                id: 'media',
+                label: 'Hình',
+                render: () => (
+                  <button
+                    data-command="image"
+                    title="Ảnh"
+                    onClick={(event: MouseEvent) => {
+                      event.preventDefault()
+                      clicked()
+                    }}
+                  >
+                    Ảnh
+                  </button>
+                ),
+              },
+            ],
+          }}
+          extra={[]}
+          overrides={{}}
+          onReveal={setTab}
+        >
+          {(groups) => (
+            <div data-testid="ribbon" data-tab={tab}>
+              {groups
+                .filter((group) => group.tab === tab)
+                .map((group) => (
+                  <div key={group.id}>{group.content}</div>
+                ))}
+            </div>
+          )}
+        </ExamCommandHost>
+      )
     }
     render(<Harness />)
     await userEvent.keyboard('{Control>}k{/Control}')
@@ -48,7 +100,27 @@ describe('exam command host', () => {
 
   it('shows empty search results without executing disabled commands', async () => {
     const run = vi.fn()
-    render(<ExamCommandHost editor={null} tabs={{}} extra={[{ id: 'save', family: 'file', label: 'Lưu đề', group: 'Tệp', tab: 'Tệp', disabled: true, run }]} overrides={{}} onReveal={vi.fn()}>{() => null}</ExamCommandHost>)
+    render(
+      <ExamCommandHost
+        editor={null}
+        tabs={{}}
+        extra={[
+          {
+            id: 'save',
+            family: 'file',
+            label: 'Lưu đề',
+            group: 'Tệp',
+            tab: 'Tệp',
+            disabled: true,
+            run,
+          },
+        ]}
+        overrides={{}}
+        onReveal={vi.fn()}
+      >
+        {() => null}
+      </ExamCommandHost>,
+    )
     await userEvent.keyboard('{Control>}k{/Control}')
     await userEvent.click(screen.getByRole('option', { name: 'Lưu đề' }))
     expect(run).not.toHaveBeenCalled()

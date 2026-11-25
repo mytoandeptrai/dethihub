@@ -1,5 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'react'
 import { MonitorPlay, Save } from 'lucide-react'
+import { useLayoutEffect, useRef, useState } from 'react'
+
 import { cn } from '@/engine/lib/cn'
 
 const W = 1280
@@ -33,7 +34,10 @@ export function HtmlSlideFrame({
   }, [])
 
   return (
-    <div ref={ref} className={cn('relative aspect-[16/9] w-full overflow-hidden bg-white', className)}>
+    <div
+      ref={ref}
+      className={cn('relative aspect-[16/9] w-full overflow-hidden bg-white', className)}
+    >
       <iframe
         title="Slide HTML"
         srcDoc={html}
@@ -63,7 +67,7 @@ export function HtmlDeckBar({ onSave, onPresent }: { onSave?: () => void; onPres
         <button
           type="button"
           onClick={onSave}
-          className="flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-semibold text-ink hover:bg-canvas"
+          className="border-line text-ink hover:bg-canvas flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-semibold"
         >
           <Save className="size-3.5" />
           Lưu

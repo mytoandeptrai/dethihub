@@ -56,7 +56,11 @@ export type BandSlots = { left: string; center: string; right: string }
  * Nội dung một dải đầu/chân trang ở trang `page`: chữ header/footer và số trang
  * (nếu đặt cùng phía) gộp theo vị trí căn — cùng ô thì nối bằng " – ".
  */
-export function bandAt(setup: PageSetup | undefined, place: 'top' | 'bottom', page: number): BandSlots | null {
+export function bandAt(
+  setup: PageSetup | undefined,
+  place: 'top' | 'bottom',
+  page: number,
+): BandSlots | null {
   const slots: BandSlots = { left: '', center: '', right: '' }
   const band = place === 'top' ? setup?.header : setup?.footer
   if (band?.text.trim() && !(band.skipFirst && page === 1)) slots[band.align] = band.text.trim()
@@ -80,7 +84,12 @@ export interface PageNumberSetup {
   place?: 'top' | 'bottom'
 }
 
-export const DEFAULT_PAGE_NUMBER: PageNumberSetup = { show: true, from: 1, startAt: 1, align: 'center' }
+export const DEFAULT_PAGE_NUMBER: PageNumberSetup = {
+  show: true,
+  from: 1,
+  startAt: 1,
+  align: 'center',
+}
 
 /** số in ở trang `page` (đếm từ 1), `null` = trang này không đánh số */
 export function pageNumberAt(pn: PageNumberSetup | undefined, page: number): number | null {
@@ -102,7 +111,9 @@ export function pageGeometry(setup: PageSetup) {
   const w = Math.round(paper.w * CM)
   const h = Math.round(paper.h * CM)
   const m = marginsOf(setup)
-  const [top, right, bottom, left] = [m.top, m.right, m.bottom, m.left].map((cm) => Math.round(cm * CM))
+  const [top, right, bottom, left] = [m.top, m.right, m.bottom, m.left].map((cm) =>
+    Math.round(cm * CM),
+  )
   return {
     PAGE_W: w,
     PAGE_H: h,

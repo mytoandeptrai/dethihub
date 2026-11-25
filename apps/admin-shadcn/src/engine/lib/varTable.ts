@@ -44,7 +44,8 @@ export function niceNum(v: number): string {
   if (Math.abs(a - Math.E) < 1e-6) return minus('e')
   if (Math.abs(a - 1 / Math.E) < 1e-6) return minus('1/e')
   if (Math.abs(a - Math.E * Math.E) < 1e-5) return minus('e²')
-  if (Math.abs(a - Math.round(a)) < 1e-6) return Math.round(a) === 0 ? '0' : minus(String(Math.round(a)))
+  if (Math.abs(a - Math.round(a)) < 1e-6)
+    return Math.round(a) === 0 ? '0' : minus(String(Math.round(a)))
   for (let q = 2; q <= 12; q++) {
     const p = a * q
     if (Math.abs(p - Math.round(p)) < 1e-6) return minus(`${Math.round(p)}/${q}`)
@@ -126,7 +127,13 @@ export function autoVarTable(expr: string): VarTableSpec {
   for (let i = 1; i < xs.length; i++) {
     const a = f(xs[i - 1])
     const b = f(xs[i])
-    if (Number.isFinite(a) && Number.isFinite(b) && Math.abs(a) > 1e3 && Math.abs(b) > 1e3 && Math.sign(a) !== Math.sign(b)) {
+    if (
+      Number.isFinite(a) &&
+      Number.isFinite(b) &&
+      Math.abs(a) > 1e3 &&
+      Math.abs(b) > 1e3 &&
+      Math.sign(a) !== Math.sign(b)
+    ) {
       const x0 = snap((xs[i - 1] + xs[i]) / 2)
       if (!crits.some((c) => Math.abs(c.x - x0) < 0.01)) crits.push({ x: x0, kind: 'break' })
     }
@@ -163,7 +170,8 @@ export function autoVarTable(expr: string): VarTableSpec {
   for (let k = -SEARCH; k <= SEARCH; k += 0.5) {
     // chỉ nhận điểm y' = 0 cô lập: hai bên y' khác 0 rõ (loại đuôi phẳng như e^x/x khi x → −∞)
     const isolated = Math.abs(d(k - 0.5)) > 1e-3 && Math.abs(d(k + 0.5)) > 1e-3
-    if (ok(k) && Math.abs(d(k)) < 1e-6 && isolated && !crits.some((c) => Math.abs(c.x - k) < 0.01)) crits.push({ x: k, kind: 'crit' })
+    if (ok(k) && Math.abs(d(k)) < 1e-6 && isolated && !crits.some((c) => Math.abs(c.x - k) < 0.01))
+      crits.push({ x: k, kind: 'crit' })
   }
 
   crits.sort((a, b) => a.x - b.x)
@@ -178,26 +186,39 @@ export function autoVarTable(expr: string): VarTableSpec {
     const v = f(x + side * 1e-7)
     // tiến sát hơn mà giá trị vẫn chạy (kể cả chậm như ln) thì là vô cực
     const closer = f(x + side * 1e-12)
-    if (!Number.isFinite(v) || Math.abs(v) > 1e5 || Math.abs(closer - v) > 1) return (Number.isFinite(closer) ? closer : v) > 0 ? '+∞' : '−∞'
+    if (!Number.isFinite(v) || Math.abs(v) > 1e5 || Math.abs(closer - v) > 1)
+      return (Number.isFinite(closer) ? closer : v) > 0 ? '+∞' : '−∞'
     return niceNum(Math.round(v * 1e4) / 1e4)
   }
   const atInf = (dir: -1 | 1) => {
     const v = f(dir * 1e7)
     // tăng không chặn (kể cả chậm như √x, ln x): so với giá trị ở xa hơn
     const far = f(dir * 1e9)
-    if (!Number.isFinite(v) || Math.abs(v) > 1e5 || Math.abs(far - v) > 1) return v > 0 ? '+∞' : '−∞'
+    if (!Number.isFinite(v) || Math.abs(v) > 1e5 || Math.abs(far - v) > 1)
+      return v > 0 ? '+∞' : '−∞'
     return niceNum(Math.round(v * 1e4) / 1e4)
   }
 
   if (!startsAtDomain) points.push({ x: '−∞', mark: '', y: atInf(-1) })
   for (const c of crits) {
-    if (c.kind === 'break') points.push({ x: niceNum(c.x), mark: '||', y: '', yLeft: limitAt(c.x, -1), yRight: limitAt(c.x, 1) })
+    if (c.kind === 'break')
+      points.push({
+        x: niceNum(c.x),
+        mark: '||',
+        y: '',
+        yLeft: limitAt(c.x, -1),
+        yRight: limitAt(c.x, 1),
+      })
     else if (c.kind === 'crit') points.push({ x: niceNum(c.x), mark: '0', y: niceNum(f(c.x)) })
     else {
       // biên miền: hàm xác định tại biên (√x tại 0) thì lấy giá trị, không thì giới hạn một phía (ln x → −∞)
       const side = c.kind === 'domain-start' ? 1 : -1
       const at = f(c.x)
-      points.push({ x: niceNum(c.x), mark: '', y: Number.isFinite(at) ? niceNum(at) : limitAt(c.x, side) })
+      points.push({
+        x: niceNum(c.x),
+        mark: '',
+        y: Number.isFinite(at) ? niceNum(at) : limitAt(c.x, side),
+      })
     }
   }
   if (!endsAtDomain) points.push({ x: '+∞', mark: '', y: atInf(1) })
@@ -245,7 +266,11 @@ const textW = (s: string) => Math.max(8, [...s].length * 8.5)
 const pretty = (s: string) => s.replace(/-/g, '−').replace(/\+∞/g, '+∞')
 
 /** mức (cao/thấp) của giá trị tại điểm i theo chiều mũi tên hai bên */
-function levelAt(spec: VarTableSpec, i: number, side: 'left' | 'right' | 'both'): 'top' | 'bottom' | 'mid' {
+function levelAt(
+  spec: VarTableSpec,
+  i: number,
+  side: 'left' | 'right' | 'both',
+): 'top' | 'bottom' | 'mid' {
   const before = spec.signs[i - 1]
   const after = spec.signs[i]
   if (side === 'left') return before === '+' ? 'top' : 'bottom'
@@ -260,7 +285,10 @@ function levelAt(spec: VarTableSpec, i: number, side: 'left' | 'right' | 'both')
   return before === '+' ? 'top' : 'bottom'
 }
 
-export function renderVarTableSvg(spec: VarTableSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderVarTableSvg(
+  spec: VarTableSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const n = spec.points.length
   const H = ROW_X + ROW_D + ROW_Y
   const colW = (W - LABEL_W - 40) / Math.max(1, n - 1)
@@ -285,10 +313,15 @@ export function renderVarTableSvg(spec: VarTableSpec, desc: string): { svg: stri
 
   spec.points.forEach((p, i) => {
     const x = px(i)
-    out.push(`<text x="${x}" y="${y1 / 2 + 6}" ${FONT} text-anchor="middle">${esc(pretty(p.x))}</text>`)
-    if (p.mark === '0') out.push(`<text x="${x}" y="${y1 + ROW_D / 2 + 6}" ${FONT} text-anchor="middle">0</text>`)
+    out.push(
+      `<text x="${x}" y="${y1 / 2 + 6}" ${FONT} text-anchor="middle">${esc(pretty(p.x))}</text>`,
+    )
+    if (p.mark === '0')
+      out.push(`<text x="${x}" y="${y1 + ROW_D / 2 + 6}" ${FONT} text-anchor="middle">0</text>`)
     if (p.mark === '||') {
-      out.push(`<path d="M${x - 2} ${y1}V${H}M${x + 2} ${y1}V${H}" stroke="#222" stroke-width="1.2"/>`)
+      out.push(
+        `<path d="M${x - 2} ${y1}V${H}M${x + 2} ${y1}V${H}" stroke="#222" stroke-width="1.2"/>`,
+      )
       const lv = levelAt(spec, i, 'left')
       const rv = levelAt(spec, i, 'right')
       const ly = lv === 'top' ? yTop : yBot
@@ -296,8 +329,12 @@ export function renderVarTableSvg(spec: VarTableSpec, desc: string): { svg: stri
       const L = pretty(p.yLeft ?? '')
       const R = pretty(p.yRight ?? '')
       if (i > 0) out.push(`<text x="${x - 7}" y="${ly}" ${FONT} text-anchor="end">${esc(L)}</text>`)
-      if (i < n - 1) out.push(`<text x="${x + 7}" y="${ry}" ${FONT} text-anchor="start">${esc(R)}</text>`)
-      anchors.push({ left: [x - 7 - textW(L) / 2, ly, textW(L)], right: [x + 7 + textW(R) / 2, ry, textW(R)] })
+      if (i < n - 1)
+        out.push(`<text x="${x + 7}" y="${ry}" ${FONT} text-anchor="start">${esc(R)}</text>`)
+      anchors.push({
+        left: [x - 7 - textW(L) / 2, ly, textW(L)],
+        right: [x + 7 + textW(R) / 2, ry, textW(R)],
+      })
     } else {
       const lv = levelAt(spec, i, 'both')
       const yy = lv === 'top' ? yTop : lv === 'bottom' ? yBot : (yTop + yBot) / 2
@@ -311,7 +348,9 @@ export function renderVarTableSvg(spec: VarTableSpec, desc: string): { svg: stri
   const arrows: string[] = []
   for (let i = 0; i + 1 < n; i++) {
     const mx = (px(i) + px(i + 1)) / 2
-    out.push(`<text x="${mx}" y="${y1 + ROW_D / 2 + 6}" ${FONT} text-anchor="middle">${spec.signs[i] === '+' ? '+' : '−'}</text>`)
+    out.push(
+      `<text x="${mx}" y="${y1 + ROW_D / 2 + 6}" ${FONT} text-anchor="middle">${spec.signs[i] === '+' ? '+' : '−'}</text>`,
+    )
     const [ax, ay, aw] = anchors[i].right
     const [bx, by, bw] = anchors[i + 1].left
     // đầu mũi tên tránh chữ: lùi theo bề rộng chữ, và lệch lên/xuống khỏi dòng số
@@ -322,7 +361,9 @@ export function renderVarTableSvg(spec: VarTableSpec, desc: string): { svg: stri
     const ey = by + lift(by)
     if (ex - sx < 12) continue
     // mỗi mũi tên một path: marker-end chỉ gắn vào cuối path
-    arrows.push(`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#222" stroke-width="1.3" fill="none" marker-end="url(#vtarr)"/>`)
+    arrows.push(
+      `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#222" stroke-width="1.3" fill="none" marker-end="url(#vtarr)"/>`,
+    )
   }
   out.push(...arrows)
 
@@ -359,7 +400,10 @@ export function fromKeys(t: string): string {
 
 /** kí hiệu → chữ gõ (để hiện lại trong ô nhập) */
 export function toKeys(t: string): string {
-  return t.replace(/∞/g, 'oo').replace(/−/g, '-').replace(/√(\d+)/g, 'sqrt$1')
+  return t
+    .replace(/∞/g, 'oo')
+    .replace(/−/g, '-')
+    .replace(/√(\d+)/g, 'sqrt$1')
 }
 
 const ROW = /^\s*([^:]+?)\s*:\s*(.*)$/
@@ -370,9 +414,12 @@ export function varTableToText(spec: VarTableSpec): string {
   spec.signs.forEach((g, i) => {
     d.push(g)
     const next = spec.points[i + 1]
-    if (i + 1 < spec.points.length - 1) d.push(next.mark === '||' ? '||' : next.mark === '0' ? '0' : '.')
+    if (i + 1 < spec.points.length - 1)
+      d.push(next.mark === '||' ? '||' : next.mark === '0' ? '0' : '.')
   })
-  const ys = spec.points.map((p) => (p.mark === '||' ? `${toKeys(p.yLeft ?? '')}||${toKeys(p.yRight ?? '')}` : toKeys(p.y) || '?'))
+  const ys = spec.points.map((p) =>
+    p.mark === '||' ? `${toKeys(p.yLeft ?? '')}||${toKeys(p.yRight ?? '')}` : toKeys(p.y) || '?',
+  )
   const f = spec.fname
   const fd = f === 'y' ? "y'" : f.replace('(', "'(")
   return `x: ${xs.join(' ')}\n${fd}: ${d.join(' ')}\n${f}: ${ys.join(' ')}`
@@ -398,17 +445,28 @@ export function parseVarTableText(text: string): VarTableSpec {
   const n = xRow.vals.length
   if (n < 2) throw new Error('Dòng x cần ít nhất 2 giá trị')
   if (dRow.vals.length !== 2 * n - 3)
-    throw new Error(`Dòng y' cần ${2 * n - 3} kí hiệu (dấu của ${n - 1} khoảng xen với ${n - 2} điểm giữa), đang có ${dRow.vals.length}`)
-  if (yRow.vals.length !== n) throw new Error(`Dòng ${yRow.name} cần ${n} giá trị cho ${n} điểm của x, đang có ${yRow.vals.length}`)
+    throw new Error(
+      `Dòng y' cần ${2 * n - 3} kí hiệu (dấu của ${n - 1} khoảng xen với ${n - 2} điểm giữa), đang có ${dRow.vals.length}`,
+    )
+  if (yRow.vals.length !== n)
+    throw new Error(
+      `Dòng ${yRow.name} cần ${n} giá trị cho ${n} điểm của x, đang có ${yRow.vals.length}`,
+    )
 
   const signs: VtSign[] = []
   const marks: VtMark[] = ['']
   dRow.vals.forEach((v, i) => {
     if (i % 2 === 0) {
-      if (v !== '+' && v !== '-' && v !== '−') throw new Error(`Dòng y': kí hiệu thứ ${i + 1} phải là dấu + hoặc - (dấu của khoảng), đang là "${v}"`)
+      if (v !== '+' && v !== '-' && v !== '−')
+        throw new Error(
+          `Dòng y': kí hiệu thứ ${i + 1} phải là dấu + hoặc - (dấu của khoảng), đang là "${v}"`,
+        )
       signs.push(v === '+' ? '+' : '-')
     } else {
-      if (v !== '0' && v !== '||' && v !== '.') throw new Error(`Dòng y': kí hiệu thứ ${i + 1} phải là 0, || hoặc . (tại điểm x), đang là "${v}"`)
+      if (v !== '0' && v !== '||' && v !== '.')
+        throw new Error(
+          `Dòng y': kí hiệu thứ ${i + 1} phải là 0, || hoặc . (tại điểm x), đang là "${v}"`,
+        )
       marks.push(v === '0' ? '0' : v === '||' ? '||' : '')
     }
   })
@@ -418,7 +476,10 @@ export function parseVarTableText(text: string): VarTableSpec {
     const y = yRow.vals[i]
     if (marks[i] === '||') {
       const [l, r] = y.split('||')
-      if (r === undefined) throw new Error(`Tại x = ${x} (điểm ||), dòng ${yRow.name} cần ghi "trái||phải", vd. -oo||+oo`)
+      if (r === undefined)
+        throw new Error(
+          `Tại x = ${x} (điểm ||), dòng ${yRow.name} cần ghi "trái||phải", vd. -oo||+oo`,
+        )
       return { x: fromKeys(x), mark: '||', y: '', yLeft: fromKeys(l), yRight: fromKeys(r) }
     }
     return { x: fromKeys(x), mark: marks[i], y: fromKeys(y) }

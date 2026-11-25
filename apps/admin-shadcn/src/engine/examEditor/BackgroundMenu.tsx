@@ -1,8 +1,9 @@
 /** Bảng chọn nền slide (tab Thiết kế): màu đặc, chuyển sắc dựng sẵn, màu tuỳ ý, hoặc quay về nền theo bộ màu. */
 import { useEffect, useRef, useState } from 'react'
-import { BACKGROUNDS, prepareBgImage } from '@/engine/lib/slideBackground'
-import { uploadImage } from '@/engine/lib/mediaStore'
+
 import { Checkbox } from '@/engine/components/ui'
+import { uploadImage } from '@/engine/lib/mediaStore'
+import { BACKGROUNDS, prepareBgImage } from '@/engine/lib/slideBackground'
 
 export function BackgroundMenu({
   current,
@@ -60,14 +61,19 @@ export function BackgroundMenu({
           />
         ))}
       </div>
-      <label className="mt-2.5 flex cursor-pointer items-center gap-2 text-[12.5px] text-ink-2">
-        <input ref={customRef} type="color" defaultValue="#ffffff" className="size-6 cursor-pointer rounded border-0 bg-transparent p-0" />
+      <label className="text-ink-2 mt-2.5 flex cursor-pointer items-center gap-2 text-[12.5px]">
+        <input
+          ref={customRef}
+          type="color"
+          defaultValue="#ffffff"
+          className="size-6 cursor-pointer rounded border-0 bg-transparent p-0"
+        />
         Màu khác…
       </label>
       <button
         type="button"
         disabled={busy}
-        className="mt-1.5 block text-[12.5px] text-ink-2 underline-offset-2 hover:text-clay hover:underline disabled:opacity-50"
+        className="text-ink-2 hover:text-clay mt-1.5 block text-[12.5px] underline-offset-2 hover:underline disabled:opacity-50"
         onClick={() => fileRef.current?.click()}
       >
         {busy ? 'Đang xử lý ảnh…' : 'Dùng ảnh từ máy…'}
@@ -84,14 +90,25 @@ export function BackgroundMenu({
         }}
       />
       {error && (
-        <div role="alert" className="mt-1.5 rounded-md bg-clay-tint px-2 py-1.5 text-[12px] leading-snug text-clay-deep">
+        <div
+          role="alert"
+          className="bg-clay-tint text-clay-deep mt-1.5 rounded-md px-2 py-1.5 text-[12px] leading-snug"
+        >
           {error}
         </div>
       )}
-      <button type="button" className="mt-1.5 block text-[12.5px] text-ink-2 underline-offset-2 hover:text-clay hover:underline" onClick={() => onPick(null, all)}>
+      <button
+        type="button"
+        className="text-ink-2 hover:text-clay mt-1.5 block text-[12.5px] underline-offset-2 hover:underline"
+        onClick={() => onPick(null, all)}
+      >
         Theo bộ màu của bài
       </button>
-      <Checkbox checked={all} onChange={setAll} className="mt-2 flex w-full border-t border-line pt-2 text-[12.5px] text-ink-2">
+      <Checkbox
+        checked={all}
+        onChange={setAll}
+        className="border-line text-ink-2 mt-2 flex w-full border-t pt-2 text-[12.5px]"
+      >
         Áp dụng cho tất cả slide
       </Checkbox>
     </div>

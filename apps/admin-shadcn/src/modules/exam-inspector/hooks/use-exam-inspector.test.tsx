@@ -1,39 +1,64 @@
+import { act, fireEvent, renderHook } from '@testing-library/react'
 import { Editor } from '@tiptap/core'
 import { StarterKit } from '@tiptap/starter-kit'
-import { act, fireEvent, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { activateInsertedBlock } from '@/modules/exam-inspector/lib/inspector-selection'
+
 import { useExamInspector } from './use-exam-inspector'
 
 import type { Mark, Node } from '@tiptap/core'
 
 const { BaseParagraphNode, EXAM_NODES, EXAM_MARKS } = await vi.importActual<{
-  BaseParagraphNode: Node; EXAM_NODES: Node[]; EXAM_MARKS: Mark[]
+  BaseParagraphNode: Node
+  EXAM_NODES: Node[]
+  EXAM_MARKS: Mark[]
 }>('@/engine/examEditor/schema')
 const editors: Editor[] = []
 function fixture() {
-  const editor = new Editor({ element: document.createElement('div'), extensions: [StarterKit.configure({ paragraph: false, underline: false }), BaseParagraphNode, ...EXAM_NODES.filter(node => node.name !== 'examAnswerKey'), ...EXAM_MARKS], content: { type: 'doc', content: [{ type: 'examTitle', content: [{ type: 'text', text: 'Original' }] }, { type: 'examParagraph', content: [{ type: 'text', text: 'Other' }] }] } })
+  const editor = new Editor({
+    element: document.createElement('div'),
+    extensions: [
+      StarterKit.configure({ paragraph: false, underline: false }),
+      BaseParagraphNode,
+      ...EXAM_NODES.filter((node) => node.name !== 'examAnswerKey'),
+      ...EXAM_MARKS,
+    ],
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'examTitle', content: [{ type: 'text', text: 'Original' }] },
+        { type: 'examParagraph', content: [{ type: 'text', text: 'Other' }] },
+      ],
+    },
+  })
   editors.push(editor)
   return editor
 }
-afterEach(() => { for (const editor of editors.splice(0)) editor.destroy() })
+afterEach(() => {
+  for (const editor of editors.splice(0)) editor.destroy()
+})
 
 describe('inspector synchronization', () => {
-  it.each([390, 768])('does not reveal on canvas taps in a %ipx sheet layout, but insertion and explicit edit reveal', (width) => {
-    const editor = fixture(), reveal = vi.fn()
-    const { result } = renderHook(() => useExamInspector(editor, reveal, width >= 1024))
-    act(() => editor.commands.setTextSelection(2))
-    act(() => fireEvent.click(editor.view.dom))
-    expect(result.current.activeInspectorBlock).not.toBeNull()
-    expect(reveal).not.toHaveBeenCalled()
-    act(() => activateInsertedBlock(editor, 0, 'title'))
-    expect(reveal).toHaveBeenCalledOnce()
-    act(() => result.current.reveal())
-    expect(reveal).toHaveBeenCalledTimes(2)
-  })
+  it.each([390, 768])(
+    'does not reveal on canvas taps in a %ipx sheet layout, but insertion and explicit edit reveal',
+    (width) => {
+      const editor = fixture(),
+        reveal = vi.fn()
+      const { result } = renderHook(() => useExamInspector(editor, reveal, width >= 1024))
+      act(() => editor.commands.setTextSelection(2))
+      act(() => fireEvent.click(editor.view.dom))
+      expect(result.current.activeInspectorBlock).not.toBeNull()
+      expect(reveal).not.toHaveBeenCalled()
+      act(() => activateInsertedBlock(editor, 0, 'title'))
+      expect(reveal).toHaveBeenCalledOnce()
+      act(() => result.current.reveal())
+      expect(reveal).toHaveBeenCalledTimes(2)
+    },
+  )
   it('reads canvas transactions; writes immediately without echoes; groups typing and undoes', () => {
-    const editor = fixture(), reveal = vi.fn()
+    const editor = fixture(),
+      reveal = vi.fn()
     const { result } = renderHook(() => useExamInspector(editor, reveal))
     act(() => editor.commands.setTextSelection(2))
     const id = result.current.activeInspectorBlock!.id
@@ -53,14 +78,21 @@ describe('inspector synchronization', () => {
   })
 
   it('reveals only for an explicit canvas click or insertion; maps positions and clears on deletion', () => {
-    const editor = fixture(), reveal = vi.fn()
+    const editor = fixture(),
+      reveal = vi.fn()
     const { result } = renderHook(() => useExamInspector(editor, reveal))
     act(() => editor.commands.setTextSelection(2))
     expect(reveal).not.toHaveBeenCalled()
     act(() => fireEvent.click(editor.view.dom))
     expect(reveal).toHaveBeenCalledOnce()
     const oldId = result.current.activeInspectorBlock!.id
-    act(() => { editor.commands.insertContentAt(0, { type: 'examTitle', content: [{ type: 'text', text: 'Inserted' }] }); activateInsertedBlock(editor, 0, 'title') })
+    act(() => {
+      editor.commands.insertContentAt(0, {
+        type: 'examTitle',
+        content: [{ type: 'text', text: 'Inserted' }],
+      })
+      activateInsertedBlock(editor, 0, 'title')
+    })
     expect(reveal).toHaveBeenCalledTimes(2)
     expect(result.current.activeInspectorBlock!.id).not.toBe(oldId)
     expect(result.current.activeInspectorBlock!.pos).toBe(0)
@@ -72,8 +104,11 @@ describe('inspector synchronization', () => {
   })
 
   it('rejects invalid writes and resets state when switching editors', () => {
-    const first = fixture(), second = fixture()
-    const { result, rerender } = renderHook(({ editor }) => useExamInspector(editor, vi.fn()), { initialProps: { editor: first } })
+    const first = fixture(),
+      second = fixture()
+    const { result, rerender } = renderHook(({ editor }) => useExamInspector(editor, vi.fn()), {
+      initialProps: { editor: first },
+    })
     act(() => first.commands.setTextSelection(2))
     const id = result.current.activeInspectorBlock!.id
     act(() => result.current.writeValues(id, { unknown: 'invalid' }, 'unknown'))

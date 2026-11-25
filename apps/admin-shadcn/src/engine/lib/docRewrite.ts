@@ -1,20 +1,39 @@
+import { FIELD_DEFAULT, type FieldScene } from './field'
+import { defaultGasProcesses, parseGasStates } from './gas'
+import { GEO2D_SHAPES, GEO3D_SHAPES } from './geometry'
+import { LENS_DEFAULT, type LensNames, type LensRay, type LensType } from './lens'
 /**
  * "Hỏi AI" trên đoạn chữ đang bôi đen trong trình soạn đề: model chỉ trả lại
  * đoạn chữ mới, người dùng xem trước rồi mới thay vào.
  */
 import { callLlm, extractJson } from './llm'
-import { GEO2D_SHAPES, GEO3D_SHAPES } from './geometry'
-import { PLOT_COLORS, autoYRange, fitAutoBounds, parseExpr, parsePlotPoints, type PlotSpec } from './plot'
-import { fitOxyBounds } from './oxy'
-import { defaultGasProcesses, parseGasStates } from './gas'
-import { renderTool, type ToolDoc } from './toolSpec'
-import { autoSignTable } from './signTable'
-import { autoVarTable } from './varTable'
-import { cleanRewrite } from './slideRewrite'
-import { AC_DEFAULT, OSC_DEFAULT, OSC_Y_DEFAULT, STANDING_DEFAULT, oscPeriod, parseOscExpr, type OscQty, type OscSpec, type OscStart, type OscStartX0 } from './oscillation'
-import { LENS_DEFAULT, type LensNames, type LensRay, type LensType } from './lens'
-import { FIELD_DEFAULT, type FieldScene } from './field'
 import { normalizeObjects, objectGroupFromRaw, prepareToolDoc } from './objects'
+import {
+  AC_DEFAULT,
+  OSC_DEFAULT,
+  OSC_Y_DEFAULT,
+  STANDING_DEFAULT,
+  oscPeriod,
+  parseOscExpr,
+  type OscQty,
+  type OscSpec,
+  type OscStart,
+  type OscStartX0,
+} from './oscillation'
+import { fitOxyBounds } from './oxy'
+import {
+  PLOT_COLORS,
+  autoYRange,
+  fitAutoBounds,
+  parseExpr,
+  parsePlotPoints,
+  type PlotSpec,
+} from './plot'
+import { autoSignTable } from './signTable'
+import { cleanRewrite } from './slideRewrite'
+import { renderTool, type ToolDoc } from './toolSpec'
+import { autoVarTable } from './varTable'
+
 import type { GeneTrait } from './punnett'
 
 export const DOC_REWRITE_PRESETS = [
@@ -24,7 +43,12 @@ export const DOC_REWRITE_PRESETS = [
   { label: 'Dễ hiểu hơn', ask: 'Viết lại dễ hiểu hơn cho học sinh' },
 ] as const
 
-export async function rewriteSelection(text: string, instruction: string, context: string, signal?: AbortSignal): Promise<string> {
+export async function rewriteSelection(
+  text: string,
+  instruction: string,
+  context: string,
+  signal?: AbortSignal,
+): Promise<string> {
   const res = await callLlm(
     [
       {
@@ -48,7 +72,11 @@ export interface PlotPlan {
   note: string
 }
 
-export async function planPlot(text: string, context: string, signal?: AbortSignal): Promise<PlotPlan> {
+export async function planPlot(
+  text: string,
+  context: string,
+  signal?: AbortSignal,
+): Promise<PlotPlan> {
   const res = await callLlm(
     [{ role: 'user', content: `${context ? `Ngữ cảnh: ${context}\n` : ''}Đề bài:\n${text}` }],
     { signal, reasoningEffort: 'low', task: { name: 've-do-thi' } },
@@ -66,7 +94,13 @@ export async function planPlot(text: string, context: string, signal?: AbortSign
 function planFromRaw(raw: Record<string, unknown>): ToolPlan {
   const note = typeof raw.note === 'string' ? raw.note.trim() : ''
   const exprs = (Array.isArray(raw.curves) ? raw.curves : [])
-    .map((c) => (typeof c === 'string' ? c : typeof c === 'object' && c && 'expr' in c ? String((c as { expr: unknown }).expr) : ''))
+    .map((c) =>
+      typeof c === 'string'
+        ? c
+        : typeof c === 'object' && c && 'expr' in c
+          ? String((c as { expr: unknown }).expr)
+          : '',
+    )
     .filter((e) => {
       try {
         parseExpr(e)
@@ -80,15 +114,29 @@ function planFromRaw(raw: Record<string, unknown>): ToolPlan {
   const points = typeof raw.points === 'string' && raw.points.trim() ? raw.points : undefined
   const named = parsePlotPoints(points)
   const [x0, x1] = [optionalNum(raw.xMin), optionalNum(raw.xMax)]
-  const [xMin, xMax] = x0 !== undefined && x1 !== undefined && !(x0 < x1 && x1 - x0 <= 200)
-    ? [-5, 5]
-    : fitAutoBounds(x0, x1, [-5, 5], named.map((p) => p.x))
+  const [xMin, xMax] =
+    x0 !== undefined && x1 !== undefined && !(x0 < x1 && x1 - x0 <= 200)
+      ? [-5, 5]
+      : fitAutoBounds(
+          x0,
+          x1,
+          [-5, 5],
+          named.map((p) => p.x),
+        )
   const [y0, y1] = [optionalNum(raw.yMin), optionalNum(raw.yMax)]
   // khung dọc ghi sẵn (vd câu trong kho) thì theo đó, để không bị nhánh dốc kéo dãn
   const defaultY = () => autoYRange(exprs.map(parseExpr), xMin, xMax)
-  const [yMin, yMax] = y0 !== undefined && y1 !== undefined
-    ? y0 < y1 ? [y0, y1] : defaultY()
-    : fitAutoBounds(y0, y1, defaultY(), named.map((p) => p.y))
+  const [yMin, yMax] =
+    y0 !== undefined && y1 !== undefined
+      ? y0 < y1
+        ? [y0, y1]
+        : defaultY()
+      : fitAutoBounds(
+          y0,
+          y1,
+          defaultY(),
+          named.map((p) => p.y),
+        )
   return {
     note,
     doc: {
@@ -120,9 +168,16 @@ export interface ToolPlan {
 }
 
 const num = (v: unknown, d: number) => (Number.isFinite(Number(v)) ? Number(v) : d)
-const optionalNum = (v: unknown) => v == null || (typeof v === 'string' && !v.trim()) || !Number.isFinite(Number(v)) ? undefined : Number(v)
+const optionalNum = (v: unknown) =>
+  v == null || (typeof v === 'string' && !v.trim()) || !Number.isFinite(Number(v))
+    ? undefined
+    : Number(v)
 
-export async function planTool(text: string, context: string, signal?: AbortSignal): Promise<ToolPlan> {
+export async function planTool(
+  text: string,
+  context: string,
+  signal?: AbortSignal,
+): Promise<ToolPlan> {
   const res = await callLlm(
     [{ role: 'user', content: `${context ? `Ngữ cảnh: ${context}\n` : ''}Đề bài:\n${text}` }],
     { signal, reasoningEffort: 'low', task: { name: 'chon-hinh' } },
@@ -147,8 +202,10 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
     return str(k)
   }
   const bool = (k: string, d: boolean) => (typeof raw[k] === 'boolean' ? (raw[k] as boolean) : d)
-  const names = (d: string[]) => (Array.isArray(raw.names) && raw.names.length ? raw.names.map(String) : d)
-  const pick = <T extends string>(k: string, all: readonly T[], d: T): T => all.find((c) => c === raw[k]) ?? d
+  const names = (d: string[]) =>
+    Array.isArray(raw.names) && raw.names.length ? raw.names.map(String) : d
+  const pick = <T extends string>(k: string, all: readonly T[], d: T): T =>
+    all.find((c) => c === raw[k]) ?? d
   const dir = (k: string) => pick(k, ['none', 'up', 'down'] as const, 'none')
   let doc: ToolDoc
   switch (raw.kind) {
@@ -156,28 +213,46 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
       doc = planFromRaw(raw).doc
       break
     case 'vartable':
-      doc = { kind: 'vartable', spec: { ...autoVarTable(need('expr', 'Không thấy hàm số để lập bảng biến thiên.')), fname: str('fname') || 'y' } }
+      doc = {
+        kind: 'vartable',
+        spec: {
+          ...autoVarTable(need('expr', 'Không thấy hàm số để lập bảng biến thiên.')),
+          fname: str('fname') || 'y',
+        },
+      }
       break
     case 'signtable':
-      doc = { kind: 'signtable', spec: autoSignTable(need('expr', 'Không thấy biểu thức để xét dấu.')) }
+      doc = {
+        kind: 'signtable',
+        spec: autoSignTable(need('expr', 'Không thấy biểu thức để xét dấu.')),
+      }
       break
     case 'oxy': {
       const items = need('items', 'AI không đưa ra được hình trên hệ trục.')
-      const bounds = fitOxyBounds(items, { xMin: optionalNum(raw.xMin), xMax: optionalNum(raw.xMax), yMin: optionalNum(raw.yMin), yMax: optionalNum(raw.yMax) })
+      const bounds = fitOxyBounds(items, {
+        xMin: optionalNum(raw.xMin),
+        xMax: optionalNum(raw.xMax),
+        yMin: optionalNum(raw.yMin),
+        yMax: optionalNum(raw.yMax),
+      })
       doc = { kind: 'oxy', spec: { ...bounds, grid: false, numbers: true, items } }
       break
     }
     case 'geo2d': {
-      const { id: shape, names: templateNames } = GEO2D_SHAPES.find((s) => s.id === raw.shape) ?? GEO2D_SHAPES.find((s) => s.id === 'triangle')!
+      const { id: shape, names: templateNames } =
+        GEO2D_SHAPES.find((s) => s.id === raw.shape) ??
+        GEO2D_SHAPES.find((s) => s.id === 'triangle')!
       const circumcircle = bool('circumcircle', false)
-      const defaults = circumcircle && templateNames.length === 3 ? [...templateNames, 'O'] : templateNames
-      const given = shape !== 'free' && Array.isArray(raw.names)
-        ? raw.names.map((n) => typeof n === 'string' ? n.trim() : '')
-        : []
+      const defaults =
+        circumcircle && templateNames.length === 3 ? [...templateNames, 'O'] : templateNames
+      const given =
+        shape !== 'free' && Array.isArray(raw.names)
+          ? raw.names.map((n) => (typeof n === 'string' ? n.trim() : ''))
+          : []
       const used = new Set(given.filter(Boolean))
       const filled = defaults.map((d, i) => {
         if (given[i]) return given[i]
-        let name = used.has(d) ? defaults.find((n) => !used.has(n)) ?? d : d
+        let name = used.has(d) ? (defaults.find((n) => !used.has(n)) ?? d) : d
         while (used.has(name)) name += "'"
         used.add(name)
         return name
@@ -192,13 +267,34 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
           diagonals: bool('diagonals', false),
           circumcircle,
           marks: bool('marks', true),
-          extras: shape === 'free' ? need('extras', 'Không thấy lệnh dựng hình theo toạ độ.') : str('extras') || undefined,
+          extras:
+            shape === 'free'
+              ? need('extras', 'Không thấy lệnh dựng hình theo toạ độ.')
+              : str('extras') || undefined,
         },
       }
       break
     }
     case 'geo3d': {
-      const shape3 = pick('shape', ['pyramid3', 'pyramid3-sa', 'pyramid3-regular', 'pyramid4', 'pyramid4-sa', 'pyramid4-regular', 'tetrahedron', 'prism3', 'box', 'cube', 'cone', 'cylinder', 'sphere'] as const, 'pyramid4')
+      const shape3 = pick(
+        'shape',
+        [
+          'pyramid3',
+          'pyramid3-sa',
+          'pyramid3-regular',
+          'pyramid4',
+          'pyramid4-sa',
+          'pyramid4-regular',
+          'tetrahedron',
+          'prism3',
+          'box',
+          'cube',
+          'cone',
+          'cylinder',
+          'sphere',
+        ] as const,
+        'pyramid4',
+      )
       // AI hay chỉ gửi tên đáy (A,B,C,D) hoặc bỏ trống: bù tên mặc định của khối cho đủ đỉnh (A', B'…)
       const def3 = GEO3D_SHAPES.find((s) => s.id === shape3)?.names ?? []
       const given3 = names([])
@@ -220,20 +316,53 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
     case 'stats':
       doc = {
         kind: 'stats',
-        spec: { chart: pick('chart', ['bar', 'line', 'pie', 'hist', 'table'] as const, 'bar'), title: str('title'), xLabel: str('xLabel'), yLabel: str('yLabel'), values: true, data: need('data', 'Không thấy số liệu để vẽ biểu đồ.') },
+        spec: {
+          chart: pick('chart', ['bar', 'line', 'pie', 'hist', 'table'] as const, 'bar'),
+          title: str('title'),
+          xLabel: str('xLabel'),
+          yLabel: str('yLabel'),
+          values: true,
+          data: need('data', 'Không thấy số liệu để vẽ biểu đồ.'),
+        },
       }
       break
     case 'trig':
-      doc = { kind: 'trig', spec: { angles: need('angles', 'Không thấy góc để biểu diễn.'), projections: bool('projections', true), tan: bool('tan', false), values: bool('values', false), cot: bool('cot', false) } }
+      doc = {
+        kind: 'trig',
+        spec: {
+          angles: need('angles', 'Không thấy góc để biểu diễn.'),
+          projections: bool('projections', true),
+          tan: bool('tan', false),
+          values: bool('values', false),
+          cot: bool('cot', false),
+        },
+      }
       break
     case 'probtree':
-      doc = { kind: 'probtree', spec: { text: need('text', 'Không thấy sơ đồ cây.'), products: bool('products', false) } }
+      doc = {
+        kind: 'probtree',
+        spec: { text: need('text', 'Không thấy sơ đồ cây.'), products: bool('products', false) },
+      }
       break
     case 'numberline':
-      doc = { kind: 'numberline', spec: { sets: need('sets', 'Không thấy tập hợp để biểu diễn.'), style: pick('style', ['hatch', 'bold'] as const, 'hatch') } }
+      doc = {
+        kind: 'numberline',
+        spec: {
+          sets: need('sets', 'Không thấy tập hợp để biểu diễn.'),
+          style: pick('style', ['hatch', 'bold'] as const, 'hatch'),
+        },
+      }
       break
     case 'venn':
-      doc = { kind: 'venn', spec: { sets: str('sets') || 'A, B', shade: str('shade'), counts: str('counts'), universe: bool('universe', true) } }
+      doc = {
+        kind: 'venn',
+        spec: {
+          sets: str('sets') || 'A, B',
+          shade: str('shade'),
+          counts: str('counts'),
+          universe: bool('universe', true),
+        },
+      }
       break
     case 'grouped':
       doc = {
@@ -249,10 +378,21 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
       }
       break
     case 'circuit':
-      doc = { kind: 'circuit', spec: { text: need('text', 'Không đọc được mạch điện trong đề.'), values: true } }
+      doc = {
+        kind: 'circuit',
+        spec: { text: need('text', 'Không đọc được mạch điện trong đề.'), values: true },
+      }
       break
     case 'motion':
-      doc = { kind: 'motion', spec: { yName: str('yName') || 'v (m/s)', tName: str('tName') || 't (s)', points: need('points', 'Không thấy số liệu chuyển động.'), dashed: bool('dashed', true) } }
+      doc = {
+        kind: 'motion',
+        spec: {
+          yName: str('yName') || 'v (m/s)',
+          tName: str('tName') || 't (s)',
+          points: need('points', 'Không thấy số liệu chuyển động.'),
+          dashed: bool('dashed', true),
+        },
+      }
       break
     case 'scene':
       doc = { kind: 'scene', spec: { text: need('text', 'Không thấy lệnh vẽ hình.') } }
@@ -264,7 +404,8 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         spec: {
           axes: pick('axes', ['pV', 'pT', 'VT'] as const, 'pV'),
           states,
-          processes: raw.processes == null ? defaultGasProcesses(parseGasStates(states)) : str('processes'),
+          processes:
+            raw.processes == null ? defaultGasProcesses(parseGasStates(states)) : str('processes'),
           pUnit: str('pUnit'),
           vUnit: str('vUnit'),
           tUnit: str('tUnit') || 'K',
@@ -278,10 +419,26 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
       break
     }
     case 'incline':
-      doc = { kind: 'incline', spec: { angle: num(raw.angle, 30), P: bool('P', true), N: bool('N', true), fms: dir('fms'), F: dir('F'), showAngle: true } }
+      doc = {
+        kind: 'incline',
+        spec: {
+          angle: num(raw.angle, 30),
+          P: bool('P', true),
+          N: bool('N', true),
+          fms: dir('fms'),
+          F: dir('F'),
+          showAngle: true,
+        },
+      }
       break
     case 'electron':
-      doc = { kind: 'electron', spec: { element: need('element', 'Không thấy nguyên tố.'), valenceOnly: bool('valenceOnly', false) } }
+      doc = {
+        kind: 'electron',
+        spec: {
+          element: need('element', 'Không thấy nguyên tố.'),
+          valenceOnly: bool('valenceOnly', false),
+        },
+      }
       break
     case 'struct':
       doc = {
@@ -290,13 +447,23 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
           formula: need('formula', 'Không thấy công thức cấu tạo.'),
           style: pick('style', ['condensed', 'skeletal'] as const, 'condensed'),
           ...(raw.number !== undefined ? { number: bool('number', false) } : {}),
-          ...(raw.ringStyle !== undefined ? { ringStyle: pick('ringStyle', ['kekule', 'circle'] as const, 'kekule') } : {}),
+          ...(raw.ringStyle !== undefined
+            ? { ringStyle: pick('ringStyle', ['kekule', 'circle'] as const, 'kekule') }
+            : {}),
           ...(raw.drawRings !== undefined ? { drawRings: bool('drawRings', true) } : {}),
         },
       }
       break
     case 'chemgraph':
-      doc = { kind: 'chemgraph', spec: { xName: str('xName') || 'n', yName: str('yName') || 'n↓', points: need('points', 'Không thấy số liệu đồ thị.'), dashed: bool('dashed', true) } }
+      doc = {
+        kind: 'chemgraph',
+        spec: {
+          xName: str('xName') || 'n',
+          yName: str('yName') || 'n↓',
+          points: need('points', 'Không thấy số liệu đồ thị.'),
+          dashed: bool('dashed', true),
+        },
+      }
       break
     case 'table':
       doc = {
@@ -344,15 +511,22 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         }
         return d
       }
-      const parsePeriodFrom = (src: Record<string, unknown>, def: OscSpec['period']): OscSpec['period'] => {
-        const pRaw = src.period && typeof src.period === 'object' ? (src.period as Record<string, unknown>) : null
+      const parsePeriodFrom = (
+        src: Record<string, unknown>,
+        def: OscSpec['period'],
+      ): OscSpec['period'] => {
+        const pRaw =
+          src.period && typeof src.period === 'object'
+            ? (src.period as Record<string, unknown>)
+            : null
         const { T, omega } = oscPeriod({ period: def })
         const defaults = { T, f: 1 / T, omega }
         if (pRaw) {
           const by = (['T', 'f', 'omega'] as const).find((k) => k === pRaw.by) ?? def.by
           return { by, value: parseVal(pRaw.value, by === 'omega', defaults[by]) }
         }
-        if (src.omega !== undefined) return { by: 'omega', value: parseVal(src.omega, true, defaults.omega) }
+        if (src.omega !== undefined)
+          return { by: 'omega', value: parseVal(src.omega, true, defaults.omega) }
         if (src.f !== undefined) return { by: 'f', value: parseVal(src.f, false, defaults.f) }
         if (src.T !== undefined) return { by: 'T', value: parseVal(src.T, false, defaults.T) }
         return def
@@ -378,7 +552,8 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
               tEnd: parseVal(s.tEnd, false, Math.round(1.5 * T * 1e6) / 1e6),
               grid,
               ticks,
-              showPhaseDiff: typeof s.showPhaseDiff === 'boolean' ? s.showPhaseDiff : AC_DEFAULT.showPhaseDiff,
+              showPhaseDiff:
+                typeof s.showPhaseDiff === 'boolean' ? s.showPhaseDiff : AC_DEFAULT.showPhaseDiff,
               phaseDiffLabel,
             },
           },
@@ -386,7 +561,10 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         break
       }
       if (raw.mode === 'standing') {
-        const s = (raw.standing && typeof raw.standing === 'object' ? raw.standing : raw) as Record<string, unknown>
+        const s = (raw.standing && typeof raw.standing === 'object' ? raw.standing : raw) as Record<
+          string,
+          unknown
+        >
         const kRaw = Math.round(parseVal(s.k, false, STANDING_DEFAULT.k))
         const k = Math.max(1, Math.min(10, kRaw))
         const ends = s.ends === 'fixed-free' ? 'fixed-free' : 'fixed-fixed'
@@ -400,8 +578,12 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
               k,
               ends,
               A: parseVal(s.A, false, STANDING_DEFAULT.A),
-              showNodes: typeof s.showNodes === 'boolean' ? s.showNodes : STANDING_DEFAULT.showNodes,
-              showAntinodes: typeof s.showAntinodes === 'boolean' ? s.showAntinodes : STANDING_DEFAULT.showAntinodes,
+              showNodes:
+                typeof s.showNodes === 'boolean' ? s.showNodes : STANDING_DEFAULT.showNodes,
+              showAntinodes:
+                typeof s.showAntinodes === 'boolean'
+                  ? s.showAntinodes
+                  : STANDING_DEFAULT.showAntinodes,
               showDim: typeof s.showDim === 'boolean' ? s.showDim : STANDING_DEFAULT.showDim,
             },
           },
@@ -416,7 +598,13 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         if (obj.by === 'phi' || 'phiPi' in obj) {
           return { by: 'phi', phiPi: parseVal(obj.phiPi, false, 0) }
         }
-        const rawX0 = typeof obj.x0 === 'string' ? obj.x0.replace(/\s+/g, '').replace(/sqrt\(?2\)?/gi, '√2').replace(/sqrt\(?3\)?/gi, '√3') : ''
+        const rawX0 =
+          typeof obj.x0 === 'string'
+            ? obj.x0
+                .replace(/\s+/g, '')
+                .replace(/sqrt\(?2\)?/gi, '√2')
+                .replace(/sqrt\(?3\)?/gi, '√3')
+            : ''
         const x0: OscStartX0 = X0S.find((k) => k === rawX0) ?? '0'
         const dir = obj.dir === 'up' || obj.dir === 'down' ? obj.dir : 'down'
         return { by: 'state', x0, dir }
@@ -430,12 +618,17 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
       )
       const { T } = oscPeriod({ period })
       const tEnd = parseVal(raw.tEnd, false, Math.round(2 * T * 1000) / 1000)
-      const secRaw = raw.second && typeof raw.second === 'object' ? (raw.second as Record<string, unknown>) : null
+      const secRaw =
+        raw.second && typeof raw.second === 'object'
+          ? (raw.second as Record<string, unknown>)
+          : null
       const second: OscSpec['second'] = secRaw
         ? {
             qty: QTYS.find((k) => k === secRaw.qty) ?? 'v',
             ...(secRaw.A !== undefined ? { A: parseVal(secRaw.A, false, A) } : {}),
-            ...(secRaw.start && typeof secRaw.start === 'object' ? { start: parseStart(secRaw.start, start) } : {}),
+            ...(secRaw.start && typeof secRaw.start === 'object'
+              ? { start: parseStart(secRaw.start, start) }
+              : {}),
             dashed: typeof secRaw.dashed === 'boolean' ? secRaw.dashed : true,
           }
         : null
@@ -460,7 +653,9 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
       const RAYS = ['parallel', 'center', 'focal'] as const
       const rawF = num(raw.f, LENS_DEFAULT.f)
       const lensType: LensType =
-        raw.type === 'diverging' || (raw.type === undefined && rawF < 0) ? 'diverging' : 'converging'
+        raw.type === 'diverging' || (raw.type === undefined && rawF < 0)
+          ? 'diverging'
+          : 'converging'
       const f = Math.abs(rawF) > 0 ? Math.abs(rawF) : LENS_DEFAULT.f
       const d = num(raw.d, LENS_DEFAULT.d)
       const h = num(raw.h, LENS_DEFAULT.h ?? 2)
@@ -469,7 +664,8 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         const validRays = raw.rays.filter((r): r is LensRay => RAYS.includes(r as LensRay))
         if (validRays.length || !raw.rays.length) rays = validRays
       }
-      const rawNames = raw.names && typeof raw.names === 'object' ? (raw.names as Record<string, unknown>) : null
+      const rawNames =
+        raw.names && typeof raw.names === 'object' ? (raw.names as Record<string, unknown>) : null
       const lensNames: LensNames | undefined = rawNames
         ? {
             A: typeof rawNames.A === 'string' ? rawNames.A : undefined,
@@ -516,8 +712,12 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         const { gene, dominance, phenotypes } = (entry ?? {}) as Record<string, unknown>
         if (typeof gene !== 'string' || !/^[a-z]$/i.test(gene.trim())) continue
         const trait: GeneTrait = { gene: gene.trim().toUpperCase() }
-        if (dominance === 'complete' || dominance === 'incomplete' || dominance === 'codominant') trait.dominance = dominance
-        if (Array.isArray(phenotypes) && phenotypes.every((n) => typeof n === 'string' && n.trim())) {
+        if (dominance === 'complete' || dominance === 'incomplete' || dominance === 'codominant')
+          trait.dominance = dominance
+        if (
+          Array.isArray(phenotypes) &&
+          phenotypes.every((n) => typeof n === 'string' && n.trim())
+        ) {
           const [first, second, third] = phenotypes.map((n: string) => n.trim())
           if (phenotypes.length === 2) trait.phenotypes = [first, second]
           if (phenotypes.length === 3) trait.phenotypes = [first, second, third]
@@ -555,7 +755,8 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
       break
 
     case 'field': {
-      const sc = raw.scene && typeof raw.scene === 'object' ? (raw.scene as Record<string, unknown>) : raw
+      const sc =
+        raw.scene && typeof raw.scene === 'object' ? (raw.scene as Record<string, unknown>) : raw
       const st = typeof sc.type === 'string' ? sc.type : 'two-charges'
       let scene: FieldScene
       switch (st) {
@@ -566,7 +767,8 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
           const arr = Array.isArray(sc.signs) ? sc.signs : []
           const s1 = arr[0] === '-' ? '-' : '+'
           const s2 = arr[1] === '+' ? '+' : '-'
-          const ratio = typeof sc.ratio === 'number' && Number.isFinite(sc.ratio) && sc.ratio > 0 ? sc.ratio : 1
+          const ratio =
+            typeof sc.ratio === 'number' && Number.isFinite(sc.ratio) && sc.ratio > 0 ? sc.ratio : 1
           scene = { type: 'two-charges', signs: [s1, s2], ratio }
           break
         }
@@ -591,10 +793,15 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
         default:
           scene = FIELD_DEFAULT.scene
       }
-      const rawProbe = raw.probe && typeof raw.probe === 'object' ? (raw.probe as Record<string, unknown>) : null
+      const rawProbe =
+        raw.probe && typeof raw.probe === 'object' ? (raw.probe as Record<string, unknown>) : null
       const probe =
         rawProbe && typeof rawProbe.x === 'number' && typeof rawProbe.y === 'number'
-          ? { x: rawProbe.x, y: rawProbe.y, vector: (rawProbe.vector === 'B' ? 'B' : 'E') as 'E' | 'B' }
+          ? {
+              x: rawProbe.x,
+              y: rawProbe.y,
+              vector: (rawProbe.vector === 'B' ? 'B' : 'E') as 'E' | 'B',
+            }
           : undefined
       doc = {
         kind: 'field',
@@ -620,7 +827,14 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
     }
 
     case 'clock':
-      doc = { kind: 'clock', spec: { hour: Math.round(num(raw.hour ?? 8, 8)), minute: Math.round(num(raw.minute, 0)), numbers: bool('numbers', true) } }
+      doc = {
+        kind: 'clock',
+        spec: {
+          hour: Math.round(num(raw.hour ?? 8, 8)),
+          minute: Math.round(num(raw.minute, 0)),
+          numbers: bool('numbers', true),
+        },
+      }
       break
 
     default:
@@ -630,7 +844,8 @@ export function toolFromRaw(raw: Record<string, unknown>): ToolDoc {
   return doc
 }
 
-
 /** câu yêu cầu tự gõ có phải là "vẽ đồ thị" không */
 export const wantsPlot = (ask: string) =>
-  /(vẽ|ve|minh hoạ|minh họa).*(đồ thị|hình|bảng xét dấu|biểu đồ|mạch|hệ trục|miền nghiệm|bảng lai|punnett)|(đồ thị|bảng xét dấu|biểu đồ|mạch điện|bảng lai|punnett).*(vẽ|minh hoạ|minh họa)/i.test(ask)
+  /(vẽ|ve|minh hoạ|minh họa).*(đồ thị|hình|bảng xét dấu|biểu đồ|mạch|hệ trục|miền nghiệm|bảng lai|punnett)|(đồ thị|bảng xét dấu|biểu đồ|mạch điện|bảng lai|punnett).*(vẽ|minh hoạ|minh họa)/i.test(
+    ask,
+  )

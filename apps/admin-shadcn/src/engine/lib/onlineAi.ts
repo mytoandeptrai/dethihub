@@ -1,12 +1,13 @@
+import { formatTrueFalse, normalizeShort, parseTrueFalse } from '@/engine/lib/grading'
+import { extractJson } from '@/engine/lib/llm'
+import { newQuestion } from '@/engine/lib/onlineExam'
+import { AI_MAX_QUESTIONS } from '@/engine/lib/prompts/de-online'
+
 /**
  * Trợ lý AI trong trình tạo đề online: giáo viên nhờ bằng lời, AI trả JSON các câu hỏi, `sanitizeAiQuestions`
  * chuẩn hoá về `Question` của đề online (cùng quy tắc với `questionIssue`) để thêm thẳng vào đề.
  */
 import type { Question } from '@/engine/data/types'
-import { formatTrueFalse, normalizeShort, parseTrueFalse } from '@/engine/lib/grading'
-import { extractJson } from '@/engine/lib/llm'
-import { newQuestion } from '@/engine/lib/onlineExam'
-import { AI_MAX_QUESTIONS } from '@/engine/lib/prompts/de-online'
 
 export { AI_MAX_QUESTIONS }
 
@@ -35,14 +36,17 @@ export function attachmentsPrompt(files: AiAttachment[]): string {
     : ''
 }
 
-const asString = (v: unknown) => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '').trim()
+const asString = (v: unknown) =>
+  (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '').trim()
 
 /** "A. nội dung" / "A) nội dung" → "nội dung" (AI đôi khi vẫn ghi sẵn nhãn). */
 const stripLabel = (s: string) => s.replace(/^\s*[A-Da-d][.)]\s+/, '').trim()
 
 function optionTexts(raw: unknown): string[] {
   if (!Array.isArray(raw)) return []
-  return raw.map((o) => stripLabel(asString(typeof o === 'object' && o ? (o as { text?: unknown }).text : o)))
+  return raw.map((o) =>
+    stripLabel(asString(typeof o === 'object' && o ? (o as { text?: unknown }).text : o)),
+  )
 }
 
 /** Chữ cái đáp án: "B", "b.", "Đáp án B", hoặc đúng nguyên văn một phương án. */
@@ -78,7 +82,11 @@ function addExplanation(q: Question, r: Record<string, unknown>) {
 
 /** Chuẩn hoá phản hồi của AI thành câu hỏi đề online. Câu sai dạng hoặc không có đề bài bị bỏ; câu thiếu đáp án vẫn giữ để giáo viên bổ sung. */
 export function sanitizeAiQuestions(raw: unknown, rng: () => number = Math.random): Question[] {
-  const list = Array.isArray(raw) ? raw : Array.isArray((raw as { questions?: unknown })?.questions) ? (raw as { questions: unknown[] }).questions : []
+  const list = Array.isArray(raw)
+    ? raw
+    : Array.isArray((raw as { questions?: unknown })?.questions)
+      ? (raw as { questions: unknown[] }).questions
+      : []
   const out: Question[] = []
   for (const item of list.slice(0, AI_MAX_QUESTIONS)) {
     if (!item || typeof item !== 'object') continue
@@ -95,7 +103,11 @@ export function sanitizeAiQuestions(raw: unknown, rng: () => number = Math.rando
         q.answer = choiceKey(asString(r.answer), texts)
         shuffleChoices(q, rng)
       } else {
-        const given = Array.isArray(r.answer) ? r.answer.map((b) => (b === true || /^(đ|đúng|true)$/i.test(asString(b)) ? 'Đ' : 'S')).join('') : asString(r.answer)
+        const given = Array.isArray(r.answer)
+          ? r.answer
+              .map((b) => (b === true || /^(đ|đúng|true)$/i.test(asString(b)) ? 'Đ' : 'S'))
+              .join('')
+          : asString(r.answer)
         const tf = parseTrueFalse(given, 4)
         q.answer = tf ? formatTrueFalse(tf) : ''
       }
@@ -117,7 +129,10 @@ export function sanitizeAiQuestions(raw: unknown, rng: () => number = Math.rando
 }
 
 /** Đọc phản hồi của AI: `message` là lời nhắn, `questions` là các câu đã chuẩn hoá. Không phải JSON thì coi cả phản hồi là lời nhắn. */
-export function parseAiReply(content: string, rng?: () => number): { message: string; questions: Question[] } {
+export function parseAiReply(
+  content: string,
+  rng?: () => number,
+): { message: string; questions: Question[] } {
   try {
     const raw = extractJson<{ message?: unknown; questions?: unknown }>(content)
     return { message: asString(raw.message), questions: sanitizeAiQuestions(raw, rng) }

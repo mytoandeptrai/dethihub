@@ -1,3 +1,4 @@
+import type { DocKind } from '@/engine/data/docTypes'
 /**
  * Icon loại tài liệu — bộ nhận diện của "Đề Thi Hub":
  *
@@ -8,18 +9,13 @@
  * Vẽ lại từ file SVG gốc (40×40) để chỉnh kích thước tuỳ ý.
  */
 import type { ReactNode } from 'react'
-import type { DocKind } from '@/engine/data/docTypes'
 
 interface DocIconProps {
   size?: number
   className?: string
 }
 
-function Frame({
-  size,
-  className,
-  children,
-}: DocIconProps & { children: ReactNode }) {
+function Frame({ size, className, children }: DocIconProps & { children: ReactNode }) {
   return (
     <svg
       width={size}

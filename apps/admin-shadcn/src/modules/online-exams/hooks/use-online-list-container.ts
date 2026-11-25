@@ -13,8 +13,8 @@ import { useState } from 'react'
 import { appPaths } from '@/config/app-paths'
 import { usePaged, useClientReady, useUrlState } from '@/hooks'
 import { t } from '@/i18n/translate'
-import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
 import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
 
 import type { lib_onlineExam_OnlineItem as OnlineItem } from '@online-exams-engine'
 export type Tab = 'history' | 'published'
@@ -33,7 +33,12 @@ export function useOnlineListContainer() {
     items,
     canCreate: access.canUse('online'),
     staffDisabled: access.isStaff && access.isDisabled('online'),
-    onCreate: () => navigate(access.canUse('online') ? appPaths.onlineExams.getHref(create()) : appPaths.onlineExams.getHref('new')),
+    onCreate: () =>
+      navigate(
+        access.canUse('online')
+          ? appPaths.onlineExams.getHref(create())
+          : appPaths.onlineExams.getHref('new'),
+      ),
     tab,
     setTab,
     paged,

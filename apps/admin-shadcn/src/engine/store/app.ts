@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Exam, Question, Section } from '@/engine/data/types'
+
 import { pickQuestions, type BankEntry } from '@/engine/data/bank'
 import { gradableMax, scoreQuestion } from '@/engine/lib/grading'
+
+import type { Exam, Question, Section } from '@/engine/data/types'
 
 export interface ChatMessage {
   id: string
@@ -41,7 +43,14 @@ interface AppState {
   quizSubmitted: boolean
   /** last graded result */
   /** gradable: tổng điểm các câu chấm được (có đáp án) */
-  lastResult: { examId: string; score: number; total: number; gradable?: number; correct?: number; at: number } | null
+  lastResult: {
+    examId: string
+    score: number
+    total: number
+    gradable?: number
+    correct?: number
+    at: number
+  } | null
 
   setMode: (m: Mode) => void
   createDraft: (meta: DraftMeta) => void
@@ -75,7 +84,14 @@ interface AppState {
   resetQuiz: () => void
   setQuizSubmitted: (v: boolean) => void
   /** đề link không kèm đáp án: server chấm xong trả điểm + đáp án, gắn vào đề và kết quả */
-  applyGrading: (examId: string, score: number, total: number, key: Record<string, { answer?: string; explanation?: string; solution?: string[] }>, gradable?: number, correct?: number) => void
+  applyGrading: (
+    examId: string,
+    score: number,
+    total: number,
+    key: Record<string, { answer?: string; explanation?: string; solution?: string[] }>,
+    gradable?: number,
+    correct?: number,
+  ) => void
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10)
@@ -157,7 +173,10 @@ export const useApp = create<AppState>()(
           const mcq = picked.filter((e) => e.type === 'trac-nghiem')
           const essay = picked.filter((e) => e.type !== 'trac-nghiem')
 
-          const sections = s.draft.sections.map((sec) => ({ ...sec, questions: [...sec.questions] }))
+          const sections = s.draft.sections.map((sec) => ({
+            ...sec,
+            questions: [...sec.questions],
+          }))
           const s1 = sections[0]
           const s2 = sections[1]
 
@@ -178,8 +197,7 @@ export const useApp = create<AppState>()(
           return { draft: { ...s.draft, sections: renumber(sections) } }
         }),
 
-      renameDraft: (title) =>
-        set((s) => (s.draft ? { draft: { ...s.draft, title } } : s)),
+      renameDraft: (title) => set((s) => (s.draft ? { draft: { ...s.draft, title } } : s)),
 
       setDraft: (draft) => set({ draft }),
 
@@ -232,10 +250,7 @@ export const useApp = create<AppState>()(
           return {
             draft: {
               ...s.draft,
-              sections: [
-                ...s.draft.sections,
-                { id: uid(), title, points: 0, questions: [] },
-              ],
+              sections: [...s.draft.sections, { id: uid(), title, points: 0, questions: [] }],
             },
           }
         }),
@@ -258,9 +273,7 @@ export const useApp = create<AppState>()(
           return {
             draft: {
               ...s.draft,
-              sections: s.draft.sections.map((sec) =>
-                sec.id === id ? { ...sec, ...patch } : sec,
-              ),
+              sections: s.draft.sections.map((sec) => (sec.id === id ? { ...sec, ...patch } : sec)),
             },
           }
         }),
@@ -350,8 +363,7 @@ export const useApp = create<AppState>()(
           return { myExams: [copy, ...s.myExams] }
         }),
 
-      deleteExam: (id) =>
-        set((s) => ({ myExams: s.myExams.filter((e) => e.id !== id) })),
+      deleteExam: (id) => set((s) => ({ myExams: s.myExams.filter((e) => e.id !== id) })),
 
       toggleShared: (id) =>
         set((s) => ({
@@ -361,7 +373,8 @@ export const useApp = create<AppState>()(
       importExam: (exam) => {
         const existing = get().myExams.find((e) => e.importedFrom === exam.id)
         // bản nhập cũ chưa có srcId thì nhập lại, để nộp bài chấm đúng câu
-        if (existing && existing.sections.every((sec) => sec.questions.every((q) => q.srcId))) return existing.id
+        if (existing && existing.sections.every((sec) => sec.questions.every((q) => q.srcId)))
+          return existing.id
         if (existing) set((s) => ({ myExams: s.myExams.filter((e) => e.id !== existing.id) }))
         const copy: Exam = {
           ...exam,
@@ -408,7 +421,13 @@ export const useApp = create<AppState>()(
           const total = questions.reduce((sum, q) => sum + q.points, 0)
           return {
             quizSubmitted: true,
-            lastResult: { examId: exam.id, score, total, gradable: gradableMax(questions), at: Date.now() },
+            lastResult: {
+              examId: exam.id,
+              score,
+              total,
+              gradable: gradableMax(questions),
+              at: Date.now(),
+            },
           }
         }),
 
@@ -439,7 +458,16 @@ export const useApp = create<AppState>()(
                   })),
                 },
           ),
-          lastResult: s.lastResult && s.lastResult.examId === examId ? { ...s.lastResult, score, total, ...(gradable !== undefined ? { gradable } : {}), ...(correct !== undefined ? { correct } : {}) } : s.lastResult,
+          lastResult:
+            s.lastResult && s.lastResult.examId === examId
+              ? {
+                  ...s.lastResult,
+                  score,
+                  total,
+                  ...(gradable !== undefined ? { gradable } : {}),
+                  ...(correct !== undefined ? { correct } : {}),
+                }
+              : s.lastResult,
         })),
     }),
     {

@@ -35,9 +35,7 @@
             "Quy tắc an toàn trong phòng thực hành",
             "Đọc chỉ số và ghi kết quả đo chiều dài, khối lượng, thời gian, nhiệt độ với đơn vị và sai số hợp lí"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: số tự nhiên, phân số, số thập phân (đọc chỉ số đo)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: số tự nhiên, phân số, số thập phân (đọc chỉ số đo)"],
           "chua_duoc_dung": [
             "Sai số tuyệt đối/tương đối, chữ số có nghĩa (Toán 10 và đại học)",
             "Cấu tạo quang học chi tiết của kính hiển vi, độ phóng đại tính bằng số lần (chỉ ở mức nhận biết)",
@@ -67,9 +65,7 @@
             "nhiệt độ sôi (boiling point)",
             "tan (soluble)"
           ],
-          "cong_thuc": [
-            "Kí hiệu: O₂, CO₂, H₂O (dùng làm quen, chưa yêu cầu phản ứng)"
-          ],
+          "cong_thuc": ["Kí hiệu: O₂, CO₂, H₂O (dùng làm quen, chưa yêu cầu phản ứng)"],
           "thi_nghiem": [
             "Quan sát sự nóng chảy của nến, sự bay hơi của nước",
             "Thử tính tan của muối, đường",
@@ -80,9 +76,7 @@
             "Mô tả ba thể của chất và sự chuyển thể (tan, đông đặc, bay hơi, ngưng tụ, thăng hoa)",
             "Nêu thành phần chính của không khí, vai trò của oxygen với sự sống và cách thu oxygen trong phòng thí nghiệm"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: phân số, phần trăm (thành phần không khí)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: phân số, phần trăm (thành phần không khí)"],
           "chua_duoc_dung": [
             "Sơ đồ phân tử chi tiết, phân biệt khí oxygen với khí oxi theo từ vựng cũ (dùng oxygen/khí oxy)",
             "Phản ứng hoá học có kí hiệu phương trình (lớp 8)",
@@ -110,9 +104,7 @@
             "polyvinyl chloride (PVC)",
             "nhiên liệu hoá thạch (fossil fuel)"
           ],
-          "cong_thuc": [
-            "Kí hiệu một số nhựa: PE, PVC, PET trên sản phẩm"
-          ],
+          "cong_thuc": ["Kí hiệu một số nhựa: PE, PVC, PET trên sản phẩm"],
           "thi_nghiem": [
             "So sánh tính chất gốm sứ, thuỷ tinh, kim loại, nhựa",
             "Quan sát nguồn gốc nguyên liệu tự nhiên (bông, tre, đá)"
@@ -122,9 +114,7 @@
             "Phân biệt nguyên liệu tự nhiên và tổng hợp; nhiên liệu hoá thạch và nhiên liệu sinh học",
             "Nêu vai trò của lương thực – thực phẩm, các chất dinh dưỡng chính"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: phần trăm (thành phần chất)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: phần trăm (thành phần chất)"],
           "chua_duoc_dung": [
             "Cấu trúc phân tử polymer (lớp 9)",
             "Nhiệt trị của nhiên liệu (tính toán bằng kJ — chỉ ở mức nêu)"
@@ -164,9 +154,7 @@
             "Nêu nguyên tắc và chọn phương pháp tách chất phù hợp (lọc, bay hơi, chưng cất, dùng nam châm, chiết...)",
             "Vận dụng tách chất trong thực tiễn (làm muối, lọc nước)"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: phần trăm khối lượng nội dung (mức nêu)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: phần trăm khối lượng nội dung (mức nêu)"],
           "chua_duoc_dung": [
             "Chiết xuất phân đoạn dầu mỏ (chỉ nêu ở lớp 9)",
             "Chromatography (sắc kí)",
@@ -205,9 +193,7 @@
             "So sánh tế bào động vật và tế bào thực vật",
             "Nêu sự lớn lên và sinh sản của tế bào (phân chia tế bào)"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kỹ năng dùng kính hiển vi ở chương Mở đầu"
-          ],
+          "kien_thuc_duoc_dung": ["Kỹ năng dùng kính hiển vi ở chương Mở đầu"],
           "chua_duoc_dung": [
             "Cơ chế phân bào (mitosis) chi tiết từng kỳ",
             "Chức năng từng bào quan nhỏ (ti thể, ribosome) ở mức phân tử",
@@ -236,17 +222,13 @@
             "hệ cơ quan (organ system)"
           ],
           "cong_thuc": [],
-          "thi_nghiem": [
-            "Quan sát và mô tả cơ thể đơn bào (trùng shoes), cơ thể đa bào"
-          ],
+          "thi_nghiem": ["Quan sát và mô tả cơ thể đơn bào (trùng shoes), cơ thể đa bào"],
           "yeu_cau_can_dat": [
             "Trình bày được mối quan hệ tế bào – mô – cơ quan – cơ thể",
             "So sánh cơ thể đơn bào và đa bào về cách thực hiện các chức năng sống",
             "Mô tả sự phân hoá chức năng giữa các mô ở sinh vật đa bào"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kiến thức tế bào ở chương V"
-          ],
+          "kien_thuc_duoc_dung": ["Kiến thức tế bào ở chương V"],
           "chua_duoc_dung": [
             "Hệ cơ quan người chi tiết (cơ thể người ở lớp 8)",
             "Phân loại mô động vật/thực vật chi tiết theo hình thái học"
@@ -286,9 +268,7 @@
             "Phân biệt các nhóm thực vật, các nhóm động vật theo đặc điểm cấu tạo",
             "Nêu khái niệm và ý nghĩa của đa dạng sinh học, biện pháp bảo tồn"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: phép chia, phân loại theo tính chất"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: phép chia, phân loại theo tính chất"],
           "chua_duoc_dung": [
             "Phân loại học theo 5/6 giới chi tiết với danh pháp Latin kép đầy đủ (chỉ nêu mức khái niệm)",
             "Di truyền học vi khuẩn (lớp 9)",
@@ -363,20 +343,14 @@
             "năng lượng hao phí (wasted energy)",
             "điện năng (electrical energy)"
           ],
-          "cong_thuc": [
-            "Đơn vị năng lượng: joule (J), kilôwatt giờ (kWh) — mức làm quen"
-          ],
-          "thi_nghiem": [
-            "Thí nghiệm chuyển hoá năng lượng: quả nặng, pin – bóng đèn, nến đốt"
-          ],
+          "cong_thuc": ["Đơn vị năng lượng: joule (J), kilôwatt giờ (kWh) — mức làm quen"],
+          "thi_nghiem": ["Thí nghiệm chuyển hoá năng lượng: quả nặng, pin – bóng đèn, nến đốt"],
           "yeu_cau_can_dat": [
             "Nêu năng lượng là khả năng thực hiện công; kể tên các dạng năng lượng (nhiệt, quang, hoá, cơ, điện, hạt nhân)",
             "Mô tả sự truyền và chuyển hoá năng lượng giữa các dạng; nêu năng lượng hao phí",
             "Phân biệt nguồn năng lượng tái tạo và không tái tạo; biện pháp tiết kiệm năng lượng"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: phép tính phần trăm (hiệu suất nội dung ở mức nêu)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: phép tính phần trăm (hiệu suất nội dung ở mức nêu)"],
           "chua_duoc_dung": [
             "Công thức động năng W = mv²/2, thế năng W = mgh (lớp 9)",
             "Định luật bảo toàn năng lượng dưới dạng phương trình (lớp 9)",
@@ -406,17 +380,13 @@
             "sao chổi (comet)"
           ],
           "cong_thuc": [],
-          "thi_nghiem": [
-            "Mô hình chuyển động tự quay của Trái Đất, pha của Mặt Trăng"
-          ],
+          "thi_nghiem": ["Mô hình chuyển động tự quay của Trái Đất, pha của Mặt Trăng"],
           "yeu_cau_can_dat": [
             "Mô tả chuyển động biểu kiến của Mặt Trời và chuyển động tự quay của Trái Đất; nêu hệ quả (ngày – đêm)",
             "Mô tả Mặt Trăng và chu kì pha trăng; nêu hiện tượng nhật thực/nguyệt thực ở mức khái quát",
             "Nêu thành phần của Hệ Mặt Trời và vị trí của Hệ Mặt Trời trong Ngân Hà"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 6: chia, ước lượng (chu kì 24 giờ, 27–29 ngày, 365 ngày)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 6: chia, ước lượng (chu kì 24 giờ, 27–29 ngày, 365 ngày)"],
           "chua_duoc_dung": [
             "Bán trục lớn, định luật Kepler (thiên văn nâng cao)",
             "Phép tính tính ngày lạc quyển, dương lịch chi tiết",
@@ -474,9 +444,7 @@
             "Nêu khái niệm nguyên tố hoá học; đọc được vị trí nguyên tố trong bảng tuần hoàn (nhóm, chu kì)",
             "Tra bảng tuần hoàn để biết kí hiệu, tên, số hiệu nguyên tử, nguyên tử khối"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: số hữu tỉ, số nguyên âm (điện tích, số hạt)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: số hữu tỉ, số nguyên âm (điện tích, số hạt)"],
           "chua_duoc_dung": [
             "Mô hình lượng tử, obitan (đại học)",
             "Cấu hình electron chi tiết theo lớp (chỉ nêu tới lớp electron ngoài cùng)",
@@ -510,17 +478,13 @@
             "CTHH: H₂O, CO₂, O₂, N₂, NaCl, HCl, CH₄...",
             "Quy tắc hoá trị: I·a = II·b (hoá trị × số nguyên tử bằng nhau)"
           ],
-          "thi_nghiem": [
-            "Mô hình ghép phân tử nước, phân tử oxygen"
-          ],
+          "thi_nghiem": ["Mô hình ghép phân tử nước, phân tử oxygen"],
           "yeu_cau_can_dat": [
             "Phân biệt đơn chất và hợp chất; nêu ý nghĩa liên kết hoá học",
             "Xác định hoá trị của nguyên tố trong hợp chất; lập công thức hoá học theo quy tắc hoá trị",
             "Nêu ý nghĩa của công thức hoá học"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: phân số, tỉ lệ, tìm hai số khi biết tổng/tỉ (lập CTHH)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: phân số, tỉ lệ, tìm hai số khi biết tổng/tỉ (lập CTHH)"],
           "chua_duoc_dung": [
             "Liên kết ion, liên kết kim loại ở mức chi tiết cơ chế (chỉ nêu tên)",
             "Mol và phương trình hoá học (lớp 8)",
@@ -599,18 +563,13 @@
             "Đơn vị đo mức tiếng ồn: đêxiben (dB)",
             "Tốc độ truyền âm trong không khí khoảng 340 m/s (20°C) — số liệu cho sẵn"
           ],
-          "thi_nghiem": [
-            "Âng-ten phát âm, cộng hưởng hai ngã tư",
-            "Quan sát dao động của dây đàn"
-          ],
+          "thi_nghiem": ["Âng-ten phát âm, cộng hưởng hai ngã tư", "Quan sát dao động của dây đàn"],
           "yeu_cau_can_dat": [
             "Mô tả âm là sóng cơ truyền trong môi trường vật chất, không truyền được trong chân không",
             "Nêu mối liên hệ tần số – độ cao, biên độ – độ to",
             "Mô tả phản xạ âm (tiếng vọng, siêu âm) và ứng dụng; nêu ô nhiễm tiếng ồn và biện pháp giảm"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: tỉ lệ nghịch (tần số – chu kì, mức nêu)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: tỉ lệ nghịch (tần số – chu kì, mức nêu)"],
           "chua_duoc_dung": [
             "Công thức sóng v = λf chi tiết (lớp 9/vật lí sóng)",
             "Phân tích phổ âm, cường độ âm theo logarit (đại học)"
@@ -695,9 +654,7 @@
             "Vận dụng tính đẩy – hút giữa hai cực nam châm",
             "Mô tả cách chế tạo nam châm điện và nêu ưu điểm (bật/tắt, thay đổi lực từ)"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: trực quan hình học cho mô hình đường sức"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: trực quan hình học cho mô hình đường sức"],
           "chua_duoc_dung": [
             "Điện từ học: cảm ứng điện từ, dòng điện cảm ứng (lớp 9 chủ đề điện – điện từ)",
             "Công thức lực từ F = BIL (đại học)"
@@ -739,9 +696,7 @@
             "Mô tả hô hấp tế bào và so sánh quang hợp – hô hấp",
             "Mô tả trao đổi khí, vai trò của nước và chất dinh dưỡng, trao đổi nước ở thực vật và động vật"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: tỉ lệ, đồ thị (yếu tố ảnh hưởng quang hợp)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: tỉ lệ, đồ thị (yếu tố ảnh hưởng quang hợp)"],
           "chua_duoc_dung": [
             "Phương trình hoá học của quang hợp, chu trình Calvin (lớp 9 và đại học)",
             "Glycolysis, chu trình Krebs (đại học)",
@@ -771,18 +726,13 @@
             "hướng sáng (phototropism)"
           ],
           "cong_thuc": [],
-          "thi_nghiem": [
-            "Thí nghiệm cây con quay về phía sáng",
-            "Quan sát tập tính của kiến, cá"
-          ],
+          "thi_nghiem": ["Thí nghiệm cây con quay về phía sáng", "Quan sát tập tính của kiến, cá"],
           "yeu_cau_can_dat": [
             "Nêu khái niệm cảm ứng; kể các hình thức phản ứng của thực vật, động vật với kích thích",
             "Mô tả một số tập tính bẩm sinh và tập tính học được ở động vật",
             "Nêu ứng dụng hiện tượng cảm ứng vào sản xuất"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: lập luận nếu – thì trong suy luận khoa học"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: lập luận nếu – thì trong suy luận khoa học"],
           "chua_duoc_dung": [
             "Hệ thần kinh, phản xạ có điều kiện Pavlov (lớp 8 – cơ thể người)",
             "Hoóc-môn sinh trưởng chi tiết (auxin) ở mức phân tử"
@@ -819,9 +769,7 @@
             "Mô tả một số biện pháp kĩ thuật thúc đẩy/điều khiển sinh trưởng (bón phân, chiếu sáng, dùng chất điều hoà ở mức nêu)",
             "Vận dụng vào trồng trọt, chăn nuôi"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7: đọc đồ thị theo trục toạ độ"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7: đọc đồ thị theo trục toạ độ"],
           "chua_duoc_dung": [
             "Hoóc-môn sinh trưởng chi tiết, gen điều khiển sinh trưởng (lớp 9, đại học)",
             "Đường cong sinh trưởng hình chữ S với mô hình toán"
@@ -1133,9 +1081,7 @@
             "sự truyền nhiệt (heat transfer)",
             "sự nở vì nhiệt (thermal expansion)"
           ],
-          "cong_thuc": [
-            "Đơn vị nhiệt lượng: joule (J), calo (cal); 1 cal = 4,186 J"
-          ],
+          "cong_thuc": ["Đơn vị nhiệt lượng: joule (J), calo (cal); 1 cal = 4,186 J"],
           "thi_nghiem": [
             "Đo nhiệt lượng bằng joulemeter (cuộn dây đốt trong nước)",
             "Thí nghiệm truyền nhiệt qua thanh kim loại",
@@ -1146,9 +1092,7 @@
             "So sánh ba cách truyền nhiệt (dẫn, đối lưu, bức xạ) và ví dụ",
             "Mô tả sự nở vì nhiệt của chất rắn, chất lỏng, khí và ứng dụng, hạn chế"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 8: tỉ lệ thuận, tính theo phần trăm"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 8: tỉ lệ thuận, tính theo phần trăm"],
           "chua_duoc_dung": [
             "Công thức Q = mcΔt chi tiết (lớp 10)",
             "Định luật bảo toàn năng lượng dạng phương trình (lớp 9)",
@@ -1180,9 +1124,7 @@
             "hoóc-môn (hormone)",
             "nhiệt độ cơ thể (body temperature)"
           ],
-          "cong_thuc": [
-            "Chỉ số BMI = m/h² (mức vận dụng sức khoẻ)"
-          ],
+          "cong_thuc": ["Chỉ số BMI = m/h² (mức vận dụng sức khoẻ)"],
           "thi_nghiem": [
             "Quan sát mô hình khung xương, mô hình tim",
             "Đo mạch, nhịp thở sau vận động"
@@ -1192,9 +1134,7 @@
             "Mô tả chức năng cơ bản của từng hệ và mối liên hệ giữa các hệ",
             "Nêu nguyên tắc điều hoà môi trường trong (nước, nhiệt độ, glucose) và ý nghĩa"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 7–8: đọc bảng số liệu, tính BMI"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 7–8: đọc bảng số liệu, tính BMI"],
           "chua_duoc_dung": [
             "Sinh hoá chi tiết quá trình tiêu hoá (enzyme cụ thể ở tá tràng)",
             "Điện tâm đồ, cơ chế xung thần kinh ở mức ion (đại học)",
@@ -1225,12 +1165,8 @@
             "chuỗi thức ăn (food chain)",
             "sinh quyển (biosphere)"
           ],
-          "cong_thuc": [
-            "Mật độ quần thể = số cá thể/diện tích (hoặc thể tích)"
-          ],
-          "thi_nghiem": [
-            "Quan sát hệ sinh thái ao, ruộng; lập chuỗi thức ăn"
-          ],
+          "cong_thuc": ["Mật độ quần thể = số cá thể/diện tích (hoặc thể tích)"],
+          "thi_nghiem": ["Quan sát hệ sinh thái ao, ruộng; lập chuỗi thức ăn"],
           "yeu_cau_can_dat": [
             "Phân loại nhân tố sinh thái (vô sinh, hữu sinh) và tác động lên sinh vật",
             "Trình bày đặc điểm quần thể (mật độ, phân bố), quần xã (quan hệ cạnh tranh, cộng sinh), hệ sinh thái (dòng năng lượng, vòng vật chất)",
@@ -1433,9 +1369,7 @@
             "Nêu nguyên tắc tạo dòng điện xoay chiều trong máy phát điện",
             "Nêu vai trò máy biến áp trong truyền tải điện; nêu tác dụng của dòng điện xoay chiều"
           ],
-          "kien_thuc_duoc_dung": [
-            "KHTN 8: từ trường, nam châm điện; KHTN 9: công suất điện"
-          ],
+          "kien_thuc_duoc_dung": ["KHTN 8: từ trường, nam châm điện; KHTN 9: công suất điện"],
           "chua_duoc_dung": [
             "Suất điện động cảm ứng theo định luật Faraday–Lenz dạng công thức (lớp 10)",
             "Dòng điện ba pha, điện từ trường lan truyền (lớp 12)"
@@ -1463,17 +1397,13 @@
             "pin mặt trời (solar cell)"
           ],
           "cong_thuc": [],
-          "thi_nghiem": [
-            "Mô hình tấm pin mặt trời với đèn chiếu"
-          ],
+          "thi_nghiem": ["Mô hình tấm pin mặt trời với đèn chiếu"],
           "yeu_cau_can_dat": [
             "Mô tả vòng năng lượng trên Trái Đất (năng lượng Mặt Trời → quang hợp, khí quyển, nước)",
             "Nêu nguồn gốc và hạn chế của năng lượng hoá thạch",
             "Kể tên các dạng năng lượng tái tạo và ưu – nhược điểm khi sử dụng"
           ],
-          "kien_thuc_duoc_dung": [
-            "KHTN 6: năng lượng tái tạo; KHTN 9 chương 1: công, công suất"
-          ],
+          "kien_thuc_duoc_dung": ["KHTN 6: năng lượng tái tạo; KHTN 9 chương 1: công, công suất"],
           "chua_duoc_dung": [
             "Công nghệ pin mặt trời chi tiết lớp silic p-n (kĩ thuật)",
             "Số liệu sản lượng điện gió/mặt trời toàn cầu cập nhật theo năm"
@@ -1551,17 +1481,13 @@
             "CTPT alkene: CₙH₂ₙ (ethene C₂H₄)",
             "CH₄ + 2O₂ → CO₂ + 2H₂O; C₂H₄ + Br₂ → C₂H₄Br₂"
           ],
-          "thi_nghiem": [
-            "Đốt methane/chất khí; cho ethene vào nước brom"
-          ],
+          "thi_nghiem": ["Đốt methane/chất khí; cho ethene vào nước brom"],
           "yeu_cau_can_dat": [
             "Nêu đặc điểm chung của hợp chất hữu cơ",
             "Trình bày đặc điểm, tính chất và ứng dụng của alkane, alkene (phản ứng cháy, thế ở mức nêu, cộng brom làm mất màu nước brom)",
             "Nêu nguồn nhiên liệu (dầu mỏ, khí tự nhiên) và hạn chế"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 9: hàm số, lập phương trình (tìm n trong CTPT)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 9: hàm số, lập phương trình (tìm n trong CTPT)"],
           "chua_duoc_dung": [
             "Alkyne, vòng benzen, đồng phân (lớp 10–11)",
             "Cơ chế phản ứng thế/cộng (lớp 10)"
@@ -1594,20 +1520,13 @@
             "C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂ (lên men)",
             "2C₂H₅OH + O₂ → CH₃COOH + H₂O (lên men giấm, nêu)"
           ],
-          "thi_nghiem": [
-            "Giấm + quỳ tím đỏ; giấm + NaHCO₃ sủi bọt CO₂"
-          ],
+          "thi_nghiem": ["Giấm + quỳ tím đỏ; giấm + NaHCO₃ sủi bọt CO₂"],
           "yeu_cau_can_dat": [
             "Nêu tính chất và ứng dụng của etylic alcohol (nhiên liệu, hoá chất, đồ uống) và cách sản xuất bằng lên men",
             "Nêu tính chất của acetic acid (tác dụng với kim loại hoạt động, base, muối carbonate), ứng dụng (giấm)"
           ],
-          "kien_thuc_duoc_dung": [
-            "KHTN 8: PTHH và tính theo PTHH; acid, base, muối"
-          ],
-          "chua_duoc_dung": [
-            "Nhóm chức -OH, -COOH (lớp 10)",
-            "Este, phản ứng ester hoá (lớp 10)"
-          ],
+          "kien_thuc_duoc_dung": ["KHTN 8: PTHH và tính theo PTHH; acid, base, muối"],
+          "chua_duoc_dung": ["Nhóm chức -OH, -COOH (lớp 10)", "Este, phản ứng ester hoá (lớp 10)"],
           "dang_bai_dien_hinh": [
             "Viết PTHH lên men tinh bột/thành ethanol",
             "Tính khối lượng ethanol từ khối lượng glucose",
@@ -1632,9 +1551,7 @@
             "polymer (polymerization)",
             "polyethylene (PE)"
           ],
-          "cong_thuc": [
-            "Glucose C₆H₁₂O₆; saccharose C₁₂H₂₂O₁₁; C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂"
-          ],
+          "cong_thuc": ["Glucose C₆H₁₂O₆; saccharose C₁₂H₂₂O₁₁; C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂"],
           "thi_nghiem": [
             "Thuỷ phân tinh bột (nuớc iốt nhận biết tinh bột)",
             "Đốt tơ nilon/tơ tằm so sánh mùi"
@@ -1679,17 +1596,13 @@
             "CaO + H₂O → Ca(OH)₂",
             "Ca(OH)₂ + CO₂ → CaCO₃ + H₂O"
           ],
-          "thi_nghiem": [
-            "Nhiệt phân đá vôi (mô tả), cho CO₂ vào nước vôi trong đục"
-          ],
+          "thi_nghiem": ["Nhiệt phân đá vôi (mô tả), cho CO₂ vào nước vôi trong đục"],
           "yeu_cau_can_dat": [
             "Nêu thành phần chính vỏ Trái Đất và khai thác tài nguyên khoáng sản",
             "Trình bày sản xuất vôi sống, xi măng từ đá vôi và ứng dụng",
             "Mô tả nguồn nhiên liệu hoá thạch, chu trình carbon và liên hệ sự ấm lên toàn cầu"
           ],
-          "kien_thuc_duoc_dung": [
-            "KHTN 8: PTHH, tính theo PTHH; KHTN 6: Trái Đất và bầu trời"
-          ],
+          "kien_thuc_duoc_dung": ["KHTN 8: PTHH, tính theo PTHH; KHTN 6: Trái Đất và bầu trời"],
           "chua_duoc_dung": [
             "Địa hoá chi tiết các chu kỳ (lớp 10/nâng cao)",
             "Lò cao luyện gang quy trình chi tiết (chỉ nêu)"
@@ -1721,12 +1634,8 @@
             "dịch mã (translation)",
             "đột biến (mutation)"
           ],
-          "cong_thuc": [
-            "Ti lệ phân li kiểu hình F₂ = 3:1 (Mendel một cặp tính trạng)"
-          ],
-          "thi_nghiem": [
-            "Trồng và phân tích kết quả lai cây đậu theo bảng Mendel"
-          ],
+          "cong_thuc": ["Ti lệ phân li kiểu hình F₂ = 3:1 (Mendel một cặp tính trạng)"],
+          "thi_nghiem": ["Trồng và phân tích kết quả lai cây đậu theo bảng Mendel"],
           "yeu_cau_can_dat": [
             "Nêu khái niệm di truyền; trình bày thí nghiệm Mendel và quy luật phân li 3:1 (viết sơ đồ lai)",
             "Mô tả cấu trúc DNA (chuỗi nucleotide), vai trò gene; mô tả tái bản DNA, phiên mã, dịch mã ở mức đại cương",
@@ -1766,21 +1675,14 @@
             "NST giới tính X, Y",
             "di truyền liên kết (linked inheritance)"
           ],
-          "cong_thuc": [
-            "Sơ đồ lai về tính trạng giới tính: XX × XY → 1XX : 1XY"
-          ],
-          "thi_nghiem": [
-            "Quan sát NST của con ruồi giấm qua ảnh"
-          ],
+          "cong_thuc": ["Sơ đồ lai về tính trạng giới tính: XX × XY → 1XX : 1XY"],
+          "thi_nghiem": ["Quan sát NST của con ruồi giấm qua ảnh"],
           "yeu_cau_can_dat": [
             "Mô tả NST và bộ NST; phân biệt nguyên phân và giảm phân ở mức đại cương",
             "Trình bày cơ chế xác định giới tính XX–XY; giải thích tỉ lệ giới tính 1:1",
             "Nêu di truyền liên kết với giới tính (mù màu) và đột biến nhiễm sắc thể (hội chứng Down ở mức nêu)"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 9: xác suất 50%, tỉ lệ",
-            "Chương di truyền Mendel"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 9: xác suất 50%, tỉ lệ", "Chương di truyền Mendel"],
           "chua_duoc_dung": [
             "Karyotype phân tích băng NST chi tiết (đại học)",
             "Liên kết không hoàn toàn với trao đổi chéo (mức nêu)"
@@ -1810,9 +1712,7 @@
             "chọn lọc tự nhiên (natural selection)"
           ],
           "cong_thuc": [],
-          "thi_nghiem": [
-            "Phân tích phả hệ gia đình theo sơ đồ cho sẵn"
-          ],
+          "thi_nghiem": ["Phân tích phả hệ gia đình theo sơ đồ cho sẵn"],
           "yeu_cau_can_dat": [
             "Sử dụng phả hệ để nhận xét cách di truyền một tính trạng; nêu ứng dụng di truyền học trong y học, nông nghiệp",
             "Nêu ý nghĩa của công nghệ di truyền (gmos, insulin)",
@@ -1851,9 +1751,7 @@
             "chọn lọc tự nhiên (natural selection)"
           ],
           "cong_thuc": [],
-          "thi_nghiem": [
-            "Phân tích phả hệ gia đình theo sơ đồ cho sẵn"
-          ],
+          "thi_nghiem": ["Phân tích phả hệ gia đình theo sơ đồ cho sẵn"],
           "yeu_cau_can_dat": [
             "Sử dụng phả hệ để nhận xét cách di truyền một tính trạng; nêu ứng dụng di truyền học trong y học, nông nghiệp",
             "Nêu ý nghĩa của công nghệ di truyền (gmos, insulin)",
@@ -1875,9 +1773,7 @@
           "luu_y_ra_de": "Không dùng thuật ngữ Darwinism/Lamarckism với cách giải thích bị bẻ cong historically."
         }
       ],
-      "chuyen_de": [
-        "Chuyên đề học tập KHTN 9 (lựa chọn theo nhà trường)"
-      ],
+      "chuyen_de": ["Chuyên đề học tập KHTN 9 (lựa chọn theo nhà trường)"],
       "ghi_chu_chua_chac": [
         "Mục lục lớp 9 lấy theo KNTT (51 bài, 14 chương) từ vietjack; CTST/CD gộp khác (ví dụ CTST không có chương khai thác tài nguyên riêng biệt) — ten_theo_sach ghi theo chương trình, chưa đối chiếu tên bài từng sách",
         "Phân bố học kì lớp 9: tham khảo KNTT HK1 học chương 1–8, HK2 học chương 9–14; các trường có thể lệch",
@@ -2151,10 +2047,7 @@
           "tong_diem": 6
         }
       ],
-      "pham_vi": [
-        "khtn8-phan-ung-hoa-hoc",
-        "khtn8-acid-base-oxide-muoi"
-      ],
+      "pham_vi": ["khtn8-phan-ung-hoa-hoc", "khtn8-acid-base-oxide-muoi"],
       "ti_le_muc_do": "NB 40%, TH 40%, VD 20%",
       "ti_le_mach": "Hoá 100% (theo tiến độ KNTT học kì 1)"
     },

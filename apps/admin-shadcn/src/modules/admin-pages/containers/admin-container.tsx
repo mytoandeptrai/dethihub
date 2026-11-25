@@ -1,7 +1,7 @@
 'use client'
 import dynamic from 'next/dynamic'
-import { PageSkeleton } from '@/components/page-skeleton'
 
+import { PageSkeleton } from '@/components/page-skeleton'
 import { useAdminContainer } from '@/modules/admin-pages/hooks/use-admin-container'
 
 import type { AdminSection } from '@/modules/admin-pages/hooks/use-admin-container'
@@ -11,5 +11,17 @@ const AdminUi = dynamic(
 )
 export function AdminContainer({ section }: { section: AdminSection }) {
   const props = useAdminContainer(section)
-  return props.isPending ? <PageSkeleton variant={section === 'overview' || section === 'stats' ? 'dashboard' : section === 'ai' ? 'form' : 'table'} /> : <AdminUi {...props} />
+  return props.isPending ? (
+    <PageSkeleton
+      variant={
+        section === 'overview' || section === 'stats'
+          ? 'dashboard'
+          : section === 'ai'
+            ? 'form'
+            : 'table'
+      }
+    />
+  ) : (
+    <AdminUi {...props} />
+  )
 }

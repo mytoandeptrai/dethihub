@@ -773,10 +773,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly10-mo-dau-an-toan",
-        "ly10-dong-hoc"
-      ],
+      "pham_vi": ["ly10-mo-dau-an-toan", "ly10-dong-hoc"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -803,11 +800,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly10-mo-dau-an-toan",
-        "ly10-dong-hoc",
-        "ly10-dong-luc-hoc"
-      ],
+      "pham_vi": ["ly10-mo-dau-an-toan", "ly10-dong-hoc", "ly10-dong-luc-hoc"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -834,10 +827,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly10-nang-luong-cong",
-        "ly10-dong-luong"
-      ],
+      "pham_vi": ["ly10-nang-luong-cong", "ly10-dong-luong"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -896,9 +886,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly11-dao-dong"
-      ],
+      "pham_vi": ["ly11-dao-dong"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -925,10 +913,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly11-dao-dong",
-        "ly11-song"
-      ],
+      "pham_vi": ["ly11-dao-dong", "ly11-song"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -955,9 +940,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly11-dien-truong"
-      ],
+      "pham_vi": ["ly11-dien-truong"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -984,10 +967,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly11-dien-truong",
-        "ly11-dong-dien-khong-doi"
-      ],
+      "pham_vi": ["ly11-dien-truong", "ly11-dong-dien-khong-doi"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1014,9 +994,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly12-vat-li-nhiet"
-      ],
+      "pham_vi": ["ly12-vat-li-nhiet"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1043,10 +1021,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly12-vat-li-nhiet",
-        "ly12-khi-ly-tuong"
-      ],
+      "pham_vi": ["ly12-vat-li-nhiet", "ly12-khi-ly-tuong"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1073,9 +1048,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly12-tu-truong-cam-ung-dien-tu"
-      ],
+      "pham_vi": ["ly12-tu-truong-cam-ung-dien-tu"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1102,10 +1075,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "ly12-tu-truong-cam-ung-dien-tu",
-        "ly12-vat-li-hat-nhan"
-      ],
+      "pham_vi": ["ly12-tu-truong-cam-ung-dien-tu", "ly12-vat-li-hat-nhan"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     }
   ]

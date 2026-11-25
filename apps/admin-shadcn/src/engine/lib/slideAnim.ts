@@ -28,7 +28,8 @@ function unitOf(el: SlideElement, layoutId: string): { key: string; anim: Anim }
   }
   if (ANSWER.has(el.id)) return { key: 'answer', anim: 'zoom' }
   if (CONCLUSION.has(el.id)) return { key: 'conclusion', anim: 'rise' }
-  if (SINGLE.has(el.id) || el.type === 'table' || el.type === 'chart') return { key: el.id, anim: 'fade' }
+  if (SINGLE.has(el.id) || el.type === 'table' || el.type === 'chart')
+    return { key: el.id, anim: 'fade' }
   return null
 }
 
@@ -98,10 +99,17 @@ export const startOf = (el: SlideElement): number | undefined => el.step ?? el.l
  * hộp chữ hiện từng dòng chiếm một lần bấm cho mỗi dòng.
  */
 function renumber(elements: SlideElement[], order?: number[]): SlideElement[] {
-  const starts = [...new Set(elements.map(startOf).filter((s): s is number => s !== undefined))].sort((a, b) => a - b)
+  const starts = [
+    ...new Set(elements.map(startOf).filter((s): s is number => s !== undefined)),
+  ].sort((a, b) => a - b)
   const ordered = order ?? starts
   const span = (start: number) =>
-    Math.max(1, ...elements.filter((el) => startOf(el) === start).map((el) => (el.lineStep !== undefined ? lineCount(el) : 1)))
+    Math.max(
+      1,
+      ...elements
+        .filter((el) => startOf(el) === start)
+        .map((el) => (el.lineStep !== undefined ? lineCount(el) : 1)),
+    )
   const map = new Map<number, number>()
   let next = 1
   for (const s of ordered) {
@@ -123,10 +131,15 @@ export type ElementAnimAction =
   | { type: 'speed'; ms: number }
 
 /** Áp một thao tác hiệu ứng cho phần tử `id`; các lần bấm luôn được đánh số lại liền mạch. */
-export function applyElementAnim(elements: SlideElement[], id: string, action: ElementAnimAction): SlideElement[] {
+export function applyElementAnim(
+  elements: SlideElement[],
+  id: string,
+  action: ElementAnimAction,
+): SlideElement[] {
   const el = elements.find((e) => e.id === id)
   if (!el) return elements
-  const patch = (fn: (e: SlideElement) => SlideElement) => elements.map((e) => (e.id === id ? fn({ ...e }) : e))
+  const patch = (fn: (e: SlideElement) => SlideElement) =>
+    elements.map((e) => (e.id === id ? fn({ ...e }) : e))
   switch (action.type) {
     case 'set': {
       if (startOf(el) !== undefined) return patch((e) => ({ ...e, anim: action.anim }))
@@ -158,7 +171,9 @@ export function applyElementAnim(elements: SlideElement[], id: string, action: E
     case 'move': {
       const start = startOf(el)
       if (start === undefined) return elements
-      const starts = [...new Set(elements.map(startOf).filter((s): s is number => s !== undefined))].sort((a, b) => a - b)
+      const starts = [
+        ...new Set(elements.map(startOf).filter((s): s is number => s !== undefined)),
+      ].sort((a, b) => a - b)
       const i = starts.indexOf(start)
       const j = i + action.dir
       if (j < 0 || j >= starts.length) return elements

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from '@/engine/compat/router'
+
 import { aiQuota } from '@/apis/ai/requests'
+import { Link } from '@/engine/compat/router'
 import { currentSession } from '@/engine/lib/auth'
 import { cn } from '@/engine/lib/cn'
 import { lastAiQuota, reportQuota, TOKENS_PER_POINT, type AiQuota } from '@/engine/lib/llm'
@@ -26,18 +27,25 @@ const fromQuota = (q: AiQuota & { base?: number }, granted: number): State => {
 /** Link tới trang nạp điểm; ẩn khi trang nạp chưa mở cho người dùng. */
 export function TopupLink({ className }: { className?: string }) {
   const canPay = usePricingAccess() === true
-  return canPay ? <Link to="/bang-gia" className={className}>Nạp điểm</Link> : null
+  return canPay ? (
+    <Link to="/bang-gia" className={className}>
+      Nạp điểm
+    </Link>
+  ) : null
 }
 
 /** Vòng điểm AI còn lại ở khung chat; bấm mở thanh nổi nhỏ. Ẩn khi chưa biết hạn mức (khách, máy dev). */
 export function AiQuotaRing({ className }: { className?: string }) {
-  const [state, setState] = useState<State | null>(() => (lastAiQuota ? fromQuota(lastAiQuota, 0) : null))
+  const [state, setState] = useState<State | null>(() =>
+    lastAiQuota ? fromQuota(lastAiQuota, 0) : null,
+  )
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     let alive = true
     const load = () =>
-      currentSession().then((session) => session ? aiQuota({}) : null)
+      currentSession()
+        .then((session) => (session ? aiQuota({}) : null))
         .then((d) => {
           if (!alive || !d) return
           if (d.unlimited) setState({ left: 0, ref: 1, unlimited: true })
@@ -92,7 +100,7 @@ export function AiQuotaRing({ className }: { className?: string }) {
         aria-expanded={open}
         data-tip={open ? undefined : 'Điểm AI'}
         onClick={() => setOpen((o) => !o)}
-        className="flex size-6 items-center justify-center rounded-full hover:bg-sunken"
+        className="hover:bg-sunken flex size-6 items-center justify-center rounded-full"
       >
         <svg viewBox="0 0 22 22" className="size-4 -rotate-90" aria-hidden="true">
           <circle cx="11" cy="11" r={R} fill="none" strokeWidth="2.5" className="stroke-line-2" />
@@ -105,20 +113,37 @@ export function AiQuotaRing({ className }: { className?: string }) {
             strokeLinecap="round"
             strokeDasharray={C}
             strokeDashoffset={C * (1 - fraction)}
-            className={cn('transition-[stroke-dashoffset] duration-500', low ? 'stroke-clay-deep' : 'stroke-clay')}
+            className={cn(
+              'transition-[stroke-dashoffset] duration-500',
+              low ? 'stroke-clay-deep' : 'stroke-clay',
+            )}
           />
         </svg>
       </button>
       {open ? (
-        <div role="dialog" aria-label="Điểm AI" className="anim-pop absolute right-0 bottom-[calc(100%+8px)] z-30 flex items-center gap-3 whitespace-nowrap rounded-[8px] border border-line-2 bg-surface px-3 py-2 text-[13px] shadow-[0_6px_20px_rgba(0,0,0,0.16)]">
+        <div
+          role="dialog"
+          aria-label="Điểm AI"
+          className="anim-pop border-line-2 bg-surface absolute right-0 bottom-[calc(100%+8px)] z-30 flex items-center gap-3 rounded-[8px] border px-3 py-2 text-[13px] whitespace-nowrap shadow-[0_6px_20px_rgba(0,0,0,0.16)]"
+        >
           {state.unlimited ? (
-            <span className="font-semibold text-ink">Không giới hạn</span>
+            <span className="text-ink font-semibold">Không giới hạn</span>
           ) : (
             <span className="text-ink-3">
-              <span className={cn('tnum text-[14px] font-semibold', low ? 'text-clay-deep' : 'text-ink')}>{points.toLocaleString('vi-VN')}</span> điểm còn lại
+              <span
+                className={cn(
+                  'tnum text-[14px] font-semibold',
+                  low ? 'text-clay-deep' : 'text-ink',
+                )}
+              >
+                {points.toLocaleString('vi-VN')}
+              </span>{' '}
+              điểm còn lại
             </span>
           )}
-          {!state.unlimited ? <TopupLink className="font-semibold text-clay hover:underline" /> : null}
+          {!state.unlimited ? (
+            <TopupLink className="text-clay font-semibold hover:underline" />
+          ) : null}
         </div>
       ) : null}
     </div>

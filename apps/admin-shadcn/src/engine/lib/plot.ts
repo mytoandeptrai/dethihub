@@ -139,7 +139,10 @@ export function parseExpr(input: string): Fn {
       // không ngoặc: "sin 2x" là sin(2x) — gom các thừa số số/x/hằng liền sau
       let arg = peek() === '(' ? atom() : power()
       if (toks[i - 1] !== ')') {
-        while (peek() !== undefined && (peek() === 'x' || peek() in CONSTS || /^\d*\.?\d+$/.test(peek()))) {
+        while (
+          peek() !== undefined &&
+          (peek() === 'x' || peek() in CONSTS || /^\d*\.?\d+$/.test(peek()))
+        ) {
           const a = arg
           const b = power()
           arg = (x) => a(x) * b(x)
@@ -190,10 +193,14 @@ export interface PlotSpec {
 }
 
 /** "M(0; 0) chiếu" → điểm; dòng sai bị bỏ qua */
-export function parsePlotPoints(text: string | undefined): Array<{ name: string; x: number; y: number; proj: boolean }> {
+export function parsePlotPoints(
+  text: string | undefined,
+): Array<{ name: string; x: number; y: number; proj: boolean }> {
   const out: Array<{ name: string; x: number; y: number; proj: boolean }> = []
   for (const line of (text ?? '').split(/\n|;\s*(?=[A-Z])/)) {
-    const m = /^\s*([A-Z][A-Za-z0-9']*)\s*\(\s*(-?[\d.,]+)\s*;\s*(-?[\d.,]+)\s*\)\s*(chiếu)?/i.exec(line.replace(/−/g, '-'))
+    const m = /^\s*([A-Z][A-Za-z0-9']*)\s*\(\s*(-?[\d.,]+)\s*;\s*(-?[\d.,]+)\s*\)\s*(chiếu)?/i.exec(
+      line.replace(/−/g, '-'),
+    )
     if (!m) continue
     const x = Number(m[2].replace(',', '.'))
     const y = Number(m[3].replace(',', '.'))
@@ -246,7 +253,10 @@ export function fitAutoBounds(
   return [lo, hi]
 }
 
-const fmt = (v: number) => String(Math.round(v * 1000) / 1000).replace('.', ',').replace('-', '−')
+const fmt = (v: number) =>
+  String(Math.round(v * 1000) / 1000)
+    .replace('.', ',')
+    .replace('-', '−')
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 const SUP_DIGITS: Record<string, string> = {
@@ -283,10 +293,16 @@ export function prettyExpr(raw: string): string {
 
   // 2. Chuyển luỹ thừa số nguyên đơn giản sang kí tự Unicode (x^2 -> x², x^3 -> x³, x^-1 -> x⁻¹)
   s = s.replace(/\^([+-]?\d+)/g, (_, exp: string) =>
-    exp.split('').map((c) => SUP_DIGITS[c] ?? c).join(''),
+    exp
+      .split('')
+      .map((c) => SUP_DIGITS[c] ?? c)
+      .join(''),
   )
   s = s.replace(/\^\(([+-]?\d+)\)/g, (_, exp: string) =>
-    exp.split('').map((c) => SUP_DIGITS[c] ?? c).join(''),
+    exp
+      .split('')
+      .map((c) => SUP_DIGITS[c] ?? c)
+      .join(''),
   )
   s = s.replace(/\^([nN])/g, 'ⁿ')
 
@@ -488,10 +504,12 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
   // miền x bị nới theo miền y → dùng luôn bước của trục y cho cả hai trục
   const stepX = forced && sY ? sY : niceStep(xMax - xMin)
   // cùng đơn vị thì cùng bước chia (trừ khi đành co giãn)
-  const stepY = Math.abs((H - 2 * PAD) / (yMax - yMin) - unit) < 1e-6 ? stepX : sY || niceStep(yMax - yMin)
+  const stepY =
+    Math.abs((H - 2 * PAD) / (yMax - yMin) - unit) < 1e-6 ? stepX : sY || niceStep(yMax - yMin)
   const ticks = (lo: number, hi: number, step: number) => {
     const r: number[] = []
-    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) r.push(Math.round(v / step) * step)
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step)
+      r.push(Math.round(v / step) * step)
     return r
   }
   // 0 nằm ngoài miền → trục bám mép: kẻ dấu ngắt trục, bỏ số sát chỗ trục (kẻo "29" nằm ngay chỗ O)
@@ -518,9 +536,13 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
   )
   // dấu ngắt trục (hai gạch chéo sát gốc O), nền trắng che khúc trục ở giữa
   if (breakY)
-    out.push(`<path d="M${X0 - 5} ${Y0 - 9}h10v6h-10z" fill="#fff"/><path d="M${X0 - 6} ${Y0 - 6}l12 -5M${X0 - 6} ${Y0 - 1}l12 -5" stroke="#222" stroke-width="1.3"/>`)
+    out.push(
+      `<path d="M${X0 - 5} ${Y0 - 9}h10v6h-10z" fill="#fff"/><path d="M${X0 - 6} ${Y0 - 6}l12 -5M${X0 - 6} ${Y0 - 1}l12 -5" stroke="#222" stroke-width="1.3"/>`,
+    )
   if (breakX)
-    out.push(`<path d="M${X0 + 9} ${Y0 - 5}h6v10h-6z" fill="#fff"/><path d="M${X0 + 8} ${Y0 + 6}l5 -12M${X0 + 13} ${Y0 + 6}l5 -12" stroke="#222" stroke-width="1.3"/>`)
+    out.push(
+      `<path d="M${X0 + 9} ${Y0 - 5}h6v10h-6z" fill="#fff"/><path d="M${X0 + 8} ${Y0 + 6}l5 -12M${X0 + 13} ${Y0 + 6}l5 -12" stroke="#222" stroke-width="1.3"/>`,
+    )
   // vạch chia + số
   const tickPath: string[] = []
   for (const v of tx) {
@@ -528,14 +550,18 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
     const x = sx(v)
     if (x > W - 22) continue
     tickPath.push(`M${x.toFixed(1)} ${Y0 - 3}v6`)
-    out.push(`<text x="${x.toFixed(1)}" y="${Y0 + 17}" ${font} text-anchor="middle" data-lbl="x:${Math.round(v * 1000) / 1000}">${fmt(v)}</text>`)
+    out.push(
+      `<text x="${x.toFixed(1)}" y="${Y0 + 17}" ${font} text-anchor="middle" data-lbl="x:${Math.round(v * 1000) / 1000}">${fmt(v)}</text>`,
+    )
   }
   for (const v of ty) {
     if (Math.abs(v) < 1e-9) continue
     const y = sy(v)
     if (y < 22) continue
     tickPath.push(`M${X0 - 3} ${y.toFixed(1)}h6`)
-    out.push(`<text x="${X0 - 7}" y="${(y + 5).toFixed(1)}" ${font} text-anchor="end" data-lbl="y:${Math.round(v * 1000) / 1000}">${fmt(v)}</text>`)
+    out.push(
+      `<text x="${X0 - 7}" y="${(y + 5).toFixed(1)}" ${font} text-anchor="end" data-lbl="y:${Math.round(v * 1000) / 1000}">${fmt(v)}</text>`,
+    )
   }
   out.push(`<path d="${tickPath.join('')}" stroke="#222" stroke-width="1.2"/>`)
 
@@ -543,7 +569,9 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
   const plotPoints = parsePlotPoints(spec.points)
 
   // đường cong: lấy mẫu dày, ngắt nét ở chỗ không xác định hoặc nhảy vọt (tiệm cận)
-  out.push(`<clipPath id="plotclip"><rect x="${PAD}" y="${PAD}" width="${W - 2 * PAD}" height="${H - 2 * PAD}"/></clipPath>`)
+  out.push(
+    `<clipPath id="plotclip"><rect x="${PAD}" y="${PAD}" width="${W - 2 * PAD}" height="${H - 2 * PAD}"/></clipPath>`,
+  )
   const N = 1200
   const span = yMax - yMin
   const marginW = (W - 2 * PAD) * 0.08
@@ -584,7 +612,8 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
     for (let k = 0; k <= N; k++) {
       const x = xMin + ((xMax - xMin) * k) / N
       const y = f(x)
-      const ok = Number.isFinite(y) && Math.abs(y - yMin) < span * 20 && Math.abs(y - yMax) < span * 20
+      const ok =
+        Number.isFinite(y) && Math.abs(y - yMin) < span * 20 && Math.abs(y - yMax) < span * 20
       const jump = ok && Number.isFinite(prev) && Math.abs(y - prev) > span * 1.5
       const px = sx(x)
       const py = sy(y)
@@ -599,7 +628,9 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
       }
       prev = ok ? y : NaN
     }
-    out.push(`<path d="${d}" stroke="${c.color}" stroke-width="2.2" fill="none" stroke-linejoin="round" clip-path="url(#plotclip)"/>`)
+    out.push(
+      `<path d="${d}" stroke="${c.color}" stroke-width="2.2" fill="none" stroke-linejoin="round" clip-path="url(#plotclip)"/>`,
+    )
 
     // Tìm các vị trí mỏ neo hợp lệ: trong miền 8% mép trong và không sát chỗ nhảy tiệm cận
     const validIndices: number[] = []
@@ -711,8 +742,14 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
 
         const kc0 = Math.max(0, k - 6)
         const kc1 = Math.min(N, k + 6)
-        const th1 = Math.atan2(cr.points[k].py - cr.points[kc0].py, cr.points[k].px - cr.points[kc0].px)
-        const th2 = Math.atan2(cr.points[kc1].py - cr.points[k].py, cr.points[kc1].px - cr.points[k].px)
+        const th1 = Math.atan2(
+          cr.points[k].py - cr.points[kc0].py,
+          cr.points[k].px - cr.points[kc0].px,
+        )
+        const th2 = Math.atan2(
+          cr.points[kc1].py - cr.points[k].py,
+          cr.points[kc1].px - cr.points[k].px,
+        )
         const curvature = Math.abs(th2 - th1)
 
         const nx = Math.sin(theta)
@@ -788,10 +825,16 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
             if (distCenter < halfW + pl.halfW + 15) {
               let minD = distToBox(pl.cx, pl.cy, s.cx, s.cy, cosPhi, sinPhi, halfW, halfH)
               for (const cor of pl.corners) {
-                minD = Math.min(minD, distToBox(cor.x, cor.y, s.cx, s.cy, cosPhi, sinPhi, halfW, halfH))
+                minD = Math.min(
+                  minD,
+                  distToBox(cor.x, cor.y, s.cx, s.cy, cosPhi, sinPhi, halfW, halfH),
+                )
               }
               for (const cor of corners) {
-                minD = Math.min(minD, distToBox(cor.x, cor.y, pl.cx, pl.cy, pl.cosPhi, pl.sinPhi, pl.halfW, pl.halfH))
+                minD = Math.min(
+                  minD,
+                  distToBox(cor.x, cor.y, pl.cx, pl.cy, pl.cosPhi, pl.sinPhi, pl.halfW, pl.halfH),
+                )
               }
               if (minD === 0) score += 40000
               else if (minD < 12) score += 5000 + (12 - minD) * 600
@@ -851,19 +894,25 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
   for (const p of plotPoints) {
     if (p.x < xMin || p.x > xMax || p.y < yMin || p.y > yMax) continue
     const [px, py] = [sx(p.x), sy(p.y)]
-    if (p.proj) out.push(`<path d="M${px.toFixed(1)} ${py.toFixed(1)}V${Y0.toFixed(1)}M${px.toFixed(1)} ${py.toFixed(1)}H${X0.toFixed(1)}" stroke="#222" stroke-width="1" stroke-dasharray="4 3" fill="none"/>`)
+    if (p.proj)
+      out.push(
+        `<path d="M${px.toFixed(1)} ${py.toFixed(1)}V${Y0.toFixed(1)}M${px.toFixed(1)} ${py.toFixed(1)}H${X0.toFixed(1)}" stroke="#222" stroke-width="1" stroke-dasharray="4 3" fill="none"/>`,
+      )
     out.push(`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.6" fill="#111"/>`)
     // nằm trên đường cong ở đáy lõm (cực tiểu) thì ghi tên phía dưới, kẻo đè lên nét
     let below = py < 40
     try {
       const f = parseExpr(spec.curves[0]?.expr ?? '')
       const h = (xMax - xMin) / 200
-      if (Math.abs(f(p.x) - p.y) < (yMax - yMin) / 50 && f(p.x - h) > p.y && f(p.x + h) > p.y) below = sy(p.y) < H - 30
+      if (Math.abs(f(p.x) - p.y) < (yMax - yMin) / 50 && f(p.x - h) > p.y && f(p.x + h) > p.y)
+        below = sy(p.y) < H - 30
     } catch {
       /* không có đường cong */
     }
     const right = px < W - 40
-    out.push(`<text x="${(px + (right ? 8 : -8)).toFixed(1)}" y="${(py + (below ? 20 : -8)).toFixed(1)}" ${font} font-style="italic" font-weight="bold" text-anchor="${right ? 'start' : 'end'}" data-lbl="pt:${esc(p.name)}">${esc(p.name)}</text>`)
+    out.push(
+      `<text x="${(px + (right ? 8 : -8)).toFixed(1)}" y="${(py + (below ? 20 : -8)).toFixed(1)}" ${font} font-style="italic" font-weight="bold" text-anchor="${right ? 'start' : 'end'}" data-lbl="pt:${esc(p.name)}">${esc(p.name)}</text>`,
+    )
   }
 
   const svg =
@@ -877,7 +926,8 @@ export function renderPlotSvg(spec: PlotSpec): { svg: string; width: number; hei
   return { svg, width: W, height: H }
 }
 
-export const svgDataUrl = (svg: string) => `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
+export const svgDataUrl = (svg: string) =>
+  `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
 
 /** SVG → PNG data URL (bản xuất Word không đọc được SVG) */
 export function svgToPng(svg: string, width: number, height: number, scale = 2): Promise<string> {

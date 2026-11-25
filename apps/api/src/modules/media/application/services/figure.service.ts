@@ -12,8 +12,8 @@ import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type { DrawnImage } from '@/modules/media/application/services/image-generation.service'
-import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 import type { AiQuotaView } from '@/shared-kernel/application/ports/ai-meter.port'
+import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 
 export interface FigureResult {
   url: string

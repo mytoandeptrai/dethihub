@@ -1,11 +1,12 @@
+import { figureDoc, figureImageAttrs, figureParagraph } from './toolImages'
+
+import type { BlockTemplate } from './templates'
+import type { BankEntry } from '@/engine/data/bank'
 /**
  * Câu trong kho câu hỏi thành khối của trình soạn. Gom nhiều câu thành một khối mẫu
  * để chèn một lần qua đường chèn chung (`insertBlockTemplate`), nên thứ tự chọn được giữ nguyên.
  */
 import type { JSONContent } from '@tiptap/core'
-import type { BankEntry } from '@/engine/data/bank'
-import type { BlockTemplate } from './templates'
-import { figureDoc, figureImageAttrs, figureParagraph } from './toolImages'
 
 const text = (s: string): JSONContent => ({ type: 'text', text: s })
 
@@ -13,7 +14,10 @@ const text = (s: string): JSONContent => ({ type: 'text', text: s })
 function entryBlock(entry: BankEntry, seq: number): JSONContent {
   const stamp = `${Date.now()}-${seq}`
   const kind = entry.type === 'dung-sai' ? 'tf' : entry.type === 'tra-loi-ngan' ? 'short' : null
-  if (kind === 'short' || (entry.options?.length && (entry.type === 'trac-nghiem' || kind === 'tf'))) {
+  if (
+    kind === 'short' ||
+    (entry.options?.length && (entry.type === 'trac-nghiem' || kind === 'tf'))
+  ) {
     return {
       type: 'examQuestion',
       attrs: { id: `q${stamp}`, no: 1, kind },
@@ -30,7 +34,9 @@ function entryBlock(entry: BankEntry, seq: number): JSONContent {
   return {
     type: 'examEssay',
     attrs: { id: `es${stamp}`, no: 1, score: entry.points },
-    content: [{ type: 'examEssayPrompt', attrs: { id: `ep${stamp}` }, content: [text(entry.prompt)] }],
+    content: [
+      { type: 'examEssayPrompt', attrs: { id: `ep${stamp}` }, content: [text(entry.prompt)] },
+    ],
   }
 }
 

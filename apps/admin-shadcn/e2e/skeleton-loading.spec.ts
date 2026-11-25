@@ -88,11 +88,17 @@ test.beforeAll(async ({ browser }) => {
       release()
       await expect(page.locator('main [aria-busy="true"]')).toHaveCount(0)
       await expect(page.locator('main')).not.toContainText('Đang tải…')
-      const loadedText = name === 'community' ? communityFixtureCard.title
-        : name === 'library' ? libraryFixtureFile.name
-          : name === 'admin-users' ? adminDemo.users[0]!.email
-            : String(fixture.data.stats[7].totalUsers)
-      await expect(page.locator('main').getByText(loadedText, { exact: true }).first()).toBeVisible()
+      const loadedText =
+        name === 'community'
+          ? communityFixtureCard.title
+          : name === 'library'
+            ? libraryFixtureFile.name
+            : name === 'admin-users'
+              ? adminDemo.users[0]!.email
+              : String(fixture.data.stats[7].totalUsers)
+      await expect(
+        page.locator('main').getByText(loadedText, { exact: true }).first(),
+      ).toBeVisible()
     } finally {
       release()
       await context.close()

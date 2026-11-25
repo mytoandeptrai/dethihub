@@ -1,5 +1,4 @@
 'use client'
-import { LoadingRegion, TableSkeleton } from '@/components/page-skeleton'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import {
@@ -13,6 +12,7 @@ import {
   X,
 } from 'lucide-react'
 
+import { LoadingRegion, TableSkeleton } from '@/components/page-skeleton'
 import {
   Avatar,
   SiteButton as Button,
@@ -239,7 +239,9 @@ export function StatsPanelStatsPanelUi(
           </div>
 
           {loading || refreshing ? (
-            <LoadingRegion><Skeleton className="h-44 w-full" /></LoadingRegion>
+            <LoadingRegion>
+              <Skeleton className="h-44 w-full" />
+            </LoadingRegion>
           ) : chartDays.length === 0 ? (
             <EmptyState title={t('adminOpsCopy.m22')} className="min-h-44" />
           ) : (
@@ -309,7 +311,9 @@ export function StatsPanelStatsPanelUi(
           </div>
 
           {loading || refreshing ? (
-            <LoadingRegion><Skeleton className="h-44 w-full" /></LoadingRegion>
+            <LoadingRegion>
+              <Skeleton className="h-44 w-full" />
+            </LoadingRegion>
           ) : chartDays.length === 0 ? (
             <EmptyState title={t('adminOpsCopy.m27')} className="min-h-44" />
           ) : (
@@ -413,7 +417,9 @@ export function StatsPanelStatsPanelUi(
 
             <div className="divide-line-2 mt-4 max-h-[55vh] divide-y overflow-y-auto">
               {loadingOnline ? (
-                <LoadingRegion><TableSkeleton /></LoadingRegion>
+                <LoadingRegion>
+                  <TableSkeleton />
+                </LoadingRegion>
               ) : onlineUsers.length === 0 ? (
                 <EmptyState title={t('adminOpsCopy.m37')} />
               ) : (

@@ -1,16 +1,36 @@
+import { getStroke } from 'perfect-freehand'
 /**
  * Bảng vẽ — vẽ cảnh lên canvas. Nét vẽ tay bằng roughjs, nét bút bằng perfect-freehand
  * (hai thư viện MIT mà Excalidraw cũng dùng). Cách tổ chức học theo `renderer/` và
  * `packages/element/src/renderElement.ts`, `shape.ts` của Excalidraw (MIT).
  */
 import rough from 'roughjs'
-import type { Drawable, Options } from 'roughjs/bin/core'
-import { getStroke } from 'perfect-freehand'
+
 import {
-  centerOf, fontOf, handlePositions, isDarkPaper, isLinear, LINE_HEIGHT, localBounds, paperBg, unionBounds,
-  type Bounds, type El, type Paper, type PenKind, type Pt,
-  isClosedStroke, closedLoop, regionHoles, textRuns, lineWidth, SUB_SCALE, runFont,
+  centerOf,
+  fontOf,
+  handlePositions,
+  isDarkPaper,
+  isLinear,
+  LINE_HEIGHT,
+  localBounds,
+  paperBg,
+  unionBounds,
+  type Bounds,
+  type El,
+  type Paper,
+  type PenKind,
+  type Pt,
+  isClosedStroke,
+  closedLoop,
+  regionHoles,
+  textRuns,
+  lineWidth,
+  SUB_SCALE,
+  runFont,
 } from './scene'
+
+import type { Drawable, Options } from 'roughjs/bin/core'
 
 export interface View {
   scrollX: number
@@ -33,7 +53,14 @@ function roughOptions(e: El): Options {
     fillStyle: e.fillStyle === 'glass' ? 'solid' : e.fillStyle,
     fillWeight: sw / 2,
     hachureGap: sw * 4,
-    strokeLineDash: e.strokeStyle !== 'solid' && e.dash ? e.dash : e.strokeStyle === 'dashed' ? [8, 8 + sw] : e.strokeStyle === 'dotted' ? [1.5, 6 + sw] : undefined,
+    strokeLineDash:
+      e.strokeStyle !== 'solid' && e.dash
+        ? e.dash
+        : e.strokeStyle === 'dashed'
+          ? [8, 8 + sw]
+          : e.strokeStyle === 'dotted'
+            ? [1.5, 6 + sw]
+            : undefined,
     disableMultiStroke: e.strokeStyle !== 'solid',
     preserveVertices: e.roughness < 1,
   }
@@ -75,7 +102,17 @@ function shapeOf(e: El): Drawable[] | Path2D {
       d = [gen.ellipse(e.w / 2, e.h / 2, e.w, e.h, o)]
       break
     case 'diamond':
-      d = [gen.polygon([[e.w / 2, 0], [e.w, e.h / 2], [e.w / 2, e.h], [0, e.h / 2]], o)]
+      d = [
+        gen.polygon(
+          [
+            [e.w / 2, 0],
+            [e.w, e.h / 2],
+            [e.w / 2, e.h],
+            [0, e.h / 2],
+          ],
+          o,
+        ),
+      ]
       break
     case 'line':
     case 'arrow': {
@@ -92,13 +129,22 @@ function shapeOf(e: El): Drawable[] | Path2D {
     case 'freedraw': {
       const pr = e.pen === 'highlight' ? undefined : e.pressures
       const pts = (e.points ?? []).map((p, i) => [p[0], p[1], pr?.[i] ?? 0.5])
-      const outline = penOutline(pts, { pen: e.pen ?? 'ball', width: e.strokeWidth, sharp: e.tipSharp, sens: e.tipSens, real: !!pr })
+      const outline = penOutline(pts, {
+        pen: e.pen ?? 'ball',
+        width: e.strokeWidth,
+        sharp: e.tipSharp,
+        sens: e.tipSens,
+        real: !!pr,
+      })
       const path = new Path2D(svgPathFromStroke(outline))
       if (e.pen === 'chalk' && outline.length > 2) {
         const step = Math.max(1, Math.floor(outline.length / 180))
         const spread = Math.max(1.2, e.strokeWidth * 0.9)
         let s = (e.seed || 1) >>> 0
-        const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
+        const rnd = () => {
+          s = (s * 1664525 + 1013904223) >>> 0
+          return s / 4294967296
+        }
         for (let i = 0; i < outline.length; i += step) {
           if (rnd() < 0.35) continue
           const [ox, oy] = outline[i]
@@ -133,28 +179,45 @@ const easeOutSine = (t: number) => Math.sin((t * Math.PI) / 2)
 
 function pathLength(pts: number[][]) {
   let len = 0
-  for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])
+  for (let i = 1; i < pts.length; i++)
+    len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])
   return len
 }
 
 /** đường viền nét bút; pts = [x, y, lực nhấn]. Dùng cho cả bảng vẽ lẫn ô xem trước kiểu bút */
-export function penOutline(pts: number[][], o: { pen: PenKind; width: number; sharp?: number; sens?: number; real: boolean }) {
+export function penOutline(
+  pts: number[][],
+  o: { pen: PenKind; width: number; sharp?: number; sens?: number; real: boolean },
+) {
   const t = PEN_TRAITS[o.pen]
   // bút thật: đa số bảng vẽ báo lực rất nhỏ khi đặt bút nhẹ → nét mảnh tới mức phải nhấn mạnh mới thấy.
   // Nâng đường cong lực: chạm nhẹ đã ra nét rõ, nhấn mạnh vẫn dày hơn.
   // Nâng nhẹ đường cong lực: chạm nhẹ vẫn ra nét, nhưng giữ khoảng đổi rộng để thấy rõ nhẹ / mạnh tay.
-  if (o.real) pts = pts.map(([x, y, p]) => [x, y, 0.15 + 0.85 * Math.pow(Math.max(0, Math.min(1, p ?? 0.5)), 0.75)])
-  const sens = o.sens ?? 0.5, sharp = o.sharp ?? 0.5
+  if (o.real)
+    pts = pts.map(([x, y, p]) => [
+      x,
+      y,
+      0.15 + 0.85 * Math.pow(Math.max(0, Math.min(1, p ?? 0.5)), 0.75),
+    ])
+  const sens = o.sens ?? 0.5,
+    sharp = o.sharp ?? 0.5
   // bút máy, bút lông: tự tính độ dày từng điểm thay cho giả lập lực của perfect-freehand
   // (giả lập đó chỉ theo tốc độ, ra nét gần như đều → trông như bút bi)
   const shaped = o.pen === 'fountain' || o.pen === 'brush'
-  if (shaped && pts.length > 2) pts = o.pen === 'fountain' ? nibPressure(pts, o.real) : brushPressure(pts, o.real, sens)
+  if (shaped && pts.length > 2)
+    pts = o.pen === 'fountain' ? nibPressure(pts, o.real) : brushPressure(pts, o.real, sens)
   const size = o.width * t.size
   // độ đổi dày theo lực nhấn vừa phải (Excalidraw: 0,6) — quá mạnh thì mép nét lồi lõm, trông lem
   // bút máy / bút lông đã tự tính độ dày mượt → cho đổi dày mạnh hơn mới ra dáng nét thanh nét đậm
   // bút thật (có lực nhấn): đổi dày theo lực mạnh hơn hẳn giả lập theo tốc độ, không thì nhấn nhẹ hay mạnh trông như nhau
   const base = t.thin * (0.4 + 1.2 * sens) + (o.real ? 0.4 + 0.2 * sens : 0)
-  const thinning = shaped ? (o.pen === 'fountain' ? 0.9 : 0.75 + 0.15 * sens) : o.pen === 'highlight' ? 0 : Math.max(-0.85, Math.min(0.85, base))
+  const thinning = shaped
+    ? o.pen === 'fountain'
+      ? 0.9
+      : 0.75 + 0.15 * sens
+    : o.pen === 'highlight'
+      ? 0
+      : Math.max(-0.85, Math.min(0.85, base))
   // vuốt nhọn không dài quá nét: nét ngắn / chấm bút không bị vuốt mất
   // (vuốt nhọn dù chỉ 0,0001px cũng làm perfect-freehand bỏ mất chấm, nên dưới 1px thì tắt hẳn)
   const tp = t.taper ? Math.min(sharp * size * t.taper, pathLength(pts) * 0.35) : 0
@@ -176,9 +239,11 @@ export function penOutline(pts: number[][], o: { pen: PenKind; width: number; sh
 
 /** hướng nét tại từng điểm (rad), lấy theo đoạn dài ~6px để không rung theo từng pixel */
 function directions(pts: number[][]): number[] {
-  const n = pts.length, out: number[] = new Array(n)
+  const n = pts.length,
+    out: number[] = new Array(n)
   for (let i = 0; i < n; i++) {
-    let a = i, b = i
+    let a = i,
+      b = i
     while (a > 0 && Math.hypot(pts[i][0] - pts[a][0], pts[i][1] - pts[a][1]) < 3) a--
     while (b < n - 1 && Math.hypot(pts[b][0] - pts[i][0], pts[b][1] - pts[i][1]) < 3) b++
     out[i] = Math.atan2(pts[b][1] - pts[a][1], pts[b][0] - pts[a][0])
@@ -198,7 +263,10 @@ function smoothArr(v: number[], k: number) {
 function nibPressure(pts: number[][], real: boolean): number[][] {
   const NIB = -Math.PI / 4
   const dir = directions(pts)
-  const w = smoothArr(dir.map((a) => 0.04 + 0.96 * Math.abs(Math.sin(a - NIB)) ** 1.3), 0.5)
+  const w = smoothArr(
+    dir.map((a) => 0.04 + 0.96 * Math.abs(Math.sin(a - NIB)) ** 1.3),
+    0.5,
+  )
   return pts.map(([x, y, p], i) => [x, y, real ? w[i] * (0.6 + 0.4 * (p ?? 0.5)) : w[i]])
 }
 /** bút lông: đi chậm thì loe đậm, đi nhanh thì vuốt mảnh; bút thật thì theo lực nhấn là chính */
@@ -206,7 +274,8 @@ function brushPressure(pts: number[][], real: boolean, sens: number): number[][]
   if (real) return pts
   const n = pts.length
   const sp = new Array(n).fill(0)
-  for (let i = 1; i < n; i++) sp[i] = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])
+  for (let i = 1; i < n; i++)
+    sp[i] = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])
   sp[0] = sp[1]
   const s = smoothArr(sp, 0.25)
   const k = 4 + 6 * (1 - sens)
@@ -240,7 +309,12 @@ function chalkFill(ctx: CanvasRenderingContext2D, color: string) {
   const g = c.getContext('2d')!
   g.fillStyle = color
   let s = 2463534242
-  const rnd = () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296 }
+  const rnd = () => {
+    s ^= s << 13
+    s ^= s >>> 17
+    s ^= s << 5
+    return (s >>> 0) / 4294967296
+  }
   for (let i = 0; i < S * S * 0.48; i++) {
     g.globalAlpha = 0.35 + rnd() * 0.65
     const w = rnd() < 0.35 ? 2 : 1.5
@@ -255,7 +329,9 @@ function chalkFill(ctx: CanvasRenderingContext2D, color: string) {
 /** ảnh đã nạp (theo src); nạp xong thì báo để vẽ lại */
 const images = new Map<string, HTMLImageElement>()
 let onImageLoad: (() => void) | null = null
-export function setImageLoadHandler(fn: (() => void) | null) { onImageLoad = fn }
+export function setImageLoadHandler(fn: (() => void) | null) {
+  onImageLoad = fn
+}
 function imageOf(src: string) {
   let img = images.get(src)
   if (!img) {
@@ -298,16 +374,25 @@ export function fillPath(e: El): Path2D | null {
       const even: Pt[] = [lp[0]]
       let carry = 0
       for (let i = 1; i <= lp.length; i++) {
-        const a = lp[i - 1], b = lp[i % lp.length]
+        const a = lp[i - 1],
+          b = lp[i % lp.length]
         const seg = Math.hypot(b[0] - a[0], b[1] - a[1])
         let t = STEP - carry
-        while (t <= seg) { even.push([a[0] + ((b[0] - a[0]) * t) / seg, a[1] + ((b[1] - a[1]) * t) / seg]); t += STEP }
+        while (t <= seg) {
+          even.push([a[0] + ((b[0] - a[0]) * t) / seg, a[1] + ((b[1] - a[1]) * t) / seg])
+          t += STEP
+        }
         carry = seg - (t - STEP)
       }
       const R = even.length > 12 ? 3 : 0
       const ring: Pt[] = even.map((_, i) => {
-        let x = 0, y = 0
-        for (let k = -R; k <= R; k++) { const q = even[(i + k + even.length) % even.length]; x += q[0]; y += q[1] }
+        let x = 0,
+          y = 0
+        for (let k = -R; k <= R; k++) {
+          const q = even[(i + k + even.length) % even.length]
+          x += q[0]
+          y += q[1]
+        }
         return [x / (2 * R + 1), y / (2 * R + 1)]
       })
       const lpS = ring
@@ -316,15 +401,21 @@ export function fillPath(e: El): Path2D | null {
       const m0 = mid(lpS[n - 1], lpS[0])
       p.moveTo(m0[0], m0[1])
       for (let i = 0; i < n; i++) {
-        const c = lpS[i], m = mid(c, lpS[(i + 1) % n])
+        const c = lpS[i],
+          m = mid(c, lpS[(i + 1) % n])
         p.quadraticCurveTo(c[0], c[1], m[0], m[1])
       }
       p.closePath()
     }
   } else if (e.kind === 'rectangle') p.rect(0, 0, e.w, e.h)
-  else if (e.kind === 'ellipse') p.ellipse(e.w / 2, e.h / 2, Math.abs(e.w / 2), Math.abs(e.h / 2), 0, 0, Math.PI * 2)
+  else if (e.kind === 'ellipse')
+    p.ellipse(e.w / 2, e.h / 2, Math.abs(e.w / 2), Math.abs(e.h / 2), 0, 0, Math.PI * 2)
   else if (e.kind === 'diamond') {
-    p.moveTo(e.w / 2, 0); p.lineTo(e.w, e.h / 2); p.lineTo(e.w / 2, e.h); p.lineTo(0, e.h / 2); p.closePath()
+    p.moveTo(e.w / 2, 0)
+    p.lineTo(e.w, e.h / 2)
+    p.lineTo(e.w / 2, e.h)
+    p.lineTo(0, e.h / 2)
+    p.closePath()
   } else return null
   return p
 }
@@ -352,7 +443,11 @@ function drawGlass(ctx: CanvasRenderingContext2D, e: El) {
   ctx.restore()
 }
 
-export function drawElement(ctx: CanvasRenderingContext2D, rc: ReturnType<typeof rough.canvas>, e: El) {
+export function drawElement(
+  ctx: CanvasRenderingContext2D,
+  rc: ReturnType<typeof rough.canvas>,
+  e: El,
+) {
   ctx.save()
   ctx.globalAlpha = e.opacity / 100
   if (e.angle) {
@@ -386,12 +481,19 @@ export function drawElement(ctx: CanvasRenderingContext2D, rc: ReturnType<typeof
     const lh = e.fontSize * LINE_HEIGHT
     ;(e.text ?? '').split('\n').forEach((line, i) => {
       const y = i * lh + (lh - e.fontSize) / 2
-      let x = e.align && e.align !== 'left' ? (e.w - lineWidth(line, e.fontSize, e)) * (e.align === 'center' ? 0.5 : 1) : 0
+      let x =
+        e.align && e.align !== 'left'
+          ? (e.w - lineWidth(line, e.fontSize, e)) * (e.align === 'center' ? 0.5 : 1)
+          : 0
       for (const r of textRuns(line)) {
         const fs = r.lv ? e.fontSize * SUB_SCALE : e.fontSize
         ctx.font = fontOf(fs, runFont(r, e))
         // chỉ số trên nâng lên, dưới hạ xuống so với dòng chữ thường
-        ctx.fillText(r.t, x, y + (r.lv === 1 ? -e.fontSize * 0.12 : r.lv === -1 ? e.fontSize * 0.45 : 0))
+        ctx.fillText(
+          r.t,
+          x,
+          y + (r.lv === 1 ? -e.fontSize * 0.12 : r.lv === -1 ? e.fontSize * 0.45 : 0),
+        )
         x += ctx.measureText(r.t).width
       }
     })
@@ -406,7 +508,12 @@ export function drawElement(ctx: CanvasRenderingContext2D, rc: ReturnType<typeof
         // gạch chéo: rough không biết lỗ → cắt theo vùng (chừa lỗ) rồi gạch cả vòng ngoài
         ctx.save()
         ctx.clip(fillPath(e)!, fillRule(e))
-        rc.polygon(closedLoop(e)!, { ...roughOptions(e), stroke: 'none', fill: e.fill, fillStyle: 'hachure' })
+        rc.polygon(closedLoop(e)!, {
+          ...roughOptions(e),
+          stroke: 'none',
+          fill: e.fill,
+          fillStyle: 'hachure',
+        })
         ctx.restore()
       }
     }
@@ -423,7 +530,8 @@ export function drawElement(ctx: CanvasRenderingContext2D, rc: ReturnType<typeof
       ctx.beginPath()
       ctx.moveTo(pts[0]?.[0] ?? 0, pts[0]?.[1] ?? 0)
       for (let i = 1; i < pts.length - 1; i++) {
-        const [x0, y0] = pts[i], [x1, y1] = pts[i + 1]
+        const [x0, y0] = pts[i],
+          [x1, y1] = pts[i + 1]
         ctx.quadraticCurveTo(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2)
       }
       const last = pts[pts.length - 1]
@@ -435,7 +543,10 @@ export function drawElement(ctx: CanvasRenderingContext2D, rc: ReturnType<typeof
     if (e.fillStyle === 'glass' && e.fill !== 'transparent') drawGlass(ctx, e)
     const s = shapeOf(e)
     if (s instanceof Path2D) {
-      ctx.fillStyle = (e.pen === 'pencil' && pencilFill(ctx, e.stroke)) || (e.pen === 'chalk' && chalkFill(ctx, e.stroke)) || e.stroke
+      ctx.fillStyle =
+        (e.pen === 'pencil' && pencilFill(ctx, e.stroke)) ||
+        (e.pen === 'chalk' && chalkFill(ctx, e.stroke)) ||
+        e.stroke
       if (e.pen === 'highlight') ctx.globalCompositeOperation = 'multiply'
       ctx.fill(s)
     } else for (const d of s) rc.draw(d)
@@ -490,19 +601,25 @@ function boardTexture(ctx: CanvasRenderingContext2D) {
   c.width = c.height = S
   const g = c.getContext('2d')!
   let s = 135792468
-  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
+  const rnd = () => {
+    s = (s * 1664525 + 1013904223) >>> 0
+    return s / 4294967296
+  }
   // vài vệt loang phấn mờ rất nhẹ (lặp qua biên ô để không lộ đường nối)
   for (let i = 0; i < 18; i++) {
-    const x = rnd() * S, y = rnd() * S, r = 60 + rnd() * 120
+    const x = rnd() * S,
+      y = rnd() * S,
+      r = 60 + rnd() * 120
     const a = 0.005 + rnd() * 0.007
-    for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {
-      if (x + ox + r < 0 || x + ox - r > S || y + oy + r < 0 || y + oy - r > S) continue
-      const gr = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r)
-      gr.addColorStop(0, `rgba(255,255,255,${a})`)
-      gr.addColorStop(1, 'rgba(255,255,255,0)')
-      g.fillStyle = gr
-      g.fillRect(0, 0, S, S)
-    }
+    for (const ox of [-S, 0, S])
+      for (const oy of [-S, 0, S]) {
+        if (x + ox + r < 0 || x + ox - r > S || y + oy + r < 0 || y + oy - r > S) continue
+        const gr = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r)
+        gr.addColorStop(0, `rgba(255,255,255,${a})`)
+        gr.addColorStop(1, 'rgba(255,255,255,0)')
+        g.fillStyle = gr
+        g.fillRect(0, 0, S, S)
+      }
   }
   // bụi phấn li ti cố định theo toạ độ cảnh
   g.fillStyle = '#ffffff'
@@ -516,11 +633,19 @@ function boardTexture(ctx: CanvasRenderingContext2D) {
 }
 
 /** nền giấy: kẻ ô / kẻ dòng / chấm / bảng đen / bảng xanh, vẽ theo toạ độ cảnh để cuộn và phóng to theo */
-export function drawPaper(ctx: CanvasRenderingContext2D, paper: Paper, view: View, w: number, h: number) {
+export function drawPaper(
+  ctx: CanvasRenderingContext2D,
+  paper: Paper,
+  view: View,
+  w: number,
+  h: number,
+) {
   if (paper === 'plain') return
   if (isDarkPaper(paper)) {
-    const x0 = -view.scrollX, y0 = -view.scrollY
-    const vw = w / view.zoom, vh = h / view.zoom
+    const x0 = -view.scrollX,
+      y0 = -view.scrollY
+    const vw = w / view.zoom,
+      vh = h / view.zoom
     ctx.save()
     ctx.fillStyle = paperBg(paper)
     ctx.fillRect(x0 - 1, y0 - 1, vw + 2, vh + 2)
@@ -534,9 +659,12 @@ export function drawPaper(ctx: CanvasRenderingContext2D, paper: Paper, view: Vie
   }
   const step = paper === 'lines' ? 32 : 24
   if (step * view.zoom < 6) return
-  const x0 = -view.scrollX, y0 = -view.scrollY
-  const x1 = x0 + w / view.zoom, y1 = y0 + h / view.zoom
-  const sx = Math.floor(x0 / step) * step, sy = Math.floor(y0 / step) * step
+  const x0 = -view.scrollX,
+    y0 = -view.scrollY
+  const x1 = x0 + w / view.zoom,
+    y1 = y0 + h / view.zoom
+  const sx = Math.floor(x0 / step) * step,
+    sy = Math.floor(y0 / step) * step
   ctx.save()
   if (paper === 'dots') {
     ctx.fillStyle = '#c9c4be'
@@ -551,8 +679,15 @@ export function drawPaper(ctx: CanvasRenderingContext2D, paper: Paper, view: Vie
     ctx.strokeStyle = paper === 'lines' ? '#d6e4f0' : '#ebe7e2'
     ctx.lineWidth = 1 / view.zoom
     ctx.beginPath()
-    for (let y = sy; y <= y1; y += step) { ctx.moveTo(x0, y); ctx.lineTo(x1, y) }
-    if (paper === 'grid') for (let x = sx; x <= x1; x += step) { ctx.moveTo(x, y0); ctx.lineTo(x, y1) }
+    for (let y = sy; y <= y1; y += step) {
+      ctx.moveTo(x0, y)
+      ctx.lineTo(x1, y)
+    }
+    if (paper === 'grid')
+      for (let x = sx; x <= x1; x += step) {
+        ctx.moveTo(x, y0)
+        ctx.lineTo(x, y1)
+      }
     ctx.stroke()
   }
   ctx.restore()
@@ -594,12 +729,7 @@ function drawLockBadge(ctx: CanvasRenderingContext2D, x: number, y: number, zoom
   ctx.restore()
 }
 
-export function render(
-  canvas: HTMLCanvasElement,
-  els: El[],
-  view: View,
-  overlay: Overlay,
-) {
+export function render(canvas: HTMLCanvasElement, els: El[], view: View, overlay: Overlay) {
   const ctx = canvas.getContext('2d')!
   const dpr = window.devicePixelRatio || 1
   const dark = isDarkPaper(overlay.paper)
@@ -638,12 +768,17 @@ export function render(
     ctx.rotate(e.angle)
     ctx.translate(-cx, -cy)
     ctx.translate(e.x, e.y)
-    ctx.fillStyle = fh.color === 'transparent' ? (dark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.6)') : rgba(fh.color, 0.35)
+    ctx.fillStyle =
+      fh.color === 'transparent'
+        ? dark
+          ? 'rgba(255,255,255,0.2)'
+          : 'rgba(255,255,255,0.6)'
+        : rgba(fh.color, 0.35)
     ctx.fill(fp, fillRule(e))
     ctx.strokeStyle = accent
     ctx.lineWidth = 2.5 / view.zoom
     ctx.setLineDash([6 / view.zoom, 4 / view.zoom])
-    ctx.lineDashOffset = -(performance.now() / 40) % 1000 / view.zoom
+    ctx.lineDashOffset = (-(performance.now() / 40) % 1000) / view.zoom
     ctx.stroke(fp)
     ctx.restore()
   }
@@ -688,7 +823,8 @@ export function render(
       ctx.restore()
     } else if (isLinear(e)) {
       const pts = e.points ?? []
-      for (const p of [pts[0], pts[pts.length - 1]]) if (p) drawHandle(ctx, [e.x + p[0], e.y + p[1]], view.zoom, true)
+      for (const p of [pts[0], pts[pts.length - 1]])
+        if (p) drawHandle(ctx, [e.x + p[0], e.y + p[1]], view.zoom, true)
     } else {
       ctx.save()
       if (e.angle) {
@@ -708,7 +844,9 @@ export function render(
     ctx.strokeRect(b[0] - pad, b[1] - pad, b[2] - b[0] + pad * 2, b[3] - b[1] + pad * 2)
     ctx.setLineDash([])
     if (anyLocked) drawLockBadge(ctx, b[2] + pad, b[1] - pad, view.zoom)
-    else for (const p of Object.values(handlePositions(b, view.zoom, false))) drawHandle(ctx, p as Pt, view.zoom)
+    else
+      for (const p of Object.values(handlePositions(b, view.zoom, false)))
+        drawHandle(ctx, p as Pt, view.zoom)
   }
 
   if (overlay.lasso && overlay.lasso.length > 1) {
@@ -734,7 +872,8 @@ export function render(
       const a = 1 - (now - tr.ts[i]) / LASER_LIFE
       if (a <= 0) continue
       // đoạn cong qua trung điểm để vệt trơn, không gãy khúc
-      const m0: Pt = i > 1 ? [(P[i - 2][0] + P[i - 1][0]) / 2, (P[i - 2][1] + P[i - 1][1]) / 2] : P[0]
+      const m0: Pt =
+        i > 1 ? [(P[i - 2][0] + P[i - 1][0]) / 2, (P[i - 2][1] + P[i - 1][1]) / 2] : P[0]
       const m1: Pt = [(P[i - 1][0] + P[i][0]) / 2, (P[i - 1][1] + P[i][1]) / 2]
       ctx.beginPath()
       ctx.moveTo(m0[0], m0[1])
@@ -745,18 +884,26 @@ export function render(
   }
   const lz = view.zoom
   for (const tr of overlay.laser) {
-    const rgb = rgbOf(tr.color), k = tr.size ?? 1
+    const rgb = rgbOf(tr.color),
+      k = tr.size ?? 1
     ctx.shadowColor = `rgba(${rgb}, 0.85)`
     ctx.shadowBlur = 14 * k * dpr
-    segs(tr, (a) => { ctx.strokeStyle = `rgba(${rgb}, ${0.55 * a})`; ctx.lineWidth = ((3 + 6 * a) * k) / lz })
+    segs(tr, (a) => {
+      ctx.strokeStyle = `rgba(${rgb}, ${0.55 * a})`
+      ctx.lineWidth = ((3 + 6 * a) * k) / lz
+    })
     ctx.shadowBlur = 0
     // lõi sáng: màu laser pha trắng
-    segs(tr, (a) => { ctx.strokeStyle = `rgba(255, 255, 255, ${0.85 * a})`; ctx.lineWidth = ((1 + 1.6 * a) * k) / lz })
+    segs(tr, (a) => {
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.85 * a})`
+      ctx.lineWidth = ((1 + 1.6 * a) * k) / lz
+    })
   }
   for (const tr of overlay.laser) {
     const last = tr.pts[tr.pts.length - 1]
     if (!last || now - tr.ts[tr.ts.length - 1] > 120) continue
-    const rgb = rgbOf(tr.color), r = (9 * (tr.size ?? 1)) / lz
+    const rgb = rgbOf(tr.color),
+      r = (9 * (tr.size ?? 1)) / lz
     const g = ctx.createRadialGradient(last[0], last[1], 0, last[0], last[1], r)
     g.addColorStop(0, 'rgba(255,255,255,1)')
     g.addColorStop(0.35, `rgba(${rgb},0.9)`)
@@ -800,22 +947,35 @@ export function render(
     for (const g of overlay.guides) {
       ctx.beginPath()
       if (g.kind === 'align') {
-        if (g.axis === 'x') { ctx.moveTo(g.pos, g.from); ctx.lineTo(g.pos, g.to) }
-        else { ctx.moveTo(g.from, g.pos); ctx.lineTo(g.to, g.pos) }
+        if (g.axis === 'x') {
+          ctx.moveTo(g.pos, g.from)
+          ctx.lineTo(g.pos, g.to)
+        } else {
+          ctx.moveTo(g.from, g.pos)
+          ctx.lineTo(g.to, g.pos)
+        }
         for (const [mx, my] of g.marks) {
-          ctx.moveTo(mx - mr, my - mr); ctx.lineTo(mx + mr, my + mr)
-          ctx.moveTo(mx - mr, my + mr); ctx.lineTo(mx + mr, my - mr)
+          ctx.moveTo(mx - mr, my - mr)
+          ctx.lineTo(mx + mr, my + mr)
+          ctx.moveTo(mx - mr, my + mr)
+          ctx.lineTo(mx + mr, my - mr)
         }
         ctx.stroke()
       } else {
         if (g.axis === 'x') {
-          ctx.moveTo(g.from, g.pos); ctx.lineTo(g.to, g.pos)
-          ctx.moveTo(g.from, g.pos - tick); ctx.lineTo(g.from, g.pos + tick)
-          ctx.moveTo(g.to, g.pos - tick); ctx.lineTo(g.to, g.pos + tick)
+          ctx.moveTo(g.from, g.pos)
+          ctx.lineTo(g.to, g.pos)
+          ctx.moveTo(g.from, g.pos - tick)
+          ctx.lineTo(g.from, g.pos + tick)
+          ctx.moveTo(g.to, g.pos - tick)
+          ctx.lineTo(g.to, g.pos + tick)
         } else {
-          ctx.moveTo(g.pos, g.from); ctx.lineTo(g.pos, g.to)
-          ctx.moveTo(g.pos - tick, g.from); ctx.lineTo(g.pos + tick, g.from)
-          ctx.moveTo(g.pos - tick, g.to); ctx.lineTo(g.pos + tick, g.to)
+          ctx.moveTo(g.pos, g.from)
+          ctx.lineTo(g.pos, g.to)
+          ctx.moveTo(g.pos - tick, g.from)
+          ctx.lineTo(g.pos + tick, g.from)
+          ctx.moveTo(g.pos - tick, g.to)
+          ctx.lineTo(g.pos + tick, g.to)
         }
         ctx.stroke()
         const mx = g.axis === 'x' ? (g.from + g.to) / 2 : g.pos

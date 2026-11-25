@@ -1,14 +1,15 @@
+import { slideCatalogText, slideProCatalogText } from '@/engine/lib/aiDeck'
+import { HTML_DECK_SYSTEM } from '@/engine/lib/htmlDeckPrompt'
+import { ASK_RULE, CHAT_MARKDOWN, THINK_VI } from '@/engine/lib/prompts/common'
 /**
  * Chữ prompt của slide, bảng vẽ và tìm trên web — chạy ở SERVER (gói esbuild `server/generated/prompts.js`, xem
  * `scripts/build-server-prompts.mjs`). Trình duyệt không còn giữ chữ này: client gửi `task` + dữ liệu người dùng.
  */
 import { FIGURE_GUIDE } from '@/engine/lib/prompts/figureGuide'
-import { slideCatalogText, slideProCatalogText } from '@/engine/lib/aiDeck'
-import { HTML_DECK_SYSTEM } from '@/engine/lib/htmlDeckPrompt'
-import { ASK_RULE, CHAT_MARKDOWN, THINK_VI } from '@/engine/lib/prompts/common'
 import { sourceSection, webSection, type SourceInput } from '@/engine/lib/prompts/sources'
 import { batchSystemPrompt, pageSystemPrompt } from '@/engine/lib/slideAi'
 import { editSystemPrompt } from '@/engine/lib/slideEdit'
+
 import type { DeckPlan } from '@/engine/lib/aiDeck'
 
 export const BOARD_SYSTEM =
@@ -30,7 +31,8 @@ const BOARD_OPS_GUIDE =
   '- {"op":"pen","pen":"pencil|ball|fountain|brush|marker|highlight","color":"#1e1e1e","width":2,"points":[[x,y],...]} — nét vẽ tay bằng bút; hoặc thay "points" bằng "curve":{"type":"circle|ellipse|wave|star|polygon","cx":0,"cy":0,"r":60,"rx":80,"ry":50,"n":5,"len":300,"amp":20,"points":[[x,y],...]}. Chỉ dùng khi người dùng muốn vẽ bằng bút; hình phức tạp thì giữ đơn giản.\n' +
   '- {"op":"update","id":"<id>","stroke":"#...","fill":"#...","x":0,"y":0,"w":0,"h":0,"text":"..."} — sửa hình có sẵn (id trong danh sách hình trên bảng hoặc phần đang chọn).\n' +
   '- {"op":"delete","ids":["<id>",...]}\n' +
-  'Cấu hình "figure" (giống công cụ của app):\n' + FIGURE_GUIDE
+  'Cấu hình "figure" (giống công cụ của app):\n' +
+  FIGURE_GUIDE
 
 /** system prompt khi đang soạn slide — yêu cầu JSON dạng deck */
 const SLIDE_SYSTEM =
@@ -121,7 +123,8 @@ const PRO_PLAN_SYSTEM =
   '- "brief" đúng 1 câu (≤ 140 ký tự) nêu dữ kiện chính; slide ảnh thì nêu rõ ảnh cần thể hiện gì. Chỉ dùng dữ kiện và con số thật, ' +
   'không bịa; số liệu không chắc thì nói rõ là minh hoạ. Tiếng Việt chuẩn.'
 
-export const slidePlanSystem = (pro?: boolean): string => (pro ? PRO_PLAN_SYSTEM : SLIDE_PLAN_SYSTEM)
+export const slidePlanSystem = (pro?: boolean): string =>
+  pro ? PRO_PLAN_SYSTEM : SLIDE_PLAN_SYSTEM
 
 export const WEB_SEARCH_SYSTEM =
   'Tìm trên web thông tin, số liệu mới và chính xác phục vụ yêu cầu soạn đề / bài giảng của giáo viên dưới đây. ' +
@@ -148,8 +151,15 @@ export function buildSlideChatSystem(i: SlideChatInput): string {
   const head =
     i.variant === 'html'
       ? HTML_SYSTEM
-      : (i.variant === 'plan' ? slidePlanSystem(i.pro) : SLIDE_SYSTEM + CHAT_MARKDOWN) + (i.ask ? ASK_RULE : '')
-  return head + (i.contextSummary ? `\nBài trình bày hiện tại: ${i.contextSummary}` : '') + sourceSection(i) + webSection(i.webFound) + (i.think ? THINK_VI : '')
+      : (i.variant === 'plan' ? slidePlanSystem(i.pro) : SLIDE_SYSTEM + CHAT_MARKDOWN) +
+        (i.ask ? ASK_RULE : '')
+  return (
+    head +
+    (i.contextSummary ? `\nBài trình bày hiện tại: ${i.contextSummary}` : '') +
+    sourceSection(i) +
+    webSection(i.webFound) +
+    (i.think ? THINK_VI : '')
+  )
 }
 
 export interface BoardInput extends SourceInput {
@@ -161,7 +171,8 @@ export interface BoardInput extends SourceInput {
 
 export function buildBoardSystem(i: BoardInput): string {
   return (
-    BOARD_SYSTEM + CHAT_MARKDOWN +
+    BOARD_SYSTEM +
+    CHAT_MARKDOWN +
     (i.ops ? BOARD_OPS_GUIDE : '') +
     (i.contextSummary ? `\nBảng vẽ hiện tại:\n${i.contextSummary}` : '') +
     sourceSection(i) +
@@ -170,10 +181,15 @@ export function buildBoardSystem(i: BoardInput): string {
 }
 
 /** một nhóm slide liền nhau trong MỘT lượt gọi (`think`: lượt stream, bắt suy nghĩ tiếng Việt) */
-export const buildSlideBatchSystem = (plan: DeckPlan, indices: number[], think?: boolean, pro?: boolean): string =>
-  batchSystemPrompt(plan, indices, pro) + (think ? THINK_VI : '')
+export const buildSlideBatchSystem = (
+  plan: DeckPlan,
+  indices: number[],
+  think?: boolean,
+  pro?: boolean,
+): string => batchSystemPrompt(plan, indices, pro) + (think ? THINK_VI : '')
 
 /** một slide (viết, sửa lỗi, chấm lại) */
-export const buildSlidePageSystem = (plan: DeckPlan, index: number, pro?: boolean): string => pageSystemPrompt(plan, plan.slides[index], index, pro)
+export const buildSlidePageSystem = (plan: DeckPlan, index: number, pro?: boolean): string =>
+  pageSystemPrompt(plan, plan.slides[index], index, pro)
 
 export const buildSlideEditSystem = (context: string): string => editSystemPrompt(context)

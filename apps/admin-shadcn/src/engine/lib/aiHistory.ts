@@ -21,24 +21,41 @@ export interface HistoryLimits {
   summaryMax: number
 }
 
-export const HISTORY_LIMITS: HistoryLimits = { freeChars: 3000, keepRecent: 6, recentClip: 1500, oldClip: 140, summaryMax: 1800 }
+export const HISTORY_LIMITS: HistoryLimits = {
+  freeChars: 3000,
+  keepRecent: 6,
+  recentClip: 1500,
+  oldClip: 140,
+  summaryMax: 1800,
+}
 
 const oneLine = (text: string) => text.replace(/\s+/g, ' ').trim()
-const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max).trimEnd()}…` : text)
+const clip = (text: string, max: number) =>
+  text.length > max ? `${text.slice(0, max).trimEnd()}…` : text
 const total = (messages: LlmMessage[]) => messages.reduce((n, m) => n + m.content.length, 0)
 
-export function compactHistory(messages: LlmMessage[], limits: HistoryLimits = HISTORY_LIMITS): LlmMessage[] {
+export function compactHistory(
+  messages: LlmMessage[],
+  limits: HistoryLimits = HISTORY_LIMITS,
+): LlmMessage[] {
   if (messages.length <= limits.keepRecent || total(messages) <= limits.freeChars) return messages
 
   const split = messages.length - limits.keepRecent
   const older = messages.slice(0, split)
-  const recent = messages.slice(split).map((m) =>
-    m.content.length > limits.recentClip ? { ...m, content: `${m.content.slice(0, limits.recentClip).trimEnd()}… [đã rút gọn]` } : m,
-  )
+  const recent = messages
+    .slice(split)
+    .map((m) =>
+      m.content.length > limits.recentClip
+        ? { ...m, content: `${m.content.slice(0, limits.recentClip).trimEnd()}… [đã rút gọn]` }
+        : m,
+    )
 
   const lines = older
     .filter((m) => m.role !== 'system')
-    .map((m) => `- ${m.role === 'user' ? 'Giáo viên' : 'Trợ lý'}: ${clip(oneLine(m.content), limits.oldClip)}`)
+    .map(
+      (m) =>
+        `- ${m.role === 'user' ? 'Giáo viên' : 'Trợ lý'}: ${clip(oneLine(m.content), limits.oldClip)}`,
+    )
   let dropped = false
   while (lines.length > 1 && lines.join('\n').length > limits.summaryMax) {
     lines.shift()
@@ -51,7 +68,10 @@ export function compactHistory(messages: LlmMessage[], limits: HistoryLimits = H
 
   // gộp vào tin đầu tiên của phần gần nhất nếu cùng vai người dùng, tránh hai tin user liền nhau
   if (recent[0]?.role === 'user') {
-    return [{ ...recent[0], content: `${summary}\n\n---\n${recent[0].content}` }, ...recent.slice(1)]
+    return [
+      { ...recent[0], content: `${summary}\n\n---\n${recent[0].content}` },
+      ...recent.slice(1),
+    ]
   }
   return [{ role: 'user', content: summary }, ...recent]
 }

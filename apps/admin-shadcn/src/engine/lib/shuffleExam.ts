@@ -1,3 +1,5 @@
+import { uid } from '@/engine/data/docTypes'
+
 /**
  * Xáo đề: từ một đề đã soạn (ExamDoc) sinh nhiều mã đề.
  * - Xáo thứ tự câu trong từng nhóm câu liền nhau cùng dạng (trắc nghiệm / đúng-sai / trả lời ngắn).
@@ -8,8 +10,13 @@
  * - Phần đáp án / hướng dẫn chấm ở cuối đề được tách khỏi đề phát cho học sinh;
  *   đáp án mới của từng mã gom vào một tài liệu riêng.
  */
-import type { AnswerKeyBlock, ExamBlock, ExamDoc, QuestionBlock, RichText } from '@/engine/data/docTypes'
-import { uid } from '@/engine/data/docTypes'
+import type {
+  AnswerKeyBlock,
+  ExamBlock,
+  ExamDoc,
+  QuestionBlock,
+  RichText,
+} from '@/engine/data/docTypes'
 
 export interface ShuffleOptions {
   codes: string[]
@@ -63,7 +70,8 @@ const plain = (rt: RichText | undefined): string =>
 
 const ANSWER_HEADING = /^\s*(phần\s+)?(đáp án|hướng dẫn chấm|lời giải|bảng đáp án)/i
 /** phương án nhắc tới phương án khác: đổi chỗ sẽ sai nghĩa */
-const LOCKED_OPTION = /(cả\s+[A-D]\b|[A-D]\s*(và|,)\s*[A-D]\b|các đáp án trên|các phương án trên|tất cả (đều|các)|đều đúng|đều sai|không có (đáp án|phương án))/i
+const LOCKED_OPTION =
+  /(cả\s+[A-D]\b|[A-D]\s*(và|,)\s*[A-D]\b|các đáp án trên|các phương án trên|tất cả (đều|các)|đều đúng|đều sai|không có (đáp án|phương án))/i
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
 const TF_LABELS = ['a', 'b', 'c', 'd', 'e', 'f']
 
@@ -71,7 +79,8 @@ const TF_LABELS = ['a', 'b', 'c', 'd', 'e', 'f']
 export function answerSectionStart(blocks: ExamBlock[]): number {
   const i = blocks.findIndex((b) => {
     if (b.type === 'answerKey' || b.type === 'rubric') return true
-    if (b.type === 'heading' || b.type === 'title' || b.type === 'paragraph') return ANSWER_HEADING.test(plain(b.text))
+    if (b.type === 'heading' || b.type === 'title' || b.type === 'paragraph')
+      return ANSWER_HEADING.test(plain(b.text))
     return false
   })
   return i < 0 ? blocks.length : i
@@ -112,16 +121,30 @@ function parseTf(s: string, n: number): boolean[] | null {
 }
 
 /** Xáo phương án một câu; trả về câu mới và đáp án mới (chuỗi rỗng nếu không biết đáp án gốc). */
-function shuffleQuestion(q: QuestionBlock, keys: string[], doOptions: boolean, random: () => number): { q: QuestionBlock; answer: string } {
+function shuffleQuestion(
+  q: QuestionBlock,
+  keys: string[],
+  doOptions: boolean,
+  random: () => number,
+): { q: QuestionBlock; answer: string } {
   const kind = kindOf(q)
   if (kind === 'short' || q.options.length < 2) {
     const ans = keys.find((k) => !letterOf(k)) ?? ''
     return { q: { ...q, options: q.options.map((o) => ({ ...o })) }, answer: ans }
   }
   const locked = q.options.some((o) => LOCKED_OPTION.test(plain(o.text)))
-  const order = doOptions && !locked ? shuffled(q.options.map((_, i) => i), random) : q.options.map((_, i) => i)
+  const order =
+    doOptions && !locked
+      ? shuffled(
+          q.options.map((_, i) => i),
+          random,
+        )
+      : q.options.map((_, i) => i)
   const labels = kind === 'tf' ? TF_LABELS : LETTERS
-  const options = order.map((from, i) => ({ ...q.options[from], label: labels[i] ?? q.options[from].label }))
+  const options = order.map((from, i) => ({
+    ...q.options[from],
+    label: labels[i] ?? q.options[from].label,
+  }))
 
   if (kind === 'tf') {
     const raw = keys.map((k) => parseTf(k, q.options.length)).find(Boolean)
@@ -141,11 +164,20 @@ function withCode(blocks: ExamBlock[], code: string): ExamBlock[] {
   if (metaIndex >= 0) {
     const meta = blocks[metaIndex] as Extract<ExamBlock, { type: 'meta' }>
     const rows = meta.rows.filter(([k]) => !/^mã đề/i.test(k))
-    return blocks.map((b, i) => (i === metaIndex ? { ...meta, rows: [...rows, ['Mã đề', code]] } : b))
+    return blocks.map((b, i) =>
+      i === metaIndex ? { ...meta, rows: [...rows, ['Mã đề', code]] } : b,
+    )
   }
   const titleIndex = blocks.findIndex((b) => b.type === 'title')
-  const line: ExamBlock = { type: 'paragraph', text: [{ text: label, marks: [{ type: 'bold' }] }], format: { align: 'right' } }
-  const at = titleIndex >= 0 ? titleIndex + 1 : blocks.findIndex((b) => b.type === 'question' || b.type === 'heading')
+  const line: ExamBlock = {
+    type: 'paragraph',
+    text: [{ text: label, marks: [{ type: 'bold' }] }],
+    format: { align: 'right' },
+  }
+  const at =
+    titleIndex >= 0
+      ? titleIndex + 1
+      : blocks.findIndex((b) => b.type === 'question' || b.type === 'heading')
   const pos = at < 0 ? 0 : at
   return [...blocks.slice(0, pos), line, ...blocks.slice(pos)]
 }
@@ -194,7 +226,12 @@ export function shuffleExam(doc: ExamDoc, opts: ShuffleOptions): ShuffleResult {
     return {
       code,
       answers,
-      doc: { ...doc, id: uid(), title: `${doc.title} - Mã ${code}`, blocks: withCode(blocks, code) },
+      doc: {
+        ...doc,
+        id: uid(),
+        title: `${doc.title} - Mã ${code}`,
+        blocks: withCode(blocks, code),
+      },
     }
   })
 
@@ -205,12 +242,22 @@ export function shuffleExam(doc: ExamDoc, opts: ShuffleOptions): ShuffleResult {
   ]
   for (const v of versions) {
     answerBlocks.push({ type: 'heading', level: 2, text: `Mã đề ${v.code}` })
-    const items: AnswerKeyBlock['items'] = v.answers.map((a) => ({ no: a.no, answer: a.answer || '?' }))
+    const items: AnswerKeyBlock['items'] = v.answers.map((a) => ({
+      no: a.no,
+      answer: a.answer || '?',
+    }))
     if (items.length) answerBlocks.push({ type: 'answerKey', items })
   }
-  const essayKey = essayPart(keySection, new Set(questions.map((q) => q.no)), doc.blocks.some((b) => b.type === 'essay'))
+  const essayKey = essayPart(
+    keySection,
+    new Set(questions.map((q) => q.no)),
+    doc.blocks.some((b) => b.type === 'essay'),
+  )
   if (essayKey.length) {
-    answerBlocks.push({ type: 'heading', level: 2, text: 'Phần tự luận (chung cho mọi mã đề)' }, ...essayKey)
+    answerBlocks.push(
+      { type: 'heading', level: 2, text: 'Phần tự luận (chung cho mọi mã đề)' },
+      ...essayKey,
+    )
   }
 
   return {
@@ -259,7 +306,11 @@ export function buildSummaryAnswers(res: ShuffleResult): SummaryAnswerData {
  * Phần hướng dẫn chấm tự luận lấy từ phần đáp án gốc: bỏ bảng đáp án trắc nghiệm và các lời giải
  * "Câu N…" (số câu cũ, không còn khớp sau khi xáo); giữ hướng dẫn chấm, lời giải "Bài N", bảng điểm.
  */
-function essayPart(keySection: ExamBlock[], questionNos: Set<number>, hasEssay: boolean): ExamBlock[] {
+function essayPart(
+  keySection: ExamBlock[],
+  questionNos: Set<number>,
+  hasEssay: boolean,
+): ExamBlock[] {
   if (!hasEssay) return []
   const out: ExamBlock[] = []
   for (const b of keySection) {
@@ -267,13 +318,22 @@ function essayPart(keySection: ExamBlock[], questionNos: Set<number>, hasEssay: 
       // mục tự luận: đáp án không phải chữ cái / Đ-S / số ngắn
       const items = b.items.filter((it) => {
         const a = plain(it.answer).trim()
-        return !(questionNos.has(it.no) && (letterOf(a) || /^[ĐDS\s]+$/i.test(a) || /^-?[\d.,]+$/.test(a)))
+        return !(
+          questionNos.has(it.no) &&
+          (letterOf(a) || /^[ĐDS\s]+$/i.test(a) || /^-?[\d.,]+$/.test(a))
+        )
       })
       if (items.length) out.push({ ...b, items })
       continue
     }
-    if ((b.type === 'heading' || b.type === 'title') && ANSWER_HEADING.test(plain(b.text)) && !/tự luận/i.test(plain(b.text))) continue
-    if ((b.type === 'paragraph' || b.type === 'heading') && /^\s*câu\s+\d+/i.test(plain(b.text))) continue
+    if (
+      (b.type === 'heading' || b.type === 'title') &&
+      ANSWER_HEADING.test(plain(b.text)) &&
+      !/tự luận/i.test(plain(b.text))
+    )
+      continue
+    if ((b.type === 'paragraph' || b.type === 'heading') && /^\s*câu\s+\d+/i.test(plain(b.text)))
+      continue
     out.push(b)
   }
   return out
@@ -284,5 +344,8 @@ export function makeCodes(start: string, count: number): string[] {
   const m = /^(.*?)(\d+)$/.exec(start.trim())
   if (!m) return Array.from({ length: count }, (_, i) => `${start.trim() || 'Mã'}${i + 1}`)
   const [, prefix, num] = m
-  return Array.from({ length: count }, (_, i) => `${prefix}${String(Number(num) + i).padStart(num.length, '0')}`)
+  return Array.from(
+    { length: count },
+    (_, i) => `${prefix}${String(Number(num) + i).padStart(num.length, '0')}`,
+  )
 }

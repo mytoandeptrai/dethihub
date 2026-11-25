@@ -103,7 +103,11 @@ const question = (kind: string | null) => (node: ProseMirrorNode) =>
 
 function fixedOptions(node: ProseMirrorNode, items: { label: string; text: string }[]) {
   const existing = children(node).filter((option) => named('examOption')(option))
-  if (items.length !== existing.length || items.some((item, index) => item.label !== existing[index]!.attrs.label)) throw new RangeError('Graded items have fixed labels and order')
+  if (
+    items.length !== existing.length ||
+    items.some((item, index) => item.label !== existing[index]!.attrs.label)
+  )
+    throw new RangeError('Graded items have fixed labels and order')
   return existing.map((option, index) => withText(option, items[index]!.text))
 }
 
@@ -116,7 +120,12 @@ function textItems(
   if (items.length < existing.length) {
     let cursor = 0
     const retained = items.map((item) => {
-      const index = existing.findIndex((node, offset) => offset >= cursor && node.textContent === item.text && (item.label === undefined || node.attrs.label === item.label))
+      const index = existing.findIndex(
+        (node, offset) =>
+          offset >= cursor &&
+          node.textContent === item.text &&
+          (item.label === undefined || node.attrs.label === item.label),
+      )
       cursor = index < 0 ? existing.length : index + 1
       return index < 0 ? undefined : existing[index]
     })
@@ -215,7 +224,11 @@ function choiceQuestion(
       label,
       match: question(kind),
       shape: { no: noSchema, prompt: z.string(), statements: z.array(optionSchema) },
-      fields: [noField, promptField, list('statements', 'Các mệnh đề', [{ ...labelField, readOnly: true }, textField], true)],
+      fields: [
+        noField,
+        promptField,
+        list('statements', 'Các mệnh đề', [{ ...labelField, readOnly: true }, textField], true),
+      ],
       read: (node) => {
         const values = read(node)
         return { no: values.no, prompt: values.prompt, statements: values.options }
@@ -232,7 +245,11 @@ function choiceQuestion(
     label,
     match: question(kind),
     shape: { no: noSchema, prompt: z.string(), options: z.array(optionSchema) },
-    fields: [noField, promptField, list('options', 'Các phương án', [{ ...labelField, readOnly: true }, textField], true)],
+    fields: [
+      noField,
+      promptField,
+      list('options', 'Các phương án', [{ ...labelField, readOnly: true }, textField], true),
+    ],
     read,
     update: (node, values) =>
       withChildren(withAttrs(node, { no: values.no }), [
@@ -413,7 +430,10 @@ export const BLOCK_SCHEMAS: BlockSchema[] = [
     label: 'Thang điểm',
     match: named('examRubric'),
     shape: { title: z.string(), items: z.array(optionSchema).min(1) },
-    fields: [field('title', 'Tiêu đề'), list('items', 'Các ý chấm', [labelField, textField], false, 1)],
+    fields: [
+      field('title', 'Tiêu đề'),
+      list('items', 'Các ý chấm', [labelField, textField], false, 1),
+    ],
     read: (node) => ({
       title: children(node).find((item) => named('examRubricTitle')(item))?.textContent ?? '',
       items: children(node)

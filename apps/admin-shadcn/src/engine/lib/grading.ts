@@ -15,7 +15,11 @@ import type { Question } from '@/engine/data/types'
 const TF_RATIO = [0, 0.1, 0.25, 0.5, 1]
 
 export function parseChoiceKey(raw: string): string[] {
-  return raw.trim().split(/\s+/).filter(Boolean).map((token) => token.match(/^(?:\d+[.):\-]?)?([A-D])$/i)?.[1].toUpperCase() ?? '')
+  return raw
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((token) => token.match(/^(?:\d+[.):\-]?)?([A-D])$/i)?.[1].toUpperCase() ?? '')
 }
 
 /** Số ký tự tối đa của đáp án trả lời ngắn (khớp 4 cột trên phiếu trả lời). */
@@ -44,7 +48,9 @@ export function formatTrueFalse(values: Array<boolean | null>): string {
 /** Đọc lại bài làm đúng/sai (chuỗi Đ/S/_) thành mảng; ý chưa chọn là `null`. */
 export function readTrueFalseAnswer(given: string | undefined, n: number): Array<boolean | null> {
   const chars = [...(given ?? '')].filter((c) => c === 'Đ' || c === 'S' || c === '_')
-  return Array.from({ length: n }, (_, i) => (chars[i] === 'Đ' ? true : chars[i] === 'S' ? false : null))
+  return Array.from({ length: n }, (_, i) =>
+    chars[i] === 'Đ' ? true : chars[i] === 'S' ? false : null,
+  )
 }
 
 /** Chuẩn hoá đáp án trả lời ngắn: bỏ khoảng trắng, dấu thập phân là dấu phẩy. */
@@ -105,7 +111,11 @@ export function gradableMax(qs: Question[]): number {
 
 /** Số câu trắc nghiệm / đúng-sai / trả lời ngắn chưa có đáp án (người đăng quên nhập). */
 export function missingKeyCount(qs: Question[]): number {
-  return qs.filter((q) => (q.type === 'trac-nghiem' || q.type === 'tra-loi-ngan' || q.type === 'dung-sai') && !isAutoGraded(q)).length
+  return qs.filter(
+    (q) =>
+      (q.type === 'trac-nghiem' || q.type === 'tra-loi-ngan' || q.type === 'dung-sai') &&
+      !isAutoGraded(q),
+  ).length
 }
 
 /** Mô tả đáp án để hiện cho người đọc ("a) Đúng · b) Sai …", "-1,5", "B"). */
@@ -114,7 +124,10 @@ export function describeAnswer(q: Question, raw: string | undefined): string {
   if (q.type === 'dung-sai') {
     const n = q.options?.length ?? 0
     return readTrueFalseAnswer(raw, n)
-      .map((v, i) => `${q.options?.[i]?.key ?? String.fromCharCode(97 + i)}) ${v === null ? '—' : v ? 'Đúng' : 'Sai'}`)
+      .map(
+        (v, i) =>
+          `${q.options?.[i]?.key ?? String.fromCharCode(97 + i)}) ${v === null ? '—' : v ? 'Đúng' : 'Sai'}`,
+      )
       .join(' · ')
   }
   return raw

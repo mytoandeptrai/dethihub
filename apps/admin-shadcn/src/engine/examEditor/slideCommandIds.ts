@@ -10,4 +10,12 @@ export const SLIDE_COMMAND_COUNTS = {
   pictureformat: 27,
 } as const
 
-export const SLIDE_FILE_COMMAND_IDS = ['slide.file.new', 'slide.file.import', 'slide.file.pptx', 'slide.file.pdf', 'slide.file.save', 'slide.file.undo', 'slide.file.redo'] as const
+export const SLIDE_FILE_COMMAND_IDS = [
+  'slide.file.new',
+  'slide.file.import',
+  'slide.file.pptx',
+  'slide.file.pdf',
+  'slide.file.save',
+  'slide.file.undo',
+  'slide.file.redo',
+] as const

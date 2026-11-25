@@ -6,10 +6,13 @@
  * Không giữ: hiệu ứng, SmartArt, biểu đồ, chữ nhiều kiểu trong cùng hộp (lấy kiểu của lượt chữ đầu, giữ đậm).
  */
 import JSZip from 'jszip'
+
 import { uid } from '@/engine/data/docTypes'
-import type { Slide, SlideElement } from '@/engine/store/docs'
+
 import { imageToSrc } from './questionImage'
 import { prepareBgImage } from './slideBackground'
+
+import type { Slide, SlideElement } from '@/engine/store/docs'
 
 const MAX_SLIDES = 150
 
@@ -22,10 +25,13 @@ const path = (el: El | null | undefined, ...names: string[]): El | null => {
   for (const n of names) cur = kid(cur, n)
   return cur
 }
-const deep = (el: El | null | undefined, name: string): El[] => (el ? Array.from(el.getElementsByTagNameNS('*', name)) : [])
-const num = (v: string | null | undefined, d = 0): number => (v == null || v === '' ? d : Number(v) || d)
+const deep = (el: El | null | undefined, name: string): El[] =>
+  el ? Array.from(el.getElementsByTagNameNS('*', name)) : []
+const num = (v: string | null | undefined, d = 0): number =>
+  v == null || v === '' ? d : Number(v) || d
 const rid = (el: El | null | undefined, name: string): string | null =>
-  el?.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', name) ?? null
+  el?.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', name) ??
+  null
 
 interface Part {
   doc: Document
@@ -95,13 +101,17 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
 }
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
-  r /= 255; g /= 255; b /= 255
-  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  r /= 255
+  g /= 255
+  b /= 255
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b)
   const l = (max + min) / 2
   if (max === min) return [0, 0, l]
   const d = max - min
   const s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  const h =
+    max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4
   return [h / 6, s, l]
 }
 function hslToHex(h: number, s: number, l: number): string {
@@ -113,19 +123,31 @@ function hslToHex(h: number, s: number, l: number): string {
     if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
     return p
   }
-  let r = l, g = l, b = l
+  let r = l,
+    g = l,
+    b = l
   if (s) {
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s
     const p = 2 * l - q
-    r = f(p, q, h + 1 / 3); g = f(p, q, h); b = f(p, q, h - 1 / 3)
+    r = f(p, q, h + 1 / 3)
+    g = f(p, q, h)
+    b = f(p, q, h - 1 / 3)
   }
-  return `#${[r, g, b].map((v) => Math.round(Math.min(1, Math.max(0, v)) * 255).toString(16).padStart(2, '0')).join('')}`
+  return `#${[r, g, b]
+    .map((v) =>
+      Math.round(Math.min(1, Math.max(0, v)) * 255)
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`
 }
 
 /** a:solidFill / a:fgClr … → '#rrggbb' (+ alpha 0–1) */
 function colorOf(holder: El | null, theme: Theme): { hex: string; alpha: number } | null {
   if (!holder) return null
-  const c = Array.from(holder.children).find((k) => ['srgbClr', 'schemeClr', 'sysClr', 'prstClr', 'scrgbClr'].includes(k.localName))
+  const c = Array.from(holder.children).find((k) =>
+    ['srgbClr', 'schemeClr', 'sysClr', 'prstClr', 'scrgbClr'].includes(k.localName),
+  )
   if (!c) return null
   let hex: string | null = null
   if (c.localName === 'srgbClr') hex = `#${c.getAttribute('val')}`
@@ -134,10 +156,24 @@ function colorOf(holder: El | null, theme: Theme): { hex: string; alpha: number 
     const v = c.getAttribute('val') ?? ''
     hex = theme.colors[SCHEME_ALIAS[v] ?? v] ?? null
   } else if (c.localName === 'prstClr') {
-    const named: Record<string, string> = { black: '#000000', white: '#ffffff', red: '#ff0000', blue: '#0000ff', green: '#008000', yellow: '#ffff00', gray: '#808080' }
+    const named: Record<string, string> = {
+      black: '#000000',
+      white: '#ffffff',
+      red: '#ff0000',
+      blue: '#0000ff',
+      green: '#008000',
+      yellow: '#ffff00',
+      gray: '#808080',
+    }
     hex = named[c.getAttribute('val') ?? ''] ?? '#000000'
   } else if (c.localName === 'scrgbClr') {
-    hex = `#${['r', 'g', 'b'].map((k) => Math.round((num(c.getAttribute(k)) / 100000) * 255).toString(16).padStart(2, '0')).join('')}`
+    hex = `#${['r', 'g', 'b']
+      .map((k) =>
+        Math.round((num(c.getAttribute(k)) / 100000) * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')}`
   }
   if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return null
   let [h, s, l] = rgbToHsl(...hexToRgb(hex))
@@ -180,8 +216,10 @@ function readTheme(part: Part | null): Theme {
     const v = kid(c, 'srgbClr')?.getAttribute('val') ?? kid(c, 'sysClr')?.getAttribute('lastClr')
     if (v) t.colors[c.localName] = `#${v}`
   }
-  t.major = path(deep(part.doc.documentElement, 'majorFont')[0], 'latin')?.getAttribute('typeface') ?? ''
-  t.minor = path(deep(part.doc.documentElement, 'minorFont')[0], 'latin')?.getAttribute('typeface') ?? ''
+  t.major =
+    path(deep(part.doc.documentElement, 'majorFont')[0], 'latin')?.getAttribute('typeface') ?? ''
+  t.minor =
+    path(deep(part.doc.documentElement, 'minorFont')[0], 'latin')?.getAttribute('typeface') ?? ''
   return t
 }
 
@@ -257,7 +295,10 @@ const pct = (ctx: Ctx, b: Box) => ({
   h: Math.max(0.5, (b.h / ctx.H) * 100),
 })
 
-function placeBox(ctx: Ctx, b: Box): Pick<SlideElement, 'x' | 'y' | 'w' | 'h' | 'rotation' | 'flipX' | 'flipY'> {
+function placeBox(
+  ctx: Ctx,
+  b: Box,
+): Pick<SlideElement, 'x' | 'y' | 'w' | 'h' | 'rotation' | 'flipX' | 'flipY'> {
   const p = pct(ctx, b)
   return {
     ...p,
@@ -269,7 +310,13 @@ function placeBox(ctx: Ctx, b: Box): Pick<SlideElement, 'x' | 'y' | 'w' | 'h' | 
 
 /* ------------------------------ chữ ------------------------------ */
 
-const ALIGN: Record<string, SlideElement['align']> = { l: 'left', ctr: 'center', r: 'right', just: 'justify', dist: 'justify' }
+const ALIGN: Record<string, SlideElement['align']> = {
+  l: 'left',
+  ctr: 'center',
+  r: 'right',
+  just: 'justify',
+  dist: 'justify',
+}
 
 /** cỡ chữ mặc định (phần trăm pt) theo lstStyle của placeholder layout/master hoặc txStyles của master */
 function inheritedSize(ctx: Ctx, sp: El, lvl: number): number | null {
@@ -284,7 +331,10 @@ function inheritedSize(ctx: Ctx, sp: El, lvl: number): number | null {
     if (v) return v
     const styles = deep(ctx.master?.doc.documentElement, 'txStyles')[0]
     const t = normType(key.type)
-    const style = kid(styles, t === 'title' ? 'titleStyle' : t === 'body' || t === 'obj' ? 'bodyStyle' : 'otherStyle')
+    const style = kid(
+      styles,
+      t === 'title' ? 'titleStyle' : t === 'body' || t === 'obj' ? 'bodyStyle' : 'otherStyle',
+    )
     const s = path(style, tag, 'defRPr')?.getAttribute('sz')
     if (s) return num(s)
     return t === 'title' ? 4400 : 2400
@@ -334,7 +384,8 @@ function textOf(ctx: Ctx, sp: El, box: Box): SlideElement | null {
       if (!bold && t.trim()) allBold = false
       line += bold && t.trim() ? `**${t.trim()}**${/\s$/.test(t) ? ' ' : ''}` : t
     }
-    const bullet = pPr && kid(pPr, 'buChar') ? `${kid(pPr, 'buChar')!.getAttribute('char') ?? '•'} ` : ''
+    const bullet =
+      pPr && kid(pPr, 'buChar') ? `${kid(pPr, 'buChar')!.getAttribute('char') ?? '•'} ` : ''
     lines.push(line.trim() ? bullet + line : line)
   }
   while (lines.length && !lines[lines.length - 1].trim()) lines.pop()
@@ -355,7 +406,9 @@ function textOf(ctx: Ctx, sp: El, box: Box): SlideElement | null {
   const isTitle = ['title', 'ctrTitle'].includes(phOf(sp)?.type ?? '')
   if (face === '+mj-lt' || (!face && isTitle)) face = ctx.theme.major
   else if (face === '+mn-lt' || !face) face = ctx.theme.minor
-  const algn = kid(firstP, 'pPr')?.getAttribute('algn') ?? (isTitle && phOf(sp)?.type === 'ctrTitle' ? 'ctr' : null)
+  const algn =
+    kid(firstP, 'pPr')?.getAttribute('algn') ??
+    (isTitle && phOf(sp)?.type === 'ctrTitle' ? 'ctr' : null)
   const anchor = inheritedAttr(ctx, sp, 'anchor')
   const u = rPr?.getAttribute('u')
   const strike = rPr?.getAttribute('strike')
@@ -372,7 +425,11 @@ function textOf(ctx: Ctx, sp: El, box: Box): SlideElement | null {
     ...(face ? { fontFamily: face } : {}),
     fontWeight: allBold ? 700 : 400,
     ...(rPr?.getAttribute('i') === '1' ? { fontStyle: 'italic' as const } : {}),
-    ...(u && u !== 'none' ? { textDecoration: 'underline' as const } : strike && strike !== 'noStrike' ? { textDecoration: 'line-through' as const } : {}),
+    ...(u && u !== 'none'
+      ? { textDecoration: 'underline' as const }
+      : strike && strike !== 'noStrike'
+        ? { textDecoration: 'line-through' as const }
+        : {}),
     ...(algn && ALIGN[algn] ? { align: ALIGN[algn] } : {}),
     ...(anchor === 'ctr' ? { valign: 'middle' as const } : {}),
   }
@@ -382,22 +439,33 @@ function textOf(ctx: Ctx, sp: El, box: Box): SlideElement | null {
 
 function shapeOf(ctx: Ctx, sp: El, box: Box, line = false): SlideElement | null {
   const spPr = kid(sp, 'spPr')
-  const prst = path(spPr, 'prstGeom')?.getAttribute('prst') ?? (kid(spPr, 'custGeom') ? 'rect' : null)
+  const prst =
+    path(spPr, 'prstGeom')?.getAttribute('prst') ?? (kid(spPr, 'custGeom') ? 'rect' : null)
   const styleFill = colorOf(path(sp, 'style', 'fillRef'), ctx.theme)
   const styleLine = colorOf(path(sp, 'style', 'lnRef'), ctx.theme)
   let fill: string | undefined
   if (kid(spPr, 'noFill')) fill = undefined
   else if (kid(spPr, 'solidFill')) fill = cssColor(colorOf(kid(spPr, 'solidFill'), ctx.theme))
   else if (kid(spPr, 'gradFill')) fill = gradientOf(kid(spPr, 'gradFill')!, ctx.theme)
-  else if (styleFill && num(path(sp, 'style', 'fillRef')?.getAttribute('idx')) > 0) fill = cssColor(styleFill)
+  else if (styleFill && num(path(sp, 'style', 'fillRef')?.getAttribute('idx')) > 0)
+    fill = cssColor(styleFill)
   const ln = kid(spPr, 'ln')
   let borderColor: string | undefined
   if (ln && kid(ln, 'noFill')) borderColor = undefined
-  else if (ln && kid(ln, 'solidFill')) borderColor = cssColor(colorOf(kid(ln, 'solidFill'), ctx.theme))
-  else if (styleLine && num(path(sp, 'style', 'lnRef')?.getAttribute('idx')) > 0) borderColor = cssColor(styleLine)
-  const border = borderColor ? Math.max(0.5, Math.round((num(ln?.getAttribute('w'), 12700) / 12700) * 1.333 * 10) / 10) : undefined
+  else if (ln && kid(ln, 'solidFill'))
+    borderColor = cssColor(colorOf(kid(ln, 'solidFill'), ctx.theme))
+  else if (styleLine && num(path(sp, 'style', 'lnRef')?.getAttribute('idx')) > 0)
+    borderColor = cssColor(styleLine)
+  const border = borderColor
+    ? Math.max(0.5, Math.round((num(ln?.getAttribute('w'), 12700) / 12700) * 1.333 * 10) / 10)
+    : undefined
   const dash = path(ln, 'prstDash')?.getAttribute('val')
-  const isLine = line || prst === 'line' || prst?.startsWith('straightConnector') || prst?.startsWith('bentConnector') || prst?.startsWith('curvedConnector')
+  const isLine =
+    line ||
+    prst === 'line' ||
+    prst?.startsWith('straightConnector') ||
+    prst?.startsWith('bentConnector') ||
+    prst?.startsWith('curvedConnector')
   if (!isLine && !fill && !borderColor) return null
   if (!prst && !isLine) return null
   const tail = path(ln, 'tailEnd')?.getAttribute('type')
@@ -406,11 +474,37 @@ function shapeOf(ctx: Ctx, sp: El, box: Box, line = false): SlideElement | null 
     id: uid(),
     type: 'shape',
     ...placeBox(ctx, box),
-    shape: isLine ? 'line' : prst === 'rect' ? 'rect' : prst === 'ellipse' ? 'ellipse' : prst === 'roundRect' ? 'round' : prst!,
-    ...(isLine ? { lineArrow: (head && head !== 'none' ? 'both' : tail && tail !== 'none' ? 'end' : 'none') as SlideElement['lineArrow'] } : {}),
-    fill: isLine ? undefined : fill ?? 'transparent',
-    ...(border ? { border: isLine ? Math.max(1, border) : border, borderColor: borderColor ?? '#000000' } : isLine ? { border: 1.5, borderColor: '#000000' } : { border: 0 }),
-    ...(dash && dash !== 'solid' ? { borderStyle: (dash.includes('dot') && !dash.includes('ash') ? 'dotted' : 'dashed') as SlideElement['borderStyle'] } : {}),
+    shape: isLine
+      ? 'line'
+      : prst === 'rect'
+        ? 'rect'
+        : prst === 'ellipse'
+          ? 'ellipse'
+          : prst === 'roundRect'
+            ? 'round'
+            : prst!,
+    ...(isLine
+      ? {
+          lineArrow: (head && head !== 'none'
+            ? 'both'
+            : tail && tail !== 'none'
+              ? 'end'
+              : 'none') as SlideElement['lineArrow'],
+        }
+      : {}),
+    fill: isLine ? undefined : (fill ?? 'transparent'),
+    ...(border
+      ? { border: isLine ? Math.max(1, border) : border, borderColor: borderColor ?? '#000000' }
+      : isLine
+        ? { border: 1.5, borderColor: '#000000' }
+        : { border: 0 }),
+    ...(dash && dash !== 'solid'
+      ? {
+          borderStyle: (dash.includes('dot') && !dash.includes('ash')
+            ? 'dotted'
+            : 'dashed') as SlideElement['borderStyle'],
+        }
+      : {}),
   }
 }
 
@@ -421,7 +515,15 @@ async function mediaSrc(ctx: Ctx, part: Part, embed: string | null): Promise<str
   const f = ctx.zip.file(target)
   if (!f) return null
   const ext = (target.split('.').pop() ?? '').toLowerCase()
-  const mime: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp', webp: 'image/webp', svg: 'image/svg+xml' }
+  const mime: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    bmp: 'image/bmp',
+    webp: 'image/webp',
+    svg: 'image/svg+xml',
+  }
   if (!mime[ext]) return null // emf/wmf: trình duyệt không vẽ được
   const blob = new Blob([await f.async('arraybuffer')], { type: mime[ext] })
   try {
@@ -437,7 +539,12 @@ async function picOf(ctx: Ctx, part: Part, pic: El, box: Box): Promise<SlideElem
   if (!src) return null
   const r = path(pic, 'blipFill', 'srcRect')
   const crop = r
-    ? { l: num(r.getAttribute('l')) / 1000, t: num(r.getAttribute('t')) / 1000, r: num(r.getAttribute('r')) / 1000, b: num(r.getAttribute('b')) / 1000 }
+    ? {
+        l: num(r.getAttribute('l')) / 1000,
+        t: num(r.getAttribute('t')) / 1000,
+        r: num(r.getAttribute('r')) / 1000,
+        b: num(r.getAttribute('b')) / 1000,
+      }
     : null
   return {
     id: uid(),
@@ -454,7 +561,11 @@ function tableOf(ctx: Ctx, frame: El, box: Box): SlideElement | null {
   const rows = kids(tbl, 'tr').map((tr) =>
     kids(tr, 'tc').map((tc) =>
       kids(kid(tc, 'txBody'), 'p')
-        .map((p) => deep(p, 't').map((t) => t.textContent ?? '').join(''))
+        .map((p) =>
+          deep(p, 't')
+            .map((t) => t.textContent ?? '')
+            .join(''),
+        )
         .join('\n')
         .trim(),
     ),
@@ -467,13 +578,19 @@ function tableOf(ctx: Ctx, frame: El, box: Box): SlideElement | null {
 
 function groupTf(grp: El, parent: Tf): Tf {
   const x = path(grp, 'grpSpPr', 'xfrm')
-  const off = kid(x, 'off'), ext = kid(x, 'ext'), chOff = kid(x, 'chOff'), chExt = kid(x, 'chExt')
+  const off = kid(x, 'off'),
+    ext = kid(x, 'ext'),
+    chOff = kid(x, 'chOff'),
+    chExt = kid(x, 'chExt')
   if (!off || !ext || !chOff || !chExt) return parent
-  const ox = num(off.getAttribute('x')), oy = num(off.getAttribute('y'))
+  const ox = num(off.getAttribute('x')),
+    oy = num(off.getAttribute('y'))
   const sx = num(ext.getAttribute('cx')) / (num(chExt.getAttribute('cx')) || 1)
   const sy = num(ext.getAttribute('cy')) / (num(chExt.getAttribute('cy')) || 1)
-  const cx = num(chOff.getAttribute('x')), cy = num(chOff.getAttribute('y'))
-  return (b) => parent({ ...b, x: ox + (b.x - cx) * sx, y: oy + (b.y - cy) * sy, w: b.w * sx, h: b.h * sy })
+  const cx = num(chOff.getAttribute('x')),
+    cy = num(chOff.getAttribute('y'))
+  return (b) =>
+    parent({ ...b, x: ox + (b.x - cx) * sx, y: oy + (b.y - cy) * sy, w: b.w * sx, h: b.h * sy })
 }
 
 async function walk(ctx: Ctx, part: Part, tree: El, tf: Tf, skipPh: boolean): Promise<void> {
@@ -520,9 +637,18 @@ async function walk(ctx: Ctx, part: Part, tree: El, tf: Tf, skipPh: boolean): Pr
 
 function frameBox(frame: El): Box | null {
   const x = kid(frame, 'xfrm')
-  const off = kid(x, 'off'), ext = kid(x, 'ext')
+  const off = kid(x, 'off'),
+    ext = kid(x, 'ext')
   if (!off || !ext) return null
-  return { x: num(off.getAttribute('x')), y: num(off.getAttribute('y')), w: num(ext.getAttribute('cx')), h: num(ext.getAttribute('cy')), rot: 0, flipH: false, flipV: false }
+  return {
+    x: num(off.getAttribute('x')),
+    y: num(off.getAttribute('y')),
+    w: num(ext.getAttribute('cx')),
+    h: num(ext.getAttribute('cy')),
+    rot: 0,
+    flipH: false,
+    flipV: false,
+  }
 }
 
 /* ------------------------------ nền ------------------------------ */
@@ -534,15 +660,19 @@ async function backgroundOf(ctx: Ctx): Promise<{ background: string; bgImage?: s
     if (!bg) continue
     const bgPr = kid(bg, 'bgPr')
     if (bgPr) {
-      if (kid(bgPr, 'solidFill')) return { background: cssColor(colorOf(kid(bgPr, 'solidFill'), ctx.theme)) ?? '#ffffff' }
-      if (kid(bgPr, 'gradFill')) return { background: gradientOf(kid(bgPr, 'gradFill')!, ctx.theme) ?? '#ffffff' }
+      if (kid(bgPr, 'solidFill'))
+        return { background: cssColor(colorOf(kid(bgPr, 'solidFill'), ctx.theme)) ?? '#ffffff' }
+      if (kid(bgPr, 'gradFill'))
+        return { background: gradientOf(kid(bgPr, 'gradFill')!, ctx.theme) ?? '#ffffff' }
       const blip = path(bgPr, 'blipFill', 'blip')
       const target = blip && part.rels.get(rid(blip, 'embed') ?? '')
       const f = target && ctx.zip.file(target)
       if (f) {
         try {
           const blob = await f.async('blob')
-          const { image, color } = await prepareBgImage(new File([blob], 'bg', { type: /\.png$/i.test(target!) ? 'image/png' : 'image/jpeg' }))
+          const { image, color } = await prepareBgImage(
+            new File([blob], 'bg', { type: /\.png$/i.test(target!) ? 'image/png' : 'image/jpeg' }),
+          )
           return { background: color, bgImage: image }
         } catch {
           /* ảnh nền hỏng: thử tầng sau */
@@ -595,7 +725,8 @@ export async function importPptx(file: File): Promise<{ title: string; slides: S
       if (themePath) themeCache.set(themePath, theme)
     }
     const ctx: Ctx = { zip, theme, W, H, part, layout, master, out: [] }
-    const showMaster = (p: Part | null) => p?.doc.documentElement.getAttribute('showMasterSp') !== '0'
+    const showMaster = (p: Part | null) =>
+      p?.doc.documentElement.getAttribute('showMasterSp') !== '0'
     if (showMaster(part) && showMaster(layout) && master) {
       const tree = deep(master.doc.documentElement, 'spTree')[0]
       if (tree) await walk(ctx, master, tree, ident, true)
@@ -616,5 +747,12 @@ export async function importPptx(file: File): Promise<{ title: string; slides: S
     })
   }
   if (!slides.length) throw new Error('Tệp .pptx không có slide nào.')
-  return { title: file.name.replace(/\.[^.]+$/, '').trim().slice(0, 120) || 'Bài giảng nhập', slides }
+  return {
+    title:
+      file.name
+        .replace(/\.[^.]+$/, '')
+        .trim()
+        .slice(0, 120) || 'Bài giảng nhập',
+    slides,
+  }
 }

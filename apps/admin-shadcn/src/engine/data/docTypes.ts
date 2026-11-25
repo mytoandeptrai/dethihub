@@ -29,7 +29,12 @@ export interface Span {
   text: string
   marks?: Mark[]
   /** ảnh chèn trong dòng (node `image` của trình soạn): span này có `text` rỗng. `src` là đường dẫn R2 hoặc data URL */
-  image?: { src: string; alt?: string; width?: number; /** JSON PlotSpec của ảnh đồ thị */ plot?: string }
+  image?: {
+    src: string
+    alt?: string
+    width?: number
+    /** JSON PlotSpec của ảnh đồ thị */ plot?: string
+  }
 }
 
 /**
@@ -174,7 +179,7 @@ export interface DividerBlock {
   type: 'divider'
 }
 
-/** Khối chia 2–3 cột: mỗi cột là các dòng chữ (xuống dòng bằng 
+/** Khối chia 2–3 cột: mỗi cột là các dòng chữ (xuống dòng bằng
 ) */
 export interface ColumnsBlock {
   type: 'columns'

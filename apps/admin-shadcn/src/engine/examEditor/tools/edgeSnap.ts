@@ -312,7 +312,9 @@ export function snapDragPoint({
     }
 
     lines.sort((a, b) => a.dist - b.dist)
-    circles.sort((a, b) => (a.kind !== b.kind ? (a.kind === 'right90_at_p' ? -1 : 1) : a.dist - b.dist))
+    circles.sort((a, b) =>
+      a.kind !== b.kind ? (a.kind === 'right90_at_p' ? -1 : 1) : a.dist - b.dist,
+    )
 
     if (lines.length) {
       const L1 = lines[0]
@@ -407,7 +409,9 @@ export function snapDragPoint({
     readouts.push(`${segLabel} = ${lenStr} · ${degInt}°`)
   }
   if (!readouts.length) {
-    readouts.push(`${dragName}(${fmtCoord(finalReal[0], snapped)}; ${fmtCoord(finalReal[1], snapped)})`)
+    readouts.push(
+      `${dragName}(${fmtCoord(finalReal[0], snapped)}; ${fmtCoord(finalReal[1], snapped)})`,
+    )
   }
 
   return { vb: finalVb, real: finalReal, snapped, guides, rightMarks, readouts }
@@ -448,7 +452,10 @@ function upsertCoordInExtras(extras: string, name: string, tuple: string): strin
   const escName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/'/g, "['′’]")
   const itemRe = new RegExp(`(^|[\\s,;])(${escName}\\s*(?:=\\s*)?)\\([^()]*\\)`, 'g')
   for (let i = lines.length - 1; i >= 0; i--) {
-    const clean = lines[i].replace(/[′’]/g, "'").replace(DRAG_MARK_RE, '').trim()
+    const clean = lines[i]
+      .replace(/[′’]/g, "'")
+      .replace(DRAG_MARK_RE, '')
+      .trim()
     if (!COORD_HEAD.test(clean)) continue
     let lastMatch: RegExpExecArray | null = null
     itemRe.lastIndex = 0
@@ -465,7 +472,13 @@ function upsertCoordInExtras(extras: string, name: string, tuple: string): strin
   return extras.trim() ? `${newLine}\n${extras}` : newLine
 }
 
-export function savePointCoord(extras: string, name: string, x: number, y: number, snapped: boolean): string {
+export function savePointCoord(
+  extras: string,
+  name: string,
+  x: number,
+  y: number,
+  snapped: boolean,
+): string {
   return upsertCoordInExtras(extras, name, `${fmtCoord(x, snapped)}; ${fmtCoord(y, snapped)}`)
 }
 
@@ -629,7 +642,9 @@ function intersectCoplanar3(a: P3, b: P3, c: P3, d: P3): P3 | null {
 }
 
 function computeBaseSpecials(base: string[], ptMap: Map<string, PickPt>): P3[] {
-  const vs = base.map((n) => ptMap.get(n)?.v as P3 | undefined).filter((v): v is P3 => Boolean(v && v.length >= 3))
+  const vs = base
+    .map((n) => ptMap.get(n)?.v as P3 | undefined)
+    .filter((v): v is P3 => Boolean(v && v.length >= 3))
   if (vs.length < 3) return []
   const raw: P3[] = [...vs]
   for (let i = 0; i < vs.length; i++) {
@@ -638,7 +653,11 @@ function computeBaseSpecials(base: string[], ptMap: Map<string, PickPt>): P3[] {
     raw.push([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2])
   }
   if (vs.length === 3) {
-    raw.push([(vs[0][0] + vs[1][0] + vs[2][0]) / 3, (vs[0][1] + vs[1][1] + vs[2][1]) / 3, (vs[0][2] + vs[1][2] + vs[2][2]) / 3])
+    raw.push([
+      (vs[0][0] + vs[1][0] + vs[2][0]) / 3,
+      (vs[0][1] + vs[1][1] + vs[2][1]) / 3,
+      (vs[0][2] + vs[1][2] + vs[2][2]) / 3,
+    ])
   } else if (vs.length === 4) {
     const diag = intersectCoplanar3(vs[0], vs[2], vs[1], vs[3])
     if (diag) raw.push(diag)
@@ -688,7 +707,11 @@ export function snapDragPoint3d({
   const neighbors = [...(adj.get(dragName) ?? [])]
   const behavior = getDrag3dBehavior({ dragName, base, top, footOf })
   const effMode: 'horiz' | 'vert' = behavior.allowVert && mode === 'vert' ? 'vert' : 'horiz'
-  const excluded = new Set<string>([dragName, ...behavior.linked, ...(behavior.followFoot ? [behavior.followFoot.foot] : [])])
+  const excluded = new Set<string>([
+    dragName,
+    ...behavior.linked,
+    ...(behavior.followFoot ? [behavior.followFoot.foot] : []),
+  ])
   const visibleNames = new Set<string>([...(origins ?? []), ...segs.flatMap((s) => [s.a, s.b])])
   const visiblePts = points.filter((p) => !excluded.has(p.name) && visibleNames.has(p.name))
 
@@ -718,7 +741,14 @@ export function snapDragPoint3d({
     if (effMode === 'horiz') {
       const z0 = rawReal[2]
       type PtCand = { v: P3; vb: Pt; dist: number; guideFrom: Pt }
-      type AxisCand = { axis: 'x' | 'y'; val: number; refVb: Pt; dirVb: Pt; dist: number; isNeighbor: boolean }
+      type AxisCand = {
+        axis: 'x' | 'y'
+        val: number
+        refVb: Pt
+        dirVb: Pt
+        dist: number
+        isNeighbor: boolean
+      }
       type LenCand = { qv: P3; rXy: number; cand3d: P3; dist: number }
 
       const ptCands: PtCand[] = []
@@ -740,15 +770,32 @@ export function snapDragPoint3d({
         const candZ3d: P3 = [o.v[0], o.v[1], z0]
         const candZVb = xform.toVb(candZ3d)
         const dzDist = distPt(rawVb, candZVb)
-        if (dzDist < T) ptCands.push({ v: candZ3d, vb: candZVb, dist: dzDist, guideFrom: { x: o.x, y: o.y } })
+        if (dzDist < T)
+          ptCands.push({ v: candZ3d, vb: candZVb, dist: dzDist, guideFrom: { x: o.x, y: o.y } })
 
         if (Math.abs((o.v[2] ?? 0) - z0) < 1e-4) {
           const isNb = neighbors.includes(o.name)
           const refVb = { x: o.x, y: o.y }
           const dxLine = distPointToLine(rawVb, { p0: refVb, dir: dirX })
-          if (dxLine < T) axisCands.push({ axis: 'x', val: o.v[1], refVb, dirVb: dirX, dist: dxLine, isNeighbor: isNb })
+          if (dxLine < T)
+            axisCands.push({
+              axis: 'x',
+              val: o.v[1],
+              refVb,
+              dirVb: dirX,
+              dist: dxLine,
+              isNeighbor: isNb,
+            })
           const dyLine = distPointToLine(rawVb, { p0: refVb, dir: dirY })
-          if (dyLine < T) axisCands.push({ axis: 'y', val: o.v[0], refVb, dirVb: dirY, dist: dyLine, isNeighbor: isNb })
+          if (dyLine < T)
+            axisCands.push({
+              axis: 'y',
+              val: o.v[0],
+              refVb,
+              dirVb: dirY,
+              dist: dyLine,
+              isNeighbor: isNb,
+            })
         }
       }
 
@@ -800,7 +847,10 @@ export function snapDragPoint3d({
               const dyC = L1.val - C.qv[1]
               if (Math.abs(dyC) > C.rXy) continue
               const dxC = Math.sqrt(C.rXy * C.rXy - dyC * dyC)
-              const xHit = Math.abs(proj3d[0] - (C.qv[0] + dxC)) <= Math.abs(proj3d[0] - (C.qv[0] - dxC)) ? C.qv[0] + dxC : C.qv[0] - dxC
+              const xHit =
+                Math.abs(proj3d[0] - (C.qv[0] + dxC)) <= Math.abs(proj3d[0] - (C.qv[0] - dxC))
+                  ? C.qv[0] + dxC
+                  : C.qv[0] - dxC
               const cand: P3 = [xHit, L1.val, z0]
               if (distPt(xform.toVb(cand), projVb) < 1.6 * T) {
                 solved = cand
@@ -810,7 +860,10 @@ export function snapDragPoint3d({
               const dxC = L1.val - C.qv[0]
               if (Math.abs(dxC) > C.rXy) continue
               const dyC = Math.sqrt(C.rXy * C.rXy - dxC * dxC)
-              const yHit = Math.abs(proj3d[1] - (C.qv[1] + dyC)) <= Math.abs(proj3d[1] - (C.qv[1] - dyC)) ? C.qv[1] + dyC : C.qv[1] - dyC
+              const yHit =
+                Math.abs(proj3d[1] - (C.qv[1] + dyC)) <= Math.abs(proj3d[1] - (C.qv[1] - dyC))
+                  ? C.qv[1] + dyC
+                  : C.qv[1] - dyC
               const cand: P3 = [L1.val, yHit, z0]
               if (distPt(xform.toVb(cand), projVb) < 1.6 * T) {
                 solved = cand
@@ -836,7 +889,10 @@ export function snapDragPoint3d({
         }
       }
       for (const ac of axisCands) {
-        const hit = ac.axis === 'x' ? Math.abs(finalReal[1] - ac.val) < 1e-4 : Math.abs(finalReal[0] - ac.val) < 1e-4
+        const hit =
+          ac.axis === 'x'
+            ? Math.abs(finalReal[1] - ac.val) < 1e-4
+            : Math.abs(finalReal[0] - ac.val) < 1e-4
         if (!hit) continue
         if (ac.isNeighbor) pushGuide(clipLineToBox(ac.refVb, ac.dirVb, viewBox))
         else pushGuide({ x1: ac.refVb.x, y1: ac.refVb.y, x2: finalVb.x, y2: finalVb.y })
@@ -884,7 +940,8 @@ export function snapDragPoint3d({
         if (sameX && sameY) {
           pushGuide({ x1: o.x, y1: o.y, x2: finalVb.x, y2: finalVb.y })
         } else if (sameZ && (sameX || sameY)) {
-          if (neighbors.includes(o.name)) pushGuide(clipLineToBox({ x: o.x, y: o.y }, sameY ? dirX : dirY, viewBox))
+          if (neighbors.includes(o.name))
+            pushGuide(clipLineToBox({ x: o.x, y: o.y }, sameY ? dirX : dirY, viewBox))
           else pushGuide({ x1: o.x, y1: o.y, x2: finalVb.x, y2: finalVb.y })
         } else if (sameZ && snapped) {
           pushGuide({ x1: o.x, y1: o.y, x2: finalVb.x, y2: finalVb.y })
@@ -897,8 +954,14 @@ export function snapDragPoint3d({
   const moved = new Map<string, { vb: Pt; real: P3 }>()
   moved.set(dragName, { vb: finalVb, real: finalReal })
   const dragOrig = ptMap.get(dragName)!.v as P3
-  const savePoints: Array<{ name: string; real: P3; orig: P3 }> = [{ name: dragName, real: finalReal, orig: dragOrig }]
-  const delta: P3 = [finalReal[0] - dragOrig[0], finalReal[1] - dragOrig[1], finalReal[2] - dragOrig[2]]
+  const savePoints: Array<{ name: string; real: P3; orig: P3 }> = [
+    { name: dragName, real: finalReal, orig: dragOrig },
+  ]
+  const delta: P3 = [
+    finalReal[0] - dragOrig[0],
+    finalReal[1] - dragOrig[1],
+    finalReal[2] - dragOrig[2],
+  ]
   for (const ln of behavior.linked) {
     const lp = ptMap.get(ln)
     if (!lp) continue
@@ -930,7 +993,16 @@ export function snapDragPoint3d({
     readouts.push(items.slice(i, i + 3).join(' · '))
   }
 
-  return { vb: finalVb, real: finalReal, snapped, mode: effMode, guides, moved, savePoints, readouts }
+  return {
+    vb: finalVb,
+    real: finalReal,
+    snapped,
+    mode: effMode,
+    guides,
+    moved,
+    savePoints,
+    readouts,
+  }
 }
 
 export function savePointsCoord3d(

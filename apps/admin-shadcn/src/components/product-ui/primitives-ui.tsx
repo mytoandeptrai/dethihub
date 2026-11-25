@@ -227,22 +227,22 @@ export function EmptyState({
 
 export function SkeletonCard({ variant = 'doc' }: { variant?: 'doc' | 'exam' }) {
   return (
-    <LoadingRegion><Card
-      className="border-line/80 shadow-soft relative flex flex-col overflow-hidden rounded-xl border bg-white p-5"
-    >
-      {variant === 'exam' ? (
-        <Skeleton className="-mx-5 -mt-5 mb-5 h-[120px] rounded-none" />
-      ) : (
-        <div className="flex items-start justify-between">
-          <Skeleton className="size-10 rounded-lg" />
-          <Skeleton className="h-5 w-14 rounded-full" />
-        </div>
-      )}
-      <Skeleton className="h-4 w-4/5" />
-      <Skeleton className="mt-2 h-4 w-3/5" />
-      <Skeleton className="mt-3 h-3 w-2/5" />
-      <Skeleton className="mt-auto h-9 w-full" />
-    </Card></LoadingRegion>
+    <LoadingRegion>
+      <Card className="border-line/80 shadow-soft relative flex flex-col overflow-hidden rounded-xl border bg-white p-5">
+        {variant === 'exam' ? (
+          <Skeleton className="-mx-5 -mt-5 mb-5 h-[120px] rounded-none" />
+        ) : (
+          <div className="flex items-start justify-between">
+            <Skeleton className="size-10 rounded-lg" />
+            <Skeleton className="h-5 w-14 rounded-full" />
+          </div>
+        )}
+        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="mt-2 h-4 w-3/5" />
+        <Skeleton className="mt-3 h-3 w-2/5" />
+        <Skeleton className="mt-auto h-9 w-full" />
+      </Card>
+    </LoadingRegion>
   )
 }
 

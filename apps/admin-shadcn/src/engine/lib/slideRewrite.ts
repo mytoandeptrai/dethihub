@@ -1,11 +1,12 @@
+import { callLlm } from './llm'
+import { limitBold } from './slideMath'
+import { fitFontSize } from './slideMeasure'
+
 /**
  * "Hỏi AI" trên một ô chữ: model chỉ trả lại chữ mới của ô đó, engine giữ nguyên mọi thứ còn lại của slide
  * (vị trí, màu, phông, hiệu ứng) và co cỡ chữ cho vừa hộp. Lệnh sửa cả slide nằm ở slideEdit.ts.
  */
 import type { SlideElement } from '@/engine/store/docs'
-import { callLlm } from './llm'
-import { limitBold } from './slideMath'
-import { fitFontSize } from './slideMeasure'
 
 export const REWRITE_PRESETS = [
   { label: 'Ngắn gọn hơn', ask: 'Viết ngắn gọn hơn, giữ ý chính' },
@@ -16,7 +17,10 @@ export const REWRITE_PRESETS = [
 
 /** Bỏ hàng rào code, ngoặc kép bao ngoài và cụm đậm thừa trong câu trả lời của model. */
 export function cleanRewrite(raw: string): string {
-  let text = raw.trim().replace(/^```[a-z]*\n?|\n?```$/gi, '').trim()
+  let text = raw
+    .trim()
+    .replace(/^```[a-z]*\n?|\n?```$/gi, '')
+    .trim()
   if (/^["“].*["”]$/s.test(text)) text = text.slice(1, -1).trim()
   return limitBold(text)
 }
@@ -45,11 +49,17 @@ export async function rewriteElement(
 ): Promise<Partial<SlideElement>> {
   const original = el.text ?? ''
   const res = await callLlm(
-    [{ role: 'user', content: `Slide: ${slideTitle || '(không có tiêu đề)'}\nNội dung ô hiện tại:\n${original}\n\nYêu cầu: ${instruction}` }],
+    [
+      {
+        role: 'user',
+        content: `Slide: ${slideTitle || '(không có tiêu đề)'}\nNội dung ô hiện tại:\n${original}\n\nYêu cầu: ${instruction}`,
+      },
+    ],
     { signal, reasoningEffort: 'low', task: { name: 'sua-slide' } },
   )
   const text = cleanRewrite(res.content)
   if (!text) throw new Error('AI không trả về nội dung, thử lại nhé.')
-  if (text.length > original.length * 3 + 200) throw new Error('AI viết quá dài cho một ô, hãy thử yêu cầu ngắn hơn.')
+  if (text.length > original.length * 3 + 200)
+    throw new Error('AI viết quá dài cho một ô, hãy thử yêu cầu ngắn hơn.')
   return rewritePatch(el, text)
 }

@@ -1,16 +1,33 @@
+import { TextSelection } from '@tiptap/pm/state'
+import {
+  ChartSpline,
+  Check,
+  Copy,
+  MessageSquarePlus,
+  PencilRuler,
+  RotateCcw,
+  Sparkles,
+  X,
+} from 'lucide-react'
 /**
  * Thanh nổi "Hỏi AI" khi bôi đen chữ trong trình soạn đề: gợi ý nhanh + ô gõ
  * yêu cầu, AI trả bản xem trước, bấm "Thay thế" mới đổi chữ trong trang.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { Editor } from '@tiptap/core'
-import { TextSelection } from '@tiptap/pm/state'
-import { ChartSpline, Check, Copy, MessageSquarePlus, PencilRuler, RotateCcw, Sparkles, X } from 'lucide-react'
-import { DOC_REWRITE_PRESETS, planTool, rewriteSelection, wantsPlot, type ToolPlan } from '@/engine/lib/docRewrite'
+
+import {
+  DOC_REWRITE_PRESETS,
+  planTool,
+  rewriteSelection,
+  wantsPlot,
+  type ToolPlan,
+} from '@/engine/lib/docRewrite'
 import { svgDataUrl } from '@/engine/lib/plot'
 import { renderTool, type ToolDoc } from '@/engine/lib/toolSpec'
+
 import type { PlotImage } from './tools/GraphToolModal'
+import type { Editor } from '@tiptap/core'
 
 type Range = { from: number; to: number; text: string }
 type Phase = 'pill' | 'ask' | 'busy' | 'result' | 'plot'
@@ -258,7 +275,8 @@ export function DocSelectionAi({
     if (!editor || editor.isDestroyed || !range) return
     const { doc } = editor.state
     // trang đã đổi trong lúc chờ AI: không thay nhầm chỗ
-    const now = range.to <= doc.content.size ? doc.textBetween(range.from, range.to, '\n', ' ').trim() : ''
+    const now =
+      range.to <= doc.content.size ? doc.textBetween(range.from, range.to, '\n', ' ').trim() : ''
     if (now !== range.text) {
       setError('Đoạn chữ đã thay đổi trong lúc chờ AI. Bôi đen lại rồi hỏi lại nhé.')
       return
@@ -284,12 +302,20 @@ export function DocSelectionAi({
     <div
       ref={boxRef}
       className="fixed z-[90]"
-      style={{ left: pos.left, top: pos.top, transform: pos.below ? undefined : 'translateY(-100%)' }}
+      style={{
+        left: pos.left,
+        top: pos.top,
+        transform: pos.below ? undefined : 'translateY(-100%)',
+      }}
       onMouseDown={keep}
     >
       {phase === 'pill' ? (
-        <div className="flex h-8 items-stretch overflow-hidden rounded-lg border border-line bg-surface text-[12.5px] font-semibold text-clay shadow-[0_6px_18px_-6px_rgba(35,32,28,0.35)]">
-          <button type="button" onClick={() => setPhase('ask')} className="flex items-center gap-1.5 px-2.5 transition-colors hover:bg-paper-2">
+        <div className="border-line bg-surface text-clay flex h-8 items-stretch overflow-hidden rounded-lg border text-[12.5px] font-semibold shadow-[0_6px_18px_-6px_rgba(35,32,28,0.35)]">
+          <button
+            type="button"
+            onClick={() => setPhase('ask')}
+            className="hover:bg-paper-2 flex items-center gap-1.5 px-2.5 transition-colors"
+          >
             <Sparkles className="size-3.5" />
             Hỏi AI
           </button>
@@ -297,8 +323,11 @@ export function DocSelectionAi({
             <button
               type="button"
               data-tip="Đính kèm đoạn đang chọn vào khung chat Trợ lý AI"
-              onClick={() => { onAskChat(range.text); close() }}
-              className="flex items-center gap-1.5 border-l border-line px-2.5 transition-colors hover:bg-paper-2"
+              onClick={() => {
+                onAskChat(range.text)
+                close()
+              }}
+              className="border-line hover:bg-paper-2 flex items-center gap-1.5 border-l px-2.5 transition-colors"
             >
               <MessageSquarePlus className="size-3.5" />
               Đưa vào chat
@@ -309,17 +338,26 @@ export function DocSelectionAi({
         <div
           role="dialog"
           aria-label="Hỏi AI"
-          className="rounded-lg border border-line bg-surface p-2.5 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]"
+          className="border-line bg-surface rounded-lg border p-2.5 shadow-[0_8px_24px_-6px_rgba(35,32,28,0.3)]"
           style={{ width: `min(${PANEL_W}px, calc(100vw - 16px))`, maxWidth: `calc(100vw - 16px)` }}
         >
           {phase === 'plot' && plan && plotImg ? (
             <>
-              <div className="mb-1.5 flex items-center gap-1.5 text-[12px] font-semibold text-ink-3">
-                <ChartSpline className="size-3.5 text-clay" />
-                {plan.doc.kind === 'graph' ? `Đồ thị ${plan.doc.spec.curves.map((c) => `y = ${c.expr}`).join('; ')}` : TOOL_NAME[plan.doc.kind]}
+              <div className="text-ink-3 mb-1.5 flex items-center gap-1.5 text-[12px] font-semibold">
+                <ChartSpline className="text-clay size-3.5" />
+                {plan.doc.kind === 'graph'
+                  ? `Đồ thị ${plan.doc.spec.curves.map((c) => `y = ${c.expr}`).join('; ')}`
+                  : TOOL_NAME[plan.doc.kind]}
               </div>
-              <img src={svgDataUrl(plotImg.svg)} alt="Xem trước hình" onLoad={() => place(range)} className="mx-auto block max-h-[260px] max-w-full rounded-md border border-line bg-white" />
-              {plan.note && <p className="mt-1.5 text-[12px] leading-snug text-ink-3">{plan.note}</p>}
+              <img
+                src={svgDataUrl(plotImg.svg)}
+                alt="Xem trước hình"
+                onLoad={() => place(range)}
+                className="border-line mx-auto block max-h-[260px] max-w-full rounded-md border bg-white"
+              />
+              {plan.note && (
+                <p className="text-ink-3 mt-1.5 text-[12px] leading-snug">{plan.note}</p>
+              )}
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <button
                   type="button"
@@ -329,7 +367,7 @@ export function DocSelectionAi({
                     onInsertPlot?.(plotImg, at)
                     close()
                   }}
-                  className="flex h-8 items-center gap-1 whitespace-nowrap rounded-md bg-clay px-3 text-[12.5px] font-semibold text-white hover:bg-clay-deep"
+                  className="bg-clay hover:bg-clay-deep flex h-8 items-center gap-1 rounded-md px-3 text-[12.5px] font-semibold whitespace-nowrap text-white"
                 >
                   <Check className="size-3.5" /> Chèn dưới câu hỏi
                 </button>
@@ -342,7 +380,7 @@ export function DocSelectionAi({
                       onEditPlot(plan.doc, at)
                       close()
                     }}
-                    className="flex h-8 items-center gap-1 whitespace-nowrap rounded-md px-2.5 text-[12.5px] text-ink-2 hover:bg-paper-2"
+                    className="text-ink-2 hover:bg-paper-2 flex h-8 items-center gap-1 rounded-md px-2.5 text-[12.5px] whitespace-nowrap"
                   >
                     <PencilRuler className="size-3.5" /> Sửa trong công cụ
                   </button>
@@ -351,28 +389,34 @@ export function DocSelectionAi({
                   type="button"
                   aria-label="Bỏ"
                   onClick={close}
-                  className="ml-auto flex size-8 items-center justify-center rounded-md text-ink-3 hover:bg-paper-2 hover:text-ink"
+                  className="text-ink-3 hover:bg-paper-2 hover:text-ink ml-auto flex size-8 items-center justify-center rounded-md"
                 >
                   <X className="size-4" />
                 </button>
               </div>
               {error && (
-                <div role="alert" className="mt-2 rounded-md bg-clay-tint px-2 py-1.5 text-[12px] leading-snug text-clay-deep">
+                <div
+                  role="alert"
+                  className="bg-clay-tint text-clay-deep mt-2 rounded-md px-2 py-1.5 text-[12px] leading-snug"
+                >
                   {error}
                 </div>
               )}
             </>
           ) : phase === 'result' ? (
             <>
-              <div className="mb-1.5 flex min-w-0 items-center gap-1.5 text-[12px] font-semibold text-ink-3">
-                <Sparkles className="size-3 text-clay" />
+              <div className="text-ink-3 mb-1.5 flex min-w-0 items-center gap-1.5 text-[12px] font-semibold">
+                <Sparkles className="text-clay size-3" />
                 <span className="truncate">{lastLabel}</span>
               </div>
-              <div className="max-h-[220px] overflow-y-auto whitespace-pre-wrap rounded-md bg-paper-2 px-2.5 py-2 text-[13px] leading-relaxed text-ink">
+              <div className="bg-paper-2 text-ink max-h-[220px] overflow-y-auto rounded-md px-2.5 py-2 text-[13px] leading-relaxed whitespace-pre-wrap">
                 {result}
               </div>
               {error && (
-                <div role="alert" className="mt-2 rounded-md bg-clay-tint px-2 py-1.5 text-[12px] leading-snug text-clay-deep">
+                <div
+                  role="alert"
+                  className="bg-clay-tint text-clay-deep mt-2 rounded-md px-2 py-1.5 text-[12px] leading-snug"
+                >
                   {error}
                 </div>
               )}
@@ -380,21 +424,21 @@ export function DocSelectionAi({
                 <button
                   type="button"
                   onClick={replace}
-                  className="flex h-8 items-center gap-1 whitespace-nowrap rounded-md bg-clay px-3 text-[12.5px] font-semibold text-white hover:bg-clay-deep"
+                  className="bg-clay hover:bg-clay-deep flex h-8 items-center gap-1 rounded-md px-3 text-[12.5px] font-semibold whitespace-nowrap text-white"
                 >
                   <Check className="size-3.5" /> Thay thế
                 </button>
                 <button
                   type="button"
                   onClick={() => void navigator.clipboard?.writeText(result)}
-                  className="flex h-8 items-center gap-1 whitespace-nowrap rounded-md px-2.5 text-[12.5px] text-ink-2 hover:bg-paper-2"
+                  className="text-ink-2 hover:bg-paper-2 flex h-8 items-center gap-1 rounded-md px-2.5 text-[12.5px] whitespace-nowrap"
                 >
                   <Copy className="size-3.5" /> Sao chép
                 </button>
                 <button
                   type="button"
                   onClick={() => void send(lastAsk, lastLabel)}
-                  className="flex h-8 items-center gap-1 whitespace-nowrap rounded-md px-2.5 text-[12.5px] text-ink-2 hover:bg-paper-2"
+                  className="text-ink-2 hover:bg-paper-2 flex h-8 items-center gap-1 rounded-md px-2.5 text-[12.5px] whitespace-nowrap"
                 >
                   <RotateCcw className="size-3.5" /> Thử lại
                 </button>
@@ -402,7 +446,7 @@ export function DocSelectionAi({
                   type="button"
                   aria-label="Bỏ"
                   onClick={close}
-                  className="ml-auto flex size-8 items-center justify-center rounded-md text-ink-3 hover:bg-paper-2 hover:text-ink"
+                  className="text-ink-3 hover:bg-paper-2 hover:text-ink ml-auto flex size-8 items-center justify-center rounded-md"
                 >
                   <X className="size-4" />
                 </button>
@@ -416,7 +460,7 @@ export function DocSelectionAi({
                     type="button"
                     disabled={phase === 'busy'}
                     onClick={() => void askPlot()}
-                    className="flex items-center gap-1 rounded-full border border-clay/40 bg-clay-tint px-2.5 py-1 text-[12px] font-medium text-clay transition-colors hover:border-clay disabled:opacity-40"
+                    className="border-clay/40 bg-clay-tint text-clay hover:border-clay flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors disabled:opacity-40"
                   >
                     <ChartSpline className="size-3.5" /> Vẽ hình minh hoạ
                   </button>
@@ -427,7 +471,7 @@ export function DocSelectionAi({
                     type="button"
                     disabled={phase === 'busy'}
                     onClick={() => void send(p.ask, p.label)}
-                    className="rounded-full border border-line px-2.5 py-1 text-[12px] text-ink-2 transition-colors hover:border-clay hover:text-clay disabled:opacity-40"
+                    className="border-line text-ink-2 hover:border-clay hover:text-clay rounded-full border px-2.5 py-1 text-[12px] transition-colors disabled:opacity-40"
                   >
                     {p.label}
                   </button>
@@ -446,19 +490,22 @@ export function DocSelectionAi({
                   disabled={phase === 'busy'}
                   onChange={(e) => setAsk(e.target.value)}
                   placeholder="Hoặc gõ yêu cầu, câu hỏi…"
-                  className="min-w-0 flex-1 rounded-md border border-line px-2 py-1.5 text-[12.5px] outline-none focus:border-clay"
+                  className="border-line focus:border-clay min-w-0 flex-1 rounded-md border px-2 py-1.5 text-[12.5px] outline-none"
                 />
                 <button
                   type="submit"
                   disabled={phase === 'busy' || !ask.trim()}
-                  className="rounded-md bg-clay px-3 text-[12.5px] font-semibold text-white disabled:opacity-40"
+                  className="bg-clay rounded-md px-3 text-[12.5px] font-semibold text-white disabled:opacity-40"
                 >
                   Gửi
                 </button>
               </form>
-              {phase === 'busy' && <div className="mt-2 text-[12px] text-ink-3">AI đang viết…</div>}
+              {phase === 'busy' && <div className="text-ink-3 mt-2 text-[12px]">AI đang viết…</div>}
               {error && (
-                <div role="alert" className="mt-2 rounded-md bg-clay-tint px-2 py-1.5 text-[12px] leading-snug text-clay-deep">
+                <div
+                  role="alert"
+                  className="bg-clay-tint text-clay-deep mt-2 rounded-md px-2 py-1.5 text-[12px] leading-snug"
+                >
                   {error}
                 </div>
               )}

@@ -123,7 +123,13 @@ export function NavRailIndicator({ containerRef, activeId }: NavRailIndicatorPro
       const left = btn.offsetLeft || 5
       const width = btn.offsetWidth || 54
       setState((prev) => {
-        if (prev.top === top && prev.height === height && prev.left === left && prev.width === width) return prev
+        if (
+          prev.top === top &&
+          prev.height === height &&
+          prev.left === left &&
+          prev.width === width
+        )
+          return prev
         return { ...prev, top, height, left, width, mode: 'instant' }
       })
     }
@@ -136,7 +142,8 @@ export function NavRailIndicator({ containerRef, activeId }: NavRailIndicatorPro
   let transition = 'none'
   if (!reducedMotion) {
     if (state.mode === 'slide') {
-      transition = 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), height 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1)'
+      transition =
+        'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), height 200ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1)'
     } else if (state.mode === 'fade' || state.mode === 'jump-fade') {
       transition = 'opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1)'
     }
@@ -145,7 +152,7 @@ export function NavRailIndicator({ containerRef, activeId }: NavRailIndicatorPro
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute top-0 z-0 rounded-xl bg-clay-soft"
+      className="bg-clay-soft pointer-events-none absolute top-0 z-0 rounded-xl"
       style={{
         transform: `translateY(${state.top}px)`,
         left: state.left,

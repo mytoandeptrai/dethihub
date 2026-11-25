@@ -21,7 +21,9 @@ export interface TableSpec {
 }
 
 export const TABLE_DEFAULT: TableSpec = {
-  cells: ['Giá trị | x_1 | x_2 | x_3', 'Tần số | 4 | 10 | 6', 'Tỉ lệ (%) | 20 | 50 | 30'].join('\n'),
+  cells: ['Giá trị | x_1 | x_2 | x_3', 'Tần số | 4 | 10 | 6', 'Tỉ lệ (%) | 20 | 50 | 30'].join(
+    '\n',
+  ),
   header: 'row',
   align: 'center',
   merges: '',
@@ -109,10 +111,15 @@ export function parseCells(text: string): { grid: string[][]; rows: number; cols
   return { grid, rows: grid.length, cols }
 }
 
-const MERGE_RE = /^\(?\s*r?(\d+)\s*[,c;]\s*(\d+)\s*\)?\s*[:\-→]+\s*\(?\s*r?(\d+)\s*[,c;]\s*(\d+)\s*\)?$/i
+const MERGE_RE =
+  /^\(?\s*r?(\d+)\s*[,c;]\s*(\d+)\s*\)?\s*[:\-→]+\s*\(?\s*r?(\d+)\s*[,c;]\s*(\d+)\s*\)?$/i
 
 /** đọc các vùng gộp ô dạng "r1,c1:r2,c2" (1-based); ném Error khi ngoài bảng hoặc chồng nhau */
-export function parseMerges(text: string, numRows: number, numCols: number): { merges: TableMerge[]; owner: number[][] } {
+export function parseMerges(
+  text: string,
+  numRows: number,
+  numCols: number,
+): { merges: TableMerge[]; owner: number[][] } {
   const owner = Array.from({ length: numRows }, () => Array<number>(numCols).fill(-1))
   const merges: TableMerge[] = []
   const lines = text
@@ -164,7 +171,10 @@ interface CellBox {
   isHeader: boolean
 }
 
-export function renderTableSvg(spec: TableSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderTableSvg(
+  spec: TableSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const { grid, rows, cols } = parseCells(spec.cells)
   const { merges, owner } = parseMerges(spec.merges ?? '', rows, cols)
   const header: TableHeader = spec.header ?? 'row'
@@ -182,7 +192,8 @@ export function renderTableSvg(spec: TableSpec, desc: string): { svg: string; wi
   const boxes: CellBox[] = []
 
   const isHeaderAt = (r: number, c: number) =>
-    ((header === 'row' || header === 'both') && r === 0) || ((header === 'col' || header === 'both') && c === 0)
+    ((header === 'row' || header === 'both') && r === 0) ||
+    ((header === 'col' || header === 'both') && c === 0)
 
   const toLines = (raw: string) => raw.split('\\n').map((s) => tokenizeRich(s.trim()))
 
@@ -224,7 +235,10 @@ export function renderTableSvg(spec: TableSpec, desc: string): { svg: string; wi
   const rowH = Array<number>(rows).fill(minRowH)
 
   const boxNeedW = (box: CellBox) => {
-    const maxLineW = Math.max(0, ...box.lines.map((tk) => measureTokens(tk, fontSize, box.isHeader)))
+    const maxLineW = Math.max(
+      0,
+      ...box.lines.map((tk) => measureTokens(tk, fontSize, box.isHeader)),
+    )
     return Math.ceil(maxLineW + padX * 2)
   }
   const boxNeedH = (box: CellBox) => {

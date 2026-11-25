@@ -163,8 +163,7 @@ const FAM = `font-family="'Times New Roman',serif"`
 const FONT = `${FAM} font-size="15"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f1 = (n: number) => (Math.round(n * 10) / 10).toString()
-const DEFS =
-  `<defs><marker id="gparr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#222"/></marker></defs>`
+const DEFS = `<defs><marker id="gparr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#222"/></marker></defs>`
 function wrap(W: number, H: number, desc: string, body: string) {
   return {
     svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${desc}${DEFS}<rect width="${W}" height="${H}" fill="#fff"/><g fill="#222">${body}</g></svg>`,
@@ -183,7 +182,10 @@ function niceStep(max: number) {
   return (k <= 1 ? 1 : k <= 2 ? 2 : k <= 2.5 ? 2.5 : k <= 5 ? 5 : 10) * p
 }
 
-export function renderGroupedSvg(spec: GroupedSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderGroupedSvg(
+  spec: GroupedSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const rows = parseGroups(spec.groups)
   const fl = spec.freqLabel.trim() || 'Số học sinh'
   const label = spec.label.trim() || 'Nhóm'
@@ -199,11 +201,24 @@ export function renderGroupedSvg(spec: GroupedSpec, desc: string): { svg: string
       { key: 'grp', name: label, cells: rows.map(groupTxt) },
       { key: 'freq', name: fl, cells: rows.map((g) => numTxt(g.freq)) },
     ]
-    if (ex.has('mid')) rowDefs.push({ key: 'mid', name: 'Giá trị đại diện', cells: mids.map((v) => round2(v)) })
-    if (ex.has('cum')) rowDefs.push({ key: 'cum', name: 'Tần số tích luỹ', cells: cums.map(numTxt) })
-    if (ex.has('rel')) rowDefs.push({ key: 'rel', name: 'Tần số tương đối (%)', cells: rows.map((g) => round2((g.freq / n) * 100)) })
+    if (ex.has('mid'))
+      rowDefs.push({ key: 'mid', name: 'Giá trị đại diện', cells: mids.map((v) => round2(v)) })
+    if (ex.has('cum'))
+      rowDefs.push({ key: 'cum', name: 'Tần số tích luỹ', cells: cums.map(numTxt) })
+    if (ex.has('rel'))
+      rowDefs.push({
+        key: 'rel',
+        name: 'Tần số tương đối (%)',
+        cells: rows.map((g) => round2((g.freq / n) * 100)),
+      })
     if (ex.has('total')) {
-      const totalOf: Record<string, string> = { grp: 'Tổng', freq: numTxt(n), mid: '', cum: numTxt(n), rel: '100' }
+      const totalOf: Record<string, string> = {
+        grp: 'Tổng',
+        freq: numTxt(n),
+        mid: '',
+        cum: numTxt(n),
+        rel: '100',
+      }
       for (const r of rowDefs) r.cells.push(totalOf[r.key] ?? '')
     }
     const firstW = Math.max(90, ...rowDefs.map((r) => [...r.name].length * 8 + 20))
@@ -215,11 +230,15 @@ export function renderGroupedSvg(spec: GroupedSpec, desc: string): { svg: string
     rowDefs.forEach((r, i) => {
       const y = 16 + i * rh
       b += `<text x="${f1(firstW / 2)}" y="${f1(y + 21)}" ${FONT} text-anchor="middle">${esc(r.name)}</text>`
-      r.cells.forEach((c, j) => (b += `<text x="${f1(firstW + cw * j + cw / 2)}" y="${f1(y + 21)}" ${FONT} text-anchor="middle">${esc(c)}</text>`))
+      r.cells.forEach(
+        (c, j) =>
+          (b += `<text x="${f1(firstW + cw * j + cw / 2)}" y="${f1(y + 21)}" ${FONT} text-anchor="middle">${esc(c)}</text>`),
+      )
     })
     let grid = `M0.75 16H${W - 0.75}V${H - 1.25}H0.75Z`
     for (let i = 1; i < rowDefs.length; i++) grid += `M0 ${f1(16 + i * rh)}H${W}`
-    for (let j = 0; j < rowDefs[0].cells.length; j++) grid += `M${f1(firstW + cw * j)} 16V${H - 1.25}`
+    for (let j = 0; j < rowDefs[0].cells.length; j++)
+      grid += `M${f1(firstW + cw * j)} 16V${H - 1.25}`
     b += `<path d="${grid}" fill="none" stroke="#222" stroke-width="1.1"/>`
     return wrap(W, H, desc, b)
   }
@@ -247,7 +266,9 @@ export function renderGroupedSvg(spec: GroupedSpec, desc: string): { svg: string
         ...(ex.has('rel') ? ['100'] : []),
       ])
     }
-    const colW = heads.map((h, i) => Math.max(52, ...[h, ...table.map((r) => r[i] ?? '')].map((c) => [...c].length * 8 + 20)))
+    const colW = heads.map((h, i) =>
+      Math.max(52, ...[h, ...table.map((r) => r[i] ?? '')].map((c) => [...c].length * 8 + 20)),
+    )
     const W = colW.reduce((a, b) => a + b, 0)
     const rh = 32
     const H = 16 + rh * (table.length + 1) + 4
@@ -301,7 +322,8 @@ export function renderGroupedSvg(spec: GroupedSpec, desc: string): { svg: string
     const x = left + i * slot
     b += `<rect x="${f1(x)}" y="${f1(Y(g.freq))}" width="${slot}" height="${f1(y0 - Y(g.freq))}" fill="#c8c8c8" stroke="#222" stroke-width="1.2"/>`
     b += `<text x="${f1(x)}" y="${f1(y0 + 18)}" ${FAM} font-size="13" text-anchor="middle">${esc(g.loTxt)}</text>`
-    if (i === rows.length - 1) b += `<text x="${f1(x + slot)}" y="${f1(y0 + 18)}" ${FAM} font-size="13" text-anchor="middle">${esc(g.hiTxt)}</text>`
+    if (i === rows.length - 1)
+      b += `<text x="${f1(x + slot)}" y="${f1(y0 + 18)}" ${FAM} font-size="13" text-anchor="middle">${esc(g.hiTxt)}</text>`
   })
   if (spec.polygon) {
     // đa giác tần số: nối trung điểm đỉnh các cột, kéo về hai đầu xuống trục
@@ -310,11 +332,14 @@ export function renderGroupedSvg(spec: GroupedSpec, desc: string): { svg: string
     pts.push([left + plotW + slot / 2, y0])
     const d = pts.map((p, i) => `${i ? 'L' : 'M'}${f1(p[0])} ${f1(p[1])}`).join('')
     b += `<path d="${d}" fill="none" stroke="#222" stroke-width="1.6"/>`
-    for (const p of pts.slice(1, -1)) b += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="4" fill="#fff" stroke="#222" stroke-width="1.6"/>`
+    for (const p of pts.slice(1, -1))
+      b += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="4" fill="#fff" stroke="#222" stroke-width="1.6"/>`
   }
   b += `<path d="M${left} ${y0}H${left + plotW + 22}" stroke="#222" stroke-width="1.2" marker-end="url(#gparr)"/>`
   b += `<path d="M${left} ${y0}V${y0 - plotH - 12}" stroke="#222" stroke-width="1.2" marker-end="url(#gparr)"/>`
-  if (fl) b += `<text x="${f1(left + 8)}" y="${f1(y0 - plotH - 6)}" ${FAM} font-size="13">${esc(fl)}</text>`
-  if (label) b += `<text x="${f1(left + plotW + 26)}" y="${f1(y0 + 36)}" ${FAM} font-size="13" text-anchor="end">${esc(label)}</text>`
+  if (fl)
+    b += `<text x="${f1(left + 8)}" y="${f1(y0 - plotH - 6)}" ${FAM} font-size="13">${esc(fl)}</text>`
+  if (label)
+    b += `<text x="${f1(left + plotW + 26)}" y="${f1(y0 + 36)}" ${FAM} font-size="13" text-anchor="end">${esc(label)}</text>`
   return wrap(W, H, desc, b)
 }

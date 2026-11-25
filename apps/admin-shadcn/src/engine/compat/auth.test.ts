@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { dialog } from '@/engine/components/Dialog'
 import { rememberReturnPath, requestReset, signInWithGoogle } from '@/engine/lib/auth'
 
@@ -13,17 +14,20 @@ beforeEach(() => {
 })
 
 describe('engine OAuth adapter', () => {
-  it.each(['/editor?exam=one', undefined])('uses the PKCE callback next parameter for %s', (returnPath) => {
-    if (returnPath) rememberReturnPath(returnPath)
-    signInWithGoogle()
-    expect(sdk.signInWithOAuth).toHaveBeenCalledOnce()
-    const options = sdk.signInWithOAuth.mock.calls[0]?.[0]
-    expect(options.provider).toBe('google')
-    const callback = new URL(options.options.redirectTo)
-    expect(callback.pathname).toBe('/auth/callback')
-    expect(callback.searchParams.get('next')).toBe(returnPath ?? '/editor')
-    expect(callback.searchParams.has('redirectTo')).toBe(false)
-  })
+  it.each(['/editor?exam=one', undefined])(
+    'uses the PKCE callback next parameter for %s',
+    (returnPath) => {
+      if (returnPath) rememberReturnPath(returnPath)
+      signInWithGoogle()
+      expect(sdk.signInWithOAuth).toHaveBeenCalledOnce()
+      const options = sdk.signInWithOAuth.mock.calls[0]?.[0]
+      expect(options.provider).toBe('google')
+      const callback = new URL(options.options.redirectTo)
+      expect(callback.pathname).toBe('/auth/callback')
+      expect(callback.searchParams.get('next')).toBe(returnPath ?? '/editor')
+      expect(callback.searchParams.has('redirectTo')).toBe(false)
+    },
+  )
 
   it('shows the SDK error verbatim without navigating', async () => {
     sdk.signInWithOAuth.mockResolvedValue({ error: { message: 'Không thể đăng nhập Google.' } })

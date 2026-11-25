@@ -38,9 +38,7 @@
           "phan_mem_ngon_ngu": [
             "Không dùng phần mềm cụ thể. Dùng hình ảnh minh họa cơ bản của hệ thống máy tính."
           ],
-          "lenh_va_cau_truc": [
-            "Không có câu lệnh hay lập trình."
-          ],
+          "lenh_va_cau_truc": ["Không có câu lệnh hay lập trình."],
           "chua_duoc_dung": [
             "CHƯA DÙNG quy đổi số nhị phân sang thập phân và ngược lại bằng phép chia/nhân 2 (học ở Lớp 10 định hướng CS).",
             "CHƯA DÙNG mã hóa ký hiệu ASCII hay Unicode chi tiết (học ở Lớp 10).",
@@ -77,9 +75,7 @@
           "phan_mem_ngon_ngu": [
             "Trình duyệt web cơ bản (Chrome, Edge, Cốc Cốc) để truy cập Internet."
           ],
-          "lenh_va_cau_truc": [
-            "Không có câu lệnh lập trình."
-          ],
+          "lenh_va_cau_truc": ["Không có câu lệnh lập trình."],
           "chua_duoc_dung": [
             "CHƯA DÙNG khái niệm địa chỉ IP, MAC, mô hình OSI hay TCP/IP (học ở Lớp 11).",
             "CHƯA DÙNG kiến thức cấu hình mạng hay bấm dây mạng LAN.",
@@ -119,9 +115,7 @@
             "Trình duyệt Web, Máy tìm kiếm Google Search.",
             "Dịch vụ thư điện tử (Gmail hoặc Outlook)."
           ],
-          "lenh_va_cau_truc": [
-            "Các phím tắt cơ bản: Ctrl+C, Ctrl+V, Ctrl+X, Delete, F2."
-          ],
+          "lenh_va_cau_truc": ["Các phím tắt cơ bản: Ctrl+C, Ctrl+V, Ctrl+X, Delete, F2."],
           "chua_duoc_dung": [
             "CHƯA DÙNG thao tác quản lý dữ liệu trên dịch vụ lưu trữ đám mây nâng cao (Google Drive, OneDrive - học ở Lớp 7, 9, 10).",
             "CHƯA DÙNG phép toán logic AND, OR, NOT nâng cao khi tìm kiếm từ khóa (học ở lớp trên).",
@@ -157,12 +151,8 @@
             "Tác hại của việc nghiện game, chia sẻ thông tin cá nhân tùy tiện.",
             "Khái niệm virus máy tính ở mức nhận biết cơ bản."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không sử dụng phần mềm cụ thể."
-          ],
-          "lenh_va_cau_truc": [
-            "Không có."
-          ],
+          "phan_mem_ngon_ngu": ["Không sử dụng phần mềm cụ thể."],
+          "lenh_va_cau_truc": ["Không có."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các điều khoản chi tiết của Luật An ninh mạng 2018 (học ở Lớp 10, 11).",
             "CHƯA DÙNG phân loại sâu virus, trojan, spyware, ransomware (học ở Lớp 9, 12).",
@@ -242,9 +232,7 @@
           "phan_mem_ngon_ngu": [
             "Chưa viết code bằng ngôn ngữ lập trình. Chỉ dùng Ngôn ngữ tự nhiên và Sơ đồ khối."
           ],
-          "lenh_va_cau_truc": [
-            "Sơ đồ khối 3 cấu trúc: Tuần tự, Rẽ nhánh, Lặp."
-          ],
+          "lenh_va_cau_truc": ["Sơ đồ khối 3 cấu trúc: Tuần tự, Rẽ nhánh, Lặp."],
           "chua_duoc_dung": [
             "CHƯA DÙNG bất kỳ ngôn ngữ lập trình nào như Scratch (Lớp 8), Python (Lớp 9/10) hay Pascal (chương trình cũ).",
             "CHƯA DÙNG các thuật toán tìm kiếm nhị phân, thuật toán sắp xếp phức tạp (học ở Lớp 7).",
@@ -287,12 +275,8 @@
             "Phân biệt HĐH máy tính và HĐH thiết bị di động.",
             "Tệp thực thi `.exe`, đuôi tệp phổ biến (`.docx`, `.xlsx`, `.pdf`, `.png`)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Giao diện Hệ điều hành Windows/Android/iOS."
-          ],
-          "lenh_va_cau_truc": [
-            "Không có lập trình."
-          ],
+          "phan_mem_ngon_ngu": ["Giao diện Hệ điều hành Windows/Android/iOS."],
+          "lenh_va_cau_truc": ["Không có lập trình."],
           "chua_duoc_dung": [
             "CHƯA DÙNG câu lệnh điều khiển hệ điều hành dạng dòng lệnh (Command Prompt/Terminal/Linux shell - học ở Lớp 11).",
             "CHƯA DÙNG thuật ngữ quản lý tiến trình (Process), ngắt (Interrupt), quản lý bộ nhớ ảo (Virtual Memory).",
@@ -329,9 +313,7 @@
           "phan_mem_ngon_ngu": [
             "Giao diện Mạng xã hội minh họa (Facebook, Zalo, YouTube hoặc mạng xã hội học tập)."
           ],
-          "lenh_va_cau_truc": [
-            "Không có."
-          ],
+          "lenh_va_cau_truc": ["Không có."],
           "chua_duoc_dung": [
             "CHƯA DÙNG kỹ thuật thiết lập mạng xã hội doanh nghiệp hay tiếp thị số (Digital Marketing).",
             "CHƯA DÙNG thuật ngữ thuật toán phân phối nội dung AI của mạng xã hội (học ở Lớp 12)."
@@ -365,12 +347,8 @@
             "Cách trích dẫn tài liệu tham khảo cơ bản (Tác giả, Tên tài liệu, Nguồn link).",
             "Phần mềm miễn phí (Freeware), phần mềm nguồn mở (Open source) vs Phần mềm thương mại (Commercial)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các giấy phép bản quyền chi tiết kiểu Creative Commons (CC-BY, CC-NC... - học ở Lớp 9/10).",
             "CHƯA DÙNG các khung xử phạt hành chính theo Nghị định pháp luật cụ thể."
@@ -408,9 +386,7 @@
             "Sắp xếp tăng dần (Ascending) / giảm dần (Descending).",
             "Biểu đồ cột (Column chart), đường (Line chart), tròn (Pie chart)."
           ],
-          "phan_mem_ngon_ngu": [
-            "MS Excel / Google Sheets / LibreOffice Calc."
-          ],
+          "phan_mem_ngon_ngu": ["MS Excel / Google Sheets / LibreOffice Calc."],
           "lenh_va_cau_truc": [
             "Cú pháp công thức bắt đầu bằng dấu `=`.",
             "Thao tác dải lệnh Data (Sort, Filter), Insert (Charts)."
@@ -450,12 +426,8 @@
             "Cài đặt thời gian hiệu ứng (Start On Click, With Previous, After Previous).",
             "Tạo nút bấm liên kết (Action Button) và Hyperlink."
           ],
-          "phan_mem_ngon_ngu": [
-            "MS PowerPoint / Google Slides."
-          ],
-          "lenh_va_cau_truc": [
-            "Dải lệnh Animations, Slide Show, Insert Hyperlink."
-          ],
+          "phan_mem_ngon_ngu": ["MS PowerPoint / Google Slides."],
+          "lenh_va_cau_truc": ["Dải lệnh Animations, Slide Show, Insert Hyperlink."],
           "chua_duoc_dung": [
             "CHƯA DÙNG phần mềm làm video chuyên nghiệp như Premiere, CapCut (học ở Lớp 8/9).",
             "CHƯA DÙNG kỹ thuật thiết kế giao diện VBA tương tác phức tạp."
@@ -493,9 +465,7 @@
           "phan_mem_ngon_ngu": [
             "Mô tả bằng Ngôn ngữ tự nhiên, Bảng theo dõi từng bước, hoặc Sơ đồ khối."
           ],
-          "lenh_va_cau_truc": [
-            "Các bước thuật toán theo thuật ngữ tiếng Việt mô tả."
-          ],
+          "lenh_va_cau_truc": ["Các bước thuật toán theo thuật ngữ tiếng Việt mô tả."],
           "chua_duoc_dung": [
             "CHƯA DÙNG mã lập trình Python hay Scratch để cài đặt các thuật toán này (Scratch học ở Lớp 8, Python học ở Lớp 10).",
             "CHƯA DÙNG các thuật toán sắp xếp nâng cao như Quicksort, Mergesort, Heapsort (học ở Lớp 11 CS).",
@@ -537,12 +507,8 @@
             "Các máy tính mốc lịch sử: ENIAC, UNIVAC, máy tính cá nhân PC.",
             "Số hóa thông tin: Chuyển thông tin thực (chữ, ảnh, âm thanh) thành dữ liệu số (dãy bit)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG thuật toán mã hóa lấy mẫu âm thanh (Sampling rate), tần số lấy mẫu (học ở Lớp 10 CS).",
             "CHƯA DÙNG kiến thức kiến trúc máy tính nâng cao (đường truyền bus, cache L1/L2/L3)."
@@ -575,12 +541,8 @@
             "Quyền truy cập tệp/thư mục chia sẻ trực tuyến.",
             "Khái niệm cơ bản về IP công cộng và IP nội bộ."
           ],
-          "phan_mem_ngon_ngu": [
-            "Trình duyệt web, Google Drive / OneDrive."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Trình duyệt web, Google Drive / OneDrive."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG tính toán chia mạng con (Subnet mask, CIDR - học ở Lớp 11).",
             "CHƯA DÙNG các lệnh kiểm tra mạng Command Prompt như `ping`, `ipconfig`, `tracert` (học ở Lớp 11)."
@@ -613,12 +575,8 @@
             "Quyền bảo vệ hình ảnh cá nhân.",
             "Các biện pháp phòng tránh nguy cơ lừa đảo trực tuyến."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các quy định xử phạt hình sự chuyên sâu.",
             "CHƯA DÙNG kỹ thuật phân tích mã độc hay điều tra số (Digital forensics)."
@@ -656,10 +614,7 @@
             "Bảng tính: MS Excel / Google Sheets.",
             "Đồ họa / Video: Inkscape (KNTT) / GIMP (CTST) / CapCut / Movie Maker (CD) tùy bộ sách."
           ],
-          "lenh_va_cau_truc": [
-            "Cú pháp địa chỉ `$A$1`, `A$1`, `$A1`.",
-            "Cú pháp `=IF(...)`."
-          ],
+          "lenh_va_cau_truc": ["Cú pháp địa chỉ `$A$1`, `A$1`, `$A1`.", "Cú pháp `=IF(...)`."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các hàm tìm kiếm `VLOOKUP`, `HLOOKUP` (học ở Lớp 9/10).",
             "CHƯA DÙNG các hàm điều kiện phức hợp `AND`, `OR` lồng trong hàm `IF` quá 3 cấp.",
@@ -698,9 +653,7 @@
             "Khối lệnh cảm biến (Sensing) chạm nhân vật, chạm màu.",
             "Khối lệnh âm thanh (Sound) và bút vẽ (Pen) cơ bản."
           ],
-          "phan_mem_ngon_ngu": [
-            "Ngôn ngữ lập trình trực quan Scratch 3.0."
-          ],
+          "phan_mem_ngon_ngu": ["Ngôn ngữ lập trình trực quan Scratch 3.0."],
           "lenh_va_cau_truc": [
             "Các nhóm khối lệnh Scratch: Motion, Looks, Sound, Events, Control, Sensing, Operators, Variables."
           ],
@@ -744,12 +697,8 @@
             "Các thuật ngữ: Chuyển đổi số, Chính quyền số, Dịch vụ công trực tuyến.",
             "Ứng dụng công nghệ thông tin trong các ngành nghề."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các mô hình Trí tuệ nhân tạo (AI) học sâu (Deep learning), Machine learning chi tiết (học ở Lớp 12).",
             "CHƯA DÙNG thuật ngữ công nghệ Blockchain, IoT chuyên sâu."
@@ -780,12 +729,8 @@
             "Cấu trúc URL (`https://www.domain.com/path`).",
             "Các đuôi tên miền quốc gia (`.vn`) và tên miền dùng chung (`.com`, `.edu`, `.gov`, `.org`)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Trình duyệt web."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Trình duyệt web."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG lập trình trang web HTML/CSS (học ở Lớp 11/12 ICT).",
             "CHƯA DÙNG các giao thức truyền tải dữ liệu hệ thống như FTP, SSH, DNS chi tiết."
@@ -818,12 +763,8 @@
             "Bản quyền phần mềm (License), mã khóa kích hoạt (Product key).",
             "Cập nhật bản vá an ninh hệ điều hành."
           ],
-          "phan_mem_ngon_ngu": [
-            "Phần mềm diệt virus (Windows Defender, Kaspersky...)."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Phần mềm diệt virus (Windows Defender, Kaspersky...)."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG kỹ thuật tấn công từ chối dịch vụ (DDoS), tấn công Man-in-the-middle.",
             "CHƯA DÙNG các phương pháp tường lửa (Firewall) cấu hình chuyên sâu."
@@ -859,9 +800,7 @@
             "Phần mềm Sơ đồ tư duy (MindManager, XMind, Canva).",
             "Phần mềm tạo web kéo thả (Google Sites / Mobirise) hoặc Phần mềm biên tập video (CapCut / Movie Maker)."
           ],
-          "lenh_va_cau_truc": [
-            "Thao tác kéo thả trên phần mềm ứng dụng."
-          ],
+          "lenh_va_cau_truc": ["Thao tác kéo thả trên phần mềm ứng dụng."],
           "chua_duoc_dung": [
             "CHƯA DÙNG mã lệnh viết tay HTML, CSS, JavaScript (học ở Lớp 11/12 ICT).",
             "CHƯA DÙNG phần mềm biên tập âm thanh đồ họa chuyên nghiệp (Adobe Premiere, Audition)."
@@ -898,9 +837,7 @@
           "phan_mem_ngon_ngu": [
             "Scratch 3.0 (Bộ KNTT/CTST) hoặc giới thiệu ngôn ngữ Python sơ lược (ở một số bộ sách)."
           ],
-          "lenh_va_cau_truc": [
-            "Các thao tác làm việc với List và My Blocks trong Scratch."
-          ],
+          "lenh_va_cau_truc": ["Các thao tác làm việc với List và My Blocks trong Scratch."],
           "chua_duoc_dung": [
             "CHƯA DÙNG cấu trúc lập trình Python phức tạp dạng mảng 2 chiều, ma trận, đọc/ghi tệp tin (học ở Lớp 10/11).",
             "CHƯA DÙNG lập trình hướng đối tượng OOP (học ở THPT)."
@@ -932,12 +869,8 @@
             "Tên gọi và mô tả công việc của các ngành nghề Tin học.",
             "Kỹ năng số cơ bản cần thiết cho lao động trong tương lai."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG thông tin phân luồng đại học/học viện chi tiết của Lớp 12."
           ],
@@ -974,12 +907,8 @@
             "Khái niệm hệ thống thông minh, cảm biến (Sensor) trong IoT.",
             "Sự khác biệt giữa máy tính vạn năng và thiết bị thông minh."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG thuật toán học máy (Machine Learning) hay mạng thần kinh nhân tạo (Neural Network - Lớp 12).",
             "CHƯA DÙNG lập trình nhúng phần cứng IoT."
@@ -1010,12 +939,8 @@
             "Dịch vụ đám mây (SaaS: Gmail, Google Drive; IaaS/PaaS khái quát).",
             "Kết nối mạng không dây 4G/5G, Wi-Fi."
           ],
-          "phan_mem_ngon_ngu": [
-            "Trình duyệt web, ứng dụng đám mây."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Trình duyệt web, ứng dụng đám mây."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các câu lệnh cấu hình Router, Switch, IP tĩnh/động (Lớp 11).",
             "CHƯA DÙNG lập trình truyền nhận dữ liệu Socket."
@@ -1046,12 +971,8 @@
             "Các ký hiệu Giấy phép Creative Commons (CC BY, CC NC, CC ND, CC SA).",
             "Phần mềm nguồn mở (Open Source) và Phần mềm thương mại (Proprietary)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các kỹ thuật tấn công mã độc chuyên sâu.",
             "CHƯA DÙNG khung xử phạt tiền cụ thể theo nghị định mới nhất (chỉ hỏi quy định hành vi)."
@@ -1084,9 +1005,7 @@
             "Bảng giá trị logic `AND`, `OR`, `NOT`, `XOR`.",
             "Biểu diễn số nguyên có dấu bằng Mã bù 2 (Two's complement)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
           "lenh_va_cau_truc": [
             "Các phép toán logic: AND ($\\land$), OR ($\\lor$), NOT ($\neg$), XOR ($\\oplus$)."
           ],
@@ -1122,12 +1041,8 @@
             "Các phép toán hình học đồ họa vector:  (Union),  (Difference),  (Intersection).",
             "Chế độ hòa trộn lớp (Blending mode), vùng chọn (Selection tool) trong GIMP."
           ],
-          "phan_mem_ngon_ngu": [
-            "Inkscape (Vẽ đồ họa Vector) và GIMP (Chỉnh sửa ảnh Raster)."
-          ],
-          "lenh_va_cau_truc": [
-            "Các menu Path (Inkscape), Layer, Select, Colors (GIMP)."
-          ],
+          "phan_mem_ngon_ngu": ["Inkscape (Vẽ đồ họa Vector) và GIMP (Chỉnh sửa ảnh Raster)."],
+          "lenh_va_cau_truc": ["Các menu Path (Inkscape), Layer, Select, Colors (GIMP)."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các phần mềm thương mại Photoshop/Illustrator nếu SGK không sử dụng.",
             "CHƯA DÙNG kỹ thuật dựng hình 3D hay hoạt hình 2D (Animation)."
@@ -1207,15 +1122,9 @@
           "kien_thuc_duoc_dung": [
             "Sự khác biệt giữa định hướng ICT (hướng ứng dụng, dịch vụ, thiết kế) và CS (hướng thuật toán, phát triển phần mềm, trí tuệ nhân tạo)."
           ],
-          "phan_mem_ngon_ngu": [
-            "Không."
-          ],
-          "lenh_va_cau_truc": [
-            "Không."
-          ],
-          "chua_duoc_dung": [
-            "Không có kiến thức bị cấm đặc thù."
-          ],
+          "phan_mem_ngon_ngu": ["Không."],
+          "lenh_va_cau_truc": ["Không."],
+          "chua_duoc_dung": ["Không có kiến thức bị cấm đặc thù."],
           "dang_bai_dien_hinh": [
             "Dạng bài lựa chọn định hướng học tập (ICT hay CS) phù hợp với nguyện vọng nghề nghiệp của học sinh (ví dụ: muốn làm Lập trình viên AI -> chọn CS; muốn làm Thiết kế đồ họa/Marketing -> chọn ICT)."
           ],
@@ -1315,9 +1224,7 @@
             "Nhận diện và phòng tránh phần mềm độc hại lan truyền qua đường truyền tin",
             "Ứng xử văn minh, tuân thủ quy định pháp luật khi giao tiếp trên mạng"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kiến thức đạo đức số, nhận diện tin giả lớp 9"
-          ],
+          "kien_thuc_duoc_dung": ["Kiến thức đạo đức số, nhận diện tin giả lớp 9"],
           "chua_duoc_dung": [
             "Kĩ thuật phân tích phần mềm độc hại (hậu mã hoá, sandbox — kiến thức an ninh mạng chuyên sâu)",
             "Điều khoản hình sự chi tiết của các đạo luật số (chỉ nêu khái quát)"
@@ -1483,9 +1390,7 @@
             "Mô tả công việc của người quản trị cơ sở dữ liệu (DBA): thiết kế, cập nhật, bảo mật, sao lưu",
             "Nhận biết một số nghề nghiệp liên quan đến CSDL và yêu cầu năng lực"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kiến thức CSDL vừa học"
-          ],
+          "kien_thuc_duoc_dung": ["Kiến thức CSDL vừa học"],
           "chua_duoc_dung": [
             "Chuẩn nghề nghiệp CNTT quốc tế, chứng chỉ ngành (ngoài phạm vi chương trình)"
           ],
@@ -1523,9 +1428,7 @@
             "Phân biệt AI loại yếu và loại mạnh ở mức nhận biết",
             "Nhận biết hạn chế, rủi ro của AI và trách nhiệm khi sử dụng công cụ AI"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kiến thức dữ liệu, mạng máy tính của các lớp dưới"
-          ],
+          "kien_thuc_duoc_dung": ["Kiến thức dữ liệu, mạng máy tính của các lớp dưới"],
           "chua_duoc_dung": [
             "Mạng nơ-ron, hàm kích hoạt, huấn luyện mô hình (đại học)",
             "Học sâu, mạng nơ-ron tích chập (đại học)",
@@ -1553,9 +1456,7 @@
             "Mô tả vai trò của một số giao thức mạng phổ biến (HTTP/HTTPS, TCP/IP, DNS, DHCP)",
             "Thực hành chia sẻ tệp, máy in qua mạng LAN"
           ],
-          "kien_thuc_duoc_dung": [
-            "Kiến thức mạng LAN, Internet, địa chỉ IP lớp 10"
-          ],
+          "kien_thuc_duoc_dung": ["Kiến thức mạng LAN, Internet, địa chỉ IP lớp 10"],
           "chua_duoc_dung": [
             "Cấu hình định tuyến tĩnh/động, VLAN, subnetting chi tiết (kiến thức quản trị mạng chuyên sâu)",
             "Chồng giao thức TCP/IP ở mức đóng gói gói tin từng lớp"
@@ -1646,10 +1547,7 @@
             "So sánh các loại đường truyền (cáp xoắn, cáp quang, sóng vô tuyến) và ứng dụng",
             "Đề xuất sơ đồ mạng đơn giản cho một tổ chức nhỏ: vị trí thiết bị, cách nối, địa chỉ IP"
           ],
-          "kien_thuc_duoc_dung": [
-            "Thiết bị mạng và giao thức của học kì 1",
-            "Địa chỉ IP lớp 10"
-          ],
+          "kien_thuc_duoc_dung": ["Thiết bị mạng và giao thức của học kì 1", "Địa chỉ IP lớp 10"],
           "chua_duoc_dung": [
             "Thiết kế mạng nhiều lớp, giao thức định tuyến OSPF/BGP (quản trị mạng chuyên sâu)",
             "Tính toán băng thông chi tiết theo mô hình hàng đợi (đại học)"
@@ -1742,9 +1640,7 @@
             "Nhận biết nhóm nghề quản trị thuộc ngành CNTT và yêu cầu năng lực, phẩm chất",
             "Tham gia hội thảo hướng nghiệp, xác định định hướng cá nhân"
           ],
-          "kien_thuc_duoc_dung": [
-            "Hướng nghiệp tin học các lớp 10–11"
-          ],
+          "kien_thuc_duoc_dung": ["Hướng nghiệp tin học các lớp 10–11"],
           "chua_duoc_dung": [
             "Chuẩn kỹ năng quốc gia về nghề CNTT, chương trình đào tạo đại học chi tiết"
           ],
@@ -1785,9 +1681,7 @@
           "luu_y_ra_de": "KNTT không có chủ đề riêng cho an toàn – bảo mật; ra đề theo nội dung chung này, không lấy chi tiết riêng của CTST/CD."
         }
       ],
-      "chuyen_de": [
-        "Chuyên đề học tập Tin học 12 (bắt buộc/tự chọn)"
-      ],
+      "chuyen_de": ["Chuyên đề học tập Tin học 12 (bắt buộc/tự chọn)"],
       "ghi_chu_chua_chac": [
         "Chỉ tra được mục lục KNTT CS đầy đủ từ loigiaihay; mục lục ICT 12 ghép từ kết quả tìm kiếm giáo án (marketing điện tử và đồ án trang web marketing, khoảng Bài 19–26) — số thứ tự bài có thể lệch, cần đối chiếu SGK in",
         "Đề tốt nghiệp Tin học 2025: cấu trúc ghi theo đề phổ biến (Phần I: 12 câu TN gồm 6 chung + 6 riêng; Phần II: 4 câu ĐS gồm 2 chung + 2 riêng; Phần III: 6 câu trả lời ngắn phần riêng) — tỉ lệ chung/riêng cần đối chiếu ma trận đề chính thức của Bộ"
@@ -1881,10 +1775,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin6-thong-tin-du-lieu",
-        "tin6-mang-may-tinh-internet"
-      ],
+      "pham_vi": ["tin6-thong-tin-du-lieu", "tin6-mang-may-tinh-internet"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1936,10 +1827,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin6-dao-duc-phap-luat-van-hoa-so",
-        "tin6-soan-thao-trinh-chieu"
-      ],
+      "pham_vi": ["tin6-dao-duc-phap-luat-van-hoa-so", "tin6-soan-thao-trinh-chieu"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1963,10 +1851,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin6-soan-thao-trinh-chieu",
-        "tin6-thuat-toan-co-ban"
-      ],
+      "pham_vi": ["tin6-soan-thao-trinh-chieu", "tin6-thuat-toan-co-ban"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1990,10 +1875,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin7-thiet-bi-he-dieu-hanh",
-        "tin7-mang-xa-hoi-trao-doi-thong-tin"
-      ],
+      "pham_vi": ["tin7-thiet-bi-he-dieu-hanh", "tin7-mang-xa-hoi-trao-doi-thong-tin"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2045,9 +1927,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin7-bang-tinh-dien-tu"
-      ],
+      "pham_vi": ["tin7-bang-tinh-dien-tu"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2099,10 +1979,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin8-lich-su-may-tinh-du-lieu",
-        "tin8-mang-may-tinh-internet"
-      ],
+      "pham_vi": ["tin8-lich-su-may-tinh-du-lieu", "tin8-mang-may-tinh-internet"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2154,9 +2031,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin8-ung-dung-tin-hoc-do-hoa"
-      ],
+      "pham_vi": ["tin8-ung-dung-tin-hoc-do-hoa"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2180,10 +2055,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin8-ung-dung-tin-hoc-do-hoa",
-        "tin8-lap-trinh-truc-quan-scratch"
-      ],
+      "pham_vi": ["tin8-ung-dung-tin-hoc-do-hoa", "tin8-lap-trinh-truc-quan-scratch"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2207,10 +2079,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin9-may-tinh-va-xa-hoi",
-        "tin9-mang-may-tinh-dich-vu-web"
-      ],
+      "pham_vi": ["tin9-may-tinh-va-xa-hoi", "tin9-mang-may-tinh-dich-vu-web"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2262,9 +2131,7 @@
           "diem_moi_cau": 2.5
         }
       ],
-      "pham_vi": [
-        "tin9-ung-dung-tin-hoc-da-phuong-tien"
-      ],
+      "pham_vi": ["tin9-ung-dung-tin-hoc-da-phuong-tien"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2372,9 +2239,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "tin10-lap-trinh-python-co-ban"
-      ],
+      "pham_vi": ["tin10-lap-trinh-python-co-ban"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2398,10 +2263,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "tin10-lap-trinh-python-co-ban",
-        "tin10-huong-nghiep-tin-hoc"
-      ],
+      "pham_vi": ["tin10-lap-trinh-python-co-ban", "tin10-huong-nghiep-tin-hoc"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2557,9 +2419,7 @@
           "tong_diem": 2
         }
       ],
-      "pham_vi": [
-        "tin11-ky-thuat-lap-trinh"
-      ],
+      "pham_vi": ["tin11-ky-thuat-lap-trinh"],
       "ti_le_muc_do": "NB 30%, TH 40%, VD 30%"
     },
     {
@@ -2592,10 +2452,7 @@
           "tong_diem": 2
         }
       ],
-      "pham_vi": [
-        "tin11-ky-thuat-lap-trinh",
-        "tin11-huong-nghiep-tin-hoc"
-      ],
+      "pham_vi": ["tin11-ky-thuat-lap-trinh", "tin11-huong-nghiep-tin-hoc"],
       "ti_le_muc_do": "NB 30%, TH 40%, VD 30%"
     },
     {
@@ -2628,10 +2485,7 @@
           "tong_diem": 2
         }
       ],
-      "pham_vi": [
-        "tin11-thuc-hanh-qlcsdl",
-        "tin11-chinh-sua-anh-lam-video"
-      ],
+      "pham_vi": ["tin11-thuc-hanh-qlcsdl", "tin11-chinh-sua-anh-lam-video"],
       "ti_le_muc_do": "NB 30%, TH 40%, VD 30%"
     },
     {
@@ -2780,10 +2634,7 @@
           "tong_diem": 2
         }
       ],
-      "pham_vi": [
-        "tin12-mang-thiet-bi-thiet-ke-mang",
-        "tin12-hoc-may-khoa-hoc-du-lieu"
-      ],
+      "pham_vi": ["tin12-mang-thiet-bi-thiet-ke-mang", "tin12-hoc-may-khoa-hoc-du-lieu"],
       "ti_le_muc_do": "NB 30%, TH 40%, VD 30%"
     },
     {
@@ -2853,10 +2704,7 @@
           "tong_diem": 2
         }
       ],
-      "pham_vi": [
-        "tin12-marketing-dien-tu-do-an-web",
-        "tin12-huong-nghiep-cntt"
-      ],
+      "pham_vi": ["tin12-marketing-dien-tu-do-an-web", "tin12-huong-nghiep-cntt"],
       "ti_le_muc_do": "NB 30%, TH 40%, VD 30%"
     },
     {

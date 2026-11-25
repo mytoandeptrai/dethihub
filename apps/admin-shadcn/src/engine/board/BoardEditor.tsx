@@ -5,33 +5,206 @@
  * Ctrl + lăn chuột để phóng to. Giao diện viết lại bằng tiếng Việt theo token của app.
  * Nội dung tự lưu trong localStorage theo id tab.
  */
-import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+
 import { TrashIcon } from '@/engine/components/appIcons'
+
 import './boardChrome.css'
-import { alignBlocks, centerOf, clone, DEFAULT_STYLE, groupBlocks, handlePositions, hasPoints, hitTest, isDarkPaper, isLinear, isPage, localBounds, measureText, mutate, newId, newSeed, paperBg, rotate, unionBounds, worldBounds, fontOf, LINE_HEIGHT, inPolygon, type AlignKind, type Bounds, type El, type Handle, type Kind, type Paper, type PenKind, type Pt, type Style, isClosedStroke, type FillStyle, withGroups, copyEls } from './scene'
-import { dropFromCache, LASER_LIFE, render, renderLive, setImageLoadHandler, type Guide, type LaserTrail, type View } from './render'
 import { lazyPage } from '@/engine/lib/lazyPage'
+
+import {
+  dropFromCache,
+  LASER_LIFE,
+  render,
+  renderLive,
+  setImageLoadHandler,
+  type Guide,
+  type LaserTrail,
+  type View,
+} from './render'
+import {
+  alignBlocks,
+  centerOf,
+  clone,
+  DEFAULT_STYLE,
+  groupBlocks,
+  handlePositions,
+  hasPoints,
+  hitTest,
+  isDarkPaper,
+  isLinear,
+  isPage,
+  localBounds,
+  measureText,
+  mutate,
+  newId,
+  newSeed,
+  paperBg,
+  rotate,
+  unionBounds,
+  worldBounds,
+  fontOf,
+  LINE_HEIGHT,
+  inPolygon,
+  type AlignKind,
+  type Bounds,
+  type El,
+  type Handle,
+  type Kind,
+  type Paper,
+  type PenKind,
+  type Pt,
+  type Style,
+  isClosedStroke,
+  type FillStyle,
+  withGroups,
+  copyEls,
+} from './scene'
 // trợ lý AI kéo theo dữ liệu slide (~160 KB gzip): tải khi mở tab AI, bảng vẽ hiện trước
-const AiPanel = lazyPage(() => import('@/engine/examEditor/AiPanel').then((m) => ({ default: m.AiPanel })))
-import { ToolsPanel } from '@/engine/examEditor/tools/LazyToolsPanel'
-import { svgDataUrl } from '@/engine/lib/plot'
-import { renderTool, readToolDoc, parseToolJson, type ToolDoc, type ToolImage } from '@/engine/lib/toolSpec'
-import { ToolModal } from '@/engine/examEditor/tools/ToolModal'
-import { svgToElements } from './svgImport'
+const AiPanel = lazyPage(() =>
+  import('@/engine/examEditor/AiPanel').then((m) => ({ default: m.AiPanel })),
+)
 import { createPortal } from 'react-dom'
-import { interiorArea, regionArea, regionAt, type Region } from './regionFill'
+
 import { figureDoc } from '@/engine/examEditor/toolImages'
+import { ToolsPanel } from '@/engine/examEditor/tools/LazyToolsPanel'
+import { ToolModal } from '@/engine/examEditor/tools/ToolModal'
 import { attachToAi, type AiRef } from '@/engine/lib/aiAttach'
+import { svgDataUrl } from '@/engine/lib/plot'
+import {
+  renderTool,
+  readToolDoc,
+  parseToolJson,
+  type ToolDoc,
+  type ToolImage,
+} from '@/engine/lib/toolSpec'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
-import { recognize } from './recognize'
-import { ExportDialog, FormulaDialog, PdfPagesDialog, type ExportChoice, type FormulaResult } from './BoardDialogs'
-import { canvasToA4Pdf, download, openPdf, pagesToPdf, pdfPageSize, readImageFile, renderPdfPage, renderRegion, savePng, type Picture } from './io'
-import { cachedSrc, IDB_PREFIX, stash, unstash } from './imgStore'
 import { pendingBoardSaves, useBoards, type BoardData } from '@/engine/store/boards'
+
+import {
+  ExportDialog,
+  FormulaDialog,
+  PdfPagesDialog,
+  type ExportChoice,
+  type FormulaResult,
+} from './BoardDialogs'
+import {
+  type Tool,
+  type Slot,
+  type Opts,
+  DEFAULT_TIP,
+  CHALK_WHITE,
+  LIGHT_COLORS,
+  CHALK_COLORS,
+  DEFAULT_OPTS,
+  DEFAULT_STYLES,
+  ERASE_R,
+  CLIP_MARK,
+  SHAPES,
+  type Saved,
+  load,
+  type Drag,
+  computeSnap,
+  TOOL_KEYS,
+  MOD_KEY,
+  SHAPE_KEYS,
+  FILLS,
+  CURSOR,
+} from './boardModel'
+import {
+  type Main,
+  ERASER_SVG,
+  LASER_COLORS,
+  LASER_SIZES,
+  LASER_SVG,
+  KIND_LABEL,
+  TOOL_LABEL,
+  curvePoints,
+  densify,
+  type SideTab,
+  SIDE_W,
+  WRENCH_D,
+  PEN_D,
+  ERASER_D,
+  LASER_D,
+  SELECT_D,
+  LASSO_D,
+  SHAPE_D,
+  TEXT_D,
+  DOT_SIZES,
+  BUCKET_D,
+  TRASH_D,
+  HAND_D,
+  UNDO_D,
+  REDO_D,
+  PLUS_D,
+  IMG_D,
+  PDF_NOTE_D,
+  EXPORT_D,
+  PAPER_D,
+  RULER_D,
+  ProtractorIcon,
+  COMPASS_D,
+  FOUNTAIN_D,
+  PENS,
+  PenPanel,
+  SHAPE_BY_ID,
+  SHAPE_SECTIONS,
+  THEME_COLORS,
+  PAPERS,
+  AiIcon,
+  SideBtn,
+  Group,
+  Chip,
+  Toggle,
+  Pop,
+  MoreColors,
+  HexInput,
+  PanelRow,
+  NONE_BG,
+  draggingFill,
+  SPREAD_MS,
+  BUCKET_SVG,
+  Swatch,
+  Ico,
+  IconBtn,
+  SelBtn,
+} from './boardUi'
 import { texToSvg } from './formula'
-import { bindToScene, guideAt, Instruments, placeInstrument, projectGuide, type InstApi, type InstKind, type InstState } from './Instruments'
-import { type Tool, type Slot, type Opts, DEFAULT_TIP, CHALK_WHITE, LIGHT_COLORS, CHALK_COLORS, DEFAULT_OPTS, DEFAULT_STYLES, ERASE_R, CLIP_MARK, SHAPES, type Saved, load, type Drag, computeSnap, TOOL_KEYS, MOD_KEY, SHAPE_KEYS, FILLS, CURSOR } from './boardModel'
-import { type Main, ERASER_SVG, LASER_COLORS, LASER_SIZES, LASER_SVG, KIND_LABEL, TOOL_LABEL, curvePoints, densify, type SideTab, SIDE_W, WRENCH_D, PEN_D, ERASER_D, LASER_D, SELECT_D, LASSO_D, SHAPE_D, TEXT_D, DOT_SIZES, BUCKET_D, TRASH_D, HAND_D, UNDO_D, REDO_D, PLUS_D, IMG_D, PDF_NOTE_D, EXPORT_D, PAPER_D, RULER_D, ProtractorIcon, COMPASS_D, FOUNTAIN_D, PENS, PenPanel, SHAPE_BY_ID, SHAPE_SECTIONS, THEME_COLORS, PAPERS, AiIcon, SideBtn, Group, Chip, Toggle, Pop, MoreColors, HexInput, PanelRow, NONE_BG, draggingFill, SPREAD_MS, BUCKET_SVG, Swatch, Ico, IconBtn, SelBtn } from './boardUi'
+import { cachedSrc, IDB_PREFIX, stash, unstash } from './imgStore'
+import {
+  bindToScene,
+  guideAt,
+  Instruments,
+  placeInstrument,
+  projectGuide,
+  type InstApi,
+  type InstKind,
+  type InstState,
+} from './Instruments'
+import {
+  canvasToA4Pdf,
+  download,
+  openPdf,
+  pagesToPdf,
+  pdfPageSize,
+  readImageFile,
+  renderPdfPage,
+  renderRegion,
+  savePng,
+  type Picture,
+} from './io'
+import { recognize } from './recognize'
+import { interiorArea, regionArea, regionAt, type Region } from './regionFill'
+import { svgToElements } from './svgImport'
 
 export default function BoardEditor({ id, readOnly = false }: { id: string; readOnly?: boolean }) {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -49,7 +222,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const opts = useRef<Opts>({ ...DEFAULT_OPTS, ...saved.current?.opts })
   // bảng lưu trước khi hình mặc định vẽ thẳng: chuyển kiểu hình đang dùng sang thẳng một lần (hình đã vẽ giữ nguyên)
   if (saved.current?.opts && !saved.current.opts.shapeStraight) {
-    styles.current.shape = { ...styles.current.shape, roughness: 0, ...(styles.current.shape.fillStyle === 'hachure' ? { fillStyle: 'solid' as const } : {}) }
+    styles.current.shape = {
+      ...styles.current.shape,
+      roughness: 0,
+      ...(styles.current.shape.fillStyle === 'hachure' ? { fillStyle: 'solid' as const } : {}),
+    }
     opts.current.shapeStraight = true
     saved.current.opts.shapeStraight = true
   }
@@ -84,7 +261,13 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const [lastSide, setLastSide] = useState<SideTab>('tools')
   const sideAnim = useAnimatedPresence(Boolean(side), 180)
   const shownSide = side ?? lastSide
-  const [dialog, setDialog] = useState<{ t: 'formula'; el?: El } | { t: 'pdf'; file: File } | { t: 'export' } | { t: 'tool'; doc: ToolDoc; ids: string[] } | null>(null)
+  const [dialog, setDialog] = useState<
+    | { t: 'formula'; el?: El }
+    | { t: 'pdf'; file: File }
+    | { t: 'export' }
+    | { t: 'tool'; doc: ToolDoc; ids: string[] }
+    | null
+  >(null)
   const dialogRef = useRef(dialog)
   dialogRef.current = dialog
   const [saveErr, setSaveErr] = useState(false)
@@ -106,8 +289,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     return t === 'freedraw' ? opts.current.pen : t === 'text' ? 'text' : 'shape'
   }
   const style = {
-    get current() { return styles.current[slot()] },
-    set current(v: Style) { styles.current[slot()] = v },
+    get current() {
+      return styles.current[slot()]
+    },
+    set current(v: Style) {
+      styles.current[slot()] = v
+    },
   }
   /** con trỏ: bút = chấm tròn đúng màu và cỡ nét, gôm = cục gôm, laser = chấm đỏ */
   const toolCursor = () => {
@@ -115,14 +302,19 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     if (t === 'freedraw') {
       const st = style.current
       const d = Math.max(4, Math.min(24, st.strokeWidth * 2.6 * view.current.zoom))
-      const n = Math.ceil(d) + 4, r = d / 2, c = n / 2
+      const n = Math.ceil(d) + 4,
+        r = d / 2,
+        c = n / 2
       const fill = st.stroke
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${n}" height="${n}"><circle cx="${c}" cy="${c}" r="${r}" fill="${fill}" fill-opacity="${st.opacity / 100}" stroke="white" stroke-width="1.2"/></svg>`
       return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${c} ${c}, crosshair`
     }
-    if (t === 'eraser') return `url("data:image/svg+xml,${encodeURIComponent(ERASER_SVG)}") 6 22, cell`
-    if (t === 'bucket') return `url("data:image/svg+xml,${encodeURIComponent(BUCKET_SVG.replaceAll('#4dabf7', opts.current.bucketFill === 'transparent' ? '#ffffff' : opts.current.bucketFill))}") 20 21, crosshair`
-    if (t === 'laser') return `url("data:image/svg+xml,${encodeURIComponent(LASER_SVG.replaceAll('#ff3b30', opts.current.laserColor))}") 9 9, crosshair`
+    if (t === 'eraser')
+      return `url("data:image/svg+xml,${encodeURIComponent(ERASER_SVG)}") 6 22, cell`
+    if (t === 'bucket')
+      return `url("data:image/svg+xml,${encodeURIComponent(BUCKET_SVG.replaceAll('#4dabf7', opts.current.bucketFill === 'transparent' ? '#ffffff' : opts.current.bucketFill))}") 20 21, crosshair`
+    if (t === 'laser')
+      return `url("data:image/svg+xml,${encodeURIComponent(LASER_SVG.replaceAll('#ff3b30', opts.current.laserColor))}") 9 9, crosshair`
     if (t === 'text') return 'text'
     if (t === 'hand') return 'grab'
     if (t === 'select') return 'default'
@@ -151,7 +343,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       for (const tr of laser.current) {
         let i = 0
         while (i < tr.ts.length && now - tr.ts[i] > LASER_LIFE) i++
-        if (i) { tr.pts.splice(0, i); tr.ts.splice(0, i) }
+        if (i) {
+          tr.pts.splice(0, i)
+          tr.ts.splice(0, i)
+        }
       }
       laser.current = laser.current.filter((tr) => tr.pts.length || tr === active)
       const z = view.current.zoom
@@ -168,17 +363,24 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         paper: opts.current.paper,
         lasso: lasso.current,
         laser: laser.current,
-        eraser: eraserAt.current && (t === 'eraser' || drag.current?.t === 'erase')
-          ? { p: eraserAt.current, r: ERASE_R[opts.current.eraseSize] / z } : null,
+        eraser:
+          eraserAt.current && (t === 'eraser' || drag.current?.t === 'erase')
+            ? { p: eraserAt.current, r: ERASE_R[opts.current.eraseSize] / z }
+            : null,
         guides: guidesRef.current,
         fillHover: fillHover.current,
-        spread: sp ? { id: sp.id, prev: sp.prev, p: sp.p, r: sp.rMax * (1 - (1 - spT) ** 3) } : null,
+        spread: sp
+          ? { id: sp.id, prev: sp.prev, p: sp.p, r: sp.rMax * (1 - (1 - spT) ** 3) }
+          : null,
       })
       if (liveRef.current) renderLive(liveRef.current, lv, view.current)
       // ghi chú PDF: trang đang nằm giữa khung nhìn
       syncPageRef.current()
       // dụng cụ hình học đi theo vùng nhìn
-      instG.current?.setAttribute('transform', `scale(${z}) translate(${view.current.scrollX} ${view.current.scrollY})`)
+      instG.current?.setAttribute(
+        'transform',
+        `scale(${z}) translate(${view.current.scrollX} ${view.current.scrollY})`,
+      )
       // laser còn vệt thì vẽ tiếp khung sau để mờ dần
       if (laser.current.some((tr) => tr.pts.length)) redrawRef.current()
       // màu đang lan / viền xem trước đang chạy → vẽ tiếp
@@ -196,7 +398,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   /** chỉ vẽ lại nét đang viết */
   const redrawLive = useCallback(() => {
     cancelAnimationFrame(liveRaf.current)
-    liveRaf.current = requestAnimationFrame(() => { if (liveRef.current) renderLive(liveRef.current, live.current, view.current) })
+    liveRaf.current = requestAnimationFrame(() => {
+      if (liveRef.current) renderLive(liveRef.current, live.current, view.current)
+    })
   }, [])
 
   const saveTimer = useRef(0)
@@ -207,9 +411,17 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const write = async () => {
       try {
         // ảnh lớn (ảnh chèn, trang PDF) cất vào IndexedDB, bản lưu chỉ giữ khoá
-        const elements = await Promise.all(els.current.map(async (e) => (e.src ? { ...e, src: await stash(e.src) } : e)))
+        const elements = await Promise.all(
+          els.current.map(async (e) => (e.src ? { ...e, src: await stash(e.src) } : e)),
+        )
         if (pendingBoardSaves.get(id) !== save) return false
-        const data: Saved = { v: 2, elements, view: view.current, styles: styles.current, opts: opts.current }
+        const data: Saved = {
+          v: 2,
+          elements,
+          view: view.current,
+          styles: styles.current,
+          opts: opts.current,
+        }
         useBoards.getState().save(id, data as unknown as BoardData)
         pendingBoardSaves.delete(id)
         setSaveErr(false)
@@ -223,7 +435,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const save = () => {
       window.clearTimeout(saveTimer.current)
       if (pendingBoardSaves.get(id) !== save) return Promise.resolve(false)
-      return (running ??= write().finally(() => { running = undefined }))
+      return (running ??= write().finally(() => {
+        running = undefined
+      }))
     }
     pendingBoardSaves.set(id, save)
     saveTimer.current = window.setTimeout(() => void save(), 400)
@@ -273,16 +487,22 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   useEffect(() => {
     const need = els.current.filter((e) => e.src?.startsWith(IDB_PREFIX))
     if (!need.length) return
-    void Promise.all(need.map(async (e) => {
-      const src = await unstash(e.src!).catch(() => '')
-      if (src) { e.src = src; dropFromCache(e.id) }
-    })).then(() => redraw())
+    void Promise.all(
+      need.map(async (e) => {
+        const src = await unstash(e.src!).catch(() => '')
+        if (src) {
+          e.src = src
+          dropFromCache(e.id)
+        }
+      }),
+    ).then(() => redraw())
   }, [redraw])
 
   /* ---------- kích thước canvas ---------- */
 
   useEffect(() => {
-    const wrap = wrapRef.current, c = canvasRef.current
+    const wrap = wrapRef.current,
+      c = canvasRef.current
     if (!wrap || !c) return
     const ro = new ResizeObserver(() => {
       const dpr = window.devicePixelRatio || 1
@@ -291,7 +511,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       c.style.width = `${wrap.clientWidth}px`
       c.style.height = `${wrap.clientHeight}px`
       const lc = liveRef.current
-      if (lc) { lc.width = c.width; lc.height = c.height }
+      if (lc) {
+        lc.width = c.width
+        lc.height = c.height
+      }
       // đổi cỡ canvas xoá trắng nó: vẽ lại ngay trong cùng khung hình, không đợi khung sau (tránh chớp khi panel trượt)
       cancelAnimationFrame(raf.current)
       paint()
@@ -299,7 +522,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     ro.observe(wrap)
     // phông chữ tải xong thì đo / vẽ lại chữ
     document.fonts?.ready.then(() => {
-      for (const e of els.current) if (e.kind === 'text') mutate(e, measureText(e.text ?? '', e.fontSize, e))
+      for (const e of els.current)
+        if (e.kind === 'text') mutate(e, measureText(e.text ?? '', e.fontSize, e))
       redraw()
     })
     return () => ro.disconnect()
@@ -328,9 +552,28 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           const w = worldBounds(e)
           return w[0] < b[2] && w[2] > b[0] && w[1] < b[3] && w[3] > b[1]
         })
-        const sig = ink.length ? JSON.stringify(ink.map((e) => [e.id, e.x, e.y, e.w, e.h, e.angle, e.points?.length ?? 0, e.stroke, e.strokeWidth, e.opacity, e.text])) : ''
+        const sig = ink.length
+          ? JSON.stringify(
+              ink.map((e) => [
+                e.id,
+                e.x,
+                e.y,
+                e.w,
+                e.h,
+                e.angle,
+                e.points?.length ?? 0,
+                e.stroke,
+                e.strokeWidth,
+                e.opacity,
+                e.text,
+              ]),
+            )
+          : ''
         if (!sig) continue
-        if (thumbSig.current[pg.id] === sig && inkThumbs[pg.id]) { next[pg.id] = inkThumbs[pg.id]; continue }
+        if (thumbSig.current[pg.id] === sig && inkThumbs[pg.id]) {
+          next[pg.id] = inkThumbs[pg.id]
+          continue
+        }
         const c = await renderRegion([pg, ...ink], b, 260 / pg.w, 'white', 'plain')
         next[pg.id] = c.toDataURL('image/jpeg', 0.8)
         thumbSig.current[pg.id] = sig
@@ -342,12 +585,19 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   }, [sv])
   /** độ mở cột trang 0..1, chạy dần khi ẩn / hiện để trang trượt theo cột */
   const railK = useRef(1)
-  const railW = () => (els.current.some(isPage) && (canvasRef.current?.clientWidth ?? 0) >= 640 ? RAIL_W * railK.current : 0)
+  const railW = () =>
+    els.current.some(isPage) && (canvasRef.current?.clientWidth ?? 0) >= 640
+      ? RAIL_W * railK.current
+      : 0
   const toggleRail = () => {
-    const open = !railOpen, from = railK.current, t0 = performance.now(), D = 220
+    const open = !railOpen,
+      from = railK.current,
+      t0 = performance.now(),
+      D = 220
     setRailOpen(open)
     const step = (t: number) => {
-      const u = Math.min(1, (t - t0) / D), e = 1 - (1 - u) ** 3
+      const u = Math.min(1, (t - t0) / D),
+        e = 1 - (1 - u) ** 3
       railK.current = from + ((open ? 1 : 0) - from) * e
       redraw()
       if (u < 1) requestAnimationFrame(step)
@@ -358,14 +608,19 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const syncPageRef = useRef(() => {})
   syncPageRef.current = () => {
     if (!pdfPages.length) return
-    const c = canvasRef.current, v = view.current
+    const c = canvasRef.current,
+      v = view.current
     if (!c) return
     const midY = (c.clientHeight * 0.4) / v.zoom - v.scrollY
     let k = 0
-    pdfPages.forEach((pg, i) => { if (pg.y <= midY) k = i })
+    pdfPages.forEach((pg, i) => {
+      if (pg.y <= midY) k = i
+    })
     if (k !== curPage) {
       setCurPage(k)
-      railRef.current?.querySelector<HTMLElement>(`[data-page="${k}"]`)?.scrollIntoView({ block: 'nearest' })
+      railRef.current
+        ?.querySelector<HTMLElement>(`[data-page="${k}"]`)
+        ?.scrollIntoView({ block: 'nearest' })
     }
   }
   /** bảng PDF: chỉ cuộn trong phạm vi các trang (chừa lề), không trôi ra vùng trống vô tận */
@@ -377,22 +632,29 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     // đổi tab thì bảng dựng lại: canvas còn cỡ mặc định 300×150 tới khi ResizeObserver đo khung thật.
     // Kéo vùng nhìn theo cỡ tạm đó sẽ làm trang lệch khỏi chỗ cũ, nên chờ đo xong (style.width do ResizeObserver đặt).
     if (!c || !c.style.width || !c.clientWidth || !c.clientHeight) return
-    const v = view.current, M = 40
-    const x1 = Math.min(...pdfPages.map((p) => p.x)), x2 = Math.max(...pdfPages.map((p) => p.x + p.w))
-    const y1 = pdfPages[0].y, y2 = Math.max(...pdfPages.map((p) => p.y + p.h))
+    const v = view.current,
+      M = 40
+    const x1 = Math.min(...pdfPages.map((p) => p.x)),
+      x2 = Math.max(...pdfPages.map((p) => p.x + p.w))
+    const y1 = pdfPages[0].y,
+      y2 = Math.max(...pdfPages.map((p) => p.y + p.h))
     const rw = railW() / v.zoom
-    const W = c.clientWidth / v.zoom - rw, H = c.clientHeight / v.zoom
+    const W = c.clientWidth / v.zoom - rw,
+      H = c.clientHeight / v.zoom
     // trục ngang: trang hẹp hơn khung thì giữ giữa; rộng hơn thì chỉ cuộn tới hai mép trang
     if (x2 - x1 + 2 * M <= W) v.scrollX = rw + W / 2 - (x1 + x2) / 2
     else v.scrollX = Math.min(rw - (x1 - M), Math.max(rw + W - (x2 + M), v.scrollX))
-    const top = y1 - M, bottom = Math.max(top, y2 + M - H)
+    const top = y1 - M,
+      bottom = Math.max(top, y2 + M - H)
     v.scrollY = Math.min(-top, Math.max(-bottom, v.scrollY))
   }
   /** cuộn tới trang i: mép trên trang sát đầu khung, trang nằm giữa phần bên phải cột thu nhỏ */
   const goPage = (i: number) => {
-    const pg = pdfPages[i], c = canvasRef.current
+    const pg = pdfPages[i],
+      c = canvasRef.current
     if (!pg || !c) return
-    const v = view.current, rw = railW()
+    const v = view.current,
+      rw = railW()
     v.scrollY = -pg.y + 16 / v.zoom
     v.scrollX = (rw + (c.clientWidth - rw) / 2) / v.zoom - (pg.x + pg.w / 2)
     redraw()
@@ -405,13 +667,24 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const instRef = useRef(inst)
   instRef.current = inst
   const instG = useRef<SVGGElement>(null)
-  useLayoutEffect(() => { redraw() }, [inst, redraw])
-  const toggleInst = (k: InstKind) => setInst((s) => {
-    if (s[k]) { const n = { ...s }; delete n[k]; return n }
-    const c = canvasRef.current, v = view.current
-    const center: Pt = [(c?.clientWidth ?? 800) / 2 / v.zoom - v.scrollX, (c?.clientHeight ?? 600) / 2 / v.zoom - v.scrollY]
-    return { ...s, [k]: placeInstrument(k, center) }
-  })
+  useLayoutEffect(() => {
+    redraw()
+  }, [inst, redraw])
+  const toggleInst = (k: InstKind) =>
+    setInst((s) => {
+      if (s[k]) {
+        const n = { ...s }
+        delete n[k]
+        return n
+      }
+      const c = canvasRef.current,
+        v = view.current
+      const center: Pt = [
+        (c?.clientWidth ?? 800) / 2 / v.zoom - v.scrollX,
+        (c?.clientHeight ?? 600) / 2 / v.zoom - v.scrollY,
+      ]
+      return { ...s, [k]: placeInstrument(k, center) }
+    })
   /** compa vẽ cung: một nét bút bình thường (kiểu bút đang chọn) */
   const arcEl = useRef<El | null>(null)
   const instApi: InstApi = {
@@ -455,7 +728,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const tol = 6 / view.current.zoom
     for (let i = els.current.length - 1; i >= 0; i--) {
       const e = els.current[i]
-      const ok = e.kind === 'rectangle' || e.kind === 'ellipse' || e.kind === 'diamond' || isClosedStroke(e)
+      const ok =
+        e.kind === 'rectangle' || e.kind === 'ellipse' || e.kind === 'diamond' || isClosedStroke(e)
       if (ok && !isPage(e) && hitTest({ ...e, fill: '#000' }, p, tol)) return e
     }
     return null
@@ -463,14 +737,18 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   /** thùng sơn tại p: vùng kín giữa các nét (kiểu Paint). Nếu vùng đó chính là phần trong của một hình
    *  (hoặc mảng màu đã tô trước) thì tô lại hình đó; vùng hở thì quay về tô hình dưới con trỏ */
   const bucketTarget = (p: Pt): { el: El } | { region: Region } | null => {
-    const v = view.current, c = canvasRef.current
+    const v = view.current,
+      c = canvasRef.current
     const el = fillTarget(p)
     if (!c) return el ? { el } : null
     const key = `${sceneVer.current}|${v.zoom}|${v.scrollX}|${v.scrollY}|${c.clientWidth}x${c.clientHeight}`
     const region = regionAt(els.current, v, c.clientWidth, c.clientHeight, key, p)
     if (!region) return el ? { el } : null
     const area = regionArea(region)
-    const same = (e: El) => { const r = area / Math.max(1, interiorArea(e)); return r > 0.85 && r < 1.2 }
+    const same = (e: El) => {
+      const r = area / Math.max(1, interiorArea(e))
+      return r > 0.85 && r < 1.2
+    }
     // vùng này đã có mảng màu (tô lần trước) → đổi màu mảng đó, không chồng thêm mảng mới
     const tol = 2 / v.zoom
     for (let i = els.current.length - 1; i >= 0; i--) {
@@ -483,24 +761,54 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   }
   /** mảng màu từ vùng kín: vòng ngoài rồi tới các vòng lỗ, chung một `points` */
   const regionEl = ({ outer, holes }: Region, fs: FillStyle): El => {
-    const x = Math.min(...outer.map((q) => q[0])), y = Math.min(...outer.map((q) => q[1]))
+    const x = Math.min(...outer.map((q) => q[0])),
+      y = Math.min(...outer.map((q) => q[1]))
     const ring = (r: Pt[]) => [...r, r[0]].map(([px, py]) => [px - x, py - y] as Pt)
     const points = ring(outer)
     const starts: number[] = []
-    for (const h of holes) { starts.push(points.length); points.push(...ring(h)) }
+    for (const h of holes) {
+      starts.push(points.length)
+      points.push(...ring(h))
+    }
     return {
-      ...DEFAULT_STYLE, id: newId(), kind: 'freedraw', x, y, w: 0, h: 0, angle: 0, seed: newSeed(), ver: 0,
-      points, pen: 'ball', region: true, holes: starts.length ? starts : undefined,
-      stroke: 'transparent', strokeWidth: 1, fill: 'transparent', fillStyle: fs,
+      ...DEFAULT_STYLE,
+      id: newId(),
+      kind: 'freedraw',
+      x,
+      y,
+      w: 0,
+      h: 0,
+      angle: 0,
+      seed: newSeed(),
+      ver: 0,
+      points,
+      pen: 'ball',
+      region: true,
+      holes: starts.length ? starts : undefined,
+      stroke: 'transparent',
+      strokeWidth: 1,
+      fill: 'transparent',
+      fillStyle: fs,
     }
   }
   /** xem trước cho thùng sơn / kéo màu */
   const bucketPreview = (p: Pt, color: string) => {
     const t = bucketTarget(p)
     const prev = fillHover.current
-    const same = t && prev && ('el' in t ? prev.el === t.el : !!prev.el.region && !prev.el.ver && Math.abs(prev.el.x - Math.min(...t.region.outer.map((q) => q[0]))) < 0.5 && Math.abs(prev.el.y - Math.min(...t.region.outer.map((q) => q[1]))) < 0.5 && (prev.el.holes?.length ?? 0) === t.region.holes.length)
+    const same =
+      t &&
+      prev &&
+      ('el' in t
+        ? prev.el === t.el
+        : !!prev.el.region &&
+          !prev.el.ver &&
+          Math.abs(prev.el.x - Math.min(...t.region.outer.map((q) => q[0]))) < 0.5 &&
+          Math.abs(prev.el.y - Math.min(...t.region.outer.map((q) => q[1]))) < 0.5 &&
+          (prev.el.holes?.length ?? 0) === t.region.holes.length)
     if (same || (!t && !prev)) return
-    fillHover.current = t ? { el: 'el' in t ? t.el : regionEl(t.region, opts.current.bucketStyle), color } : null
+    fillHover.current = t
+      ? { el: 'el' in t ? t.el : regionEl(t.region, opts.current.bucketStyle), color }
+      : null
     redraw()
   }
   const bucketFill = (p: Pt, color: string, fs: FillStyle) => {
@@ -511,7 +819,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const e = regionEl(t.region, fs)
     // nằm dưới mọi nét, trên các trang PDF làm nền
     let at = 0
-    els.current.forEach((x, i) => { if (isPage(x)) at = i + 1 })
+    els.current.forEach((x, i) => {
+      if (isPage(x)) at = i + 1
+    })
     els.current.splice(at, 0, e)
     groupWithWalls(e, t.region)
     applyFill(e, color, fs, p)
@@ -541,15 +851,24 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const prev = clone(e)
     mutate(e, { fill: color, fillStyle: fs })
     const [x1, y1, x2, y2] = worldBounds(e)
-    const rMax = Math.max(...[[x1, y1], [x2, y1], [x1, y2], [x2, y2]].map(([x, y]) => Math.hypot(x - p[0], y - p[1])))
+    const rMax = Math.max(
+      ...[
+        [x1, y1],
+        [x2, y1],
+        [x1, y2],
+        [x2, y2],
+      ].map(([x, y]) => Math.hypot(x - p[0], y - p[1])),
+    )
     spread.current = { id: e.id, prev, p, t0: performance.now(), rMax }
     commit()
   }
   const topHit = (p: Pt) => {
     const tol = 6 / view.current.zoom
     // trang PDF khoá làm nền: không bấm chọn được
-    for (let i = els.current.length - 1; i >= 0; i--) if (!isPage(els.current[i]) && hitTest(els.current[i], p, tol)) return els.current[i]
-    const inside = (b: Bounds | null) => !!b && p[0] >= b[0] - tol && p[0] <= b[2] + tol && p[1] >= b[1] - tol && p[1] <= b[3] + tol
+    for (let i = els.current.length - 1; i >= 0; i--)
+      if (!isPage(els.current[i]) && hitTest(els.current[i], p, tol)) return els.current[i]
+    const inside = (b: Bounds | null) =>
+      !!b && p[0] >= b[0] - tol && p[0] <= b[2] + tol && p[1] >= b[1] - tol && p[1] <= b[3] + tol
     // đang chọn nhiều hình: bấm chỗ trống trong khung chọn cũng kéo được cả vùng
     const s = sel()
     if (s.length > 1 && inside(unionBounds(s))) return s[0]
@@ -573,8 +892,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       const e = s[0]
       if (isLinear(e)) {
         const pts = e.points ?? []
-        const ends: [Handle, Pt][] = [['p0', pts[0]], ['p1', pts[pts.length - 1]]]
-        for (const [h, q] of ends) if (q && Math.hypot(p[0] - e.x - q[0], p[1] - e.y - q[1]) <= r) return h
+        const ends: [Handle, Pt][] = [
+          ['p0', pts[0]],
+          ['p1', pts[pts.length - 1]],
+        ]
+        for (const [h, q] of ends)
+          if (q && Math.hypot(p[0] - e.x - q[0], p[1] - e.y - q[1]) <= r) return h
         return null
       }
       const q = rotate(p, centerOf(e), -e.angle)
@@ -588,23 +911,34 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     return null
   }
 
-  const pickTool = useCallback((t: Tool) => {
-    toolRef.current = t
-    fillHover.current = null
-    if (SHAPES.includes(t as Kind)) {
-      const k = t as Kind
-      opts.current.lastShape = k
-      opts.current.recentShapes = [k, ...opts.current.recentShapes.filter((x) => x !== k)].slice(0, 4)
-    }
-    setTool(t)
-    if (t !== 'select') selected.current.clear()
-    redraw()
-  }, [redraw])
+  const pickTool = useCallback(
+    (t: Tool) => {
+      toolRef.current = t
+      fillHover.current = null
+      if (SHAPES.includes(t as Kind)) {
+        const k = t as Kind
+        opts.current.lastShape = k
+        opts.current.recentShapes = [k, ...opts.current.recentShapes.filter((x) => x !== k)].slice(
+          0,
+          4,
+        )
+      }
+      setTool(t)
+      if (t !== 'select') selected.current.clear()
+      redraw()
+    },
+    [redraw],
+  )
 
   const newElement = (kind: Kind, p: Pt): El => ({
     ...style.current,
     pen: kind === 'freedraw' ? opts.current.pen : undefined,
-    ...(kind === 'freedraw' ? (() => { const tp = opts.current.penTips[opts.current.pen] ?? DEFAULT_TIP; return { tipSharp: tp.sharp, tipSens: tp.sens } })() : {}),
+    ...(kind === 'freedraw'
+      ? (() => {
+          const tp = opts.current.penTips[opts.current.pen] ?? DEFAULT_TIP
+          return { tipSharp: tp.sharp, tipSens: tp.sens }
+        })()
+      : {}),
     id: newId(),
     kind,
     x: p[0],
@@ -614,7 +948,15 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     angle: 0,
     seed: newSeed(),
     ver: 0,
-    points: kind === 'line' || kind === 'arrow' ? [[0, 0], [0, 0]] : kind === 'freedraw' ? [[0, 0]] : undefined,
+    points:
+      kind === 'line' || kind === 'arrow'
+        ? [
+            [0, 0],
+            [0, 0],
+          ]
+        : kind === 'freedraw'
+          ? [[0, 0]]
+          : undefined,
     text: kind === 'text' ? '' : undefined,
   })
 
@@ -627,19 +969,22 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     redraw()
   }
 
-  const finishText = useCallback((value: string) => {
-    const ed = editingRef.current
-    if (!ed) return
-    const text = value.replace(/\s+$/, '')
-    if (!text) {
-      els.current = els.current.filter((e) => e.id !== ed.el.id)
-      selected.current.delete(ed.el.id)
-    } else mutate(ed.el, { text, ...measureText(text, ed.el.fontSize, ed.el) })
-    editingRef.current = null
-    setEditing(null)
-    commit()
-    redraw()
-  }, [commit, redraw])
+  const finishText = useCallback(
+    (value: string) => {
+      const ed = editingRef.current
+      if (!ed) return
+      const text = value.replace(/\s+$/, '')
+      if (!text) {
+        els.current = els.current.filter((e) => e.id !== ed.el.id)
+        selected.current.delete(ed.el.id)
+      } else mutate(ed.el, { text, ...measureText(text, ed.el.fontSize, ed.el) })
+      editingRef.current = null
+      setEditing(null)
+      commit()
+      redraw()
+    },
+    [commit, redraw],
+  )
 
   /* ---------- chuột / bút ---------- */
 
@@ -678,7 +1023,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       finishText(ta?.value ?? '')
       return
     }
-    try { ev.currentTarget.setPointerCapture(ev.pointerId) } catch {}
+    try {
+      ev.currentTarget.setPointerCapture(ev.pointerId)
+    } catch {}
     if (ev.pointerType === 'touch') {
       touches.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY })
       if (touches.current.size >= 2) {
@@ -690,13 +1037,25 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     }
     const p = toScene(ev.clientX, ev.clientY)
     // lật đầu gôm của bút hoặc giữ nút trên thân bút → gôm tạm thời
-    const flip = ev.pointerType === 'pen' && (ev.button === 5 || ev.button === 2 || (ev.buttons & 32) !== 0)
+    const flip =
+      ev.pointerType === 'pen' && (ev.button === 5 || ev.button === 2 || (ev.buttons & 32) !== 0)
     const t: Tool = readOnly ? 'hand' : flip ? 'eraser' : toolRef.current
     const v = view.current
 
     if (ev.pointerType === 'pen') penSeen.current = true
-    if (ev.button === 1 || t === 'hand' || space.current || (ev.pointerType === 'touch' && penSeen.current)) {
-      drag.current = { t: 'pan', sx: ev.clientX, sy: ev.clientY, scrollX: v.scrollX, scrollY: v.scrollY }
+    if (
+      ev.button === 1 ||
+      t === 'hand' ||
+      space.current ||
+      (ev.pointerType === 'touch' && penSeen.current)
+    ) {
+      drag.current = {
+        t: 'pan',
+        sx: ev.clientX,
+        sy: ev.clientY,
+        scrollX: v.scrollX,
+        scrollY: v.scrollY,
+      }
       return
     }
     if (ev.button !== 0 && !flip) return
@@ -707,7 +1066,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       return
     }
     if (t === 'laser') {
-      const trail: LaserTrail = { pts: [p], ts: [performance.now()], color: opts.current.laserColor, size: opts.current.laserSize }
+      const trail: LaserTrail = {
+        pts: [p],
+        ts: [performance.now()],
+        color: opts.current.laserColor,
+        size: opts.current.laserSize,
+      }
       laser.current.push(trail)
       drag.current = { t: 'laser', trail }
       redraw()
@@ -718,7 +1082,7 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       const s = sel()
       const h = s.some((e) => e.locked) ? null : handleAt(p)
       if (h === 'p0' || h === 'p1') {
-        drag.current = { t: 'endpoint', index: h === 'p0' ? 0 : (s[0].points!.length - 1), el: s[0] }
+        drag.current = { t: 'endpoint', index: h === 'p0' ? 0 : s[0].points!.length - 1, el: s[0] }
         return
       }
       if (h === 'rot') {
@@ -727,7 +1091,13 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       }
       if (h) {
         const single = s.length === 1
-        drag.current = { t: 'resize', handle: h, orig: s.map(clone), ob: single ? localBounds(s[0]) : unionBounds(s)!, single }
+        drag.current = {
+          t: 'resize',
+          handle: h,
+          orig: s.map(clone),
+          ob: single ? localBounds(s[0]) : unionBounds(s)!,
+          single,
+        }
         return
       }
       const hit = topHit(p)
@@ -751,9 +1121,16 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           moving = copies
         }
         const movingIds = selected.current
-        const v = view.current, cw = canvasRef.current?.clientWidth ?? 2000, ch = canvasRef.current?.clientHeight ?? 1200
-        const vx0 = -v.scrollX, vy0 = -v.scrollY, vx1 = vx0 + cw / v.zoom, vy1 = vy0 + ch / v.zoom
-        const candidates = groupBlocks(els.current.filter((e) => !movingIds.has(e.id) && !isPage(e)))
+        const v = view.current,
+          cw = canvasRef.current?.clientWidth ?? 2000,
+          ch = canvasRef.current?.clientHeight ?? 1200
+        const vx0 = -v.scrollX,
+          vy0 = -v.scrollY,
+          vx1 = vx0 + cw / v.zoom,
+          vy1 = vy0 + ch / v.zoom
+        const candidates = groupBlocks(
+          els.current.filter((e) => !movingIds.has(e.id) && !isPage(e)),
+        )
           .map((b) => b.bounds)
           .filter((b) => b[2] >= vx0 && b[0] <= vx1 && b[3] >= vy0 && b[1] <= vy1)
         drag.current = {
@@ -766,9 +1143,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         }
       } else {
         if (!ev.shiftKey) selected.current.clear()
-        drag.current = opts.current.selectMode === 'lasso'
-          ? { t: 'lasso', pts: [p], base: new Set(selected.current) }
-          : { t: 'marquee', start: p, cur: p, base: new Set(selected.current) }
+        drag.current =
+          opts.current.selectMode === 'lasso'
+            ? { t: 'lasso', pts: [p], base: new Set(selected.current) }
+            : { t: 'marquee', start: p, cur: p, base: new Set(selected.current) }
       }
       bump()
       redraw()
@@ -793,14 +1171,20 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     }
 
     // bút đặt sát mép thước → nét bám theo mép
-    const guide = t === 'freedraw' ? guideAt(instRef.current, p, 22 / v.zoom) ?? undefined : undefined
+    const guide =
+      t === 'freedraw' ? (guideAt(instRef.current, p, 22 / v.zoom) ?? undefined) : undefined
     const el = newElement(t as Kind, guide ? projectGuide(guide, p) : p)
     if (el.kind === 'freedraw') {
       // chuột thường luôn báo lực 0,5; bảng vẽ chạy chế độ chuột vẫn có thể gửi lực thật → coi như bút
-      if (ev.pointerType === 'pen' || (ev.pointerType === 'mouse' && ev.pressure > 0 && ev.pressure !== 0.5)) el.pressures = [ev.pressure || 0.5]
+      if (
+        ev.pointerType === 'pen' ||
+        (ev.pointerType === 'mouse' && ev.pressure > 0 && ev.pressure !== 0.5)
+      )
+        el.pressures = [ev.pressure || 0.5]
       if (opts.current.snap && !guide) armHold(ev.clientX, ev.clientY)
       live.current = el
-      if (liveRef.current) liveRef.current.style.mixBlendMode = el.pen === 'highlight' ? 'multiply' : 'normal'
+      if (liveRef.current)
+        liveRef.current.style.mixBlendMode = el.pen === 'highlight' ? 'multiply' : 'normal'
     }
     els.current.push(el)
     drag.current = { t: 'create', el, start: p, guide }
@@ -819,11 +1203,22 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const e = d.el
     const shape = recognize((e.points ?? []).map(([px, py]) => [e.x + px, e.y + py] as Pt))
     if (!shape) return
-    const look = { stroke: e.stroke, strokeWidth: e.strokeWidth, opacity: e.opacity, roughness: 0, strokeStyle: e.strokeStyle, fill: 'transparent' }
+    const look = {
+      stroke: e.stroke,
+      strokeWidth: e.strokeWidth,
+      opacity: e.opacity,
+      roughness: 0,
+      strokeStyle: e.strokeStyle,
+      fill: 'transparent',
+    }
     let el: El
     if (shape.kind === 'line') {
       const [o] = shape.points
-      el = { ...newElement('line', o), ...look, points: shape.points.map(([px, py]) => [px - o[0], py - o[1]] as Pt) }
+      el = {
+        ...newElement('line', o),
+        ...look,
+        points: shape.points.map(([px, py]) => [px - o[0], py - o[1]] as Pt),
+      }
     } else {
       el = { ...newElement(shape.kind, [shape.x, shape.y]), ...look, w: shape.w, h: shape.h }
     }
@@ -834,7 +1229,13 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const center = centerOf(el)
     const tip = (e.points ?? []).at(-1) ?? [0, 0]
     const at: Pt = [e.x + tip[0], e.y + tip[1]]
-    drag.current = { t: 'snapped', el, orig: clone(el), center, dist: Math.max(1, Math.hypot(at[0] - center[0], at[1] - center[1])) }
+    drag.current = {
+      t: 'snapped',
+      el,
+      orig: clone(el),
+      center,
+      dist: Math.max(1, Math.hypot(at[0] - center[0], at[1] - center[1])),
+    }
     redraw()
   }
 
@@ -844,29 +1245,51 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     let hit = false
     const out: El[] = []
     for (const e of els.current) {
-      if (isPage(e) || e.locked) { out.push(e); continue }
+      if (isPage(e) || e.locked) {
+        out.push(e)
+        continue
+      }
       if (opts.current.eraseMode === 'stroke' || e.kind !== 'freedraw' || e.region) {
-        if (hitTest(e, p, r)) { hit = true; selected.current.delete(e.id); dropFromCache(e.id) } else out.push(e)
+        if (hitTest(e, p, r)) {
+          hit = true
+          selected.current.delete(e.id)
+          dropFromCache(e.id)
+        } else out.push(e)
         continue
       }
       const rr = r + e.strokeWidth * 1.3
       const [x1, y1, x2, y2] = localBounds(e)
-      if (p[0] < x1 - rr || p[0] > x2 + rr || p[1] < y1 - rr || p[1] > y2 + rr) { out.push(e); continue }
+      if (p[0] < x1 - rr || p[0] > x2 + rr || p[1] < y1 - rr || p[1] > y2 + rr) {
+        out.push(e)
+        continue
+      }
       const pts = e.points ?? []
       const runs: number[][] = []
       let run: number[] = []
       for (let i = 0; i < pts.length; i++) {
         if (Math.hypot(e.x + pts[i][0] - p[0], e.y + pts[i][1] - p[1]) > rr) run.push(i)
-        else { if (run.length) runs.push(run); run = [] }
+        else {
+          if (run.length) runs.push(run)
+          run = []
+        }
       }
       if (run.length) runs.push(run)
-      if (runs.length === 1 && runs[0].length === pts.length) { out.push(e); continue }
+      if (runs.length === 1 && runs[0].length === pts.length) {
+        out.push(e)
+        continue
+      }
       hit = true
       selected.current.delete(e.id)
       dropFromCache(e.id)
       for (const ri of runs) {
         if (ri.length < 2) continue
-        out.push({ ...e, id: newId(), ver: 0, points: ri.map((i) => pts[i]), pressures: e.pressures && ri.map((i) => e.pressures![i]) })
+        out.push({
+          ...e,
+          id: newId(),
+          ver: 0,
+          points: ri.map((i) => pts[i]),
+          pressures: e.pressures && ri.map((i) => e.pressures![i]),
+        })
       }
     }
     if (hit) {
@@ -881,17 +1304,22 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       if (pinching.current) {
         if (touches.current.size === 2) {
           const prev = [...touches.current.values()]
-          const m0x = (prev[0].x + prev[1].x) / 2, m0y = (prev[0].y + prev[1].y) / 2
+          const m0x = (prev[0].x + prev[1].x) / 2,
+            m0y = (prev[0].y + prev[1].y) / 2
           const d0 = Math.hypot(prev[1].x - prev[0].x, prev[1].y - prev[0].y)
           touches.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY })
           const next = [...touches.current.values()]
-          const m1x = (next[0].x + next[1].x) / 2, m1y = (next[0].y + next[1].y) / 2
+          const m1x = (next[0].x + next[1].x) / 2,
+            m1y = (next[0].y + next[1].y) / 2
           const d1 = Math.hypot(next[1].x - next[0].x, next[1].y - next[0].y)
           const v = view.current
           v.scrollX += (m1x - m0x) / v.zoom
           v.scrollY += (m1y - m0y) / v.zoom
           if (d0 > 0 && d1 > 0 && d1 !== d0) zoomAt(v.zoom * (d1 / d0), m1x, m1y)
-          else { redraw(); persist() }
+          else {
+            redraw()
+            persist()
+          }
         } else {
           touches.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY })
         }
@@ -905,7 +1333,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
 
     if (!d) {
       const t = toolRef.current
-      if (t === 'eraser') { eraserAt.current = p; c.style.cursor = toolCursor(); redraw(); return }
+      if (t === 'eraser') {
+        eraserAt.current = p
+        c.style.cursor = toolCursor()
+        redraw()
+        return
+      }
       if (t === 'bucket') {
         c.style.cursor = toolCursor()
         bucketPreview(p, opts.current.bucketFill)
@@ -935,7 +1368,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       }
       case 'create': {
         const e = d.el
-        let dx = p[0] - d.start[0], dy = p[1] - d.start[1]
+        let dx = p[0] - d.start[0],
+          dy = p[1] - d.start[1]
         if (e.kind === 'freedraw') {
           const pts = e.points!
           // lấy cả các điểm trình duyệt gộp lại giữa hai khung hình → nét không bị gãy khi viết nhanh
@@ -949,15 +1383,18 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
                 d.guide = g
                 clearTimeout(hold.current.timer)
                 const o = projectGuide(g, [e.x + pts[0][0], e.y + pts[0][1]])
-                e.x = o[0]; e.y = o[1]
-                pts.length = 1; pts[0] = [0, 0]
+                e.x = o[0]
+                e.y = o[1]
+                pts.length = 1
+                pts[0] = [0, 0]
                 if (pr) pr.length = 1
               }
             }
             if (d.guide) q = projectGuide(d.guide, q)
             const last = pts[pts.length - 1]
             // chỉ bỏ điểm gần như trùng (bỏ quá tay thì chỗ đi bút chậm bị vón cục)
-            if (Math.hypot(q[0] - e.x - last[0], q[1] - e.y - last[1]) * view.current.zoom < 0.25) continue
+            if (Math.hypot(q[0] - e.x - last[0], q[1] - e.y - last[1]) * view.current.zoom < 0.25)
+              continue
             pts.push([q[0] - e.x, q[1] - e.y])
             if (pr) {
               // lực nhấn nhảy từng điểm làm mép nét lồi lõm: lọc cho êm; lực 0 (mất tín hiệu) thì giữ lực trước
@@ -966,8 +1403,16 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             }
           }
           e.ver++
-          if (opts.current.snap && !d.guide && Math.hypot(ev.clientX - hold.current.x, ev.clientY - hold.current.y) > 4) armHold(ev.clientX, ev.clientY)
-          if (live.current === e) { redrawLive(); return }
+          if (
+            opts.current.snap &&
+            !d.guide &&
+            Math.hypot(ev.clientX - hold.current.x, ev.clientY - hold.current.y) > 4
+          )
+            armHold(ev.clientX, ev.clientY)
+          if (live.current === e) {
+            redrawLive()
+            return
+          }
         } else if (isLinear(e)) {
           if (ev.shiftKey) {
             const a = Math.round(Math.atan2(dy, dx) / (Math.PI / 12)) * (Math.PI / 12)
@@ -975,7 +1420,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             dx = len * Math.cos(a)
             dy = len * Math.sin(a)
           }
-          mutate(e, { points: [[0, 0], [dx, dy]] })
+          mutate(e, {
+            points: [
+              [0, 0],
+              [dx, dy],
+            ],
+          })
         } else {
           if (ev.shiftKey) {
             const m = Math.max(Math.abs(dx), Math.abs(dy))
@@ -983,22 +1433,37 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             dy = Math.sign(dy || 1) * m
           }
           mutate(e, {
-            x: Math.min(d.start[0], d.start[0] + dx), y: Math.min(d.start[1], d.start[1] + dy),
-            w: Math.abs(dx), h: Math.abs(dy),
+            x: Math.min(d.start[0], d.start[0] + dx),
+            y: Math.min(d.start[1], d.start[1] + dy),
+            w: Math.abs(dx),
+            h: Math.abs(dy),
           })
         }
         redraw()
         return
       }
       case 'move': {
-        let dx = p[0] - d.start[0], dy = p[1] - d.start[1]
+        let dx = p[0] - d.start[0],
+          dy = p[1] - d.start[1]
         let lockAxis: 'x' | 'y' | null = null
         if (ev.shiftKey) {
-          if (Math.abs(dx) > Math.abs(dy)) { dy = 0; lockAxis = 'x' }
-          else { dx = 0; lockAxis = 'y' }
+          if (Math.abs(dx) > Math.abs(dy)) {
+            dy = 0
+            lockAxis = 'x'
+          } else {
+            dx = 0
+            lockAxis = 'y'
+          }
         }
         if (opts.current.guides && !ev.altKey && d.origBounds && d.candidates.length) {
-          const snapped = computeSnap(d.origBounds, dx, dy, d.candidates, 5 / view.current.zoom, lockAxis)
+          const snapped = computeSnap(
+            d.origBounds,
+            dx,
+            dy,
+            d.candidates,
+            5 / view.current.zoom,
+            lockAxis,
+          )
           dx = snapped.dx
           dy = snapped.dy
           guidesRef.current = snapped.guides
@@ -1013,7 +1478,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       }
       case 'marquee': {
         d.cur = p
-        const b: Bounds = [Math.min(d.start[0], p[0]), Math.min(d.start[1], p[1]), Math.max(d.start[0], p[0]), Math.max(d.start[1], p[1])]
+        const b: Bounds = [
+          Math.min(d.start[0], p[0]),
+          Math.min(d.start[1], p[1]),
+          Math.max(d.start[0], p[0]),
+          Math.max(d.start[1], p[1]),
+        ]
         marquee.current = b
         const next = new Set(d.base)
         for (const e of els.current) {
@@ -1031,7 +1501,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         let q: Pt = [p[0] - e.x, p[1] - e.y]
         if (ev.shiftKey) {
           const other = pts[d.index === 0 ? pts.length - 1 : 0]
-          const dx = q[0] - other[0], dy = q[1] - other[1]
+          const dx = q[0] - other[0],
+            dy = q[1] - other[1]
           const a = Math.round(Math.atan2(dy, dx) / (Math.PI / 12)) * (Math.PI / 12)
           const len = Math.hypot(dx, dy)
           q = [other[0] + len * Math.cos(a), other[1] + len * Math.sin(a)]
@@ -1057,7 +1528,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         const step = ERASE_R[opts.current.eraseSize] / view.current.zoom / 2
         const n = Math.max(1, Math.ceil(Math.hypot(p[0] - d.last[0], p[1] - d.last[1]) / step))
         eraserAt.current = p
-        for (let i = 1; i <= n; i++) eraseAt([d.last[0] + ((p[0] - d.last[0]) * i) / n, d.last[1] + ((p[1] - d.last[1]) * i) / n])
+        for (let i = 1; i <= n; i++)
+          eraseAt([
+            d.last[0] + ((p[0] - d.last[0]) * i) / n,
+            d.last[1] + ((p[1] - d.last[1]) * i) / n,
+          ])
         d.last = p
         return
       }
@@ -1066,20 +1541,38 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         const pts = orig.points
         if (el.kind === 'line' && pts?.length === 2) {
           // đường thẳng: đầu cuối theo bút, gần ngang / dọc / chéo 45° thì bắt thẳng
-          let dx = p[0] - orig.x, dy = p[1] - orig.y
+          let dx = p[0] - orig.x,
+            dy = p[1] - orig.y
           const len = Math.hypot(dx, dy)
-          const a = Math.atan2(dy, dx), step = Math.PI / 4, snapA = Math.round(a / step) * step
-          if (Math.abs(snapA - a) < (7 * Math.PI) / 180) { dx = len * Math.cos(snapA); dy = len * Math.sin(snapA) }
-          mutate(el, { points: [[0, 0], [dx, dy]] })
+          const a = Math.atan2(dy, dx),
+            step = Math.PI / 4,
+            snapA = Math.round(a / step) * step
+          if (Math.abs(snapA - a) < (7 * Math.PI) / 180) {
+            dx = len * Math.cos(snapA)
+            dy = len * Math.sin(snapA)
+          }
+          mutate(el, {
+            points: [
+              [0, 0],
+              [dx, dy],
+            ],
+          })
         } else {
           // hình: phóng to / thu nhỏ quanh tâm theo khoảng cách bút – tâm
           const k = Math.max(0.05, Math.hypot(p[0] - d.center[0], p[1] - d.center[1]) / d.dist)
           const [cx, cy] = d.center
           if (pts) {
-            const P = pts.map(([px, py]) => [cx + (orig.x + px - cx) * k, cy + (orig.y + py - cy) * k] as Pt)
-            mutate(el, { x: P[0][0], y: P[0][1], points: P.map(([x, y]) => [x - P[0][0], y - P[0][1]] as Pt) })
+            const P = pts.map(
+              ([px, py]) => [cx + (orig.x + px - cx) * k, cy + (orig.y + py - cy) * k] as Pt,
+            )
+            mutate(el, {
+              x: P[0][0],
+              y: P[0][1],
+              points: P.map(([x, y]) => [x - P[0][0], y - P[0][1]] as Pt),
+            })
           } else {
-            const w = orig.w * k, h = orig.h * k
+            const w = orig.w * k,
+              h = orig.h * k
             mutate(el, { x: cx - w / 2, y: cy - h / 2, w, h })
           }
         }
@@ -1101,7 +1594,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         const next = new Set(d.base)
         for (const e of els.current) {
           if (isPage(e) || e.locked) continue
-          const pts = hasPoints(e) ? e.points!.map(([px, py]) => [e.x + px, e.y + py] as Pt) : [centerOf(e)]
+          const pts = hasPoints(e)
+            ? e.points!.map(([px, py]) => [e.x + px, e.y + py] as Pt)
+            : [centerOf(e)]
           const inside = pts.filter((q) => inPolygon(q, d.pts)).length
           if (inside / pts.length >= 0.6) next.add(e.id)
         }
@@ -1124,8 +1619,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     if (h.includes('e')) x2 = Math.max(q[0], x1 + 1)
     if (h.includes('n')) y1 = Math.min(q[1], y2 - 1)
     if (h.includes('s')) y2 = Math.max(q[1], y1 + 1)
-    const ow = ox2 - ox1 || 1, oh = oy2 - oy1 || 1
-    let sx = (x2 - x1) / ow, sy = (y2 - y1) / oh
+    const ow = ox2 - ox1 || 1,
+      oh = oy2 - oy1 || 1
+    let sx = (x2 - x1) / ow,
+      sy = (y2 - y1) / oh
     const corner = h.length === 2
     const isText = d.single && o0.kind === 'text'
     if ((keepRatio || isText) && corner) {
@@ -1149,11 +1646,15 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         mutate(e, { fontSize, ...m, x: C[0] - m.w / 2, y: C[1] - m.h / 2 })
       } else if (hasPoints(o0)) {
         const [bx1, by1] = localBounds(o0)
-        const pts = o0.points!.map(([px, py]) => [(o0.x + px - bx1) * sx, (o0.y + py - by1) * sy] as Pt)
-        const w = (x2 - x1), hh = (y2 - y1)
+        const pts = o0.points!.map(
+          ([px, py]) => [(o0.x + px - bx1) * sx, (o0.y + py - by1) * sy] as Pt,
+        )
+        const w = x2 - x1,
+          hh = y2 - y1
         mutate(e, { points: pts, x: C[0] - w / 2, y: C[1] - hh / 2 })
       } else {
-        const w = x2 - x1, hh = y2 - y1
+        const w = x2 - x1,
+          hh = y2 - y1
         mutate(e, { w, h: hh, x: C[0] - w / 2, y: C[1] - hh / 2 })
       }
       return
@@ -1162,11 +1663,13 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     for (const o of d.orig) {
       const e = els.current.find((x) => x.id === o.id)
       if (!e) continue
-      const nx = x1 + (o.x - ox1) * sx, ny = y1 + (o.y - oy1) * sy
+      const nx = x1 + (o.x - ox1) * sx,
+        ny = y1 + (o.y - oy1) * sy
       if (o.kind === 'text') {
         const fontSize = Math.max(6, o.fontSize * Math.min(sx, sy))
         mutate(e, { x: nx, y: ny, fontSize, ...measureText(o.text ?? '', fontSize, o) })
-      } else if (hasPoints(o)) mutate(e, { x: nx, y: ny, points: o.points!.map(([px, py]) => [px * sx, py * sy] as Pt) })
+      } else if (hasPoints(o))
+        mutate(e, { x: nx, y: ny, points: o.points!.map(([px, py]) => [px * sx, py * sy] as Pt) })
       else mutate(e, { x: nx, y: ny, w: o.w * sx, h: o.h * sy })
     }
   }
@@ -1194,8 +1697,14 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         // chấm bút: thêm điểm thứ hai lệch rất nhỏ để nét không dài bằng 0 (cách của Excalidraw)
         const pts = e.points!
         if (pts.every((q) => Math.hypot(q[0], q[1]) * view.current.zoom < 1)) {
-          e.points = [[0, 0], [0.0001, 0.0001]]
-          if (e.pressures) { const p0 = Math.max(0.5, ...e.pressures); e.pressures = [p0, p0] }
+          e.points = [
+            [0, 0],
+            [0.0001, 0.0001],
+          ]
+          if (e.pressures) {
+            const p0 = Math.max(0.5, ...e.pressures)
+            e.pressures = [p0, p0]
+          }
           e.ver++
         }
       }
@@ -1204,7 +1713,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       if (tiny) els.current = els.current.filter((x) => x !== e)
       else if (e.kind !== 'freedraw') {
         if (opts.current.keepTool && SHAPES.includes(e.kind)) selected.current.clear()
-        else { selected.current = new Set([e.id]); pickTool('select') }
+        else {
+          selected.current = new Set([e.id])
+          pickTool('select')
+        }
       }
       commit()
     } else if (d.t === 'pan') {
@@ -1240,19 +1752,23 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
 
   /* ---------- lăn chuột: cuộn / phóng to ---------- */
 
-  const zoomAt = useCallback((next: number, cx?: number, cy?: number) => {
-    const c = canvasRef.current
-    if (!c) return
-    const v = view.current
-    const z = Math.min(4, Math.max(0.1, next))
-    const r = c.getBoundingClientRect()
-    const sx = cx ?? r.left + r.width / 2, sy = cy ?? r.top + r.height / 2
-    const before = [(sx - r.left) / v.zoom - v.scrollX, (sy - r.top) / v.zoom - v.scrollY]
-    v.zoom = z
-    v.scrollX = (sx - r.left) / z - before[0]
-    v.scrollY = (sy - r.top) / z - before[1]
-    changed()
-  }, [changed])
+  const zoomAt = useCallback(
+    (next: number, cx?: number, cy?: number) => {
+      const c = canvasRef.current
+      if (!c) return
+      const v = view.current
+      const z = Math.min(4, Math.max(0.1, next))
+      const r = c.getBoundingClientRect()
+      const sx = cx ?? r.left + r.width / 2,
+        sy = cy ?? r.top + r.height / 2
+      const before = [(sx - r.left) / v.zoom - v.scrollX, (sy - r.top) / v.zoom - v.scrollY]
+      v.zoom = z
+      v.scrollX = (sx - r.left) / z - before[0]
+      v.scrollY = (sy - r.top) / z - before[1]
+      changed()
+    },
+    [changed],
+  )
 
   useEffect(() => {
     const c = canvasRef.current
@@ -1260,9 +1776,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const onWheel = (ev: WheelEvent) => {
       ev.preventDefault()
       const v = view.current
-      if (ev.ctrlKey || ev.metaKey) zoomAt(v.zoom * Math.exp(-ev.deltaY * 0.0015), ev.clientX, ev.clientY)
+      if (ev.ctrlKey || ev.metaKey)
+        zoomAt(v.zoom * Math.exp(-ev.deltaY * 0.0015), ev.clientX, ev.clientY)
       else {
-        const dx = ev.shiftKey ? ev.deltaY : ev.deltaX, dy = ev.shiftKey ? 0 : ev.deltaY
+        const dx = ev.shiftKey ? ev.deltaY : ev.deltaX,
+          dy = ev.shiftKey ? 0 : ev.deltaY
         v.scrollX -= dx / v.zoom
         v.scrollY -= dy / v.zoom
         redraw()
@@ -1276,7 +1794,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   /* ---------- phím tắt ---------- */
 
   const deleteSelected = () => {
-    const victims = new Set(sel().filter((e) => !e.locked).map((e) => e.id))
+    const victims = new Set(
+      sel()
+        .filter((e) => !e.locked)
+        .map((e) => e.id),
+    )
     if (!victims.size) return
     els.current = els.current.filter((e) => !victims.has(e.id))
     for (const vid of victims) selected.current.delete(vid)
@@ -1307,7 +1829,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const ungroup = () => {
     const s = sel().filter((e) => e.groupId)
     if (!s.length) return
-    for (const e of s) { delete e.groupId; delete e.tool }
+    for (const e of s) {
+      delete e.groupId
+      delete e.tool
+    }
     commit()
   }
   const align = (kind: AlignKind) => {
@@ -1335,7 +1860,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   pasteHandler.current = (ev: ClipboardEvent) => {
     if (readOnly) return
     const target = ev.target as HTMLElement | null
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
+    if (
+      target &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    )
+      return
     if (editingRef.current || dialogRef.current) return
     // nhiều tab bảng vẽ cùng mở: chỉ bảng đang hiện mới nhận
     if (!canvasRef.current?.offsetParent) return
@@ -1343,22 +1872,34 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const dt = ev.clipboardData
     const text = dt?.getData('text/plain') ?? ''
     // ảnh chép từ trình duyệt / công cụ chụp màn hình nằm trong items (files có khi rỗng)
-    const files = [...(dt?.items ?? [])].filter((i) => i.kind === 'file').map((i) => i.getAsFile()).filter((f): f is File => !!f)
-    const ours = clipboard.current.length > 0 && (text.startsWith(CLIP_MARK) ? text === clipMark.current : !clipMark.current && !files.length && !text)
+    const files = [...(dt?.items ?? [])]
+      .filter((i) => i.kind === 'file')
+      .map((i) => i.getAsFile())
+      .filter((f): f is File => !!f)
+    const ours =
+      clipboard.current.length > 0 &&
+      (text.startsWith(CLIP_MARK)
+        ? text === clipMark.current
+        : !clipMark.current && !files.length && !text)
     ev.preventDefault()
     if (ours) return pasteInternal()
     const pdf = files.find((f) => f.type === 'application/pdf')
     if (pdf) return setDialog({ t: 'pdf', file: pdf })
     const imgs = files.filter((f) => f.type.startsWith('image/'))
     if (imgs.length) {
-      void Promise.all(imgs.map((f) => readImageFile(f).catch(() => null))).then((pics) => placePictures(pics.filter((p): p is Picture => !!p)))
+      void Promise.all(imgs.map((f) => readImageFile(f).catch(() => null))).then((pics) =>
+        placePictures(pics.filter((p): p is Picture => !!p)),
+      )
       return
     }
     if (text.trim() && !text.startsWith(CLIP_MARK)) {
       const c = canvasRef.current!
       const v = view.current
       const r = c.getBoundingClientRect()
-      const el = newElement('text', [r.width / 2 / v.zoom - v.scrollX, r.height / 2 / v.zoom - v.scrollY])
+      const el = newElement('text', [
+        r.width / 2 / v.zoom - v.scrollX,
+        r.height / 2 / v.zoom - v.scrollY,
+      ])
       el.text = text.replace(/\r\n?/g, '\n').slice(0, 5000)
       Object.assign(el, measureText(el.text, el.fontSize, el))
       el.x -= el.w / 2
@@ -1379,7 +1920,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   keyHandler.current = (ev: KeyboardEvent) => {
     if (readOnly) return
     const target = ev.target as HTMLElement | null
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
+    if (
+      target &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    )
+      return
     if (editingRef.current || dialogRef.current) return
     const k = ev.key.toLowerCase()
     const mod = ev.ctrlKey || ev.metaKey
@@ -1389,19 +1934,44 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       ev.preventDefault()
       return
     }
-    if (mod && k === 'z') { ev.preventDefault(); return ev.shiftKey ? redo() : undo() }
-    if (mod && k === 'y') { ev.preventDefault(); return redo() }
-    if (mod && k === 'a') { ev.preventDefault(); selected.current = new Set(els.current.filter((e) => !isPage(e) && !e.locked).map((e) => e.id)); pickTool('select'); toolRef.current = 'select'; return changed() }
-    if (mod && k === 'd') { ev.preventDefault(); return duplicate() }
-    if (mod && k === 'g') { ev.preventDefault(); return ev.shiftKey ? ungroup() : group() }
-    if (mod && ev.shiftKey && k === 'l') { ev.preventDefault(); return toggleLock() }
+    if (mod && k === 'z') {
+      ev.preventDefault()
+      return ev.shiftKey ? redo() : undo()
+    }
+    if (mod && k === 'y') {
+      ev.preventDefault()
+      return redo()
+    }
+    if (mod && k === 'a') {
+      ev.preventDefault()
+      selected.current = new Set(
+        els.current.filter((e) => !isPage(e) && !e.locked).map((e) => e.id),
+      )
+      pickTool('select')
+      toolRef.current = 'select'
+      return changed()
+    }
+    if (mod && k === 'd') {
+      ev.preventDefault()
+      return duplicate()
+    }
+    if (mod && k === 'g') {
+      ev.preventDefault()
+      return ev.shiftKey ? ungroup() : group()
+    }
+    if (mod && ev.shiftKey && k === 'l') {
+      ev.preventDefault()
+      return toggleLock()
+    }
     if (mod && (k === 'c' || k === 'x')) {
       if (!selected.current.size) return
       clipboard.current = sel().map(clone)
       // ghi dấu vào clipboard hệ thống: lúc dán, còn đúng dấu này thì dán hình của bảng,
       // còn nếu người dùng đã sao chép thứ khác (ảnh, chữ) thì dán thứ đó
       clipMark.current = `${CLIP_MARK}${Date.now()}`
-      navigator.clipboard?.writeText(clipMark.current).catch(() => { clipMark.current = '' })
+      navigator.clipboard?.writeText(clipMark.current).catch(() => {
+        clipMark.current = ''
+      })
       if (k === 'x') deleteSelected()
       return
     }
@@ -1412,12 +1982,28 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       pasteFallback.current = window.setTimeout(pasteInternal, 120)
       return
     }
-    if (mod && (k === '=' || k === '+')) { ev.preventDefault(); return zoomAt(view.current.zoom * 1.1) }
-    if (mod && k === '-') { ev.preventDefault(); return zoomAt(view.current.zoom / 1.1) }
-    if (mod && k === '0') { ev.preventDefault(); return zoomAt(1) }
+    if (mod && (k === '=' || k === '+')) {
+      ev.preventDefault()
+      return zoomAt(view.current.zoom * 1.1)
+    }
+    if (mod && k === '-') {
+      ev.preventDefault()
+      return zoomAt(view.current.zoom / 1.1)
+    }
+    if (mod && k === '0') {
+      ev.preventDefault()
+      return zoomAt(1)
+    }
     if (mod) return
-    if (k === 'delete' || k === 'backspace') { ev.preventDefault(); return deleteSelected() }
-    if (k === 'escape') { selected.current.clear(); pickTool('select'); return changed() }
+    if (k === 'delete' || k === 'backspace') {
+      ev.preventDefault()
+      return deleteSelected()
+    }
+    if (k === 'escape') {
+      selected.current.clear()
+      pickTool('select')
+      return changed()
+    }
     if (k.startsWith('arrow') && selected.current.size) {
       ev.preventDefault()
       const movable = sel().filter((e) => !e.locked)
@@ -1430,14 +2016,30 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     }
     if (k === 'enter' && selected.current.size === 1) {
       const e = sel()[0]
-      if (e.kind === 'text' && !e.locked) { ev.preventDefault(); return startText(e, false) }
+      if (e.kind === 'text' && !e.locked) {
+        ev.preventDefault()
+        return startText(e, false)
+      }
     }
     if (ev.altKey && !mod && !ev.shiftKey) {
-      const ak: Record<string, AlignKind> = { a: 'left', d: 'right', w: 'top', s: 'bottom', h: 'centerX', v: 'centerY' }
-      if (ak[k] && selected.current.size > 1) { ev.preventDefault(); return align(ak[k]) }
+      const ak: Record<string, AlignKind> = {
+        a: 'left',
+        d: 'right',
+        w: 'top',
+        s: 'bottom',
+        h: 'centerX',
+        v: 'centerY',
+      }
+      if (ak[k] && selected.current.size > 1) {
+        ev.preventDefault()
+        return align(ak[k])
+      }
       return
     }
-    if (k === 'q') { setOpt('keepTool', !opts.current.keepTool); return }
+    if (k === 'q') {
+      setOpt('keepTool', !opts.current.keepTool)
+      return
+    }
     const t = TOOL_KEYS[k]
     if (t) pickTool(t)
   }
@@ -1465,10 +2067,15 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   /** chèn hình từ panel Công cụ (đồ thị, hình học…) vào giữa khung nhìn, chọn sẵn để kéo / đổi cỡ */
   /** chỗ trống gần (x, y): nếu đã có hình đặt đúng chỗ đó (chèn liên tiếp) thì lệch xuống-phải từng nấc */
   const freeSpot = (x: number, y: number): Pt => {
-    const step = 28 / view.current.zoom, near = 6 / view.current.zoom
+    const step = 28 / view.current.zoom,
+      near = 6 / view.current.zoom
     for (let k = 0; k < 30; k++) {
-      if (!els.current.some((e) => !isPage(e) && Math.abs(e.x - x) < near && Math.abs(e.y - y) < near)) break
-      x += step; y += step
+      if (
+        !els.current.some((e) => !isPage(e) && Math.abs(e.x - x) < near && Math.abs(e.y - y) < near)
+      )
+        break
+      x += step
+      y += step
     }
     return [x, y]
   }
@@ -1479,7 +2086,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const r = c.getBoundingClientRect()
     const w = Math.min(420, (r.width / v.zoom) * 0.6)
     const h = (w * img.height) / img.width
-    const cx = r.width / 2 / v.zoom - v.scrollX, cy = r.height / 2 / v.zoom - v.scrollY
+    const cx = r.width / 2 / v.zoom - v.scrollX,
+      cy = r.height / 2 / v.zoom - v.scrollY
     const [x, y] = freeSpot(cx - w / 2, cy - h / 2)
     const added = toolEls(img, x, y, w)
     els.current.push(...added)
@@ -1491,9 +2099,21 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const toolEls = (img: ToolImage, x: number, y: number, w: number): El[] => {
     const doc = readToolDoc(img.svg)
     let out: El[] = []
-    try { out = svgToElements(img.svg, { x, y, width: w, tool: doc ? JSON.stringify(doc) : undefined }) } catch (err) { console.warn('svgToElements', err) }
+    try {
+      out = svgToElements(img.svg, { x, y, width: w, tool: doc ? JSON.stringify(doc) : undefined })
+    } catch (err) {
+      console.warn('svgToElements', err)
+    }
     if (out.length) return out
-    return [{ ...newElement('image', [x, y]), w, h: (w * img.height) / img.width, src: svgDataUrl(img.svg), opacity: 100 }]
+    return [
+      {
+        ...newElement('image', [x, y]),
+        w,
+        h: (w * img.height) / img.width,
+        src: svgDataUrl(img.svg),
+        opacity: 100,
+      },
+    ]
   }
 
   /** sửa lại hình công cụ (bấm đúp): thay đúng chỗ cũ, giữ bề ngang, cùng lớp */
@@ -1503,13 +2123,17 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     if (!b) return
     // vị trí, tỉ lệ của hình cũ: ảnh thì chính khung ảnh; nhóm thì dựng lại hình cũ ở tỉ lệ 1 rồi so khung
     // (khung nhóm không gồm nền trắng / lề nên không dùng thẳng được, nhóm có thể đã bị kéo / đổi cỡ)
-    let x = b[0], y = b[1], w = b[2] - b[0]
+    let x = b[0],
+      y = b[1],
+      w = b[2] - b[0]
     if (!(old.length === 1 && old[0].kind === 'image')) {
       const ref = renderTool(oldDoc)
       const bo = unionBounds(svgToElements(ref.svg, { x: 0, y: 0, width: ref.width }))
       if (bo && bo[2] > bo[0]) {
         const sc = (b[2] - b[0]) / (bo[2] - bo[0])
-        x = b[0] - bo[0] * sc; y = b[1] - bo[1] * sc; w = ref.width * sc
+        x = b[0] - bo[0] * sc
+        y = b[1] - bo[1] * sc
+        w = ref.width * sc
       }
     }
     const added = toolEls(img, x, y, w)
@@ -1528,10 +2152,14 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const r = c.getBoundingClientRect()
     const maxW = Math.min(pics.length > 1 ? 640 : 520, (r.width / v.zoom) * 0.7)
     const gap = 24
-    const sizes = pics.map((p) => { const w = Math.min(maxW, p.w); return [w, (w * p.h) / p.w] })
+    const sizes = pics.map((p) => {
+      const w = Math.min(maxW, p.w)
+      return [w, (w * p.h) / p.w]
+    })
     const totalH = sizes.reduce((a, s) => a + s[1], 0) + gap * (pics.length - 1)
     const cx = r.width / 2 / v.zoom - v.scrollX
-    let y = pics.length > 1 ? 40 / v.zoom - v.scrollY : r.height / 2 / v.zoom - v.scrollY - totalH / 2
+    let y =
+      pics.length > 1 ? 40 / v.zoom - v.scrollY : r.height / 2 / v.zoom - v.scrollY - totalH / 2
     const added = pics.map((p, i) => {
       const [w, h] = sizes[i]
       const el: El = { ...newElement('image', [cx - w / 2, y]), w, h, src: p.src, opacity: 100 }
@@ -1547,12 +2175,19 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const onPickFile = async (ev: React.ChangeEvent<HTMLInputElement>) => {
     const files = [...(ev.target.files ?? [])]
     ev.target.value = ''
-    const pdf = files.find((f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))
+    const pdf = files.find(
+      (f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'),
+    )
     if (pdf) return setDialog({ t: 'pdf', file: pdf })
     const pics: Picture[] = []
-    for (const f of files) if (f.type.startsWith('image/')) {
-      try { pics.push(await readImageFile(f)) } catch { /* bỏ file hỏng */ }
-    }
+    for (const f of files)
+      if (f.type.startsWith('image/')) {
+        try {
+          pics.push(await readImageFile(f))
+        } catch {
+          /* bỏ file hỏng */
+        }
+      }
     placePictures(pics)
   }
 
@@ -1571,7 +2206,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         const v = view.current
         const r = c.getBoundingClientRect()
         // trang rộng vừa khung ở tỉ lệ 100% → viết ghi chú ở đúng cỡ thật (thu nhỏ thì nét mảnh bị nhoè, rung tay lộ rõ)
-        const W = Math.round(Math.max(560, Math.min(1100, r.width - (r.width >= 640 ? RAIL_W : 0) - 64))), GAP = 32
+        const W = Math.round(
+            Math.max(560, Math.min(1100, r.width - (r.width >= 640 ? RAIL_W : 0) - 64)),
+          ),
+          GAP = 32
         const cx = r.width / 2 / v.zoom - v.scrollX
         // đặt dưới nội dung đang có, bảng trống thì từ mép trên khung nhìn
         const u = unionBounds(els.current)
@@ -1583,7 +2221,14 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           const size = await pdfPageSize(doc, i)
           const pic = await renderPdfPage(doc, i, 1400)
           const h = (W * size.h) / size.w
-          pages.push({ ...newElement('image', [cx - W / 2, y]), w: W, h, src: pic.src, opacity: 100, page: { n: i, w: size.w, h: size.h } })
+          pages.push({
+            ...newElement('image', [cx - W / 2, y]),
+            w: W,
+            h,
+            src: pic.src,
+            opacity: 100,
+            page: { n: i, w: size.w, h: size.h },
+          })
           y += h + GAP
         }
         els.current = [...pages, ...els.current]
@@ -1595,7 +2240,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         v.scrollY = -top + 24 / v.zoom
         pickTool('freedraw')
         commit()
-        if (doc.numPages > MAX) window.alert(`PDF có ${doc.numPages} trang, bảng chỉ mở ${MAX} trang đầu.`)
+        if (doc.numPages > MAX)
+          window.alert(`PDF có ${doc.numPages} trang, bảng chỉ mở ${MAX} trang đầu.`)
       } finally {
         doc.close()
       }
@@ -1623,8 +2269,17 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     if (!c) return
     const v = view.current
     const rc = c.getBoundingClientRect()
-    const cx = rc.width / 2 / v.zoom - v.scrollX, cy = rc.height / 2 / v.zoom - v.scrollY
-    const el: El = { ...newElement('image', freeSpot(cx - r.w / 2, cy - r.h / 2)), w: r.w, h: r.h, src: r.src, latex: r.latex, stroke: style.current.stroke, opacity: 100 }
+    const cx = rc.width / 2 / v.zoom - v.scrollX,
+      cy = rc.height / 2 / v.zoom - v.scrollY
+    const el: El = {
+      ...newElement('image', freeSpot(cx - r.w / 2, cy - r.h / 2)),
+      w: r.w,
+      h: r.h,
+      src: r.src,
+      latex: r.latex,
+      stroke: style.current.stroke,
+      opacity: 100,
+    }
     els.current.push(el)
     pickTool('select')
     selected.current = new Set([el.id])
@@ -1641,23 +2296,39 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       if (!pages.length) throw new Error('Bảng chưa có trang PDF nào.')
       const items = []
       for (const pg of preview ? pages.slice(0, 3) : pages) {
-        const k = preview ? preview / Math.max(pg.w, pg.h) : Math.min(1600, pg.page!.w * ch.scale * 1.1) / pg.w
-        items.push({ c: await renderRegion(els.current, [pg.x, pg.y, pg.x + pg.w, pg.y + pg.h], k, 'white', 'plain'), pw: pg.page!.w, ph: pg.page!.h })
+        const k = preview
+          ? preview / Math.max(pg.w, pg.h)
+          : Math.min(1600, pg.page!.w * ch.scale * 1.1) / pg.w
+        items.push({
+          c: await renderRegion(
+            els.current,
+            [pg.x, pg.y, pg.x + pg.w, pg.y + pg.h],
+            k,
+            'white',
+            'plain',
+          ),
+          pw: pg.page!.w,
+          ph: pg.page!.h,
+        })
       }
       return { items, total: pages.length }
     }
     const v = view.current
     const r = c.getBoundingClientRect()
-    const pool = ch.area === 'selection' ? els.current.filter((e) => selected.current.has(e.id)) : els.current
+    const pool =
+      ch.area === 'selection' ? els.current.filter((e) => selected.current.has(e.id)) : els.current
     let b: Bounds | null
-    if (ch.area === 'view') b = [-v.scrollX, -v.scrollY, -v.scrollX + r.width / v.zoom, -v.scrollY + r.height / v.zoom]
+    if (ch.area === 'view')
+      b = [-v.scrollX, -v.scrollY, -v.scrollX + r.width / v.zoom, -v.scrollY + r.height / v.zoom]
     else {
       const u = unionBounds(pool)
       b = u && [u[0] - 20, u[1] - 20, u[2] + 20, u[3] + 20]
     }
     if (!b || !pool.length) throw new Error('Bảng chưa có gì để xuất.')
     // canvas của trình duyệt giới hạn ~16 nghìn px mỗi cạnh
-    const scale = preview ? preview / Math.max(b[2] - b[0], b[3] - b[1]) : Math.min(ch.scale, 16000 / (b[2] - b[0]), 16000 / (b[3] - b[1]))
+    const scale = preview
+      ? preview / Math.max(b[2] - b[0], b[3] - b[1])
+      : Math.min(ch.scale, 16000 / (b[2] - b[0]), 16000 / (b[3] - b[1]))
     const out = await renderRegion(pool, b, scale, ch.bg, opts.current.paper)
     return { items: [{ c: out, pw: 0, ph: 0 }], total: 1 }
   }
@@ -1670,7 +2341,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const onExport = async (ch: ExportChoice) => {
     const r = await buildExport(ch)
     if (ch.format === 'pdf-pages') {
-      download(URL.createObjectURL(pagesToPdf(r.items)), `ghi-chu-${new Date().toISOString().slice(0, 10)}.pdf`)
+      download(
+        URL.createObjectURL(pagesToPdf(r.items)),
+        `ghi-chu-${new Date().toISOString().slice(0, 10)}.pdf`,
+      )
       return setDialog(null)
     }
     const out = r.items[0].c
@@ -1691,19 +2365,25 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const r1 = (n: number) => Math.round(n)
   const describeEl = (e: El) => {
     const [x1, y1, x2, y2] = worldBounds(e)
-    const what = e.kind === 'freedraw' ? `nét ${PENS.find((pn) => pn.id === e.pen)?.label.toLowerCase() ?? 'bút'}` : KIND_LABEL[e.kind]
+    const what =
+      e.kind === 'freedraw'
+        ? `nét ${PENS.find((pn) => pn.id === e.pen)?.label.toLowerCase() ?? 'bút'}`
+        : KIND_LABEL[e.kind]
     const extra = [
       e.kind === 'text' ? `chữ "${(e.text ?? '').slice(0, 80)}"` : '',
       e.latex ? `công thức LaTeX "${e.latex.slice(0, 120)}"` : '',
       e.kind !== 'image' ? `màu ${e.stroke}` : '',
       e.fill !== 'transparent' && e.kind !== 'image' && e.kind !== 'text' ? `nền ${e.fill}` : '',
-    ].filter(Boolean).join(', ')
+    ]
+      .filter(Boolean)
+      .join(', ')
     return `id=${e.id} ${what} tại x=${r1(x1)} y=${r1(y1)} rộng ${r1(x2 - x1)} cao ${r1(y2 - y1)}${extra ? `, ${extra}` : ''}`
   }
   const boardSummary = () => {
     const c = canvasRef.current
     const v = view.current
-    const W = (c?.clientWidth ?? 800) / v.zoom, H = (c?.clientHeight ?? 600) / v.zoom
+    const W = (c?.clientWidth ?? 800) / v.zoom,
+      H = (c?.clientHeight ?? 600) / v.zoom
     const head = `Vùng nhìn thấy: x từ ${r1(-v.scrollX)} đến ${r1(-v.scrollX + W)}, y từ ${r1(-v.scrollY)} đến ${r1(-v.scrollY + H)}. Giấy: ${PAPERS.find((pp) => pp.id === opts.current.paper)?.label}.`
     const list = els.current.slice(-80).map(describeEl)
     return `${head}\n${list.length ? `Các hình trên bảng (${els.current.length}):\n${list.join('\n')}` : 'Bảng đang trống.'}`
@@ -1711,7 +2391,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
 
   /** "Hỏi AI": đính kèm các hình đang chọn vào khung chat rồi mở Trợ lý */
   const askAi = () => {
-    const refs: AiRef[] = sel().map((e) => ({ id: e.id, label: e.kind === 'text' ? `Chữ "${(e.text ?? '').slice(0, 18)}"` : KIND_LABEL[e.kind] ?? 'Hình', detail: describeEl(e) }))
+    const refs: AiRef[] = sel().map((e) => ({
+      id: e.id,
+      label:
+        e.kind === 'text' ? `Chữ "${(e.text ?? '').slice(0, 18)}"` : (KIND_LABEL[e.kind] ?? 'Hình'),
+      detail: describeEl(e),
+    }))
     if (!refs.length) return
     attachToAi(aiKey, refs)
     setMounted((m) => (m.has('ai') ? m : new Set(m).add('ai')))
@@ -1723,40 +2408,76 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const out: string[] = []
     const num = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? v : d)
     const str = (v: unknown, d: string) => (typeof v === 'string' && v ? v : d)
-    const color = (v: unknown, d: string) => (typeof v === 'string' && /^#[0-9a-f]{3,8}$/i.test(v) ? v : v === 'transparent' ? 'transparent' : d)
-    const pts = (v: unknown): Pt[] => (Array.isArray(v) ? v.filter((p) => Array.isArray(p) && p.length >= 2).map((p) => [Number(p[0]), Number(p[1])] as Pt).filter((p) => p.every(Number.isFinite)) : [])
+    const color = (v: unknown, d: string) =>
+      typeof v === 'string' && /^#[0-9a-f]{3,8}$/i.test(v)
+        ? v
+        : v === 'transparent'
+          ? 'transparent'
+          : d
+    const pts = (v: unknown): Pt[] =>
+      Array.isArray(v)
+        ? v
+            .filter((p) => Array.isArray(p) && p.length >= 2)
+            .map((p) => [Number(p[0]), Number(p[1])] as Pt)
+            .filter((p) => p.every(Number.isFinite))
+        : []
     const c = canvasRef.current
     const v = view.current
-    const cx = ((c?.clientWidth ?? 800) / 2) / v.zoom - v.scrollX, cy = ((c?.clientHeight ?? 600) / 2) / v.zoom - v.scrollY
+    const cx = (c?.clientWidth ?? 800) / 2 / v.zoom - v.scrollX,
+      cy = (c?.clientHeight ?? 600) / 2 / v.zoom - v.scrollY
     const added: El[] = []
-    const base = (kind: Kind, slot: Slot, x: number, y: number): El => ({ ...newElement(kind, [x, y]), ...styles.current[slot], pen: undefined, x, y })
+    const base = (kind: Kind, slot: Slot, x: number, y: number): El => ({
+      ...newElement(kind, [x, y]),
+      ...styles.current[slot],
+      pen: undefined,
+      x,
+      y,
+    })
     for (const op of ops) {
       try {
         switch (op.op) {
           case 'figure': {
             const doc = figureDoc(op.figure)
-            if (!doc) { out.push('Không dựng được hình theo cấu hình AI gửi.'); break }
+            if (!doc) {
+              out.push('Không dựng được hình theo cấu hình AI gửi.')
+              break
+            }
             const img = renderTool(doc)
-            const w = num(op.w, 360), h = (w * img.height) / img.width
+            const w = num(op.w, 360),
+              h = (w * img.height) / img.width
             added.push(...toolEls(img, num(op.x, cx - w / 2), num(op.y, cy - h / 2), w))
             out.push(`Đã vẽ ${TOOL_LABEL[doc.kind] ?? 'hình'}.`)
             break
           }
           case 'shape': {
-            const kind = (['rectangle', 'ellipse', 'diamond'] as const).find((k) => k === op.shape) ?? 'rectangle'
+            const kind =
+              (['rectangle', 'ellipse', 'diamond'] as const).find((k) => k === op.shape) ??
+              'rectangle'
             const el = base(kind, 'shape', num(op.x, cx - 80), num(op.y, cy - 45))
             Object.assign(el, {
-              w: Math.max(4, num(op.w, 160)), h: Math.max(4, num(op.h, 90)),
-              stroke: color(op.stroke, el.stroke), fill: color(op.fill, 'transparent'),
-              fillStyle: op.fillStyle === 'solid' || op.fillStyle === 'glass' ? op.fillStyle : 'hachure',
-              strokeStyle: (['solid', 'dashed', 'dotted'] as const).find((k) => k === op.strokeStyle) ?? 'solid',
-              strokeWidth: num(op.strokeWidth, 2), roughness: op.rough === false ? 0 : 1,
+              w: Math.max(4, num(op.w, 160)),
+              h: Math.max(4, num(op.h, 90)),
+              stroke: color(op.stroke, el.stroke),
+              fill: color(op.fill, 'transparent'),
+              fillStyle:
+                op.fillStyle === 'solid' || op.fillStyle === 'glass' ? op.fillStyle : 'hachure',
+              strokeStyle:
+                (['solid', 'dashed', 'dotted'] as const).find((k) => k === op.strokeStyle) ??
+                'solid',
+              strokeWidth: num(op.strokeWidth, 2),
+              roughness: op.rough === false ? 0 : 1,
             })
             added.push(el)
             if (typeof op.label === 'string' && op.label.trim()) {
               const fs = Math.min(28, Math.max(14, el.h / 3))
               const m = measureText(op.label, fs)
-              added.push({ ...base('text', 'text', el.x + el.w / 2 - m.w / 2, el.y + el.h / 2 - m.h / 2), text: op.label, fontSize: fs, ...m, stroke: el.stroke })
+              added.push({
+                ...base('text', 'text', el.x + el.w / 2 - m.w / 2, el.y + el.h / 2 - m.h / 2),
+                text: op.label,
+                fontSize: fs,
+                ...m,
+                stroke: el.stroke,
+              })
             }
             out.push(`Đã vẽ ${KIND_LABEL[kind].toLowerCase()}.`)
             break
@@ -1767,8 +2488,12 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             const el = base(op.arrow ? 'arrow' : 'line', 'shape', P[0][0], P[0][1])
             Object.assign(el, {
               points: P.map(([x, y]) => [x - P[0][0], y - P[0][1]] as Pt),
-              stroke: color(op.stroke, el.stroke), strokeWidth: num(op.strokeWidth, 2), roughness: 0,
-              strokeStyle: (['solid', 'dashed', 'dotted'] as const).find((k) => k === op.strokeStyle) ?? 'solid',
+              stroke: color(op.stroke, el.stroke),
+              strokeWidth: num(op.strokeWidth, 2),
+              roughness: 0,
+              strokeStyle:
+                (['solid', 'dashed', 'dotted'] as const).find((k) => k === op.strokeStyle) ??
+                'solid',
             })
             added.push(el)
             out.push(op.arrow ? 'Đã vẽ mũi tên.' : 'Đã vẽ đường thẳng.')
@@ -1779,7 +2504,13 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             if (!t) break
             const fs = Math.min(96, Math.max(10, num(op.fontSize, 24)))
             const m = measureText(t, fs)
-            added.push({ ...base('text', 'text', num(op.x, cx - m.w / 2), num(op.y, cy)), text: t, fontSize: fs, ...m, stroke: color(op.color, '#1e1e1e') })
+            added.push({
+              ...base('text', 'text', num(op.x, cx - m.w / 2), num(op.y, cy)),
+              text: t,
+              fontSize: fs,
+              ...m,
+              stroke: color(op.color, '#1e1e1e'),
+            })
             out.push(`Đã ghi "${t.slice(0, 30)}${t.length > 30 ? '…' : ''}".`)
             break
           }
@@ -1790,9 +2521,13 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             if (!P.length && cv) P = curvePoints(cv, cx, cy)
             if (P.length < 2) break
             const el: El = {
-              ...newElement('freedraw', P[0]), ...styles.current[pen], pen,
-              stroke: color(op.color, styles.current[pen].stroke), strokeWidth: num(op.width, styles.current[pen].strokeWidth),
-              points: densify(P).map(([x, y]) => [x - P[0][0], y - P[0][1]] as Pt), pressures: undefined,
+              ...newElement('freedraw', P[0]),
+              ...styles.current[pen],
+              pen,
+              stroke: color(op.color, styles.current[pen].stroke),
+              strokeWidth: num(op.width, styles.current[pen].strokeWidth),
+              points: densify(P).map(([x, y]) => [x - P[0][0], y - P[0][1]] as Pt),
+              pressures: undefined,
             }
             const tp = opts.current.penTips[pen] ?? DEFAULT_TIP
             el.tipSharp = tp.sharp
@@ -1811,7 +2546,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             if (typeof op.y === 'number') patch.y = op.y
             if (typeof op.w === 'number' && !hasPoints(e)) patch.w = op.w
             if (typeof op.h === 'number' && !hasPoints(e)) patch.h = op.h
-            if (typeof op.text === 'string' && e.kind === 'text') Object.assign(patch, { text: op.text, ...measureText(op.text, e.fontSize, e) })
+            if (typeof op.text === 'string' && e.kind === 'text')
+              Object.assign(patch, { text: op.text, ...measureText(op.text, e.fontSize, e) })
             mutate(e, patch)
             out.push(`Đã sửa ${KIND_LABEL[e.kind]?.toLowerCase() ?? 'hình'}.`)
             break
@@ -1821,7 +2557,8 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             const before = els.current.length
             els.current = els.current.filter((e) => !ids.has(e.id))
             for (const i of ids) selected.current.delete(i)
-            if (before !== els.current.length) out.push(`Đã xoá ${before - els.current.length} hình.`)
+            if (before !== els.current.length)
+              out.push(`Đã xoá ${before - els.current.length} hình.`)
             break
           }
         }
@@ -1845,7 +2582,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const down = (e: PointerEvent) => {
       if (!(e.target as Element | null)?.closest?.(`[data-pop="${pop}"]`)) setPop(null)
     }
-    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setPop(null) }
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPop(null)
+    }
     document.addEventListener('pointerdown', down, true)
     document.addEventListener('keydown', key, true)
     return () => {
@@ -1876,15 +2615,21 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const cur: Style = selection[0] ?? style.current
   const ctxKinds: Kind[] = selection.length
     ? selection.map((e) => e.kind)
-    : tool === 'freedraw' || tool === 'text' || SHAPES.includes(tool as Kind) ? [tool as Kind] : []
+    : tool === 'freedraw' || tool === 'text' || SHAPES.includes(tool as Kind)
+      ? [tool as Kind]
+      : []
   const kinds = new Set(ctxKinds)
   const onlyText = kinds.size > 0 && [...kinds].every((k) => k === 'text')
-  const canFill = [...kinds].some((k) => k === 'rectangle' || k === 'ellipse' || k === 'diamond') || selection.some(isClosedStroke)
+  const canFill =
+    [...kinds].some((k) => k === 'rectangle' || k === 'ellipse' || k === 'diamond') ||
+    selection.some(isClosedStroke)
   const hasText = kinds.has('text')
   const onlyImage = kinds.size > 0 && [...kinds].every((k) => k === 'image')
   // đang chọn đúng một hình công cụ (đồ thị, sơ đồ…): thanh gọn, đổi nét / chữ qua bảng thông số
-  const toolDoc = selection.length && selection.every((e) => e.groupId && e.groupId === selection[0].groupId)
-    ? parseToolJson(selection.find((e) => e.tool)?.tool) : null
+  const toolDoc =
+    selection.length && selection.every((e) => e.groupId && e.groupId === selection[0].groupId)
+      ? parseToolJson(selection.find((e) => e.tool)?.tool)
+      : null
   const o = opts.current
   const setOpt = <K extends keyof Opts>(k: K, value: Opts[K]) => {
     opts.current = { ...opts.current, [k]: value }
@@ -1947,7 +2692,10 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     }
     if (!selection.length) style.current = { ...style.current, [k]: value }
     for (const e of selection) {
-      if (e.kind === 'text' && (k === 'fontSize' || k === 'bold' || k === 'italic' || k === 'font')) {
+      if (
+        e.kind === 'text' &&
+        (k === 'fontSize' || k === 'bold' || k === 'italic' || k === 'font')
+      ) {
         const next = { ...e, [k]: value }
         const m = measureText(e.text ?? '', next.fontSize, next)
         if (k === 'fontSize') {
@@ -2000,10 +2748,26 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         onKeyDown={(ev) => {
           const mod = ev.ctrlKey || ev.metaKey
           const k = ev.key.toLowerCase()
-          if (mod && k === 'b') { ev.preventDefault(); setProp('bold', !e.bold); return }
-          if (mod && k === 'i') { ev.preventDefault(); setProp('italic', !e.italic); return }
-          if (mod && ev.key === '.') { ev.preventDefault(); wrapScript('^'); return }
-          if (mod && ev.key === ',') { ev.preventDefault(); wrapScript('_'); return }
+          if (mod && k === 'b') {
+            ev.preventDefault()
+            setProp('bold', !e.bold)
+            return
+          }
+          if (mod && k === 'i') {
+            ev.preventDefault()
+            setProp('italic', !e.italic)
+            return
+          }
+          if (mod && ev.key === '.') {
+            ev.preventDefault()
+            wrapScript('^')
+            return
+          }
+          if (mod && ev.key === ',') {
+            ev.preventDefault()
+            wrapScript('_')
+            return
+          }
           if (ev.key === 'Escape' || (ev.key === 'Enter' && mod)) {
             ev.preventDefault()
             ev.currentTarget.blur()
@@ -2037,37 +2801,92 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     )
   }
 
-  const main: Main = tool === 'freedraw' ? 'pen' : SHAPES.includes(tool as Kind) ? 'shape' : (tool as Main)
+  const main: Main =
+    tool === 'freedraw' ? 'pen' : SHAPES.includes(tool as Kind) ? 'shape' : (tool as Main)
   const isHighlight = tool === 'freedraw' && o.pen === 'highlight' && !selection.length
   const hasShape = main === 'shape' || [...kinds].some((k) => SHAPES.includes(k))
   // hàng màu gần đây riêng theo công cụ (đang chọn hình thì theo loại hình được chọn)
   const ctxTool = selection.length
-    ? selection.every((e) => e.kind === 'text') ? 'text' : selection.every((e) => e.kind === 'freedraw') ? 'pen' : 'shape'
-    : tool === 'text' ? 'text' : tool === 'freedraw' ? 'pen' : 'shape'
-  const recentKey = isHighlight ? 'recentHighlights' : ctxTool === 'text' ? 'recentTextColors' : ctxTool === 'shape' ? 'recentShapeColors' : 'recentColors'
+    ? selection.every((e) => e.kind === 'text')
+      ? 'text'
+      : selection.every((e) => e.kind === 'freedraw')
+        ? 'pen'
+        : 'shape'
+    : tool === 'text'
+      ? 'text'
+      : tool === 'freedraw'
+        ? 'pen'
+        : 'shape'
+  const recentKey = isHighlight
+    ? 'recentHighlights'
+    : ctxTool === 'text'
+      ? 'recentTextColors'
+      : ctxTool === 'shape'
+        ? 'recentShapeColors'
+        : 'recentColors'
   const colors = o[recentKey] ?? DEFAULT_OPTS[recentKey]
   /** dùng một màu: tô cho nét/hình, rồi đưa màu đó lên đầu hàng */
   const useColor = (c: string) => {
     const list = opts.current[recentKey] ?? DEFAULT_OPTS[recentKey]
-    opts.current = { ...opts.current, [recentKey]: [c, ...list.filter((x) => x.toLowerCase() !== c.toLowerCase())].slice(0, list.length || 6) }
+    opts.current = {
+      ...opts.current,
+      [recentKey]: [c, ...list.filter((x) => x.toLowerCase() !== c.toLowerCase())].slice(
+        0,
+        list.length || 6,
+      ),
+    }
     setProp('stroke', c)
   }
   // bút: nét = nấc × cỡ ngòi (bút bi 2,2) nên chia nhỏ phần mảnh, nấc 4 / 6 là mặc định của bút bi / bút máy
-  const widths = isHighlight ? [4, 6, 8, 11, 14, 18] : ctxTool === 'pen' ? [0.5, 0.65, 0.8, 1, 1.5, 2] : [0.5, 1, 1.5, 2, 3, 5]
+  const widths = isHighlight
+    ? [4, 6, 8, 11, 14, 18]
+    : ctxTool === 'pen'
+      ? [0.5, 0.65, 0.8, 1, 1.5, 2]
+      : [0.5, 1, 1.5, 2, 3, 5]
   const WIDTH_NAMES = ['rất mảnh', 'mảnh', 'vừa', 'hơi đậm', 'đậm', 'rất đậm']
 
   /* nhóm tuỳ chọn dùng lại giữa các công cụ */
   const colorRow = (
     <Group label="Màu">
       {colors.map((c) => (
-        <Swatch key={c} color={c} round active={cur.stroke.toLowerCase() === c.toLowerCase()} onClick={() => useColor(c)} title={onlyText ? 'Màu chữ' : 'Màu nét'} />
+        <Swatch
+          key={c}
+          color={c}
+          round
+          active={cur.stroke.toLowerCase() === c.toLowerCase()}
+          onClick={() => useColor(c)}
+          title={onlyText ? 'Màu chữ' : 'Màu nét'}
+        />
       ))}
-      <Pop id="color" pop={pop} setPop={setPop} title="Màu khác"
-        face={<span className="mx-[3px] block h-5 w-5 rounded-full border border-black/10" style={{ background: 'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)' }} />}>
+      <Pop
+        id="color"
+        pop={pop}
+        setPop={setPop}
+        title="Màu khác"
+        face={
+          <span
+            className="mx-[3px] block h-5 w-5 rounded-full border border-black/10"
+            style={{
+              background:
+                'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)',
+            }}
+          />
+        }
+      >
         <div className="grid grid-cols-10 gap-1">
           {THEME_COLORS.map((c) => (
-            <button key={c} type="button" data-tip={c} aria-label={c} onClick={() => { useColor(c); setPop(null) }}
-              className={`h-[18px] w-[18px] rounded-[3px] border border-black/10 hover:scale-110 ${cur.stroke === c ? 'ring-2 ring-clay ring-offset-1' : ''}`} style={{ background: c }} />
+            <button
+              key={c}
+              type="button"
+              data-tip={c}
+              aria-label={c}
+              onClick={() => {
+                useColor(c)
+                setPop(null)
+              }}
+              className={`h-[18px] w-[18px] rounded-[3px] border border-black/10 hover:scale-110 ${cur.stroke === c ? 'ring-clay ring-2 ring-offset-1' : ''}`}
+              style={{ background: c }}
+            />
           ))}
         </div>
         <HexInput value={cur.stroke} onPreview={(c) => setProp('stroke', c)} onCommit={useColor} />
@@ -2077,8 +2896,15 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const fontRow = (
     <Group label="Cỡ chữ">
       {[16, 24, 36, 56].map((s, i) => (
-        <Chip key={s} active={cur.fontSize === s} onClick={() => setProp('fontSize', s)} title={`Chữ ${['nhỏ', 'vừa', 'lớn', 'rất lớn'][i]}`}>
-          <span className="font-semibold" style={{ fontSize: 10 + i * 3 }}>A</span>
+        <Chip
+          key={s}
+          active={cur.fontSize === s}
+          onClick={() => setProp('fontSize', s)}
+          title={`Chữ ${['nhỏ', 'vừa', 'lớn', 'rất lớn'][i]}`}
+        >
+          <span className="font-semibold" style={{ fontSize: 10 + i * 3 }}>
+            A
+          </span>
         </Chip>
       ))}
     </Group>
@@ -2087,29 +2913,67 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const subHint = 'Bấm đúp vào chữ để gõ rồi chọn phần cần làm chỉ số'
   const textStyleRow = (
     <Group label="Kiểu chữ">
-      <Chip active={!!cur.bold} onMouseDown={keepFocus} onClick={() => setProp('bold', !cur.bold)} title="Đậm — Ctrl+B">
-        <span className="font-bold text-[13.5px]">B</span>
+      <Chip
+        active={!!cur.bold}
+        onMouseDown={keepFocus}
+        onClick={() => setProp('bold', !cur.bold)}
+        title="Đậm — Ctrl+B"
+      >
+        <span className="text-[13.5px] font-bold">B</span>
       </Chip>
-      <Chip active={!!cur.italic} onMouseDown={keepFocus} onClick={() => setProp('italic', !cur.italic)} title="Nghiêng — Ctrl+I">
-        <span className="font-serif italic text-[14px]">I</span>
+      <Chip
+        active={!!cur.italic}
+        onMouseDown={keepFocus}
+        onClick={() => setProp('italic', !cur.italic)}
+        title="Nghiêng — Ctrl+I"
+      >
+        <span className="font-serif text-[14px] italic">I</span>
       </Chip>
-      <Chip active={cur.font === 'serif'} onMouseDown={keepFocus} onClick={() => setProp('font', cur.font === 'serif' ? undefined : 'serif')} title="Chữ có chân (Serif)">
+      <Chip
+        active={cur.font === 'serif'}
+        onMouseDown={keepFocus}
+        onClick={() => setProp('font', cur.font === 'serif' ? undefined : 'serif')}
+        title="Chữ có chân (Serif)"
+      >
         <span className="font-serif text-[13px]">Aa</span>
       </Chip>
-      <Chip active={false} onMouseDown={keepFocus} onClick={() => { if (editing) wrapScript('^') }} title={editing ? 'Chỉ số trên — Ctrl+.' : subHint}>
-        <span className={`text-[12.5px] leading-none ${editing ? '' : 'opacity-40'}`}>x<sup className="text-[9px]">2</sup></span>
+      <Chip
+        active={false}
+        onMouseDown={keepFocus}
+        onClick={() => {
+          if (editing) wrapScript('^')
+        }}
+        title={editing ? 'Chỉ số trên — Ctrl+.' : subHint}
+      >
+        <span className={`text-[12.5px] leading-none ${editing ? '' : 'opacity-40'}`}>
+          x<sup className="text-[9px]">2</sup>
+        </span>
       </Chip>
-      <Chip active={false} onMouseDown={keepFocus} onClick={() => { if (editing) wrapScript('_') }} title={editing ? 'Chỉ số dưới — Ctrl+,' : subHint}>
-        <span className={`text-[12.5px] leading-none ${editing ? '' : 'opacity-40'}`}>x<sub className="text-[9px]">2</sub></span>
+      <Chip
+        active={false}
+        onMouseDown={keepFocus}
+        onClick={() => {
+          if (editing) wrapScript('_')
+        }}
+        title={editing ? 'Chỉ số dưới — Ctrl+,' : subHint}
+      >
+        <span className={`text-[12.5px] leading-none ${editing ? '' : 'opacity-40'}`}>
+          x<sub className="text-[9px]">2</sub>
+        </span>
       </Chip>
     </Group>
   )
-  const strokeDash = cur.strokeStyle === 'dashed' ? '5 4' : cur.strokeStyle === 'dotted' ? '0.5 4' : undefined
+  const strokeDash =
+    cur.strokeStyle === 'dashed' ? '5 4' : cur.strokeStyle === 'dotted' ? '0.5 4' : undefined
   const previewW = Math.min(7, Math.max(1, cur.strokeWidth * (isHighlight ? 0.38 : 1.2)))
   const strokePop = (
-    <Pop id="stroke" pop={pop} setPop={setPop} title="Nét"
-      face={(
-        <span className="flex items-center gap-1.5 px-1 text-[12.5px] text-ink">
+    <Pop
+      id="stroke"
+      pop={pop}
+      setPop={setPop}
+      title="Nét"
+      face={
+        <span className="text-ink flex items-center gap-1.5 px-1 text-[12.5px]">
           <svg width="28" height="12" viewBox="0 0 28 12" aria-hidden>
             <path
               d="M2 6h24"
@@ -2122,36 +2986,77 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           </svg>
           <span className="hidden sm:inline">Nét</span>
         </span>
-      )}>
+      }
+    >
       <PanelRow label="Độ dày">
         {widths.map((w, i) => (
-          <Chip key={w} active={cur.strokeWidth === w} onClick={() => setProp('strokeWidth', w)} title={`Nét ${WIDTH_NAMES[i]}`}>
+          <Chip
+            key={w}
+            active={cur.strokeWidth === w}
+            onClick={() => setProp('strokeWidth', w)}
+            title={`Nét ${WIDTH_NAMES[i]}`}
+          >
             <span className="flex h-4 w-5 items-center justify-center">
-              <span className="block w-4 rounded-full bg-current" style={{ height: ctxTool === 'pen' && !isHighlight ? w * 2.2 : [1, 1.5, 2.5, 3.5, 5, 7][i] }} />
+              <span
+                className="block w-4 rounded-full bg-current"
+                style={{
+                  height: ctxTool === 'pen' && !isHighlight ? w * 2.2 : [1, 1.5, 2.5, 3.5, 5, 7][i],
+                }}
+              />
             </span>
           </Chip>
         ))}
       </PanelRow>
       <PanelRow label="Kiểu nét">
         {(['solid', 'dashed', 'dotted'] as const).map((st, i) => (
-          <Chip key={st} active={cur.strokeStyle === st} onClick={() => setProp('strokeStyle', st)} title={`Nét ${['liền', 'đứt', 'chấm'][i]}`}>
+          <Chip
+            key={st}
+            active={cur.strokeStyle === st}
+            onClick={() => setProp('strokeStyle', st)}
+            title={`Nét ${['liền', 'đứt', 'chấm'][i]}`}
+          >
             <svg width="22" height="10" viewBox="0 0 22 10" aria-hidden>
-              <path d="M1 5h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray={st === 'dashed' ? '5 4' : st === 'dotted' ? '0.5 4' : undefined} />
+              <path
+                d="M1 5h20"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray={st === 'dashed' ? '5 4' : st === 'dotted' ? '0.5 4' : undefined}
+              />
             </svg>
           </Chip>
         ))}
       </PanelRow>
       {hasShape && (
         <PanelRow label="Nét vẽ">
-          <Chip active={cur.roughness === 0} onClick={() => setProp('roughness', 0)} title="Nét thẳng, gọn">Thẳng</Chip>
-          <Chip active={cur.roughness >= 1} onClick={() => setProp('roughness', 1)} title="Nét như vẽ tay">Vẽ tay</Chip>
+          <Chip
+            active={cur.roughness === 0}
+            onClick={() => setProp('roughness', 0)}
+            title="Nét thẳng, gọn"
+          >
+            Thẳng
+          </Chip>
+          <Chip
+            active={cur.roughness >= 1}
+            onClick={() => setProp('roughness', 1)}
+            title="Nét như vẽ tay"
+          >
+            Vẽ tay
+          </Chip>
         </PanelRow>
       )}
       {selection.length > 0 && !onlyText && hasText && (
         <PanelRow label="Cỡ chữ">
           {[16, 24, 36, 56].map((s, i) => (
-            <Chip key={s} active={cur.fontSize === s} onClick={() => setProp('fontSize', s)} title={`Chữ ${['nhỏ', 'vừa', 'lớn', 'rất lớn'][i]}`}>
-              <span className="font-semibold" style={{ fontSize: 10 + i * 3 }}>A</span>
+            <Chip
+              key={s}
+              active={cur.fontSize === s}
+              onClick={() => setProp('fontSize', s)}
+              title={`Chữ ${['nhỏ', 'vừa', 'lớn', 'rất lớn'][i]}`}
+            >
+              <span className="font-semibold" style={{ fontSize: 10 + i * 3 }}>
+                A
+              </span>
             </Chip>
           ))}
         </PanelRow>
@@ -2161,95 +3066,250 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
   const fillPopBody = (
     <>
       <PanelRow label="Màu nền">
-        {FILLS.map((c) => <Swatch key={c} color={c} drag={cur.fillStyle} active={cur.fill === c} onClick={() => setProp('fill', c)} />)}
-        <button type="button" data-tip="Màu khác" aria-label="Màu khác" aria-expanded={moreFill} onClick={() => setMoreFill((v) => !v)}
-          className={`mx-[3px] h-5 w-5 shrink-0 rounded-[5px] border border-black/10 hover:scale-110 ${moreFill || (cur.fill !== 'transparent' && !FILLS.includes(cur.fill)) ? 'ring-2 ring-clay ring-offset-2 ring-offset-surface' : ''}`}
-          style={{ background: 'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)' }} />
+        {FILLS.map((c) => (
+          <Swatch
+            key={c}
+            color={c}
+            drag={cur.fillStyle}
+            active={cur.fill === c}
+            onClick={() => setProp('fill', c)}
+          />
+        ))}
+        <button
+          type="button"
+          data-tip="Màu khác"
+          aria-label="Màu khác"
+          aria-expanded={moreFill}
+          onClick={() => setMoreFill((v) => !v)}
+          className={`mx-[3px] h-5 w-5 shrink-0 rounded-[5px] border border-black/10 hover:scale-110 ${moreFill || (cur.fill !== 'transparent' && !FILLS.includes(cur.fill)) ? 'ring-clay ring-offset-surface ring-2 ring-offset-2' : ''}`}
+          style={{
+            background:
+              'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)',
+          }}
+        />
       </PanelRow>
-      {moreFill && <MoreColors value={cur.fill} drag={cur.fillStyle} onPick={(c) => setProp('fill', c)} onPreview={(c) => setProp('fill', c)} />}
+      {moreFill && (
+        <MoreColors
+          value={cur.fill}
+          drag={cur.fillStyle}
+          onPick={(c) => setProp('fill', c)}
+          onPreview={(c) => setProp('fill', c)}
+        />
+      )}
       {cur.fill !== 'transparent' && (
         <PanelRow label="Kiểu tô">
-          <Chip active={cur.fillStyle === 'hachure'} onClick={() => setProp('fillStyle', 'hachure')}>Gạch chéo</Chip>
-          <Chip active={cur.fillStyle === 'solid'} onClick={() => setProp('fillStyle', 'solid')}>Đặc</Chip>
-          <Chip active={cur.fillStyle === 'glass'} onClick={() => setProp('fillStyle', 'glass')} title="Màu trong suốt như kính, nhìn xuyên được hình phía sau">Kính</Chip>
+          <Chip
+            active={cur.fillStyle === 'hachure'}
+            onClick={() => setProp('fillStyle', 'hachure')}
+          >
+            Gạch chéo
+          </Chip>
+          <Chip active={cur.fillStyle === 'solid'} onClick={() => setProp('fillStyle', 'solid')}>
+            Đặc
+          </Chip>
+          <Chip
+            active={cur.fillStyle === 'glass'}
+            onClick={() => setProp('fillStyle', 'glass')}
+            title="Màu trong suốt như kính, nhìn xuyên được hình phía sau"
+          >
+            Kính
+          </Chip>
         </PanelRow>
       )}
     </>
   )
   const fillPop = (
-    <Pop id="fill" pop={pop} setPop={setPop} title="Tô nền"
-      face={<span className="flex items-center gap-1.5 px-1 text-[12.5px] text-ink"><span className="h-4 w-4 rounded-[4px] border border-line" style={{ background: cur.fill === 'transparent' ? NONE_BG : cur.fill }} />Tô nền</span>}>
+    <Pop
+      id="fill"
+      pop={pop}
+      setPop={setPop}
+      title="Tô nền"
+      face={
+        <span className="text-ink flex items-center gap-1.5 px-1 text-[12.5px]">
+          <span
+            className="border-line h-4 w-4 rounded-[4px] border"
+            style={{ background: cur.fill === 'transparent' ? NONE_BG : cur.fill }}
+          />
+          Tô nền
+        </span>
+      }
+    >
       {fillPopBody}
     </Pop>
   )
   const opacityPopBody = (
     <div className="w-[180px]">
-      <input type="range" min={10} max={100} step={10} value={cur.opacity}
-        onChange={(e) => setProp('opacity', Number(e.target.value))} className="w-full accent-[#b4532a]" />
+      <input
+        type="range"
+        min={10}
+        max={100}
+        step={10}
+        value={cur.opacity}
+        onChange={(e) => setProp('opacity', Number(e.target.value))}
+        className="w-full accent-[#b4532a]"
+      />
     </div>
   )
 
-  const selPillBtn = 'flex h-9 min-w-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-2 text-ink transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 sm:h-8 sm:min-w-8'
+  const selPillBtn =
+    'flex h-9 min-w-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-2 text-ink transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 sm:h-8 sm:min-w-8'
 
   let options: ReactNode
   /** hàng thứ 3 khi đang chọn: thao tác với phần đang chọn, thanh viên thuốc nổi trên bảng */
   let selActions: ReactNode = null
   if (selection.length) {
-    const canGroup = selection.length > 1 && !selection.every((e) => e.groupId && e.groupId === selection[0].groupId)
+    const canGroup =
+      selection.length > 1 &&
+      !selection.every((e) => e.groupId && e.groupId === selection[0].groupId)
     const canUngroup = selection.some((e) => e.groupId)
     const blocks = groupBlocks(selection)
     const movableBlocks = blocks.filter((b) => !b.locked)
     const canAlign = blocks.length >= 2 && movableBlocks.length >= 1
     const canDist = movableBlocks.length >= 3
-    const alignItems: { id: AlignKind; tip: string; kbd?: string; disabled?: boolean; icon: ReactNode }[] = [
+    const alignItems: {
+      id: AlignKind
+      tip: string
+      kbd?: string
+      disabled?: boolean
+      icon: ReactNode
+    }[] = [
       {
-        id: 'left', tip: 'Căn trái', kbd: 'Alt+A',
-        icon: <><path d="M4 4v16" /><rect x="7" y="6" width="12" height="4.5" rx="1" /><rect x="7" y="13.5" width="7" height="4.5" rx="1" /></>,
+        id: 'left',
+        tip: 'Căn trái',
+        kbd: 'Alt+A',
+        icon: (
+          <>
+            <path d="M4 4v16" />
+            <rect x="7" y="6" width="12" height="4.5" rx="1" />
+            <rect x="7" y="13.5" width="7" height="4.5" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'centerX', tip: 'Căn giữa ngang', kbd: 'Alt+H',
-        icon: <><path d="M12 3v3M12 10.5v3M12 18v3" /><rect x="5" y="6" width="14" height="4.5" rx="1" /><rect x="7.5" y="13.5" width="9" height="4.5" rx="1" /></>,
+        id: 'centerX',
+        tip: 'Căn giữa ngang',
+        kbd: 'Alt+H',
+        icon: (
+          <>
+            <path d="M12 3v3M12 10.5v3M12 18v3" />
+            <rect x="5" y="6" width="14" height="4.5" rx="1" />
+            <rect x="7.5" y="13.5" width="9" height="4.5" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'right', tip: 'Căn phải', kbd: 'Alt+D',
-        icon: <><path d="M20 4v16" /><rect x="5" y="6" width="12" height="4.5" rx="1" /><rect x="10" y="13.5" width="7" height="4.5" rx="1" /></>,
+        id: 'right',
+        tip: 'Căn phải',
+        kbd: 'Alt+D',
+        icon: (
+          <>
+            <path d="M20 4v16" />
+            <rect x="5" y="6" width="12" height="4.5" rx="1" />
+            <rect x="10" y="13.5" width="7" height="4.5" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'top', tip: 'Căn trên', kbd: 'Alt+W',
-        icon: <><path d="M4 4h16" /><rect x="6" y="7" width="4.5" height="12" rx="1" /><rect x="13.5" y="7" width="4.5" height="7" rx="1" /></>,
+        id: 'top',
+        tip: 'Căn trên',
+        kbd: 'Alt+W',
+        icon: (
+          <>
+            <path d="M4 4h16" />
+            <rect x="6" y="7" width="4.5" height="12" rx="1" />
+            <rect x="13.5" y="7" width="4.5" height="7" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'centerY', tip: 'Căn giữa dọc', kbd: 'Alt+V',
-        icon: <><path d="M3 12h3M10.5 12h3M18 12h3" /><rect x="6" y="5" width="4.5" height="14" rx="1" /><rect x="13.5" y="7.5" width="4.5" height="9" rx="1" /></>,
+        id: 'centerY',
+        tip: 'Căn giữa dọc',
+        kbd: 'Alt+V',
+        icon: (
+          <>
+            <path d="M3 12h3M10.5 12h3M18 12h3" />
+            <rect x="6" y="5" width="4.5" height="14" rx="1" />
+            <rect x="13.5" y="7.5" width="4.5" height="9" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'bottom', tip: 'Căn dưới', kbd: 'Alt+S',
-        icon: <><path d="M4 20h16" /><rect x="6" y="5" width="4.5" height="12" rx="1" /><rect x="13.5" y="10" width="4.5" height="7" rx="1" /></>,
+        id: 'bottom',
+        tip: 'Căn dưới',
+        kbd: 'Alt+S',
+        icon: (
+          <>
+            <path d="M4 20h16" />
+            <rect x="6" y="5" width="4.5" height="12" rx="1" />
+            <rect x="13.5" y="10" width="4.5" height="7" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'distX', tip: 'Giãn đều ngang (cần ≥ 3 khối)', disabled: !canDist,
-        icon: <><path d="M4 4v16M20 4v16" /><rect x="7" y="7" width="3.5" height="10" rx="1" /><rect x="13.5" y="7" width="3.5" height="10" rx="1" /></>,
+        id: 'distX',
+        tip: 'Giãn đều ngang (cần ≥ 3 khối)',
+        disabled: !canDist,
+        icon: (
+          <>
+            <path d="M4 4v16M20 4v16" />
+            <rect x="7" y="7" width="3.5" height="10" rx="1" />
+            <rect x="13.5" y="7" width="3.5" height="10" rx="1" />
+          </>
+        ),
       },
       {
-        id: 'distY', tip: 'Giãn đều dọc (cần ≥ 3 khối)', disabled: !canDist,
-        icon: <><path d="M4 4h16M4 20h16" /><rect x="7" y="7" width="10" height="3.5" rx="1" /><rect x="7" y="13.5" width="10" height="3.5" rx="1" /></>,
+        id: 'distY',
+        tip: 'Giãn đều dọc (cần ≥ 3 khối)',
+        disabled: !canDist,
+        icon: (
+          <>
+            <path d="M4 4h16M4 20h16" />
+            <rect x="7" y="7" width="10" height="3.5" rx="1" />
+            <rect x="7" y="13.5" width="10" height="3.5" rx="1" />
+          </>
+        ),
       },
     ]
     const hasLocked = selection.some((e) => e.locked)
     const allLocked = selection.every((e) => e.locked)
     const lockBtn = (
-      <SelBtn label={allLocked ? 'Mở khoá — Ctrl+Shift+L' : 'Khoá hình — Ctrl+Shift+L'} onClick={toggleLock}>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <SelBtn
+        label={allLocked ? 'Mở khoá — Ctrl+Shift+L' : 'Khoá hình — Ctrl+Shift+L'}
+        onClick={toggleLock}
+      >
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
           <rect x="5" y="11" width="14" height="10" rx="2" />
-          {allLocked
-            ? <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-            : <path d="M8 11V7a4 4 0 0 1 7.6-1.7" />}
+          {allLocked ? (
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+          ) : (
+            <path d="M8 11V7a4 4 0 0 1 7.6-1.7" />
+          )}
         </svg>
       </SelBtn>
     )
     const dupBtn = (
       <SelBtn label="Nhân đôi — Ctrl+D" onClick={duplicate}>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
           <rect x="8" y="8" width="12" height="12" rx="2" />
           <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
         </svg>
@@ -2257,18 +3317,22 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     )
     const askAiBtn = (
       <button
-        type="button" onClick={askAi} data-tip="Đính kèm phần đang chọn vào khung chat Trợ lý AI" aria-label="Đính kèm phần đang chọn vào khung chat Trợ lý AI"
-        className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[12.5px] font-medium text-ink transition-all hover:bg-sunken active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 sm:h-8"
+        type="button"
+        onClick={askAi}
+        data-tip="Đính kèm phần đang chọn vào khung chat Trợ lý AI"
+        aria-label="Đính kèm phần đang chọn vào khung chat Trợ lý AI"
+        className="text-ink hover:bg-sunken focus-visible:ring-clay/40 flex h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none active:scale-95 sm:h-8"
       >
-        <AiIcon size={16} /><span>Hỏi AI</span>
+        <AiIcon size={16} />
+        <span>Hỏi AI</span>
       </button>
     )
     selActions = hasLocked ? (
       <>
         {lockBtn}
-        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+        <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
         {dupBtn}
-        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+        <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
         {askAiBtn}
       </>
     ) : (
@@ -2276,76 +3340,160 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         {/* cụm 1: tô nền + độ trong */}
         <div className="flex shrink-0 items-center gap-0.5">
           {!toolDoc && canFill && (
-            <Pop id="fill" pop={pop} setPop={setPop} title="Tô nền"
+            <Pop
+              id="fill"
+              pop={pop}
+              setPop={setPop}
+              title="Tô nền"
               btnClassName={`${selPillBtn} w-9 px-0 sm:w-8 sm:px-0`}
-              face={(
+              face={
                 <span className="flex flex-col items-center justify-center gap-[2px]">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
                     <path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11z" />
                     <path d="M5 2l5 5M2 13h15" />
                     <path d="M21 15s1.8 2.1 1.8 3.3a1.8 1.8 0 1 1-3.6 0c0-1.2 1.8-3.3 1.8-3.3z" />
                   </svg>
-                  <span className="h-[3px] w-4 rounded-full border border-black/15" style={{ background: cur.fill === 'transparent' ? NONE_BG : cur.fill }} />
+                  <span
+                    className="h-[3px] w-4 rounded-full border border-black/15"
+                    style={{ background: cur.fill === 'transparent' ? NONE_BG : cur.fill }}
+                  />
                 </span>
-              )}>
+              }
+            >
               {fillPopBody}
             </Pop>
           )}
-          <Pop id="opacity" pop={pop} setPop={setPop} title="Độ trong"
+          <Pop
+            id="opacity"
+            pop={pop}
+            setPop={setPop}
+            title="Độ trong"
             btnClassName={selPillBtn}
-            face={(
-              <span className="flex items-center gap-1.5 text-ink">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            face={
+              <span className="text-ink flex items-center gap-1.5">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
                   <circle cx="12" cy="12" r="8" />
                   <path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" stroke="none" />
                 </svg>
-                <span className="text-[11.5px] font-medium tabular-nums leading-none">{cur.opacity}%</span>
+                <span className="text-[11.5px] leading-none font-medium tabular-nums">
+                  {cur.opacity}%
+                </span>
               </span>
-            )}>
+            }
+          >
             {opacityPopBody}
           </Pop>
         </div>
 
-        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+        <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
 
         {/* cụm 2: hỏi AI */}
         {askAiBtn}
 
-        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+        <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
 
         {canAlign && (
           <>
-            <Pop id="align" pop={pop} setPop={setPop} title="Căn chỉnh"
+            <Pop
+              id="align"
+              pop={pop}
+              setPop={setPop}
+              title="Căn chỉnh"
               btnClassName={`${selPillBtn} w-9 px-0 sm:w-8 sm:px-0`}
-              face={(
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              face={
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
                   <path d="M4 4v16" />
                   <rect x="7" y="6" width="12" height="4.5" rx="1" />
                   <rect x="7" y="13.5" width="7" height="4.5" rx="1" />
                 </svg>
-              )}>
+              }
+            >
               <div className="grid grid-cols-3 gap-1 p-0.5">
                 {alignItems.slice(0, 6).map((it) => (
                   <button
-                    key={it.id} type="button" data-tip={it.tip} data-tip-kbd={it.kbd} aria-label={it.tip}
-                    onClick={() => { align(it.id); setPop(null) }}
-                    className="grid h-9 w-9 place-items-center rounded-[7px] text-ink transition-colors hover:bg-sunken active:scale-95 sm:h-8 sm:w-8"
+                    key={it.id}
+                    type="button"
+                    data-tip={it.tip}
+                    data-tip-kbd={it.kbd}
+                    aria-label={it.tip}
+                    onClick={() => {
+                      align(it.id)
+                      setPop(null)
+                    }}
+                    className="text-ink hover:bg-sunken grid h-9 w-9 place-items-center rounded-[7px] transition-colors active:scale-95 sm:h-8 sm:w-8"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
                       {it.icon}
                     </svg>
                   </button>
                 ))}
               </div>
-              <div className="my-1 h-px bg-line" />
+              <div className="bg-line my-1 h-px" />
               <div className="grid grid-cols-2 gap-1 p-0.5">
                 {alignItems.slice(6).map((it) => (
                   <button
-                    key={it.id} type="button" disabled={it.disabled} data-tip={it.tip} aria-label={it.tip}
-                    onClick={() => { align(it.id); setPop(null) }}
-                    className="flex h-9 items-center justify-center gap-1.5 rounded-[7px] px-2 text-[11.5px] text-ink transition-colors hover:bg-sunken active:scale-95 disabled:pointer-events-none disabled:opacity-35 sm:h-8"
+                    key={it.id}
+                    type="button"
+                    disabled={it.disabled}
+                    data-tip={it.tip}
+                    aria-label={it.tip}
+                    onClick={() => {
+                      align(it.id)
+                      setPop(null)
+                    }}
+                    className="text-ink hover:bg-sunken flex h-9 items-center justify-center gap-1.5 rounded-[7px] px-2 text-[11.5px] transition-colors active:scale-95 disabled:pointer-events-none disabled:opacity-35 sm:h-8"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
                       {it.icon}
                     </svg>
                     <span>{it.id === 'distX' ? 'Ngang' : 'Dọc'}</span>
@@ -2353,21 +3501,41 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
                 ))}
               </div>
             </Pop>
-            <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+            <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
           </>
         )}
 
         {/* cụm 3: sắp xếp & nhân đôi */}
         <div className="flex shrink-0 items-center gap-0.5">
           <SelBtn label="Đưa lên trên cùng" onClick={() => reorder('front')}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <rect x="3" y="3" width="10" height="10" rx="2" fill="currentColor" />
               <path d="M15 11h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-4" />
               <path d="M17.5 8.5V3m-2.2 2.2L17.5 3l2.2 2.2" />
             </svg>
           </SelBtn>
           <SelBtn label="Đưa xuống dưới cùng" onClick={() => reorder('back')}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <rect x="3" y="3" width="10" height="10" rx="2" />
               <rect x="11" y="11" width="10" height="10" rx="2" fill="currentColor" />
               <path d="M17.5 3v5.5m-2.2-2.2 2.2 2.2 2.2-2.2" />
@@ -2375,7 +3543,17 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           </SelBtn>
           {canGroup && (
             <SelBtn label="Nhóm lại — Ctrl+G" onClick={group}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
                 <rect x="3" y="3" width="18" height="18" rx="3" strokeDasharray="3 2.5" />
                 <rect x="6.5" y="6.5" width="5" height="5" rx="1" />
                 <rect x="12.5" y="12.5" width="5" height="5" rx="1" />
@@ -2384,8 +3562,21 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           )}
           {canUngroup && (
             <SelBtn label="Tách nhóm — Ctrl+Shift+G" onClick={ungroup}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M14 3h5a2 2 0 0 1 2 2v5M10 21H5a2 2 0 0 1-2-2v-5" strokeDasharray="2.5 2.5" />
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path
+                  d="M14 3h5a2 2 0 0 1 2 2v5M10 21H5a2 2 0 0 1-2-2v-5"
+                  strokeDasharray="2.5 2.5"
+                />
                 <rect x="4" y="4" width="6.5" height="6.5" rx="1.2" />
                 <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" />
               </svg>
@@ -2394,11 +3585,11 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
           {dupBtn}
         </div>
 
-        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+        <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
 
         {lockBtn}
 
-        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-line" />
+        <span aria-hidden className="bg-line mx-1 h-4 w-px shrink-0" />
 
         {/* cụm 4: xoá */}
         <SelBtn label="Xoá — Delete" onClick={deleteSelected} danger>
@@ -2408,17 +3599,40 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     )
     options = (
       <>
-        <Group><span className="rounded-full bg-clay/15 px-2 py-0.5 text-[11.5px] font-medium text-clay">Đã chọn {selection.length}{hasLocked ? ' · Đã khoá' : ''}</span></Group>
+        <Group>
+          <span className="bg-clay/15 text-clay rounded-full px-2 py-0.5 text-[11.5px] font-medium">
+            Đã chọn {selection.length}
+            {hasLocked ? ' · Đã khoá' : ''}
+          </span>
+        </Group>
         {tool === 'select' && (
           <Group>
-            <Chip active={o.selectMode === 'box'} onClick={() => setOpt('selectMode', 'box')} title="Chọn bằng khung chữ nhật"><Ico d="M4 4h16v16H4z" /></Chip>
-            <Chip active={o.selectMode === 'lasso'} onClick={() => setOpt('selectMode', 'lasso')} title="Chọn bằng khoanh tự do"><Ico d={LASSO_D} /></Chip>
+            <Chip
+              active={o.selectMode === 'box'}
+              onClick={() => setOpt('selectMode', 'box')}
+              title="Chọn bằng khung chữ nhật"
+            >
+              <Ico d="M4 4h16v16H4z" />
+            </Chip>
+            <Chip
+              active={o.selectMode === 'lasso'}
+              onClick={() => setOpt('selectMode', 'lasso')}
+              title="Chọn bằng khoanh tự do"
+            >
+              <Ico d={LASSO_D} />
+            </Chip>
           </Group>
         )}
         {!hasLocked && toolDoc && (
           <Group>
-            <Chip onClick={() => setDialog({ t: 'tool', doc: toolDoc, ids: selection.map((e) => e.id) })} title="Mở lại bảng thông số của hình (như bấm đúp)">
-              <Ico d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4" /><span>Sửa hình</span>
+            <Chip
+              onClick={() =>
+                setDialog({ t: 'tool', doc: toolDoc, ids: selection.map((e) => e.id) })
+              }
+              title="Mở lại bảng thông số của hình (như bấm đúp)"
+            >
+              <Ico d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4" />
+              <span>Sửa hình</span>
             </Chip>
           </Group>
         )}
@@ -2433,24 +3647,41 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       <>
         <Group label="Bút">
           {PENS.filter((pn) => pn.outside).map((pn) => (
-            <Chip key={pn.id} active={o.pen === pn.id} onClick={() => pickPen(pn.id)} title={pn.label}>
+            <Chip
+              key={pn.id}
+              active={o.pen === pn.id}
+              onClick={() => pickPen(pn.id)}
+              title={pn.label}
+            >
               <Ico d={pn.icon} />
               <span>{pn.label}</span>
             </Chip>
           ))}
-          <Pop id="pens" pop={pop} setPop={setPop} title="Kiểu bút"
+          <Pop
+            id="pens"
+            pop={pop}
+            setPop={setPop}
+            title="Kiểu bút"
             face={(() => {
               const inner = PENS.find((pn) => pn.id === o.pen && !pn.outside)
               return (
-                <span className={`flex h-8 items-center gap-1.5 rounded-[7px] px-1.5 text-[12.5px] ${inner ? 'bg-clay/10 text-clay' : 'text-ink'}`}>
+                <span
+                  className={`flex h-8 items-center gap-1.5 rounded-[7px] px-1.5 text-[12.5px] ${inner ? 'bg-clay/10 text-clay' : 'text-ink'}`}
+                >
                   <Ico d={inner?.icon ?? FOUNTAIN_D} />
                   {inner?.label ?? 'Kiểu bút'}
-                  <svg width="9" height="9" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
+                  <svg width="9" height="9" viewBox="0 0 10 10">
+                    <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
                 </span>
               )
-            })()}>
+            })()}
+          >
             <PenPanel
-              pen={o.pen} paper={o.paper} color={styles.current[o.pen].stroke} width={styles.current[o.pen].strokeWidth}
+              pen={o.pen}
+              paper={o.paper}
+              color={styles.current[o.pen].stroke}
+              width={styles.current[o.pen].strokeWidth}
               tip={o.penTips[o.pen] ?? DEFAULT_TIP}
               onPen={pickPen}
               onTip={(tp) => setOpt('penTips', { ...o.penTips, [o.pen]: tp })}
@@ -2460,7 +3691,9 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         {colorRow}
         <Group>{strokePop}</Group>
         <Group>
-          <Toggle on={o.snap} onClick={() => setOpt('snap', !o.snap)}>Giữ bút để nắn hình</Toggle>
+          <Toggle on={o.snap} onClick={() => setOpt('snap', !o.snap)}>
+            Giữ bút để nắn hình
+          </Toggle>
         </Group>
       </>
     )
@@ -2468,23 +3701,50 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     options = (
       <>
         <Group label="Cách gôm">
-          <Chip active={o.eraseMode === 'stroke'} onClick={() => setOpt('eraseMode', 'stroke')} title="Chạm vào nét nào xoá cả nét đó">
-            <Ico d="M4 15c3-6 6-6 8-2s5 4 8-2M9 7l6 6M15 7l-6 6" /><span>Cả nét</span>
+          <Chip
+            active={o.eraseMode === 'stroke'}
+            onClick={() => setOpt('eraseMode', 'stroke')}
+            title="Chạm vào nét nào xoá cả nét đó"
+          >
+            <Ico d="M4 15c3-6 6-6 8-2s5 4 8-2M9 7l6 6M15 7l-6 6" />
+            <span>Cả nét</span>
           </Chip>
-          <Chip active={o.eraseMode === 'partial'} onClick={() => setOpt('eraseMode', 'partial')} title="Chỉ xoá phần nét bút đi qua">
-            <Ico d="M3 14c2-4 4-4 5-2M16 12c1 2 3 2 5-2M10.5 9.5a2.5 2.5 0 1 0 3 3" /><span>Từng phần</span>
+          <Chip
+            active={o.eraseMode === 'partial'}
+            onClick={() => setOpt('eraseMode', 'partial')}
+            title="Chỉ xoá phần nét bút đi qua"
+          >
+            <Ico d="M3 14c2-4 4-4 5-2M16 12c1 2 3 2 5-2M10.5 9.5a2.5 2.5 0 1 0 3 3" />
+            <span>Từng phần</span>
           </Chip>
         </Group>
         <Group label="Cỡ gôm">
           {ERASE_R.map((r, i) => (
-            <Chip key={r} active={o.eraseSize === i} onClick={() => setOpt('eraseSize', i)} title={`Gôm ${['nhỏ', 'vừa', 'to'][i]}`}>
-              <span className="rounded-full bg-current opacity-70" style={{ width: 6 + i * 4, height: 6 + i * 4 }} />
+            <Chip
+              key={r}
+              active={o.eraseSize === i}
+              onClick={() => setOpt('eraseSize', i)}
+              title={`Gôm ${['nhỏ', 'vừa', 'to'][i]}`}
+            >
+              <span
+                className="rounded-full bg-current opacity-70"
+                style={{ width: 6 + i * 4, height: 6 + i * 4 }}
+              />
             </Chip>
           ))}
         </Group>
         <Group>
-          <Chip onClick={() => { if (!els.current.length) return; els.current = []; selected.current.clear(); commit() }} title="Xoá mọi thứ trên bảng (Ctrl+Z để lấy lại)">
-            <Ico d={TRASH_D} /><span>Xoá cả bảng</span>
+          <Chip
+            onClick={() => {
+              if (!els.current.length) return
+              els.current = []
+              selected.current.clear()
+              commit()
+            }}
+            title="Xoá mọi thứ trên bảng (Ctrl+Z để lấy lại)"
+          >
+            <Ico d={TRASH_D} />
+            <span>Xoá cả bảng</span>
           </Chip>
         </Group>
       </>
@@ -2494,31 +3754,83 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     const laserColors = o.recentLaserColors ?? LASER_COLORS
     const useLaserColor = (c: string) => {
       const list = opts.current.recentLaserColors ?? LASER_COLORS
-      opts.current = { ...opts.current, recentLaserColors: [c, ...list.filter((x) => x.toLowerCase() !== c.toLowerCase())].slice(0, list.length || 6) }
+      opts.current = {
+        ...opts.current,
+        recentLaserColors: [c, ...list.filter((x) => x.toLowerCase() !== c.toLowerCase())].slice(
+          0,
+          list.length || 6,
+        ),
+      }
       setOpt('laserColor', c)
     }
     options = (
       <>
         <Group label="Màu">
           {laserColors.map((c) => (
-            <Swatch key={c} color={c} round active={o.laserColor.toLowerCase() === c.toLowerCase()} onClick={() => useLaserColor(c)} title="Màu laser" />
+            <Swatch
+              key={c}
+              color={c}
+              round
+              active={o.laserColor.toLowerCase() === c.toLowerCase()}
+              onClick={() => useLaserColor(c)}
+              title="Màu laser"
+            />
           ))}
-          <Pop id="laserColor" pop={pop} setPop={setPop} title="Màu khác"
-            face={<span className="mx-[3px] block h-5 w-5 rounded-full border border-black/10" style={{ background: 'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)' }} />}>
+          <Pop
+            id="laserColor"
+            pop={pop}
+            setPop={setPop}
+            title="Màu khác"
+            face={
+              <span
+                className="mx-[3px] block h-5 w-5 rounded-full border border-black/10"
+                style={{
+                  background:
+                    'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)',
+                }}
+              />
+            }
+          >
             <div className="grid grid-cols-10 gap-1">
               {THEME_COLORS.map((c) => (
-                <button key={c} type="button" data-tip={c} aria-label={c} onClick={() => { useLaserColor(c); setPop(null) }}
-                  className={`h-[18px] w-[18px] rounded-[3px] border border-black/10 hover:scale-110 ${o.laserColor === c ? 'ring-2 ring-clay ring-offset-1' : ''}`} style={{ background: c }} />
+                <button
+                  key={c}
+                  type="button"
+                  data-tip={c}
+                  aria-label={c}
+                  onClick={() => {
+                    useLaserColor(c)
+                    setPop(null)
+                  }}
+                  className={`h-[18px] w-[18px] rounded-[3px] border border-black/10 hover:scale-110 ${o.laserColor === c ? 'ring-clay ring-2 ring-offset-1' : ''}`}
+                  style={{ background: c }}
+                />
               ))}
             </div>
-            <HexInput value={o.laserColor} onPreview={(c) => setOpt('laserColor', c)} onCommit={useLaserColor} />
+            <HexInput
+              value={o.laserColor}
+              onPreview={(c) => setOpt('laserColor', c)}
+              onCommit={useLaserColor}
+            />
           </Pop>
         </Group>
         <Group label="Độ dày">
           {LASER_SIZES.map((sz, i) => (
-            <Chip key={sz} active={o.laserSize === sz} onClick={() => setOpt('laserSize', sz)} title={`Laser ${WIDTH_NAMES[i + 1]}`}>
+            <Chip
+              key={sz}
+              active={o.laserSize === sz}
+              onClick={() => setOpt('laserSize', sz)}
+              title={`Laser ${WIDTH_NAMES[i + 1]}`}
+            >
               <span className="flex size-4 items-center justify-center">
-                <span className="rounded-full" style={{ width: DOT_SIZES[i + 1], height: DOT_SIZES[i + 1], background: o.laserColor }} />
+                <span
+                  className="rounded-full"
+                  style={{
+                    width: DOT_SIZES[i + 1],
+                    height: DOT_SIZES[i + 1],
+                    background: o.laserColor,
+                  }}
+                />
               </span>
             </Chip>
           ))}
@@ -2530,30 +3842,88 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
       <>
         <Group label="Màu tô">
           {FILLS.map((c) => (
-            <Swatch key={c} color={c} drag={o.bucketStyle} active={o.bucketFill === c} onClick={() => setOpt('bucketFill', c)} title="Bấm vào hình để tô, hoặc kéo màu thả vào hình" />
+            <Swatch
+              key={c}
+              color={c}
+              drag={o.bucketStyle}
+              active={o.bucketFill === c}
+              onClick={() => setOpt('bucketFill', c)}
+              title="Bấm vào hình để tô, hoặc kéo màu thả vào hình"
+            />
           ))}
-          <Pop id="bucketMore" pop={pop} setPop={setPop} title="Màu khác"
-            face={<span className={`mx-[3px] block h-5 w-5 rounded-[5px] border border-black/10 ${!FILLS.includes(o.bucketFill) ? 'ring-2 ring-clay ring-offset-2 ring-offset-surface' : ''}`} style={{ background: 'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)' }} />}>
-            <MoreColors value={o.bucketFill} drag={o.bucketStyle} onPick={(c) => setOpt('bucketFill', c)} onPreview={(c) => setOpt('bucketFill', c)} />
+          <Pop
+            id="bucketMore"
+            pop={pop}
+            setPop={setPop}
+            title="Màu khác"
+            face={
+              <span
+                className={`mx-[3px] block h-5 w-5 rounded-[5px] border border-black/10 ${!FILLS.includes(o.bucketFill) ? 'ring-clay ring-offset-surface ring-2 ring-offset-2' : ''}`}
+                style={{
+                  background:
+                    'conic-gradient(#e03131, #f08c00, #fab005, #2f9e44, #1971c2, #7048e8, #e03131)',
+                }}
+              />
+            }
+          >
+            <MoreColors
+              value={o.bucketFill}
+              drag={o.bucketStyle}
+              onPick={(c) => setOpt('bucketFill', c)}
+              onPreview={(c) => setOpt('bucketFill', c)}
+            />
           </Pop>
         </Group>
         <Group label="Kiểu tô">
-          <Chip active={o.bucketStyle === 'solid'} onClick={() => setOpt('bucketStyle', 'solid')}>Đặc</Chip>
-          <Chip active={o.bucketStyle === 'glass'} onClick={() => setOpt('bucketStyle', 'glass')} title="Màu trong suốt như kính, nhìn xuyên được hình phía sau">Kính</Chip>
-          <Chip active={o.bucketStyle === 'hachure'} onClick={() => setOpt('bucketStyle', 'hachure')}>Gạch chéo</Chip>
+          <Chip active={o.bucketStyle === 'solid'} onClick={() => setOpt('bucketStyle', 'solid')}>
+            Đặc
+          </Chip>
+          <Chip
+            active={o.bucketStyle === 'glass'}
+            onClick={() => setOpt('bucketStyle', 'glass')}
+            title="Màu trong suốt như kính, nhìn xuyên được hình phía sau"
+          >
+            Kính
+          </Chip>
+          <Chip
+            active={o.bucketStyle === 'hachure'}
+            onClick={() => setOpt('bucketStyle', 'hachure')}
+          >
+            Gạch chéo
+          </Chip>
         </Group>
-        <Group><span className="text-[12px] text-ink-3">Bấm vào trong hình để tô · kéo ô màu thả vào hình cũng được</span></Group>
+        <Group>
+          <span className="text-ink-3 text-[12px]">
+            Bấm vào trong hình để tô · kéo ô màu thả vào hình cũng được
+          </span>
+        </Group>
       </>
     )
   } else if (main === 'select') {
     options = (
       <>
         <Group label="Cách chọn">
-          <Chip active={o.selectMode === 'box'} onClick={() => setOpt('selectMode', 'box')} title="Kéo khung chữ nhật để chọn"><Ico d="M4 4h16v16H4z" /><span>Khung</span></Chip>
-          <Chip active={o.selectMode === 'lasso'} onClick={() => setOpt('selectMode', 'lasso')} title="Khoanh tự do quanh nét cần chọn"><Ico d={LASSO_D} /><span>Khoanh tự do</span></Chip>
+          <Chip
+            active={o.selectMode === 'box'}
+            onClick={() => setOpt('selectMode', 'box')}
+            title="Kéo khung chữ nhật để chọn"
+          >
+            <Ico d="M4 4h16v16H4z" />
+            <span>Khung</span>
+          </Chip>
+          <Chip
+            active={o.selectMode === 'lasso'}
+            onClick={() => setOpt('selectMode', 'lasso')}
+            title="Khoanh tự do quanh nét cần chọn"
+          >
+            <Ico d={LASSO_D} />
+            <span>Khoanh tự do</span>
+          </Chip>
         </Group>
         <Group>
-          <Toggle on={o.guides} onClick={() => setOpt('guides', !o.guides)}>Đường gióng</Toggle>
+          <Toggle on={o.guides} onClick={() => setOpt('guides', !o.guides)}>
+            Đường gióng
+          </Toggle>
         </Group>
       </>
     )
@@ -2561,22 +3931,57 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     options = (
       <>
         <Group label="Hình">
-          {o.recentShapes.map((k) => SHAPE_BY_ID[k]).filter(Boolean).map((sd) => (
-            <Chip key={sd.id} active={tool === sd.id} onClick={() => pickTool(sd.id)} title={sd.label} kbd={sd.kbd}><Ico d={sd.icon} /></Chip>
-          ))}
-          <Pop id="shapes" pop={pop} setPop={setPop} title="Tất cả hình"
-            face={<span className="flex items-center gap-1 px-1 text-[12.5px] text-ink">Tất cả<svg width="9" height="9" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></span>}>
+          {o.recentShapes
+            .map((k) => SHAPE_BY_ID[k])
+            .filter(Boolean)
+            .map((sd) => (
+              <Chip
+                key={sd.id}
+                active={tool === sd.id}
+                onClick={() => pickTool(sd.id)}
+                title={sd.label}
+                kbd={sd.kbd}
+              >
+                <Ico d={sd.icon} />
+              </Chip>
+            ))}
+          <Pop
+            id="shapes"
+            pop={pop}
+            setPop={setPop}
+            title="Tất cả hình"
+            face={
+              <span className="text-ink flex items-center gap-1 px-1 text-[12.5px]">
+                Tất cả
+                <svg width="9" height="9" viewBox="0 0 10 10">
+                  <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </span>
+            }
+          >
             {SHAPE_SECTIONS.map((sec) => (
               <div key={sec.label}>
-                <div className="mb-1 text-[11.5px] text-ink-3">{sec.label}</div>
+                <div className="text-ink-3 mb-1 text-[11.5px]">{sec.label}</div>
                 <div className="grid grid-cols-4 gap-1">
-                  {sec.ids.map((k) => SHAPE_BY_ID[k]).map((sd) => (
-                    <button key={sd.id} type="button" data-tip={sd.label} data-tip-kbd={sd.kbd} aria-label={sd.label} onClick={() => { pickTool(sd.id); setPop(null) }}
-                      className={`flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-[7px] text-[11px] ${tool === sd.id ? 'bg-clay/15 text-clay' : 'text-ink hover:bg-sunken'}`}>
-                      <Ico d={sd.icon} size={18} />
-                      <span>{sd.short}</span>
-                    </button>
-                  ))}
+                  {sec.ids
+                    .map((k) => SHAPE_BY_ID[k])
+                    .map((sd) => (
+                      <button
+                        key={sd.id}
+                        type="button"
+                        data-tip={sd.label}
+                        data-tip-kbd={sd.kbd}
+                        aria-label={sd.label}
+                        onClick={() => {
+                          pickTool(sd.id)
+                          setPop(null)
+                        }}
+                        className={`flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-[7px] text-[11px] ${tool === sd.id ? 'bg-clay/15 text-clay' : 'text-ink hover:bg-sunken'}`}
+                      >
+                        <Ico d={sd.icon} size={18} />
+                        <span>{sd.short}</span>
+                      </button>
+                    ))}
                 </div>
               </div>
             ))}
@@ -2586,8 +3991,22 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
         <Group>{strokePop}</Group>
         {canFill && <Group>{fillPop}</Group>}
         <Group>
-          <Toggle on={o.keepTool} onClick={() => setOpt('keepTool', !o.keepTool)} title="Vẽ xong vẫn giữ công cụ Hình để vẽ tiếp — Q">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <Toggle
+            on={o.keepTool}
+            onClick={() => setOpt('keepTool', !o.keepTool)}
+            title="Vẽ xong vẫn giữ công cụ Hình để vẽ tiếp — Q"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <rect x="5" y="11" width="14" height="10" rx="2" />
               <path d="M8 11V7a4 4 0 0 1 8 0v4" />
             </svg>
@@ -2624,52 +4043,166 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
     return () => window.clearTimeout(t)
   }, [hasSel])
 
-  const mainTools: { id: Main; label: string; tip: string; kbd: string; icon: string; onClick: () => void }[] = [
-    { id: 'pen', label: 'Bút', tip: 'Bút vẽ', kbd: 'P', icon: PEN_D, onClick: () => pickTool('freedraw') },
-    { id: 'eraser', label: 'Gôm', tip: 'Gôm', kbd: 'E', icon: ERASER_D, onClick: () => pickTool('eraser') },
-    { id: 'laser', label: 'Laser', tip: 'Bút laser (chỉ trỏ, tự mờ)', kbd: 'K', icon: LASER_D, onClick: () => pickTool('laser') },
-    { id: 'select', label: 'Chọn', tip: 'Chọn', kbd: 'V', icon: SELECT_D, onClick: () => pickTool('select') },
-    { id: 'shape', label: 'Hình', tip: 'Hình', kbd: SHAPE_KEYS[o.lastShape] ?? 'R', icon: SHAPE_D, onClick: () => pickTool(o.lastShape) },
-    { id: 'bucket', label: 'Tô màu', tip: 'Tô màu vùng kín', kbd: 'G', icon: BUCKET_D, onClick: () => pickTool('bucket') },
-    { id: 'text', label: 'Chữ', tip: 'Chữ', kbd: 'T', icon: TEXT_D, onClick: () => pickTool('text') },
-    { id: 'hand', label: 'Kéo', tip: 'Kéo bảng', kbd: 'H', icon: HAND_D, onClick: () => pickTool('hand') },
+  const mainTools: {
+    id: Main
+    label: string
+    tip: string
+    kbd: string
+    icon: string
+    onClick: () => void
+  }[] = [
+    {
+      id: 'pen',
+      label: 'Bút',
+      tip: 'Bút vẽ',
+      kbd: 'P',
+      icon: PEN_D,
+      onClick: () => pickTool('freedraw'),
+    },
+    {
+      id: 'eraser',
+      label: 'Gôm',
+      tip: 'Gôm',
+      kbd: 'E',
+      icon: ERASER_D,
+      onClick: () => pickTool('eraser'),
+    },
+    {
+      id: 'laser',
+      label: 'Laser',
+      tip: 'Bút laser (chỉ trỏ, tự mờ)',
+      kbd: 'K',
+      icon: LASER_D,
+      onClick: () => pickTool('laser'),
+    },
+    {
+      id: 'select',
+      label: 'Chọn',
+      tip: 'Chọn',
+      kbd: 'V',
+      icon: SELECT_D,
+      onClick: () => pickTool('select'),
+    },
+    {
+      id: 'shape',
+      label: 'Hình',
+      tip: 'Hình',
+      kbd: SHAPE_KEYS[o.lastShape] ?? 'R',
+      icon: SHAPE_D,
+      onClick: () => pickTool(o.lastShape),
+    },
+    {
+      id: 'bucket',
+      label: 'Tô màu',
+      tip: 'Tô màu vùng kín',
+      kbd: 'G',
+      icon: BUCKET_D,
+      onClick: () => pickTool('bucket'),
+    },
+    {
+      id: 'text',
+      label: 'Chữ',
+      tip: 'Chữ',
+      kbd: 'T',
+      icon: TEXT_D,
+      onClick: () => pickTool('text'),
+    },
+    {
+      id: 'hand',
+      label: 'Kéo',
+      tip: 'Kéo bảng',
+      kbd: 'H',
+      icon: HAND_D,
+      onClick: () => pickTool('hand'),
+    },
   ]
 
-  if (readOnly) return (
-    <div className="board-editor flex min-h-0 flex-1 flex-col overflow-hidden" style={{ backgroundColor: paperBg(o.paper) }} aria-label="Bảng vẽ chỉ xem">
-      <div className="border-line flex gap-3 border-b p-3 print:hidden">
-        <button type="button" onClick={() => setDialog({ t: 'export' })}>Xuất PNG / PDF</button>
-        {pdfPages.map((_page, index) => <button type="button" key={index} onClick={() => goPage(index)}>Trang {index + 1}</button>)}
+  if (readOnly)
+    return (
+      <div
+        className="board-editor flex min-h-0 flex-1 flex-col overflow-hidden"
+        style={{ backgroundColor: paperBg(o.paper) }}
+        aria-label="Bảng vẽ chỉ xem"
+      >
+        <div className="border-line flex gap-3 border-b p-3 print:hidden">
+          <button type="button" onClick={() => setDialog({ t: 'export' })}>
+            Xuất PNG / PDF
+          </button>
+          {pdfPages.map((_page, index) => (
+            <button type="button" key={index} onClick={() => goPage(index)}>
+              Trang {index + 1}
+            </button>
+          ))}
+        </div>
+        <div className="relative min-w-0 flex-1 overflow-hidden" ref={wrapRef}>
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 touch-none select-none"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+          />
+          <canvas ref={liveRef} className="pointer-events-none absolute inset-0 h-full w-full" />
+        </div>
+        {dialog?.t === 'export' && (
+          <ExportDialog
+            hasSelection={false}
+            hasPages={els.current.some(isPage)}
+            defaultPaperBg={isDarkPaper(o.paper)}
+            onClose={() => setDialog(null)}
+            onDone={onExport}
+            preview={exportPreview}
+          />
+        )}
       </div>
-      <div className="relative min-w-0 flex-1 overflow-hidden" ref={wrapRef}>
-        <canvas ref={canvasRef} className="absolute inset-0 touch-none select-none" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} />
-        <canvas ref={liveRef} className="pointer-events-none absolute inset-0 h-full w-full" />
-      </div>
-      {dialog?.t === 'export' && <ExportDialog hasSelection={false} hasPages={els.current.some(isPage)} defaultPaperBg={isDarkPaper(o.paper)} onClose={() => setDialog(null)} onDone={onExport} preview={exportPreview} />}
-    </div>
-  )
+    )
 
   return (
-    <div className="board-editor flex min-h-0 flex-1 flex-col overflow-hidden" style={{ backgroundColor: paperBg(o.paper) }}>
+    <div
+      className="board-editor flex min-h-0 flex-1 flex-col overflow-hidden"
+      style={{ backgroundColor: paperBg(o.paper) }}
+    >
       {/* tầng 1: công cụ chính · tầng 2: tuỳ chọn của công cụ đang chọn */}
-      <div className="relative z-20 shrink-0 border-b border-line bg-surface">
+      <div className="border-line bg-surface relative z-20 shrink-0 border-b">
         <div className="@container flex h-12 min-w-0 items-end gap-1.5 px-2 pb-1 sm:gap-2 sm:px-3">
           <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:none] sm:flex-none sm:gap-2 sm:overflow-visible">
             <div className="flex shrink-0 items-center gap-0.5">
-              <IconBtn label={`Hoàn tác — ${MOD_KEY}+Z`} onClick={undo} disabled={undoStack.current.length < 2}><Ico d={UNDO_D} /></IconBtn>
-              <IconBtn label={`Làm lại — ${MOD_KEY}+Y`} onClick={redo} disabled={!redoStack.current.length}><Ico d={REDO_D} /></IconBtn>
+              <IconBtn
+                label={`Hoàn tác — ${MOD_KEY}+Z`}
+                onClick={undo}
+                disabled={undoStack.current.length < 2}
+              >
+                <Ico d={UNDO_D} />
+              </IconBtn>
+              <IconBtn
+                label={`Làm lại — ${MOD_KEY}+Y`}
+                onClick={redo}
+                disabled={!redoStack.current.length}
+              >
+                <Ico d={REDO_D} />
+              </IconBtn>
             </div>
-            <span className="h-5 w-px shrink-0 bg-line" />
-            <div ref={segRef} className="relative flex shrink-0 items-center gap-0.5 rounded-[10px] bg-sunken p-[3px]">
+            <span className="bg-line h-5 w-px shrink-0" />
+            <div
+              ref={segRef}
+              className="bg-sunken relative flex shrink-0 items-center gap-0.5 rounded-[10px] p-[3px]"
+            >
               {/* nền trắng trượt theo công cụ đang chọn */}
               <span
                 aria-hidden
-                className="absolute top-[3px] h-9 rounded-[7px] bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] transition-[left,width] duration-200 ease-out sm:h-8"
+                className="bg-surface absolute top-[3px] h-9 rounded-[7px] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] transition-[left,width] duration-200 ease-out sm:h-8"
                 style={{ left: seg.l, width: seg.w, opacity: seg.w ? 1 : 0 }}
               />
               {mainTools.map((m) => (
                 <button
-                  key={m.id} type="button" data-tip={m.tip} data-tip-kbd={m.kbd} aria-label={m.tip} aria-pressed={main === m.id} onClick={m.onClick}
+                  key={m.id}
+                  type="button"
+                  data-tip={m.tip}
+                  data-tip-kbd={m.kbd}
+                  aria-label={m.tip}
+                  aria-pressed={main === m.id}
+                  onClick={m.onClick}
                   className={`${m.id === 'laser' || m.id === 'hand' ? 'hidden sm:flex' : 'flex'} relative h-9 min-w-9 items-center justify-center gap-1.5 rounded-[7px] px-2 text-[13px] transition-colors duration-200 sm:h-8 sm:min-w-0 sm:px-3 ${main === m.id ? 'text-clay' : 'text-ink-2 hover:text-ink'}`}
                 >
                   <Ico d={m.icon} size={16} />
@@ -2679,264 +4212,590 @@ export default function BoardEditor({ id, readOnly = false }: { id: string; read
             </div>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-0.5">
-            <Pop id="insert" pop={pop} setPop={setPop} title="Chèn" align="right" className="hidden sm:block"
-              face={<span className="flex items-center gap-1.5 px-1.5 text-[13px] text-ink"><Ico d={PLUS_D} size={16} />Chèn</span>}>
-              <button type="button" onClick={() => { setPop(null); fileRef.current?.click() }} className="flex w-full items-center gap-2 rounded-[6px] px-2 py-1.5 text-left text-[13px] text-ink hover:bg-sunken">
-                <Ico d={IMG_D} size={16} />Ảnh hoặc PDF vào bảng
+            <Pop
+              id="insert"
+              pop={pop}
+              setPop={setPop}
+              title="Chèn"
+              align="right"
+              className="hidden sm:block"
+              face={
+                <span className="text-ink flex items-center gap-1.5 px-1.5 text-[13px]">
+                  <Ico d={PLUS_D} size={16} />
+                  Chèn
+                </span>
+              }
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setPop(null)
+                  fileRef.current?.click()
+                }}
+                className="text-ink hover:bg-sunken flex w-full items-center gap-2 rounded-[6px] px-2 py-1.5 text-left text-[13px]"
+              >
+                <Ico d={IMG_D} size={16} />
+                Ảnh hoặc PDF vào bảng
               </button>
-              <button type="button" onClick={() => { setPop(null); pdfRef.current?.click() }} className="flex w-full items-center gap-2 rounded-[6px] px-2 py-1.5 text-left text-[13px] text-ink hover:bg-sunken">
-                <Ico d={PDF_NOTE_D} size={16} />Mở PDF để ghi chú từng trang
+              <button
+                type="button"
+                onClick={() => {
+                  setPop(null)
+                  pdfRef.current?.click()
+                }}
+                className="text-ink hover:bg-sunken flex w-full items-center gap-2 rounded-[6px] px-2 py-1.5 text-left text-[13px]"
+              >
+                <Ico d={PDF_NOTE_D} size={16} />
+                Mở PDF để ghi chú từng trang
               </button>
             </Pop>
-            <input ref={pdfRef} type="file" hidden accept="application/pdf,.pdf" onChange={onOpenPdfNotes} />
-            <input ref={fileRef} type="file" hidden multiple accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf" onChange={onPickFile} />
-            <button type="button" data-tip="Xuất PNG / PDF" onClick={() => setDialog({ t: 'export' })}
-              className="hidden h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[13px] text-ink hover:bg-sunken sm:flex">
-              <Ico d={EXPORT_D} size={16} />Xuất
+            <input
+              ref={pdfRef}
+              type="file"
+              hidden
+              accept="application/pdf,.pdf"
+              onChange={onOpenPdfNotes}
+            />
+            <input
+              ref={fileRef}
+              type="file"
+              hidden
+              multiple
+              accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf"
+              onChange={onPickFile}
+            />
+            <button
+              type="button"
+              data-tip="Xuất PNG / PDF"
+              onClick={() => setDialog({ t: 'export' })}
+              className="text-ink hover:bg-sunken hidden h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[13px] sm:flex"
+            >
+              <Ico d={EXPORT_D} size={16} />
+              Xuất
             </button>
-            {busy && <span className="ml-1 text-[12px] text-ink-2">{busy}</span>}
-            {saveErr && <span className="ml-1 text-[12px] text-red-600" data-tip="Bộ nhớ trình duyệt đã đầy: xoá bớt ảnh/trang PDF hoặc xuất bảng ra file để giữ lại">Chưa lưu được (đầy bộ nhớ)</span>}
-            <span className="mx-1.5 hidden h-5 w-px bg-line @[1000px]:block" />
-            <Pop id="inst" pop={pop} setPop={setPop} title="Dụng cụ hình học" align="right" className="hidden @[1000px]:block"
-              face={<span className="flex items-center gap-1.5 px-1.5 text-[13px] text-ink"><Ico d={RULER_D} size={16} />Dụng cụ</span>}>
-              <div className="text-[12px] font-medium text-ink-2">Dụng cụ hình học</div>
-              {([['ruler', 'Thước kẻ', 'Vẽ sát mép thước thành đường thẳng', <Ico d={RULER_D} size={18} />], ['protractor', 'Thước đo góc', 'Kéo kim đỏ để đo góc', <ProtractorIcon size={20} />], ['compass', 'Compa', 'Kéo núm xanh quanh kim để vẽ cung', <Ico d={COMPASS_D} size={18} />]] as const).map(([k, label, hint, icon]) => (
-                <button key={k} type="button" aria-pressed={!!inst[k]} onClick={() => toggleInst(k)}
-                  className={`flex w-full items-center gap-2.5 rounded-[6px] px-2 py-1.5 text-left text-[13px] hover:bg-sunken ${inst[k] ? 'text-clay' : 'text-ink'}`}>
-                  <span className={`flex size-8 shrink-0 items-center justify-center rounded-[7px] ${inst[k] ? 'bg-clay/10' : 'bg-sunken'}`}>{icon}</span>
+            {busy && <span className="text-ink-2 ml-1 text-[12px]">{busy}</span>}
+            {saveErr && (
+              <span
+                className="ml-1 text-[12px] text-red-600"
+                data-tip="Bộ nhớ trình duyệt đã đầy: xoá bớt ảnh/trang PDF hoặc xuất bảng ra file để giữ lại"
+              >
+                Chưa lưu được (đầy bộ nhớ)
+              </span>
+            )}
+            <span className="bg-line mx-1.5 hidden h-5 w-px @[1000px]:block" />
+            <Pop
+              id="inst"
+              pop={pop}
+              setPop={setPop}
+              title="Dụng cụ hình học"
+              align="right"
+              className="hidden @[1000px]:block"
+              face={
+                <span className="text-ink flex items-center gap-1.5 px-1.5 text-[13px]">
+                  <Ico d={RULER_D} size={16} />
+                  Dụng cụ
+                </span>
+              }
+            >
+              <div className="text-ink-2 text-[12px] font-medium">Dụng cụ hình học</div>
+              {(
+                [
+                  [
+                    'ruler',
+                    'Thước kẻ',
+                    'Vẽ sát mép thước thành đường thẳng',
+                    <Ico d={RULER_D} size={18} />,
+                  ],
+                  [
+                    'protractor',
+                    'Thước đo góc',
+                    'Kéo kim đỏ để đo góc',
+                    <ProtractorIcon size={20} />,
+                  ],
+                  [
+                    'compass',
+                    'Compa',
+                    'Kéo núm xanh quanh kim để vẽ cung',
+                    <Ico d={COMPASS_D} size={18} />,
+                  ],
+                ] as const
+              ).map(([k, label, hint, icon]) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={!!inst[k]}
+                  onClick={() => toggleInst(k)}
+                  className={`hover:bg-sunken flex w-full items-center gap-2.5 rounded-[6px] px-2 py-1.5 text-left text-[13px] ${inst[k] ? 'text-clay' : 'text-ink'}`}
+                >
+                  <span
+                    className={`flex size-8 shrink-0 items-center justify-center rounded-[7px] ${inst[k] ? 'bg-clay/10' : 'bg-sunken'}`}
+                  >
+                    {icon}
+                  </span>
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="font-medium">{label}</span>
-                    <span className="text-[11.5px] text-ink-2">{hint}</span>
+                    <span className="text-ink-2 text-[11.5px]">{hint}</span>
                   </span>
                   {inst[k] ? <Ico d="M5 12.5l4.5 4.5L19 7.5" size={16} /> : null}
                 </button>
               ))}
             </Pop>
-            <Pop id="paper" pop={pop} setPop={setPop} title="Kiểu giấy" align="right" className="hidden @[1000px]:block"
-              face={<span className="flex items-center gap-1.5 px-1.5 text-[13px] text-ink"><Ico d={PAPER_D} size={16} />Giấy</span>}>
-              <div className="text-[12px] font-medium text-ink-2">Kiểu giấy</div>
+            <Pop
+              id="paper"
+              pop={pop}
+              setPop={setPop}
+              title="Kiểu giấy"
+              align="right"
+              className="hidden @[1000px]:block"
+              face={
+                <span className="text-ink flex items-center gap-1.5 px-1.5 text-[13px]">
+                  <Ico d={PAPER_D} size={16} />
+                  Giấy
+                </span>
+              }
+            >
+              <div className="text-ink-2 text-[12px] font-medium">Kiểu giấy</div>
               <div className="grid grid-cols-2 gap-2">
                 {PAPERS.map((pp) => {
                   const on = o.paper === pp.id
                   return (
-                    <button key={pp.id} type="button" aria-pressed={on} onClick={() => { setPaper(pp.id); setPop(null) }}
-                      className="group flex flex-col items-center gap-1.5 rounded-[8px] p-1 text-[12px]">
+                    <button
+                      key={pp.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => {
+                        setPaper(pp.id)
+                        setPop(null)
+                      }}
+                      className="group flex flex-col items-center gap-1.5 rounded-[8px] p-1 text-[12px]"
+                    >
                       <span
-                        className={`relative block h-[64px] w-[88px] rounded-[6px] border transition-shadow ${on ? 'border-clay ring-2 ring-clay/30' : 'border-line group-hover:border-ink-3'}`}
-                        style={{ backgroundColor: pp.color ?? '#ffffff', backgroundImage: pp.bg, backgroundSize: '11px 11px', backgroundPosition: '5px 5px' }}
+                        className={`relative block h-[64px] w-[88px] rounded-[6px] border transition-shadow ${on ? 'border-clay ring-clay/30 ring-2' : 'border-line group-hover:border-ink-3'}`}
+                        style={{
+                          backgroundColor: pp.color ?? '#ffffff',
+                          backgroundImage: pp.bg,
+                          backgroundSize: '11px 11px',
+                          backgroundPosition: '5px 5px',
+                        }}
                       >
                         {on && (
-                          <span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-clay text-white">
-                            <svg width="9" height="9" viewBox="0 0 10 10"><path d="M2 5.2l2 2 4-4.4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          <span className="bg-clay absolute top-1 right-1 grid h-4 w-4 place-items-center rounded-full text-white">
+                            <svg width="9" height="9" viewBox="0 0 10 10">
+                              <path
+                                d="M2 5.2l2 2 4-4.4"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
                           </span>
                         )}
                       </span>
-                      <span className={on ? 'font-medium text-clay' : 'text-ink-2'}>{pp.label}</span>
+                      <span className={on ? 'text-clay font-medium' : 'text-ink-2'}>
+                        {pp.label}
+                      </span>
                     </button>
                   )
                 })}
               </div>
             </Pop>
-            <div className="ml-1 hidden items-center rounded-[8px] border border-line sm:flex">
-              <IconBtn label={`Thu nhỏ — ${MOD_KEY}+-`} onClick={() => zoomAt(v.zoom / 1.2)}><Ico d="M6 12h12" /></IconBtn>
-              <button type="button" data-tip="Về 100%" data-tip-kbd={`${MOD_KEY}+0`} onClick={() => zoomAt(1)} className="h-8 w-12 rounded-[6px] text-center text-[12.5px] text-ink tnum hover:bg-sunken">
+            <div className="border-line ml-1 hidden items-center rounded-[8px] border sm:flex">
+              <IconBtn label={`Thu nhỏ — ${MOD_KEY}+-`} onClick={() => zoomAt(v.zoom / 1.2)}>
+                <Ico d="M6 12h12" />
+              </IconBtn>
+              <button
+                type="button"
+                data-tip="Về 100%"
+                data-tip-kbd={`${MOD_KEY}+0`}
+                onClick={() => zoomAt(1)}
+                className="text-ink tnum hover:bg-sunken h-8 w-12 rounded-[6px] text-center text-[12.5px]"
+              >
                 {Math.round(v.zoom * 100)}%
               </button>
-              <IconBtn label={`Phóng to — ${MOD_KEY}++`} onClick={() => zoomAt(v.zoom * 1.2)}><Ico d="M6 12h12M12 6v12" /></IconBtn>
+              <IconBtn label={`Phóng to — ${MOD_KEY}++`} onClick={() => zoomAt(v.zoom * 1.2)}>
+                <Ico d="M6 12h12M12 6v12" />
+              </IconBtn>
             </div>
-            <span className="mx-1.5 hidden h-5 w-px bg-line @[1000px]:block" />
+            <span className="bg-line mx-1.5 hidden h-5 w-px @[1000px]:block" />
             <div className="hidden items-center gap-0.5 @[1000px]:flex">
-              <SideBtn label="Công cụ" on={side === 'tools'} onClick={() => toggleSide('tools')}><Ico d={WRENCH_D} size={16} /></SideBtn>
-              <SideBtn label="Trợ lý" on={side === 'ai'} onClick={() => toggleSide('ai')}><AiIcon /></SideBtn>
+              <SideBtn label="Công cụ" on={side === 'tools'} onClick={() => toggleSide('tools')}>
+                <Ico d={WRENCH_D} size={16} />
+              </SideBtn>
+              <SideBtn label="Trợ lý" on={side === 'ai'} onClick={() => toggleSide('ai')}>
+                <AiIcon />
+              </SideBtn>
             </div>
-            <Pop id="more" pop={pop} setPop={setPop} title="Thêm" align="right" className="@[1000px]:hidden"
-              face={<span className="flex items-center justify-center px-1 text-ink"><Ico d="M5 12h.01M12 12h.01M19 12h.01" size={18} /></span>}>
+            <Pop
+              id="more"
+              pop={pop}
+              setPop={setPop}
+              title="Thêm"
+              align="right"
+              className="@[1000px]:hidden"
+              face={
+                <span className="text-ink flex items-center justify-center px-1">
+                  <Ico d="M5 12h.01M12 12h.01M19 12h.01" size={18} />
+                </span>
+              }
+            >
               <div className="w-[232px] max-w-full space-y-2.5">
                 <div className="space-y-1.5 sm:hidden">
                   <div className="grid grid-cols-2 gap-1.5">
-                    {mainTools.filter((m) => m.id === 'laser' || m.id === 'hand').map((m) => (
-                      <button key={m.id} type="button" aria-pressed={main === m.id} onClick={() => { setPop(null); m.onClick() }}
-                        className={`flex h-9 items-center gap-2 rounded-[7px] border px-2 text-[13px] ${main === m.id ? 'border-clay bg-clay/10 font-medium text-clay' : 'border-line text-ink hover:bg-sunken'}`}>
-                        <Ico d={m.icon} size={16} />{m.id === 'hand' ? 'Kéo trang' : m.label}
-                      </button>
-                    ))}
+                    {mainTools
+                      .filter((m) => m.id === 'laser' || m.id === 'hand')
+                      .map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          aria-pressed={main === m.id}
+                          onClick={() => {
+                            setPop(null)
+                            m.onClick()
+                          }}
+                          className={`flex h-9 items-center gap-2 rounded-[7px] border px-2 text-[13px] ${main === m.id ? 'border-clay bg-clay/10 text-clay font-medium' : 'border-line text-ink hover:bg-sunken'}`}
+                        >
+                          <Ico d={m.icon} size={16} />
+                          {m.id === 'hand' ? 'Kéo trang' : m.label}
+                        </button>
+                      ))}
                   </div>
-                  <div className="flex items-center justify-between rounded-[8px] border border-line px-1 py-0.5">
-                    <IconBtn label={`Thu nhỏ — ${MOD_KEY}+-`} onClick={() => zoomAt(v.zoom / 1.2)}><Ico d="M6 12h12" /></IconBtn>
-                    <button type="button" data-tip="Về 100%" data-tip-kbd={`${MOD_KEY}+0`} onClick={() => zoomAt(1)} className="h-9 flex-1 rounded-[6px] text-center text-[12.5px] text-ink tnum hover:bg-sunken">
+                  <div className="border-line flex items-center justify-between rounded-[8px] border px-1 py-0.5">
+                    <IconBtn label={`Thu nhỏ — ${MOD_KEY}+-`} onClick={() => zoomAt(v.zoom / 1.2)}>
+                      <Ico d="M6 12h12" />
+                    </IconBtn>
+                    <button
+                      type="button"
+                      data-tip="Về 100%"
+                      data-tip-kbd={`${MOD_KEY}+0`}
+                      onClick={() => zoomAt(1)}
+                      className="text-ink tnum hover:bg-sunken h-9 flex-1 rounded-[6px] text-center text-[12.5px]"
+                    >
                       {Math.round(v.zoom * 100)}%
                     </button>
-                    <IconBtn label={`Phóng to — ${MOD_KEY}++`} onClick={() => zoomAt(v.zoom * 1.2)}><Ico d="M6 12h12M12 6v12" /></IconBtn>
+                    <IconBtn label={`Phóng to — ${MOD_KEY}++`} onClick={() => zoomAt(v.zoom * 1.2)}>
+                      <Ico d="M6 12h12M12 6v12" />
+                    </IconBtn>
                   </div>
-                  <button type="button" onClick={() => { setPop(null); fileRef.current?.click() }} className="flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] text-ink hover:bg-sunken">
-                    <Ico d={IMG_D} size={16} />Chèn ảnh / PDF vào bảng
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPop(null)
+                      fileRef.current?.click()
+                    }}
+                    className="text-ink hover:bg-sunken flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px]"
+                  >
+                    <Ico d={IMG_D} size={16} />
+                    Chèn ảnh / PDF vào bảng
                   </button>
-                  <button type="button" onClick={() => { setPop(null); pdfRef.current?.click() }} className="flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] text-ink hover:bg-sunken">
-                    <Ico d={PDF_NOTE_D} size={16} />Mở PDF để ghi chú
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPop(null)
+                      pdfRef.current?.click()
+                    }}
+                    className="text-ink hover:bg-sunken flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px]"
+                  >
+                    <Ico d={PDF_NOTE_D} size={16} />
+                    Mở PDF để ghi chú
                   </button>
-                  <button type="button" onClick={() => { setPop(null); setDialog({ t: 'export' }) }} className="flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] text-ink hover:bg-sunken">
-                    <Ico d={EXPORT_D} size={16} />Xuất PNG / PDF
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPop(null)
+                      setDialog({ t: 'export' })
+                    }}
+                    className="text-ink hover:bg-sunken flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px]"
+                  >
+                    <Ico d={EXPORT_D} size={16} />
+                    Xuất PNG / PDF
                   </button>
-                  <div className="border-t border-line" />
+                  <div className="border-line border-t" />
                 </div>
                 <div>
-                  <div className="mb-1.5 text-[12px] font-medium text-ink-2">Kiểu giấy</div>
+                  <div className="text-ink-2 mb-1.5 text-[12px] font-medium">Kiểu giấy</div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {PAPERS.map((pp) => {
                       const on = o.paper === pp.id
                       return (
-                        <button key={pp.id} type="button" aria-pressed={on} onClick={() => { setPaper(pp.id); setPop(null) }}
-                          className={`flex h-9 items-center gap-2 rounded-[7px] border px-2 text-[12px] ${on ? 'border-clay bg-clay/10 font-medium text-clay' : 'border-line text-ink-2 hover:bg-sunken'}`}>
-                          <span className="h-4 w-4 shrink-0 rounded-[3px] border border-line" style={{ backgroundColor: pp.color ?? '#ffffff', backgroundImage: pp.bg, backgroundSize: '8px 8px' }} />
+                        <button
+                          key={pp.id}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => {
+                            setPaper(pp.id)
+                            setPop(null)
+                          }}
+                          className={`flex h-9 items-center gap-2 rounded-[7px] border px-2 text-[12px] ${on ? 'border-clay bg-clay/10 text-clay font-medium' : 'border-line text-ink-2 hover:bg-sunken'}`}
+                        >
+                          <span
+                            className="border-line h-4 w-4 shrink-0 rounded-[3px] border"
+                            style={{
+                              backgroundColor: pp.color ?? '#ffffff',
+                              backgroundImage: pp.bg,
+                              backgroundSize: '8px 8px',
+                            }}
+                          />
                           <span>{pp.label}</span>
                         </button>
                       )
                     })}
                   </div>
                 </div>
-                <div className="border-t border-line pt-1.5 space-y-1">
-                  <Toggle on={o.guides} onClick={() => setOpt('guides', !o.guides)}>Đường gióng</Toggle>
-                  <button type="button" onClick={() => { setPop(null); toggleSide('tools') }} className={`flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] ${side === 'tools' ? 'bg-clay/10 font-medium text-clay' : 'text-ink hover:bg-sunken'}`}>
-                    <Ico d={WRENCH_D} size={16} />Công cụ
+                <div className="border-line space-y-1 border-t pt-1.5">
+                  <Toggle on={o.guides} onClick={() => setOpt('guides', !o.guides)}>
+                    Đường gióng
+                  </Toggle>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPop(null)
+                      toggleSide('tools')
+                    }}
+                    className={`flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] ${side === 'tools' ? 'bg-clay/10 text-clay font-medium' : 'text-ink hover:bg-sunken'}`}
+                  >
+                    <Ico d={WRENCH_D} size={16} />
+                    Công cụ
                   </button>
-                  <button type="button" onClick={() => { setPop(null); toggleSide('ai') }} className={`flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] ${side === 'ai' ? 'bg-clay/10 font-medium text-clay' : 'text-ink hover:bg-sunken'}`}>
-                    <AiIcon size={16} />Trợ lý AI
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPop(null)
+                      toggleSide('ai')
+                    }}
+                    className={`flex h-9 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] ${side === 'ai' ? 'bg-clay/10 text-clay font-medium' : 'text-ink hover:bg-sunken'}`}
+                  >
+                    <AiIcon size={16} />
+                    Trợ lý AI
                   </button>
                 </div>
               </div>
             </Pop>
           </div>
         </div>
-        <div className="flex h-12 items-center overflow-x-auto [scrollbar-width:none] px-2 pb-1 text-[12.5px] text-ink-2 sm:h-11 sm:px-3 [&>div:first-child]:pl-0 max-xl:[mask-image:linear-gradient(to_right,#000_calc(100%-28px),transparent)]">
+        <div className="text-ink-2 flex h-12 items-center overflow-x-auto px-2 pb-1 text-[12.5px] [scrollbar-width:none] max-xl:[mask-image:linear-gradient(to_right,#000_calc(100%-28px),transparent)] sm:h-11 sm:px-3 [&>div:first-child]:pl-0">
           {options}
         </div>
       </div>
 
       <div className="relative flex min-h-0 flex-1">
-      <div className="relative min-w-0 flex-1 overflow-hidden" ref={wrapRef}>
-        {selBarMounted && (
-          <div className="pointer-events-none absolute left-1/2 top-2 z-10 max-w-[calc(100%-16px)] -translate-x-1/2">
-            <div
-              className={`flex h-10 items-center rounded-full border border-line bg-surface px-1.5 text-[12.5px] text-ink-2 shadow-lift transition-[opacity,transform] duration-150 ease-out motion-reduce:translate-y-0 ${selBarVisible ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none -translate-y-1 opacity-0'}`}
-            >
-              <div className="flex items-center overflow-x-auto [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)]">
-                {selActions ?? lastSelActionsRef.current}
+        <div className="relative min-w-0 flex-1 overflow-hidden" ref={wrapRef}>
+          {selBarMounted && (
+            <div className="pointer-events-none absolute top-2 left-1/2 z-10 max-w-[calc(100%-16px)] -translate-x-1/2">
+              <div
+                className={`border-line bg-surface text-ink-2 shadow-lift flex h-10 items-center rounded-full border px-1.5 text-[12.5px] transition-[opacity,transform] duration-150 ease-out motion-reduce:translate-y-0 ${selBarVisible ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none -translate-y-1 opacity-0'}`}
+              >
+                <div className="flex items-center overflow-x-auto [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)]">
+                  {selActions ?? lastSelActionsRef.current}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 touch-none select-none"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onPointerLeave={() => { eraserAt.current = null; fillHover.current = null; redraw() }}
-          onDoubleClick={onDoubleClick}
-          onContextMenu={(e) => e.preventDefault()}
-          onDragOver={(ev) => {
-            if (!draggingFill) return
-            ev.preventDefault()
-            ev.dataTransfer.dropEffect = 'copy'
-            bucketPreview(toScene(ev.clientX, ev.clientY), draggingFill.color)
-          }}
-          onDragLeave={() => { if (fillHover.current) { fillHover.current = null; redraw() } }}
-          onDrop={(ev) => {
-            const d = draggingFill
-            if (!d) return
-            ev.preventDefault()
-            fillHover.current = null
-            bucketFill(toScene(ev.clientX, ev.clientY), d.color, d.style)
-            redraw()
-          }}
-        />
-        <canvas ref={liveRef} className="pointer-events-none absolute inset-0 h-full w-full" />
-        <Instruments s={inst} set={setInst} gRef={instG} api={instApi} />
-        {pdfPages.length > 0 && (
-          <>
-            {(
-              <div ref={railRef} aria-hidden={!railOpen} className="absolute inset-y-0 left-0 z-[5] hidden flex-col gap-3 overflow-y-auto border-r border-line bg-[#f4f4f6] px-3 py-3 transition-transform duration-[220ms] ease-out sm:flex"
-                style={{ width: RAIL_W, transform: railOpen ? 'none' : 'translateX(-100%)', visibility: railOpen ? undefined : 'hidden', transition: railOpen ? undefined : 'transform 220ms ease-out, visibility 0s 220ms' }}>
-                {pdfPages.map((pg, i) => (
-                  <button key={pg.id} type="button" data-page={i} onClick={() => goPage(i)} aria-label={`Trang ${i + 1}`}
-                    className={`group flex shrink-0 items-start gap-2 rounded-[6px] p-1 text-left ${i === curPage ? 'bg-clay/15' : 'hover:bg-black/5'}`}>
-                    <span className={`w-5 shrink-0 pt-0.5 text-right text-[11.5px] tabular-nums ${i === curPage ? 'font-semibold text-clay' : 'text-ink-2'}`}>{i + 1}</span>
-                    <img src={inkThumbs[pg.id] ?? (pg.src?.startsWith(IDB_PREFIX) ? cachedSrc(pg.src) : pg.src)} alt="" draggable={false} loading="lazy"
-                      className={`min-w-0 flex-1 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] ${i === curPage ? 'ring-2 ring-clay' : ''}`}
-                      style={{ aspectRatio: `${pg.w} / ${pg.h}` }} />
-                  </button>
-                ))}
+          )}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 touch-none select-none"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onPointerLeave={() => {
+              eraserAt.current = null
+              fillHover.current = null
+              redraw()
+            }}
+            onDoubleClick={onDoubleClick}
+            onContextMenu={(e) => e.preventDefault()}
+            onDragOver={(ev) => {
+              if (!draggingFill) return
+              ev.preventDefault()
+              ev.dataTransfer.dropEffect = 'copy'
+              bucketPreview(toScene(ev.clientX, ev.clientY), draggingFill.color)
+            }}
+            onDragLeave={() => {
+              if (fillHover.current) {
+                fillHover.current = null
+                redraw()
+              }
+            }}
+            onDrop={(ev) => {
+              const d = draggingFill
+              if (!d) return
+              ev.preventDefault()
+              fillHover.current = null
+              bucketFill(toScene(ev.clientX, ev.clientY), d.color, d.style)
+              redraw()
+            }}
+          />
+          <canvas ref={liveRef} className="pointer-events-none absolute inset-0 h-full w-full" />
+          <Instruments s={inst} set={setInst} gRef={instG} api={instApi} />
+          {pdfPages.length > 0 && (
+            <>
+              {
+                <div
+                  ref={railRef}
+                  aria-hidden={!railOpen}
+                  className="border-line absolute inset-y-0 left-0 z-[5] hidden flex-col gap-3 overflow-y-auto border-r bg-[#f4f4f6] px-3 py-3 transition-transform duration-[220ms] ease-out sm:flex"
+                  style={{
+                    width: RAIL_W,
+                    transform: railOpen ? 'none' : 'translateX(-100%)',
+                    visibility: railOpen ? undefined : 'hidden',
+                    transition: railOpen
+                      ? undefined
+                      : 'transform 220ms ease-out, visibility 0s 220ms',
+                  }}
+                >
+                  {pdfPages.map((pg, i) => (
+                    <button
+                      key={pg.id}
+                      type="button"
+                      data-page={i}
+                      onClick={() => goPage(i)}
+                      aria-label={`Trang ${i + 1}`}
+                      className={`group flex shrink-0 items-start gap-2 rounded-[6px] p-1 text-left ${i === curPage ? 'bg-clay/15' : 'hover:bg-black/5'}`}
+                    >
+                      <span
+                        className={`w-5 shrink-0 pt-0.5 text-right text-[11.5px] tabular-nums ${i === curPage ? 'text-clay font-semibold' : 'text-ink-2'}`}
+                      >
+                        {i + 1}
+                      </span>
+                      <img
+                        src={
+                          inkThumbs[pg.id] ??
+                          (pg.src?.startsWith(IDB_PREFIX) ? cachedSrc(pg.src) : pg.src)
+                        }
+                        alt=""
+                        draggable={false}
+                        loading="lazy"
+                        className={`min-w-0 flex-1 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] ${i === curPage ? 'ring-clay ring-2' : ''}`}
+                        style={{ aspectRatio: `${pg.w} / ${pg.h}` }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              }
+              <button
+                type="button"
+                onClick={toggleRail}
+                data-tip={railOpen ? 'Ẩn danh sách trang' : 'Hiện danh sách trang'}
+                className="border-line bg-surface text-ink shadow-lift absolute bottom-3 z-[6] hidden h-8 items-center gap-1.5 rounded-full border px-3 text-[12.5px] transition-[left] duration-[220ms] ease-out sm:flex"
+                style={{ left: railOpen ? RAIL_W + 12 : 12 }}
+              >
+                <Ico d={PAPER_D} size={14} />
+                {railOpen ? 'Ẩn trang' : 'Trang'}
+              </button>
+              <div className="pointer-events-none absolute bottom-3 left-1/2 z-[6] -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-[12.5px] text-white tabular-nums">
+                {curPage + 1} / {pdfPages.length}
               </div>
-            )}
-            <button type="button" onClick={toggleRail} data-tip={railOpen ? 'Ẩn danh sách trang' : 'Hiện danh sách trang'}
-              className="absolute bottom-3 z-[6] hidden h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-[12.5px] text-ink shadow-lift transition-[left] duration-[220ms] ease-out sm:flex"
-              style={{ left: railOpen ? RAIL_W + 12 : 12 }}>
-              <Ico d={PAPER_D} size={14} />{railOpen ? 'Ẩn trang' : 'Trang'}
-            </button>
-            <div className="pointer-events-none absolute bottom-3 left-1/2 z-[6] -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-[12.5px] tabular-nums text-white">
-              {curPage + 1} / {pdfPages.length}
-            </div>
-          </>
+            </>
+          )}
+          {textarea}
+        </div>
+        {dialog?.t === 'formula' && (
+          <FormulaDialog
+            initial={dialog.el?.latex}
+            color={dialog.el?.stroke ?? style.current.stroke}
+            onClose={() => setDialog(null)}
+            onDone={onFormula}
+          />
         )}
-        {textarea}
-      </div>
-      {dialog?.t === 'formula' && (
-        <FormulaDialog initial={dialog.el?.latex} color={dialog.el?.stroke ?? style.current.stroke} onClose={() => setDialog(null)} onDone={onFormula} />
-      )}
-      {dialog?.t === 'tool' && createPortal(
-        <ToolModal
-          kind={dialog.doc.kind}
-          initial={dialog.doc.spec}
-          submitLabel="Cập nhật"
-          onClose={() => setDialog(null)}
-          onInsert={(img) => { const { ids, doc } = dialog; setDialog(null); replaceTool(ids, doc, img) }}
-        />,
-        document.body,
-      )}
-      {dialog?.t === 'pdf' && (
-        <PdfPagesDialog file={dialog.file} onClose={() => setDialog(null)} onDone={(pages) => { setDialog(null); placePictures(pages) }} />
-      )}
-      {dialog?.t === 'export' && (
-        <ExportDialog hasSelection={selected.current.size > 0} hasPages={els.current.some(isPage)} defaultPaperBg={isDarkPaper(o.paper)} onClose={() => setDialog(null)} onDone={onExport} preview={exportPreview} />
-      )}
+        {dialog?.t === 'tool' &&
+          createPortal(
+            <ToolModal
+              kind={dialog.doc.kind}
+              initial={dialog.doc.spec}
+              submitLabel="Cập nhật"
+              onClose={() => setDialog(null)}
+              onInsert={(img) => {
+                const { ids, doc } = dialog
+                setDialog(null)
+                replaceTool(ids, doc, img)
+              }}
+            />,
+            document.body,
+          )}
+        {dialog?.t === 'pdf' && (
+          <PdfPagesDialog
+            file={dialog.file}
+            onClose={() => setDialog(null)}
+            onDone={(pages) => {
+              setDialog(null)
+              placePictures(pages)
+            }}
+          />
+        )}
+        {dialog?.t === 'export' && (
+          <ExportDialog
+            hasSelection={selected.current.size > 0}
+            hasPages={els.current.some(isPage)}
+            defaultPaperBg={isDarkPaper(o.paper)}
+            onClose={() => setDialog(null)}
+            onDone={onExport}
+            preview={exportPreview}
+          />
+        )}
 
-      {sideAnim.mounted && (
+        {sideAnim.mounted && (
+          <div
+            className={`fixed inset-0 z-30 bg-black/30 lg:hidden ${sideAnim.closing ? 'backdrop-out' : 'backdrop-in'}`}
+            onClick={() => setSide(null)}
+            aria-hidden
+          />
+        )}
+
+        {/* panel phải: điện thoại phủ toàn màn hình, máy tính bảng trượt đè lên canvas, desktop đẩy canvas */}
         <div
-          className={`fixed inset-0 z-30 bg-black/30 lg:hidden ${sideAnim.closing ? 'backdrop-out' : 'backdrop-in'}`}
-          onClick={() => setSide(null)}
-          aria-hidden
-        />
-      )}
-
-      {/* panel phải: điện thoại phủ toàn màn hình, máy tính bảng trượt đè lên canvas, desktop đẩy canvas */}
-      <div
-        className={`${sideAnim.mounted ? `fixed inset-0 z-40 sm:inset-auto sm:absolute sm:inset-y-0 sm:right-0 sm:w-[min(360px,90vw)] ${sideAnim.closing ? 'board-side-out' : 'board-side-in'}` : 'hidden'} lg:static lg:inset-auto lg:z-auto lg:block lg:h-full lg:w-[var(--side-w)] lg:min-h-0 lg:shrink-0 lg:overflow-hidden lg:transition-[width] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none`}
-        style={{ '--side-w': side ? `${SIDE_W}px` : '0px' } as React.CSSProperties}
-        inert={!side}
-      >
-        <aside className="flex h-full min-h-0 w-full flex-col border-l border-line bg-surface lg:w-[360px]" aria-label={shownSide === 'tools' ? 'Công cụ' : 'Trợ lý'}>
-          <div className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-3 text-[13.5px] font-medium text-ink sm:h-11">
-            <span className="text-clay">{shownSide === 'tools' ? <Ico d={WRENCH_D} size={17} /> : <AiIcon size={17} />}</span>
-            {shownSide === 'tools' ? 'Công cụ' : 'Trợ lý AI'}
-            <button type="button" onClick={() => setSide(null)} data-tip="Đóng" aria-label="Đóng panel" className="ml-auto grid h-9 w-9 place-items-center rounded-[6px] text-ink-3 hover:bg-sunken hover:text-ink sm:h-7 sm:w-7">
-              <Ico d="M6 6l12 12M18 6L6 18" />
-            </button>
-          </div>
-          <div className="relative min-h-0 flex-1">
-            {mounted.has('ai') && (
-              <div className={`absolute inset-0 flex flex-col [&>.ai-panel]:min-h-0 [&>.ai-panel]:w-full [&>.ai-panel]:flex-1 [&>.ai-panel]:border-0 [&_.ai-panel-header]:hidden ${shownSide === 'ai' ? '' : 'invisible'}`}>
-                <Suspense fallback={null}><AiPanel mode="board" attachKey={aiKey} onBoardOps={applyBoardOps} contextSummary={side === 'ai' ? boardSummary() : ''} /></Suspense>
-              </div>
-            )}
-            {mounted.has('tools') && (
-              <div className={`absolute inset-0 overflow-y-auto px-3 pb-3 ${shownSide === 'tools' ? '' : 'invisible'}`}>
-                <ToolsPanel onInsertPlot={insertImage} onFormula={() => setDialog({ t: 'formula' })} />
-              </div>
-            )}
-          </div>
-        </aside>
-      </div>
+          className={`${sideAnim.mounted ? `fixed inset-0 z-40 sm:absolute sm:inset-auto sm:inset-y-0 sm:right-0 sm:w-[min(360px,90vw)] ${sideAnim.closing ? 'board-side-out' : 'board-side-in'}` : 'hidden'} motion-reduce:transition-none lg:static lg:inset-auto lg:z-auto lg:block lg:h-full lg:min-h-0 lg:w-[var(--side-w)] lg:shrink-0 lg:overflow-hidden lg:transition-[width] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)]`}
+          style={{ '--side-w': side ? `${SIDE_W}px` : '0px' } as React.CSSProperties}
+          inert={!side}
+        >
+          <aside
+            className="border-line bg-surface flex h-full min-h-0 w-full flex-col border-l lg:w-[360px]"
+            aria-label={shownSide === 'tools' ? 'Công cụ' : 'Trợ lý'}
+          >
+            <div className="border-line text-ink flex h-12 shrink-0 items-center gap-2 border-b px-3 text-[13.5px] font-medium sm:h-11">
+              <span className="text-clay">
+                {shownSide === 'tools' ? <Ico d={WRENCH_D} size={17} /> : <AiIcon size={17} />}
+              </span>
+              {shownSide === 'tools' ? 'Công cụ' : 'Trợ lý AI'}
+              <button
+                type="button"
+                onClick={() => setSide(null)}
+                data-tip="Đóng"
+                aria-label="Đóng panel"
+                className="text-ink-3 hover:bg-sunken hover:text-ink ml-auto grid h-9 w-9 place-items-center rounded-[6px] sm:h-7 sm:w-7"
+              >
+                <Ico d="M6 6l12 12M18 6L6 18" />
+              </button>
+            </div>
+            <div className="relative min-h-0 flex-1">
+              {mounted.has('ai') && (
+                <div
+                  className={`absolute inset-0 flex flex-col [&_.ai-panel-header]:hidden [&>.ai-panel]:min-h-0 [&>.ai-panel]:w-full [&>.ai-panel]:flex-1 [&>.ai-panel]:border-0 ${shownSide === 'ai' ? '' : 'invisible'}`}
+                >
+                  <Suspense fallback={null}>
+                    <AiPanel
+                      mode="board"
+                      attachKey={aiKey}
+                      onBoardOps={applyBoardOps}
+                      contextSummary={side === 'ai' ? boardSummary() : ''}
+                    />
+                  </Suspense>
+                </div>
+              )}
+              {mounted.has('tools') && (
+                <div
+                  className={`absolute inset-0 overflow-y-auto px-3 pb-3 ${shownSide === 'tools' ? '' : 'invisible'}`}
+                >
+                  <ToolsPanel
+                    onInsertPlot={insertImage}
+                    onFormula={() => setDialog({ t: 'formula' })}
+                  />
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   )

@@ -1,34 +1,59 @@
+import { ChevronDown, CircleHelp, RotateCcw, Waypoints, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { inputClass } from '@/engine/components/ui'
+import { cn } from '@/engine/lib/cn'
+import { GEO_HELP } from '@/engine/lib/geoConstruct'
+import {
+  GEO2D_SHAPES,
+  GEO3D_SHAPES,
+  type Geo2dShape,
+  type Geo2dSpec,
+  type Geo3dShape,
+  type Geo3dSpec,
+} from '@/engine/lib/geometry'
+import { svgDataUrl } from '@/engine/lib/plot'
+import { renderTool, type ToolImage } from '@/engine/lib/toolSpec'
+
+import { EdgeEditPreview } from './EdgeEditPreview'
+import { hasDragCoords, resetDragCoords } from './edgeSnap'
+import { LabelPreview } from './LabelDragPreview'
 /**
  * Công cụ Toán: hình học phẳng / hình học không gian. Chọn mẫu hình, đặt tên
  * đỉnh, bật các đường phụ; hình vẽ theo quy ước SGK (không gian: phép chiếu
  * song song, cạnh khuất nét đứt).
  */
 import { PickPreview } from './PickPreview'
-import { LabelPreview } from './LabelDragPreview'
-import { EdgeEditPreview } from './EdgeEditPreview'
-import { hasDragCoords, resetDragCoords } from './edgeSnap'
-import { useMemo, useState } from 'react'
-import { cn } from '@/engine/lib/cn'
-import { inputClass } from '@/engine/components/ui'
-import { GEO2D_SHAPES, GEO3D_SHAPES, type Geo2dShape, type Geo2dSpec, type Geo3dShape, type Geo3dSpec } from '@/engine/lib/geometry'
-import { renderTool, type ToolImage } from '@/engine/lib/toolSpec'
-import { svgDataUrl } from '@/engine/lib/plot'
-import { GEO_HELP } from '@/engine/lib/geoConstruct'
-import { ChevronDown, CircleHelp, RotateCcw, Waypoints, X } from 'lucide-react'
 import { Check, ToolShell, sectionTitle } from './ToolShell'
 
-const FREE_SAMPLE = 'A(0; 4)\nB(0; 0)\nC(7; 0)\nM(2,5; 0)\nAB, AM\nđường BC kéo dài\nnhãn AB "4 km"\nkích thước BC "7 km"'
+const FREE_SAMPLE =
+  'A(0; 4)\nB(0; 0)\nC(7; 0)\nM(2,5; 0)\nAB, AM\nđường BC kéo dài\nnhãn AB "4 km"\nkích thước BC "7 km"'
 
-const isTri2d =(s: Geo2dShape) => ['triangle', 'right-triangle', 'isosceles', 'equilateral', 'inscribed-triangle'].includes(s)
-const isQuad2d = (s: Geo2dShape) => ['square', 'rectangle', 'parallelogram', 'rhombus', 'trapezoid'].includes(s)
+const isTri2d = (s: Geo2dShape) =>
+  ['triangle', 'right-triangle', 'isosceles', 'equilateral', 'inscribed-triangle'].includes(s)
+const isQuad2d = (s: Geo2dShape) =>
+  ['square', 'rectangle', 'parallelogram', 'rhombus', 'trapezoid'].includes(s)
 const isRound3d = (s: Geo3dShape) => s === 'cone' || s === 'cylinder' || s === 'sphere'
 const hasBase4 = (s: Geo3dShape) => s.startsWith('pyramid4') || s === 'box' || s === 'cube'
 
-type Props<S> = { initial?: S | null; submitLabel?: string; onClose: () => void; onInsert: (img: ToolImage) => void }
+type Props<S> = {
+  initial?: S | null
+  submitLabel?: string
+  onClose: () => void
+  onInsert: (img: ToolImage) => void
+}
 
 export function Geo2dModal({ initial, submitLabel, onClose, onInsert }: Props<Geo2dSpec>) {
   const [spec, setSpec] = useState<Geo2dSpec>(
-    initial ?? { shape: 'triangle', names: ['A', 'B', 'C'], altitude: false, median: false, diagonals: false, circumcircle: false, marks: true },
+    initial ?? {
+      shape: 'triangle',
+      names: ['A', 'B', 'C'],
+      altitude: false,
+      median: false,
+      diagonals: false,
+      circumcircle: false,
+      marks: true,
+    },
   )
   const preview = useMemo(() => renderTool({ kind: 'geo2d', spec }), [spec])
   const set = (patch: Partial<Geo2dSpec>) => setSpec((s) => ({ ...s, ...patch }))
@@ -42,7 +67,11 @@ export function Geo2dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
         value={spec.shape}
         onPick={(o) =>
           // "Tự do" bắt đầu trống trơn: điền sẵn một hình mẫu để người dùng sửa số, khỏi phải nhớ cú pháp
-          set(o.id === 'free' && !(spec.extras ?? '').trim() ? { shape: o.id, names: o.names, extras: FREE_SAMPLE } : { shape: o.id, names: o.names })
+          set(
+            o.id === 'free' && !(spec.extras ?? '').trim()
+              ? { shape: o.id, names: o.names, extras: FREE_SAMPLE }
+              : { shape: o.id, names: o.names },
+          )
         }
       />
       {spec.names.length > 0 && <Names names={spec.names} onChange={(names) => set({ names })} />}
@@ -51,15 +80,30 @@ export function Geo2dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
           <h3 className={sectionTitle}>Đường phụ</h3>
           {isTri2d(spec.shape) && (
             <>
-              <Check checked={spec.altitude} onChange={(altitude) => set({ altitude })}>Đường cao AH</Check>
-              <Check checked={spec.median} onChange={(median) => set({ median })}>Trung tuyến AM</Check>
+              <Check checked={spec.altitude} onChange={(altitude) => set({ altitude })}>
+                Đường cao AH
+              </Check>
+              <Check checked={spec.median} onChange={(median) => set({ median })}>
+                Trung tuyến AM
+              </Check>
               {spec.shape !== 'inscribed-triangle' && (
-                <Check checked={spec.circumcircle} onChange={(circumcircle) => set({ circumcircle })}>Đường tròn ngoại tiếp</Check>
+                <Check
+                  checked={spec.circumcircle}
+                  onChange={(circumcircle) => set({ circumcircle })}
+                >
+                  Đường tròn ngoại tiếp
+                </Check>
               )}
             </>
           )}
-          {isQuad2d(spec.shape) && <Check checked={spec.diagonals} onChange={(diagonals) => set({ diagonals })}>Hai đường chéo</Check>}
-          <Check checked={spec.marks} onChange={(marks) => set({ marks })}>Kí hiệu góc vuông, cạnh bằng nhau</Check>
+          {isQuad2d(spec.shape) && (
+            <Check checked={spec.diagonals} onChange={(diagonals) => set({ diagonals })}>
+              Hai đường chéo
+            </Check>
+          )}
+          <Check checked={spec.marks} onChange={(marks) => set({ marks })}>
+            Kí hiệu góc vuông, cạnh bằng nhau
+          </Check>
         </section>
       )}
       <Extras
@@ -101,8 +145,10 @@ export function Geo2dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
               aria-pressed={mode === 'edge'}
               onClick={() => setMode((m) => (m === 'edge' ? 'pick' : 'edge'))}
               className={cn(
-                'flex items-center gap-1 whitespace-nowrap rounded-[6px] border px-1.5 py-1 text-[11.5px] transition-colors',
-                mode === 'edge' ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                'flex items-center gap-1 rounded-[6px] border px-1.5 py-1 text-[11.5px] whitespace-nowrap transition-colors',
+                mode === 'edge'
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               <Waypoints className="size-3.5" /> Chỉnh cạnh
@@ -114,13 +160,27 @@ export function Geo2dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
               onClick={() => set({ extras: resetDragCoords(spec.extras ?? '') })}
               disabled={!hasDrag}
               data-tip="Xoá các toạ độ do kéo sinh ra"
-              className="flex items-center gap-1 whitespace-nowrap rounded-[6px] border border-line px-1.5 py-1 text-[11.5px] text-ink-2 transition-colors hover:border-ink-4 disabled:pointer-events-none disabled:opacity-40"
+              className="border-line text-ink-2 hover:border-ink-4 flex items-center gap-1 rounded-[6px] border px-1.5 py-1 text-[11.5px] whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-40"
             >
               <RotateCcw className="size-3.5" /> Đặt lại hình
             </button>
           }
-          previewOverride={mode === 'edge' ? <EdgeEditPreview img={img} extras={spec.extras ?? ''} onExtras={(extras) => set({ extras })} /> : undefined}
-          fallback={<PickPreview img={img} extras={spec.extras ?? ''} onExtras={(extras) => set({ extras })} />}
+          previewOverride={
+            mode === 'edge' ? (
+              <EdgeEditPreview
+                img={img}
+                extras={spec.extras ?? ''}
+                onExtras={(extras) => set({ extras })}
+              />
+            ) : undefined
+          }
+          fallback={
+            <PickPreview
+              img={img}
+              extras={spec.extras ?? ''}
+              onExtras={(extras) => set({ extras })}
+            />
+          }
         />
       )}
       onSubmit={() => onInsert(preview)}
@@ -131,7 +191,14 @@ export function Geo2dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
 
 export function Geo3dModal({ initial, submitLabel, onClose, onInsert }: Props<Geo3dSpec>) {
   const [spec, setSpec] = useState<Geo3dSpec>(
-    initial ?? { shape: 'pyramid4-sa', names: GEO3D_SHAPES[4].names, height: true, diagonals: false, marks: true, tall: 1 },
+    initial ?? {
+      shape: 'pyramid4-sa',
+      names: GEO3D_SHAPES[4].names,
+      height: true,
+      diagonals: false,
+      marks: true,
+      tall: 1,
+    },
   )
   const preview = useMemo(() => renderTool({ kind: 'geo3d', spec }), [spec])
   const set = (patch: Partial<Geo3dSpec>) => setSpec((s) => ({ ...s, ...patch }))
@@ -152,16 +219,34 @@ export function Geo3dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
       <Names names={spec.names} onChange={(names) => set({ names })} />
       <section>
         <h3 className={sectionTitle}>Đường phụ</h3>
-        {spec.shape !== 'sphere' && spec.shape !== 'tetrahedron' && spec.shape !== 'box' && spec.shape !== 'cube' && spec.shape !== 'prism3' && !spec.shape.endsWith('-sa') && (
-          <Check checked={spec.height} onChange={(height) => set({ height })}>
-            {round ? 'Đường cao, bán kính đáy' : 'Đường cao (chân là tâm/hình chiếu)'}
+        {spec.shape !== 'sphere' &&
+          spec.shape !== 'tetrahedron' &&
+          spec.shape !== 'box' &&
+          spec.shape !== 'cube' &&
+          spec.shape !== 'prism3' &&
+          !spec.shape.endsWith('-sa') && (
+            <Check checked={spec.height} onChange={(height) => set({ height })}>
+              {round ? 'Đường cao, bán kính đáy' : 'Đường cao (chân là tâm/hình chiếu)'}
+            </Check>
+          )}
+        {hasBase4(spec.shape) && (
+          <Check checked={spec.diagonals} onChange={(diagonals) => set({ diagonals })}>
+            Đường chéo đáy AC, BD
           </Check>
         )}
-        {hasBase4(spec.shape) && <Check checked={spec.diagonals} onChange={(diagonals) => set({ diagonals })}>Đường chéo đáy AC, BD</Check>}
-        <Check checked={spec.marks} onChange={(marks) => set({ marks })}>Kí hiệu góc vuông</Check>
+        <Check checked={spec.marks} onChange={(marks) => set({ marks })}>
+          Kí hiệu góc vuông
+        </Check>
       </section>
       {!round && (
-        <Extras value={spec.extras ?? ''} onChange={(extras) => set({ extras })} errors={preview.errors} example={'M = trung điểm SC\nO = AC cắt BD\nH = hình chiếu A lên SB\nAM, SO, AH\nvuông H A S'} />
+        <Extras
+          value={spec.extras ?? ''}
+          onChange={(extras) => set({ extras })}
+          errors={preview.errors}
+          example={
+            'M = trung điểm SC\nO = AC cắt BD\nH = hình chiếu A lên SB\nAM, SO, AH\nvuông H A S'
+          }
+        />
       )}
       {spec.shape !== 'sphere' && spec.shape !== 'cube' && (
         <section>
@@ -206,11 +291,15 @@ export function Geo3dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
               type="button"
               disabled={round}
               aria-pressed={mode === 'edge' && !round}
-              data-tip={round ? 'Nón, trụ, cầu chưa chỉnh cạnh được' : 'Kéo nút ở đỉnh để chỉnh hình khối'}
+              data-tip={
+                round ? 'Nón, trụ, cầu chưa chỉnh cạnh được' : 'Kéo nút ở đỉnh để chỉnh hình khối'
+              }
               onClick={() => setMode((m) => (m === 'edge' ? 'pick' : 'edge'))}
               className={cn(
-                'flex items-center gap-1 whitespace-nowrap rounded-[6px] border px-1.5 py-1 text-[11.5px] transition-colors disabled:pointer-events-none disabled:opacity-40',
-                mode === 'edge' && !round ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                'flex items-center gap-1 rounded-[6px] border px-1.5 py-1 text-[11.5px] whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-40',
+                mode === 'edge' && !round
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               <Waypoints className="size-3.5" /> Chỉnh cạnh
@@ -222,19 +311,34 @@ export function Geo3dModal({ initial, submitLabel, onClose, onInsert }: Props<Ge
               onClick={() => set({ extras: resetDragCoords(spec.extras ?? '') })}
               disabled={!hasDrag || round}
               data-tip="Xoá các toạ độ do kéo sinh ra"
-              className="flex items-center gap-1 whitespace-nowrap rounded-[6px] border border-line px-1.5 py-1 text-[11.5px] text-ink-2 transition-colors hover:border-ink-4 disabled:pointer-events-none disabled:opacity-40"
+              className="border-line text-ink-2 hover:border-ink-4 flex items-center gap-1 rounded-[6px] border px-1.5 py-1 text-[11.5px] whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-40"
             >
               <RotateCcw className="size-3.5" /> Đặt lại hình
             </button>
           }
           previewOverride={
-            mode === 'edge' && !round ? <EdgeEditPreview key={spec.shape} img={img} extras={spec.extras ?? ''} onExtras={(extras) => set({ extras })} /> : undefined
+            mode === 'edge' && !round ? (
+              <EdgeEditPreview
+                key={spec.shape}
+                img={img}
+                extras={spec.extras ?? ''}
+                onExtras={(extras) => set({ extras })}
+              />
+            ) : undefined
           }
           fallback={
             round ? (
-              <img src={svgDataUrl(img.svg)} alt="Xem trước" className="max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain" />
+              <img
+                src={svgDataUrl(img.svg)}
+                alt="Xem trước"
+                className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+              />
             ) : (
-              <PickPreview img={img} extras={spec.extras ?? ''} onExtras={(extras) => set({ extras })} />
+              <PickPreview
+                img={img}
+                extras={spec.extras ?? ''}
+                onExtras={(extras) => set({ extras })}
+              />
             )
           }
         />
@@ -257,7 +361,12 @@ function ShapePicker<T extends string>({
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const cur = options.find((o) => o.id === value)
-  const norm = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').toLowerCase()
+  const norm = (t: string) =>
+    t
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/đ/g, 'd')
+      .toLowerCase()
   const list = q ? options.filter((o) => norm(o.label).includes(norm(q))) : options
   return (
     <section>
@@ -266,7 +375,7 @@ function ShapePicker<T extends string>({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between rounded-[6px] bg-clay-tint px-2.5 py-1.5 text-left text-[13px] font-medium text-clay"
+        className="bg-clay-tint text-clay flex w-full items-center justify-between rounded-[6px] px-2.5 py-1.5 text-left text-[13px] font-medium"
       >
         <span className="truncate">{cur?.label ?? 'Chọn hình'}</span>
         <ChevronDown className={cn('size-4 shrink-0 transition-transform', open && 'rotate-180')} />
@@ -293,13 +402,17 @@ function ShapePicker<T extends string>({
                 aria-pressed={value === o.id}
                 className={cn(
                   'rounded-[6px] px-2.5 py-1.5 text-left text-[13px] transition-colors',
-                  value === o.id ? 'bg-clay-tint font-medium text-clay' : 'text-ink-2 hover:bg-sunken hover:text-ink',
+                  value === o.id
+                    ? 'bg-clay-tint text-clay font-medium'
+                    : 'text-ink-2 hover:bg-sunken hover:text-ink',
                 )}
               >
                 {o.label}
               </button>
             ))}
-            {!list.length && <p className="px-2.5 py-1.5 text-[12px] text-ink-3">Không có hình nào khớp</p>}
+            {!list.length && (
+              <p className="text-ink-3 px-2.5 py-1.5 text-[12px]">Không có hình nào khớp</p>
+            )}
           </div>
         </div>
       )}
@@ -307,7 +420,17 @@ function ShapePicker<T extends string>({
   )
 }
 
-function Extras({ value, onChange, errors, example }: { value: string; onChange: (v: string) => void; errors?: Array<{ line: number; msg: string }>; example: string }) {
+function Extras({
+  value,
+  onChange,
+  errors,
+  example,
+}: {
+  value: string
+  onChange: (v: string) => void
+  errors?: Array<{ line: number; msg: string }>
+  example: string
+}) {
   const [help, setHelp] = useState(false)
   return (
     <section className="relative">
@@ -319,7 +442,10 @@ function Extras({ value, onChange, errors, example }: { value: string; onChange:
           aria-label="Các lệnh dựng hình"
           aria-expanded={help}
           data-tip="Các lệnh dựng hình"
-          className={cn('flex size-5 items-center justify-center rounded-full transition-colors', help ? 'bg-clay text-white' : 'text-ink-3 hover:bg-sunken hover:text-clay')}
+          className={cn(
+            'flex size-5 items-center justify-center rounded-full transition-colors',
+            help ? 'bg-clay text-white' : 'text-ink-3 hover:bg-sunken hover:text-clay',
+          )}
         >
           <CircleHelp className="size-4" />
         </button>
@@ -335,9 +461,12 @@ function Extras({ value, onChange, errors, example }: { value: string; onChange:
         className={cn(inputClass, 'w-full resize-y font-mono text-[13px] leading-[1.5]')}
       />
       {!!errors?.length && (
-        <ul className="mt-1.5 flex flex-col gap-0.5 text-[12px] text-clay-deep">
+        <ul className="text-clay-deep mt-1.5 flex flex-col gap-0.5 text-[12px]">
           {errors.map((e, i) => (
-            <li key={i}>{e.line ? `Dòng ${e.line}: ` : ''}{e.msg}</li>
+            <li key={i}>
+              {e.line ? `Dòng ${e.line}: ` : ''}
+              {e.msg}
+            </li>
           ))}
         </ul>
       )}
@@ -348,22 +477,31 @@ function Extras({ value, onChange, errors, example }: { value: string; onChange:
 /** bảng lệnh dựng hình, chia nhóm; mỗi lệnh một thẻ (mã lệnh + giải thích) */
 function GeoHelp({ onClose }: { onClose: () => void }) {
   return (
-    <div className="mb-3 rounded-[8px] border border-line bg-surface p-3 shadow-sm">
+    <div className="border-line bg-surface mb-3 rounded-[8px] border p-3 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[12.5px] text-ink-2">Mỗi dòng một lệnh. Bấm lên hình cũng tự ghi lệnh vào đây.</p>
-        <button type="button" onClick={onClose} aria-label="Đóng hướng dẫn" className="rounded p-0.5 text-ink-3 hover:bg-sunken hover:text-ink">
+        <p className="text-ink-2 text-[12.5px]">
+          Mỗi dòng một lệnh. Bấm lên hình cũng tự ghi lệnh vào đây.
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Đóng hướng dẫn"
+          className="text-ink-3 hover:bg-sunken hover:text-ink rounded p-0.5"
+        >
           <X className="size-3.5" />
         </button>
       </div>
       <div className="flex flex-col gap-3">
         {GEO_HELP.map((g) => (
           <div key={g.group}>
-            <h4 className="mb-1 text-[11.5px] font-semibold uppercase tracking-[0.04em] text-clay">{g.group}</h4>
+            <h4 className="text-clay mb-1 text-[11.5px] font-semibold tracking-[0.04em] uppercase">
+              {g.group}
+            </h4>
             <ul className="flex flex-col gap-1">
               {g.items.map((it) => (
-                <li key={it.code} className="rounded-[6px] bg-sunken px-2.5 py-1.5">
-                  <code className="block font-mono text-[12.5px] text-ink">{it.code}</code>
-                  <span className="text-[11.5px] text-ink-3">{it.what}</span>
+                <li key={it.code} className="bg-sunken rounded-[6px] px-2.5 py-1.5">
+                  <code className="text-ink block font-mono text-[12.5px]">{it.code}</code>
+                  <span className="text-ink-3 text-[11.5px]">{it.what}</span>
                 </li>
               ))}
             </ul>
@@ -385,7 +523,10 @@ function Names({ names, onChange }: { names: string[]; onChange: (names: string[
             value={n}
             onChange={(e) => onChange(names.map((v, k) => (k === i ? e.target.value : v)))}
             aria-label={`Tên điểm ${i + 1}`}
-            className={cn(inputClass, 'h-8 w-12 px-1 py-1 text-center font-serif text-[14px] italic')}
+            className={cn(
+              inputClass,
+              'h-8 w-12 px-1 py-1 text-center font-serif text-[14px] italic',
+            )}
           />
         ))}
       </div>

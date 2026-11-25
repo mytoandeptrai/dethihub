@@ -6,7 +6,17 @@ const delta = 'data: {"choices":[{"delta":{"content":"Answer"}}]}\n\n'
 
 describe('chat completion stream', () => {
   it('reads the OpenRouter reasoning alias without doubling gateways that send both fields', async () => {
-    const response = new Response(': keep-alive\n\ndata: ' + JSON.stringify({ choices: [{ delta: { reasoning: 'First' } }] }) + '\n\ndata: ' + JSON.stringify({ choices: [{ delta: { reasoning: 'Second', reasoning_content: 'Second' } }] }) + '\n\n' + delta + 'data: [DONE]\n\n')
+    const response = new Response(
+      ': keep-alive\n\ndata: ' +
+        JSON.stringify({ choices: [{ delta: { reasoning: 'First' } }] }) +
+        '\n\ndata: ' +
+        JSON.stringify({
+          choices: [{ delta: { reasoning: 'Second', reasoning_content: 'Second' } }],
+        }) +
+        '\n\n' +
+        delta +
+        'data: [DONE]\n\n',
+    )
     const received: string[] = []
     const result = await readStream(response, (chunk) => received.push(chunk.reasoning))
     expect(result.reasoning).toBe('FirstSecond')

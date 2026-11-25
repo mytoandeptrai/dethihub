@@ -134,12 +134,7 @@
             "Khoảng thế kỷ VIII TCN – Hình thành các thành Hy Lạp cổ đại",
             "Năm 476 – Đế quốc La Mã Tây Âu sụp đổ, kết thúc thời kỳ cổ đại phương Tây"
           ],
-          "nhan_vat": [
-            "Hăm-mu-ra-bi",
-            "Tần Thủy Hoàng",
-            "A-lex-an-đơ Đại đế",
-            "Xê-zar"
-          ],
+          "nhan_vat": ["Hăm-mu-ra-bi", "Tần Thủy Hoàng", "A-lex-an-đơ Đại đế", "Xê-zar"],
           "khai_niem": [
             "Quân chủ chuyên chế",
             "Dân chủ chủ nô",
@@ -185,12 +180,7 @@
             "Khoảng thế kỷ VII đến thế kỷ X – Hình thành các quốc gia phong kiến hình thành (Sri Vi-jay-a, Pu-gan, Dva-ra-va-ti)"
           ],
           "nhan_vat": [],
-          "khai_niem": [
-            "Quốc gia sơ kỳ",
-            "Quốc gia phong kiến",
-            "Giao lưu văn hóa",
-            "Ấn Độ hóa"
-          ],
+          "khai_niem": ["Quốc gia sơ kỳ", "Quốc gia phong kiến", "Giao lưu văn hóa", "Ấn Độ hóa"],
           "kien_thuc_duoc_dung": [
             "Vị trí cầu nối địa lý, gió mùa.",
             "Sự tiếp thu chữ Phạn, Phật giáo, Ấn Độ giáo, kiến trúc đền tháp Ấn Độ."
@@ -293,14 +283,8 @@
             "Thiên niên kỷ IV TCN – Sự xuất hiện các đô thị cổ đại đầu tiên ở Lưỡng Hà, Ai Cập"
           ],
           "nhan_vat": [],
-          "khai_niem": [
-            "Đô thị cổ đại",
-            "Thành phố gia đình",
-            "Trung tâm thương mại"
-          ],
-          "kien_thuc_duoc_dung": [
-            "Vừa mang tính chất Lịch sử vừa mang tính chất Địa lí tích hợp."
-          ],
+          "khai_niem": ["Đô thị cổ đại", "Thành phố gia đình", "Trung tâm thương mại"],
+          "kien_thuc_duoc_dung": ["Vừa mang tính chất Lịch sử vừa mang tính chất Địa lí tích hợp."],
           "chua_duoc_dung": [
             "CHƯA DÙNG kiến thức về đô thị thời trung đại Tây Âu (học ở Lớp 7) hoặc đô thị thời hiện đại (học ở Lớp 9).",
             "CHƯA DÙNG các lý thuyết quy hoạch không gian đô thị chuyên ngành địa lý nâng cao cấp THPT.",
@@ -346,13 +330,7 @@
             "Thế kỷ XIV–XVI – Phong trào Văn hóa Phục hưng ở Tây Âu",
             "Thế kỷ XVI – Phong trào Cải cách tôn giáo (M. Lu-thơ, J. Can-văng)"
           ],
-          "nhan_vat": [
-            "Cô-lông-bơ",
-            "Ma-ghen-lan",
-            "Đa Vin-xi",
-            "M. Lu-thơ",
-            "Can-văng"
-          ],
+          "nhan_vat": ["Cô-lông-bơ", "Ma-ghen-lan", "Đa Vin-xi", "M. Lu-thơ", "Can-văng"],
           "khai_niem": [
             "Lãnh địa phong kiến",
             "Lãnh chủ",
@@ -402,10 +380,7 @@
             "Năm 319–550 – Vương triều Gúp-ta ở Ấn Độ",
             "Năm 1526–1707 – Vương triều Mô-gôn ở Ấn Độ"
           ],
-          "nhan_vat": [
-            "Đường Thái Tông",
-            "A-cơ-ba"
-          ],
+          "nhan_vat": ["Đường Thái Tông", "A-cơ-ba"],
           "khai_niem": [
             "Chế độ khoa cử",
             "Tứ đại phát minh",
@@ -449,15 +424,8 @@
             "Thế kỷ XIV – Vương quốc Lan Xạng (Lào) được thành lập",
             "Thế kỷ XIII–XVI – Sự hình thành và phát triển của các quốc gia Hồi giáo ở ĐNÁ (Ma-lắc-ca)"
           ],
-          "nhan_vat": [
-            "Phạ Ngừm"
-          ],
-          "khai_niem": [
-            "Ăng-co Vat",
-            "Ăng-co Thom",
-            "Thạt Luổng",
-            "Văn hóa Hồi giáo ĐNÁ"
-          ],
+          "nhan_vat": ["Phạ Ngừm"],
+          "khai_niem": ["Ăng-co Vat", "Ăng-co Thom", "Thạt Luổng", "Văn hóa Hồi giáo ĐNÁ"],
           "kien_thuc_duoc_dung": [
             "Sự phát triển nông nghiệp lúa nước, thương mại đường biển.",
             "Các công trình kiến trúc Phật giáo và Ấn Độ giáo nổi tiếng."
@@ -553,18 +521,10 @@
             "Phân tích được vai trò của đô thị đối với sự phát triển kinh tế - xã hội."
           ],
           "pham_vi_thoi_gian": "Thế kỷ V đến thế kỷ XVI",
-          "su_kien_moc": [
-            "Thế kỷ XI – Các thành thị trung đại Tây Âu ra đời"
-          ],
+          "su_kien_moc": ["Thế kỷ XI – Các thành thị trung đại Tây Âu ra đời"],
           "nhan_vat": [],
-          "khai_niem": [
-            "Đô thị trung đại",
-            "Thương cảng",
-            "Hội chợ"
-          ],
-          "kien_thuc_duoc_dung": [
-            "Tích hợp kiến thức Sử - Địa về không gian không khí đô thị."
-          ],
+          "khai_niem": ["Đô thị trung đại", "Thương cảng", "Hội chợ"],
+          "kien_thuc_duoc_dung": ["Tích hợp kiến thức Sử - Địa về không gian không khí đô thị."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các cuộc phát kiến không gian vũ trụ thời hiện đại.",
             "CHƯA DÙNG kiến thức bản đồ và địa lý tự nhiên lớp trên.",
@@ -658,16 +618,8 @@
             "Năm 1511 – Bồ Đào Nha đánh chiếm Ma-lắc-ca (sự mở đầu xâm lược phương Tây ở ĐNÁ)",
             "Cuối thế kỷ XIX – Hầu hết các nước ĐNÁ (trừ Xiêm) đã trở thành thuộc địa của thực dân phương Tây"
           ],
-          "nhan_vat": [
-            "Hô-xê Ri-zan",
-            "A-phi-nô-ga-xka"
-          ],
-          "khai_niem": [
-            "Chủ nghĩa thực dân",
-            "Thực dân phương Tây",
-            "Thuộc địa",
-            "Nửa phong kiến"
-          ],
+          "nhan_vat": ["Hô-xê Ri-zan", "A-phi-nô-ga-xka"],
+          "khai_niem": ["Chủ nghĩa thực dân", "Thực dân phương Tây", "Thuộc địa", "Nửa phong kiến"],
           "kien_thuc_duoc_dung": [
             "Chính sách chia để trị, bóc lột kinh tế thuộc địa của Pháp, Anh, Hà Lan, Tây Ban Nha.",
             "Ngoại lệ của Xiêm (Thái Lan) giữ được độc lập nhờ chính sách cải cách ngoại giao khôn khéo."
@@ -765,9 +717,7 @@
             "Tháng 3/1917 – Cách mạng tháng Hai ở Nga (lật đổ chế độ Nga hoàng)",
             "Ngày 7/11/1917 (25/10 theo lịch Nga) – Cách mạng tháng Mười Nga giành thắng lợi"
           ],
-          "nhan_vat": [
-            "V.I. Lê-nin"
-          ],
+          "nhan_vat": ["V.I. Lê-nin"],
           "khai_niem": [
             "Chủ nghĩa đế quốc",
             "Tổ chức độc quyền (Tơ-rớt, Cát-ten, Xanh-đi-ca)",
@@ -874,17 +824,9 @@
             "Nêu được quá trình xác lập và bảo vệ chủ quyền biển đảo của Việt Nam trong lịch sử."
           ],
           "pham_vi_thoi_gian": "Lịch sử Việt Nam từ truyền thống đến hiện đại",
-          "su_kien_moc": [
-            "Thế kỷ XVII – Chúa Nguyễn thành lập Đội Hoàng Sa và Đội Bắc Hải"
-          ],
+          "su_kien_moc": ["Thế kỷ XVII – Chúa Nguyễn thành lập Đội Hoàng Sa và Đội Bắc Hải"],
           "nhan_vat": [],
-          "khai_niem": [
-            "Biển Đông",
-            "Hoàng Sa",
-            "Trường Sa",
-            "Chủ quyền biển đảo",
-            "UNCLOS 1982"
-          ],
+          "khai_niem": ["Biển Đông", "Hoàng Sa", "Trường Sa", "Chủ quyền biển đảo", "UNCLOS 1982"],
           "kien_thuc_duoc_dung": [
             "Tích hợp kiến thức địa lý biển đảo và lịch sử thực thi chủ quyền."
           ],
@@ -933,13 +875,7 @@
             "Ngày 9/5/1945 – Phát xít Đức ký hiệp định hàng hàng không điều kiện (Ngày Chiến thắng)",
             "Ngày 15/8/1945 – Phát xít Nhật đầu hàng không điều kiện, Chiến tranh thế giới thứ hai kết thúc"
           ],
-          "nhan_vat": [
-            "Hi-tle",
-            "Mu-xô-li-ni",
-            "Ru-zơ-ven",
-            "Xta-lin",
-            "Sơ-chinh"
-          ],
+          "nhan_vat": ["Hi-tle", "Mu-xô-li-ni", "Ru-zơ-ven", "Xta-lin", "Sơ-chinh"],
           "khai_niem": [
             "Trật tự Véc-xai - Oa-sinh-tơn",
             "Đại suy thoái 1929-1933",
@@ -1052,11 +988,7 @@
             "Năm 1989–1991 – Chiến tranh Lạnh kết thúc, sụp đổ chế độ XHCN ở Liên Xô và Đông Âu",
             "Năm 1993 – Đổi tên Cộng đồng châu Âu thành Liên minh châu Âu (EU)"
           ],
-          "nhan_vat": [
-            "Nê-ru",
-            "Phi-đen Ca-xtơ-rô",
-            "Man-đê-la"
-          ],
+          "nhan_vat": ["Nê-ru", "Phi-đen Ca-xtơ-rô", "Man-đê-la"],
           "khai_niem": [
             "Trật tự hai cực I-an-ta",
             "Liên Hợp Quốc",
@@ -1110,12 +1042,7 @@
             "Ngày 27/1/1973 – Ký kết Hiệp định Pa-ri về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam",
             "Từ 4/3 đến 30/4/1975 – Tổng tiến công và nổi dậy Xuân 1975 (Chiến dịch Tây Nguyên, Huế - Đà Nẵng, Chiến dịch Hồ Chí Minh giải phóng hoàn toàn miền Nam 30/4/1975)"
           ],
-          "nhan_vat": [
-            "Hồ Chí Minh",
-            "Võ Nguyên Giáp",
-            "Nguyễn Thị Định",
-            "Bùi Quang Thận"
-          ],
+          "nhan_vat": ["Hồ Chí Minh", "Võ Nguyên Giáp", "Nguyễn Thị Định", "Bùi Quang Thận"],
           "khai_niem": [
             "Lời kêu gọi toàn quốc kháng chiến",
             "Điện Biên Phủ 1954",
@@ -1168,10 +1095,7 @@
             "Tháng 12/1986 – Đại hội VI của Đảng đề ra đường lối Đổi mới toàn diện đất nước",
             "Năm 1995 – Việt Nam bình thường hóa quan hệ với Mỹ và gia nhập ASEAN"
           ],
-          "nhan_vat": [
-            "Trường Chinh",
-            "Nguyễn Văn Linh"
-          ],
+          "nhan_vat": ["Trường Chinh", "Nguyễn Văn Linh"],
           "khai_niem": [
             "Thống nhất nhà nước",
             "Cộng hòa Xã hội Chủ nghĩa Việt Nam",
@@ -1212,15 +1136,8 @@
           "pham_vi_thoi_gian": "Lịch sử Việt Nam từ cổ đại đến hiện đại",
           "su_kien_moc": [],
           "nhan_vat": [],
-          "khai_niem": [
-            "Văn minh châu thổ",
-            "Sông Hồng",
-            "Sông Cửu Long",
-            "Đô thị hóa"
-          ],
-          "kien_thuc_duoc_dung": [
-            "Tích hợp kiến thức Sử - Địa cấp THCS."
-          ],
+          "khai_niem": ["Văn minh châu thổ", "Sông Hồng", "Sông Cửu Long", "Đô thị hóa"],
+          "kien_thuc_duoc_dung": ["Tích hợp kiến thức Sử - Địa cấp THCS."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các quy hoạch không gian vùng kinh tế hiện đại.",
             "CHƯA DÙNG các phân tích sinh thái nông nghiệp chuyên sâu.",
@@ -1257,10 +1174,7 @@
           ],
           "pham_vi_thoi_gian": "Tổng quan lý luận Sử học và hiện tại",
           "su_kien_moc": [],
-          "nhan_vat": [
-            "Hê-rô-đốt (Cha đẻ của Sử học)",
-            "Tư Mã Thiên (Tác giả Sử ký)"
-          ],
+          "nhan_vat": ["Hê-rô-đốt (Cha đẻ của Sử học)", "Tư Mã Thiên (Tác giả Sử ký)"],
           "khai_niem": [
             "Sử học",
             "Hiện thực lịch sử",
@@ -1370,12 +1284,7 @@
             "Năm 1946 – Máy tính điện tử ENIAC ra đời",
             "Từ đầu thế kỷ XXI – Cách mạng công nghiệp lần thứ tư (Cách mạng 4.0)"
           ],
-          "nhan_vat": [
-            "Giêm Oát",
-            "Et-đi-sơn",
-            "Hen-ri Pho",
-            "Bơ-nơ Li (Internet)"
-          ],
+          "nhan_vat": ["Giêm Oát", "Et-đi-sơn", "Hen-ri Pho", "Bơ-nơ Li (Internet)"],
           "khai_niem": [
             "Cách mạng công nghiệp 1.0",
             "Cách mạng công nghiệp 2.0",
@@ -1525,9 +1434,7 @@
           "su_kien_moc": [
             "Ngày 18/11/1930 – Thành lập Hội phản đế đồng minh (Ngày truyền thống Mặt trận Tổ quốc Việt Nam)"
           ],
-          "nhan_vat": [
-            "Hồ Chí Minh (với tư tưởng Đại đoàn kết dân tộc)"
-          ],
+          "nhan_vat": ["Hồ Chí Minh (với tư tưởng Đại đoàn kết dân tộc)"],
           "khai_niem": [
             "Cộng đồng 54 dân tộc",
             "Ngữ hệ",
@@ -1589,12 +1496,7 @@
             "Năm 1986 – Việt Nam bắt đầu công cuộc Đổi mới (Đại hội VI)",
             "Năm 1991 – Liên Xô sụp đổ, hệ thống XHCN theo mô hình Xô viết tan rã"
           ],
-          "nhan_vat": [
-            "V.I. Lê-nin",
-            "Xta-lin",
-            "Đặng Tiểu Bình",
-            "Phi-đen Ca-xtơ-rô"
-          ],
+          "nhan_vat": ["V.I. Lê-nin", "Xta-lin", "Đặng Tiểu Bình", "Phi-đen Ca-xtơ-rô"],
           "khai_niem": [
             "Chủ nghĩa xã hội",
             "Hệ thống XHCN thế giới",
@@ -1690,11 +1592,7 @@
             "Năm 2002 – Tuyên bố về ứng xử của các bên ở Biển Đông (DOC) được ký kết giữa ASEAN và Trung Quốc",
             "Năm 2012 – Quốc hội Việt Nam thông qua Luật Biển Việt Nam"
           ],
-          "nhan_vat": [
-            "Nguyễn Hoàng",
-            "Gia Long",
-            "Minh Mạng"
-          ],
+          "nhan_vat": ["Nguyễn Hoàng", "Gia Long", "Minh Mạng"],
           "khai_niem": [
             "Biển Đông",
             "Hoàng Sa",
@@ -1751,13 +1649,7 @@
             "Năm 1789 – Trận Ngọc Hồi - Đống Đa đánh tan quân Thanh",
             "Năm 1858–1884 – Kháng chiến chống Pháp của nhà Nguyễn thất bại"
           ],
-          "nhan_vat": [
-            "Lý Thường Kiệt",
-            "Trần Hưng Đạo",
-            "Hồ Quý Ly",
-            "Lê Lợi",
-            "Quang Trung"
-          ],
+          "nhan_vat": ["Lý Thường Kiệt", "Trần Hưng Đạo", "Hồ Quý Ly", "Lê Lợi", "Quang Trung"],
           "khai_niem": [
             "Chiến tranh bảo vệ Tổ quốc",
             "Chiến tranh chính nghĩa",
@@ -1804,11 +1696,7 @@
             "Nửa sau thế kỷ XV (1460–1497) – Cuộc cải cách toàn diện của vua Lê Thánh Tông (chia 13 đạo thừa tuyên, ban hành luật Hồng Đức)",
             "Năm 1831–1832 – Cuộc cải cách hành chính của vua Minh Mạng (chia cả nước thành 31 tỉnh, thành lập Viện Cơ mật, Nội các)"
           ],
-          "nhan_vat": [
-            "Hồ Quý Ly",
-            "Lê Thánh Tông",
-            "Minh Mạng"
-          ],
+          "nhan_vat": ["Hồ Quý Ly", "Lê Thánh Tông", "Minh Mạng"],
           "khai_niem": [
             "Cải cách",
             "Tiền giấy Thông bảo",
@@ -1859,15 +1747,8 @@
             "1984 – Bru-nây độc lập",
             "2002 – Đông Ti-mo độc lập"
           ],
-          "nhan_vat": [
-            "Xu-các-nô",
-            "Hồ Chí Minh"
-          ],
-          "khai_niem": [
-            "chủ nghĩa thực dân",
-            "thuộc địa",
-            "giải phóng dân tộc"
-          ],
+          "nhan_vat": ["Xu-các-nô", "Hồ Chí Minh"],
+          "khai_niem": ["chủ nghĩa thực dân", "thuộc địa", "giải phóng dân tộc"],
           "kien_thuc_duoc_dung": [
             "Đông Nam Á cổ – trung đại (lớp 6, 7, 10)",
             "Đông Nam Á thế kỷ XVI–XIX (lớp 8)"
@@ -1921,14 +1802,7 @@
             "Tháng 12/1991 – Liên Xô sụp đổ, Trật tự 2 cực I-an-ta hoàn toàn sụp đổ",
             "Đầu thế kỷ XXI đến nay – Định hình Trật tự thế giới đa cực"
           ],
-          "nhan_vat": [
-            "Ru-zơ-ven",
-            "Xta-lin",
-            "Sơ-chinh",
-            "Trơ-man",
-            "Góc-ba-chốp",
-            "Bu-xơ (bố)"
-          ],
+          "nhan_vat": ["Ru-zơ-ven", "Xta-lin", "Sơ-chinh", "Trơ-man", "Góc-ba-chốp", "Bu-xơ (bố)"],
           "khai_niem": [
             "Trật tự 2 cực I-an-ta",
             "Chiến tranh lạnh",
@@ -2034,12 +1908,7 @@
             "Ngày 30/4/1975 – Chiến dịch Hồ Chí Minh toàn thắng, giải phóng hoàn toàn miền Nam",
             "Năm 1978–1979 – Thắng lợi chiến tranh bảo vệ biên giới Tây Nam và phía Bắc"
           ],
-          "nhan_vat": [
-            "Hồ Chí Minh",
-            "Võ Nguyên Giáp",
-            "Nguyễn Chí Thanh",
-            "Lê Duẩn"
-          ],
+          "nhan_vat": ["Hồ Chí Minh", "Võ Nguyên Giáp", "Nguyễn Chí Thanh", "Lê Duẩn"],
           "khai_niem": [
             "Cách mạng tháng Tám",
             "Chiến tranh giải phóng dân tộc",
@@ -2203,9 +2072,7 @@
             "Ngày 2/9/1969 – Chủ tịch Hồ Chí Minh qua đời, để lại Di chúc lịch sử",
             "Năm 1987 – UNESCO ra Nghị quyết vinh danh Chủ tịch Hồ Chí Minh là 'Anh hùng giải phóng dân tộc, Nhà văn hóa kiệt xuất của Việt Nam'"
           ],
-          "nhan_vat": [
-            "Chủ tịch Hồ Chí Minh"
-          ],
+          "nhan_vat": ["Chủ tịch Hồ Chí Minh"],
           "khai_niem": [
             "Tư tưởng Hồ Chí Minh",
             "Anh hùng giải phóng dân tộc",
@@ -2255,10 +2122,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su6-vi-sao-can-hoc-lich-su",
-        "su6-xa-hoi-nguyen-thuy"
-      ],
+      "pham_vi": ["su6-vi-sao-can-hoc-lich-su", "su6-xa-hoi-nguyen-thuy"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2277,11 +2141,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su6-vi-sao-can-hoc-lich-su",
-        "su6-xa-hoi-nguyen-thuy",
-        "su6-van-minh-co-dai"
-      ],
+      "pham_vi": ["su6-vi-sao-can-hoc-lich-su", "su6-xa-hoi-nguyen-thuy", "su6-van-minh-co-dai"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2300,10 +2160,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su6-dong-nam-a-co-dai",
-        "su6-viet-nam-co-bac-thuoc"
-      ],
+      "pham_vi": ["su6-dong-nam-a-co-dai", "su6-viet-nam-co-bac-thuoc"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2322,10 +2179,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su6-viet-nam-co-bac-thuoc",
-        "su6-chu-de-chung-do-thi"
-      ],
+      "pham_vi": ["su6-viet-nam-co-bac-thuoc", "su6-chu-de-chung-do-thi"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2344,10 +2198,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su7-tay-au-trung-dai",
-        "su7-trung-quoc-an-do-trung-dai"
-      ],
+      "pham_vi": ["su7-tay-au-trung-dai", "su7-trung-quoc-an-do-trung-dai"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2389,9 +2240,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su7-viet-nam-thoi-ngop-le-so"
-      ],
+      "pham_vi": ["su7-viet-nam-thoi-ngop-le-so"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2410,10 +2259,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su7-viet-nam-thoi-ngop-le-so",
-        "su7-chu-de-chung-phat-kien-dia-li"
-      ],
+      "pham_vi": ["su7-viet-nam-thoi-ngop-le-so", "su7-chu-de-chung-phat-kien-dia-li"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2432,10 +2278,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su8-cach-mang-tu-san-cong-nghiep",
-        "su8-dong-nam-a-the-ky-16-19"
-      ],
+      "pham_vi": ["su8-cach-mang-tu-san-cong-nghiep", "su8-dong-nam-a-the-ky-16-19"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2477,10 +2320,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su8-the-gioi-cuoi-19-dau-20",
-        "su8-viet-nam-the-ky-19-dau-20"
-      ],
+      "pham_vi": ["su8-the-gioi-cuoi-19-dau-20", "su8-viet-nam-the-ky-19-dau-20"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2499,10 +2339,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su8-viet-nam-the-ky-19-dau-20",
-        "su8-chu-de-chung-bien-dong"
-      ],
+      "pham_vi": ["su8-viet-nam-the-ky-19-dau-20", "su8-chu-de-chung-bien-dong"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2521,10 +2358,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su9-the-gioi-1918-1945",
-        "su9-viet-nam-1918-1945"
-      ],
+      "pham_vi": ["su9-the-gioi-1918-1945", "su9-viet-nam-1918-1945"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2543,10 +2377,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su9-the-gioi-1918-1945",
-        "su9-viet-nam-1918-1945"
-      ],
+      "pham_vi": ["su9-the-gioi-1918-1945", "su9-viet-nam-1918-1945"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2565,10 +2396,7 @@
           "diem_moi_cau": 1.5
         }
       ],
-      "pham_vi": [
-        "su9-the-gioi-1945-nay",
-        "su9-viet-nam-1945-1975"
-      ],
+      "pham_vi": ["su9-the-gioi-1945-nay", "su9-viet-nam-1945-1975"],
       "ti_le_muc_do": "Môn Lịch sử và Địa lí (Sử chiếm 50% = 5.0 điểm): 40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2615,10 +2443,7 @@
           "diem_moi_cau": 0.75
         }
       ],
-      "pham_vi": [
-        "su10-lich-su-va-su-hoc",
-        "su10-van-minh-the-gioi-co-trung-dai"
-      ],
+      "pham_vi": ["su10-lich-su-va-su-hoc", "su10-van-minh-the-gioi-co-trung-dai"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2670,10 +2495,7 @@
           "diem_moi_cau": 0.75
         }
       ],
-      "pham_vi": [
-        "su10-van-minh-dong-nam-a",
-        "su10-van-minh-tren-dat-nuoc-viet-nam"
-      ],
+      "pham_vi": ["su10-van-minh-dong-nam-a", "su10-van-minh-tren-dat-nuoc-viet-nam"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2697,10 +2519,7 @@
           "diem_moi_cau": 0.75
         }
       ],
-      "pham_vi": [
-        "su10-van-minh-tren-dat-nuoc-viet-nam",
-        "su10-cong-dong-cac-dan-toc-viet-nam"
-      ],
+      "pham_vi": ["su10-van-minh-tren-dat-nuoc-viet-nam", "su10-cong-dong-cac-dan-toc-viet-nam"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2724,10 +2543,7 @@
           "diem_moi_cau": 0.75
         }
       ],
-      "pham_vi": [
-        "su11-lich-su-chu-nghia-xa-hoi",
-        "su11-chu-nghia-tu-ban"
-      ],
+      "pham_vi": ["su11-lich-su-chu-nghia-xa-hoi", "su11-chu-nghia-tu-ban"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2806,10 +2622,7 @@
           "diem_moi_cau": 0.75
         }
       ],
-      "pham_vi": [
-        "su11-cai-cach-trong-lich-su-viet-nam",
-        "su11-lich-su-doi-ngoai-viet-nam"
-      ],
+      "pham_vi": ["su11-cai-cach-trong-lich-su-viet-nam", "su11-lich-su-doi-ngoai-viet-nam"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -2833,10 +2646,7 @@
           "diem_moi_cau": 0.75
         }
       ],
-      "pham_vi": [
-        "su12-the-gioi-trong-va-sau-chien-tranh-lanh",
-        "su12-asean-lich-su"
-      ],
+      "pham_vi": ["su12-the-gioi-trong-va-sau-chien-tranh-lanh", "su12-asean-lich-su"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {

@@ -105,7 +105,10 @@ function deaccent(str: string): string {
 
 const MARR_RE = /^(\S+?)\s*(xx|x)\s*(\S+?)(?:\s*(?:->|→)\s*(.*))?$/i
 
-export function parsePedigree(text: string, options?: { legend?: boolean; carrierStyle?: 'half' | 'dot' }): ParseResult {
+export function parsePedigree(
+  text: string,
+  options?: { legend?: boolean; carrierStyle?: 'half' | 'dot' },
+): ParseResult {
   const persons = new Map<string, PedigreePerson>()
   const marriages: PedigreeMarriage[] = []
   const errors: Array<{ line: number; msg: string }> = []
@@ -181,7 +184,8 @@ export function parsePedigree(text: string, options?: { legend?: boolean; carrie
         let gender: Gender = 'unknown'
         if (/\bnam\b/.test(attrD)) gender = 'male'
         else if (/\b(nu)\b/.test(attrD)) gender = 'female'
-        else if (attrD.includes('?') || attrD.includes('chua ro') || attrD.includes('kxd')) gender = 'unknown'
+        else if (attrD.includes('?') || attrD.includes('chua ro') || attrD.includes('kxd'))
+          gender = 'unknown'
 
         // Trạng thái bệnh tật / mang gen
         let status: HealthStatus = 'normal'
@@ -189,7 +193,11 @@ export function parsePedigree(text: string, options?: { legend?: boolean; carrie
           status = 'carrier'
         } else if (attrD.includes('benh')) {
           status = 'affected'
-        } else if (attrD.includes('binh thuong') || attrD.includes('lanh') || attrD.includes('bt')) {
+        } else if (
+          attrD.includes('binh thuong') ||
+          attrD.includes('lanh') ||
+          attrD.includes('bt')
+        ) {
           status = 'normal'
         }
 
@@ -240,11 +248,25 @@ export function parsePedigree(text: string, options?: { legend?: boolean; carrie
 
       if (!persons.has(p1)) {
         errors.push({ line: lineNum, msg: `Người "${p1}" chưa được khai báo` })
-        persons.set(p1, { id: p1, label: p1, gender: 'male', status: 'normal', deceased: false, isQuestion: false })
+        persons.set(p1, {
+          id: p1,
+          label: p1,
+          gender: 'male',
+          status: 'normal',
+          deceased: false,
+          isQuestion: false,
+        })
       }
       if (!persons.has(p2)) {
         errors.push({ line: lineNum, msg: `Người "${p2}" chưa được khai báo` })
-        persons.set(p2, { id: p2, label: p2, gender: 'female', status: 'normal', deceased: false, isQuestion: false })
+        persons.set(p2, {
+          id: p2,
+          label: p2,
+          gender: 'female',
+          status: 'normal',
+          deceased: false,
+          isQuestion: false,
+        })
       }
 
       const children: ChildItem[] = []
@@ -281,7 +303,14 @@ export function parsePedigree(text: string, options?: { legend?: boolean; carrie
           ids.forEach((cid) => {
             if (!persons.has(cid)) {
               errors.push({ line: lineNum, msg: `Người con "${cid}" chưa được khai báo` })
-              persons.set(cid, { id: cid, label: cid, gender: 'unknown', status: 'normal', deceased: false, isQuestion: false })
+              persons.set(cid, {
+                id: cid,
+                label: cid,
+                gender: 'unknown',
+                status: 'normal',
+                deceased: false,
+                isQuestion: false,
+              })
             }
             if (childParentMap.has(cid)) {
               errors.push({ line: lineNum, msg: `Con "${cid}" đã có bố mẹ khác (trùng bố mẹ)` })
@@ -468,7 +497,9 @@ export function layoutPedigree(parsed: ParseResult): PedigreeLayout {
   }
 
   const hasParents = new Set<string>()
-  for (const m of marriages) for (const ch of m.children) for (const id of ch.type === 'single' ? [ch.id] : ch.ids) hasParents.add(id)
+  for (const m of marriages)
+    for (const ch of m.children)
+      for (const id of ch.type === 'single' ? [ch.id] : ch.ids) hasParents.add(id)
 
   // 1. Sắp xếp thứ tự các cá thể trong từng thế hệ từ trái sang phải
   const orderedGen = new Map<number, string[]>()
@@ -515,7 +546,11 @@ export function layoutPedigree(parsed: ParseResult): PedigreeLayout {
 
     const sortedMarriages = marriages
       // chỉ cặp bố mẹ ở đúng thế hệ ngay trên (con của họ thuộc thế hệ g)
-      .filter((m) => Math.max(genMap.get(m.parent1) ?? 0, genMap.get(m.parent2) ?? 0) === g - 1 && m.children.length > 0)
+      .filter(
+        (m) =>
+          Math.max(genMap.get(m.parent1) ?? 0, genMap.get(m.parent2) ?? 0) === g - 1 &&
+          m.children.length > 0,
+      )
       .sort((a, b) => (parentMidPos.get(a) ?? 0) - (parentMidPos.get(b) ?? 0))
 
     for (const m of sortedMarriages) {
@@ -523,13 +558,17 @@ export function layoutPedigree(parsed: ParseResult): PedigreeLayout {
       // người có vợ/chồng thuộc nhóm anh chị em đã xếp (bên trái) đứng đầu, thuộc nhóm chưa xếp (bên phải) đứng cuối,
       // để đường nối vợ chồng không cắt qua người khác; cặp sinh đôi giữ nguyên khối
       const sideOf = (ids: string[]) => {
-        const sp = ids.flatMap((id) => spouseOf.get(id) ?? []).filter((s) => (genMap.get(s) ?? 0) === g && hasParents.has(s))
+        const sp = ids
+          .flatMap((id) => spouseOf.get(id) ?? [])
+          .filter((s) => (genMap.get(s) ?? 0) === g && hasParents.has(s))
         if (sp.some((s) => placed.has(s))) return 0
         if (sp.length) return 2
         return 1
       }
       const groups = [...m.children].sort(
-        (a, b) => sideOf(a.type === 'single' ? [a.id] : a.ids) - sideOf(b.type === 'single' ? [b.id] : b.ids),
+        (a, b) =>
+          sideOf(a.type === 'single' ? [a.id] : a.ids) -
+          sideOf(b.type === 'single' ? [b.id] : b.ids),
       )
       for (const ch of groups) {
         if (ch.type === 'single') sibIds.push(ch.id)
@@ -764,7 +803,12 @@ export function renderPedigreeSvg(
       const childTopY = y + ROW_HEIGHT - 13
 
       // Điểm nhánh của từng con trên đường ngang
-      type Branch = { x: number; childType: 'single' | 'twins'; childIds: string[]; identical?: boolean }
+      type Branch = {
+        x: number
+        childType: 'single' | 'twins'
+        childIds: string[]
+        identical?: boolean
+      }
       const branches: Branch[] = []
 
       for (const ch of m.children) {
@@ -786,7 +830,11 @@ export function renderPedigreeSvg(
         }
       }
 
-      if (branches.length === 1 && branches[0].childType === 'single' && Math.abs(branches[0].x - midParentX) < 1) {
+      if (
+        branches.length === 1 &&
+        branches[0].childType === 'single' &&
+        Math.abs(branches[0].x - midParentX) < 1
+      ) {
         // Chỉ 1 con thẳng hàng: một đoạn thẳng từ bố mẹ xuống thẳng con
         body += `<line x1="${f1(midParentX)}" y1="${f1(y)}" x2="${f1(midParentX)}" y2="${f1(childTopY)}" stroke="#111" stroke-width="1.5"/>`
       } else {
@@ -904,17 +952,29 @@ export function renderPedigreeSvg(
 
   if (legend) {
     // Thu thập các kí hiệu thực tế có dùng
-    const usedMaleNormal = Array.from(persons.values()).some((p) => p.gender === 'male' && p.status === 'normal' && !p.deceased)
-    const usedFemaleNormal = Array.from(persons.values()).some((p) => p.gender === 'female' && p.status === 'normal' && !p.deceased)
-    const usedMaleAffected = Array.from(persons.values()).some((p) => p.gender === 'male' && p.status === 'affected')
-    const usedFemaleAffected = Array.from(persons.values()).some((p) => p.gender === 'female' && p.status === 'affected')
+    const usedMaleNormal = Array.from(persons.values()).some(
+      (p) => p.gender === 'male' && p.status === 'normal' && !p.deceased,
+    )
+    const usedFemaleNormal = Array.from(persons.values()).some(
+      (p) => p.gender === 'female' && p.status === 'normal' && !p.deceased,
+    )
+    const usedMaleAffected = Array.from(persons.values()).some(
+      (p) => p.gender === 'male' && p.status === 'affected',
+    )
+    const usedFemaleAffected = Array.from(persons.values()).some(
+      (p) => p.gender === 'female' && p.status === 'affected',
+    )
     const usedCarrier = Array.from(persons.values()).some((p) => p.status === 'carrier')
     const usedDeceased = Array.from(persons.values()).some((p) => p.deceased)
     const usedUnknown = Array.from(persons.values()).some((p) => p.gender === 'unknown')
     const usedQuestion = Array.from(persons.values()).some((p) => p.isQuestion)
     const usedConsanguineous = marriages.some((m) => m.consanguineous)
-    const usedTwinsIdentical = marriages.some((m) => m.children.some((c) => c.type === 'identicalTwins'))
-    const usedTwinsFraternal = marriages.some((m) => m.children.some((c) => c.type === 'fraternalTwins'))
+    const usedTwinsIdentical = marriages.some((m) =>
+      m.children.some((c) => c.type === 'identicalTwins'),
+    )
+    const usedTwinsFraternal = marriages.some((m) =>
+      m.children.some((c) => c.type === 'fraternalTwins'),
+    )
 
     type LegItem = { icon: string; label: string }
     const legItems: LegItem[] = []

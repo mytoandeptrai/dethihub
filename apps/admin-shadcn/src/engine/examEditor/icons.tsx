@@ -13,8 +13,9 @@
  * shared pinned stroke width).
  */
 
-import type { ReactNode } from 'react'
 import { TrashIcon } from '@/engine/components/appIcons'
+
+import type { ReactNode } from 'react'
 
 interface IconProps {
   size?: number

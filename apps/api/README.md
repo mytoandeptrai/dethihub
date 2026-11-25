@@ -4,15 +4,15 @@
 
 ## Tech Stack
 
-| Category  | Technology                                           |
-| --------- | ---------------------------------------------------- |
-| Framework | NestJS 11 + TypeScript 5                             |
+| Category  | Technology                                      |
+| --------- | ----------------------------------------------- |
+| Framework | NestJS 11 + TypeScript 5                        |
 | Database  | PostgreSQL · Prisma (via `@workspace/database`) |
-| Auth      | JWT · Passport · OAuth2 (Google / GitHub)            |
-| Cache     | Redis · cache-manager · Keyv                         |
-| Docs      | Swagger + Scalar (available at `/docs`)              |
-| Logging   | nestjs-pino · pino-http                              |
-| Testing   | Vitest · @nestjs/testing · Supertest                 |
+| Auth      | JWT · Passport · OAuth2 (Google / GitHub)       |
+| Cache     | Redis · cache-manager · Keyv                    |
+| Docs      | Swagger + Scalar (available at `/docs`)         |
+| Logging   | nestjs-pino · pino-http                         |
+| Testing   | Vitest · @nestjs/testing · Supertest            |
 
 ## Quick Start
 

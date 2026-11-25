@@ -32,23 +32,99 @@ export function fixMathEscapes(text: string): string {
 }
 
 const SYMBOLS: Record<string, string> = {
-  cdot: '·', times: '×', div: '÷', pm: '±', mp: '∓', leq: '≤', le: '≤', geq: '≥', ge: '≥',
-  neq: '≠', ne: '≠', approx: '≈', equiv: '≡', to: '→', rightarrow: '→', leftarrow: '←',
-  Rightarrow: '⇒', Leftarrow: '⇐', Leftrightarrow: '⇔', leftrightarrow: '↔', infty: '∞',
-  in: '∈', notin: '∉', subset: '⊂', cup: '∪', cap: '∩', emptyset: '∅', forall: '∀', exists: '∃',
-  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', Delta: 'Δ', theta: 'θ', lambda: 'λ', mu: 'μ',
-  pi: 'π', sigma: 'σ', Sigma: 'Σ', omega: 'ω', Omega: 'Ω', varphi: 'φ', phi: 'φ', rho: 'ρ',
-  angle: '∠', perp: '⊥', parallel: '∥', circ: '°', degree: '°', ldots: '…', dots: '…',
-  sum: 'Σ', prod: '∏', int: '∫', partial: '∂', nabla: '∇', sqrt: '√', hbar: 'ħ', therefore: '∴',
+  cdot: '·',
+  times: '×',
+  div: '÷',
+  pm: '±',
+  mp: '∓',
+  leq: '≤',
+  le: '≤',
+  geq: '≥',
+  ge: '≥',
+  neq: '≠',
+  ne: '≠',
+  approx: '≈',
+  equiv: '≡',
+  to: '→',
+  rightarrow: '→',
+  leftarrow: '←',
+  Rightarrow: '⇒',
+  Leftarrow: '⇐',
+  Leftrightarrow: '⇔',
+  leftrightarrow: '↔',
+  infty: '∞',
+  in: '∈',
+  notin: '∉',
+  subset: '⊂',
+  cup: '∪',
+  cap: '∩',
+  emptyset: '∅',
+  forall: '∀',
+  exists: '∃',
+  alpha: 'α',
+  beta: 'β',
+  gamma: 'γ',
+  delta: 'δ',
+  Delta: 'Δ',
+  theta: 'θ',
+  lambda: 'λ',
+  mu: 'μ',
+  pi: 'π',
+  sigma: 'σ',
+  Sigma: 'Σ',
+  omega: 'ω',
+  Omega: 'Ω',
+  varphi: 'φ',
+  phi: 'φ',
+  rho: 'ρ',
+  angle: '∠',
+  perp: '⊥',
+  parallel: '∥',
+  circ: '°',
+  degree: '°',
+  ldots: '…',
+  dots: '…',
+  sum: 'Σ',
+  prod: '∏',
+  int: '∫',
+  partial: '∂',
+  nabla: '∇',
+  sqrt: '√',
+  hbar: 'ħ',
+  therefore: '∴',
 }
 
 const SUPER: Record<string, string> = {
-  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-  '+': '⁺', '-': '⁻', n: 'ⁿ', x: 'ˣ',
+  '0': '⁰',
+  '1': '¹',
+  '2': '²',
+  '3': '³',
+  '4': '⁴',
+  '5': '⁵',
+  '6': '⁶',
+  '7': '⁷',
+  '8': '⁸',
+  '9': '⁹',
+  '+': '⁺',
+  '-': '⁻',
+  'n': 'ⁿ',
+  'x': 'ˣ',
 }
 const SUB: Record<string, string> = {
-  '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
-  '+': '₊', '-': '₋', n: 'ₙ', x: 'ₓ',
+  '0': '₀',
+  '1': '₁',
+  '2': '₂',
+  '3': '₃',
+  '4': '₄',
+  '5': '₅',
+  '6': '₆',
+  '7': '₇',
+  '8': '₈',
+  '9': '₉',
+  '+': '₊',
+  '-': '₋',
+  'n': 'ₙ',
+  'x': 'ₓ',
 }
 
 const script = (body: string, map: Record<string, string>): string | null => {
@@ -65,9 +141,16 @@ const script = (body: string, map: Record<string, string>): string | null => {
 export function latexToPlain(latex: string): string {
   let s = latex
   // \ce{...} (mhchem): bỏ vỏ, đổi mũi tên
-  s = s.replace(/\\ce\{([^}]*)\}/g, (_, body: string) => body.replace(/<->|<=>/g, '⇌').replace(/->/g, '→'))
-  s = s.replace(/\\(?:d|t)?frac\{([^{}]*)\}\{([^{}]*)\}/g, '($1)/($2)').replace(/\(([^()/ ]+)\)\/\(([^()/ ]+)\)/g, '$1/$2')
-  s = s.replace(/\\sqrt\[(\w+)\]\{([^{}]*)\}/g, '$1√($2)').replace(/\\sqrt\{([^{}]*)\}/g, '√($1)').replace(/\\sqrt\s*(\w)/g, '√$1')
+  s = s.replace(/\\ce\{([^}]*)\}/g, (_, body: string) =>
+    body.replace(/<->|<=>/g, '⇌').replace(/->/g, '→'),
+  )
+  s = s
+    .replace(/\\(?:d|t)?frac\{([^{}]*)\}\{([^{}]*)\}/g, '($1)/($2)')
+    .replace(/\(([^()/ ]+)\)\/\(([^()/ ]+)\)/g, '$1/$2')
+  s = s
+    .replace(/\\sqrt\[(\w+)\]\{([^{}]*)\}/g, '$1√($2)')
+    .replace(/\\sqrt\{([^{}]*)\}/g, '√($1)')
+    .replace(/\\sqrt\s*(\w)/g, '√$1')
   s = s.replace(/\\(?:text|mathrm|mathbf|mathit|operatorname)\{([^{}]*)\}/g, '$1')
   s = s.replace(/\\left|\\right|\\,|\\;|\\!|\\quad|\\qquad/g, ' ')
   s = s.replace(/\^\{([^{}]+)\}/g, (_, body: string) => script(body, SUPER) ?? `^(${body})`)
@@ -75,7 +158,10 @@ export function latexToPlain(latex: string): string {
   s = s.replace(/_\{([^{}]+)\}/g, (_, body: string) => script(body, SUB) ?? `_(${body})`)
   s = s.replace(/_([^{}\s\\])/g, (_, body: string) => script(body, SUB) ?? `_${body}`)
   s = s.replace(/\\([a-zA-Z]+)/g, (_, name: string) => SYMBOLS[name] ?? name)
-  return s.replace(/[{}\\]/g, '').replace(/\s{2,}/g, ' ').trim()
+  return s
+    .replace(/[{}\\]/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
 }
 
 /** Số công thức "cao" (phân số, căn, tổng, tích phân) trong chuỗi — làm dòng chữ phình ra. */
@@ -101,12 +187,14 @@ export function mathToPlain(text: string): string {
  */
 const BOLD = /\*\*([^*\n]+?)\*\*|\*\*/g
 
-export const hasBold = (text: string | undefined): boolean => !!text && /\*\*[^*\n]+?\*\*/.test(text)
+export const hasBold = (text: string | undefined): boolean =>
+  !!text && /\*\*[^*\n]+?\*\*/.test(text)
 
 /** Có gì cần vẽ bằng HTML (công thức hoặc chữ đậm) thay vì chữ thuần. */
 export const hasRich = (text: string | undefined): boolean => hasMath(text) || hasBold(text)
 
-export const stripBold = (text: string): string => (text.includes('**') ? text.replace(BOLD, (_, body?: string) => body ?? '') : text)
+export const stripBold = (text: string): string =>
+  text.includes('**') ? text.replace(BOLD, (_, body?: string) => body ?? '') : text
 
 /**
  * Giữ tối đa `maxSpans` cụm đậm, mỗi cụm ≤ `maxWords` từ; cụm thừa/quá dài thành chữ thường.
@@ -117,7 +205,9 @@ export function limitBold(text: string, maxSpans = 2, maxWords = 6): string {
   let kept = 0
   return text.replace(BOLD, (_, body?: string) => {
     if (body === undefined) return ''
-    return kept < maxSpans && body.trim().split(/\s+/).length <= maxWords && ++kept ? `**${body}**` : body
+    return kept < maxSpans && body.trim().split(/\s+/).length <= maxWords && ++kept
+      ? `**${body}**`
+      : body
   })
 }
 

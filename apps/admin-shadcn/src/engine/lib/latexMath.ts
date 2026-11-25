@@ -36,23 +36,172 @@ type Node =
   | { t: 'acc'; chr: string; body: Node[] }
 
 const SYMBOLS: Record<string, string> = {
-  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', vartheta: 'ϑ', iota: 'ι',
-  kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ', phi: 'φ', varphi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω',
-  Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π', Sigma: 'Σ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω',
-  cdot: '·', times: '×', div: '÷', pm: '±', mp: '∓', le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠', approx: '≈', equiv: '≡', sim: '∼', propto: '∝',
-  infty: '∞', to: '→', rightarrow: '→', leftarrow: '←', Rightarrow: '⇒', Leftarrow: '⇐', Leftrightarrow: '⇔', leftrightarrow: '↔', mapsto: '↦',
-  in: '∈', notin: '∉', ni: '∋', subset: '⊂', subseteq: '⊆', supset: '⊃', supseteq: '⊇', cup: '∪', cap: '∩', emptyset: '∅', varnothing: '∅',
-  forall: '∀', exists: '∃', neg: '¬', land: '∧', lor: '∨', perp: '⊥', parallel: '∥', angle: '∠', triangle: '△', circ: '∘', degree: '°',
-  partial: '∂', nabla: '∇', prime: '′', ldots: '…', dots: '…', cdots: '⋯', vdots: '⋮', because: '∵', therefore: '∴', setminus: '∖', star: '⋆', bullet: '•',
-  langle: '⟨', rangle: '⟩', lbrace: '{', rbrace: '}', '{': '{', '}': '}', '%': '%', $: '$', _: '_', '&': '&', '#': '#',
-  ',': ' ', ';': ' ', ':': ' ', ' ': ' ', quad: '  ', qquad: '    ', '!': '', '\\': ' ',
+  'alpha': 'α',
+  'beta': 'β',
+  'gamma': 'γ',
+  'delta': 'δ',
+  'epsilon': 'ε',
+  'varepsilon': 'ε',
+  'zeta': 'ζ',
+  'eta': 'η',
+  'theta': 'θ',
+  'vartheta': 'ϑ',
+  'iota': 'ι',
+  'kappa': 'κ',
+  'lambda': 'λ',
+  'mu': 'μ',
+  'nu': 'ν',
+  'xi': 'ξ',
+  'pi': 'π',
+  'rho': 'ρ',
+  'sigma': 'σ',
+  'tau': 'τ',
+  'upsilon': 'υ',
+  'phi': 'φ',
+  'varphi': 'φ',
+  'chi': 'χ',
+  'psi': 'ψ',
+  'omega': 'ω',
+  'Gamma': 'Γ',
+  'Delta': 'Δ',
+  'Theta': 'Θ',
+  'Lambda': 'Λ',
+  'Xi': 'Ξ',
+  'Pi': 'Π',
+  'Sigma': 'Σ',
+  'Phi': 'Φ',
+  'Psi': 'Ψ',
+  'Omega': 'Ω',
+  'cdot': '·',
+  'times': '×',
+  'div': '÷',
+  'pm': '±',
+  'mp': '∓',
+  'le': '≤',
+  'leq': '≤',
+  'ge': '≥',
+  'geq': '≥',
+  'ne': '≠',
+  'neq': '≠',
+  'approx': '≈',
+  'equiv': '≡',
+  'sim': '∼',
+  'propto': '∝',
+  'infty': '∞',
+  'to': '→',
+  'rightarrow': '→',
+  'leftarrow': '←',
+  'Rightarrow': '⇒',
+  'Leftarrow': '⇐',
+  'Leftrightarrow': '⇔',
+  'leftrightarrow': '↔',
+  'mapsto': '↦',
+  'in': '∈',
+  'notin': '∉',
+  'ni': '∋',
+  'subset': '⊂',
+  'subseteq': '⊆',
+  'supset': '⊃',
+  'supseteq': '⊇',
+  'cup': '∪',
+  'cap': '∩',
+  'emptyset': '∅',
+  'varnothing': '∅',
+  'forall': '∀',
+  'exists': '∃',
+  'neg': '¬',
+  'land': '∧',
+  'lor': '∨',
+  'perp': '⊥',
+  'parallel': '∥',
+  'angle': '∠',
+  'triangle': '△',
+  'circ': '∘',
+  'degree': '°',
+  'partial': '∂',
+  'nabla': '∇',
+  'prime': '′',
+  'ldots': '…',
+  'dots': '…',
+  'cdots': '⋯',
+  'vdots': '⋮',
+  'because': '∵',
+  'therefore': '∴',
+  'setminus': '∖',
+  'star': '⋆',
+  'bullet': '•',
+  'langle': '⟨',
+  'rangle': '⟩',
+  'lbrace': '{',
+  'rbrace': '}',
+  '{': '{',
+  '}': '}',
+  '%': '%',
+  '$': '$',
+  '_': '_',
+  '&': '&',
+  '#': '#',
+  ',': ' ',
+  ';': ' ',
+  ':': ' ',
+  ' ': ' ',
+  'quad': '  ',
+  'qquad': '    ',
+  '!': '',
+  '\\': ' ',
 }
 
-const FUNCTIONS = new Set(['sin', 'cos', 'tan', 'cot', 'sec', 'csc', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'log', 'ln', 'lg', 'exp', 'max', 'min', 'det', 'gcd', 'deg', 'dim', 'ker', 'sup', 'inf'])
+const FUNCTIONS = new Set([
+  'sin',
+  'cos',
+  'tan',
+  'cot',
+  'sec',
+  'csc',
+  'arcsin',
+  'arccos',
+  'arctan',
+  'sinh',
+  'cosh',
+  'tanh',
+  'log',
+  'ln',
+  'lg',
+  'exp',
+  'max',
+  'min',
+  'det',
+  'gcd',
+  'deg',
+  'dim',
+  'ker',
+  'sup',
+  'inf',
+])
 /** dấu trên đầu: ký tự gộp (m:acc); `overline`/`bar` dùng gạch ngang (m:bar) nên để chr rỗng */
-const ACCENTS: Record<string, string> = { vec: '⃗', overrightarrow: '⃗', overline: '', bar: '', hat: '̂', widehat: '̂', tilde: '̃', dot: '̇', ddot: '̈' }
+const ACCENTS: Record<string, string> = {
+  vec: '⃗',
+  overrightarrow: '⃗',
+  overline: '',
+  bar: '',
+  hat: '̂',
+  widehat: '̂',
+  tilde: '̃',
+  dot: '̇',
+  ddot: '̈',
+}
 const BLACKBOARD: Record<string, string> = { R: 'ℝ', N: 'ℕ', Z: 'ℤ', Q: 'ℚ', C: 'ℂ', P: 'ℙ' }
-const ARRAYS = new Set(['cases', 'aligned', 'align', 'array', 'matrix', 'pmatrix', 'bmatrix', 'gathered', 'split'])
+const ARRAYS = new Set([
+  'cases',
+  'aligned',
+  'align',
+  'array',
+  'matrix',
+  'pmatrix',
+  'bmatrix',
+  'gathered',
+  'split',
+])
 
 type Tok = { k: 'cmd' | 'ch' | 'open' | 'close' | 'sup' | 'sub' | 'amp'; v: string }
 
@@ -120,7 +269,11 @@ class Parser {
     // chỉ số chỉ bám vào phần tử liền trước (một ký tự), không bám cả cụm chữ
     if (last?.t === 'text' && last.s.length > 1) {
       const head = last.s.slice(0, -1)
-      return [...base.slice(0, -1), { t: 'text', s: head }, { t: 'script', base: [{ t: 'text', s: last.s.slice(-1) }], sub, sup }]
+      return [
+        ...base.slice(0, -1),
+        { t: 'text', s: head },
+        { t: 'script', base: [{ t: 'text', s: last.s.slice(-1) }], sub, sup },
+      ]
     }
     return [{ t: 'script', base: base.length ? base : [{ t: 'text', s: '' }], sub, sup }]
   }
@@ -204,7 +357,15 @@ class Parser {
         return [{ t: 'text', s: flatText(this.arg()) }]
       case 'mathbb': {
         const s = flatText(this.arg())
-        return [{ t: 'text', s: s.split('').map((c) => BLACKBOARD[c] ?? c).join('') }]
+        return [
+          {
+            t: 'text',
+            s: s
+              .split('')
+              .map((c) => BLACKBOARD[c] ?? c)
+              .join(''),
+          },
+        ]
       }
       case 'begin': {
         const env = flatText(this.arg())
@@ -270,35 +431,93 @@ function emit(nodes: Node[]): MathComponent[] {
         break
       case 'script': {
         const base = emit(n.base)
-        if (n.sub && n.sup) out.push(new MathSubSuperScript({ children: base, subScript: emit(n.sub), superScript: emit(n.sup) }))
+        if (n.sub && n.sup)
+          out.push(
+            new MathSubSuperScript({
+              children: base,
+              subScript: emit(n.sub),
+              superScript: emit(n.sup),
+            }),
+          )
         else if (n.sup) out.push(new MathSuperScript({ children: base, superScript: emit(n.sup) }))
         else out.push(new MathSubScript({ children: base, subScript: emit(n.sub ?? []) }))
         break
       }
       case 'brackets': {
         const body = emit(n.body)
-        if (n.open === '(' ) out.push(new MathRoundBrackets({ children: body }))
+        if (n.open === '(') out.push(new MathRoundBrackets({ children: body }))
         else if (n.open === '[') out.push(new MathSquareBrackets({ children: body }))
         else if (n.open === '\\{') out.push(new MathCurlyBrackets({ children: body }))
         else if (n.open === '\\langle') out.push(new MathAngledBrackets({ children: body }))
-        else out.push(new MathRun(n.open === '.' ? '' : n.open.replace(/^\\/, '')), ...body, new MathRun(n.close === '.' ? '' : n.close.replace(/^\\/, '')))
+        else
+          out.push(
+            new MathRun(n.open === '.' ? '' : n.open.replace(/^\\/, '')),
+            ...body,
+            new MathRun(n.close === '.' ? '' : n.close.replace(/^\\/, '')),
+          )
         break
       }
       case 'nary':
         // số hạng ngay sau tổng/tích phân đã nằm trong chuỗi tiếp theo; để trống thì Word hiện ô chờ, nên gom ở bước `group`
-        out.push(n.kind === 'sum' ? new MathSum({ children: emit(n.body), subScript: sub(n.sub), superScript: sub(n.sup) }) : new MathIntegral({ children: emit(n.body), subScript: sub(n.sub), superScript: sub(n.sup) }))
+        out.push(
+          n.kind === 'sum'
+            ? new MathSum({
+                children: emit(n.body),
+                subScript: sub(n.sub),
+                superScript: sub(n.sup),
+              })
+            : new MathIntegral({
+                children: emit(n.body),
+                subScript: sub(n.sub),
+                superScript: sub(n.sup),
+              }),
+        )
         break
       case 'acc': {
-        const body = new BuilderElement({ name: 'm:e', children: emit(n.body) as unknown as XmlComponent[] })
+        const body = new BuilderElement({
+          name: 'm:e',
+          children: emit(n.body) as unknown as XmlComponent[],
+        })
         out.push(
           (n.chr
-            ? new BuilderElement({ name: 'm:acc', children: [new BuilderElement({ name: 'm:accPr', children: [new BuilderElement<{ val: string }>({ name: 'm:chr', attributes: { val: { key: 'm:val', value: n.chr } } })] }), body] })
-            : new BuilderElement({ name: 'm:bar', children: [new BuilderElement({ name: 'm:barPr', children: [new BuilderElement<{ val: string }>({ name: 'm:pos', attributes: { val: { key: 'm:val', value: 'top' } } })] }), body] })) as unknown as MathComponent,
+            ? new BuilderElement({
+                name: 'm:acc',
+                children: [
+                  new BuilderElement({
+                    name: 'm:accPr',
+                    children: [
+                      new BuilderElement<{ val: string }>({
+                        name: 'm:chr',
+                        attributes: { val: { key: 'm:val', value: n.chr } },
+                      }),
+                    ],
+                  }),
+                  body,
+                ],
+              })
+            : new BuilderElement({
+                name: 'm:bar',
+                children: [
+                  new BuilderElement({
+                    name: 'm:barPr',
+                    children: [
+                      new BuilderElement<{ val: string }>({
+                        name: 'm:pos',
+                        attributes: { val: { key: 'm:val', value: 'top' } },
+                      }),
+                    ],
+                  }),
+                  body,
+                ],
+              })) as unknown as MathComponent,
         )
         break
       }
       case 'lim':
-        out.push(new MathLimitLower({ children: [new MathRun(n.name)], limit: emit(n.sub) }), ...emit(n.body))
+        out.push(
+          new MathLimitLower({ children: [new MathRun(n.name)], limit: emit(n.sub) }),
+          ...emit(n.body),
+        )
         break
     }
   }

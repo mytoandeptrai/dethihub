@@ -119,18 +119,20 @@ function SidebarUi({
             {!compact && t('auth.loginTitle')}
           </Link>
         )}
-        {canCreate && <Link
-          href={appPaths.editor.href}
-          aria-current={activePath === appPaths.editor.href ? 'page' : undefined}
-          className={cn(
-            linkClass,
-            'mt-3 justify-center bg-indigo-600 text-white shadow-sm hover:bg-indigo-700',
-          )}
-          aria-label={t('product.create')}
-        >
-          <span className="text-lg">+</span>
-          {!compact && t('product.create')}
-        </Link>}
+        {canCreate && (
+          <Link
+            href={appPaths.editor.href}
+            aria-current={activePath === appPaths.editor.href ? 'page' : undefined}
+            className={cn(
+              linkClass,
+              'mt-3 justify-center bg-indigo-600 text-white shadow-sm hover:bg-indigo-700',
+            )}
+            aria-label={t('product.create')}
+          >
+            <span className="text-lg">+</span>
+            {!compact && t('product.create')}
+          </Link>
+        )}
       </div>
       <nav
         aria-label={t('product.navigation')}

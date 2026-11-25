@@ -1,8 +1,19 @@
 /** Căn và phân bố đều nhiều phần tử slide (hộp theo % khung, bỏ qua góc xoay). */
-export type AlignMode = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom' | 'spreadX' | 'spreadY'
+export type AlignMode =
+  | 'left'
+  | 'center'
+  | 'right'
+  | 'top'
+  | 'middle'
+  | 'bottom'
+  | 'spreadX'
+  | 'spreadY'
 export type Box = { id: string; x: number; y: number; w: number; h: number }
 
-export function alignBoxes(boxes: Box[], mode: AlignMode): Record<string, { x?: number; y?: number }> {
+export function alignBoxes(
+  boxes: Box[],
+  mode: AlignMode,
+): Record<string, { x?: number; y?: number }> {
   const out: Record<string, { x?: number; y?: number }> = {}
   if (boxes.length < 2) return out
   const left = Math.min(...boxes.map((b) => b.x))

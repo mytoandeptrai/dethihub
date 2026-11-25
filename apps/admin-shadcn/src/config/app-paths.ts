@@ -4,7 +4,11 @@ const authHref = (path: string, redirectTo?: string | null) =>
 export const appPaths = {
   home: { href: '/' },
   editor: { href: '/editor' },
-  onlineExams: { href: '/online-exams', getHref: (id: string) => `/online-exams/${encodeURIComponent(id)}`, results: (id: string) => `/online-exams/${encodeURIComponent(id)}/results` },
+  onlineExams: {
+    href: '/online-exams',
+    getHref: (id: string) => `/online-exams/${encodeURIComponent(id)}`,
+    results: (id: string) => `/online-exams/${encodeURIComponent(id)}/results`,
+  },
   play: { getHref: (id: string) => `/play/${encodeURIComponent(id)}` },
   quiz: { getHref: (id: string) => `/quiz/${encodeURIComponent(id)}` },
   exams: { getHref: (id: string) => `/exams/${encodeURIComponent(id)}` },
@@ -15,7 +19,17 @@ export const appPaths = {
   pricing: { href: '/pricing' },
   previewDesigns: { href: '/preview-designs' },
   profile: { href: '/profile', uploads: { href: '/profile/uploads' } },
-  admin: { href: '/admin', users: '/admin/users', content: '/admin/content', bank: '/admin/bank', stats: '/admin/stats', payments: '/admin/payments', ai: '/admin/ai', audit: '/admin/audit', features: '/admin/features' },
+  admin: {
+    href: '/admin',
+    users: '/admin/users',
+    content: '/admin/content',
+    bank: '/admin/bank',
+    stats: '/admin/stats',
+    payments: '/admin/payments',
+    ai: '/admin/ai',
+    audit: '/admin/audit',
+    features: '/admin/features',
+  },
   terms: { href: '/terms' },
   privacy: { href: '/privacy' },
   auth: {

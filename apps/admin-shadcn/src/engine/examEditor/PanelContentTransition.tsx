@@ -8,7 +8,9 @@
  * - Khi đóng/mở panel: giữ hoạt cảnh co giãn bề rộng hiện có, không chạy hiệu ứng dọc này.
  */
 import React, { useLayoutEffect, useRef, useState } from 'react'
+
 import { cn } from '@/engine/lib/cn'
+
 import { usePrefersReducedMotion } from './NavRailIndicator'
 
 export interface PanelContentTransitionProps {
@@ -33,7 +35,9 @@ interface ExitingPaneState {
 }
 
 function findScrollElement(root: HTMLElement): HTMLElement | null {
-  const known = root.querySelector<HTMLElement>('.nav-body, [class*="overflow-y-auto"], .overflow-y-auto')
+  const known = root.querySelector<HTMLElement>(
+    '.nav-body, [class*="overflow-y-auto"], .overflow-y-auto',
+  )
   if (known) return known
   if (root.scrollHeight > root.clientHeight) return root
   const all = root.querySelectorAll<HTMLElement>('*')
@@ -109,7 +113,7 @@ function TabPane({
       onScrollCapture={handleScrollCapture}
       aria-hidden={isExiting ? true : undefined}
       className={cn(
-        'panel-tab-pane col-start-1 row-start-1 flex h-full w-full min-h-0 flex-col overflow-hidden',
+        'panel-tab-pane col-start-1 row-start-1 flex h-full min-h-0 w-full flex-col overflow-hidden',
         animClass,
       )}
     >
@@ -217,7 +221,7 @@ export function PanelContentTransition({
   }, [activeTab, tabOrder, isReduced])
 
   return (
-    <div className="panel-tab-stage relative grid flex-1 min-h-0 w-full grid-cols-1 grid-rows-1 overflow-hidden">
+    <div className="panel-tab-stage relative grid min-h-0 w-full flex-1 grid-cols-1 grid-rows-1 overflow-hidden">
       {exiting && (
         <TabPane
           key={exiting.tab}

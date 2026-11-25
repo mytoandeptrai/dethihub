@@ -27,9 +27,9 @@ import { inputClass } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { useClientReady, useSession as useFrontendSession } from '@/hooks'
 import { t } from '@/i18n/translate'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 import { onlineMetaSchema } from '@/modules/online-exams/hooks/schema'
 import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
-import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 import type {
   lib_onlineExam_OnlineItem as OnlineItem,

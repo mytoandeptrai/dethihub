@@ -18,22 +18,30 @@ function formulaSvg(s: string, sz = 17) {
   const subSz = Math.round(sz * 0.68)
   const subDy = Math.round(sz * 0.24)
   const supDy = Math.round(sz * 0.35)
-  return esc(s).replace(/\^\{?(\d*[+-])\}?|(\d+)/g, (_, sup: string | undefined, sub: string | undefined) =>
-    sup
-      ? `<tspan font-size="${subSz}" dy="${-supDy}">${sup.replace(/-/g, '−')}</tspan><tspan dy="${supDy}">\u200B</tspan>`
-      : `<tspan font-size="${subSz}" dy="${subDy}">${sub}</tspan><tspan dy="${-subDy}">\u200B</tspan>`,
+  return esc(s).replace(
+    /\^\{?(\d*[+-])\}?|(\d+)/g,
+    (_, sup: string | undefined, sub: string | undefined) =>
+      sup
+        ? `<tspan font-size="${subSz}" dy="${-supDy}">${sup.replace(/-/g, '−')}</tspan><tspan dy="${supDy}">\u200B</tspan>`
+        : `<tspan font-size="${subSz}" dy="${subDy}">${sub}</tspan><tspan dy="${-subDy}">\u200B</tspan>`,
   )
 }
 const SUB = '₀₁₂₃₄₅₆₇₈₉'
 /** chữ số sau chữ cái thành chỉ số dưới Unicode: CO2 → CO₂ */
-export const subscript = (s: string) => s.replace(/([A-Za-z)])(\d+)/g, (_, a: string, d: string) => a + [...d].map((c) => SUB[+c]).join(''))
+export const subscript = (s: string) =>
+  s.replace(
+    /([A-Za-z)])(\d+)/g,
+    (_, a: string, d: string) => a + [...d].map((c) => SUB[+c]).join(''),
+  )
 
 /* ------------------------------------------------------------------ *
  * Cấu hình electron
  * ------------------------------------------------------------------ */
 
 const SYMBOLS =
-  'H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba'.split(' ')
+  'H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba'.split(
+    ' ',
+  )
 const ORDER = ['1s', '2s', '2p', '3s', '3p', '4s', '3d', '4p', '5s', '4d', '5p', '6s']
 const CAP: Record<string, number> = { s: 2, p: 6, d: 10 }
 
@@ -44,10 +52,16 @@ export interface ElectronSpec {
   valenceOnly: boolean
 }
 
-export function electronConfig(input: string): { name: string; z: number; shells: Array<[string, number]> } {
+export function electronConfig(input: string): {
+  name: string
+  z: number
+  shells: Array<[string, number]>
+} {
   const m = /^\s*([A-Za-z]{1,2}|\d{1,2})\s*(?:(\d?)([+-]))?\s*$/.exec(input)
   if (!m) throw new Error('Gõ kí hiệu nguyên tố (vd. Fe, Cl) hoặc số hiệu (vd. 26); ion: Fe3+, Cl-')
-  const sym = /\d/.test(m[1]) ? SYMBOLS[+m[1] - 1] : m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()
+  const sym = /\d/.test(m[1])
+    ? SYMBOLS[+m[1] - 1]
+    : m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()
   const z = SYMBOLS.indexOf(sym) + 1
   if (!z) throw new Error(`Chưa hỗ trợ nguyên tố "${m[1]}" (có từ H đến Ba, Z = 1–56)`)
   let e = z
@@ -65,7 +79,9 @@ export function electronConfig(input: string): { name: string; z: number; shells
   let shells = fill(e)
   // ngoại lệ bán bão hoà / bão hoà: Cr, Cu, Mo, Ag
   if ([24, 29, 42, 47].includes(z)) {
-    const ns = shells.find(([o]) => o.endsWith('s') && ((z < 40 && o === '4s') || (z > 40 && o === '5s')))!
+    const ns = shells.find(
+      ([o]) => o.endsWith('s') && ((z < 40 && o === '4s') || (z > 40 && o === '5s')),
+    )!
     const d = shells.find(([o]) => o === (z < 40 ? '3d' : '4d'))!
     ns[1] = 1
     d[1] += 1
@@ -78,7 +94,9 @@ export function electronConfig(input: string): { name: string; z: number; shells
       // cation: bớt electron lớp ngoài cùng (ns) trước, rồi (n−1)d
       let left = q
       // lớp n lớn nhất trước (4s trước 3d); cùng lớp thì d → p → s (Al3+: 3p rồi 3s)
-      const byN = [...shells].sort((a, b) => +b[0][0] - +a[0][0] || 'dps'.indexOf(a[0][1]) - 'dps'.indexOf(b[0][1]))
+      const byN = [...shells].sort(
+        (a, b) => +b[0][0] - +a[0][0] || 'dps'.indexOf(a[0][1]) - 'dps'.indexOf(b[0][1]),
+      )
       for (const sh of byN) {
         const k = Math.min(sh[1], left)
         sh[1] -= k
@@ -88,20 +106,30 @@ export function electronConfig(input: string): { name: string; z: number; shells
       shells = shells.filter(([, k]) => k > 0)
     }
   }
-  const sorted = [...shells].sort((a, b) => +a[0][0] - +b[0][0] || 'spd'.indexOf(a[0][1]) - 'spd'.indexOf(b[0][1]))
-  return { name: sym + (m[3] ? `${m[2] && m[2] !== '1' ? m[2] : ''}${m[3]}` : ''), z, shells: sorted }
+  const sorted = [...shells].sort(
+    (a, b) => +a[0][0] - +b[0][0] || 'spd'.indexOf(a[0][1]) - 'spd'.indexOf(b[0][1]),
+  )
+  return {
+    name: sym + (m[3] ? `${m[2] && m[2] !== '1' ? m[2] : ''}${m[3]}` : ''),
+    z,
+    shells: sorted,
+  }
 }
 
 /** Fe3+ → Fe với điện tích 3+ ở trên */
 function ionSvg(name: string) {
   const m = /^([A-Za-z]+)(\d?[+-])?$/.exec(name)
-  return m && m[2] ? `${m[1]}<tspan font-size="11" dy="-7">${m[2].replace('-', '−')}</tspan><tspan dy="7">​</tspan>` : esc(name)
+  return m && m[2]
+    ? `${m[1]}<tspan font-size="11" dy="-7">${m[2].replace('-', '−')}</tspan><tspan dy="7">​</tspan>`
+    : esc(name)
 }
 
 export function renderElectronSvg(spec: ElectronSpec, desc: string) {
   const { name, z, shells } = electronConfig(spec.element)
   const maxN = Math.max(...shells.map(([o]) => +o[0]))
-  const show = spec.valenceOnly ? shells.filter(([o]) => +o[0] === maxN || (o[1] === 'd' && +o[0] === maxN - 1)) : shells
+  const show = spec.valenceOnly
+    ? shells.filter(([o]) => +o[0] === maxN || (o[1] === 'd' && +o[0] === maxN - 1))
+    : shells
   const B = 26
   const gap = 14
   const W0 = show.reduce((w, [o]) => w + (CAP[o[1]] / 2) * B + gap, 0) - gap
@@ -110,7 +138,9 @@ export function renderElectronSvg(spec: ElectronSpec, desc: string) {
   let x = (W - W0) / 2
   const y = 62
   // dòng cấu hình
-  const conf = shells.map(([o, k]) => `${o}<tspan font-size="11" dy="-7">${k}</tspan><tspan dy="7"> </tspan>`).join('')
+  const conf = shells
+    .map(([o, k]) => `${o}<tspan font-size="11" dy="-7">${k}</tspan><tspan dy="7"> </tspan>`)
+    .join('')
   let b = `<text x="${W / 2}" y="26" ${FAM} font-size="16" text-anchor="middle">${ionSvg(name)} (Z = ${z}): ${conf}</text>`
   for (const [o, k] of show) {
     const boxes = CAP[o[1]] / 2
@@ -195,7 +225,8 @@ function parseChain(src: string): Grp[] {
         text += src[i++]
       }
       text = text.trim()
-      if (!text || /^\^\{?\d*[+-]\}?$/.test(text)) throw new Error(`Thiếu nhóm nguyên tử ở vị trí ${i + 1}`)
+      if (!text || /^\^\{?\d*[+-]\}?$/.test(text))
+        throw new Error(`Thiếu nhóm nguyên tử ở vị trí ${i + 1}`)
       const ring = ringOf(text, true)
       const g: Grp = { text, bond, branches: [] }
       while (src[i] === '(') {
@@ -204,7 +235,8 @@ function parseChain(src: string): Grp[] {
           const posM = /^(-?\d+):/.exec(src.slice(i))
           if (posM) {
             const pos = +posM[1]
-            if (pos < 1 || pos > ring.n) throw new Error(`Vị trí nhóm thế (${pos}) phải từ 1 đến ${ring.n}`)
+            if (pos < 1 || pos > ring.n)
+              throw new Error(`Vị trí nhóm thế (${pos}) phải từ 1 đến ${ring.n}`)
             i += posM[0].length
             let b = '-'
             if ('-=≡#'.includes(src[i])) b = src[i++]
@@ -266,7 +298,13 @@ function bondSvg(kind: string, x1: number, y1: number, x2: number, y2: number, i
 }
 
 /** đa giác đều tâm (cx, cy) bán kính r, đỉnh đầu ở góc a0 */
-function polygon(n: number, cx: number, cy: number, r: number, a0: number): Array<[number, number]> {
+function polygon(
+  n: number,
+  cx: number,
+  cy: number,
+  r: number,
+  a0: number,
+): Array<[number, number]> {
   return Array.from({ length: n }, (_, k) => {
     const a = a0 + (2 * Math.PI * k) / n
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)] as [number, number]
@@ -367,7 +405,8 @@ function ringSvgFromData(ring: StructRing): string {
   return s
 }
 
-const numSvg = (n: number, x: number, y: number) => `<text x="${f1(x)}" y="${f1(y)}" ${FAM} font-size="11" fill="#555" text-anchor="middle">${n}</text>`
+const numSvg = (n: number, x: number, y: number) =>
+  `<text x="${f1(x)}" y="${f1(y)}" ${FAM} font-size="11" fill="#555" text-anchor="middle">${n}</text>`
 
 /** Khung chữ nhật bao quanh các điểm đã vẽ — để tính khung SVG. */
 class Bounds {
@@ -428,7 +467,9 @@ function buildCondensed(
     bb.add(x, y - pad)
   }
   const label = (t: string, x: number, y: number) => {
-    parts.push(`<text x="${f1(x)}" y="${f1(y + 6)}" ${FAM} font-size="17" text-anchor="middle">${formulaSvg(t)}</text>`)
+    parts.push(
+      `<text x="${f1(x)}" y="${f1(y + 6)}" ${FAM} font-size="17" text-anchor="middle">${formulaSvg(t)}</text>`,
+    )
     const hw = tw(t) / 2
     bb.add(x - hw, y - 12)
     bb.add(x + hw, y + 10)
@@ -493,7 +534,9 @@ function buildCondensed(
         const uy = (v[1] - cy) / R
         const nx = cx + (R - 10) * ux
         const ny = cy + (R - 10) * uy + 4
-        parts.push(`<text x="${f1(nx)}" y="${f1(ny)}" ${FAM} font-size="10" fill="#555" text-anchor="middle">${k + 1}</text>`)
+        parts.push(
+          `<text x="${f1(nx)}" y="${f1(ny)}" ${FAM} font-size="10" fill="#555" text-anchor="middle">${k + 1}</text>`,
+        )
         numbers.push({ n: k + 1, x: nx, y: ny })
       }
     }
@@ -523,7 +566,12 @@ function buildCondensed(
   for (let i = 0; i < main.length; i++) {
     if (ringOf(main[i].text, allowFormulaRing) || main[i].branches.length !== 1) continue
     let end = i
-    while (end + 1 < main.length && !ringOf(main[end + 1].text, allowFormulaRing) && main[end + 1].branches.length === 1) end++
+    while (
+      end + 1 < main.length &&
+      !ringOf(main[end + 1].text, allowFormulaRing) &&
+      main[end + 1].branches.length === 1
+    )
+      end++
     for (let j = i; j <= end; j++) singleBranchDir[j] = (end - j) % 2 === 0 ? 1 : -1
     i = end
   }
@@ -595,15 +643,26 @@ function buildSkeletal(
   const text = (t: string, x: number, y: number) => {
     // OH, Cl, NH2… ghi chữ; nền trắng che đầu nét
     const w = tw(t) + 4
-    parts.push(`<rect x="${f1(x - w / 2)}" y="${f1(y - 10)}" width="${f1(w)}" height="20" fill="#fff"/>`)
-    parts.push(`<text x="${f1(x)}" y="${f1(y + 6)}" ${FAM} font-size="17" text-anchor="middle">${formulaSvg(t)}</text>`)
+    parts.push(
+      `<rect x="${f1(x - w / 2)}" y="${f1(y - 10)}" width="${f1(w)}" height="20" fill="#fff"/>`,
+    )
+    parts.push(
+      `<text x="${f1(x)}" y="${f1(y + 6)}" ${FAM} font-size="17" text-anchor="middle">${formulaSvg(t)}</text>`,
+    )
     bb.add(x - w / 2, y - 10)
     bb.add(x + w / 2, y + 10)
     labels.push({ text: t, x, y, box: { x0: x - w / 2, y0: y - 10, x1: x + w / 2, y1: y + 10 } })
   }
 
   /** vẽ một mạch từ điểm p theo hướng góc a (zigzag ±30° quanh a). */
-  const walk = (grp: Grp[], p: [number, number], a: number, startSide: number, numbered: boolean, anchored = false) => {
+  const walk = (
+    grp: Grp[],
+    p: [number, number],
+    a: number,
+    startSide: number,
+    numbered: boolean,
+    anchored = false,
+  ) => {
     let cur = p
     let side = startSide
     let no = 0
@@ -619,7 +678,9 @@ function buildSkeletal(
       const dir = anchored && i === 0 ? a : a + side * (Math.PI / 6)
       if (ring) {
         // vòng đặt tiếp theo hướng mạch: đỉnh gắn = cur + bước, tâm lùi thêm R
-        const att: [number, number] = moves ? [cur[0] + L * Math.cos(dir), cur[1] + L * Math.sin(dir)] : cur
+        const att: [number, number] = moves
+          ? [cur[0] + L * Math.cos(dir), cur[1] + L * Math.sin(dir)]
+          : cur
         if (moves) addBond(g.bond, cur[0], cur[1], att[0], att[1])
         const cx = att[0] + R * Math.cos(a)
         const cy = att[1] + R * Math.sin(a)
@@ -646,7 +707,9 @@ function buildSkeletal(
             const uy = (v[1] - cy) / R
             const nx = cx + (R - 10) * ux
             const ny = cy + (R - 10) * uy + 4
-            pending.push(`<text x="${f1(nx)}" y="${f1(ny)}" ${FAM} font-size="10" fill="#555" text-anchor="middle">${k + 1}</text>`)
+            pending.push(
+              `<text x="${f1(nx)}" y="${f1(ny)}" ${FAM} font-size="10" fill="#555" text-anchor="middle">${k + 1}</text>`,
+            )
             numbers.push({ n: k + 1, x: nx, y: ny })
           }
         }
@@ -682,7 +745,9 @@ function buildSkeletal(
         side = -side
         return
       }
-      const next: [number, number] = moves ? [cur[0] + L * Math.cos(dir), cur[1] + L * Math.sin(dir)] : cur
+      const next: [number, number] = moves
+        ? [cur[0] + L * Math.cos(dir), cur[1] + L * Math.sin(dir)]
+        : cur
       if (!anchored) {
         minMainY = Math.min(minMainY, next[1])
         maxMainY = Math.max(maxMainY, next[1])
@@ -767,7 +832,12 @@ export function renderStructSvg(spec: StructSpec, desc: string) {
   const pad = 22
   const W = Math.max(140, width + pad * 2)
   const H = Math.max(60, height + pad * 2)
-  return wrap(Math.round(W), Math.round(H), desc, `<g transform="translate(${pad} ${pad})">${body}</g>`)
+  return wrap(
+    Math.round(W),
+    Math.round(H),
+    desc,
+    `<g transform="translate(${pad} ${pad})">${body}</g>`,
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -783,5 +853,13 @@ export interface ChemGraphSpec {
 }
 
 export function renderChemGraphSvg(spec: ChemGraphSpec, desc: string) {
-  return renderMotionSvg({ yName: subscript(spec.yName), tName: subscript(spec.xName), points: spec.points, dashed: spec.dashed }, desc)
+  return renderMotionSvg(
+    {
+      yName: subscript(spec.yName),
+      tName: subscript(spec.xName),
+      points: spec.points,
+      dashed: spec.dashed,
+    },
+    desc,
+  )
 }

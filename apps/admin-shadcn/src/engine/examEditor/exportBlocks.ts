@@ -5,12 +5,14 @@
  * đề cộng đồng), còn trình soạn dùng mô hình block `ExamDoc`.
  */
 import katex from 'katex'
-import type { BandSetup, PageNumberSetup } from './pageSetup'
+
+import { estimateChoiceCols } from './choiceCols'
 import 'katex/contrib/mhchem' // \ce{...}
+import { splitRichLines } from './convert'
+
+import type { BandSetup, PageNumberSetup } from './pageSetup'
 import type { ExamBlock, ExamDoc, FormatAttrs, RichText, Span } from '@/engine/data/docTypes'
 import type { SummaryAnswerData } from '@/engine/lib/shuffleExam'
-import { estimateChoiceCols } from './choiceCols'
-import { splitRichLines } from './convert'
 
 /* ------------------------------------------------------------------ *
  * Word (.docx)
@@ -19,7 +21,15 @@ import { splitRichLines } from './convert'
 /** Tải file .docx thật. Thư viện `docx` nạp động để không nằm trong bundle chính. */
 export async function exportDocBlocks(
   doc: ExamDoc,
-  opts?: { landscape?: boolean; paper?: { w: number; h: number }; fileName?: string; margins?: { top: number; right: number; bottom: number; left: number }; pageNumber?: PageNumberSetup; header?: BandSetup; footer?: BandSetup },
+  opts?: {
+    landscape?: boolean
+    paper?: { w: number; h: number }
+    fileName?: string
+    margins?: { top: number; right: number; bottom: number; left: number }
+    pageNumber?: PageNumberSetup
+    header?: BandSetup
+    footer?: BandSetup
+  },
 ): Promise<void> {
   const { buildDocxBlob } = await import('./docxBlocks')
   const url = URL.createObjectURL(await buildDocxBlob(doc, opts))
@@ -37,7 +47,12 @@ function sanitize(s: string): string {
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
 /** Giá trị CSS lấy từ JSON đề (có thể do người khác soạn): chỉ giữ ký tự an toàn, không thoát được khỏi style="". */
@@ -67,7 +82,11 @@ function textToHtml(text: string): string {
   let at = 0
   for (const m of text.matchAll(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g)) {
     out += escapeHtml(text.slice(at, m.index))
-    out += katex.renderToString(m[1] ?? m[2], { output: 'mathml', displayMode: m[1] !== undefined, throwOnError: false })
+    out += katex.renderToString(m[1] ?? m[2], {
+      output: 'mathml',
+      displayMode: m[1] !== undefined,
+      throwOnError: false,
+    })
     at = m.index + m[0].length
   }
   return out + escapeHtml(text.slice(at))
@@ -158,7 +177,10 @@ function blocksToHtml(blocks: ExamBlock[]): string {
 function tocHtml(after: ExamBlock[]): string {
   const rows = after
     .filter((b): b is Extract<ExamBlock, { type: 'heading' }> => b.type === 'heading')
-    .map((h) => `<p class="p" style="margin:2px 0 2px ${((h.level ?? 1) - 1) * 18}px">${richToHtml(h.text)}</p>`)
+    .map(
+      (h) =>
+        `<p class="p" style="margin:2px 0 2px ${((h.level ?? 1) - 1) * 18}px">${richToHtml(h.text)}</p>`,
+    )
   return `<h2 class="h1">MỤC LỤC</h2>${rows.join('')}`
 }
 
@@ -217,7 +239,10 @@ function blockToHtml(b: ExamBlock, seq: BlockSeq): string {
       const head = `<p class="q"${formatCss(b.format)}><b>Câu ${seq.q}.</b> ${richToHtml(b.text)}</p>`
       // trả lời ngắn: 4 ô trống điền đáp số (khớp 4 cột trên phiếu trả lời)
       if (b.kind === 'short') {
-        return head + '<table class="sa" cellspacing="0"><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>'
+        return (
+          head +
+          '<table class="sa" cellspacing="0"><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>'
+        )
       }
       // đúng/sai: mỗi ý một dòng, nhãn "a)"; trắc nghiệm: 4/3/2/1 cột theo độ dài (như màn hình), nhãn "A."
       const tf = b.kind === 'tf'
@@ -237,7 +262,10 @@ function blockToHtml(b: ExamBlock, seq: BlockSeq): string {
             '</tr>',
         )
         .join('')
-      return head + (rows ? `<div class="opts${tf ? ' tf' : ` c${cols}`}"><table>${rows}</table></div>` : '')
+      return (
+        head +
+        (rows ? `<div class="opts${tf ? ' tf' : ` c${cols}`}"><table>${rows}</table></div>` : '')
+      )
     }
 
     case 'essay':
@@ -269,9 +297,7 @@ function blockToHtml(b: ExamBlock, seq: BlockSeq): string {
       return (
         (b.title ? `<h2 class="h2">${richToHtml(b.title)}</h2>` : '') +
         '<ol class="rub">' +
-        b.items
-          .map((i) => `<li>${escapeHtml(i.label)} ${richToHtml(i.text)}</li>`)
-          .join('') +
+        b.items.map((i) => `<li>${escapeHtml(i.label)} ${richToHtml(i.text)}</li>`).join('') +
         '</ol>'
       )
 
@@ -409,7 +435,14 @@ export function printDoc(doc: ExamDoc, page?: PrintPage): void {
 }
 
 /** khổ/lề trang lấy từ Thiết lập trang của trình soạn (cm) */
-export type PrintPage = { landscape?: boolean; paper?: { w: number; h: number }; margins?: { top: number; right: number; bottom: number; left: number }; pageNumber?: PageNumberSetup; header?: BandSetup; footer?: BandSetup }
+export type PrintPage = {
+  landscape?: boolean
+  paper?: { w: number; h: number }
+  margins?: { top: number; right: number; bottom: number; left: number }
+  pageNumber?: PageNumberSetup
+  header?: BandSetup
+  footer?: BandSetup
+}
 
 /** ghi đè @page mặc định của EXPORT_CSS bằng lề/hướng người dùng đặt */
 function pageCss(page?: PrintPage): string {
@@ -426,7 +459,8 @@ function pageCss(page?: PrintPage): string {
  */
 function bandCss(page: PrintPage): string {
   const pn = page.pageNumber
-  const css = (v: string) => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\s+/g, ' ')}"`
+  const css = (v: string) =>
+    `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\s+/g, ' ')}"`
   const boxes: string[] = []
   const firsts: string[] = []
   for (const side of ['top', 'bottom'] as const) {
@@ -435,7 +469,8 @@ function bandCss(page: PrintPage): string {
       const text = band?.text.trim() && band.align === slot ? band.text.trim() : ''
       const num = !!pn?.show && (pn.place ?? 'bottom') === side && pn.align === slot
       const content = (t: boolean, n: boolean) =>
-        [t && css(text), t && n && '" – "', n && 'counter(page)'].filter(Boolean).join(' ') || 'none'
+        [t && css(text), t && n && '" – "', n && 'counter(page)'].filter(Boolean).join(' ') ||
+        'none'
       const all = content(!!text, num)
       if (all === 'none') continue
       const box = `@${side}-${slot}`
@@ -445,15 +480,19 @@ function bandCss(page: PrintPage): string {
     }
   }
   const offset = pn?.show ? Math.round(pn.startAt - pn.from) : 0
-  return (boxes.length ? ` @page { ${boxes.join(' ')} }` : '') +
+  return (
+    (boxes.length ? ` @page { ${boxes.join(' ')} }` : '') +
     // counter-increment ở trang đầu thay cho mức +1 mặc định → các trang sau cứ +1 tiếp
     (offset ? ` @page :first { counter-increment: page ${offset + 1}; }` : '') +
     (firsts.length ? ` @page :first { ${firsts.join(' ')} }` : '')
+  )
 }
 
 /** In nhiều đề trong một lần (xáo đề: mỗi mã đề sang trang mới) → lưu thành một file PDF. */
 export function printDocs(docs: ExamDoc[], title: string): void {
-  const body = docs.map((d) => blocksToHtml(d.blocks)).join('<div style="page-break-after:always"></div>')
+  const body = docs
+    .map((d) => blocksToHtml(d.blocks))
+    .join('<div style="page-break-after:always"></div>')
   printHtml(`<!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
 <style>${EXPORT_CSS}</style></head>
@@ -468,7 +507,10 @@ export interface PrintShuffleItem {
 
 /** Dựng HTML cho hai bảng đáp án tổng hợp (theo đề gốc và theo từng mã đề để chấm tay). */
 export function summaryAnswersToHtml(summary: SummaryAnswerData, examTitle: string): string {
-  const codeGroups = chunk(summary.codes.map((_, i) => i), 10)
+  const codeGroups = chunk(
+    summary.codes.map((_, i) => i),
+    10,
+  )
 
   const renderGroupTables = (rows: SummaryAnswerData['byOriginal'], firstCol: string) =>
     codeGroups
@@ -478,7 +520,11 @@ export function summaryAnswersToHtml(summary: SummaryAnswerData, examTitle: stri
           .map(
             (r) =>
               `<tr><td style="font-weight:bold;background:#fafafa;">Câu ${r.no}</td>` +
-              grp.map((ci) => `<td style="font-weight:bold;">${escapeHtml(r.answers[ci] || '?')}</td>`).join('') +
+              grp
+                .map(
+                  (ci) => `<td style="font-weight:bold;">${escapeHtml(r.answers[ci] || '?')}</td>`,
+                )
+                .join('') +
               `</tr>`,
           )
           .join('')
@@ -568,7 +614,8 @@ function printHtml(html: string): void {
 function printViaHiddenFrame(html: string): void {
   const frame = document.createElement('iframe')
   frame.setAttribute('aria-hidden', 'true')
-  frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
+  frame.style.cssText =
+    'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
   document.body.appendChild(frame)
   const cleanup = () => {
     // đợi hộp thoại in đóng rồi mới gỡ iframe (bỏ sớm sẽ huỷ lệnh in)

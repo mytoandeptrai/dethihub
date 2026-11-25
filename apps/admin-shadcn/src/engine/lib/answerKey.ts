@@ -24,7 +24,8 @@ const LABEL: Record<AnswerGroupKind, string> = {
 export const ANSWER_COLS = 10
 export const TF_PARTS = ['a)', 'b)', 'c)', 'd)'] as const
 
-const plain = (rt: RichText) => (typeof rt === 'string' ? rt : rt.map((s) => s.text).join('')).trim()
+const plain = (rt: RichText) =>
+  (typeof rt === 'string' ? rt : rt.map((s) => s.text).join('')).trim()
 
 export function answerKind(answer: RichText): AnswerGroupKind {
   const t = plain(answer).toUpperCase()
@@ -34,7 +35,11 @@ export function answerKind(answer: RichText): AnswerGroupKind {
 }
 
 /** 4 ý Đ/S của một câu đúng/sai */
-export const tfParts = (answer: RichText) => plain(answer).toUpperCase().replace(/[\s,;-]/g, '').split('')
+export const tfParts = (answer: RichText) =>
+  plain(answer)
+    .toUpperCase()
+    .replace(/[\s,;-]/g, '')
+    .split('')
 
 /** gom đáp án theo dạng, giữ thứ tự xuất hiện; một dạng duy nhất thì không cần nhãn */
 export function groupAnswers(items: AnswerItem[]): AnswerGroup[] {
@@ -50,9 +55,13 @@ export function groupAnswers(items: AnswerItem[]): AnswerGroup[] {
 }
 
 /** chia lưới thành các hàng đủ `per` ô (ô thiếu ở hàng cuối là undefined để giữ thẳng cột) */
-export function gridRows(items: AnswerItem[]): { per: number; rows: Array<Array<AnswerItem | undefined>> } {
+export function gridRows(items: AnswerItem[]): {
+  per: number
+  rows: Array<Array<AnswerItem | undefined>>
+} {
   const per = Math.min(ANSWER_COLS, items.length || 1)
   const rows: Array<Array<AnswerItem | undefined>> = []
-  for (let i = 0; i < items.length; i += per) rows.push(Array.from({ length: per }, (_, k) => items[i + k]))
+  for (let i = 0; i < items.length; i += per)
+    rows.push(Array.from({ length: per }, (_, k) => items[i + k]))
   return { per, rows }
 }

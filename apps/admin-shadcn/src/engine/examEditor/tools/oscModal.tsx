@@ -1,13 +1,35 @@
 /** Hộp công cụ Dao động (điều hoà, xoay chiều, sóng dừng). */
 import { useMemo, useState } from 'react'
-import { cn } from '@/engine/lib/cn'
-import { inputClass } from '@/engine/components/ui'
-import { type ToolDoc } from '@/engine/lib/toolSpec'
-import { svgDataUrl } from '@/engine/lib/plot'
-import { AC_DEFAULT, OSC_DEFAULT, OSC_Y_DEFAULT, STANDING_DEFAULT, acEquation, fmtAcAmp, formatOmega, oscEquation, oscParams, oscPeriod, parseOscExpr, standingInfo, type AcSpec, type OscMode, type OscQty, type OscSpec, type OscStart, type OscStartX0, type StandingSpec } from '@/engine/lib/oscillation'
+
 import { Segmented } from '@/engine/components/Segmented'
-import { Check, ToolShell, sectionTitle } from './ToolShell'
+import { inputClass } from '@/engine/components/ui'
+import { cn } from '@/engine/lib/cn'
+import {
+  AC_DEFAULT,
+  OSC_DEFAULT,
+  OSC_Y_DEFAULT,
+  STANDING_DEFAULT,
+  acEquation,
+  fmtAcAmp,
+  formatOmega,
+  oscEquation,
+  oscParams,
+  oscPeriod,
+  parseOscExpr,
+  standingInfo,
+  type AcSpec,
+  type OscMode,
+  type OscQty,
+  type OscSpec,
+  type OscStart,
+  type OscStartX0,
+  type StandingSpec,
+} from '@/engine/lib/oscillation'
+import { svgDataUrl } from '@/engine/lib/plot'
+import { type ToolDoc } from '@/engine/lib/toolSpec'
+
 import { type Props, useRender } from './toolModalKit'
+import { Check, ToolShell, sectionTitle } from './ToolShell'
 
 const OSC_QTYS: Array<{ id: OscQty; label: string }> = [
   { id: 'x', label: 'Li độ x' },
@@ -60,7 +82,8 @@ const OSC_TICKS: Array<{ id: OscSpec['ticks']; label: string }> = [
   { id: 'symbol', label: 'Kí hiệu (A, T…)' },
 ]
 
-const fmtOscInput = (n: number) => (Number.isFinite(n) ? String(Math.round(n * 1e6) / 1e6).replace('.', ',') : '')
+const fmtOscInput = (n: number) =>
+  Number.isFinite(n) ? String(Math.round(n * 1e6) / 1e6).replace('.', ',') : ''
 
 function OscStartPicker({
   value,
@@ -73,7 +96,9 @@ function OscStartPicker({
   const pill = (on: boolean) =>
     cn(
       'rounded-[6px] border px-2 py-1 text-[12px] transition-colors',
-      on ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+      on
+        ? 'border-clay bg-clay-tint text-clay font-medium'
+        : 'border-line text-ink-2 hover:border-ink-4',
     )
 
   const toPhiMode = () => {
@@ -98,10 +123,20 @@ function OscStartPicker({
   return (
     <div className="space-y-2">
       <div className="flex gap-1.5">
-        <button type="button" aria-pressed={value.by === 'state'} onClick={toStateMode} className={pill(value.by === 'state')}>
+        <button
+          type="button"
+          aria-pressed={value.by === 'state'}
+          onClick={toStateMode}
+          className={pill(value.by === 'state')}
+        >
           Từ x₀, chiều
         </button>
-        <button type="button" aria-pressed={value.by === 'phi'} onClick={toPhiMode} className={pill(value.by === 'phi')}>
+        <button
+          type="button"
+          aria-pressed={value.by === 'phi'}
+          onClick={toPhiMode}
+          className={pill(value.by === 'phi')}
+        >
           Nhập pha φ
         </button>
       </div>
@@ -121,7 +156,9 @@ function OscStartPicker({
             ))}
           </div>
           {atBoundary ? (
-            <p className="text-[11.5px] text-ink-3">Tại biên ±A, vận tốc bằng 0 (không phân biệt chiều).</p>
+            <p className="text-ink-3 text-[11.5px]">
+              Tại biên ±A, vận tốc bằng 0 (không phân biệt chiều).
+            </p>
           ) : (
             <div className="flex gap-1.5">
               {(
@@ -146,7 +183,7 @@ function OscStartPicker({
       ) : (
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="shrink-0 text-[12.5px] text-ink-2">φ =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">φ =</span>
             <input
               value={phiText}
               onChange={(e) => {
@@ -158,7 +195,7 @@ function OscStartPicker({
               aria-label="Pha ban đầu theo đơn vị pi"
               className={cn(inputClass, 'h-9 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">π (rad)</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">π (rad)</span>
           </div>
           <div className="flex flex-wrap gap-1">
             {OSC_PHI_PRESETS.map((p) => (
@@ -182,7 +219,9 @@ function OscStartPicker({
 }
 
 export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscSpec>) {
-  const [spec, setSpec] = useState<OscSpec>(() => (initial ? { ...OSC_DEFAULT, ...initial } : OSC_DEFAULT))
+  const [spec, setSpec] = useState<OscSpec>(() =>
+    initial ? { ...OSC_DEFAULT, ...initial } : OSC_DEFAULT,
+  )
   const mode: OscMode = spec.mode ?? 'osc'
   const ac = spec.ac ?? AC_DEFAULT
   const st = spec.standing ?? STANDING_DEFAULT
@@ -206,9 +245,14 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
   const [stAText, setStAText] = useState(() => fmtOscInput(st.A))
 
   const set = (p: Partial<OscSpec>) => setSpec((s) => ({ ...s, ...p }))
-  const setAc = (p: Partial<AcSpec>) => setSpec((s) => ({ ...s, mode: 'ac', ac: { ...(s.ac ?? AC_DEFAULT), ...p } }))
+  const setAc = (p: Partial<AcSpec>) =>
+    setSpec((s) => ({ ...s, mode: 'ac', ac: { ...(s.ac ?? AC_DEFAULT), ...p } }))
   const setSt = (p: Partial<StandingSpec>) =>
-    setSpec((s) => ({ ...s, mode: 'standing', standing: { ...(s.standing ?? STANDING_DEFAULT), ...p } }))
+    setSpec((s) => ({
+      ...s,
+      mode: 'standing',
+      standing: { ...(s.standing ?? STANDING_DEFAULT), ...p },
+    }))
   const doc = useMemo((): ToolDoc => ({ kind: 'osc', spec }), [spec])
   const { preview, error } = useRender(doc)
 
@@ -268,12 +312,15 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
   const pill = (on: boolean) =>
     cn(
       'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-      on ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+      on
+        ? 'border-clay bg-clay-tint text-clay font-medium'
+        : 'border-line text-ink-2 hover:border-ink-4',
     )
 
   const switchMode = (next: OscMode) => {
     if (next === 'ac') set({ mode: 'ac', ac: spec.ac ?? AC_DEFAULT })
-    else if (next === 'standing') set({ mode: 'standing', standing: spec.standing ?? STANDING_DEFAULT })
+    else if (next === 'standing')
+      set({ mode: 'standing', standing: spec.standing ?? STANDING_DEFAULT })
     else set({ mode: 'osc' })
   }
 
@@ -325,7 +372,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         value={mode}
         onChange={switchMode}
         label="Loại đồ thị"
-        className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+        className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
         options={[
           { key: 'osc', label: 'Dao động' },
           { key: 'ac', label: 'Điện xoay chiều' },
@@ -341,7 +388,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         <h3 className={sectionTitle}>Giá trị cực đại</h3>
         <div className="grid grid-cols-2 gap-2">
           <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[12.5px] text-ink-2">U₀ =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">U₀ =</span>
             <input
               value={u0Text}
               onChange={(e) => {
@@ -351,12 +398,12 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               }}
               placeholder="220√2"
               aria-label="Điện áp cực đại U0 (V)"
-              className={cn(inputClass, 'h-9 flex-1 min-w-0')}
+              className={cn(inputClass, 'h-9 min-w-0 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">V</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">V</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[12.5px] text-ink-2">I₀ =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">I₀ =</span>
             <input
               value={i0Text}
               onChange={(e) => {
@@ -366,9 +413,9 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               }}
               placeholder="2"
               aria-label="Cường độ dòng điện cực đại I0 (A)"
-              className={cn(inputClass, 'h-9 flex-1 min-w-0')}
+              className={cn(inputClass, 'h-9 min-w-0 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">A</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">A</span>
           </div>
         </div>
       </section>
@@ -393,7 +440,9 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
           onChange={(e) => {
             const v = e.target.value
             setAcPText(v)
-            setAc({ period: { by: ac.period.by, value: parseOscExpr(v, ac.period.by === 'omega') } })
+            setAc({
+              period: { by: ac.period.by, value: parseOscExpr(v, ac.period.by === 'omega') },
+            })
           }}
           placeholder={ac.period.by === 'omega' ? 'vd. 100π' : 'vd. 50'}
           aria-label="Giá trị chu kì hoặc tần số dòng điện"
@@ -405,7 +454,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         <h3 className={sectionTitle}>Pha ban đầu (đơn vị π rad)</h3>
         <div className="grid grid-cols-2 gap-2">
           <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[12.5px] text-ink-2">φᵤ =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">φᵤ =</span>
             <input
               value={phiUText}
               onChange={(e) => {
@@ -415,12 +464,12 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               }}
               placeholder="0"
               aria-label="Pha ban đầu của u theo đơn vị pi"
-              className={cn(inputClass, 'h-9 flex-1 min-w-0')}
+              className={cn(inputClass, 'h-9 min-w-0 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">π</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">π</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[12.5px] text-ink-2">φᵢ =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">φᵢ =</span>
             <input
               value={phiIText}
               onChange={(e) => {
@@ -430,9 +479,9 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               }}
               placeholder="-1/3"
               aria-label="Pha ban đầu của i theo đơn vị pi"
-              className={cn(inputClass, 'h-9 flex-1 min-w-0')}
+              className={cn(inputClass, 'h-9 min-w-0 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">π</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">π</span>
           </div>
         </div>
       </section>
@@ -451,7 +500,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
             aria-label="Thời gian kết thúc (s)"
             className={cn(inputClass, 'h-9 flex-1')}
           />
-          <span className="shrink-0 text-[13px] text-ink-2">s</span>
+          <span className="text-ink-2 shrink-0 text-[13px]">s</span>
         </div>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {OSC_TEND_PRESETS.map((p) => (
@@ -472,7 +521,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         <h3 className={sectionTitle}>Lưới ô nét đứt</h3>
         <div className="flex flex-wrap gap-1.5">
           {OSC_GRIDS.map((g) => (
-            <button key={g.id} type="button" aria-pressed={ac.grid === g.id} onClick={() => setAc({ grid: g.id })} className={pill(ac.grid === g.id)}>
+            <button
+              key={g.id}
+              type="button"
+              aria-pressed={ac.grid === g.id}
+              onClick={() => setAc({ grid: g.id })}
+              className={pill(ac.grid === g.id)}
+            >
               {g.label}
             </button>
           ))}
@@ -483,7 +538,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         <h3 className={sectionTitle}>Nhãn trên trục</h3>
         <div className="flex flex-wrap gap-1.5">
           {OSC_TICKS.map((t) => (
-            <button key={t.id} type="button" aria-pressed={ac.ticks === t.id} onClick={() => setAc({ ticks: t.id })} className={pill(ac.ticks === t.id)}>
+            <button
+              key={t.id}
+              type="button"
+              aria-pressed={ac.ticks === t.id}
+              onClick={() => setAc({ ticks: t.id })}
+              className={pill(ac.ticks === t.id)}
+            >
               {t.label}
             </button>
           ))}
@@ -496,11 +557,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         </Check>
         {ac.showPhaseDiff && (
           <div className="flex items-center gap-1.5 pl-6">
-            <span className="text-[12px] text-ink-3">Nhãn:</span>
-            {([
-              ['dt', 'Δt'],
-              ['phi', 'φ'],
-            ] as const).map(([k, lbl]) => (
+            <span className="text-ink-3 text-[12px]">Nhãn:</span>
+            {(
+              [
+                ['dt', 'Δt'],
+                ['phi', 'φ'],
+              ] as const
+            ).map(([k, lbl]) => (
               <button
                 key={k}
                 type="button"
@@ -525,7 +588,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
           value={st.ends}
           onChange={(ends) => setSt({ ends })}
           label="Loại đầu dây"
-          className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+          className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
           options={[
             { key: 'fixed-fixed', label: 'Hai đầu cố định' },
             { key: 'fixed-free', label: 'Một đầu tự do' },
@@ -537,7 +600,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         <h3 className={sectionTitle}>Thông số dây</h3>
         <div className="grid grid-cols-2 gap-2">
           <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[12.5px] text-ink-2">ℓ =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">ℓ =</span>
             <input
               value={stLenText}
               onChange={(e) => {
@@ -547,12 +610,12 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               }}
               inputMode="decimal"
               aria-label="Chiều dài dây (cm)"
-              className={cn(inputClass, 'h-9 flex-1 min-w-0')}
+              className={cn(inputClass, 'h-9 min-w-0 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">cm</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">cm</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[12.5px] text-ink-2">A =</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">A =</span>
             <input
               value={stAText}
               onChange={(e) => {
@@ -562,9 +625,9 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               }}
               inputMode="decimal"
               aria-label="Biên độ bụng (cm)"
-              className={cn(inputClass, 'h-9 flex-1 min-w-0')}
+              className={cn(inputClass, 'h-9 min-w-0 flex-1')}
             />
-            <span className="shrink-0 text-[12.5px] text-ink-2">cm</span>
+            <span className="text-ink-2 shrink-0 text-[12.5px]">cm</span>
           </div>
         </div>
       </section>
@@ -573,7 +636,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
         <h3 className={sectionTitle}>Số bó sóng (k)</h3>
         <div className="flex flex-wrap gap-1.5">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((k) => (
-            <button key={k} type="button" aria-pressed={st.k === k} onClick={() => setSt({ k })} className={pill(st.k === k)}>
+            <button
+              key={k}
+              type="button"
+              aria-pressed={st.k === k}
+              onClick={() => setSt({ k })}
+              className={pill(st.k === k)}
+            >
               {k}
             </button>
           ))}
@@ -598,13 +667,23 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
   const inputs = (
     <>
       {modeSelector}
-      {mode === 'ac' ? acInputs : mode === 'standing' ? standingInputs : (
+      {mode === 'ac' ? (
+        acInputs
+      ) : mode === 'standing' ? (
+        standingInputs
+      ) : (
         <>
           <section>
             <h3 className={sectionTitle}>Đại lượng</h3>
             <div className="flex flex-wrap gap-1.5">
               {OSC_QTYS.map((q) => (
-                <button key={q.id} type="button" aria-pressed={spec.qty === q.id} onClick={() => switchQty(q.id)} className={pill(spec.qty === q.id)}>
+                <button
+                  key={q.id}
+                  type="button"
+                  aria-pressed={spec.qty === q.id}
+                  onClick={() => switchQty(q.id)}
+                  className={pill(spec.qty === q.id)}
+                >
                   {q.label}
                 </button>
               ))}
@@ -614,7 +693,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
           <section>
             <h3 className={sectionTitle}>Biên độ</h3>
             <div className="flex items-center gap-2">
-              <span className="shrink-0 text-[13px] text-ink-2">A =</span>
+              <span className="text-ink-2 shrink-0 text-[13px]">A =</span>
               <input
                 value={aText}
                 onChange={(e) => {
@@ -626,7 +705,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
                 aria-label="Biên độ A (cm)"
                 className={cn(inputClass, 'h-9 flex-1')}
               />
-              <span className="shrink-0 text-[13px] text-ink-2">cm</span>
+              <span className="text-ink-2 shrink-0 text-[13px]">cm</span>
             </div>
           </section>
 
@@ -650,7 +729,12 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               onChange={(e) => {
                 const v = e.target.value
                 setPText(v)
-                set({ period: { by: spec.period.by, value: parseOscExpr(v, spec.period.by === 'omega') } })
+                set({
+                  period: {
+                    by: spec.period.by,
+                    value: parseOscExpr(v, spec.period.by === 'omega'),
+                  },
+                })
               }}
               placeholder={spec.period.by === 'omega' ? 'vd. 2π, π hoặc 10' : 'vd. 2'}
               aria-label="Giá trị chu kì hoặc tần số"
@@ -679,7 +763,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
                 aria-label="Thời gian kết thúc (s)"
                 className={cn(inputClass, 'h-9 flex-1')}
               />
-              <span className="shrink-0 text-[13px] text-ink-2">s</span>
+              <span className="text-ink-2 shrink-0 text-[13px]">s</span>
             </div>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {OSC_TEND_PRESETS.map((p) => (
@@ -700,7 +784,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
             <h3 className={sectionTitle}>Lưới ô nét đứt</h3>
             <div className="flex flex-wrap gap-1.5">
               {OSC_GRIDS.map((g) => (
-                <button key={g.id} type="button" aria-pressed={spec.grid === g.id} onClick={() => set({ grid: g.id })} className={pill(spec.grid === g.id)}>
+                <button
+                  key={g.id}
+                  type="button"
+                  aria-pressed={spec.grid === g.id}
+                  onClick={() => set({ grid: g.id })}
+                  className={pill(spec.grid === g.id)}
+                >
                   {g.label}
                 </button>
               ))}
@@ -711,7 +801,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
             <h3 className={sectionTitle}>Nhãn trên trục</h3>
             <div className="flex flex-wrap gap-1.5">
               {OSC_TICKS.map((t) => (
-                <button key={t.id} type="button" aria-pressed={spec.ticks === t.id} onClick={() => set({ ticks: t.id })} className={pill(spec.ticks === t.id)}>
+                <button
+                  key={t.id}
+                  type="button"
+                  aria-pressed={spec.ticks === t.id}
+                  onClick={() => set({ ticks: t.id })}
+                  className={pill(spec.ticks === t.id)}
+                >
                   {t.label}
                 </button>
               ))}
@@ -719,13 +815,21 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
           </section>
 
           <section className="grid grid-cols-2 gap-2">
-            <label className="text-[12.5px] text-ink-2">
+            <label className="text-ink-2 text-[12.5px]">
               Trục dọc
-              <input className={cn(inputClass, 'mt-1 h-9')} value={spec.yName} onChange={(e) => set({ yName: e.target.value })} />
+              <input
+                className={cn(inputClass, 'mt-1 h-9')}
+                value={spec.yName}
+                onChange={(e) => set({ yName: e.target.value })}
+              />
             </label>
-            <label className="text-[12.5px] text-ink-2">
+            <label className="text-ink-2 text-[12.5px]">
               Trục ngang
-              <input className={cn(inputClass, 'mt-1 h-9')} value={spec.tName} onChange={(e) => set({ tName: e.target.value })} />
+              <input
+                className={cn(inputClass, 'mt-1 h-9')}
+                value={spec.tName}
+                onChange={(e) => set({ tName: e.target.value })}
+              />
             </label>
           </section>
 
@@ -745,7 +849,7 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
               Vẽ đường thứ hai để so pha
             </Check>
             {spec.second && (
-              <div className="mt-2 space-y-2.5 rounded-[8px] border border-line bg-paper-2 p-3">
+              <div className="border-line bg-paper-2 mt-2 space-y-2.5 rounded-[8px] border p-3">
                 <div className="flex flex-wrap gap-1.5">
                   {OSC_QTYS.map((q) => (
                     <button
@@ -760,24 +864,32 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
                   ))}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="shrink-0 text-[12.5px] text-ink-2">A₂ =</span>
+                  <span className="text-ink-2 shrink-0 text-[12.5px]">A₂ =</span>
                   <input
                     value={sAText}
                     onChange={(e) => {
                       const v = e.target.value
                       setSAText(v)
                       if (!spec.second) return
-                      set({ second: { ...spec.second, A: v.trim() ? parseOscExpr(v, false) : undefined } })
+                      set({
+                        second: {
+                          ...spec.second,
+                          A: v.trim() ? parseOscExpr(v, false) : undefined,
+                        },
+                      })
                     }}
                     placeholder="Bằng A"
                     aria-label="Biên độ đường thứ hai"
                     className={cn(inputClass, 'h-9 flex-1')}
                   />
-                  <span className="shrink-0 text-[12.5px] text-ink-2">cm</span>
+                  <span className="text-ink-2 shrink-0 text-[12.5px]">cm</span>
                 </div>
                 <Check
                   checked={!spec.second.start}
-                  onChange={(same) => spec.second && set({ second: { ...spec.second, start: same ? undefined : { ...spec.start } } })}
+                  onChange={(same) =>
+                    spec.second &&
+                    set({ second: { ...spec.second, start: same ? undefined : { ...spec.start } } })
+                  }
                 >
                   Cùng trạng thái đầu
                 </Check>
@@ -800,38 +912,43 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
       )}
 
       {error && (
-        <p role="alert" className="rounded-[6px] bg-clay-tint px-2.5 py-1.5 text-[12px] leading-snug text-clay-deep">
+        <p
+          role="alert"
+          className="bg-clay-tint text-clay-deep rounded-[6px] px-2.5 py-1.5 text-[12px] leading-snug"
+        >
           {error}
         </p>
       )}
 
       {eqText && (
-        <div className="rounded-[6px] border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink-2">
+        <div className="border-line bg-paper-2 text-ink-2 rounded-[6px] border px-3 py-2 text-[12.5px]">
           <div>
-            Phương trình: <span className="font-serif text-[13.5px] font-medium text-ink">{eqText}</span>
+            Phương trình:{' '}
+            <span className="text-ink font-serif text-[13.5px] font-medium">{eqText}</span>
           </div>
           {eq2Text && (
             <div className="mt-0.5">
-              Đường 2: <span className="font-serif text-[13.5px] font-medium text-ink">{eq2Text}</span>
+              Đường 2:{' '}
+              <span className="text-ink font-serif text-[13.5px] font-medium">{eq2Text}</span>
             </div>
           )}
         </div>
       )}
 
       {acEq && (
-        <div className="rounded-[6px] border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink-2">
+        <div className="border-line bg-paper-2 text-ink-2 rounded-[6px] border px-3 py-2 text-[12.5px]">
           <div>
-            <span className="font-serif text-[13.5px] font-medium text-ink">{acEq.u}</span>
+            <span className="text-ink font-serif text-[13.5px] font-medium">{acEq.u}</span>
           </div>
           <div className="mt-0.5">
-            <span className="font-serif text-[13.5px] font-medium text-ink">{acEq.i}</span>
+            <span className="text-ink font-serif text-[13.5px] font-medium">{acEq.i}</span>
           </div>
         </div>
       )}
 
       {stSummary && (
-        <div className="rounded-[6px] border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink-2">
-          <span className="font-medium text-ink">{stSummary}</span>
+        <div className="border-line bg-paper-2 text-ink-2 rounded-[6px] border px-3 py-2 text-[12.5px]">
+          <span className="text-ink font-medium">{stSummary}</span>
         </div>
       )}
     </>
@@ -839,7 +956,13 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
 
   return (
     <ToolShell
-      title={mode === 'ac' ? 'Đồ thị điện xoay chiều u – i' : mode === 'standing' ? 'Hình sóng dừng trên dây' : 'Đồ thị dao động điều hoà'}
+      title={
+        mode === 'ac'
+          ? 'Đồ thị điện xoay chiều u – i'
+          : mode === 'standing'
+            ? 'Hình sóng dừng trên dây'
+            : 'Đồ thị dao động điều hoà'
+      }
       hint={
         mode === 'ac'
           ? 'Nhập U₀, I₀, tần số và pha ban đầu; tự vẽ hai trục tung u (V), i (A) và độ lệch pha'
@@ -855,32 +978,34 @@ export function OscModal({ initial, submitLabel, onClose, onInsert }: Props<OscS
           <img
             src={svgDataUrl(img.svg)}
             alt="Xem trước"
-            className="min-h-0 max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain"
+            className="border-line max-h-full min-h-0 max-w-full rounded-[4px] border bg-white object-contain"
           />
           {eqText && (
-            <div className="shrink-0 rounded-[6px] border border-line bg-surface px-3 py-1.5 text-center text-[12.5px] text-ink-2">
+            <div className="border-line bg-surface text-ink-2 shrink-0 rounded-[6px] border px-3 py-1.5 text-center text-[12.5px]">
               <div>
-                Phương trình: <span className="font-serif text-[13.5px] font-medium text-ink">{eqText}</span>
+                Phương trình:{' '}
+                <span className="text-ink font-serif text-[13.5px] font-medium">{eqText}</span>
               </div>
               {eq2Text && (
                 <div className="mt-0.5">
-                  Đường 2: <span className="font-serif text-[13.5px] font-medium text-ink">{eq2Text}</span>
+                  Đường 2:{' '}
+                  <span className="text-ink font-serif text-[13.5px] font-medium">{eq2Text}</span>
                 </div>
               )}
             </div>
           )}
           {acEq && (
-            <div className="shrink-0 rounded-[6px] border border-line bg-surface px-3 py-1.5 text-center text-[12.5px] text-ink-2">
+            <div className="border-line bg-surface text-ink-2 shrink-0 rounded-[6px] border px-3 py-1.5 text-center text-[12.5px]">
               <div>
-                <span className="font-serif text-[13.5px] font-medium text-ink">{acEq.u}</span>
+                <span className="text-ink font-serif text-[13.5px] font-medium">{acEq.u}</span>
               </div>
               <div className="mt-0.5">
-                <span className="font-serif text-[13.5px] font-medium text-ink">{acEq.i}</span>
+                <span className="text-ink font-serif text-[13.5px] font-medium">{acEq.i}</span>
               </div>
             </div>
           )}
           {stSummary && (
-            <div className="shrink-0 rounded-[6px] border border-line bg-surface px-3 py-1.5 text-center text-[12.5px] font-medium text-ink">
+            <div className="border-line bg-surface text-ink shrink-0 rounded-[6px] border px-3 py-1.5 text-center text-[12.5px] font-medium">
               {stSummary}
             </div>
           )}

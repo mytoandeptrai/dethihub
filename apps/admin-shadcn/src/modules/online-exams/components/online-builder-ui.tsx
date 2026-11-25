@@ -37,6 +37,7 @@ import {
   QuestionBody,
   QuestionImageField,
 } from '@/components/online-exams-kernel'
+import { PageSkeleton } from '@/components/page-skeleton'
 import {
   Badge,
   SiteButton as Button,
@@ -54,7 +55,6 @@ import {
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
 import { FeatureNotice } from '@/modules/feature-access/components/feature-notice'
-import { PageSkeleton } from '@/components/page-skeleton'
 import { OnlineBuilderModel } from '@/modules/online-exams/hooks'
 
 import type { OnlineBuilderParts } from '@/modules/online-exams/containers/online-builder-container'
@@ -67,18 +67,21 @@ export function OnlineBuilderOnlineBuilderUi(
 ) {
   const { ExamPreview, Toggle, QuestionEditor } = props.parts
   if (props.viewState === 4) return <FeatureNotice />
-  if (props.viewState === 1 && props.readOnly) return <PageShell>
-    <FeatureNotice banner />
-    <div className="my-4 flex gap-4 print:hidden"><Link to={appPaths.onlineExams.href}>Quay lại</Link><Button onClick={() => window.print()}>In / PDF</Button></div>
-    <ExamPreview title={props.item.meta.title} questions={props.questions} />
-  </PageShell>
+  if (props.viewState === 1 && props.readOnly)
+    return (
+      <PageShell>
+        <FeatureNotice banner />
+        <div className="my-4 flex gap-4 print:hidden">
+          <Link to={appPaths.onlineExams.href}>Quay lại</Link>
+          <Button onClick={() => window.print()}>In / PDF</Button>
+        </div>
+        <ExamPreview title={props.item.meta.title} questions={props.questions} />
+      </PageShell>
+    )
   if (props.viewState === 0) {
     return <Navigate to={appPaths.onlineExams.href} replace />
   }
-  if (props.viewState === 2)
-    return (
-      <PageSkeleton variant="form" />
-    )
+  if (props.viewState === 2) return <PageSkeleton variant="form" />
   if (props.viewState === 3)
     return (
       <PageShell>

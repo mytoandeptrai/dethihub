@@ -1,3 +1,17 @@
+import { decorKitCatalogText, isDecorKitId } from './slideDecor'
+import { designById, designCatalogText } from './slideDesigns'
+import {
+  isEditorialLayout,
+  isLayoutId,
+  isTone,
+  PRO_LAYOUT_IDS,
+  SLIDE_LAYOUTS,
+  type SlideLayoutContent,
+} from './slideLayouts'
+import { isStylePackId, stylePackCatalogText } from './slideStyles'
+import { inferSubject, isSubjectId, subjectCatalogText } from './slideSubjects'
+import { DECK_THEMES, PRO_THEMES, resolveThemeId } from './slideTheme'
+
 /**
  * Đọc kết quả AI cho slide: dàn ý (chặng 26a) và deck JSON đầy đủ.
  *
@@ -6,15 +20,21 @@
  */
 import type { SlideTextStyle } from './slideTextEffects'
 import type { SlideElement, SlideTone } from '@/engine/store/docs'
-import { isEditorialLayout, isLayoutId, isTone, PRO_LAYOUT_IDS, SLIDE_LAYOUTS, type SlideLayoutContent } from './slideLayouts'
-import { DECK_THEMES, PRO_THEMES, resolveThemeId } from './slideTheme'
-import { inferSubject, isSubjectId, subjectCatalogText } from './slideSubjects'
-import { isStylePackId, stylePackCatalogText } from './slideStyles'
-import { decorKitCatalogText, isDecorKitId } from './slideDecor'
-import { designById, designCatalogText } from './slideDesigns'
 
-export interface AiSlidePayload extends Pick<SlideLayoutContent,
-  'credit' | 'value' | 'label' | 'focusX' | 'focusY' | 'imageCrop' | 'image2' | 'image2Crop' | 'caption' | 'caption2' | 'textPosition' | 'bars'
+export interface AiSlidePayload extends Pick<
+  SlideLayoutContent,
+  | 'credit'
+  | 'value'
+  | 'label'
+  | 'focusX'
+  | 'focusY'
+  | 'imageCrop'
+  | 'image2'
+  | 'image2Crop'
+  | 'caption'
+  | 'caption2'
+  | 'textPosition'
+  | 'bars'
 > {
   title?: string
   /** id layout của lib/slideLayouts.ts; thiếu/sai thì rơi về title+bullets cũ */
@@ -129,7 +149,9 @@ export function repairJson(raw: string): string | null {
   const stack: string[] = []
   // `\cdot`, `\(`… không phải escape JSON hợp lệ: nhân đôi gạch chéo để giữ LaTeX.
   // (`\frac`, `\times`… lại là escape hợp lệ — xử lý ở `fixMathEscapes`.)
-  const src = raw.replace(/\\(["\\/bfnrt]|u[0-9a-fA-F]{4})|\\/g, (m, ok?: string) => (ok ? m : '\\\\'))
+  const src = raw.replace(/\\(["\\/bfnrt]|u[0-9a-fA-F]{4})|\\/g, (m, ok?: string) =>
+    ok ? m : '\\\\',
+  )
   for (const ch of src) {
     if (inString) {
       if (escaped) {
@@ -194,9 +216,7 @@ export function parseAiDeck(raw: string): { slides: AiSlidePayload[]; title?: st
     if (Array.isArray(slides) && slides.length > 0) {
       return {
         slides: slides as AiSlidePayload[],
-        title: Array.isArray(data)
-          ? undefined
-          : text((data as { title?: unknown }).title, 160),
+        title: Array.isArray(data) ? undefined : text((data as { title?: unknown }).title, 160),
       }
     }
   }
@@ -213,15 +233,15 @@ export function parseAiObject(raw: string): unknown | null {
 
 /** Layout thay thế cùng "họ nội dung" khi hai slide liền kề trùng bố cục. */
 const RHYTHM_ALTERNATES: Record<string, string[]> = {
-  bullets: ['cards', 'two-column'],
-  cards: ['bullets', 'timeline'],
+  'bullets': ['cards', 'two-column'],
+  'cards': ['bullets', 'timeline'],
   'two-column': ['comparison', 'cards'],
-  comparison: ['two-column'],
+  'comparison': ['two-column'],
   'image-left': ['image-right'],
   'image-right': ['image-left'],
-  stats: ['cards'],
-  timeline: ['cycle', 'cards'],
-  cycle: ['timeline'],
+  'stats': ['cards'],
+  'timeline': ['cycle', 'cards'],
+  'cycle': ['timeline'],
 }
 
 /** Tỉ lệ tối đa slide `bullets` trong một deck dài (≥ 6 slide). */
@@ -229,17 +249,35 @@ const MAX_BULLET_SHARE = 0.4
 
 /** Layout của chế độ thường → layout Chuyên nghiệp cùng họ nội dung (brief vẫn dùng được). */
 const PRO_LAYOUT_MAP: Record<string, string> = {
-  title: 'photo-full', 'image-full': 'photo-full', 'image-left': 'photo-full', 'image-right': 'photo-full',
-  section: 'manifesto', statement: 'manifesto', hook: 'manifesto', quote: 'manifesto', closing: 'manifesto', mindmap: 'manifesto',
-  bullets: 'editorial-text', 'two-column': 'editorial-text', comparison: 'editorial-text', example: 'editorial-text', quiz: 'editorial-text',
-  cards: 'rules', agenda: 'rules', timeline: 'rules', cycle: 'rules', table: 'rules', stats: 'rules', 'stat-image': 'bignum',
+  'title': 'photo-full',
+  'image-full': 'photo-full',
+  'image-left': 'photo-full',
+  'image-right': 'photo-full',
+  'section': 'manifesto',
+  'statement': 'manifesto',
+  'hook': 'manifesto',
+  'quote': 'manifesto',
+  'closing': 'manifesto',
+  'mindmap': 'manifesto',
+  'bullets': 'editorial-text',
+  'two-column': 'editorial-text',
+  'comparison': 'editorial-text',
+  'example': 'editorial-text',
+  'quiz': 'editorial-text',
+  'cards': 'rules',
+  'agenda': 'rules',
+  'timeline': 'rules',
+  'cycle': 'rules',
+  'table': 'rules',
+  'stats': 'rules',
+  'stat-image': 'bignum',
 }
 const PRO_ALTERNATES: Record<string, string[]> = {
   'editorial-text': ['rules', 'manifesto'],
-  rules: ['editorial-text', 'bignum'],
-  manifesto: ['editorial-text', 'rules'],
-  bignum: ['rules', 'editorial-text'],
-  bars: ['rules'],
+  'rules': ['editorial-text', 'bignum'],
+  'manifesto': ['editorial-text', 'rules'],
+  'bignum': ['rules', 'editorial-text'],
+  'bars': ['rules'],
   'photo-compare': ['editorial-text'],
   'photo-full': ['manifesto'],
 }
@@ -254,7 +292,9 @@ export function proPlan(plan: DeckPlan): DeckPlan {
   const allowed = new Set<string>(PRO_LAYOUT_IDS)
   const last = plan.slides.length - 1
   const slides = plan.slides.map((slide, i) => {
-    let layout = allowed.has(slide.layout) ? slide.layout : PRO_LAYOUT_MAP[slide.layout] ?? 'editorial-text'
+    let layout = allowed.has(slide.layout)
+      ? slide.layout
+      : (PRO_LAYOUT_MAP[slide.layout] ?? 'editorial-text')
     if (i === 0) layout = 'photo-full'
     else if (layout === 'photo-full' && i !== last) layout = 'manifesto'
     return { ...slide, layout, tone: undefined as SlideTone | undefined }
@@ -267,8 +307,14 @@ export function proPlan(plan: DeckPlan): DeckPlan {
   }
   let light = 0
   for (const slide of slides) {
-    if (!PRO_LIGHT_LAYOUTS.has(slide.layout)) { light = 0; continue }
-    if (++light > 2) { slide.tone = 'accent'; light = 0 }
+    if (!PRO_LIGHT_LAYOUTS.has(slide.layout)) {
+      light = 0
+      continue
+    }
+    if (++light > 2) {
+      slide.tone = 'accent'
+      light = 0
+    }
   }
   const theme = PRO_THEMES.some((t) => t.id === plan.theme) ? plan.theme : PRO_THEMES[0].id
   return { ...plan, theme, design: undefined, stylePack: 'editorial', decorKit: 'toi-gian', slides }
@@ -312,9 +358,7 @@ export function parseDeckPlan(raw: string): DeckPlan | null {
     if (!data || typeof data !== 'object') continue
     const outer = data as Record<string, unknown>
     const source =
-      outer.plan && typeof outer.plan === 'object'
-        ? (outer.plan as Record<string, unknown>)
-        : outer
+      outer.plan && typeof outer.plan === 'object' ? (outer.plan as Record<string, unknown>) : outer
     const rawSlides = Array.isArray(source.slides) ? source.slides : null
     if (!rawSlides?.length) continue
 
@@ -329,9 +373,7 @@ export function parseDeckPlan(raw: string): DeckPlan | null {
       slides.push({
         title,
         layout:
-          typeof slide.layout === 'string' && isLayoutId(slide.layout)
-            ? slide.layout
-            : 'bullets',
+          typeof slide.layout === 'string' && isLayoutId(slide.layout) ? slide.layout : 'bullets',
         ...(isTone(slide.tone) ? { tone: slide.tone } : {}),
         ...(kicker ? { kicker } : {}),
         ...(brief ? { brief } : {}),
@@ -340,7 +382,10 @@ export function parseDeckPlan(raw: string): DeckPlan | null {
     if (!slides.length) continue
 
     const designId = text(source.design, 40)
-    const design = designById(designId) ?? designById(text(source.style, 80)) ?? designById(text(source.theme, 40))
+    const design =
+      designById(designId) ??
+      designById(text(source.style, 80)) ??
+      designById(text(source.theme, 40))
     const themeId = text(source.theme, 40)
     const packId = text(source.stylePack, 40)
     const title = text(source.title, 160)
@@ -348,8 +393,16 @@ export function parseDeckPlan(raw: string): DeckPlan | null {
     const kitId = text(source.decorKit, 40)
 
     const resolvedTheme = resolveThemeId(themeId) ?? (design ? design.themeId : undefined)
-    const resolvedPack = isStylePackId(packId) ? packId : (design?.stylePack && isStylePackId(design.stylePack) ? design.stylePack : undefined)
-    const resolvedKit = isDecorKitId(kitId) ? kitId : (design?.decorKit && isDecorKitId(design.decorKit) ? design.decorKit : undefined)
+    const resolvedPack = isStylePackId(packId)
+      ? packId
+      : design?.stylePack && isStylePackId(design.stylePack)
+        ? design.stylePack
+        : undefined
+    const resolvedKit = isDecorKitId(kitId)
+      ? kitId
+      : design?.decorKit && isDecorKitId(design.decorKit)
+        ? design.decorKit
+        : undefined
 
     return {
       title,
@@ -359,7 +412,9 @@ export function parseDeckPlan(raw: string): DeckPlan | null {
       ...(resolvedKit ? { decorKit: resolvedKit } : {}),
       subject: isSubjectId(subjectId)
         ? subjectId
-        : inferSubject([title, text(source.audience, 120), ...slides.map((s) => s.title)].join(' ')),
+        : inferSubject(
+            [title, text(source.audience, 120), ...slides.map((s) => s.title)].join(' '),
+          ),
       audience: text(source.audience, 120),
       style: text(source.style, 600) ?? design?.description,
       mainIdeas: textList(source.mainIdeas, 6, 160),
@@ -375,7 +430,9 @@ export function parseDeckPlan(raw: string): DeckPlan | null {
  */
 export function slideCatalogText(includeEditorial = false): string {
   // Prompt server hiện vẫn chọn trong catalog cũ. Bật catalog mới khi phần server đã sẵn sàng.
-  const layouts = includeEditorial ? SLIDE_LAYOUTS : SLIDE_LAYOUTS.filter((layout) => !isEditorialLayout(layout.id))
+  const layouts = includeEditorial
+    ? SLIDE_LAYOUTS
+    : SLIDE_LAYOUTS.filter((layout) => !isEditorialLayout(layout.id))
   return [
     'BỘ MÀU (chọn "theme" đúng một id — theo chủ đề, cảm xúc và đối tượng; tags chỉ là gợi ý, không bắt buộc theo môn):',
     ...DECK_THEMES.map(

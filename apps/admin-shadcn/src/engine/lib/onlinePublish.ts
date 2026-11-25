@@ -1,10 +1,11 @@
+import { appPaths } from '@/config/app-paths'
 import { publishDoc, setListed } from '@/engine/lib/community'
 import { itemToDoc, type OnlineItem } from '@/engine/lib/onlineExam'
 import { useOnline } from '@/engine/store/online'
-import { appPaths } from '@/config/app-paths'
 
 /** Link mở đề đã xuất bản; ai có link đều làm được, không cần đăng nhập. */
-export const shareUrl = (publishedId: string) => window.location.origin + appPaths.play.getHref(publishedId)
+export const shareUrl = (publishedId: string) =>
+  window.location.origin + appPaths.play.getHref(publishedId)
 
 /**
  * Xuất bản đề: `listed` = hiện trong danh sách cộng đồng, false = chỉ học sinh có link làm được.

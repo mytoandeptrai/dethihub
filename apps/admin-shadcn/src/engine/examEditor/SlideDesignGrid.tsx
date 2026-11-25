@@ -1,14 +1,16 @@
-/**
- * Lưới chọn bộ thiết kế (tab Mẫu → Bộ màu ở panel trái): bấm là đổi phong cách
- * toàn bài, không thêm slide. Thẻ gọn (không dựng SlideThumb nặng).
- */
-import type { CSSProperties } from 'react'
 import { Check } from 'lucide-react'
+
 import { cn } from '@/engine/lib/cn'
 import { SLIDE_DESIGNS, designTheme, type SlideDesign } from '@/engine/lib/slideDesigns'
 import { previewSlideFont, slideFontStack } from '@/engine/lib/slideFonts'
 import { skinById } from '@/engine/lib/slideSkins'
 import { DECK_THEMES, normalizeTheme } from '@/engine/lib/slideTheme'
+
+/**
+ * Lưới chọn bộ thiết kế (tab Mẫu → Bộ màu ở panel trái): bấm là đổi phong cách
+ * toàn bài, không thêm slide. Thẻ gọn (không dựng SlideThumb nặng).
+ */
+import type { CSSProperties } from 'react'
 
 interface SlideDesignGridProps {
   activeDesignId?: string
@@ -50,11 +52,11 @@ export function SlideDesignGrid({
   return (
     <div className="pb-4">
       {disabled && (
-        <p className="mb-3 rounded-lg border border-line bg-paper px-3 py-2 text-[12px] text-ink-3">
+        <p className="border-line bg-paper text-ink-3 mb-3 rounded-lg border px-3 py-2 text-[12px]">
           Bài giảng HTML dùng định dạng riêng nên không áp dụng bộ thiết kế.
         </p>
       )}
-      <p className="mb-2.5 text-[11.5px] leading-snug text-ink-3">
+      <p className="text-ink-3 mb-2.5 text-[11.5px] leading-snug">
         Nhấp để đổi phong cách toàn bài (giữ nguyên số slide và nội dung).
       </p>
 
@@ -83,7 +85,9 @@ export function SlideDesignGrid({
             </span>
             <span className="slide-design-card__bars">
               <i style={{ background: DEFAULT_THEME.accent }} />
-              <i style={{ background: DEFAULT_THEME.secondary ?? DEFAULT_THEME.muted ?? '#94a3b8' }} />
+              <i
+                style={{ background: DEFAULT_THEME.secondary ?? DEFAULT_THEME.muted ?? '#94a3b8' }}
+              />
             </span>
           </span>
           {!activeDesignId && (

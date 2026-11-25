@@ -16,7 +16,7 @@ export function ProgressBar({
   }, [pct])
   return (
     <div
-      className={`${className} h-2.5 overflow-hidden rounded-full bg-sunken`}
+      className={`${className} bg-sunken h-2.5 overflow-hidden rounded-full`}
       role="meter"
       aria-valuemin={0}
       aria-valuemax={100}

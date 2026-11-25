@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { Fragment } from 'react'
+
 import { t } from '@/i18n/translate'
 import { isAiQuestionBlock, questionText } from '@/lib/ai-question-stream'
 
@@ -12,7 +13,8 @@ const record = (value: unknown): Record<string, unknown> =>
     ? (value as Record<string, unknown>)
     : {}
 const list = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
-const contentText = (value: unknown) => typeof value === 'number' || typeof value === 'boolean' ? String(value) : questionText(value)
+const contentText = (value: unknown) =>
+  typeof value === 'number' || typeof value === 'boolean' ? String(value) : questionText(value)
 function keyed<T>(items: T[]) {
   const occurrences = new Map<string, number>()
   return items.map((value) => {
@@ -91,7 +93,18 @@ function PaperBlock({
       if (typeof image.src !== 'string') return
       if (buffer) parts.push(<Fragment key={`text-${key}`}>{renderText(buffer)}</Fragment>)
       buffer = ''
-      parts.push(<Image key={key} unoptimized src={image.src} alt={String(image.alt ?? '')} width={Number(image.width) || 260} height={200} style={{ width: 'auto', height: 'auto' }} className="my-2 block max-h-56 max-w-full object-contain" />)
+      parts.push(
+        <Image
+          key={key}
+          unoptimized
+          src={image.src}
+          alt={String(image.alt ?? '')}
+          width={Number(image.width) || 260}
+          height={200}
+          style={{ width: 'auto', height: 'auto' }}
+          className="my-2 block max-h-56 max-w-full object-contain"
+        />,
+      )
     })
     if (buffer) parts.push(<Fragment key="tail">{renderText(buffer)}</Fragment>)
     return parts
@@ -110,7 +123,11 @@ function PaperBlock({
       <div className="text-ink-3 text-xs">
         {block.type === 'meta'
           ? list(block.rows)
-              .map((row) => list(row).map((item) => contentText(item)).join(': '))
+              .map((row) =>
+                list(row)
+                  .map((item) => contentText(item))
+                  .join(': '),
+              )
               .join(' · ')
           : text(block.text)}
       </div>
@@ -124,7 +141,11 @@ function PaperBlock({
             {t(block.type === 'essay' ? 'aiReview.essay' : 'aiReview.question', { number })}{' '}
           </span>
           {text(block.text ?? block.prompt)}
-          {block.type === 'essay' ? <span className="ml-2 text-xs font-medium">{t('aiReview.score', { score: Number(block.score) })}</span> : null}
+          {block.type === 'essay' ? (
+            <span className="ml-2 text-xs font-medium">
+              {t('aiReview.score', { score: Number(block.score) })}
+            </span>
+          ) : null}
         </div>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
           {list(block.options ?? block.statements).map((option, index) => {
@@ -167,7 +188,10 @@ function PaperBlock({
         {text(block.title)}
         <ul className="list-disc space-y-1 pl-4">
           {keyed(list(block.items)).map(({ value: item, key }) => (
-            <li key={key}>{block.type === 'rubric' ? <b>{text(record(item).label)} </b> : null}{text(record(item).text ?? item)}</li>
+            <li key={key}>
+              {block.type === 'rubric' ? <b>{text(record(item).label)} </b> : null}
+              {text(record(item).text ?? item)}
+            </li>
           ))}
         </ul>
       </div>
@@ -197,9 +221,7 @@ function PaperBlock({
     return <PaperTable rows={list(block.rows).map((row) => list(row))} renderText={renderText} />
   const label = blockLabels[block.type as keyof typeof blockLabels] ?? 'unknown'
   return (
-    <span
-      className="inline-flex rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200"
-    >
+    <span className="inline-flex rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200">
       {t(`aiReview.${label}`)}
       {block.type === 'image' && block.alt ? ` · ${questionText(block.alt)}` : ''}
     </span>
@@ -221,19 +243,32 @@ export function AiDocumentPreview({
     noChanges?: boolean
     answerKeyWarning?: boolean
     answerKeyWarningReason?: 'missing-key' | 'extra-key'
-    patches: { op: 'replace' | 'insertAfter' | 'insertBefore' | 'delete'; index: number; blocks: unknown[]; numbers?: number[] }[]
+    patches: {
+      op: 'replace' | 'insertAfter' | 'insertBefore' | 'delete'
+      index: number
+      blocks: unknown[]
+      numbers?: number[]
+    }[]
   }
   questionCount?: number
   total?: number
   renderText?: (text: string) => ReactNode
 }) {
   const patches = prepared.action === 'patch' ? prepared.patches : []
-  const blocks = prepared.action === 'append' || prepared.action === 'replace' ? prepared.blocks.map((block) => record(block)) : []
-  const allBlocks = [...blocks, ...patches.flatMap((patch) => patch.blocks.map((block) => record(block)))]
+  const blocks =
+    prepared.action === 'append' || prepared.action === 'replace'
+      ? prepared.blocks.map((block) => record(block))
+      : []
+  const allBlocks = [
+    ...blocks,
+    ...patches.flatMap((patch) => patch.blocks.map((block) => record(block))),
+  ]
   const questionCount = allBlocks.filter((block) => isAiQuestionBlock(block)).length
-  const answers = prepared.answers ?? allBlocks
-    .filter((block) => block.type === 'answerKey')
-    .flatMap((block) => list(block.items).map((item) => record(item)))
+  const answers =
+    prepared.answers ??
+    allBlocks
+      .filter((block) => block.type === 'answerKey')
+      .flatMap((block) => list(block.items).map((item) => record(item)))
   const action = prepared.action === 'none' ? 'draft' : prepared.action
   let questionNumber = 0
   let essayNumber = 0
@@ -247,7 +282,11 @@ export function AiDocumentPreview({
           <PaperBlock
             block={block}
             number={number}
-            answer={block.type === 'question' ? answers.find((answer) => Number(answer.no) === number)?.answer : undefined}
+            answer={
+              block.type === 'question'
+                ? answers.find((answer) => Number(answer.no) === number)?.answer
+                : undefined
+            }
             renderText={renderText}
           />
         </div>
@@ -260,8 +299,20 @@ export function AiDocumentPreview({
     >
       <h4 className="font-semibold text-indigo-700 dark:text-indigo-300">{t('aiReview.title')}</h4>
       <p className="mt-2 font-semibold">{t(`aiReview.${action}`)}</p>
-      {prepared.noChanges ? <p role="alert" className="my-2 text-amber-800 dark:text-amber-300">{t('aiReview.noChanges')}</p> : null}
-      {prepared.answerKeyWarning ? <p role="alert" className="my-2 text-amber-800 dark:text-amber-300">{t(prepared.answerKeyWarningReason === 'extra-key' ? 'aiReview.extraAnswerKeyWarning' : 'aiReview.answerKeyWarning')}</p> : null}
+      {prepared.noChanges ? (
+        <p role="alert" className="my-2 text-amber-800 dark:text-amber-300">
+          {t('aiReview.noChanges')}
+        </p>
+      ) : null}
+      {prepared.answerKeyWarning ? (
+        <p role="alert" className="my-2 text-amber-800 dark:text-amber-300">
+          {t(
+            prepared.answerKeyWarningReason === 'extra-key'
+              ? 'aiReview.extraAnswerKeyWarning'
+              : 'aiReview.answerKeyWarning',
+          )}
+        </p>
+      ) : null}
       {typeof document.name === 'string' ? (
         <p className="mt-1 font-medium">{document.name}</p>
       ) : null}
@@ -287,7 +338,10 @@ export function AiDocumentPreview({
               {t(`aiReview.${patchLabels[patch.op as keyof typeof patchLabels] ?? 'patch'}`)}
               {` · k${patch.index}`}
             </p>
-            {renderBlocks(list(patch.blocks).map((block) => record(block)), patch.numbers)}
+            {renderBlocks(
+              list(patch.blocks).map((block) => record(block)),
+              patch.numbers,
+            )}
           </div>
         ))}
         {allBlocks.length === 0 && patches.length === 0 ? (

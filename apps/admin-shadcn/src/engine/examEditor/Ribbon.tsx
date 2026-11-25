@@ -1,3 +1,5 @@
+import { BookMarked } from 'lucide-react'
+import { MonitorPlay, ListTree, TableCellsMerge, TableCellsSplit } from 'lucide-react'
 /**
  * Ribbon của trình soạn đề — port cấu trúc ribbon Word của GenOffice:
  * các tab (Trang chủ / Chèn / Bố cục / Thiết kế / Tài liệu), mỗi tab là các
@@ -10,12 +12,24 @@
  *
  * Mọi icon là SVG stroke `currentColor` từ bộ icon GenOffice — KHÔNG dùng emoji.
  */
-import { Fragment, Suspense, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import {
+  Fragment,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
+
+import { Segmented } from '@/engine/components/Segmented'
 import { Spinner } from '@/engine/components/ui'
-import type { PageMargins } from './ExamEditor'
+import { cn } from '@/engine/lib/cn'
+import { lazyPage } from '@/engine/lib/lazyPage'
+
 import { ColorPalette } from './ColorPalette'
-import { DEFAULT_PAGE_NUMBER, PAGE_SIZES, type BandSetup, type PageNumberSetup, type PageSizeId } from './pageSetup'
-import type { Editor } from '@tiptap/core'
+import { ExamCommandHost } from './ExamCommandHost'
+import { FileMenu, type FileMenuExtra } from './FileMenu'
 import {
   RibbonBody,
   RibbonButton,
@@ -24,26 +38,48 @@ import {
   RibbonTabs,
   type RibbonTabDef,
 } from './Layout'
-import { cn } from '@/engine/lib/cn'
-import { Segmented } from '@/engine/components/Segmented'
-import { BookMarked } from 'lucide-react'
-import { MonitorPlay, ListTree, TableCellsMerge, TableCellsSplit } from 'lucide-react'
-import { FileMenu, type FileMenuExtra } from './FileMenu'
-import { ExamCommandHost } from './ExamCommandHost'
+import {
+  DEFAULT_PAGE_NUMBER,
+  PAGE_SIZES,
+  type BandSetup,
+  type PageNumberSetup,
+  type PageSizeId,
+} from './pageSetup'
+
 import type { ExamCommand } from './commands'
-import { lazyPage } from '@/engine/lib/lazyPage'
+import type { PageMargins } from './ExamEditor'
+import type { Editor } from '@tiptap/core'
 // ngân hàng câu hỏi (kéo theo công cụ vẽ hình ~100 KB gzip) nạp khi mở
 const loadBankModal = () => import('./BankModal')
 const BankModal = lazyPage(() => loadBankModal().then((m) => ({ default: m.BankModal })))
-import { templateById, insertBlockTemplate } from './templates'
-import { applyFormatAttrs, getSelectedBlock, syncDomSelection, type FormatState } from './formatState'
-import { TablePicker, SymbolPicker, ImagePicker, EquationDialog, LinkDialog, ShapePicker, insertExamTable } from './InsertMenus'
 import { Dropdown } from './Dropdown'
-import { useAnchoredPopover, popoverStyle } from './useAnchoredPopover'
+import {
+  applyFormatAttrs,
+  getSelectedBlock,
+  syncDomSelection,
+  type FormatState,
+} from './formatState'
+import {
+  TablePicker,
+  SymbolPicker,
+  ImagePicker,
+  EquationDialog,
+  LinkDialog,
+  ShapePicker,
+  insertExamTable,
+} from './InsertMenus'
 import { PhoneRibbon, TabletRibbonBody, type RibbonGroupDef } from './RibbonAdaptive'
+import { templateById, insertBlockTemplate } from './templates'
+import { useAnchoredPopover, popoverStyle } from './useAnchoredPopover'
 // deleteActions kéo theo lõi TipTap/ProseMirror: nạp lúc bấm (khi đó ExamEditor đã tải sẵn) để trang chung nhẹ
-const del = (fn: 'deleteCurrentTable' | 'deleteCurrentTableColumn' | 'deleteCurrentTableRow' | 'deleteCurrentBlock', editor: Editor) =>
-  void import('./deleteActions').then((m) => m[fn](editor))
+const del = (
+  fn:
+    | 'deleteCurrentTable'
+    | 'deleteCurrentTableColumn'
+    | 'deleteCurrentTableRow'
+    | 'deleteCurrentBlock',
+  editor: Editor,
+) => void import('./deleteActions').then((m) => m[fn](editor))
 import {
   IconAlignCenter,
   IconAlignJustify,
@@ -102,8 +138,36 @@ export const RIBBON_TABS: RibbonTabDef[] = [
   { id: 'layout', label: 'Bố cục' },
 ]
 
-const FONT_SIZES = ['8', '9', '10', '11', '12', '13', '14', '15', '16', '18', '20', '22', '24', '26', '28', '36', '48', '72']
-const FONTS = ['Times New Roman', 'Arial', 'Calibri', 'Georgia', 'Segoe UI', 'Tahoma', 'Verdana', 'Courier New']
+const FONT_SIZES = [
+  '8',
+  '9',
+  '10',
+  '11',
+  '12',
+  '13',
+  '14',
+  '15',
+  '16',
+  '18',
+  '20',
+  '22',
+  '24',
+  '26',
+  '28',
+  '36',
+  '48',
+  '72',
+]
+const FONTS = [
+  'Times New Roman',
+  'Arial',
+  'Calibri',
+  'Georgia',
+  'Segoe UI',
+  'Tahoma',
+  'Verdana',
+  'Courier New',
+]
 const LINE_SPACING = [
   { label: '1,0', value: '1' },
   { label: '1,15', value: '1.15' },
@@ -114,14 +178,54 @@ const LINE_SPACING = [
 ]
 
 const HIGHLIGHTS = [
-  '#ffff00', '#00ff00', '#00ffff', '#ff00ff', '#0000ff', '#ff0000', '#000080', '#008080',
-  '#008000', '#800080', '#800000', '#808000', '#808080', '#c0c0c0', '#000000',
+  '#ffff00',
+  '#00ff00',
+  '#00ffff',
+  '#ff00ff',
+  '#0000ff',
+  '#ff0000',
+  '#000080',
+  '#008080',
+  '#008000',
+  '#800080',
+  '#800000',
+  '#808000',
+  '#808080',
+  '#c0c0c0',
+  '#000000',
 ]
 
 const THEME_COLORS = [
-  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
-  '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
-  '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+  '#000000',
+  '#434343',
+  '#666666',
+  '#999999',
+  '#b7b7b7',
+  '#cccccc',
+  '#d9d9d9',
+  '#efefef',
+  '#f3f3f3',
+  '#ffffff',
+  '#980000',
+  '#ff0000',
+  '#ff9900',
+  '#ffff00',
+  '#00ff00',
+  '#00ffff',
+  '#4a86e8',
+  '#0000ff',
+  '#9900ff',
+  '#ff00ff',
+  '#e6b8af',
+  '#f4cccc',
+  '#fce5cd',
+  '#fff2cc',
+  '#d9ead3',
+  '#d0e0e3',
+  '#c9daf8',
+  '#cfe2f3',
+  '#d9d2e9',
+  '#ead1dc',
 ]
 
 interface StylePreset {
@@ -135,10 +239,26 @@ const STYLE_PRESETS: StylePreset[] = [
   { id: 'noSpacing', label: 'Không giãn', preview: { fontSize: 13, lineHeight: 1 } },
   { id: 'title', label: 'Tiêu đề', preview: { fontSize: 17, fontWeight: 700 } },
   { id: 'subtitle', label: 'Phụ đề', preview: { fontSize: 13, color: '#666' } },
-  { id: 'heading1', label: 'Tiêu đề 1', preview: { fontSize: 15, fontWeight: 700, color: 'var(--word-heading)' } },
-  { id: 'heading2', label: 'Tiêu đề 2', preview: { fontSize: 14, fontWeight: 700, color: 'var(--word-heading)' } },
-  { id: 'heading3', label: 'Tiêu đề 3', preview: { fontSize: 13, fontWeight: 700, color: 'var(--word-heading)' } },
-  { id: 'quote', label: 'Trích dẫn', preview: { fontSize: 13, fontStyle: 'italic', color: '#666' } },
+  {
+    id: 'heading1',
+    label: 'Tiêu đề 1',
+    preview: { fontSize: 15, fontWeight: 700, color: 'var(--word-heading)' },
+  },
+  {
+    id: 'heading2',
+    label: 'Tiêu đề 2',
+    preview: { fontSize: 14, fontWeight: 700, color: 'var(--word-heading)' },
+  },
+  {
+    id: 'heading3',
+    label: 'Tiêu đề 3',
+    preview: { fontSize: 13, fontWeight: 700, color: 'var(--word-heading)' },
+  },
+  {
+    id: 'quote',
+    label: 'Trích dẫn',
+    preview: { fontSize: 13, fontStyle: 'italic', color: '#666' },
+  },
 ]
 
 export function Ribbon({
@@ -284,7 +404,9 @@ export function Ribbon({
 
   const setFontSize = (v: string) => {
     setSize(v)
-    chain()?.setMark('textStyle', { fontSize: `${v}pt` }).run()
+    chain()
+      ?.setMark('textStyle', { fontSize: `${v}pt` })
+      .run()
   }
 
   const stepFontSize = (dir: 1 | -1) => {
@@ -361,9 +483,14 @@ export function Ribbon({
       void loadBankModal()
       void import('@/engine/data/bank').then((m) => m.loadFullBank())
     }
-    const idle = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback
+    const idle = (
+      window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }
+    ).requestIdleCallback
     const id = idle ? idle(warm, { timeout: 8000 }) : window.setTimeout(warm, 4000)
-    return () => (idle ? (window as { cancelIdleCallback?: (n: number) => void }).cancelIdleCallback?.(id) : window.clearTimeout(id))
+    return () =>
+      idle
+        ? (window as { cancelIdleCallback?: (n: number) => void }).cancelIdleCallback?.(id)
+        : window.clearTimeout(id)
   }, [])
 
   const insertTemplate = (id: string) => {
@@ -385,7 +512,17 @@ export function Ribbon({
     let newType: string | null = null
     switch (id) {
       case 'normal':
-        patch = { align: undefined, textAlign: undefined, lineHeight: undefined, indentLeft: undefined, indentFirstLine: undefined, spaceBefore: undefined, spaceAfter: undefined, borders: undefined, shading: undefined }
+        patch = {
+          align: undefined,
+          textAlign: undefined,
+          lineHeight: undefined,
+          indentLeft: undefined,
+          indentFirstLine: undefined,
+          spaceBefore: undefined,
+          spaceAfter: undefined,
+          borders: undefined,
+          shading: undefined,
+        }
         break
       case 'noSpacing':
         patch = { spaceBefore: 0, spaceAfter: 0, lineHeight: 1 }
@@ -420,7 +557,11 @@ export function Ribbon({
         break
     }
     const attrs = { ...node.attrs, ...patch }
-    let tr = state.tr.setNodeMarkup(nodePos, newType ? state.schema.nodes[newType] : undefined, attrs)
+    let tr = state.tr.setNodeMarkup(
+      nodePos,
+      newType ? state.schema.nodes[newType] : undefined,
+      attrs,
+    )
     if (id === 'quote' || id === 'subtitle') {
       const from = nodePos + 1
       const to = nodePos + node.nodeSize - 1
@@ -444,7 +585,12 @@ export function Ribbon({
       downloadHint=".doc"
       extra={[
         { label: 'Xuất PDF', hint: 'In ra hoặc lưu thành PDF', onClick: onExportPdf },
-        { label: 'Làm đề tương tác', hint: 'Làm thử có đếm ngược, tự chấm', onClick: onStartQuiz, icon: <MonitorPlay className="size-4" strokeWidth={1.5} /> },
+        {
+          label: 'Làm đề tương tác',
+          hint: 'Làm thử có đếm ngược, tự chấm',
+          onClick: onStartQuiz,
+          icon: <MonitorPlay className="size-4" strokeWidth={1.5} />,
+        },
         ...fileActions,
       ]}
     />
@@ -457,7 +603,8 @@ export function Ribbon({
         label: 'Clipboard',
         render: () => (
           <div className="rb-row rb-row--top">
-            <RibbonButton data-command="exam.home.clipboard.1"
+            <RibbonButton
+              data-command="exam.home.clipboard.1"
               icon={<IconPaste size={26} />}
               label="Dán"
               disabled={disabled}
@@ -466,9 +613,28 @@ export function Ribbon({
               }
             />
             <div className="rb-col rb-col--icons">
-              <RibbonIconButton data-command="exam.home.clipboard.2" icon={<IconCut size={16} />} title="Cắt" disabled={disabled} onClick={() => document.execCommand('cut')} />
-              <RibbonIconButton data-command="exam.home.clipboard.3" icon={<IconCopy size={16} />} title="Sao chép" disabled={disabled} onClick={() => document.execCommand('copy')} />
-              <RibbonIconButton data-command="exam.home.clipboard.4" icon={<IconFormatPainter size={16} />} title="Sao chép định dạng" active={painter} disabled={disabled} onClick={capturePainter} />
+              <RibbonIconButton
+                data-command="exam.home.clipboard.2"
+                icon={<IconCut size={16} />}
+                title="Cắt"
+                disabled={disabled}
+                onClick={() => document.execCommand('cut')}
+              />
+              <RibbonIconButton
+                data-command="exam.home.clipboard.3"
+                icon={<IconCopy size={16} />}
+                title="Sao chép"
+                disabled={disabled}
+                onClick={() => document.execCommand('copy')}
+              />
+              <RibbonIconButton
+                data-command="exam.home.clipboard.4"
+                icon={<IconFormatPainter size={16} />}
+                title="Sao chép định dạng"
+                active={painter}
+                disabled={disabled}
+                onClick={capturePainter}
+              />
             </div>
           </div>
         ),
@@ -479,15 +645,21 @@ export function Ribbon({
         render: () => (
           <div className="rb-font-group">
             <div className="rb-row">
-              <Dropdown data-command="exam.home.font.1"
+              <Dropdown
+                data-command="exam.home.font.1"
                 value={font}
-                options={FONTS.map((f) => ({ value: f, label: f, render: <span style={{ fontFamily: f }}>{f}</span> }))}
+                options={FONTS.map((f) => ({
+                  value: f,
+                  label: f,
+                  render: <span style={{ fontFamily: f }}>{f}</span>,
+                }))}
                 onPick={setFontFamily}
                 disabled={disabled}
                 ariaLabel="Phông chữ"
                 width={148}
               />
-              <Dropdown data-command="exam.home.font.2"
+              <Dropdown
+                data-command="exam.home.font.2"
                 value={size}
                 options={FONT_SIZES.map((s) => ({ value: s, label: s }))}
                 onPick={setFontSize}
@@ -495,23 +667,106 @@ export function Ribbon({
                 ariaLabel="Cỡ chữ"
                 width={58}
               />
-              <RibbonIconButton data-command="exam.home.font.3" icon={<IconGrowFont size={16} />} title="Phóng to chữ" disabled={disabled} onClick={() => stepFontSize(1)} />
-              <RibbonIconButton data-command="exam.home.font.4" icon={<IconShrinkFont size={16} />} title="Thu nhỏ chữ" disabled={disabled} onClick={() => stepFontSize(-1)} />
+              <RibbonIconButton
+                data-command="exam.home.font.3"
+                icon={<IconGrowFont size={16} />}
+                title="Phóng to chữ"
+                disabled={disabled}
+                onClick={() => stepFontSize(1)}
+              />
+              <RibbonIconButton
+                data-command="exam.home.font.4"
+                icon={<IconShrinkFont size={16} />}
+                title="Thu nhỏ chữ"
+                disabled={disabled}
+                onClick={() => stepFontSize(-1)}
+              />
               <span className="rb-mini-sep" />
-              <RibbonIconButton data-command="exam.home.font.5" icon={<IconChangeCase size={16} />} title="Đổi kiểu chữ" disabled={disabled} onClick={() => applyCase('upper')} />
-              <RibbonIconButton data-command="exam.home.font.6" icon={<IconClearFormat size={16} />} title="Xóa định dạng" disabled={disabled} onClick={clearFormatting} />
+              <RibbonIconButton
+                data-command="exam.home.font.5"
+                icon={<IconChangeCase size={16} />}
+                title="Đổi kiểu chữ"
+                disabled={disabled}
+                onClick={() => applyCase('upper')}
+              />
+              <RibbonIconButton
+                data-command="exam.home.font.6"
+                icon={<IconClearFormat size={16} />}
+                title="Xóa định dạng"
+                disabled={disabled}
+                onClick={clearFormatting}
+              />
             </div>
             <div className="rb-row">
-              <button data-command="exam.home.font.7" type="button" className={cn('rb-icon', format.bold && 'active')} data-tip="Đậm" aria-label="Đậm" disabled={disabled} onMouseDown={(e) => e.preventDefault()} onClick={() => chain()?.toggleBold().run()}><b>B</b></button>
-              <button data-command="exam.home.font.8" type="button" className={cn('rb-icon', format.italic && 'active')} data-tip="Nghiêng" aria-label="Nghiêng" disabled={disabled} onMouseDown={(e) => e.preventDefault()} onClick={() => chain()?.toggleItalic().run()}><i>I</i></button>
-              <button data-command="exam.home.font.9" type="button" className={cn('rb-icon', format.underline && 'active')} data-tip="Gạch chân" aria-label="Gạch chân" disabled={disabled} onMouseDown={(e) => e.preventDefault()} onClick={() => chain()?.toggleUnderline().run()}><u>U</u></button>
-              <button data-command="exam.home.font.10" type="button" className={cn('rb-icon', format.strike && 'active')} data-tip="Gạch ngang" aria-label="Gạch ngang" disabled={disabled} onMouseDown={(e) => e.preventDefault()} onClick={() => chain()?.toggleStrike().run()}><s>ab</s></button>
+              <button
+                data-command="exam.home.font.7"
+                type="button"
+                className={cn('rb-icon', format.bold && 'active')}
+                data-tip="Đậm"
+                aria-label="Đậm"
+                disabled={disabled}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => chain()?.toggleBold().run()}
+              >
+                <b>B</b>
+              </button>
+              <button
+                data-command="exam.home.font.8"
+                type="button"
+                className={cn('rb-icon', format.italic && 'active')}
+                data-tip="Nghiêng"
+                aria-label="Nghiêng"
+                disabled={disabled}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => chain()?.toggleItalic().run()}
+              >
+                <i>I</i>
+              </button>
+              <button
+                data-command="exam.home.font.9"
+                type="button"
+                className={cn('rb-icon', format.underline && 'active')}
+                data-tip="Gạch chân"
+                aria-label="Gạch chân"
+                disabled={disabled}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => chain()?.toggleUnderline().run()}
+              >
+                <u>U</u>
+              </button>
+              <button
+                data-command="exam.home.font.10"
+                type="button"
+                className={cn('rb-icon', format.strike && 'active')}
+                data-tip="Gạch ngang"
+                aria-label="Gạch ngang"
+                disabled={disabled}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => chain()?.toggleStrike().run()}
+              >
+                <s>ab</s>
+              </button>
               <span className="rb-mini-sep" />
-              <RibbonIconButton data-command="exam.home.font.11" icon={<IconSubscript size={16} />} title="Chỉ số dưới" active={format.sub} disabled={disabled} onClick={() => chain()?.toggleMark('sub').run()} />
-              <RibbonIconButton data-command="exam.home.font.12" icon={<IconSuperscript size={16} />} title="Chỉ số trên" active={format.super} disabled={disabled} onClick={() => chain()?.toggleMark('super').run()} />
+              <RibbonIconButton
+                data-command="exam.home.font.11"
+                icon={<IconSubscript size={16} />}
+                title="Chỉ số dưới"
+                active={format.sub}
+                disabled={disabled}
+                onClick={() => chain()?.toggleMark('sub').run()}
+              />
+              <RibbonIconButton
+                data-command="exam.home.font.12"
+                icon={<IconSuperscript size={16} />}
+                title="Chỉ số trên"
+                active={format.super}
+                disabled={disabled}
+                onClick={() => chain()?.toggleMark('super').run()}
+              />
               <span className="rb-mini-sep" />
               <div className="rb-split">
-                <RibbonIconButton data-command="exam.home.font.13"
+                <RibbonIconButton
+                  data-command="exam.home.font.13"
                   icon={
                     <span className="rb-color-glyph">
                       <IconHighlight size={16} />
@@ -523,7 +778,8 @@ export function Ribbon({
                   disabled={disabled}
                   onClick={() => chain()?.toggleHighlight({ color: penHighlight }).run()}
                 />
-                <ColorDropdown data-command="exam.home.font.14"
+                <ColorDropdown
+                  data-command="exam.home.font.14"
                   title="Màu tô sáng"
                   colors={HIGHLIGHTS}
                   current={penHighlight}
@@ -536,7 +792,8 @@ export function Ribbon({
                 />
               </div>
               <div className="rb-split">
-                <RibbonIconButton data-command="exam.home.font.15"
+                <RibbonIconButton
+                  data-command="exam.home.font.15"
                   icon={
                     <span className="rb-color-glyph">
                       <IconFontColorA size={16} />
@@ -547,11 +804,18 @@ export function Ribbon({
                   disabled={disabled}
                   onClick={() => chain()?.setMark('textStyle', { color: penColor }).run()}
                 />
-                <ColorDropdown data-command="exam.home.font.16"
+                <ColorDropdown
+                  data-command="exam.home.font.16"
                   title="Màu chữ"
                   colors={THEME_COLORS}
                   current={penColor}
-                  none={{ label: 'Tự động (đen)', onClick: () => { setPenColor('#000000'); chain()?.unsetMark('textStyle').run() } }}
+                  none={{
+                    label: 'Tự động (đen)',
+                    onClick: () => {
+                      setPenColor('#000000')
+                      chain()?.unsetMark('textStyle').run()
+                    },
+                  }}
                   onPick={(c) => {
                     setPenColor(c)
                     chain()?.setMark('textStyle', { color: c }).run()
@@ -569,20 +833,84 @@ export function Ribbon({
         render: () => (
           <div className="rb-col">
             <div className="rb-row">
-              <RibbonIconButton data-command="exam.home.paragraph.1" icon={<IconBullets size={16} />} title="Danh sách gạch đầu dòng" disabled={disabled} onClick={() => insertTemplate('bullets')} />
-              <RibbonIconButton data-command="exam.home.paragraph.2" icon={<IconNumbered size={16} />} title="Danh sách đánh số" disabled={disabled} onClick={() => insertTemplate('numbered')} />
-              <RibbonIconButton data-command="exam.home.paragraph.3" icon={<IconMultilevel size={16} />} title="Danh sách nhiều cấp" disabled={disabled} onClick={() => insertTemplate('multilevel')} />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.1"
+                icon={<IconBullets size={16} />}
+                title="Danh sách gạch đầu dòng"
+                disabled={disabled}
+                onClick={() => insertTemplate('bullets')}
+              />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.2"
+                icon={<IconNumbered size={16} />}
+                title="Danh sách đánh số"
+                disabled={disabled}
+                onClick={() => insertTemplate('numbered')}
+              />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.3"
+                icon={<IconMultilevel size={16} />}
+                title="Danh sách nhiều cấp"
+                disabled={disabled}
+                onClick={() => insertTemplate('multilevel')}
+              />
               <span className="rb-mini-sep" />
-              <RibbonIconButton data-command="exam.home.paragraph.4" icon={<IconIndentDec size={16} />} title="Giảm thụt lề" disabled={disabled} onClick={() => live && applyFormatAttrs(live, { indentLeft: Math.max(0, format.indentLeft - 12) })} />
-              <RibbonIconButton data-command="exam.home.paragraph.5" icon={<IconIndentInc size={16} />} title="Tăng thụt lề" disabled={disabled} onClick={() => live && applyFormatAttrs(live, { indentLeft: format.indentLeft + 12 })} />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.4"
+                icon={<IconIndentDec size={16} />}
+                title="Giảm thụt lề"
+                disabled={disabled}
+                onClick={() =>
+                  live &&
+                  applyFormatAttrs(live, { indentLeft: Math.max(0, format.indentLeft - 12) })
+                }
+              />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.5"
+                icon={<IconIndentInc size={16} />}
+                title="Tăng thụt lề"
+                disabled={disabled}
+                onClick={() =>
+                  live && applyFormatAttrs(live, { indentLeft: format.indentLeft + 12 })
+                }
+              />
             </div>
             <div className="rb-row">
-              <RibbonIconButton data-command="exam.home.paragraph.6" icon={<IconAlignLeft size={16} />} title="Căn trái" active={format.align === 'left'} disabled={disabled} onClick={() => chain()?.setTextAlign('left').run()} />
-              <RibbonIconButton data-command="exam.home.paragraph.7" icon={<IconAlignCenter size={16} />} title="Căn giữa" active={format.align === 'center'} disabled={disabled} onClick={() => chain()?.setTextAlign('center').run()} />
-              <RibbonIconButton data-command="exam.home.paragraph.8" icon={<IconAlignRight size={16} />} title="Căn phải" active={format.align === 'right'} disabled={disabled} onClick={() => chain()?.setTextAlign('right').run()} />
-              <RibbonIconButton data-command="exam.home.paragraph.9" icon={<IconAlignJustify size={16} />} title="Căn đều" active={format.align === 'justify'} disabled={disabled} onClick={() => chain()?.setTextAlign('justify').run()} />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.6"
+                icon={<IconAlignLeft size={16} />}
+                title="Căn trái"
+                active={format.align === 'left'}
+                disabled={disabled}
+                onClick={() => chain()?.setTextAlign('left').run()}
+              />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.7"
+                icon={<IconAlignCenter size={16} />}
+                title="Căn giữa"
+                active={format.align === 'center'}
+                disabled={disabled}
+                onClick={() => chain()?.setTextAlign('center').run()}
+              />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.8"
+                icon={<IconAlignRight size={16} />}
+                title="Căn phải"
+                active={format.align === 'right'}
+                disabled={disabled}
+                onClick={() => chain()?.setTextAlign('right').run()}
+              />
+              <RibbonIconButton
+                data-command="exam.home.paragraph.9"
+                icon={<IconAlignJustify size={16} />}
+                title="Căn đều"
+                active={format.align === 'justify'}
+                disabled={disabled}
+                onClick={() => chain()?.setTextAlign('justify').run()}
+              />
               <span className="rb-mini-sep" />
-              <Dropdown data-command="exam.home.paragraph.10"
+              <Dropdown
+                data-command="exam.home.paragraph.10"
                 value={String(format.lineHeight)}
                 options={LINE_SPACING.map((l) => ({ value: l.value, label: l.label }))}
                 onPick={(v) => chain()?.setLineHeight(v).run()}
@@ -592,7 +920,8 @@ export function Ribbon({
               />
               <span className="rb-mini-sep" />
               <div className="rb-split">
-                <RibbonIconButton data-command="exam.home.paragraph.11"
+                <RibbonIconButton
+                  data-command="exam.home.paragraph.11"
                   icon={
                     <span className="rb-color-glyph">
                       <IconShading size={16} />
@@ -601,20 +930,37 @@ export function Ribbon({
                   }
                   title="Đổ bóng đoạn"
                   disabled={disabled}
-                  onClick={() => live && applyFormatAttrs(live, { shading: format.shading ? undefined : '#fff2cc' })}
+                  onClick={() =>
+                    live &&
+                    applyFormatAttrs(live, { shading: format.shading ? undefined : '#fff2cc' })
+                  }
                 />
-                <ColorDropdown data-command="exam.home.paragraph.12"
+                <ColorDropdown
+                  data-command="exam.home.paragraph.12"
                   title="Màu đổ bóng đoạn"
                   colors={THEME_COLORS}
                   current={format.shading}
-                  none={{ label: 'Không đổ bóng', onClick: () => live && applyFormatAttrs(live, { shading: undefined }) }}
+                  none={{
+                    label: 'Không đổ bóng',
+                    onClick: () => live && applyFormatAttrs(live, { shading: undefined }),
+                  }}
                   onPick={(c) => live && applyFormatAttrs(live, { shading: c })}
                   disabled={disabled}
                 />
               </div>
               <div className="rb-split">
-                <RibbonIconButton data-command="exam.home.paragraph.13" icon={<IconBorderAll size={16} />} title="Viền đoạn" disabled={disabled} onClick={() => live && applyFormatAttrs(live, { borders: format.borders === 'box' ? 'none' : 'box' })} />
-                <ColorDropdown data-command="exam.home.paragraph.14"
+                <RibbonIconButton
+                  data-command="exam.home.paragraph.13"
+                  icon={<IconBorderAll size={16} />}
+                  title="Viền đoạn"
+                  disabled={disabled}
+                  onClick={() =>
+                    live &&
+                    applyFormatAttrs(live, { borders: format.borders === 'box' ? 'none' : 'box' })
+                  }
+                />
+                <ColorDropdown
+                  data-command="exam.home.paragraph.14"
                   title="Viền đoạn"
                   colors={[]}
                   items={BORDER_ITEMS.map((it) => ({
@@ -636,12 +982,25 @@ export function Ribbon({
         render: () => (
           <div className="rb-styles">
             {STYLE_PRESETS.map((s) => (
-              <button data-command="exam.home.styles.1" key={s.id} type="button" className="rb-style-card" disabled={disabled} data-tip={s.label} onMouseDown={(e) => e.preventDefault()} onClick={() => applyStylePreset(s.id)}>
-                <span className="rb-style-card__preview" style={s.preview}>AaBbCcDd</span>
+              <button
+                data-command="exam.home.styles.1"
+                key={s.id}
+                type="button"
+                className="rb-style-card"
+                disabled={disabled}
+                data-tip={s.label}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyStylePreset(s.id)}
+              >
+                <span className="rb-style-card__preview" style={s.preview}>
+                  AaBbCcDd
+                </span>
                 <span className="rb-style-card__label">{s.label}</span>
               </button>
             ))}
-            <StylePaneButton data-command="exam.home.styles.2" data-command-label="Kiểu"
+            <StylePaneButton
+              data-command="exam.home.styles.2"
+              data-command-label="Kiểu"
               disabled={disabled}
               onPick={(id) => applyStylePreset(id)}
             />
@@ -654,12 +1013,40 @@ export function Ribbon({
         render: () => (
           <div className="rb-row">
             <div className="rb-col">
-              <RibbonIconButton data-command="exam.home.editing.1" icon={<IconSearch size={16} />} label="Tìm" title="Tìm" disabled={disabled} onClick={onFind} />
-              <RibbonIconButton data-command="exam.home.editing.2" icon={<IconReplace size={16} />} label="Thay thế" title="Thay thế" disabled={disabled} onClick={onReplace} />
+              <RibbonIconButton
+                data-command="exam.home.editing.1"
+                icon={<IconSearch size={16} />}
+                label="Tìm"
+                title="Tìm"
+                disabled={disabled}
+                onClick={onFind}
+              />
+              <RibbonIconButton
+                data-command="exam.home.editing.2"
+                icon={<IconReplace size={16} />}
+                label="Thay thế"
+                title="Thay thế"
+                disabled={disabled}
+                onClick={onReplace}
+              />
             </div>
             <div className="rb-col">
-              <RibbonIconButton data-command="exam.home.editing.3" icon={<IconSelectAll size={16} />} label="Chọn tất cả" title="Chọn tất cả" disabled={disabled} onClick={() => chain()?.selectAll().run()} />
-              <RibbonIconButton data-command="exam.home.editing.4" icon={<IconTrash size={16} />} label="Xóa khối" title="Xóa khối đang chọn" disabled={disabled} onClick={() => live && del('deleteCurrentBlock', live)} />
+              <RibbonIconButton
+                data-command="exam.home.editing.3"
+                icon={<IconSelectAll size={16} />}
+                label="Chọn tất cả"
+                title="Chọn tất cả"
+                disabled={disabled}
+                onClick={() => chain()?.selectAll().run()}
+              />
+              <RibbonIconButton
+                data-command="exam.home.editing.4"
+                icon={<IconTrash size={16} />}
+                label="Xóa khối"
+                title="Xóa khối đang chọn"
+                disabled={disabled}
+                onClick={() => live && del('deleteCurrentBlock', live)}
+              />
             </div>
           </div>
         ),
@@ -669,22 +1056,37 @@ export function Ribbon({
       {
         id: 'bank',
         label: 'Kho',
-        render: () => <RibbonButton data-command="exam.insert.bank.1" icon={<BookMarked size={26} strokeWidth={1.75} />} label="Kho câu hỏi" disabled={disabled} onClick={() => setBankOpen(true)} />,
+        render: () => (
+          <RibbonButton
+            data-command="exam.insert.bank.1"
+            icon={<BookMarked size={26} strokeWidth={1.75} />}
+            label="Kho câu hỏi"
+            disabled={disabled}
+            onClick={() => setBankOpen(true)}
+          />
+        ),
       },
       {
         id: 'table',
         label: 'Bảng',
         render: () => (
           <>
-            <TablePicker data-command="exam.insert.table.1" data-command-label="Bảng" editor={editor} disabled={disabled} />
-            <RibbonButton data-command="exam.insert.table.2"
+            <TablePicker
+              data-command="exam.insert.table.1"
+              data-command-label="Bảng"
+              editor={editor}
+              disabled={disabled}
+            />
+            <RibbonButton
+              data-command="exam.insert.table.2"
               icon={<TableCellsMerge className="size-[26px]" strokeWidth={1.3} />}
               label="Gộp ô"
               title="Kéo chọn nhiều ô trong bảng rồi bấm để gộp"
               disabled={disabled}
               onClick={() => live?.chain().focus().mergeCells().run()}
             />
-            <RibbonButton data-command="exam.insert.table.3"
+            <RibbonButton
+              data-command="exam.insert.table.3"
               icon={<TableCellsSplit className="size-[26px]" strokeWidth={1.3} />}
               label="Tách ô"
               title="Đặt con trỏ vào ô đã gộp rồi bấm để tách lại"
@@ -692,9 +1094,27 @@ export function Ribbon({
               onClick={() => live?.chain().focus().splitCell().run()}
             />
             <div className="rb-col rb-col--icons">
-              <RibbonIconButton data-command="exam.insert.table.4" icon={<IconRowDelete size={16} />} title="Xóa hàng" disabled={disabled} onClick={() => live && del('deleteCurrentTableRow', live)} />
-              <RibbonIconButton data-command="exam.insert.table.5" icon={<IconColDelete size={16} />} title="Xóa cột" disabled={disabled} onClick={() => live && del('deleteCurrentTableColumn', live)} />
-              <RibbonIconButton data-command="exam.insert.table.6" icon={<IconTableDelete size={16} />} title="Xóa bảng" disabled={disabled} onClick={() => live && del('deleteCurrentTable', live)} />
+              <RibbonIconButton
+                data-command="exam.insert.table.4"
+                icon={<IconRowDelete size={16} />}
+                title="Xóa hàng"
+                disabled={disabled}
+                onClick={() => live && del('deleteCurrentTableRow', live)}
+              />
+              <RibbonIconButton
+                data-command="exam.insert.table.5"
+                icon={<IconColDelete size={16} />}
+                title="Xóa cột"
+                disabled={disabled}
+                onClick={() => live && del('deleteCurrentTableColumn', live)}
+              />
+              <RibbonIconButton
+                data-command="exam.insert.table.6"
+                icon={<IconTableDelete size={16} />}
+                title="Xóa bảng"
+                disabled={disabled}
+                onClick={() => live && del('deleteCurrentTable', live)}
+              />
             </div>
           </>
         ),
@@ -704,23 +1124,52 @@ export function Ribbon({
         label: 'Minh họa',
         render: () => (
           <>
-            <ImagePicker data-command="exam.insert.media.1" data-command-label="Ảnh" editor={editor} disabled={disabled} />
-            <ShapePicker data-command="exam.insert.media.2" data-command-label="Hình vẽ" editor={editor} disabled={disabled} />
+            <ImagePicker
+              data-command="exam.insert.media.1"
+              data-command-label="Ảnh"
+              editor={editor}
+              disabled={disabled}
+            />
+            <ShapePicker
+              data-command="exam.insert.media.2"
+              data-command-label="Hình vẽ"
+              editor={editor}
+              disabled={disabled}
+            />
           </>
         ),
       },
       {
         id: 'link',
         label: 'Liên kết',
-        render: () => <RibbonButton data-command="exam.insert.link.1" icon={<IconLink size={26} />} label="Liên kết" disabled={disabled} onClick={() => setDialog('link')} />,
+        render: () => (
+          <RibbonButton
+            data-command="exam.insert.link.1"
+            icon={<IconLink size={26} />}
+            label="Liên kết"
+            disabled={disabled}
+            onClick={() => setDialog('link')}
+          />
+        ),
       },
       {
         id: 'symbols',
         label: 'Ký hiệu',
         render: () => (
           <>
-            <SymbolPicker data-command="exam.insert.symbols.1" data-command-label="Ký hiệu" editor={editor} disabled={disabled} />
-            <RibbonButton data-command="exam.insert.symbols.2" icon={<IconEquation size={26} />} label="Công thức" disabled={disabled} onClick={() => setDialog('equation')} />
+            <SymbolPicker
+              data-command="exam.insert.symbols.1"
+              data-command-label="Ký hiệu"
+              editor={editor}
+              disabled={disabled}
+            />
+            <RibbonButton
+              data-command="exam.insert.symbols.2"
+              icon={<IconEquation size={26} />}
+              label="Công thức"
+              disabled={disabled}
+              onClick={() => setDialog('equation')}
+            />
           </>
         ),
       },
@@ -729,8 +1178,20 @@ export function Ribbon({
         label: 'Trang',
         render: () => (
           <>
-            <RibbonButton data-command="exam.insert.page.1" icon={<IconPageBreak size={26} />} label="Ngắt trang" disabled={disabled} onClick={() => insertTemplate('pageBreak')} />
-            <RibbonButton data-command="exam.insert.page.2" icon={<ListTree className="size-[26px]" strokeWidth={1.3} />} label="Chèn mục lục" disabled={disabled} onClick={() => insertTemplate('toc')} />
+            <RibbonButton
+              data-command="exam.insert.page.1"
+              icon={<IconPageBreak size={26} />}
+              label="Ngắt trang"
+              disabled={disabled}
+              onClick={() => insertTemplate('pageBreak')}
+            />
+            <RibbonButton
+              data-command="exam.insert.page.2"
+              icon={<ListTree className="size-[26px]" strokeWidth={1.3} />}
+              label="Chèn mục lục"
+              disabled={disabled}
+              onClick={() => insertTemplate('toc')}
+            />
           </>
         ),
       },
@@ -741,7 +1202,8 @@ export function Ribbon({
         label: 'Thiết lập trang',
         render: () => (
           <div className="rb-row rb-row--top">
-            <MenuButton data-command="exam.layout.pageSetup.1"
+            <MenuButton
+              data-command="exam.layout.pageSetup.1"
               icon={<PageGlyph margins={margins} />}
               label="Lề"
               title="Lề trang"
@@ -751,11 +1213,15 @@ export function Ribbon({
               {(close) => (
                 <>
                   {MARGIN_PRESETS.map((p) => (
-                    <button data-command="exam.layout.pageSetup.2"
+                    <button
+                      data-command="exam.layout.pageSetup.2"
                       key={p.id}
                       type="button"
                       role="menuitem"
-                      className={cn('rb-color-item rb-margin-item', sameMargins(p.m, margins) && 'is-active')}
+                      className={cn(
+                        'rb-color-item rb-margin-item',
+                        sameMargins(p.m, margins) && 'is-active',
+                      )}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
                         onMarginsChange?.(p.m)
@@ -766,22 +1232,37 @@ export function Ribbon({
                       <span className="rb-margin-item__text">
                         <span className="rb-color-item__label">{p.label}</span>
                         <span className="rb-margin-item__sub">
-                          Trên {fmtCm(p.m.top)} · Dưới {fmtCm(p.m.bottom)} · Trái {fmtCm(p.m.left)} · Phải {fmtCm(p.m.right)}
+                          Trên {fmtCm(p.m.top)} · Dưới {fmtCm(p.m.bottom)} · Trái {fmtCm(p.m.left)}{' '}
+                          · Phải {fmtCm(p.m.right)}
                         </span>
                       </span>
                     </button>
                   ))}
                   <div className="rb-color-menu__title">Lề tuỳ chỉnh (cm)</div>
                   <div className="rb-margin-grid">
-                    {([['top', 'Trên'], ['bottom', 'Dưới'], ['left', 'Trái'], ['right', 'Phải']] as const).map(([side, label]) => (
-                      <MarginInput data-command="exam.layout.pageSetup.3" key={side} label={label} value={margins[side]} disabled={disabled}
-                        onChange={(cm) => onMarginsChange?.({ ...margins, [side]: cm })} />
+                    {(
+                      [
+                        ['top', 'Trên'],
+                        ['bottom', 'Dưới'],
+                        ['left', 'Trái'],
+                        ['right', 'Phải'],
+                      ] as const
+                    ).map(([side, label]) => (
+                      <MarginInput
+                        data-command="exam.layout.pageSetup.3"
+                        key={side}
+                        label={label}
+                        value={margins[side]}
+                        disabled={disabled}
+                        onChange={(cm) => onMarginsChange?.({ ...margins, [side]: cm })}
+                      />
                     ))}
                   </div>
                 </>
               )}
             </MenuButton>
-            <MenuButton data-command="exam.layout.pageSetup.4"
+            <MenuButton
+              data-command="exam.layout.pageSetup.4"
               icon={<OrientGlyph landscape={orientation === 'landscape'} />}
               label="Hướng"
               title="Hướng trang"
@@ -790,7 +1271,8 @@ export function Ribbon({
             >
               {(close) =>
                 (['portrait', 'landscape'] as const).map((o) => (
-                  <button data-command="exam.layout.pageSetup.5"
+                  <button
+                    data-command="exam.layout.pageSetup.5"
                     key={o}
                     type="button"
                     role="menuitem"
@@ -802,15 +1284,25 @@ export function Ribbon({
                     }}
                   >
                     <OrientGlyph landscape={o === 'landscape'} size={22} />
-                    <span className="rb-color-item__label">{o === 'portrait' ? 'Dọc' : 'Ngang'}</span>
+                    <span className="rb-color-item__label">
+                      {o === 'portrait' ? 'Dọc' : 'Ngang'}
+                    </span>
                   </button>
                 ))
               }
             </MenuButton>
-            <MenuButton data-command="exam.layout.pageSetup.6" icon={<IconColumns size={26} />} label="Cột" title="Chèn khối chia cột" disabled={disabled || !editor} minWidth={170}>
+            <MenuButton
+              data-command="exam.layout.pageSetup.6"
+              icon={<IconColumns size={26} />}
+              label="Cột"
+              title="Chèn khối chia cột"
+              disabled={disabled || !editor}
+              minWidth={170}
+            >
               {(close) =>
                 [2, 3].map((n) => (
-                  <button data-command="exam.layout.pageSetup.7"
+                  <button
+                    data-command="exam.layout.pageSetup.7"
                     key={n}
                     type="button"
                     role="menuitem"
@@ -822,7 +1314,10 @@ export function Ribbon({
                         .focus()
                         .insertContent({
                           type: 'examColumns',
-                          content: Array.from({ length: n }, () => ({ type: 'examColumn', content: [{ type: 'paragraph' }] })),
+                          content: Array.from({ length: n }, () => ({
+                            type: 'examColumn',
+                            content: [{ type: 'paragraph' }],
+                          })),
                         })
                         .run()
                       close()
@@ -833,10 +1328,18 @@ export function Ribbon({
                 ))
               }
             </MenuButton>
-            <MenuButton data-command="exam.layout.pageSetup.8" icon={<IconPageSize size={26} />} label="Khổ giấy" title="Khổ giấy" disabled={disabled} minWidth={200}>
+            <MenuButton
+              data-command="exam.layout.pageSetup.8"
+              icon={<IconPageSize size={26} />}
+              label="Khổ giấy"
+              title="Khổ giấy"
+              disabled={disabled}
+              minWidth={200}
+            >
               {(close) =>
                 (Object.keys(PAGE_SIZES) as PageSizeId[]).map((id) => (
-                  <button data-command="exam.layout.pageSetup.9"
+                  <button
+                    data-command="exam.layout.pageSetup.9"
                     key={id}
                     type="button"
                     role="menuitem"
@@ -848,32 +1351,49 @@ export function Ribbon({
                     }}
                   >
                     <span className="rb-color-item__label">{PAGE_SIZES[id].label}</span>
-                    <span className="ml-auto pl-4 text-[11.5px] text-ink-3 tabular-nums">
+                    <span className="text-ink-3 ml-auto pl-4 text-[11.5px] tabular-nums">
                       {`${PAGE_SIZES[id].w} × ${PAGE_SIZES[id].h} cm`.replace(/\./g, ',')}
                     </span>
                   </button>
                 ))
               }
             </MenuButton>
-            <MenuButton data-command="exam.layout.pageSetup.10"
+            <MenuButton
+              data-command="exam.layout.pageSetup.10"
               icon={<IconHeader size={26} />}
               label="Đầu trang"
               title="Đầu trang"
               disabled={disabled}
               minWidth={260}
             >
-              {() => <BandMenu data-command="exam.layout.pageSetup.11" value={header} onChange={onHeaderChange} label="Đầu trang" />}
+              {() => (
+                <BandMenu
+                  data-command="exam.layout.pageSetup.11"
+                  value={header}
+                  onChange={onHeaderChange}
+                  label="Đầu trang"
+                />
+              )}
             </MenuButton>
-            <MenuButton data-command="exam.layout.pageSetup.12"
+            <MenuButton
+              data-command="exam.layout.pageSetup.12"
               icon={<IconFooter size={26} />}
               label="Chân trang"
               title="Chân trang"
               disabled={disabled}
               minWidth={260}
             >
-              {() => <BandMenu data-command="exam.layout.pageSetup.13" value={footer} onChange={onFooterChange} label="Chân trang" />}
+              {() => (
+                <BandMenu
+                  data-command="exam.layout.pageSetup.13"
+                  value={footer}
+                  onChange={onFooterChange}
+                  label="Chân trang"
+                />
+              )}
             </MenuButton>
-            <MenuButton data-command="exam.layout.pageSetup.14"
+            <MenuButton
+              data-command="exam.layout.pageSetup.14"
               icon={<IconPageNumber size={26} />}
               label="Số trang"
               title="Đánh số trang"
@@ -882,39 +1402,78 @@ export function Ribbon({
             >
               {() => {
                 const pn = pageNumber ?? { ...DEFAULT_PAGE_NUMBER, show: false }
-                const set = (patch: Partial<PageNumberSetup>) => onPageNumberChange?.({ ...pn, ...patch })
-                const int = (v: string, min: number) => Math.max(min, Math.min(999, Math.round(Number(v)) || min))
+                const set = (patch: Partial<PageNumberSetup>) =>
+                  onPageNumberChange?.({ ...pn, ...patch })
+                const int = (v: string, min: number) =>
+                  Math.max(min, Math.min(999, Math.round(Number(v)) || min))
                 return (
-                  <div className="flex flex-col gap-2.5 p-2.5 text-[12px] text-ink">
+                  <div className="text-ink flex flex-col gap-2.5 p-2.5 text-[12px]">
                     <label className="flex cursor-pointer items-center gap-2 select-none">
-                      <input data-command="exam.layout.pageSetup.15" type="checkbox" checked={pn.show} onChange={(e) => set({ show: e.target.checked })} />
+                      <input
+                        data-command="exam.layout.pageSetup.15"
+                        type="checkbox"
+                        checked={pn.show}
+                        onChange={(e) => set({ show: e.target.checked })}
+                      />
                       <span>Hiện số trang</span>
                     </label>
                     <label className="rb-inline-label justify-between">
                       Bắt đầu đánh số từ trang
-                      <input data-command="exam.layout.pageSetup.16" className="rb-num-input" type="number" min={1} max={999} value={pn.from} disabled={!pn.show}
-                        onChange={(e) => set({ from: int(e.target.value, 1) })} aria-label="Trang bắt đầu hiện số" />
+                      <input
+                        data-command="exam.layout.pageSetup.16"
+                        className="rb-num-input"
+                        type="number"
+                        min={1}
+                        max={999}
+                        value={pn.from}
+                        disabled={!pn.show}
+                        onChange={(e) => set({ from: int(e.target.value, 1) })}
+                        aria-label="Trang bắt đầu hiện số"
+                      />
                     </label>
                     <label className="rb-inline-label justify-between">
                       Số đầu tiên
-                      <input data-command="exam.layout.pageSetup.17" className="rb-num-input" type="number" min={0} max={999} value={pn.startAt} disabled={!pn.show}
-                        onChange={(e) => set({ startAt: int(e.target.value, 0) })} aria-label="Số in ở trang bắt đầu" />
+                      <input
+                        data-command="exam.layout.pageSetup.17"
+                        className="rb-num-input"
+                        type="number"
+                        min={0}
+                        max={999}
+                        value={pn.startAt}
+                        disabled={!pn.show}
+                        onChange={(e) => set({ startAt: int(e.target.value, 0) })}
+                        aria-label="Số in ở trang bắt đầu"
+                      />
                     </label>
-                    <div className={cn('flex flex-col gap-1.5', !pn.show && 'pointer-events-none opacity-50')}>
+                    <div
+                      className={cn(
+                        'flex flex-col gap-1.5',
+                        !pn.show && 'pointer-events-none opacity-50',
+                      )}
+                    >
                       Vị trí
-                      <Segmented data-command="exam.layout.pageSetup.18"
+                      <Segmented
+                        data-command="exam.layout.pageSetup.18"
                         value={pn.place ?? 'bottom'}
                         onChange={(place) => set({ place })}
                         label="Đầu hay chân trang"
                         className="!h-8 w-full [&>button]:flex-1 [&>button]:justify-center [&>button]:px-2 [&>button]:text-[12px]"
-                        options={[{ key: 'top', label: 'Đầu trang' }, { key: 'bottom', label: 'Chân trang' }]}
+                        options={[
+                          { key: 'top', label: 'Đầu trang' },
+                          { key: 'bottom', label: 'Chân trang' },
+                        ]}
                       />
-                      <Segmented data-command="exam.layout.pageSetup.19"
+                      <Segmented
+                        data-command="exam.layout.pageSetup.19"
                         value={pn.align}
                         onChange={(align) => set({ align })}
                         label="Căn số trang"
                         className="!h-8 w-full [&>button]:flex-1 [&>button]:justify-center [&>button]:px-2 [&>button]:text-[12px]"
-                        options={[{ key: 'left', label: 'Trái' }, { key: 'center', label: 'Giữa' }, { key: 'right', label: 'Phải' }]}
+                        options={[
+                          { key: 'left', label: 'Trái' },
+                          { key: 'center', label: 'Giữa' },
+                          { key: 'right', label: 'Phải' },
+                        ]}
                       />
                     </div>
                   </div>
@@ -930,7 +1489,8 @@ export function Ribbon({
         render: () => (
           <>
             <div className="rb-split">
-              <RibbonButton data-command="exam.layout.theme.1"
+              <RibbonButton
+                data-command="exam.layout.theme.1"
                 icon={
                   <span className="rb-color-glyph">
                     <IconDoc size={26} />
@@ -940,7 +1500,8 @@ export function Ribbon({
                 label="Màu trang"
                 onClick={() => onPageColorChange?.('#ffffff')}
               />
-              <ColorDropdown data-command="exam.layout.theme.2"
+              <ColorDropdown
+                data-command="exam.layout.theme.2"
                 title="Màu trang"
                 current={pageColor}
                 colors={THEME_COLORS}
@@ -948,7 +1509,8 @@ export function Ribbon({
               />
             </div>
             <div className="rb-split">
-              <RibbonButton data-command="exam.layout.theme.3"
+              <RibbonButton
+                data-command="exam.layout.theme.3"
                 icon={
                   <span className="rb-color-glyph">
                     <IconTable size={26} />
@@ -958,7 +1520,8 @@ export function Ribbon({
                 label="Viền trang"
                 onClick={() => onPageBorderChange?.(pageBorder ? 0 : 3)}
               />
-              <ColorDropdown data-command="exam.layout.theme.4"
+              <ColorDropdown
+                data-command="exam.layout.theme.4"
                 title="Viền trang"
                 colors={[]}
                 items={[
@@ -968,7 +1531,13 @@ export function Ribbon({
                   { w: 6, label: 'Rất đậm (6px)' },
                 ].map((it) => ({
                   label: it.label,
-                  icon: <span className="rb-line-glyph" style={{ height: Math.max(1, it.w), opacity: it.w ? 1 : 0.25 }} aria-hidden="true" />,
+                  icon: (
+                    <span
+                      className="rb-line-glyph"
+                      style={{ height: Math.max(1, it.w), opacity: it.w ? 1 : 0.25 }}
+                      aria-hidden="true"
+                    />
+                  ),
                   active: (pageBorder ?? 0) === it.w,
                   onClick: () => onPageBorderChange?.(it.w),
                 }))}
@@ -985,25 +1554,31 @@ export function Ribbon({
             <div className="rb-row">
               <label className="rb-inline-label">
                 Trước
-                <input data-command="exam.layout.layoutPara.1"
+                <input
+                  data-command="exam.layout.layoutPara.1"
                   className="rb-num-input"
                   type="number"
                   min={0}
                   value={format.spaceBefore}
                   disabled={disabled}
-                  onChange={(e) => live && applyFormatAttrs(live, { spaceBefore: Number(e.target.value) })}
+                  onChange={(e) =>
+                    live && applyFormatAttrs(live, { spaceBefore: Number(e.target.value) })
+                  }
                   aria-label="Khoảng cách trước đoạn"
                 />
               </label>
               <label className="rb-inline-label">
                 Sau
-                <input data-command="exam.layout.layoutPara.2"
+                <input
+                  data-command="exam.layout.layoutPara.2"
                   className="rb-num-input"
                   type="number"
                   min={0}
                   value={format.spaceAfter}
                   disabled={disabled}
-                  onChange={(e) => live && applyFormatAttrs(live, { spaceAfter: Number(e.target.value) })}
+                  onChange={(e) =>
+                    live && applyFormatAttrs(live, { spaceAfter: Number(e.target.value) })
+                  }
                   aria-label="Khoảng cách sau đoạn"
                 />
               </label>
@@ -1011,24 +1586,30 @@ export function Ribbon({
             <div className="rb-row">
               <label className="rb-inline-label">
                 Thụt trái
-                <input data-command="exam.layout.layoutPara.3"
+                <input
+                  data-command="exam.layout.layoutPara.3"
                   className="rb-num-input"
                   type="number"
                   min={0}
                   value={format.indentLeft}
                   disabled={disabled}
-                  onChange={(e) => live && applyFormatAttrs(live, { indentLeft: Number(e.target.value) })}
+                  onChange={(e) =>
+                    live && applyFormatAttrs(live, { indentLeft: Number(e.target.value) })
+                  }
                   aria-label="Thụt lề trái"
                 />
               </label>
               <label className="rb-inline-label">
                 Dòng đầu
-                <input data-command="exam.layout.layoutPara.4"
+                <input
+                  data-command="exam.layout.layoutPara.4"
                   className="rb-num-input"
                   type="number"
                   value={format.indentFirstLine}
                   disabled={disabled}
-                  onChange={(e) => live && applyFormatAttrs(live, { indentFirstLine: Number(e.target.value) })}
+                  onChange={(e) =>
+                    live && applyFormatAttrs(live, { indentFirstLine: Number(e.target.value) })
+                  }
                   aria-label="Thụt dòng đầu"
                 />
               </label>
@@ -1041,154 +1622,228 @@ export function Ribbon({
         label: 'Hiển thị',
         render: () => (
           <div className="rb-row">
-            <button data-command="exam.layout.view.1" type="button" className="rb-toggle" onMouseDown={(e) => e.preventDefault()} onClick={() => onZoomChange(Math.max(50, zoom - 10))} aria-label="Thu nhỏ">−</button>
+            <button
+              data-command="exam.layout.view.1"
+              type="button"
+              className="rb-toggle"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onZoomChange(Math.max(50, zoom - 10))}
+              aria-label="Thu nhỏ"
+            >
+              −
+            </button>
             <span className="rb-zoom tnum">{zoom}%</span>
-            <button data-command="exam.layout.view.2" type="button" className="rb-toggle" onMouseDown={(e) => e.preventDefault()} onClick={() => onZoomChange(Math.min(200, zoom + 10))} aria-label="Phóng to">+</button>
+            <button
+              data-command="exam.layout.view.2"
+              type="button"
+              className="rb-toggle"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onZoomChange(Math.min(200, zoom + 10))}
+              aria-label="Phóng to"
+            >
+              +
+            </button>
           </div>
         ),
       },
     ],
   }
 
-  const overlays = <>
-    {editor && dialog === 'link' && <LinkDialog editor={editor} onClose={() => setDialog(null)} />}
-    {editor && dialog === 'equation' && <EquationDialog editor={editor} onClose={() => setDialog(null)} />}
-    {editor && bankOpen && <Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-black/20"><Spinner className="size-6" /></div>}><BankModal editor={editor} onClose={() => setBankOpen(false)} /></Suspense>}
-  </>
+  const overlays = (
+    <>
+      {editor && dialog === 'link' && (
+        <LinkDialog editor={editor} onClose={() => setDialog(null)} />
+      )}
+      {editor && dialog === 'equation' && (
+        <EquationDialog editor={editor} onClose={() => setDialog(null)} />
+      )}
+      {editor && bankOpen && (
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-50 grid place-items-center bg-black/20">
+              <Spinner className="size-6" />
+            </div>
+          }
+        >
+          <BankModal editor={editor} onClose={() => setBankOpen(false)} />
+        </Suspense>
+      )}
+    </>
+  )
   const extra: ExamCommand[] = [
-      { id: 'file.new', label: 'Đề mới', run: onNewDoc },
-      { id: 'file.import', label: 'Nhập file…', run: () => importInputRef.current?.click() },
-      { id: 'file.word', label: 'Xuất Word', run: onExportWord },
-      { id: 'file.pdf', label: 'Xuất PDF', run: onExportPdf },
-      { id: 'file.quiz', label: 'Làm đề tương tác', run: onStartQuiz },
-      { id: 'file.save', label: 'Lưu', run: onSave },
-      { id: 'file.print', label: 'In', run: onPrint },
-      { id: 'file.undo', label: 'Hoàn tác', run: () => chain()?.undo().run() },
-      { id: 'file.redo', label: 'Làm lại', run: () => chain()?.redo().run() },
-      { id: 'nav.templates', label: 'Mẫu và khối chèn', run: () => onOpenNav?.('blocks') },
-      { id: 'nav.tools', label: 'Đồ thị và công cụ vẽ', run: () => onOpenNav?.('tools') },
-      { id: 'nav.toc', label: 'Mục lục', run: () => onOpenNav?.('toc') },
-    ].map((command) => ({ ...command, family: command.id, group: command.id.startsWith('file.') ? 'Tệp' : 'Điều hướng', tab: 'Tệp' }))
+    { id: 'file.new', label: 'Đề mới', run: onNewDoc },
+    { id: 'file.import', label: 'Nhập file…', run: () => importInputRef.current?.click() },
+    { id: 'file.word', label: 'Xuất Word', run: onExportWord },
+    { id: 'file.pdf', label: 'Xuất PDF', run: onExportPdf },
+    { id: 'file.quiz', label: 'Làm đề tương tác', run: onStartQuiz },
+    { id: 'file.save', label: 'Lưu', run: onSave },
+    { id: 'file.print', label: 'In', run: onPrint },
+    { id: 'file.undo', label: 'Hoàn tác', run: () => chain()?.undo().run() },
+    { id: 'file.redo', label: 'Làm lại', run: () => chain()?.redo().run() },
+    { id: 'nav.templates', label: 'Mẫu và khối chèn', run: () => onOpenNav?.('blocks') },
+    { id: 'nav.tools', label: 'Đồ thị và công cụ vẽ', run: () => onOpenNav?.('tools') },
+    { id: 'nav.toc', label: 'Mục lục', run: () => onOpenNav?.('toc') },
+  ].map((command) => ({
+    ...command,
+    family: command.id,
+    group: command.id.startsWith('file.') ? 'Tệp' : 'Điều hướng',
+    tab: 'Tệp',
+  }))
   return (
-    <ExamCommandHost editor={editor} tabs={groupsByTab} extra={extra} overrides={{ 'exam.insert.table.1': () => insertExamTable(editor, 3, 3) }} onReveal={(tab) => { setCollapsed(false); setRevealRequest({ tab }); onTabChange(tab) }}>
-    {(groups) => {
-      const renderedTabs = Object.fromEntries(Object.keys(groupsByTab).map((tab) => [tab, groups.filter((group) => group.tab === tab).map((group) => ({ id: group.id, label: group.label, render: () => group.content }))]))
-      const activeGroups = renderedTabs[activeTab] ?? renderedTabs.home
-      return <>
-    <div
-      className="ribbon"
-      onMouseDown={(e) => {
-        const target = e.target as HTMLElement
-        if (live && target.closest('button')) syncDomSelection(live)
+    <ExamCommandHost
+      editor={editor}
+      tabs={groupsByTab}
+      extra={extra}
+      overrides={{ 'exam.insert.table.1': () => insertExamTable(editor, 3, 3) }}
+      onReveal={(tab) => {
+        setCollapsed(false)
+        setRevealRequest({ tab })
+        onTabChange(tab)
       }}
     >
-      {layoutMode === 'phone' ? (
-        <PhoneRibbon
-          fileMenu={fileMenuEl}
-          groupsByTab={renderedTabs}
-          reveal={revealRequest}
-          onSave={onSave}
-          onUndo={() => chain()?.undo().run()}
-          onRedo={() => chain()?.redo().run()}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          disabled={disabled}
-          onOpenNav={onOpenNav}
-          format={format}
-          onToggleBold={() => chain()?.toggleBold().run()}
-          onToggleItalic={() => chain()?.toggleItalic().run()}
-          onToggleUnderline={() => chain()?.toggleUnderline().run()}
-          penColor={penColor}
-          onPickColor={(c) => {
-            setPenColor(c)
-            chain()?.setMark('textStyle', { color: c }).run()
-          }}
-          themeColors={THEME_COLORS}
-          onInsertTemplate={insertTemplate}
-          onIndentDec={() => live && applyFormatAttrs(live, { indentLeft: Math.max(0, format.indentLeft - 12) })}
-          onIndentInc={() => live && applyFormatAttrs(live, { indentLeft: format.indentLeft + 12 })}
-          onAlign={(a) => chain()?.setTextAlign(a).run()}
-        />
-      ) : (
-        <>
-          <RibbonTabs
-            tabs={RIBBON_TABS}
-            active={activeTab}
-            onChange={handleTabChange}
-            leading={
-              <>
-                {fileMenuEl}
-                <span className="qa-sep" aria-hidden="true" />
-                <button type="button" className="qa-btn" onClick={onSave} data-tip="Lưu đề" aria-label="Lưu đề">
-                  <IconSave size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="qa-btn"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => chain()?.undo().run()}
-                  disabled={disabled || !canUndo}
-                  data-tip="Hoàn tác"
-                  aria-label="Hoàn tác"
-                >
-                  <IconUndo size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="qa-btn"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => chain()?.redo().run()}
-                  disabled={disabled || !canRedo}
-                  data-tip="Làm lại"
-                  aria-label="Làm lại"
-                >
-                  <IconRedo size={16} />
-                </button>
-                <button type="button" className="qa-btn" onClick={onPrint} data-tip="In đề" aria-label="In đề">
-                  <IconPrinter size={16} />
-                </button>
-                <span className="qa-sep" aria-hidden="true" />
-              </>
-            }
-          >
-            <span className="ribbon-tabs-spacer" />
-            <div className="ribbon-quick">
-              <span className="ribbon-quick__meta">
-                {pageCount} trang · {dirty ? 'Chưa lưu' : 'Đã lưu'}
-              </span>
-              <button
-                type="button"
-                className="ribbon-toggle-btn"
-                onClick={() => setCollapsed(!collapsed)}
-                data-tip={collapsed ? 'Mở rộng dải ruy-băng' : 'Thu gọn dải ruy-băng'}
-                aria-label={collapsed ? 'Mở rộng dải ruy-băng' : 'Thu gọn dải ruy-băng'}
-              >
-                {collapsed ? <IconChevronDown size={14} /> : <IconChevronUp size={14} />}
-              </button>
+      {(groups) => {
+        const renderedTabs = Object.fromEntries(
+          Object.keys(groupsByTab).map((tab) => [
+            tab,
+            groups
+              .filter((group) => group.tab === tab)
+              .map((group) => ({ id: group.id, label: group.label, render: () => group.content })),
+          ]),
+        )
+        const activeGroups = renderedTabs[activeTab] ?? renderedTabs.home
+        return (
+          <>
+            <div
+              className="ribbon"
+              onMouseDown={(e) => {
+                const target = e.target as HTMLElement
+                if (live && target.closest('button')) syncDomSelection(live)
+              }}
+            >
+              {layoutMode === 'phone' ? (
+                <PhoneRibbon
+                  fileMenu={fileMenuEl}
+                  groupsByTab={renderedTabs}
+                  reveal={revealRequest}
+                  onSave={onSave}
+                  onUndo={() => chain()?.undo().run()}
+                  onRedo={() => chain()?.redo().run()}
+                  canUndo={canUndo}
+                  canRedo={canRedo}
+                  disabled={disabled}
+                  onOpenNav={onOpenNav}
+                  format={format}
+                  onToggleBold={() => chain()?.toggleBold().run()}
+                  onToggleItalic={() => chain()?.toggleItalic().run()}
+                  onToggleUnderline={() => chain()?.toggleUnderline().run()}
+                  penColor={penColor}
+                  onPickColor={(c) => {
+                    setPenColor(c)
+                    chain()?.setMark('textStyle', { color: c }).run()
+                  }}
+                  themeColors={THEME_COLORS}
+                  onInsertTemplate={insertTemplate}
+                  onIndentDec={() =>
+                    live &&
+                    applyFormatAttrs(live, { indentLeft: Math.max(0, format.indentLeft - 12) })
+                  }
+                  onIndentInc={() =>
+                    live && applyFormatAttrs(live, { indentLeft: format.indentLeft + 12 })
+                  }
+                  onAlign={(a) => chain()?.setTextAlign(a).run()}
+                />
+              ) : (
+                <>
+                  <RibbonTabs
+                    tabs={RIBBON_TABS}
+                    active={activeTab}
+                    onChange={handleTabChange}
+                    leading={
+                      <>
+                        {fileMenuEl}
+                        <span className="qa-sep" aria-hidden="true" />
+                        <button
+                          type="button"
+                          className="qa-btn"
+                          onClick={onSave}
+                          data-tip="Lưu đề"
+                          aria-label="Lưu đề"
+                        >
+                          <IconSave size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          className="qa-btn"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => chain()?.undo().run()}
+                          disabled={disabled || !canUndo}
+                          data-tip="Hoàn tác"
+                          aria-label="Hoàn tác"
+                        >
+                          <IconUndo size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          className="qa-btn"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => chain()?.redo().run()}
+                          disabled={disabled || !canRedo}
+                          data-tip="Làm lại"
+                          aria-label="Làm lại"
+                        >
+                          <IconRedo size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          className="qa-btn"
+                          onClick={onPrint}
+                          data-tip="In đề"
+                          aria-label="In đề"
+                        >
+                          <IconPrinter size={16} />
+                        </button>
+                        <span className="qa-sep" aria-hidden="true" />
+                      </>
+                    }
+                  >
+                    <span className="ribbon-tabs-spacer" />
+                    <div className="ribbon-quick">
+                      <span className="ribbon-quick__meta">
+                        {pageCount} trang · {dirty ? 'Chưa lưu' : 'Đã lưu'}
+                      </span>
+                      <button
+                        type="button"
+                        className="ribbon-toggle-btn"
+                        onClick={() => setCollapsed(!collapsed)}
+                        data-tip={collapsed ? 'Mở rộng dải ruy-băng' : 'Thu gọn dải ruy-băng'}
+                        aria-label={collapsed ? 'Mở rộng dải ruy-băng' : 'Thu gọn dải ruy-băng'}
+                      >
+                        {collapsed ? <IconChevronDown size={14} /> : <IconChevronUp size={14} />}
+                      </button>
+                    </div>
+                  </RibbonTabs>
+
+                  {!collapsed &&
+                    (layoutMode === 'tablet' && !revealRequest ? (
+                      <TabletRibbonBody activeKey={activeTab} groups={activeGroups} />
+                    ) : (
+                      <RibbonBody activeKey={activeTab}>
+                        {activeGroups.map((g, i) => (
+                          <Fragment key={g.id}>
+                            {i > 0 && <span className="ribbon-sep" />}
+                            <RibbonGroup label={g.label}>{g.render()}</RibbonGroup>
+                          </Fragment>
+                        ))}
+                      </RibbonBody>
+                    ))}
+                </>
+              )}
+
+              {overlays}
             </div>
-          </RibbonTabs>
-
-          {!collapsed && (
-            layoutMode === 'tablet' && !revealRequest ? (
-              <TabletRibbonBody activeKey={activeTab} groups={activeGroups} />
-            ) : (
-              <RibbonBody activeKey={activeTab}>
-                {activeGroups.map((g, i) => (
-                  <Fragment key={g.id}>
-                    {i > 0 && <span className="ribbon-sep" />}
-                    <RibbonGroup label={g.label}>{g.render()}</RibbonGroup>
-                  </Fragment>
-                ))}
-              </RibbonBody>
-            )
-          )}
-        </>
-      )}
-
-      {overlays}
-    </div>
-    </>
-    }}
+          </>
+        )
+      }}
     </ExamCommandHost>
   )
 }
@@ -1321,7 +1976,6 @@ function ColorDropdown({
     }
   }, [open])
 
-
   return (
     <div className="rb-color-drop" ref={ref}>
       <button
@@ -1339,17 +1993,36 @@ function ColorDropdown({
         <IconCaret size={14} />
       </button>
       {open && (
-        <div className="rb-color-menu" role="menu" aria-label={title} style={{ ...popoverStyle(pos), width: 'auto', minWidth: 196 }}>
+        <div
+          className="rb-color-menu"
+          role="menu"
+          aria-label={title}
+          style={{ ...popoverStyle(pos), width: 'auto', minWidth: 196 }}
+        >
           <div className="rb-color-menu__title">{title}</div>
           {none && (
-            <button type="button" role="menuitem" className="rb-color-item" onMouseDown={(e) => e.preventDefault()} onClick={() => { none.onClick(); setOpen(false) }}>
+            <button
+              type="button"
+              role="menuitem"
+              className="rb-color-item"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                none.onClick()
+                setOpen(false)
+              }}
+            >
               <span className="rb-color-none" aria-hidden="true" />
               <span className="rb-color-item__label">{none.label}</span>
             </button>
           )}
           {colors.length > 0 && onPick && (
             <div className="rb-color-palette">
-              <ColorPalette value={current ?? ''} themeColors={[]} onPick={onPick} onClose={() => setOpen(false)} />
+              <ColorPalette
+                value={current ?? ''}
+                themeColors={[]}
+                onPick={onPick}
+                onClose={() => setOpen(false)}
+              />
             </div>
           )}
           {items?.map((it) => (
@@ -1360,7 +2033,10 @@ function ColorDropdown({
               aria-checked={!!it.active}
               className={cn('rb-color-item', it.active && 'is-active')}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { it.onClick(); setOpen(false) }}
+              onClick={() => {
+                it.onClick()
+                setOpen(false)
+              }}
             >
               {it.icon}
               <span className="rb-color-item__label">{it.label}</span>
@@ -1387,7 +2063,17 @@ const sameMargins = (a: PageMargins, b: PageMargins) =>
   (['top', 'right', 'bottom', 'left'] as const).every((k) => Math.abs(a[k] - b[k]) < 0.005)
 
 /** ô nhập lề một cạnh (cm), 0–6 cm */
-function MarginInput({ label, value, disabled, onChange }: { label: string; value: number; disabled?: boolean; onChange: (cm: number) => void }) {
+function MarginInput({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string
+  value: number
+  disabled?: boolean
+  onChange: (cm: number) => void
+}) {
   return (
     <label className="rb-inline-label">
       {label}
@@ -1421,9 +2107,24 @@ function PageGlyph({ margins, size = 26 }: { margins: PageMargins; size?: number
   const w = Math.max(1, W - (margins.left + margins.right) * k)
   const h = Math.max(1, H - (margins.top + margins.bottom) * k)
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      aria-hidden
+    >
       <rect x="4" y="1" width={W} height={H} rx="1.5" strokeWidth="1.3" />
-      <rect x={x} y={y} width={w} height={h} strokeWidth="1" strokeDasharray="1.6 1.4" opacity="0.75" />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        strokeWidth="1"
+        strokeDasharray="1.6 1.4"
+        opacity="0.75"
+      />
     </svg>
   )
 }
@@ -1431,7 +2132,16 @@ function PageGlyph({ margins, size = 26 }: { margins: PageMargins; size?: number
 /** trang dọc / ngang có dòng chữ */
 function OrientGlyph({ landscape, size = 26 }: { landscape: boolean; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      aria-hidden
+    >
       {landscape ? (
         <>
           <rect x="1.5" y="5" width="21" height="14" rx="1.5" />
@@ -1485,7 +2195,12 @@ function MenuButton({
     <div className="rb-color-drop" ref={ref}>
       <span ref={triggerRef as React.RefObject<HTMLSpanElement>} style={{ display: 'inline-flex' }}>
         <RibbonButton
-          icon={<span className="rb-menu-glyph">{icon}<IconCaret size={10} /></span>}
+          icon={
+            <span className="rb-menu-glyph">
+              {icon}
+              <IconCaret size={10} />
+            </span>
+          }
           label={label}
           title={title}
           disabled={disabled}
@@ -1494,7 +2209,12 @@ function MenuButton({
         />
       </span>
       {open && (
-        <div className="rb-color-menu" role="menu" aria-label={title} style={{ ...popoverStyle(pos), width: 'auto', minWidth }}>
+        <div
+          className="rb-color-menu"
+          role="menu"
+          aria-label={title}
+          style={{ ...popoverStyle(pos), width: 'auto', minWidth }}
+        >
           <div className="rb-color-menu__title">{title}</div>
           {children(() => setOpen(false))}
         </div>
@@ -1504,11 +2224,19 @@ function MenuButton({
 }
 
 /** Ô chữ đầu/chân trang: nội dung, căn lề, bỏ trang đầu. */
-function BandMenu({ value, onChange, label }: { value?: BandSetup; onChange?: (b: BandSetup) => void; label: string }) {
+function BandMenu({
+  value,
+  onChange,
+  label,
+}: {
+  value?: BandSetup
+  onChange?: (b: BandSetup) => void
+  label: string
+}) {
   const b = value ?? { text: '', align: 'center' as const }
   const set = (patch: Partial<BandSetup>) => onChange?.({ ...b, ...patch })
   return (
-    <div className="flex flex-col gap-2.5 p-2.5 text-[12px] text-ink">
+    <div className="text-ink flex flex-col gap-2.5 p-2.5 text-[12px]">
       <input
         className="rb-num-input !h-8 !w-full !text-[13px]"
         value={b.text}
@@ -1522,10 +2250,18 @@ function BandMenu({ value, onChange, label }: { value?: BandSetup; onChange?: (b
         onChange={(align) => set({ align })}
         label={`Căn ${label.toLowerCase()}`}
         className="!h-8 w-full [&>button]:flex-1 [&>button]:justify-center [&>button]:px-2 [&>button]:text-[12px]"
-        options={[{ key: 'left', label: 'Trái' }, { key: 'center', label: 'Giữa' }, { key: 'right', label: 'Phải' }]}
+        options={[
+          { key: 'left', label: 'Trái' },
+          { key: 'center', label: 'Giữa' },
+          { key: 'right', label: 'Phải' },
+        ]}
       />
       <label className="flex cursor-pointer items-center gap-2 select-none">
-        <input type="checkbox" checked={!!b.skipFirst} onChange={(e) => set({ skipFirst: e.target.checked })} />
+        <input
+          type="checkbox"
+          checked={!!b.skipFirst}
+          onChange={(e) => set({ skipFirst: e.target.checked })}
+        />
         <span>Bỏ trang đầu</span>
       </label>
     </div>

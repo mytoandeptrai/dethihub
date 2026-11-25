@@ -1,14 +1,14 @@
 'use client'
-import { LoadingRegion, CardGridSkeleton, PageSkeleton } from '@/components/page-skeleton'
 import {
   lib_documents_DOC_TYPES as DOC_TYPES,
   Link,
   Navigate,
   components_appIcons_TrashIcon as TrashIcon,
 } from '@profile-engine'
-import { ChevronLeft, Search, Upload, X } from 'lucide-react'
 import { Skeleton } from '@workspace/ui/components/skeleton'
+import { ChevronLeft, Search, Upload, X } from 'lucide-react'
 
+import { LoadingRegion, CardGridSkeleton, PageSkeleton } from '@/components/page-skeleton'
 import {
   SiteButton as Button,
   DocIcon,
@@ -48,7 +48,7 @@ export function MyUploadsMyUploadsUi(
       <PageShell className="flex flex-col gap-6">
         <Link
           to={appPaths.profile.href}
-          className="-mb-2 inline-flex w-fit items-center gap-1 text-[13px] text-ink-3 hover:text-ink"
+          className="text-ink-3 hover:text-ink -mb-2 inline-flex w-fit items-center gap-1 text-[13px]"
         >
           <ChevronLeft className="size-4" />
           {t('profileCopy.m59')}
@@ -67,31 +67,35 @@ export function MyUploadsStorageBarUi(
   if (props.viewState === 0) {
     const { st, pct, quota } = props
     return (
-      <section className="mb-6 rounded-xl border border-line bg-surface p-5 shadow-sm">
+      <section className="border-line bg-surface mb-6 rounded-xl border p-5 shadow-sm">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wider text-ink-3">
+          <h2 className="text-ink-3 text-[13px] font-semibold tracking-wider uppercase">
             {t('profileCopy.m60')}
           </h2>
           {typeof st === 'object' ? (
-            <p className="font-display text-[22px] font-semibold text-ink tnum">
+            <p className="font-display text-ink tnum text-[22px] font-semibold">
               {mb(st.used)}{' '}
-              <span className="text-[14px] font-medium text-ink-3">
+              <span className="text-ink-3 text-[14px] font-medium">
                 {t('profileCopy.m61')}
                 {mb(st.max)}
               </span>
             </p>
+          ) : st === 'loading' ? (
+            <LoadingRegion>
+              <Skeleton className="h-7 w-36" />
+            </LoadingRegion>
           ) : (
-            st === 'loading' ? <LoadingRegion><Skeleton className="h-7 w-36" /></LoadingRegion> : <p className="text-[13px] text-ink-3">{t('profileCopy.m62')}</p>
+            <p className="text-ink-3 text-[13px]">{t('profileCopy.m62')}</p>
           )}
         </div>
         <ProgressBar pct={pct} label={t('profileCopy.m63')} className="mt-3" />
         {typeof st === 'object' ? (
-          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-ink-3">
+          <ul className="text-ink-3 mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px]">
             {KIND_LABEL.map(([k, label]) => {
               const v = st.kinds[k]
               const full = v?.limit !== null && v?.limit !== undefined && v.count >= v.limit
               return (
-                <li key={k} className={full ? 'font-semibold text-clay-deep' : ''}>
+                <li key={k} className={full ? 'text-clay-deep font-semibold' : ''}>
                   {label}
                   {t('profileCopy.m64')}
                   <span className="tnum">
@@ -108,14 +112,14 @@ export function MyUploadsStorageBarUi(
         {quota ? (
           <p
             role="alert"
-            className="mt-3 rounded-[6px] bg-clay-tint px-3 py-2 text-[13px] text-clay-deep"
+            className="bg-clay-tint text-clay-deep mt-3 rounded-[6px] px-3 py-2 text-[13px]"
           >
             {t('profileCopy.m66')}
             {quota}
             {t('profileCopy.m67')}
           </p>
         ) : pct >= 90 ? (
-          <p className="mt-3 text-[12.5px] text-clay-deep">{t('profileCopy.m68')}</p>
+          <p className="text-clay-deep mt-3 text-[12.5px]">{t('profileCopy.m68')}</p>
         ) : null}
       </section>
     )
@@ -182,23 +186,25 @@ export function MyUploadsMyFilesCardUi(
         {err ? (
           <p
             role="alert"
-            className="mt-4 rounded-[6px] bg-clay-tint px-3 py-2 text-[13px] text-clay-deep"
+            className="bg-clay-tint text-clay-deep mt-4 rounded-[6px] px-3 py-2 text-[13px]"
           >
             {err}
           </p>
         ) : null}
         {files === 'error' ? (
-          <p className="mt-4 text-[13px] text-ink-3">{t('profileCopy.m72')}</p>
+          <p className="text-ink-3 mt-4 text-[13px]">{t('profileCopy.m72')}</p>
         ) : null}
         {empty && files === 'loading' ? (
-          <LoadingRegion className="mt-6"><CardGridSkeleton /></LoadingRegion>
+          <LoadingRegion className="mt-6">
+            <CardGridSkeleton />
+          </LoadingRegion>
         ) : empty ? (
           <EmptyState title={t('profileCopy.m73')} description={t('profileCopy.m74')} />
         ) : (
           <div ref={listRef} className="mt-5 scroll-mt-24">
             <Toolbar>
               <label className="relative min-w-[180px] flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" />
+                <Search className="text-ink-3 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <input
                   type="search"
                   value={q}
@@ -242,11 +248,11 @@ export function MyUploadsMyFilesCardUi(
                   return (
                     <li
                       key={it.id}
-                      className={`flex min-w-0 items-center gap-3 rounded-xl border border-line bg-surface px-3 py-4 shadow-sm transition-shadow hover:shadow-lift motion-reduce:transition-none ${it.pending && !failed ? 'opacity-70' : ''}`}
+                      className={`border-line bg-surface hover:shadow-lift flex min-w-0 items-center gap-3 rounded-xl border px-3 py-4 shadow-sm transition-shadow motion-reduce:transition-none ${it.pending && !failed ? 'opacity-70' : ''}`}
                     >
                       <span className="flex h-8 w-11 shrink-0 items-center justify-center">
                         {it.kind === 'file' ? (
-                          <span className="flex h-8 w-11 items-center justify-center rounded-[5px] bg-sunken text-[11px] font-semibold text-ink-2">
+                          <span className="bg-sunken text-ink-2 flex h-8 w-11 items-center justify-center rounded-[5px] text-[11px] font-semibold">
                             {DOC_TYPES[it.mime ?? ''] ?? t('profileCopy.m86')}
                           </span>
                         ) : (
@@ -260,7 +266,7 @@ export function MyUploadsMyFilesCardUi(
                         data-tip={it.title}
                         className="min-w-0 flex-1 text-left disabled:cursor-default"
                       >
-                        <span className="block truncate text-[14px] text-ink hover:text-clay-deep">
+                        <span className="text-ink hover:text-clay-deep block truncate text-[14px]">
                           {it.title}
                         </span>
                         <span
@@ -274,10 +280,10 @@ export function MyUploadsMyFilesCardUi(
                                 : KIND_PATH[it.kind])}
                         </span>
                       </button>
-                      <span className="hidden shrink-0 text-[12.5px] text-ink-3 tnum sm:inline">
+                      <span className="text-ink-3 tnum hidden shrink-0 text-[12.5px] sm:inline">
                         {new Date(it.updatedAt).toLocaleDateString('vi-VN')}
                       </span>
-                      <span className="w-16 shrink-0 text-right text-[12.5px] text-ink-3 tnum">
+                      <span className="text-ink-3 tnum w-16 shrink-0 text-right text-[12.5px]">
                         {mb(it.size)}
                       </span>
                       {it.pending && !failed ? (
@@ -294,7 +300,7 @@ export function MyUploadsMyFilesCardUi(
                               : t('profileCopy.m90', { value0: it.title })
                           }
                           data-tip={failed ? t('profileCopy.m91') : t('profileCopy.m57')}
-                          className="grid size-8 shrink-0 place-items-center rounded-[6px] text-ink-3 hover:bg-sunken hover:text-clay-deep"
+                          className="text-ink-3 hover:bg-sunken hover:text-clay-deep grid size-8 shrink-0 place-items-center rounded-[6px]"
                         >
                           {failed ? <X className="size-4" /> : <TrashIcon className="size-4" />}
                         </button>
@@ -306,7 +312,7 @@ export function MyUploadsMyFilesCardUi(
             )}
             {pages > 1 ? (
               <div className="mt-2 flex items-center justify-between gap-3">
-                <span className="text-[12.5px] text-ink-3 tnum">
+                <span className="text-ink-3 tnum text-[12.5px]">
                   {(cur - 1) * PER_PAGE + 1}
                   {t('profileCopy.m92')}
                   {Math.min(cur * PER_PAGE, shown.length)}

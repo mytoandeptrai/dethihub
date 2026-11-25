@@ -3,6 +3,7 @@
  * Bản build production không nạp file này.
  */
 import { wait } from './adminApi'
+
 import type {
   ContentDoc,
   ContentDocPage,
@@ -329,11 +330,41 @@ const MOCK_DOCS: ContentDoc[] = [
 ]
 
 const MOCK_TOP_USERS: ContentTopUserStorage[] = [
-  { ownerId: '00000000-0000-4000-8000-000000000001', email: 'giaovien1@example.com', name: 'Cô Nguyễn Thu Hà', totalSize: 13_150_000, docCount: 2 },
-  { ownerId: '00000000-0000-4000-8000-000000000005', email: 'giaovien5@example.com', name: 'Thầy Trần Đức Nam', totalSize: 3_120_000, docCount: 1 },
-  { ownerId: '00000000-0000-4000-8000-000000000002', email: 'giaovien2@example.com', name: 'Thầy Lê Hoàng', totalSize: 2_150_000, docCount: 1 },
-  { ownerId: '00000000-0000-4000-8000-000000000004', email: 'giaovien4@example.com', name: 'Cô Phạm Hồng Nhung', totalSize: 1_450_000, docCount: 1 },
-  { ownerId: '00000000-0000-4000-8000-000000000003', email: 'giaovien3@example.com', name: 'Cô Đỗ Mai Lan', totalSize: 980_000, docCount: 1 },
+  {
+    ownerId: '00000000-0000-4000-8000-000000000001',
+    email: 'giaovien1@example.com',
+    name: 'Cô Nguyễn Thu Hà',
+    totalSize: 13_150_000,
+    docCount: 2,
+  },
+  {
+    ownerId: '00000000-0000-4000-8000-000000000005',
+    email: 'giaovien5@example.com',
+    name: 'Thầy Trần Đức Nam',
+    totalSize: 3_120_000,
+    docCount: 1,
+  },
+  {
+    ownerId: '00000000-0000-4000-8000-000000000002',
+    email: 'giaovien2@example.com',
+    name: 'Thầy Lê Hoàng',
+    totalSize: 2_150_000,
+    docCount: 1,
+  },
+  {
+    ownerId: '00000000-0000-4000-8000-000000000004',
+    email: 'giaovien4@example.com',
+    name: 'Cô Phạm Hồng Nhung',
+    totalSize: 1_450_000,
+    docCount: 1,
+  },
+  {
+    ownerId: '00000000-0000-4000-8000-000000000003',
+    email: 'giaovien3@example.com',
+    name: 'Cô Đỗ Mai Lan',
+    totalSize: 980_000,
+    docCount: 1,
+  },
 ]
 
 const MOCK_FEEDBACK: ContentFeedback[] = [
@@ -341,7 +372,8 @@ const MOCK_FEEDBACK: ContentFeedback[] = [
     id: 1,
     userId: '00000000-0000-4000-8000-000000000001',
     email: 'giaovien1@example.com',
-    message: 'Ứng dụng soạn đề rất tiện, mong đội ngũ phát triển thêm tính năng tách nhóm câu hỏi có cùng đoạn văn đọc hiểu trong môn Tiếng Anh và Ngữ văn.',
+    message:
+      'Ứng dụng soạn đề rất tiện, mong đội ngũ phát triển thêm tính năng tách nhóm câu hỏi có cùng đoạn văn đọc hiểu trong môn Tiếng Anh và Ngữ văn.',
     page: '/soan-de',
     createdAt: '2026-11-09T11:00:00Z',
     read: false,
@@ -350,7 +382,8 @@ const MOCK_FEEDBACK: ContentFeedback[] = [
     id: 2,
     userId: null,
     email: 'khachhang@gmail.com',
-    message: 'Tôi là phụ huynh muốn làm thử đề của con trên điện thoại nhưng cỡ chữ công thức toán hơi nhỏ, mong thêm tuỳ chọn phóng to.',
+    message:
+      'Tôi là phụ huynh muốn làm thử đề của con trên điện thoại nhưng cỡ chữ công thức toán hơi nhỏ, mong thêm tuỳ chọn phóng to.',
     page: '/lam-de/demo',
     createdAt: '2026-11-08T18:40:00Z',
     read: false,
@@ -359,7 +392,8 @@ const MOCK_FEEDBACK: ContentFeedback[] = [
     id: 3,
     userId: '00000000-0000-4000-8000-000000000002',
     email: 'giaovien2@example.com',
-    message: 'Xuất Word rất đẹp và giữ chuẩn lề A4, thầy cô trong tổ chuyên môn trường tôi đều khen. Cảm ơn tác giả nhiều!',
+    message:
+      'Xuất Word rất đẹp và giữ chuẩn lề A4, thầy cô trong tổ chuyên môn trường tôi đều khen. Cảm ơn tác giả nhiều!',
     page: '/de-cong-dong',
     createdAt: '2026-11-07T16:15:00Z',
     read: true,
@@ -368,7 +402,8 @@ const MOCK_FEEDBACK: ContentFeedback[] = [
     id: 4,
     userId: null,
     email: null,
-    message: 'Nên thêm tính năng in phiếu trả lời trắc nghiệm 20 câu / 40 câu để học sinh tô chì như thi thật.',
+    message:
+      'Nên thêm tính năng in phiếu trả lời trắc nghiệm 20 câu / 40 câu để học sinh tô chì như thi thật.',
     page: '/cham-trac-nghiem',
     createdAt: '2026-11-06T09:30:00Z',
     read: true,
@@ -384,7 +419,9 @@ const MOCK_FEEDBACK: ContentFeedback[] = [
   },
 ]
 
-export function mockListContentExams(opts: { q?: string; status?: string; subject?: string; page?: number; perPage?: number } = {}): Promise<ContentExamPage> {
+export function mockListContentExams(
+  opts: { q?: string; status?: string; subject?: string; page?: number; perPage?: number } = {},
+): Promise<ContentExamPage> {
   const q = (opts.q ?? '').toLowerCase()
   const page = opts.page ?? 1
   const perPage = opts.perPage ?? 20
@@ -416,15 +453,33 @@ export function mockGetContentExam(examId: string): Promise<{ exam: any }> {
         unit: found.school,
         kind: 'exam',
         blocks: [
-          { id: 'b1', type: 'question', prompt: found.preview, choices: ['Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D'], answer: 'A', points: 0.4 },
-          { id: 'b2', type: 'question', prompt: 'Câu hỏi mẫu tiếp theo trong đề thi...', choices: ['Lựa chọn 1', 'Lựa chọn 2', 'Lựa chọn 3', 'Lựa chọn 4'], answer: 'B', points: 0.4 },
+          {
+            id: 'b1',
+            type: 'question',
+            prompt: found.preview,
+            choices: ['Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D'],
+            answer: 'A',
+            points: 0.4,
+          },
+          {
+            id: 'b2',
+            type: 'question',
+            prompt: 'Câu hỏi mẫu tiếp theo trong đề thi...',
+            choices: ['Lựa chọn 1', 'Lựa chọn 2', 'Lựa chọn 3', 'Lựa chọn 4'],
+            answer: 'B',
+            points: 0.4,
+          },
         ],
       },
     },
   })
 }
 
-export function mockSetContentExamStatus(examId: string, status: 'published' | 'hidden' | 'removed', reason?: string): Promise<{ ok: boolean }> {
+export function mockSetContentExamStatus(
+  examId: string,
+  status: 'published' | 'hidden' | 'removed',
+  reason?: string,
+): Promise<{ ok: boolean }> {
   const target = MOCK_EXAMS.find((e) => e.id === examId)
   if (target) {
     target.status = status
@@ -441,7 +496,9 @@ export function mockDeleteContentExam(examId: string): Promise<{ ok: boolean }> 
   return wait({ ok: true })
 }
 
-export function mockListContentReports(opts: { status?: string; page?: number; perPage?: number } = {}): Promise<ContentReportPage> {
+export function mockListContentReports(
+  opts: { status?: string; page?: number; perPage?: number } = {},
+): Promise<ContentReportPage> {
   const page = opts.page ?? 1
   const perPage = opts.perPage ?? 20
   const filtered = MOCK_REPORTS.filter((r) => !opts.status || r.status === opts.status)
@@ -453,7 +510,10 @@ export function mockListContentReports(opts: { status?: string; page?: number; p
   })
 }
 
-export function mockResolveContentReport(reportId: number, status: 'resolved' | 'dismissed'): Promise<{ ok: boolean }> {
+export function mockResolveContentReport(
+  reportId: number,
+  status: 'resolved' | 'dismissed',
+): Promise<{ ok: boolean }> {
   const rep = MOCK_REPORTS.find((r) => r.id === reportId)
   if (rep) {
     rep.status = status
@@ -463,11 +523,15 @@ export function mockResolveContentReport(reportId: number, status: 'resolved' | 
   return wait({ ok: true })
 }
 
-export function mockListContentDocs(opts: { q?: string; page?: number; perPage?: number } = {}): Promise<ContentDocPage> {
+export function mockListContentDocs(
+  opts: { q?: string; page?: number; perPage?: number } = {},
+): Promise<ContentDocPage> {
   const q = (opts.q ?? '').toLowerCase()
   const page = opts.page ?? 1
   const perPage = opts.perPage ?? 20
-  const filtered = MOCK_DOCS.filter((d) => !q || d.name.toLowerCase().includes(q) || d.ownerEmail.toLowerCase().includes(q))
+  const filtered = MOCK_DOCS.filter(
+    (d) => !q || d.name.toLowerCase().includes(q) || d.ownerEmail.toLowerCase().includes(q),
+  )
   return wait({
     docs: filtered.slice((page - 1) * perPage, page * perPage),
     total: filtered.length,
@@ -483,10 +547,14 @@ export function mockDeleteContentDoc(docId: string): Promise<{ ok: boolean; r2Re
   return wait({ ok: true, r2Removed: true })
 }
 
-export function mockListContentFeedback(opts: { read?: boolean; page?: number; perPage?: number } = {}): Promise<ContentFeedbackPage> {
+export function mockListContentFeedback(
+  opts: { read?: boolean; page?: number; perPage?: number } = {},
+): Promise<ContentFeedbackPage> {
   const page = opts.page ?? 1
   const perPage = opts.perPage ?? 20
-  const filtered = MOCK_FEEDBACK.filter((f) => typeof opts.read !== 'boolean' || f.read === opts.read)
+  const filtered = MOCK_FEEDBACK.filter(
+    (f) => typeof opts.read !== 'boolean' || f.read === opts.read,
+  )
   return wait({
     feedback: filtered.slice((page - 1) * perPage, page * perPage),
     total: filtered.length,
@@ -495,7 +563,10 @@ export function mockListContentFeedback(opts: { read?: boolean; page?: number; p
   })
 }
 
-export function mockMarkContentFeedbackRead(feedbackId: number, read = true): Promise<{ ok: boolean }> {
+export function mockMarkContentFeedbackRead(
+  feedbackId: number,
+  read = true,
+): Promise<{ ok: boolean }> {
   const f = MOCK_FEEDBACK.find((item) => item.id === feedbackId)
   if (f) f.read = read
   return wait({ ok: true })

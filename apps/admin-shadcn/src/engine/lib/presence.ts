@@ -9,7 +9,7 @@ import { currentSession } from '@/engine/lib/auth'
 export async function pingPresence(): Promise<void> {
   if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return
   try {
-    if (!await currentSession()) return
+    if (!(await currentSession())) return
     const { submitPresence } = await import('@/apis/presence/requests')
     await submitPresence()
   } catch {}

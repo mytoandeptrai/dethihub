@@ -1,21 +1,31 @@
 /** Hộp công cụ Vật lí: mạch điện, chuyển động, chất khí, cảnh vật, mặt phẳng nghiêng, chuyển thể, thấu kính, điện trường. */
 import { useEffect, useMemo, useState } from 'react'
-import { cn } from '@/engine/lib/cn'
-import { prepareToolDoc } from '@/engine/lib/objects'
-import { inputClass } from '@/engine/components/ui'
-import { type ToolDoc } from '@/engine/lib/toolSpec'
-import { svgDataUrl } from '@/engine/lib/plot'
-import { LabelPreview } from './LabelDragPreview'
-import { CIRCUIT_HELP, type CircuitSpec } from '@/engine/lib/circuit'
-import type { Dir, InclineSpec, MotionSpec } from '@/engine/lib/physics'
-import { GAS_DEFAULT, type GasAxes, type GasSpec } from '@/engine/lib/gas'
-import { SCENE_DEFAULT, SCENE_HELP, type SceneSpec } from '@/engine/lib/scene'
-import { PHASE_DEFAULT, type PhaseSpec } from '@/engine/lib/phaseChange'
-import { calcLens, fmtLensNum, LENS_DEFAULT, type LensNames, type LensRay, type LensSpec } from '@/engine/lib/lens'
+
 import { Segmented } from '@/engine/components/Segmented'
-import { Check, ToolShell, sectionTitle } from './ToolShell'
+import { inputClass } from '@/engine/components/ui'
+import { CIRCUIT_HELP, type CircuitSpec } from '@/engine/lib/circuit'
+import { cn } from '@/engine/lib/cn'
 import { FIELD_DEFAULT, type FieldScene, type FieldSpec } from '@/engine/lib/field'
+import { GAS_DEFAULT, type GasAxes, type GasSpec } from '@/engine/lib/gas'
+import {
+  calcLens,
+  fmtLensNum,
+  LENS_DEFAULT,
+  type LensNames,
+  type LensRay,
+  type LensSpec,
+} from '@/engine/lib/lens'
+import { prepareToolDoc } from '@/engine/lib/objects'
+import { PHASE_DEFAULT, type PhaseSpec } from '@/engine/lib/phaseChange'
+import { svgDataUrl } from '@/engine/lib/plot'
+import { SCENE_DEFAULT, SCENE_HELP, type SceneSpec } from '@/engine/lib/scene'
+import { type ToolDoc } from '@/engine/lib/toolSpec'
+
+import { LabelPreview } from './LabelDragPreview'
 import { type Props, type HelpGroups, useRender, TextBlock } from './toolModalKit'
+import { Check, ToolShell, sectionTitle } from './ToolShell'
+
+import type { Dir, InclineSpec, MotionSpec } from '@/engine/lib/physics'
 
 const CIRCUIT_DEFAULT: CircuitSpec = {
   text: 'nguồn E = 12 V, r = 1 Ω\nK - A - R1=4Ω - (R2=6Ω // R3=3Ω // V) - Đ(6V-3W)',
@@ -32,7 +42,9 @@ export function CircuitModal({ initial, submitLabel, onClose, onInsert }: Props<
       <TextBlock
         title="Mạch"
         help={CIRCUIT_HELP}
-        intro={'Nối tiếp "-", song song "//", ngoặc để gom cụm. Nguồn ghi một dòng riêng bắt đầu bằng "nguồn".'}
+        intro={
+          'Nối tiếp "-", song song "//", ngoặc để gom cụm. Nguồn ghi một dòng riêng bắt đầu bằng "nguồn".'
+        }
         value={spec.text}
         onChange={(text) => set({ text })}
         rows={5}
@@ -40,7 +52,9 @@ export function CircuitModal({ initial, submitLabel, onClose, onInsert }: Props<
         label="Mạch điện"
       />
       <section>
-        <Check checked={spec.values} onChange={(values) => set({ values })}>Ghi giá trị dưới linh kiện</Check>
+        <Check checked={spec.values} onChange={(values) => set({ values })}>
+          Ghi giá trị dưới linh kiện
+        </Check>
       </section>
     </>
   )
@@ -81,7 +95,14 @@ const MOTION_HELP: HelpGroups = [
 ]
 
 export function MotionModal({ initial, submitLabel, onClose, onInsert }: Props<MotionSpec>) {
-  const [spec, setSpec] = useState<MotionSpec>(initial ?? { yName: MOTION_KINDS[0].y, tName: 't (s)', points: MOTION_KINDS[0].example, dashed: true })
+  const [spec, setSpec] = useState<MotionSpec>(
+    initial ?? {
+      yName: MOTION_KINDS[0].y,
+      tName: 't (s)',
+      points: MOTION_KINDS[0].example,
+      dashed: true,
+    },
+  )
   const set = (p: Partial<MotionSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'motion', spec }), [spec])
   const { preview, error } = useRender(doc)
@@ -95,10 +116,19 @@ export function MotionModal({ initial, submitLabel, onClose, onInsert }: Props<M
               key={k.y}
               type="button"
               aria-pressed={spec.yName === k.y}
-              onClick={() => set({ yName: k.y, ...(MOTION_KINDS.some((x) => x.example === spec.points) ? { points: k.example } : {}) })}
+              onClick={() =>
+                set({
+                  yName: k.y,
+                  ...(MOTION_KINDS.some((x) => x.example === spec.points)
+                    ? { points: k.example }
+                    : {}),
+                })
+              }
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                spec.yName === k.y ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                spec.yName === k.y
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {k.label}
@@ -117,17 +147,27 @@ export function MotionModal({ initial, submitLabel, onClose, onInsert }: Props<M
         label="Các điểm của đồ thị"
       />
       <section className="grid grid-cols-2 gap-2">
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Trục dọc
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.yName} onChange={(e) => set({ yName: e.target.value })} />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.yName}
+            onChange={(e) => set({ yName: e.target.value })}
+          />
         </label>
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Trục ngang
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.tName} onChange={(e) => set({ tName: e.target.value })} />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.tName}
+            onChange={(e) => set({ tName: e.target.value })}
+          />
         </label>
       </section>
       <section>
-        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>Nét đứt chiếu xuống hai trục</Check>
+        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>
+          Nét đứt chiếu xuống hai trục
+        </Check>
       </section>
     </>
   )
@@ -172,29 +212,48 @@ const GAS_HELP: HelpGroups = [
     group: 'Quá trình',
     items: [
       { code: '1-2: đẳng nhiệt', what: 'p–V: cung hypebol (p·V như nhau); p–T, V–T: đoạn đứng' },
-      { code: '2-3: đẳng tích', what: 'p–V: đoạn đứng; p–T: đoạn trên đường qua O; V–T: đoạn ngang' },
+      {
+        code: '2-3: đẳng tích',
+        what: 'p–V: đoạn đứng; p–T: đoạn trên đường qua O; V–T: đoạn ngang',
+      },
       { code: '3-1: đẳng áp', what: 'p–V, p–T: đoạn ngang; V–T: đoạn trên đường qua O' },
-      { code: 'a-b: đẳng áp | p_1', what: 'Thêm "| nhãn" để ghi nhãn ở đầu xa O (p_1 hoặc p₁ thành p₁)' },
+      {
+        code: 'a-b: đẳng áp | p_1',
+        what: 'Thêm "| nhãn" để ghi nhãn ở đầu xa O (p_1 hoặc p₁ thành p₁)',
+      },
       { code: '1-2', what: 'Bỏ trống loại: nối thẳng' },
     ],
   },
 ]
 
 export function GasModal({ initial, submitLabel, onClose, onInsert }: Props<GasSpec>) {
-  const [spec, setSpec] = useState<GasSpec>(() => (initial ? { ...initial, showStates: initial.showStates ?? true } : GAS_DEFAULT))
+  const [spec, setSpec] = useState<GasSpec>(() =>
+    initial ? { ...initial, showStates: initial.showStates ?? true } : GAS_DEFAULT,
+  )
   const set = (p: Partial<GasSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'gas', spec }), [spec])
   const { preview, error } = useRender(doc)
   const coord = GAS_AXES.find((a) => a.id === spec.axes)?.coord ?? '(V; p)'
   const pill = (on: boolean) =>
-    cn('rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors', on ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4')
+    cn(
+      'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
+      on
+        ? 'border-clay bg-clay-tint text-clay font-medium'
+        : 'border-line text-ink-2 hover:border-ink-4',
+    )
   const inputs = (
     <>
       <section>
         <h3 className={sectionTitle}>Hệ trục</h3>
         <div className="flex flex-wrap gap-1.5">
           {GAS_AXES.map((a) => (
-            <button key={a.id} type="button" aria-pressed={spec.axes === a.id} onClick={() => set({ axes: a.id })} className={pill(spec.axes === a.id)}>
+            <button
+              key={a.id}
+              type="button"
+              aria-pressed={spec.axes === a.id}
+              onClick={() => set({ axes: a.id })}
+              className={pill(spec.axes === a.id)}
+            >
               {a.label}
             </button>
           ))}
@@ -229,9 +288,13 @@ export function GasModal({ initial, submitLabel, onClose, onInsert }: Props<GasS
             ['tUnit', 'Đơn vị T'],
           ] as const
         ).map(([k, label]) => (
-          <label key={k} className="text-[12.5px] text-ink-2">
+          <label key={k} className="text-ink-2 text-[12.5px]">
             {label}
-            <input className={cn(inputClass, 'mt-1 h-9')} value={spec[k]} onChange={(e) => set({ [k]: e.target.value })} />
+            <input
+              className={cn(inputClass, 'mt-1 h-9')}
+              value={spec[k]}
+              onChange={(e) => set({ [k]: e.target.value })}
+            />
           </label>
         ))}
       </section>
@@ -239,17 +302,31 @@ export function GasModal({ initial, submitLabel, onClose, onInsert }: Props<GasS
         <h3 className={sectionTitle}>Nhãn trên trục</h3>
         <div className="flex flex-wrap gap-1.5">
           {GAS_TICKS.map((t) => (
-            <button key={t.id} type="button" aria-pressed={spec.ticks === t.id} onClick={() => set({ ticks: t.id })} className={pill(spec.ticks === t.id)}>
+            <button
+              key={t.id}
+              type="button"
+              aria-pressed={spec.ticks === t.id}
+              onClick={() => set({ ticks: t.id })}
+              className={pill(spec.ticks === t.id)}
+            >
               {t.label}
             </button>
           ))}
         </div>
       </section>
       <section className="space-y-1.5">
-        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>Nét đứt gióng xuống hai trục</Check>
-        <Check checked={spec.arrows} onChange={(arrows) => set({ arrows })}>Mũi tên chiều quá trình</Check>
-        <Check checked={spec.toOrigin} onChange={(toOrigin) => set({ toOrigin })}>Kéo dài nét đứt về gốc O (đường qua O)</Check>
-        <Check checked={spec.showStates !== false} onChange={(showStates) => set({ showStates })}>Hiện điểm trạng thái</Check>
+        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>
+          Nét đứt gióng xuống hai trục
+        </Check>
+        <Check checked={spec.arrows} onChange={(arrows) => set({ arrows })}>
+          Mũi tên chiều quá trình
+        </Check>
+        <Check checked={spec.toOrigin} onChange={(toOrigin) => set({ toOrigin })}>
+          Kéo dài nét đứt về gốc O (đường qua O)
+        </Check>
+        <Check checked={spec.showStates !== false} onChange={(showStates) => set({ showStates })}>
+          Hiện điểm trạng thái
+        </Check>
       </section>
     </>
   )
@@ -278,9 +355,14 @@ export function SceneModal({ initial, submitLabel, onClose, onInsert }: Props<Sc
   // nạp kho hình vật (+ vật ngoài kho của hình cũ) rồi vẽ lại; không tự vẽ vật mới theo từng phím gõ (tốn điểm)
   const [spritesTick, setSpritesTick] = useState(0)
   useEffect(() => {
-    void prepareToolDoc({ kind: 'scene', spec: initial ?? SCENE_DEFAULT }).finally(() => setSpritesTick(1))
+    void prepareToolDoc({ kind: 'scene', spec: initial ?? SCENE_DEFAULT }).finally(() =>
+      setSpritesTick(1),
+    )
   }, [initial])
-  const doc = useMemo((): ToolDoc => ({ kind: 'scene', spec: spritesTick ? spec : { ...spec } }), [spec, spritesTick])
+  const doc = useMemo(
+    (): ToolDoc => ({ kind: 'scene', spec: spritesTick ? spec : { ...spec } }),
+    [spec, spritesTick],
+  )
   const { preview, error } = useRender(doc)
   const inputs = (
     <TextBlock
@@ -312,7 +394,13 @@ export function SceneModal({ initial, submitLabel, onClose, onInsert }: Props<Sc
           onChange={(labelPos) => setSpec((s) => ({ ...s, labelPos }))}
           move={move}
           onToggle={() => setMove((v) => !v)}
-          fallback={<img src={svgDataUrl(img.svg)} alt="Xem trước" className="max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain" />}
+          fallback={
+            <img
+              src={svgDataUrl(img.svg)}
+              alt="Xem trước"
+              className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+            />
+          }
         />
       )}
     />
@@ -325,9 +413,17 @@ const DIRS: Array<{ id: Dir; label: string }> = [
   { id: 'down', label: 'Xuống dốc' },
 ]
 
-function DirPick({ title, value, onChange }: { title: string; value: Dir; onChange: (d: Dir) => void }) {
+function DirPick({
+  title,
+  value,
+  onChange,
+}: {
+  title: string
+  value: Dir
+  onChange: (d: Dir) => void
+}) {
   return (
-    <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
+    <div className="text-ink-2 flex items-center gap-2 text-[12.5px]">
       <span className="w-20">{title}</span>
       {DIRS.map((d) => (
         <button
@@ -335,7 +431,12 @@ function DirPick({ title, value, onChange }: { title: string; value: Dir; onChan
           type="button"
           aria-pressed={value === d.id}
           onClick={() => onChange(d.id)}
-          className={cn('rounded-[6px] border px-2 py-0.5', value === d.id ? 'border-clay bg-clay-tint text-clay' : 'border-line hover:border-ink-4')}
+          className={cn(
+            'rounded-[6px] border px-2 py-0.5',
+            value === d.id
+              ? 'border-clay bg-clay-tint text-clay'
+              : 'border-line hover:border-ink-4',
+          )}
         >
           {d.label}
         </button>
@@ -345,7 +446,9 @@ function DirPick({ title, value, onChange }: { title: string; value: Dir; onChan
 }
 
 export function InclineModal({ initial, submitLabel, onClose, onInsert }: Props<InclineSpec>) {
-  const [spec, setSpec] = useState<InclineSpec>(initial ?? { angle: 30, P: true, N: true, fms: 'up', F: 'none', showAngle: true })
+  const [spec, setSpec] = useState<InclineSpec>(
+    initial ?? { angle: 30, P: true, N: true, fms: 'up', F: 'none', showAngle: true },
+  )
   const set = (p: Partial<InclineSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'incline', spec }), [spec])
   const { preview, error } = useRender(doc)
@@ -353,17 +456,32 @@ export function InclineModal({ initial, submitLabel, onClose, onInsert }: Props<
     <>
       <section>
         <h3 className={sectionTitle}>Góc nghiêng: {spec.angle}°</h3>
-        <input type="range" min={10} max={60} step={5} value={spec.angle} onChange={(e) => set({ angle: Number(e.target.value) })} className="w-full accent-clay" aria-label="Góc nghiêng" />
+        <input
+          type="range"
+          min={10}
+          max={60}
+          step={5}
+          value={spec.angle}
+          onChange={(e) => set({ angle: Number(e.target.value) })}
+          className="accent-clay w-full"
+          aria-label="Góc nghiêng"
+        />
       </section>
       <section className="space-y-2">
         <h3 className={sectionTitle}>Lực</h3>
-        <Check checked={spec.P} onChange={(P) => set({ P })}>Trọng lực P</Check>
-        <Check checked={spec.N} onChange={(N) => set({ N })}>Phản lực N</Check>
+        <Check checked={spec.P} onChange={(P) => set({ P })}>
+          Trọng lực P
+        </Check>
+        <Check checked={spec.N} onChange={(N) => set({ N })}>
+          Phản lực N
+        </Check>
         <DirPick title="Ma sát Fms" value={spec.fms} onChange={(fms) => set({ fms })} />
         <DirPick title="Lực kéo F" value={spec.F} onChange={(F) => set({ F })} />
       </section>
       <section>
-        <Check checked={spec.showAngle} onChange={(showAngle) => set({ showAngle })}>Ghi góc α</Check>
+        <Check checked={spec.showAngle} onChange={(showAngle) => set({ showAngle })}>
+          Ghi góc α
+        </Check>
       </section>
     </>
   )
@@ -386,8 +504,13 @@ export function InclineModal({ initial, submitLabel, onClose, onInsert }: Props<
  * Hoá học: cấu hình electron, công thức cấu tạo, đồ thị số mol
  * ------------------------------------------------------------------ */
 
-
-const PHASE_KINDS: Array<{ label: string; yName: string; tName: string; points: string; extend: boolean }> = [
+const PHASE_KINDS: Array<{
+  label: string
+  yName: string
+  tName: string
+  points: string
+  extend: boolean
+}> = [
   {
     label: 'Nóng chảy nước đá',
     yName: 't (°C)',
@@ -399,7 +522,8 @@ const PHASE_KINDS: Array<{ label: string; yName: string; tName: string; points: 
     label: 'Mẫu đề',
     yName: 't (°C)',
     tName: 'T (phút)',
-    points: '(0; -45)\nA: (15; -8,83)\nB: (27,4; -8,83)\nC: (40 = T_1; 0)\n(54 = T_2; 0)\n_(66; 16)',
+    points:
+      '(0; -45)\nA: (15; -8,83)\nB: (27,4; -8,83)\nC: (40 = T_1; 0)\n(54 = T_2; 0)\n_(66; 16)',
     extend: false,
   },
   {
@@ -416,14 +540,23 @@ const PHASE_HELP: HelpGroups = [
     group: 'Điểm & tên điểm',
     items: [
       { code: '(0; -45)   (4; 0)', what: 'Điểm (thời gian; nhiệt độ), nối gấp khúc theo thứ tự' },
-      { code: 'A: (15; -8,83)', what: 'Đặt tên điểm A phía trên điểm; thập phân dùng dấu phẩy hoặc chấm' },
-      { code: '_(66; 16)', what: 'Điểm đi tiếp cuối đường (vẽ đoạn nối, không ghi vạch số trên trục)' },
+      {
+        code: 'A: (15; -8,83)',
+        what: 'Đặt tên điểm A phía trên điểm; thập phân dùng dấu phẩy hoặc chấm',
+      },
+      {
+        code: '_(66; 16)',
+        what: 'Điểm đi tiếp cuối đường (vẽ đoạn nối, không ghi vạch số trên trục)',
+      },
     ],
   },
   {
     group: 'Kí hiệu trên trục',
     items: [
-      { code: 'C: (60 = T_1; 0)', what: 'Vẽ ở x = 60, ghi T₁ trên trục ngang (_1, _2… thành chỉ số dưới)' },
+      {
+        code: 'C: (60 = T_1; 0)',
+        what: 'Vẽ ở x = 60, ghi T₁ trên trục ngang (_1, _2… thành chỉ số dưới)',
+      },
       { code: '(15; 50 = t_1)', what: 'Ghi kí hiệu t₁ trên trục dọc (dùng được cho cả hai trục)' },
     ],
   },
@@ -448,10 +581,20 @@ export function PhaseModal({ initial, submitLabel, onClose, onInsert }: Props<Ph
                 key={k.label}
                 type="button"
                 aria-pressed={active}
-                onClick={() => set({ yName: k.yName, tName: k.tName, points: k.points, extend: k.extend, labelPos: undefined })}
+                onClick={() =>
+                  set({
+                    yName: k.yName,
+                    tName: k.tName,
+                    points: k.points,
+                    extend: k.extend,
+                    labelPos: undefined,
+                  })
+                }
                 className={cn(
                   'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                  active ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                  active
+                    ? 'border-clay bg-clay-tint text-clay font-medium'
+                    : 'border-line text-ink-2 hover:border-ink-4',
                 )}
               >
                 {k.label}
@@ -471,19 +614,33 @@ export function PhaseModal({ initial, submitLabel, onClose, onInsert }: Props<Ph
         label="Các điểm của đồ thị chuyển thể"
       />
       <section className="grid grid-cols-2 gap-2">
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Trục dọc
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.yName} onChange={(e) => set({ yName: e.target.value })} />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.yName}
+            onChange={(e) => set({ yName: e.target.value })}
+          />
         </label>
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Trục ngang
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.tName} onChange={(e) => set({ tName: e.target.value })} />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.tName}
+            onChange={(e) => set({ tName: e.target.value })}
+          />
         </label>
       </section>
       <section className="space-y-1.5">
-        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>Nét đứt gióng xuống hai trục</Check>
-        <Check checked={spec.dots} onChange={(dots) => set({ dots })}>Chấm tại điểm có tên</Check>
-        <Check checked={spec.extend} onChange={(extend) => set({ extend })}>Kéo dài ngang sau điểm cuối</Check>
+        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>
+          Nét đứt gióng xuống hai trục
+        </Check>
+        <Check checked={spec.dots} onChange={(dots) => set({ dots })}>
+          Chấm tại điểm có tên
+        </Check>
+        <Check checked={spec.extend} onChange={(extend) => set({ extend })}>
+          Kéo dài ngang sau điểm cuối
+        </Check>
       </section>
     </>
   )
@@ -506,7 +663,13 @@ export function PhaseModal({ initial, submitLabel, onClose, onInsert }: Props<Ph
           onChange={(labelPos) => set({ labelPos })}
           move={move}
           onToggle={() => setMove((v) => !v)}
-          fallback={<img src={svgDataUrl(img.svg)} alt="Xem trước" className="max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain" />}
+          fallback={
+            <img
+              src={svgDataUrl(img.svg)}
+              alt="Xem trước"
+              className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+            />
+          }
         />
       )}
     />
@@ -517,9 +680,11 @@ export function PhaseModal({ initial, submitLabel, onClose, onInsert }: Props<Ph
  * Vật lí 11: đồ thị dao động điều hoà
  * ------------------------------------------------------------------ */
 
-
 const parseLensNum = (raw: string) => {
-  const s = raw.trim().replace(',', '.').replace(/[−–]/g, '-')
+  const s = raw
+    .trim()
+    .replace(',', '.')
+    .replace(/[−–]/g, '-')
   if (!s) return NaN
   const n = Number(s)
   return Number.isFinite(n) ? n : NaN
@@ -596,7 +761,7 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
           value={spec.type}
           onChange={(type) => set({ type })}
           label="Loại thấu kính"
-          className="w-full flex h-10 [&>button]:flex-1 [&>button]:justify-center"
+          className="flex h-10 w-full [&>button]:flex-1 [&>button]:justify-center"
           options={[
             { key: 'converging', label: 'Hội tụ' },
             { key: 'diverging', label: 'Phân kì' },
@@ -607,7 +772,7 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
       <section>
         <h3 className={sectionTitle}>Số liệu (cm)</h3>
         <div className="grid grid-cols-3 gap-2">
-          <label className="text-[12.5px] text-ink-2">
+          <label className="text-ink-2 text-[12.5px]">
             Tiêu cự f
             <input
               value={fText}
@@ -621,7 +786,7 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
               className={cn(inputClass, 'mt-1 h-9')}
             />
           </label>
-          <label className="text-[12.5px] text-ink-2">
+          <label className="text-ink-2 text-[12.5px]">
             Khoảng cách d
             <input
               value={dText}
@@ -635,7 +800,7 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
               className={cn(inputClass, 'mt-1 h-9')}
             />
           </label>
-          <label className="text-[12.5px] text-ink-2">
+          <label className="text-ink-2 text-[12.5px]">
             Cao vật h
             <input
               value={hText}
@@ -673,7 +838,7 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
           Ẩn ảnh (học sinh tự vẽ)
         </Check>
         <div className="mt-2.5 flex items-center justify-between gap-2">
-          <span className="text-[13px] text-ink-2">Vật đặt bên</span>
+          <span className="text-ink-2 text-[13px]">Vật đặt bên</span>
           <Segmented<'left' | 'right'>
             value={spec.objectSide ?? 'left'}
             onChange={(objectSide) => set({ objectSide })}
@@ -691,14 +856,14 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
         <button
           type="button"
           onClick={() => setShowNames((v) => !v)}
-          className="text-[12.5px] font-medium text-clay hover:underline"
+          className="text-clay text-[12.5px] font-medium hover:underline"
         >
           {showNames ? 'Thu gọn đặt tên điểm' : 'Đổi tên các điểm (A, B, A′, B′, O, F, F′)'}
         </button>
         {showNames && (
           <div className="mt-2 grid grid-cols-4 gap-1.5">
             {LENS_NAME_FIELDS.map((f) => (
-              <label key={f.key} className="text-[11.5px] text-ink-3">
+              <label key={f.key} className="text-ink-3 text-[11.5px]">
                 {f.label}
                 <input
                   value={spec.names?.[f.key] ?? f.def}
@@ -712,16 +877,19 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
       </section>
 
       {error && (
-        <p role="alert" className="rounded-[6px] bg-clay-tint px-2.5 py-1.5 text-[12px] leading-snug text-clay-deep">
+        <p
+          role="alert"
+          className="bg-clay-tint text-clay-deep rounded-[6px] px-2.5 py-1.5 text-[12px] leading-snug"
+        >
           {error}
         </p>
       )}
 
       {calc && (
-        <div className="rounded-[6px] border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink-2">
-          <div className="font-medium text-ink">{calc.summary}</div>
+        <div className="border-line bg-paper-2 text-ink-2 rounded-[6px] border px-3 py-2 text-[12.5px]">
+          <div className="text-ink font-medium">{calc.summary}</div>
           {!calc.atInfinity && calc.dPrime !== null && calc.k !== null && (
-            <div className="mt-0.5 text-[12px] text-ink-3">
+            <div className="text-ink-3 mt-0.5 text-[12px]">
               d′ = {fmtLensNum(calc.dPrime)} cm · k = {fmtLensNum(calc.k)}
             </div>
           )}
@@ -742,13 +910,13 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
           <img
             src={svgDataUrl(img.svg)}
             alt="Xem trước"
-            className="min-h-0 max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain"
+            className="border-line max-h-full min-h-0 max-w-full rounded-[4px] border bg-white object-contain"
           />
           {calc && (
-            <div className="shrink-0 rounded-[6px] border border-line bg-surface px-3 py-1.5 text-center text-[12.5px] text-ink-2">
-              <span className="font-medium text-ink">{calc.summary}</span>
+            <div className="border-line bg-surface text-ink-2 shrink-0 rounded-[6px] border px-3 py-1.5 text-center text-[12.5px]">
+              <span className="text-ink font-medium">{calc.summary}</span>
               {!calc.atInfinity && calc.dPrime !== null && calc.k !== null && (
-                <span className="ml-2 text-ink-3">
+                <span className="text-ink-3 ml-2">
                   (d′ = {fmtLensNum(calc.dPrime)} cm, k = {fmtLensNum(calc.k)})
                 </span>
               )}
@@ -767,7 +935,6 @@ export function LensModal({ initial, submitLabel, onClose, onInsert }: Props<Len
 /* ------------------------------------------------------------------ *
  * Sinh học: Sơ đồ phả hệ
  * ------------------------------------------------------------------ */
-
 
 const FIELD_SCENE_OPTIONS: Array<{ key: FieldScene['type']; label: string }> = [
   { key: 'charge', label: '1 điện tích' },
@@ -803,16 +970,19 @@ function defaultFieldScene(type: FieldScene['type']): FieldScene {
 
 export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<FieldSpec>) {
   const [spec, setSpec] = useState<FieldSpec>(() =>
-    initial
-      ? { ...FIELD_DEFAULT, ...initial }
-      : { ...FIELD_DEFAULT },
+    initial ? { ...FIELD_DEFAULT, ...initial } : { ...FIELD_DEFAULT },
   )
   const set = (p: Partial<FieldSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'field', spec }), [spec])
   const { preview, error } = useRender(doc)
 
   const sc = spec.scene
-  const isMagnetic = sc.type === 'wire' || sc.type === 'wire-side' || sc.type === 'loop' || sc.type === 'solenoid' || sc.type === 'magnet'
+  const isMagnetic =
+    sc.type === 'wire' ||
+    sc.type === 'wire-side' ||
+    sc.type === 'loop' ||
+    sc.type === 'solenoid' ||
+    sc.type === 'magnet'
 
   const inputs = (
     <>
@@ -826,16 +996,23 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
               aria-pressed={sc.type === opt.key}
               onClick={() => {
                 const nextScene = defaultFieldScene(opt.key)
-                const nextVec = opt.key === 'wire' || opt.key === 'wire-side' || opt.key === 'loop' || opt.key === 'solenoid' || opt.key === 'magnet' ? 'B' : 'E'
+                const nextVec =
+                  opt.key === 'wire' ||
+                  opt.key === 'wire-side' ||
+                  opt.key === 'loop' ||
+                  opt.key === 'solenoid' ||
+                  opt.key === 'magnet'
+                    ? 'B'
+                    : 'E'
                 set({
                   scene: nextScene,
                   ...(spec.probe ? { probe: { ...spec.probe, vector: nextVec } } : {}),
                 })
               }}
               className={cn(
-                'rounded-[6px] border px-2.5 py-1.5 text-[12.5px] text-left transition-colors',
+                'rounded-[6px] border px-2.5 py-1.5 text-left text-[12.5px] transition-colors',
                 sc.type === opt.key
-                  ? 'border-clay bg-clay-tint font-medium text-clay'
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
                   : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
@@ -852,7 +1029,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             value={sc.sign}
             onChange={(sign) => set({ scene: { type: 'charge', sign } })}
             label="Dấu điện tích"
-            className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+            className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
             options={[
               { key: '+', label: 'Dương (+)' },
               { key: '-', label: 'Âm (−)' },
@@ -866,12 +1043,12 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
           <h3 className={sectionTitle}>Hai điện tích</h3>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <span className="text-[12px] text-ink-3">Điện tích trái (q₁)</span>
+              <span className="text-ink-3 text-[12px]">Điện tích trái (q₁)</span>
               <Segmented<'+' | '-'>
                 value={sc.signs[0]}
                 onChange={(s0) => set({ scene: { ...sc, signs: [s0, sc.signs[1]] } })}
                 label="Dấu q1"
-                className="mt-1 w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+                className="mt-1 flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
                 options={[
                   { key: '+', label: '+' },
                   { key: '-', label: '−' },
@@ -879,12 +1056,12 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
               />
             </div>
             <div>
-              <span className="text-[12px] text-ink-3">Điện tích phải (q₂)</span>
+              <span className="text-ink-3 text-[12px]">Điện tích phải (q₂)</span>
               <Segmented<'+' | '-'>
                 value={sc.signs[1]}
                 onChange={(s1) => set({ scene: { ...sc, signs: [sc.signs[0], s1] } })}
                 label="Dấu q2"
-                className="mt-1 w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+                className="mt-1 flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
                 options={[
                   { key: '+', label: '+' },
                   { key: '-', label: '−' },
@@ -892,7 +1069,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
               />
             </div>
           </div>
-          <label className="text-[12.5px] text-ink-2">
+          <label className="text-ink-2 text-[12.5px]">
             Tỉ số độ lớn |q₂| / |q₁| ({(sc.ratio ?? 1).toFixed(1).replace('.', ',')})
             <input
               type="range"
@@ -901,7 +1078,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
               step={0.5}
               value={sc.ratio ?? 1}
               onChange={(e) => set({ scene: { ...sc, ratio: Number(e.target.value) } })}
-              className="mt-1 w-full accent-clay"
+              className="accent-clay mt-1 w-full"
             />
           </label>
         </section>
@@ -914,7 +1091,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             value={sc.current}
             onChange={(current) => set({ scene: { type: 'wire', current } })}
             label="Chiều dòng điện"
-            className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+            className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
             options={[
               { key: 'out', label: 'Đi ra (⊙)' },
               { key: 'in', label: 'Đi vào (⊗)' },
@@ -930,7 +1107,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             value={sc.current}
             onChange={(current) => set({ scene: { type: 'wire-side', current } })}
             label="Chiều dòng điện"
-            className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+            className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
             options={[
               { key: 'up', label: 'Đi lên (↑)' },
               { key: 'down', label: 'Đi xuống (↓)' },
@@ -946,7 +1123,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             value={sc.current}
             onChange={(current) => set({ scene: { type: 'loop', current } })}
             label="Chiều dòng điện vòng dây"
-            className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+            className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
             options={[
               { key: 'ccw', label: 'Trên ⊙, dưới ⊗' },
               { key: 'cw', label: 'Trên ⊗, dưới ⊙' },
@@ -962,7 +1139,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             value={sc.current}
             onChange={(current) => set({ scene: { type: 'solenoid', current } })}
             label="Chiều dòng điện ống dây"
-            className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+            className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
             options={[
               { key: 'right', label: 'Trái → phải (mặt trước ↑)' },
               { key: 'left', label: 'Phải → trái (mặt trước ↓)' },
@@ -978,7 +1155,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             value={sc.orient}
             onChange={(orient) => set({ scene: { type: 'magnet', orient } })}
             label="Hướng nam châm"
-            className="w-full flex h-9 [&>button]:flex-1 [&>button]:justify-center"
+            className="flex h-9 w-full [&>button]:flex-1 [&>button]:justify-center"
             options={[
               { key: 'h', label: 'Nằm ngang (N–S)' },
               { key: 'v', label: 'Thẳng đứng' },
@@ -989,7 +1166,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
 
       <section className="flex flex-col gap-1.5">
         <h3 className={sectionTitle}>Đường sức &amp; hiển thị</h3>
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Số đường sức: {spec.lines}
           <input
             type="range"
@@ -998,7 +1175,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
             step={2}
             value={spec.lines}
             onChange={(e) => set({ lines: Number(e.target.value) })}
-            className="mt-1 w-full accent-clay"
+            className="accent-clay mt-1 w-full"
           />
         </label>
         <Check checked={spec.showArrows} onChange={(showArrows) => set({ showArrows })}>
@@ -1021,7 +1198,7 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
         )}
         {spec.probe && sc.type !== 'wire-side' && (
           <div className="grid grid-cols-2 gap-2 pl-6">
-            <label className="text-[12px] text-ink-3">
+            <label className="text-ink-3 text-[12px]">
               xM ({spec.probe.x.toFixed(1).replace('.', ',')})
               <input
                 type="range"
@@ -1029,13 +1206,11 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
                 max={1.8}
                 step={0.1}
                 value={spec.probe.x}
-                onChange={(e) =>
-                  set({ probe: { ...spec.probe!, x: Number(e.target.value) } })
-                }
-                className="mt-0.5 w-full accent-clay"
+                onChange={(e) => set({ probe: { ...spec.probe!, x: Number(e.target.value) } })}
+                className="accent-clay mt-0.5 w-full"
               />
             </label>
-            <label className="text-[12px] text-ink-3">
+            <label className="text-ink-3 text-[12px]">
               yM ({spec.probe.y.toFixed(1).replace('.', ',')})
               <input
                 type="range"
@@ -1043,10 +1218,8 @@ export function FieldModal({ initial, submitLabel, onClose, onInsert }: Props<Fi
                 max={1.2}
                 step={0.1}
                 value={spec.probe.y}
-                onChange={(e) =>
-                  set({ probe: { ...spec.probe!, y: Number(e.target.value) } })
-                }
-                className="mt-0.5 w-full accent-clay"
+                onChange={(e) => set({ probe: { ...spec.probe!, y: Number(e.target.value) } })}
+                className="accent-clay mt-0.5 w-full"
               />
             </label>
           </div>

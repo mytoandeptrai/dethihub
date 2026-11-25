@@ -27,7 +27,11 @@ export function useAiChatScroll(turns: readonly { id: string; pending?: boolean 
       const maximum = Math.max(0, chat.scrollHeight - chat.clientHeight)
       const actions = !turn?.pending && chat.lastElementChild?.querySelector('[data-ai-approval]')
       const target = actions
-        ? chat.scrollTop + actions.getBoundingClientRect().bottom - chat.getBoundingClientRect().top - chat.clientTop - chat.clientHeight
+        ? chat.scrollTop +
+          actions.getBoundingClientRect().bottom -
+          chat.getBoundingClientRect().top -
+          chat.clientTop -
+          chat.clientHeight
         : maximum
       chat.scrollTop = Math.max(0, Math.min(maximum, target))
       previous.current = { top: chat.scrollTop, maximum }

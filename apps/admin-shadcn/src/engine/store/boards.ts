@@ -38,11 +38,17 @@ export const useBoards = create<BoardsState>()(
         set((s) => {
           const now = new Date().toISOString()
           const cur = s.items.find((b) => b.id === id)
-          const next: BoardItem = cur ? { ...cur, data, updatedAt: now } : { id, title: defaultBoardTitle(), updatedAt: now, data }
+          const next: BoardItem = cur
+            ? { ...cur, data, updatedAt: now }
+            : { id, title: defaultBoardTitle(), updatedAt: now, data }
           return { items: [next, ...s.items.filter((b) => b.id !== id)] }
         }),
       rename: (id, title) =>
-        set((s) => ({ items: s.items.map((b) => (b.id === id ? { ...b, title, updatedAt: new Date().toISOString() } : b)) })),
+        set((s) => ({
+          items: s.items.map((b) =>
+            b.id === id ? { ...b, title, updatedAt: new Date().toISOString() } : b,
+          ),
+        })),
       remove: (id) => {
         pendingBoardSaves.delete(id)
         set((s) => ({ items: s.items.filter((b) => b.id !== id) }))
@@ -62,7 +68,13 @@ export const useBoards = create<BoardsState>()(
           for (const k of legacy) {
             const id = k.slice('derou.board.'.length)
             const data = JSON.parse(localStorage.getItem(k) ?? 'null') as BoardData | null
-            if (!have.has(id) && data?.v === 2) add.push({ id, title: defaultBoardTitle(), updatedAt: new Date().toISOString(), data })
+            if (!have.has(id) && data?.v === 2)
+              add.push({
+                id,
+                title: defaultBoardTitle(),
+                updatedAt: new Date().toISOString(),
+                data,
+              })
           }
           if (add.length) state.replaceAll([...add, ...state.items])
           for (const k of legacy) localStorage.removeItem(k)

@@ -1,5 +1,6 @@
-import type { Session as SupabaseSession } from '@supabase/supabase-js'
 import { getBrowserSupabase } from '@/lib/supabase/browser'
+
+import type { Session as SupabaseSession } from '@supabase/supabase-js'
 
 export interface Session {
   access_token: string
@@ -17,7 +18,17 @@ let listening = false
 export function toEngineSession(session: SupabaseSession | null): Session | null {
   if (!session) return null
   const meta = session.user.user_metadata
-  return { access_token: session.access_token, refresh_token: session.refresh_token, expires_at: session.expires_at ?? 0, user: { id: session.user.id, email: session.user.email ?? '', name: meta.display_name || meta.full_name || meta.name, avatar: meta.avatar_url || meta.picture } }
+  return {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: session.expires_at ?? 0,
+    user: {
+      id: session.user.id,
+      email: session.user.email ?? '',
+      name: meta.display_name || meta.full_name || meta.name,
+      avatar: meta.avatar_url || meta.picture,
+    },
+  }
 }
 
 export function saveSession(session: SupabaseSession | null) {
@@ -33,7 +44,9 @@ export function getSession(): Session | null {
   return cached
 }
 
-export async function currentSession(_options: { keepOnError?: boolean } = {}): Promise<Session | null> {
+export async function currentSession(
+  _options: { keepOnError?: boolean } = {},
+): Promise<Session | null> {
   getSession()
   const { data, error } = await getBrowserSupabase().auth.getSession()
   if (error) return null

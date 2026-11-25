@@ -1,4 +1,9 @@
-import { billingFirstBonus, billingCreateOrder, billingGetOrder, billingCancelOrder } from '@/apis/billing/requests'
+import {
+  billingFirstBonus,
+  billingCreateOrder,
+  billingGetOrder,
+  billingCancelOrder,
+} from '@/apis/billing/requests'
 
 /** Các gói đã được thưởng lần đầu (lần sau nạp gói đó không còn thưởng). */
 export async function boughtPacks(): Promise<number[]> {

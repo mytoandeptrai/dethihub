@@ -1,3 +1,6 @@
+import { Mark, Node, mergeAttributes, nodeInputRule } from '@tiptap/core'
+import katex from 'katex'
+
 /**
  * Schema TipTap cho tài liệu đề thi.
  *
@@ -10,8 +13,6 @@
  * của TipTap) nên mọi ô đều sửa trực tiếp được trong editor.
  */
 import { TocNode } from './toc'
-import { Mark, Node, mergeAttributes, nodeInputRule } from '@tiptap/core'
-import katex from 'katex'
 
 /** Thuộc tính chung: id để AI/undo tham chiếu ổn định. */
 export interface ExamNodeAttrs {
@@ -39,10 +40,12 @@ export const UnderlineMark = Mark.create({
     return {
       toggleUnderline:
         () =>
-        ({ commands }) => commands.toggleMark(this.name),
+        ({ commands }) =>
+          commands.toggleMark(this.name),
       unsetUnderline:
         () =>
-        ({ commands }) => commands.unsetMark(this.name),
+        ({ commands }) =>
+          commands.unsetMark(this.name),
     }
   },
 })
@@ -159,10 +162,9 @@ export const BaseParagraphNode = Node.create({
     }
     return [
       'p',
-      mergeAttributes(
-        textAlign ? { style: `text-align: ${textAlign}` } : {},
-        { style: formatStyle(rest) },
-      ),
+      mergeAttributes(textAlign ? { style: `text-align: ${textAlign}` } : {}, {
+        style: formatStyle(rest),
+      }),
       0,
     ]
   },
@@ -275,7 +277,11 @@ export const ColumnsNode = Node.create({
     const { id } = HTMLAttributes as Record<string, unknown>
     return [
       'div',
-      mergeAttributes({ 'data-exam-node': 'examColumns', 'data-cols': node.childCount, ...(id ? { 'data-id': id } : {}) }),
+      mergeAttributes({
+        'data-exam-node': 'examColumns',
+        'data-cols': node.childCount,
+        ...(id ? { 'data-id': id } : {}),
+      }),
       0,
     ]
   },
@@ -335,7 +341,10 @@ export const MetaRowNode = Node.create({
     const { label, ...rest } = HTMLAttributes as Record<string, unknown>
     return [
       'div',
-      mergeAttributes({ 'data-exam-node': 'examMetaRow', 'data-label': label }, { style: formatStyle(rest) }),
+      mergeAttributes(
+        { 'data-exam-node': 'examMetaRow', 'data-label': label },
+        { style: formatStyle(rest) },
+      ),
       0,
     ]
   },
@@ -368,7 +377,7 @@ export const PageBreakNode = Node.create({
       mergeAttributes(
         {
           'data-exam-node': 'examPageBreak',
-          class: 'exam-pagebreak',
+          'class': 'exam-pagebreak',
           ...(id ? { 'data-id': id } : {}),
         },
         { style: formatStyle(rest) },
@@ -422,14 +431,17 @@ export const BulletNode = Node.create({
         if (node.type.name !== 'examBullet') continue
         const level = Math.max(0, Math.min(2, (Number(node.attrs.level) || 0) + delta))
         this.editor.view.dispatch(
-          this.editor.state.tr.setNodeMarkup($from.before(depth), undefined, { ...node.attrs, level }),
+          this.editor.state.tr.setNodeMarkup($from.before(depth), undefined, {
+            ...node.attrs,
+            level,
+          }),
         )
         return true
       }
       // ngoài danh sách thì để Tab/Shift+Tab làm việc mặc định (bảng, ô…)
       return false
     }
-    return { Tab: shift(1), 'Shift-Tab': shift(-1) }
+    return { 'Tab': shift(1), 'Shift-Tab': shift(-1) }
   },
   parseHTML() {
     return [{ tag: 'div[data-exam-node="examBullet"]' }]
@@ -441,7 +453,11 @@ export const BulletNode = Node.create({
       'div',
       mergeAttributes(
         { 'data-exam-node': 'examBullet', ...(lv ? { 'data-level': String(lv) } : {}) },
-        { style: [formatStyle(rest), lv ? `margin-left: ${lv * 24}px` : ''].filter(Boolean).join('; ') },
+        {
+          style: [formatStyle(rest), lv ? `margin-left: ${lv * 24}px` : '']
+            .filter(Boolean)
+            .join('; '),
+        },
       ),
       0,
     ]
@@ -775,17 +791,10 @@ export const RubricItemNode = Node.create({
 export const BoxedMark = Mark.create({
   name: 'boxed',
   parseHTML() {
-    return [
-      { tag: 'span[data-boxed]' },
-      { style: 'border', consuming: false },
-    ]
+    return [{ tag: 'span[data-boxed]' }, { style: 'border', consuming: false }]
   },
   renderHTML({ HTMLAttributes }) {
-    return [
-      'span',
-      mergeAttributes(HTMLAttributes, { 'data-boxed': '', class: 'doc-boxed' }),
-      0,
-    ]
+    return ['span', mergeAttributes(HTMLAttributes, { 'data-boxed': '', 'class': 'doc-boxed' }), 0]
   },
 })
 
@@ -819,7 +828,7 @@ export const InlineMathNode = Node.create({
   },
   renderHTML({ HTMLAttributes }) {
     const latex = String((HTMLAttributes as Record<string, unknown>).latex ?? '')
-    return ['span', { 'data-inline-math': latex, class: 'inline-math' }, latex]
+    return ['span', { 'data-inline-math': latex, 'class': 'inline-math' }, latex]
   },
   addNodeView() {
     return ({ node }) => {
@@ -855,7 +864,13 @@ export const InlineMathNode = Node.create({
   },
   addInputRules() {
     // gõ `$x^2$` trong editor → chuyển ngay thành công thức
-    return [nodeInputRule({ find: /\$([^$\n]+)\$$/, type: this.type, getAttributes: (m) => ({ latex: m[1] }) })]
+    return [
+      nodeInputRule({
+        find: /\$([^$\n]+)\$$/,
+        type: this.type,
+        getAttributes: (m) => ({ latex: m[1] }),
+      }),
+    ]
   },
 })
 
@@ -900,7 +915,9 @@ export const ImageNode = Node.create({
         h.className = `exam-image__handle exam-image__handle--${corner}`
         h.setAttribute('data-tip', 'Kéo để đổi cỡ ảnh')
         h.draggable = false
-        h.addEventListener('pointerdown', (e) => startResize(e, corner === 'nw' || corner === 'sw' ? -1 : 1))
+        h.addEventListener('pointerdown', (e) =>
+          startResize(e, corner === 'nw' || corner === 'sw' ? -1 : 1),
+        )
         return h
       })
       dom.append(img, ...handles)
@@ -928,7 +945,9 @@ export const ImageNode = Node.create({
         let w = startW
         dom.classList.add('is-resizing')
         const move = (ev: PointerEvent) => {
-          w = Math.round(Math.min(maxW, Math.max(40, startW + (dir * (ev.clientX - startX)) / scale)))
+          w = Math.round(
+            Math.min(maxW, Math.max(40, startW + (dir * (ev.clientX - startX)) / scale)),
+          )
           img.style.width = `${w}px`
         }
         const up = () => {
@@ -938,7 +957,9 @@ export const ImageNode = Node.create({
           dom.classList.remove('is-resizing')
           const pos = typeof getPos === 'function' ? getPos() : undefined
           if (pos === undefined || w === startW || editor.isDestroyed) return
-          editor.view.dispatch(editor.state.tr.setNodeMarkup(pos, undefined, { ...current.attrs, width: w }))
+          editor.view.dispatch(
+            editor.state.tr.setNodeMarkup(pos, undefined, { ...current.attrs, width: w }),
+          )
         }
         target.addEventListener('pointermove', move)
         target.addEventListener('pointerup', up)
@@ -955,7 +976,8 @@ export const ImageNode = Node.create({
         },
         selectNode: () => dom.classList.add('is-selected'),
         deselectNode: () => dom.classList.remove('is-selected'),
-        stopEvent: (e) => (e.target as HTMLElement).classList?.contains('exam-image__handle') ?? false,
+        stopEvent: (e) =>
+          (e.target as HTMLElement).classList?.contains('exam-image__handle') ?? false,
         ignoreMutation: () => true,
       }
     }
@@ -973,7 +995,12 @@ export const ImageNode = Node.create({
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     setImage: {
-      setImage: (options: { src: string; alt?: string; width?: number; plot?: string }) => ReturnType
+      setImage: (options: {
+        src: string
+        alt?: string
+        width?: number
+        plot?: string
+      }) => ReturnType
     }
   }
 }
@@ -989,7 +1016,8 @@ export const EXAM_NODES = [
   StudentNode,
   HeadingNode,
   ParagraphNode,
-  BulletsNode,  BulletNode,
+  BulletsNode,
+  BulletNode,
   GridNode,
   GridCellNode,
   QuestionNode,

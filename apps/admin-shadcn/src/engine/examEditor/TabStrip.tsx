@@ -5,15 +5,18 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+
 import { useNavigate } from '@/engine/compat/router'
-import type { OpenTab } from '@/engine/store/compose'
+import { DocIcon, IconDocExam, IconDocBoard, IconDocSlide } from '@/engine/components/docIcons'
 import { cn } from '@/engine/lib/cn'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
-import { DocIcon, IconDocExam, IconDocBoard, IconDocSlide } from '@/engine/components/docIcons'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+
 import { IconChevronDown, IconChevronLeft, IconClose, IconHome, IconPlus } from './icons'
 import { useAnchoredPopover, popoverStyle } from './useAnchoredPopover'
 import { useSlidingThumb } from './useSlidingThumb'
-import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+
+import type { OpenTab } from '@/engine/store/compose'
 
 export function TabStrip({
   tabs,
@@ -49,7 +52,11 @@ export function TabStrip({
   const navigate = useNavigate()
   const stripRef = useRef<HTMLDivElement>(null)
   // đĩa trắng trượt tới tab đang chọn; đo lại khi đổi tab hoặc danh sách tab thay đổi
-  const thumb = useSlidingThumb(stripRef, '.tab-item.active', `${startActive ? 'start' : activeId}:${tabs.map((t) => t.id).join(',')}`)
+  const thumb = useSlidingThumb(
+    stripRef,
+    '.tab-item.active',
+    `${startActive ? 'start' : activeId}:${tabs.map((t) => t.id).join(',')}`,
+  )
 
   // nhiều tab tràn khỏi thanh: mép mờ bên còn tab khuất + nút liệt kê tất cả tab
   const [edge, setEdge] = useState({ l: false, r: false, over: false })
@@ -86,14 +93,21 @@ export function TabStrip({
     const t = el?.querySelector<HTMLElement>('.tab-item.active')
     if (!el || !t) return
     const pad = 40
-    const left = t.offsetLeft - pad, right = t.offsetLeft + t.offsetWidth + pad
+    const left = t.offsetLeft - pad,
+      right = t.offsetLeft + t.offsetWidth + pad
     if (left < el.scrollLeft) el.scrollTo({ left, behavior: 'smooth' })
-    else if (right > el.scrollLeft + el.clientWidth) el.scrollTo({ left: right - el.clientWidth, behavior: 'smooth' })
+    else if (right > el.scrollLeft + el.clientWidth)
+      el.scrollTo({ left: right - el.clientWidth, behavior: 'smooth' })
   }, [activeId, startActive, tabs.length])
 
   return (
     <>
-      <div className={cn('tab-strip', edge.l && 'fade-l', edge.r && 'fade-r')} role="tablist" aria-label="Đề đang mở" ref={stripRef}>
+      <div
+        className={cn('tab-strip', edge.l && 'fade-l', edge.r && 'fade-r')}
+        role="tablist"
+        aria-label="Đề đang mở"
+        ref={stripRef}
+      >
         {thumb ? (
           <span
             aria-hidden
@@ -148,14 +162,26 @@ export function TabStrip({
         />
       </div>
       {edge.over && (
-        <TabListMenu tabs={tabs} activeId={startActive ? null : activeId} onSelect={onSelect} onSelectStart={onSelectStart} startActive={startActive} />
+        <TabListMenu
+          tabs={tabs}
+          activeId={startActive ? null : activeId}
+          onSelect={onSelect}
+          onSelectStart={onSelectStart}
+          startActive={startActive}
+        />
       )}
     </>
   )
 }
 
 /** Nút ⌄ khi tab tràn: liệt kê mọi tab đang mở để nhảy tới nhanh (như Chrome) */
-function TabListMenu({ tabs, activeId, startActive, onSelect, onSelectStart }: {
+function TabListMenu({
+  tabs,
+  activeId,
+  startActive,
+  onSelect,
+  onSelectStart,
+}: {
   tabs: OpenTab[]
   activeId: string | null
   startActive: boolean
@@ -169,13 +195,25 @@ function TabListMenu({ tabs, activeId, startActive, onSelect, onSelectStart }: {
   const popAnim = useAnimatedPresence(open, 140)
   useEffect(() => {
     if (!open) return
-    const onDown = (e: MouseEvent) => { const t = e.target as Node; if (boxRef.current && !boxRef.current.contains(t) && !popRef.current?.contains(t)) setOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (boxRef.current && !boxRef.current.contains(t) && !popRef.current?.contains(t))
+        setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open])
-  const pick = (fn: () => void) => { setOpen(false); fn() }
+  const pick = (fn: () => void) => {
+    setOpen(false)
+    fn()
+  }
   return (
     <div className="tab-list-menu" ref={boxRef}>
       <button
@@ -191,23 +229,40 @@ function TabListMenu({ tabs, activeId, startActive, onSelect, onSelectStart }: {
         <IconChevronDown size={16} />
       </button>
       {/* gắn vào body: thanh tab có lớp chồng riêng (mép mờ), để bên trong thì menu bị nội dung bên dưới (bảng vẽ…) đè lên */}
-      {popAnim.mounted && createPortal(
-        <div ref={popRef} className={cn('new-doc-pop tab-list-pop', popAnim.closing ? 'pop-out' : 'pop-in')} style={popoverStyle(pos)} role="menu">
-          <div className="new-doc-pop__head">Tab đang mở</div>
-          <button type="button" role="menuitem" className={cn('tab-list-opt', startActive && 'is-active')} onClick={() => pick(onSelectStart)}>
-            <IconHome size={18} />
-            <span className="tab-list-opt__title">Bắt đầu</span>
-          </button>
-          {tabs.map((t) => (
-            <button key={t.id} type="button" role="menuitem" className={cn('tab-list-opt', t.id === activeId && 'is-active')} onClick={() => pick(() => onSelect(t.id))}>
-              <DocIcon kind={t.kind} size={18} />
-              <span className="tab-list-opt__title">{t.title}</span>
-              {t.dirty && <span className="tab-list-opt__dot" aria-label="Chưa lưu" />}
+      {popAnim.mounted &&
+        createPortal(
+          <div
+            ref={popRef}
+            className={cn('new-doc-pop tab-list-pop', popAnim.closing ? 'pop-out' : 'pop-in')}
+            style={popoverStyle(pos)}
+            role="menu"
+          >
+            <div className="new-doc-pop__head">Tab đang mở</div>
+            <button
+              type="button"
+              role="menuitem"
+              className={cn('tab-list-opt', startActive && 'is-active')}
+              onClick={() => pick(onSelectStart)}
+            >
+              <IconHome size={18} />
+              <span className="tab-list-opt__title">Bắt đầu</span>
             </button>
-          ))}
-        </div>,
-        document.body,
-      )}
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="menuitem"
+                className={cn('tab-list-opt', t.id === activeId && 'is-active')}
+                onClick={() => pick(() => onSelect(t.id))}
+              >
+                <DocIcon kind={t.kind} size={18} />
+                <span className="tab-list-opt__title">{t.title}</span>
+                {t.dirty && <span className="tab-list-opt__dot" aria-label="Chưa lưu" />}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
@@ -258,7 +313,8 @@ function NewDocMenu({
     if (!open) return
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node
-      if (menuRef.current && !menuRef.current.contains(t) && !popRef.current?.contains(t)) setOpen(false)
+      if (menuRef.current && !menuRef.current.contains(t) && !popRef.current?.contains(t))
+        setOpen(false)
     }
     document.addEventListener('mousedown', onDown)
     return () => document.removeEventListener('mousedown', onDown)
@@ -305,37 +361,45 @@ function NewDocMenu({
         <IconPlus size={16} />
       </button>
 
-      {popAnim.mounted && createPortal(
-        <div ref={popRef} className={cn('new-doc-pop', popAnim.closing ? 'pop-out' : 'pop-in')} style={popoverStyle(pos)} role="menu">
-          <div className="new-doc-pop__head">Tạo tài liệu mới</div>
-          {NEW_DOC_OPTIONS.filter((opt) => canUse(opt.kind === 'exam' ? 'word' : opt.kind)).map((opt) => {
-            const disabled = !opt.available || (opt.kind === 'slide' && !slideEnabled)
-            return (
-              <button
-                key={opt.kind}
-                type="button"
-                role="menuitem"
-                className={cn('new-doc-opt', disabled && 'is-disabled')}
-                disabled={disabled}
-                onClick={() => pick(opt)}
-              >
-                <span className="new-doc-opt__icon" aria-hidden="true">
-                  {iconOf(opt.kind)}
-                </span>
-                <span className="new-doc-opt__text">
-                  <span className="new-doc-opt__title">
-                    {opt.label}
-                    <span className="new-doc-opt__ext">{opt.ext}</span>
-                  </span>
-                  <span className="new-doc-opt__note">{opt.note}</span>
-                </span>
-                {!opt.available && <span className="new-doc-opt__soon">Sắp có</span>}
-              </button>
-            )
-          })}
-        </div>,
-        document.body,
-      )}
+      {popAnim.mounted &&
+        createPortal(
+          <div
+            ref={popRef}
+            className={cn('new-doc-pop', popAnim.closing ? 'pop-out' : 'pop-in')}
+            style={popoverStyle(pos)}
+            role="menu"
+          >
+            <div className="new-doc-pop__head">Tạo tài liệu mới</div>
+            {NEW_DOC_OPTIONS.filter((opt) => canUse(opt.kind === 'exam' ? 'word' : opt.kind)).map(
+              (opt) => {
+                const disabled = !opt.available || (opt.kind === 'slide' && !slideEnabled)
+                return (
+                  <button
+                    key={opt.kind}
+                    type="button"
+                    role="menuitem"
+                    className={cn('new-doc-opt', disabled && 'is-disabled')}
+                    disabled={disabled}
+                    onClick={() => pick(opt)}
+                  >
+                    <span className="new-doc-opt__icon" aria-hidden="true">
+                      {iconOf(opt.kind)}
+                    </span>
+                    <span className="new-doc-opt__text">
+                      <span className="new-doc-opt__title">
+                        {opt.label}
+                        <span className="new-doc-opt__ext">{opt.ext}</span>
+                      </span>
+                      <span className="new-doc-opt__note">{opt.note}</span>
+                    </span>
+                    {!opt.available && <span className="new-doc-opt__soon">Sắp có</span>}
+                  </button>
+                )
+              },
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

@@ -5,7 +5,9 @@ import { useRequireStaff } from './use-require-staff'
 
 const { me, missing } = vi.hoisted(() => ({
   me: { data: { role: null as string | null }, isSuccess: false, error: null as Error | null },
-  missing: vi.fn(() => { throw new Error('NEXT_NOT_FOUND') }),
+  missing: vi.fn(() => {
+    throw new Error('NEXT_NOT_FOUND')
+  }),
 }))
 
 vi.mock('@/apis/me', () => ({ useMe: () => me }))

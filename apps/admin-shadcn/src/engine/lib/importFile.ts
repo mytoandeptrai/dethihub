@@ -1,3 +1,7 @@
+import { uid } from '@/engine/data/docTypes'
+
+import { extractAttachment } from './sources'
+
 /**
  * Nhập tệp văn phòng vào app (Tệp → Nhập file).
  *
@@ -6,9 +10,7 @@
  * ở đây chỉ chia lại thành block đề hoặc slide của bài giảng.
  */
 import type { ExamBlock } from '@/engine/data/docTypes'
-import { uid } from '@/engine/data/docTypes'
 import type { DeckTheme, Slide, SlideElement } from '@/engine/store/docs'
-import { extractAttachment } from './sources'
 
 export const IMPORT_ACCEPT = '.docx,.doc,.xlsx,.xls,.pptx,.ppt'
 const MAX_BYTES = 12 * 1024 * 1024
@@ -42,7 +44,13 @@ export async function readImportFile(file: File, marks = false): Promise<Importe
   if (!text && slides.length === 0) {
     throw new Error('Tệp không có nội dung văn bản để nhập.')
   }
-  return { title: titleOf(file.name), text, slides, ...(payload.images?.length ? { images: payload.images } : {}), ...(payload.warning ? { warning: payload.warning } : {}) }
+  return {
+    title: titleOf(file.name),
+    text,
+    slides,
+    ...(payload.images?.length ? { images: payload.images } : {}),
+    ...(payload.warning ? { warning: payload.warning } : {}),
+  }
 }
 
 /** Mỗi dòng có nội dung thành một đoạn văn của đề. */

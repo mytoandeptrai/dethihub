@@ -539,7 +539,9 @@
     align-items: stretch;
     border-radius: 6px;
     box-shadow: inset 0 0 0 1px transparent;
-    transition: box-shadow 0.15s, background-color 0.15s;
+    transition:
+      box-shadow 0.15s,
+      background-color 0.15s;
   }
 
   .rb-split:hover:not(:has(:disabled)),
@@ -598,7 +600,9 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition: background-color 0.15s, color 0.15s;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
   }
 
   /* vạch ngăn giữa nút chính và mũi tên, chỉ hiện khi rê vào khối */
@@ -674,7 +678,9 @@
     border-radius: 4px;
     cursor: pointer;
     padding: 0;
-    transition: transform 0.1s, box-shadow 0.1s;
+    transition:
+      transform 0.1s,
+      box-shadow 0.1s;
   }
 
   .rb-color-swatch:hover {
@@ -683,7 +689,9 @@
   }
 
   .rb-color-swatch.is-current {
-    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+    box-shadow:
+      0 0 0 2px var(--surface),
+      0 0 0 4px var(--accent);
   }
 
   .rb-color-item {
@@ -769,7 +777,15 @@
     flex-shrink: 0;
     border: 1px solid var(--docs-swatch-outline);
     border-radius: 4px;
-    background: linear-gradient(to top right, transparent calc(50% - 1px), #e5484d calc(50% - 1px), #e5484d calc(50% + 1px), transparent calc(50% + 1px)), #fff;
+    background:
+      linear-gradient(
+        to top right,
+        transparent calc(50% - 1px),
+        #e5484d calc(50% - 1px),
+        #e5484d calc(50% + 1px),
+        transparent calc(50% + 1px)
+      ),
+      #fff;
   }
 
   /* hình minh hoạ cạnh viền: khung mờ, cạnh được chọn tô đậm */
@@ -781,11 +797,21 @@
     border-radius: 2px;
   }
 
-  .rb-border-glyph.is-top { border-top: 2px solid var(--text); }
-  .rb-border-glyph.is-bottom { border-bottom: 2px solid var(--text); }
-  .rb-border-glyph.is-left { border-left: 2px solid var(--text); }
-  .rb-border-glyph.is-right { border-right: 2px solid var(--text); }
-  .rb-border-glyph.is-box { border: 2px solid var(--text); }
+  .rb-border-glyph.is-top {
+    border-top: 2px solid var(--text);
+  }
+  .rb-border-glyph.is-bottom {
+    border-bottom: 2px solid var(--text);
+  }
+  .rb-border-glyph.is-left {
+    border-left: 2px solid var(--text);
+  }
+  .rb-border-glyph.is-right {
+    border-right: 2px solid var(--text);
+  }
+  .rb-border-glyph.is-box {
+    border: 2px solid var(--text);
+  }
 
   /* độ dày viền trang */
   .rb-line-glyph {
@@ -965,7 +991,6 @@
     z-index: 1;
   }
 
-
   .tab-item__icon {
     display: flex;
     align-items: center;
@@ -1051,7 +1076,9 @@
     color: var(--tabstrip-text);
     cursor: pointer;
     padding: 0;
-    transition: background-color 0.2s var(--ease-soft), color 0.2s var(--ease-soft);
+    transition:
+      background-color 0.2s var(--ease-soft),
+      color 0.2s var(--ease-soft);
   }
 
   .tab-back-btn:hover {
@@ -1265,8 +1292,13 @@
     transition: all var(--transition-fast);
   }
 
-  .ai-dock__collapse-side, .ai-dock__collapse-down { display: flex; }
-  .ai-dock__collapse-down { display: none; }
+  .ai-dock__collapse-side,
+  .ai-dock__collapse-down {
+    display: flex;
+  }
+  .ai-dock__collapse-down {
+    display: none;
+  }
 
   .ai-dock__collapse:hover {
     background: var(--color-bg-subtle);
@@ -1601,7 +1633,9 @@
     font-weight: 500;
     line-height: 1.3;
     cursor: pointer;
-    transition: background var(--transition-fast), opacity var(--transition-fast);
+    transition:
+      background var(--transition-fast),
+      opacity var(--transition-fast);
   }
 
   .ai-plan-primary {
@@ -1763,7 +1797,10 @@
     font-size: 12.5px;
     cursor: pointer;
   }
-  .ai-retry:hover { border-color: var(--primary); color: var(--primary); }
+  .ai-retry:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
   .ai-dislike {
     display: inline-flex;
     margin: 6px 0 0 6px;
@@ -1775,15 +1812,44 @@
     cursor: pointer;
     opacity: 0.6;
   }
-  .ai-msg:hover .ai-dislike { opacity: 1; }
-  .ai-dislike:hover:not(:disabled) { background: var(--hover, rgba(0, 0, 0, 0.05)); color: var(--danger); }
-  .ai-dislike.is-on { color: var(--danger); opacity: 1; cursor: default; }
-  .ai-dislike:disabled:not(.is-on) { opacity: 0.3; cursor: default; }
-  .ai-vote { display: inline-flex; margin-left: 2px; }
-  .ai-vote .ai-dislike { margin-left: 2px; margin-top: 0; }
-  .ai-vote { align-items: center; margin-top: 6px; }
-  .ai-cost { margin-left: 6px; font-size: 11.5px; color: var(--color-ink-3, #8a8a8a); white-space: nowrap; }
-  .ai-like:hover:not(:disabled), .ai-like.is-on { color: var(--primary); }
+  .ai-msg:hover .ai-dislike {
+    opacity: 1;
+  }
+  .ai-dislike:hover:not(:disabled) {
+    background: var(--hover, rgba(0, 0, 0, 0.05));
+    color: var(--danger);
+  }
+  .ai-dislike.is-on {
+    color: var(--danger);
+    opacity: 1;
+    cursor: default;
+  }
+  .ai-dislike:disabled:not(.is-on) {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .ai-vote {
+    display: inline-flex;
+    margin-left: 2px;
+  }
+  .ai-vote .ai-dislike {
+    margin-left: 2px;
+    margin-top: 0;
+  }
+  .ai-vote {
+    align-items: center;
+    margin-top: 6px;
+  }
+  .ai-cost {
+    margin-left: 6px;
+    font-size: 11.5px;
+    color: var(--color-ink-3, #8a8a8a);
+    white-space: nowrap;
+  }
+  .ai-like:hover:not(:disabled),
+  .ai-like.is-on {
+    color: var(--primary);
+  }
 
   .ai-msg-sources {
     display: flex;
@@ -1815,7 +1881,9 @@
     color: var(--color-text-secondary, #555);
     font-size: 12px;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition:
+      background 0.15s,
+      color 0.15s;
   }
   .ai-sources__btn:hover {
     background: var(--color-bg-subtle, #f4f1ec);
@@ -2276,7 +2344,10 @@
     animation: ai-ask-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   @keyframes ai-ask-in {
-    from { opacity: 0; transform: translateY(6px); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
   }
   .ai-ask__head {
     display: flex;
@@ -2294,7 +2365,9 @@
     animation: ai-ask-fade 0.18s ease-out both;
   }
   @keyframes ai-ask-fade {
-    from { opacity: 0; }
+    from {
+      opacity: 0;
+    }
   }
   .ai-ask__nav {
     display: inline-flex;
@@ -2350,7 +2423,9 @@
     font-size: 14px;
     text-align: left;
     cursor: pointer;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
   }
   .ai-ask__opt:hover {
     background: var(--color-bg-subtle);
@@ -2378,7 +2453,9 @@
     font-size: 12px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
   }
   .ai-ask__opt.is-on .ai-ask__key {
     background: var(--color-clay);
@@ -2449,7 +2526,9 @@
     cursor: default;
   }
   @media (prefers-reduced-motion: reduce) {
-    .ai-ask, .ai-ask__q, .ai-ask__opts {
+    .ai-ask,
+    .ai-ask__q,
+    .ai-ask__opts {
       animation: none;
     }
   }
@@ -2828,7 +2907,9 @@
     margin-top: 4px;
     color: var(--color-ink-3);
     opacity: 0.55;
-    transition: color 180ms ease, opacity 180ms ease;
+    transition:
+      color 180ms ease,
+      opacity 180ms ease;
   }
 
   .nav-tpl button:hover .nav-tpl__grip,
@@ -3006,12 +3087,22 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 12px;
-    font: 13px/20px 'Times New Roman', serif;
+    font:
+      13px/20px 'Times New Roman',
+      serif;
     color: #222;
     white-space: nowrap;
   }
-  .doc-page-band > :nth-child(1) { text-align: left; overflow: hidden; text-overflow: ellipsis; }
-  .doc-page-band > :nth-child(3) { text-align: right; overflow: hidden; text-overflow: ellipsis; }
+  .doc-page-band > :nth-child(1) {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .doc-page-band > :nth-child(3) {
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   .doc-flow {
     position: absolute;
@@ -3129,7 +3220,9 @@
     border-radius: 6px;
     padding: 0 6px;
     font-size: 12.5px;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
     background: var(--surface);
     color: var(--text);
     font-variant-numeric: tabular-nums;
@@ -3175,7 +3268,10 @@
     color: var(--text);
     cursor: pointer;
     white-space: nowrap;
-    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s,
+      background-color 0.15s;
   }
 
   .gs-dd-trigger:hover:not(:disabled) {
@@ -3234,8 +3330,14 @@
   }
 
   @keyframes gs-dd-in {
-    from { opacity: 0; transform: translateY(-3px); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .gs-dd-item {
@@ -3431,7 +3533,9 @@
     font-size: 13px;
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.12s, background 0.12s;
+    transition:
+      border-color 0.12s,
+      background 0.12s;
   }
   .eq-snippet:hover {
     border-color: var(--accent);
@@ -4265,10 +4369,16 @@
     width: auto;
     border: none;
   }
-  .ai-dock__collapse-side { display: none; }
-  .ai-dock__collapse-down { display: flex; }
+  .ai-dock__collapse-side {
+    display: none;
+  }
+  .ai-dock__collapse-down {
+    display: flex;
+  }
   /* đang trượt xuống thì ẩn nút nổi "Trợ lý AI", hiện lại khi panel đã đóng hẳn */
-  .ai-dock.ai-dock--closing .ai-rail { display: none !important; }
+  .ai-dock.ai-dock--closing .ai-rail {
+    display: none !important;
+  }
   /* rail dọc biến thành nút nổi góc dưới phải */
   /* nút nổi là position: fixed nên không bị overflow của dock cắt */
   .ai-dock.collapsed {
@@ -4353,10 +4463,26 @@
   position: absolute;
   inset: calc(-8 * var(--s));
 }
-.exam-image__handle--nw { left: calc(-7 * var(--s)); top: calc(-7 * var(--s)); cursor: nwse-resize; }
-.exam-image__handle--ne { right: calc(-7 * var(--s)); top: calc(-7 * var(--s)); cursor: nesw-resize; }
-.exam-image__handle--sw { left: calc(-7 * var(--s)); bottom: calc(-7 * var(--s)); cursor: nesw-resize; }
-.exam-image__handle--se { right: calc(-7 * var(--s)); bottom: calc(-7 * var(--s)); cursor: nwse-resize; }
+.exam-image__handle--nw {
+  left: calc(-7 * var(--s));
+  top: calc(-7 * var(--s));
+  cursor: nwse-resize;
+}
+.exam-image__handle--ne {
+  right: calc(-7 * var(--s));
+  top: calc(-7 * var(--s));
+  cursor: nesw-resize;
+}
+.exam-image__handle--sw {
+  left: calc(-7 * var(--s));
+  bottom: calc(-7 * var(--s));
+  cursor: nesw-resize;
+}
+.exam-image__handle--se {
+  right: calc(-7 * var(--s));
+  bottom: calc(-7 * var(--s));
+  cursor: nwse-resize;
+}
 .exam-image.is-selected .exam-image__handle,
 .exam-image.is-resizing .exam-image__handle {
   display: block;
@@ -5283,7 +5409,13 @@ div[data-exam-node='examQuestionPrompt'] > .exam-image:has(+ .ProseMirror-separa
   mask-image: linear-gradient(to left, transparent 0, #000 32px);
 }
 .tab-strip.fade-l.fade-r {
-  mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
 }
 .tab-list-menu {
   display: flex;
@@ -5444,12 +5576,35 @@ div[data-exam-node='examQuestionPrompt'] > .exam-image:has(+ .ProseMirror-separa
 }
 
 /* Bố cục › Lề / Hướng: nút lớn có mũi tên + bảng chọn */
-.rb-menu-glyph { display: inline-flex; align-items: center; gap: 1px; }
-.rb-margin-item { align-items: center; padding-top: 6px; padding-bottom: 6px; }
-.rb-margin-item__text { display: flex; flex-direction: column; gap: 1px; }
-.rb-margin-item__sub { font-size: 11px; color: var(--muted, #8a8580); font-weight: 400; }
-.rb-margin-grid { display: grid; grid-template-columns: repeat(2, auto); gap: 6px 10px; padding: 4px 10px 10px; }
-.rb-margin-grid .rb-inline-label { justify-content: space-between; }
+.rb-menu-glyph {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.rb-margin-item {
+  align-items: center;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.rb-margin-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.rb-margin-item__sub {
+  font-size: 11px;
+  color: var(--muted, #8a8580);
+  font-weight: 400;
+}
+.rb-margin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 6px 10px;
+  padding: 4px 10px 10px;
+}
+.rb-margin-grid .rb-inline-label {
+  justify-content: space-between;
+}
 
 @media screen {
   @layer components {
@@ -5460,7 +5615,10 @@ div[data-exam-node='examQuestionPrompt'] > .exam-image:has(+ .ProseMirror-separa
 
     .ribbon-tab {
       border-radius: var(--radius-md);
-      transition: background-color 150ms, color 150ms, box-shadow 150ms;
+      transition:
+        background-color 150ms,
+        color 150ms,
+        box-shadow 150ms;
     }
 
     .ribbon-tab:hover {
@@ -5489,7 +5647,10 @@ div[data-exam-node='examQuestionPrompt'] > .exam-image:has(+ .ProseMirror-separa
     .rb-toggle,
     .ribbon-phone-btn {
       border-radius: var(--radius-sm);
-      transition: background-color 150ms, color 150ms, box-shadow 150ms;
+      transition:
+        background-color 150ms,
+        color 150ms,
+        box-shadow 150ms;
     }
 
     .rb-big:hover:not(:disabled) .rb-big-icon,
@@ -5516,7 +5677,11 @@ div[data-exam-node='examQuestionPrompt'] > .exam-image:has(+ .ProseMirror-separa
     .tab-active-plate {
       background: var(--color-surface);
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      box-shadow: inset 0 1px var(--color-line), inset 1px 0 var(--color-line), inset -1px 0 var(--color-line), var(--shadow-soft);
+      box-shadow:
+        inset 0 1px var(--color-line),
+        inset 1px 0 var(--color-line),
+        inset -1px 0 var(--color-line),
+        var(--shadow-soft);
     }
 
     .tab-item__close:hover {
@@ -5543,7 +5708,10 @@ div[data-exam-node='examQuestionPrompt'] > .exam-image:has(+ .ProseMirror-separa
     .ai-dock__collapse {
       border-radius: var(--radius-sm);
       color: var(--color-ink-3);
-      transition: background-color 150ms, color 150ms, box-shadow 150ms;
+      transition:
+        background-color 150ms,
+        color 150ms,
+        box-shadow 150ms;
     }
 
     .ai-header-btn:hover,

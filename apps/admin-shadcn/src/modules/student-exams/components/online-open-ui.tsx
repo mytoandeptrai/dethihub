@@ -1,8 +1,8 @@
 'use client'
 import { Link } from '@student-engine'
-import { PageSkeleton } from '@/components/page-skeleton'
 import { AlertCircle, ArrowRight, CheckCircle2, LogIn } from 'lucide-react'
 
+import { PageSkeleton } from '@/components/page-skeleton'
 import {
   SiteButton as Button,
   Card,
@@ -33,10 +33,20 @@ export function OnlineOpenUi(
     return (
       <PageShell className="max-w-[760px] py-8 lg:py-12">
         <EmptyState
-          icon={done ? <CheckCircle2 className="size-6" strokeWidth={1.6} /> : <AlertCircle className="size-6" strokeWidth={1.6} />}
+          icon={
+            done ? (
+              <CheckCircle2 className="size-6" strokeWidth={1.6} />
+            ) : (
+              <AlertCircle className="size-6" strokeWidth={1.6} />
+            )
+          }
           title={done ? t('studentCopy.m283') : t('studentCopy.m284')}
           description={done ? t('studentCopy.m285') : error!}
-          action={<Link to={appPaths.home.href}><Button variant="primary">{t('studentCopy.m286')}</Button></Link>}
+          action={
+            <Link to={appPaths.home.href}>
+              <Button variant="primary">{t('studentCopy.m286')}</Button>
+            </Link>
+          }
         />
       </PageShell>
     )
@@ -45,7 +55,16 @@ export function OnlineOpenUi(
     const { loginHref } = props
     return (
       <PageShell className="max-w-[760px] py-8 lg:py-12">
-        <EmptyState icon={<LogIn className="size-6" strokeWidth={1.6} />} title={t('studentCopy.m287')} description={t('studentCopy.m288')} action={<Link to={loginHref}><Button variant="primary">{t('studentCopy.m107')}</Button></Link>} />
+        <EmptyState
+          icon={<LogIn className="size-6" strokeWidth={1.6} />}
+          title={t('studentCopy.m287')}
+          description={t('studentCopy.m288')}
+          action={
+            <Link to={loginHref}>
+              <Button variant="primary">{t('studentCopy.m107')}</Button>
+            </Link>
+          }
+        />
       </PageShell>
     )
   }

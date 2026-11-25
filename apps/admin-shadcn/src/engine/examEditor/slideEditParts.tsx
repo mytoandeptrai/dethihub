@@ -1,23 +1,55 @@
+import {
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalSpaceAround,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalSpaceAround,
+  CopyPlus,
+  Ellipsis,
+  Link2,
+  Lock,
+  LockOpen,
+  RotateCw,
+} from 'lucide-react'
 /** Slide — phần sửa trực tiếp trên khung: kéo / đổi cỡ / xoay, đường gióng bắt dính, thanh nhóm. */
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { svgDataUrl } from '@/engine/lib/plot'
-import { readToolDoc, type ToolDoc } from '@/engine/lib/toolSpec'
-import { ToolModal } from './tools/ToolModal'
-import { FRAME_PLACEHOLDER, dragImage, photoFrameClip } from '@/engine/lib/slideShapes'
-import { AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalSpaceAround, AlignStartHorizontal, AlignStartVertical, AlignVerticalSpaceAround, CopyPlus, Ellipsis, Link2, Lock, LockOpen, RotateCw } from 'lucide-react'
+
 import { TrashIcon } from '@/engine/components/appIcons'
+import { cn } from '@/engine/lib/cn'
+import { uploadImage } from '@/engine/lib/mediaStore'
+import { svgDataUrl } from '@/engine/lib/plot'
 import { type AlignMode } from '@/engine/lib/slideAlign'
 import { graphicById } from '@/engine/lib/slideGraphics'
-import { GraphicFill, SlideIcon } from './LazyAssets'
-import { cn } from '@/engine/lib/cn'
-import type { SlideElement } from '@/engine/store/docs'
-import { hasTextEffects } from '@/engine/lib/slideTextEffects'
+import { FRAME_PLACEHOLDER, dragImage, photoFrameClip } from '@/engine/lib/slideShapes'
 import { elementHeight } from '@/engine/lib/slideText'
+import { hasTextEffects } from '@/engine/lib/slideTextEffects'
 import { readableTextOn, type ResolvedTheme } from '@/engine/lib/slideTheme'
-import { uploadImage } from '@/engine/lib/mediaStore'
+import { readToolDoc, type ToolDoc } from '@/engine/lib/toolSpec'
+
+import { GraphicFill, SlideIcon } from './LazyAssets'
+import {
+  fontStack,
+  ConnectorSvg,
+  shapeCss,
+  isHollowShape,
+  HOLLOW_HIT,
+  shapeInner,
+  ShapeText,
+  ChartView,
+  AutoFitText,
+  imageImgStyle,
+  imageStyleParts,
+  VideoView,
+  SlideElView,
+} from './slideRender'
 import { MathCell, clamp } from './slideViewHelpers'
-import { fontStack, ConnectorSvg, shapeCss, isHollowShape, HOLLOW_HIT, shapeInner, ShapeText, ChartView, AutoFitText, imageImgStyle, imageStyleParts, VideoView, SlideElView } from './slideRender'
+import { ToolModal } from './tools/ToolModal'
+
+import type { SlideElement } from '@/engine/store/docs'
 
 export const FRAME_HOVER = 'slide-frame-hover'
 
@@ -36,15 +68,30 @@ function coverCropOf(w: number, h: number, nat: { w: number; h: number } | null)
 }
 
 /* ---------- thanh nổi khi chọn nhiều phần tử: căn + phân bố đều ---------- */
-export const GROUP_ACTIONS: Array<{ mode: AlignMode; label: string; Icon: typeof AlignStartVertical; min?: number }> = [
+export const GROUP_ACTIONS: Array<{
+  mode: AlignMode
+  label: string
+  Icon: typeof AlignStartVertical
+  min?: number
+}> = [
   { mode: 'left', label: 'Căn trái', Icon: AlignStartVertical },
   { mode: 'center', label: 'Căn giữa ngang', Icon: AlignCenterVertical },
   { mode: 'right', label: 'Căn phải', Icon: AlignEndVertical },
   { mode: 'top', label: 'Căn trên', Icon: AlignStartHorizontal },
   { mode: 'middle', label: 'Căn giữa dọc', Icon: AlignCenterHorizontal },
   { mode: 'bottom', label: 'Căn dưới', Icon: AlignEndHorizontal },
-  { mode: 'spreadX', label: 'Khoảng cách đều theo chiều ngang', Icon: AlignHorizontalSpaceAround, min: 3 },
-  { mode: 'spreadY', label: 'Khoảng cách đều theo chiều dọc', Icon: AlignVerticalSpaceAround, min: 3 },
+  {
+    mode: 'spreadX',
+    label: 'Khoảng cách đều theo chiều ngang',
+    Icon: AlignHorizontalSpaceAround,
+    min: 3,
+  },
+  {
+    mode: 'spreadY',
+    label: 'Khoảng cách đều theo chiều dọc',
+    Icon: AlignVerticalSpaceAround,
+    min: 3,
+  },
 ]
 
 export function GroupToolbar({
@@ -76,18 +123,32 @@ export function GroupToolbar({
   const btn = 'grid size-8 place-items-center rounded-md text-ink hover:bg-black/5'
   return (
     <div
-      className="slide-sel-toolbar absolute left-1/2 z-[51] flex -translate-x-1/2 items-center gap-0.5 rounded-full border border-line bg-surface px-1.5 py-1 shadow-[0_4px_16px_-4px_rgba(35,32,28,0.25)]"
-      style={above ? { top: `calc(${top}% - 48px)` } : { top: `calc(${Math.min(bottom, 100)}% + 8px)` }}
+      className="slide-sel-toolbar border-line bg-surface absolute left-1/2 z-[51] flex -translate-x-1/2 items-center gap-0.5 rounded-full border px-1.5 py-1 shadow-[0_4px_16px_-4px_rgba(35,32,28,0.25)]"
+      style={
+        above ? { top: `calc(${top}% - 48px)` } : { top: `calc(${Math.min(bottom, 100)}% + 8px)` }
+      }
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
       {isOneGroup ? (
-        <button type="button" data-tip-kbd="Ctrl+Shift+G" data-tip="Rã nhóm" className="h-8 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold text-ink hover:bg-black/5" onClick={onUngroup}>
+        <button
+          type="button"
+          data-tip-kbd="Ctrl+Shift+G"
+          data-tip="Rã nhóm"
+          className="text-ink h-8 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap hover:bg-black/5"
+          onClick={onUngroup}
+        >
           Bỏ nhóm
         </button>
       ) : (
         <>
-          <button type="button" data-tip-kbd="Ctrl+G" data-tip={`Nhóm ${els.length} mục`} className="h-8 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold text-ink hover:bg-black/5" onClick={onGroup}>
+          <button
+            type="button"
+            data-tip-kbd="Ctrl+G"
+            data-tip={`Nhóm ${els.length} mục`}
+            className="text-ink h-8 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap hover:bg-black/5"
+            onClick={onGroup}
+          >
             Nhóm
           </button>
           {GROUP_ACTIONS.map(({ mode, label, Icon, min }, i) => (
@@ -97,7 +158,11 @@ export function GroupToolbar({
               data-tip={min && els.length < min ? `${label} (cần chọn từ ${min} mục)` : label}
               aria-label={label}
               disabled={!!min && els.length < min}
-              className={cn(btn, 'disabled:opacity-35 disabled:hover:bg-transparent', (i === 0 || i === 3 || i === 6) && 'ml-1')}
+              className={cn(
+                btn,
+                'disabled:opacity-35 disabled:hover:bg-transparent',
+                (i === 0 || i === 3 || i === 6) && 'ml-1',
+              )}
               onClick={() => onAlign(mode)}
             >
               <Icon size={16} strokeWidth={1.8} />
@@ -105,13 +170,33 @@ export function GroupToolbar({
           ))}
         </>
       )}
-      <button type="button" data-tip={locked ? 'Mở khoá' : 'Khoá'} aria-label={locked ? 'Mở khoá' : 'Khoá'} aria-pressed={locked} className={cn(btn, 'ml-1', locked && 'bg-clay/10 text-clay')} onClick={onToggleLock}>
+      <button
+        type="button"
+        data-tip={locked ? 'Mở khoá' : 'Khoá'}
+        aria-label={locked ? 'Mở khoá' : 'Khoá'}
+        aria-pressed={locked}
+        className={cn(btn, 'ml-1', locked && 'bg-clay/10 text-clay')}
+        onClick={onToggleLock}
+      >
         {locked ? <Lock size={17} strokeWidth={1.8} /> : <LockOpen size={17} strokeWidth={1.8} />}
       </button>
-      <button type="button" data-tip="Nhân bản" data-tip-kbd="Ctrl+D" aria-label="Nhân bản" className={btn} onClick={onDuplicate}>
+      <button
+        type="button"
+        data-tip="Nhân bản"
+        data-tip-kbd="Ctrl+D"
+        aria-label="Nhân bản"
+        className={btn}
+        onClick={onDuplicate}
+      >
         <CopyPlus size={17} strokeWidth={1.8} />
       </button>
-      <button type="button" data-tip="Xoá" aria-label="Xoá các mục đã chọn" className={btn} onClick={onDelete}>
+      <button
+        type="button"
+        data-tip="Xoá"
+        aria-label="Xoá các mục đã chọn"
+        className={btn}
+        onClick={onDelete}
+      >
         <TrashIcon size={17} strokeWidth={1.8} />
       </button>
       <button
@@ -138,7 +223,10 @@ export const SLIDE_W_PX = 1920
 export const SLIDE_H_PX = 1080
 
 /** Khoảng trống ngang/dọc từ hộp đang kéo tới phần tử gần nhất cùng hàng/cột. */
-export function gapsTo(box: { x: number; y: number; w: number; h: number }, others: Array<{ xs: number[]; ys: number[] }>): Gap[] {
+export function gapsTo(
+  box: { x: number; y: number; w: number; h: number },
+  others: Array<{ xs: number[]; ys: number[] }>,
+): Gap[] {
   const [l, r, t, b] = [box.x, box.x + box.w, box.y, box.y + box.h]
   const cx = l + box.w / 2
   const cy = t + box.h / 2
@@ -151,17 +239,27 @@ export function gapsTo(box: { x: number; y: number; w: number; h: number }, othe
     const [ot, , ob] = o.ys
     const rowOverlap = ot < b && ob > t
     const colOverlap = ol < r && or > l
-    if (rowOverlap && or <= l && (!left || or > left.x1)) left = { x1: or, y1: cy, x2: l, y2: cy, label: 0 }
-    if (rowOverlap && ol >= r && (!right || ol < right.x2)) right = { x1: r, y1: cy, x2: ol, y2: cy, label: 0 }
-    if (colOverlap && ob <= t && (!up || ob > up.y1)) up = { x1: cx, y1: ob, x2: cx, y2: t, label: 0 }
-    if (colOverlap && ot >= b && (!down || ot < down.y2)) down = { x1: cx, y1: b, x2: cx, y2: ot, label: 0 }
+    if (rowOverlap && or <= l && (!left || or > left.x1))
+      left = { x1: or, y1: cy, x2: l, y2: cy, label: 0 }
+    if (rowOverlap && ol >= r && (!right || ol < right.x2))
+      right = { x1: r, y1: cy, x2: ol, y2: cy, label: 0 }
+    if (colOverlap && ob <= t && (!up || ob > up.y1))
+      up = { x1: cx, y1: ob, x2: cx, y2: t, label: 0 }
+    if (colOverlap && ot >= b && (!down || ot < down.y2))
+      down = { x1: cx, y1: b, x2: cx, y2: ot, label: 0 }
   }
   return [left, right, up, down]
     .filter((g): g is Gap => !!g)
-    .map((g) => ({ ...g, label: Math.round(g.y1 === g.y2 ? ((g.x2 - g.x1) * SLIDE_W_PX) / 100 : ((g.y2 - g.y1) * SLIDE_H_PX) / 100) }))
+    .map((g) => ({
+      ...g,
+      label: Math.round(
+        g.y1 === g.y2 ? ((g.x2 - g.x1) * SLIDE_W_PX) / 100 : ((g.y2 - g.y1) * SLIDE_H_PX) / 100,
+      ),
+    }))
     .filter((g) => g.label > 0)
 }
-export const showGuides = (g: Guides) => window.dispatchEvent(new CustomEvent<Guides>(GUIDES, { detail: g }))
+export const showGuides = (g: Guides) =>
+  window.dispatchEvent(new CustomEvent<Guides>(GUIDES, { detail: g }))
 
 /** Mép trái/giữa/phải (hoặc trên/giữa/dưới) của hộp gần đích nào nhất trong `tol` → độ dời và vị trí đường gióng. */
 let snapEnabled = true
@@ -189,19 +287,37 @@ export function SnapGuides() {
   }, [])
   return (
     <>
-      {g.x !== null && <div className="pointer-events-none absolute inset-y-0 z-[60] w-px bg-[#e0368f]" style={{ left: `${g.x}%` }} />}
-      {g.y !== null && <div className="pointer-events-none absolute inset-x-0 z-[60] h-px bg-[#e0368f]" style={{ top: `${g.y}%` }} />}
+      {g.x !== null && (
+        <div
+          className="pointer-events-none absolute inset-y-0 z-[60] w-px bg-[#e0368f]"
+          style={{ left: `${g.x}%` }}
+        />
+      )}
+      {g.y !== null && (
+        <div
+          className="pointer-events-none absolute inset-x-0 z-[60] h-px bg-[#e0368f]"
+          style={{ top: `${g.y}%` }}
+        />
+      )}
       {g.gaps?.map((gap, i) => {
         const across = gap.y1 === gap.y2
         return (
           <div
             key={i}
             // khung trong suốt chỉ để canh nhãn vào giữa khoảng trống — không vẽ đường nối
-            className={cn('pointer-events-none absolute z-[60] flex items-center justify-center', across ? 'h-px' : 'w-px')}
-            style={{ left: `${gap.x1}%`, top: `${gap.y1}%`, width: across ? `${gap.x2 - gap.x1}%` : undefined, height: across ? undefined : `${gap.y2 - gap.y1}%` }}
+            className={cn(
+              'pointer-events-none absolute z-[60] flex items-center justify-center',
+              across ? 'h-px' : 'w-px',
+            )}
+            style={{
+              left: `${gap.x1}%`,
+              top: `${gap.y1}%`,
+              width: across ? `${gap.x2 - gap.x1}%` : undefined,
+              height: across ? undefined : `${gap.y2 - gap.y1}%`,
+            }}
           >
             {/* nhãn cùng kiểu viên thuốc "Chọn ảnh": nền trắng, bóng, chữ đậm — nằm giữa đoạn đo */}
-            <span className="shrink-0 whitespace-nowrap rounded-full bg-white px-2 py-[3px] text-[11px] font-semibold leading-none text-ink shadow-[0_0_0_1px_rgb(0_0_0/0.08),0_2px_6px_-1px_rgb(0_0_0/0.3)] tabular-nums">
+            <span className="text-ink shrink-0 rounded-full bg-white px-2 py-[3px] text-[11px] leading-none font-semibold whitespace-nowrap tabular-nums shadow-[0_0_0_1px_rgb(0_0_0/0.08),0_2px_6px_-1px_rgb(0_0_0/0.3)]">
               {gap.label}
             </span>
           </div>
@@ -306,7 +422,12 @@ export function EditableEl({
     rotate: el.rotation ? `${el.rotation}deg` : undefined,
     scale: el.flipX || el.flipY ? `${el.flipX ? -1 : 1} ${el.flipY ? -1 : 1}` : undefined,
     transition: 'scale 350ms cubic-bezier(.2,.8,.2,1)',
-    outline: selected || grouped === true ? '2px solid #b4532a' : grouped === 'soft' ? '1px dashed rgba(180, 83, 42, 0.55)' : undefined,
+    outline:
+      selected || grouped === true
+        ? '2px solid #b4532a'
+        : grouped === 'soft'
+          ? '1px dashed rgba(180, 83, 42, 0.55)'
+          : undefined,
     outlineOffset: selected || grouped ? 0 : undefined,
     // khung viền rỗng (nền trong suốt, vd khung trang trí của bộ thiết kế phủ gần cả slide):
     // chỉ nhận chuột ở dải viền, kẻo bấm vào vùng trống hay sát mép lại chọn nhầm cả khung to
@@ -379,7 +500,11 @@ export function EditableEl({
         const sy = ev.altKey ? null : snapTo(y, base.h, snapYs, (SNAP_PX / rect.height) * 100)
         if (sx) x += sx.d
         if (sy) y += sy.d
-        showGuides({ x: sx?.at ?? null, y: sy?.at ?? null, gaps: gapsTo({ x, y, w: base.w, h: base.h }, others) })
+        showGuides({
+          x: sx?.at ?? null,
+          y: sy?.at ?? null,
+          gaps: gapsTo({ x, y, w: base.w, h: base.h }, others),
+        })
         // kéo ra ngoài slide được (phần ngoài bị khung che), chỉ giữ lại một mép 3% để còn nắm kéo về
         x = clamp(x, 3 - base.w, 97)
         y = clamp(y, 3 - base.h, 97)
@@ -393,7 +518,10 @@ export function EditableEl({
         if (canFill) {
           const hit = document
             .elementsFromPoint(ev.clientX, ev.clientY)
-            .find((n): n is HTMLElement => n instanceof HTMLElement && !!n.dataset.frameId && n.dataset.frameId !== el.id)
+            .find(
+              (n): n is HTMLElement =>
+                n instanceof HTMLElement && !!n.dataset.frameId && n.dataset.frameId !== el.id,
+            )
           hoverFrame(hit?.dataset.frameId ?? null)
         }
         return
@@ -426,7 +554,8 @@ export function EditableEl({
       if (dir.includes('n')) t = Math.min(t + localY, b - minH)
       if (dir.includes('s')) b = Math.max(b + localY, t + minH)
       // đồ hoạ kéo góc: khoá theo tỉ lệ thật của hình (hộp cũ bị vuông/méo cũng tự khớp lại)
-      const ratio = el.type === 'graphic' && dir.length === 2 ? graphicById(el.graphicId)?.ratio : undefined
+      const ratio =
+        el.type === 'graphic' && dir.length === 2 ? graphicById(el.graphicId)?.ratio : undefined
       if (ratio) {
         const fitH = (r - l) / ratio
         if (dir.includes('n')) t = b - fitH
@@ -458,17 +587,31 @@ export function EditableEl({
           let gy: number | null = null
           if (dir.includes('w')) {
             const s = snapTo(nextXPct, 0, snapXs, tolX)
-            if (s && nextWPct - s.d >= MIN) { nextXPct += s.d; nextWPct -= s.d; gx = s.at }
+            if (s && nextWPct - s.d >= MIN) {
+              nextXPct += s.d
+              nextWPct -= s.d
+              gx = s.at
+            }
           } else if (dir.includes('e')) {
             const s = snapTo(nextXPct + nextWPct, 0, snapXs, tolX)
-            if (s && nextWPct + s.d >= MIN) { nextWPct += s.d; gx = s.at }
+            if (s && nextWPct + s.d >= MIN) {
+              nextWPct += s.d
+              gx = s.at
+            }
           }
           if (dir.includes('n')) {
             const s = snapTo(nextYPct, 0, snapYs, tolY)
-            if (s && nextHPct - s.d >= MIN) { nextYPct += s.d; nextHPct -= s.d; gy = s.at }
+            if (s && nextHPct - s.d >= MIN) {
+              nextYPct += s.d
+              nextHPct -= s.d
+              gy = s.at
+            }
           } else if (dir.includes('s')) {
             const s = snapTo(nextYPct + nextHPct, 0, snapYs, tolY)
-            if (s && nextHPct + s.d >= MIN) { nextHPct += s.d; gy = s.at }
+            if (s && nextHPct + s.d >= MIN) {
+              nextHPct += s.d
+              gy = s.at
+            }
           }
           showGuides({ x: gx, y: gy })
         }
@@ -539,7 +682,7 @@ export function EditableEl({
     style,
     'data-el-id': el.id,
     // Shift+bấm đã xử lý ở pointerdown; vừa kéo xong thì giữ nguyên vùng chọn (nhóm không bị thu về một)
-    onClick: (e: React.MouseEvent) => {
+    'onClick': (e: React.MouseEvent) => {
       e.stopPropagation()
       if (formatPainterActive) {
         onPaintApply?.()
@@ -547,9 +690,9 @@ export function EditableEl({
       }
       if (!e.shiftKey && !movedRef.current) onSelect()
     },
-    onPointerDown: (e: React.PointerEvent) => startDrag(e, 'move'),
+    'onPointerDown': (e: React.PointerEvent) => startDrag(e, 'move'),
     // chạy trước handler bấm đúp của từng loại (sửa chữ…): vào trong nhóm rồi mới sửa
-    onDoubleClickCapture: grouped === 'soft' ? () => onSelectSingle?.() : undefined,
+    'onDoubleClickCapture': grouped === 'soft' ? () => onSelectSingle?.() : undefined,
   }
 
   // sát mép dưới slide thì nút xoay không còn chỗ phía dưới (bị cắt) nên lật lên đỉnh;
@@ -577,7 +720,8 @@ export function EditableEl({
     onBeginHistory()
     const move = (ev: PointerEvent) => {
       // tay nắm dưới đáy: con trỏ ở chính giữa phía dưới = 0° (−90); sát mép dưới slide thì tay nắm lật lên đỉnh (+90).
-      const deg = (Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180) / Math.PI + (rotTop ? 90 : -90)
+      const deg =
+        (Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180) / Math.PI + (rotTop ? 90 : -90)
       const snapped = ev.shiftKey ? Math.round(deg / 15) * 15 : Math.round(deg)
       onPreview({ rotation: ((snapped % 360) + 360) % 360 })
     }
@@ -592,31 +736,46 @@ export function EditableEl({
     window.addEventListener('pointercancel', up)
   }
 
-  const handle = selected && el.locked ? (
-    <span className="slide-el-lock" data-tip="Đã khoá" aria-label="Đã khoá">
-      <Lock size={12} strokeWidth={2.2} />
-    </span>
-  ) : selected ? (
-    <>
-      {/* hộp chữ không có tay nắm trên/dưới (như Canva): chiều cao luôn ôm theo chữ */}
-      {HANDLE_DIRS.filter((dir) => el.type !== 'text' || (dir !== 'n' && dir !== 's')).map((dir) => (
-        <span
-          key={dir}
-          className={`slide-el-handle slide-el-handle--${dir}`}
-          // tâm tay nắm nằm trên viền; sát mép slide (khung cắt overflow) thì đẩy hẳn vào trong
-          style={{
-            translate: `${dir.includes('w') ? (atL ? '0' : '-50%') : dir.includes('e') ? (atR ? '-100%' : '-50%') : '-50%'} ${
-              dir.includes('n') ? (atT ? '0' : '-50%') : dir.includes('s') ? (atB ? '-100%' : '-50%') : '-50%'
-            }`,
-          }}
-          onPointerDown={(e) => startDrag(e, 'resize', dir)}
-        />
-      ))}
-      <span className={`slide-el-rotate${rotTop ? ' slide-el-rotate--top' : ''}${rotInside ? ' slide-el-rotate--in' : ''}`} data-tip="Xoay" onPointerDown={startRotate}>
-        <RotateCw size={13} strokeWidth={2} />
+  const handle =
+    selected && el.locked ? (
+      <span className="slide-el-lock" data-tip="Đã khoá" aria-label="Đã khoá">
+        <Lock size={12} strokeWidth={2.2} />
       </span>
-    </>
-  ) : null
+    ) : selected ? (
+      <>
+        {/* hộp chữ không có tay nắm trên/dưới (như Canva): chiều cao luôn ôm theo chữ */}
+        {HANDLE_DIRS.filter((dir) => el.type !== 'text' || (dir !== 'n' && dir !== 's')).map(
+          (dir) => (
+            <span
+              key={dir}
+              className={`slide-el-handle slide-el-handle--${dir}`}
+              // tâm tay nắm nằm trên viền; sát mép slide (khung cắt overflow) thì đẩy hẳn vào trong
+              style={{
+                translate: `${dir.includes('w') ? (atL ? '0' : '-50%') : dir.includes('e') ? (atR ? '-100%' : '-50%') : '-50%'} ${
+                  dir.includes('n')
+                    ? atT
+                      ? '0'
+                      : '-50%'
+                    : dir.includes('s')
+                      ? atB
+                        ? '-100%'
+                        : '-50%'
+                      : '-50%'
+                }`,
+              }}
+              onPointerDown={(e) => startDrag(e, 'resize', dir)}
+            />
+          ),
+        )}
+        <span
+          className={`slide-el-rotate${rotTop ? ' slide-el-rotate--top' : ''}${rotInside ? ' slide-el-rotate--in' : ''}`}
+          data-tip="Xoay"
+          onPointerDown={startRotate}
+        >
+          <RotateCw size={13} strokeWidth={2} />
+        </span>
+      </>
+    ) : null
 
   const linkBadge = el.href ? (
     <span
@@ -644,39 +803,54 @@ export function EditableEl({
     return (
       <div
         {...common}
-        style={{ ...style, cursor: formatPainterActive ? 'inherit' : selected && !editingText ? 'move' : 'default' }}
+        style={{
+          ...style,
+          cursor: formatPainterActive ? 'inherit' : selected && !editingText ? 'move' : 'default',
+        }}
         onDoubleClick={() => {
           if (!formatPainterActive) onEditingText(true)
         }}
       >
-        {!editingText && hasTextEffects(el) ? <SlideElView el={el} theme={theme} embedded /> : <AutoFitText
-          locked={!editingText}
-          focusOnMount={editingText}
-          onDone={() => onEditingText(false)}
-          value={el.text ?? ''}
-          baseSize={el.fontSize ?? (el.variant === 'body' ? 2.4 : 3.6)}
-          weight={el.fontWeight ?? (el.variant === 'body' ? 500 : 600)}
-          fontFamily={fontStack(
-            el.fontFamily ?? (el.variant === 'body' ? theme.fonts.body : theme.fonts.heading),
-          )}
-          fontStyle={el.fontStyle}
-          textDecoration={el.textDecoration}
-          align={el.align}
-          color={el.textColor ?? theme.fg}
-          lineHeight={el.lineHeight}
-          letterSpacing={el.letterSpacing}
-          background={el.fill}
-          highlight={el.highlight}
-          valign={el.valign === 'middle' || el.fill ? 'middle' : 'top'}
-          onChange={(text) => onChange({ text })}
-        />}
+        {!editingText && hasTextEffects(el) ? (
+          <SlideElView el={el} theme={theme} embedded />
+        ) : (
+          <AutoFitText
+            locked={!editingText}
+            focusOnMount={editingText}
+            onDone={() => onEditingText(false)}
+            value={el.text ?? ''}
+            baseSize={el.fontSize ?? (el.variant === 'body' ? 2.4 : 3.6)}
+            weight={el.fontWeight ?? (el.variant === 'body' ? 500 : 600)}
+            fontFamily={fontStack(
+              el.fontFamily ?? (el.variant === 'body' ? theme.fonts.body : theme.fonts.heading),
+            )}
+            fontStyle={el.fontStyle}
+            textDecoration={el.textDecoration}
+            align={el.align}
+            color={el.textColor ?? theme.fg}
+            lineHeight={el.lineHeight}
+            letterSpacing={el.letterSpacing}
+            background={el.fill}
+            highlight={el.highlight}
+            valign={el.valign === 'middle' || el.fill ? 'middle' : 'top'}
+            onChange={(text) => onChange({ text })}
+          />
+        )}
         {chrome}
       </div>
     )
 
   if (el.type === 'icon') {
     return el.assetId ? (
-      <div {...common} style={{ ...style, opacity: el.opacity, color: el.textColor ?? theme.accent, cursor: formatPainterActive ? 'inherit' : selected ? 'move' : 'default' }}>
+      <div
+        {...common}
+        style={{
+          ...style,
+          opacity: el.opacity,
+          color: el.textColor ?? theme.accent,
+          cursor: formatPainterActive ? 'inherit' : selected ? 'move' : 'default',
+        }}
+      >
         <SlideIcon id={el.assetId} className="h-full w-full p-[2%]" />
         {chrome}
       </div>
@@ -685,7 +859,13 @@ export function EditableEl({
 
   if (el.type === 'connector') {
     return (
-      <div {...common} style={{ ...style, cursor: formatPainterActive ? 'inherit' : selected ? 'move' : 'default' }}>
+      <div
+        {...common}
+        style={{
+          ...style,
+          cursor: formatPainterActive ? 'inherit' : selected ? 'move' : 'default',
+        }}
+      >
         <ConnectorSvg el={el} theme={theme} />
         {chrome}
       </div>
@@ -695,7 +875,14 @@ export function EditableEl({
   if (el.type === 'graphic') {
     if (!el.graphicId || !graphicById(el.graphicId)) return null
     return (
-      <div {...common} style={{ ...style, opacity: el.opacity, cursor: formatPainterActive ? 'inherit' : selected ? 'move' : 'default' }}>
+      <div
+        {...common}
+        style={{
+          ...style,
+          opacity: el.opacity,
+          cursor: formatPainterActive ? 'inherit' : selected ? 'move' : 'default',
+        }}
+      >
         <GraphicFill
           className={`h-full w-full ${graphicById(el.graphicId)?.category === 'ornament' ? '' : 'p-[2%]'}`}
           id={el.graphicId}
@@ -709,10 +896,21 @@ export function EditableEl({
 
   if (el.type === 'shape')
     return (
-      <div {...common} style={{ ...style, ...shapeCss(el, theme), ...(style.clipPath ? { clipPath: style.clipPath } : null) }} onDoubleClick={() => el.shape !== 'line' && !formatPainterActive && onEditingText(true)}>
+      <div
+        {...common}
+        style={{
+          ...style,
+          ...shapeCss(el, theme),
+          ...(style.clipPath ? { clipPath: style.clipPath } : null),
+        }}
+        onDoubleClick={() => el.shape !== 'line' && !formatPainterActive && onEditingText(true)}
+      >
         {shapeInner(el, theme)}
         {editingText && el.shape !== 'line' ? (
-          <div style={{ position: 'absolute', inset: '10% 12%' }} onBlur={() => onEditingText(false)}>
+          <div
+            style={{ position: 'absolute', inset: '10% 12%' }}
+            onBlur={() => onEditingText(false)}
+          >
             <AutoFitText
               value={el.text ?? ''}
               baseSize={el.fontSize ?? 2.4}
@@ -759,8 +957,7 @@ export function EditableEl({
                     key={ci}
                     style={{
                       padding: '0.5em 0.7em',
-                      borderBottom:
-                        ri < rowCount - 1 ? `1px solid ${theme.muted}` : undefined,
+                      borderBottom: ri < rowCount - 1 ? `1px solid ${theme.muted}` : undefined,
                       borderRight: ci < r.length - 1 ? `1px solid ${theme.muted}` : undefined,
                       background:
                         ri === 0 ? theme.accent : ri % 2 === 0 ? theme.surface : 'transparent',
@@ -799,7 +996,11 @@ export function EditableEl({
     return (
       <div {...common}>
         {/* bản soạn chỉ hiện ảnh bìa: iframe sẽ nuốt thao tác kéo/chọn */}
-        <VideoView el={el} theme={theme} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
+        <VideoView
+          el={el}
+          theme={theme}
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+        />
         {chrome}
       </div>
     )
@@ -841,10 +1042,14 @@ export function EditableEl({
         let visR = visR0
         let visT = visT0
         let visB = visB0
-        if (hitW) visL = clamp(visL0 + (dxPct / fullW) * 100, 0, Math.min(90, 100 - minCropPctW - visR))
-        if (hitE) visR = clamp(visR0 - (dxPct / fullW) * 100, 0, Math.min(90, 100 - minCropPctW - visL))
-        if (hitN) visT = clamp(visT0 + (dyPct / fullH) * 100, 0, Math.min(90, 100 - minCropPctH - visB))
-        if (hitS) visB = clamp(visB0 - (dyPct / fullH) * 100, 0, Math.min(90, 100 - minCropPctH - visT))
+        if (hitW)
+          visL = clamp(visL0 + (dxPct / fullW) * 100, 0, Math.min(90, 100 - minCropPctW - visR))
+        if (hitE)
+          visR = clamp(visR0 - (dxPct / fullW) * 100, 0, Math.min(90, 100 - minCropPctW - visL))
+        if (hitN)
+          visT = clamp(visT0 + (dyPct / fullH) * 100, 0, Math.min(90, 100 - minCropPctH - visB))
+        if (hitS)
+          visB = clamp(visB0 - (dyPct / fullH) * 100, 0, Math.min(90, 100 - minCropPctH - visT))
         const l = Math.round((el.flipX ? visR : visL) * 100) / 100
         const r = Math.round((el.flipX ? visL : visR) * 100) / 100
         const t = Math.round((el.flipY ? visB : visT) * 100) / 100
@@ -923,7 +1128,11 @@ export function EditableEl({
           border: parts.cssBorder,
         }}
         onDragOver={(e) => {
-          if (!e.dataTransfer.types.includes('Files') && !e.dataTransfer.types.includes('text/uri-list')) return
+          if (
+            !e.dataTransfer.types.includes('Files') &&
+            !e.dataTransfer.types.includes('text/uri-list')
+          )
+            return
           e.preventDefault()
           if (dropPreview === null) setDropPreview(dragImage.src)
         }}
@@ -960,14 +1169,19 @@ export function EditableEl({
           <img
             src={dropPreview || el.src || FRAME_PLACEHOLDER}
             alt=""
-            className={cn('pointer-events-none h-full w-full object-cover', dropPreview ? '' : 'opacity-60')}
+            className={cn(
+              'pointer-events-none h-full w-full object-cover',
+              dropPreview ? '' : 'opacity-60',
+            )}
           />
         ) : el.src ? (
           <img
             src={el.src}
             alt=""
             style={imageImgStyle(el.crop, el.imagePosition)}
-            onLoad={(e) => setNatSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })}
+            onLoad={(e) =>
+              setNatSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })
+            }
             onDoubleClick={() => {
               // ảnh vẽ bằng công cụ Đồ thị: nhấp đúp mở lại modal để sửa
               const doc = readToolDoc(el.src)
@@ -975,7 +1189,11 @@ export function EditableEl({
             }}
           />
         ) : parts.clip ? (
-          <img src={FRAME_PLACEHOLDER} alt="" className="pointer-events-none h-full w-full object-cover" />
+          <img
+            src={FRAME_PLACEHOLDER}
+            alt=""
+            className="pointer-events-none h-full w-full object-cover"
+          />
         ) : (
           <div className="flex flex-col items-center gap-1 px-1 text-center">
             <label className="cursor-pointer hover:underline">
@@ -990,7 +1208,9 @@ export function EditableEl({
                   reader.onload = () => {
                     uploadImage(String(reader.result))
                       .then((src) => onChange({ src, crop: undefined }))
-                      .catch((err) => setImageError(err instanceof Error ? err.message : String(err)))
+                      .catch((err) =>
+                        setImageError(err instanceof Error ? err.message : String(err)),
+                      )
                   }
                   reader.readAsDataURL(file)
                 }}
@@ -1012,12 +1232,15 @@ export function EditableEl({
                   setImageBusy(false)
                 }
               }}
-              className="rounded border border-clay/60 px-1.5 py-0.5 text-[1.5cqw] font-semibold text-clay disabled:opacity-60"
+              className="border-clay/60 text-clay rounded border px-1.5 py-0.5 text-[1.5cqw] font-semibold disabled:opacity-60"
             >
               {imageBusy ? 'Đang tạo ảnh…' : 'Tạo ảnh AI'}
             </button>
             {imageError ? (
-              <span className="max-w-full truncate text-[1.3cqw] text-red-500" data-tip={imageError}>
+              <span
+                className="max-w-full truncate text-[1.3cqw] text-red-500"
+                data-tip={imageError}
+              >
                 Lỗi tạo ảnh
               </span>
             ) : null}
@@ -1078,7 +1301,7 @@ export function EditableEl({
         </div>
         {isFrame && !isCropActive && (
           // nút chọn file nằm ngoài lớp cắt để khung tim/sao… không cắt mất; khung vẫn nhận kéo-thả
-          <label className="absolute bottom-[6%] left-1/2 z-10 -translate-x-1/2 cursor-pointer whitespace-nowrap rounded-full bg-white/95 px-[1.2cqw] py-[0.45cqw] text-[1.35cqw] font-semibold text-ink opacity-0 shadow transition-opacity group-hover/frame:opacity-100">
+          <label className="text-ink absolute bottom-[6%] left-1/2 z-10 -translate-x-1/2 cursor-pointer rounded-full bg-white/95 px-[1.2cqw] py-[0.45cqw] text-[1.35cqw] font-semibold whitespace-nowrap opacity-0 shadow transition-opacity group-hover/frame:opacity-100">
             <input
               type="file"
               accept="image/*"

@@ -26,10 +26,10 @@ import { toast } from 'sonner'
 
 import { aiQuotaQuery } from '@/apis/ai/queries'
 import { useMe } from '@/apis/me/queries'
-import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 import { appPaths } from '@/config/app-paths'
 import { useSession } from '@/hooks'
 import { t } from '@/i18n/translate'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 const storageKey = 'dethihub.sidebar-collapsed'
 
@@ -177,7 +177,9 @@ export function useAppShellContainer() {
     mobileNavigation: [
       { path: appPaths.myDocs.href, label: t('product.myDocs'), icon: FolderOpen },
       { path: appPaths.onlineExams.href, label: t('product.online'), icon: ListChecks },
-      ...(canCreate ? [{ path: appPaths.editor.href, label: t('product.mobileCreate'), icon: Plus }] : []),
+      ...(canCreate
+        ? [{ path: appPaths.editor.href, label: t('product.mobileCreate'), icon: Plus }]
+        : []),
       { path: appPaths.grading.href, label: t('product.mobileGrading'), icon: GraduationCap },
     ],
     explore,

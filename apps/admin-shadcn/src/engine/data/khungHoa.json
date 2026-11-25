@@ -1073,10 +1073,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa10-cau-tao-nguyen-tu",
-        "hoa10-bang-tuan-hoan"
-      ],
+      "pham_vi": ["hoa10-cau-tao-nguyen-tu", "hoa10-bang-tuan-hoan"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1103,11 +1100,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa10-cau-tao-nguyen-tu",
-        "hoa10-bang-tuan-hoan",
-        "hoa10-lien-ket-hoa-hoc"
-      ],
+      "pham_vi": ["hoa10-cau-tao-nguyen-tu", "hoa10-bang-tuan-hoan", "hoa10-lien-ket-hoa-hoc"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1134,10 +1127,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa10-phan-ung-oxi-hoa-khu",
-        "hoa10-nang-luong-hoa-hoc"
-      ],
+      "pham_vi": ["hoa10-phan-ung-oxi-hoa-khu", "hoa10-nang-luong-hoa-hoc"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1164,11 +1154,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa10-nang-luong-hoa-hoc",
-        "hoa10-toc-do-phan-ung",
-        "hoa10-halogen"
-      ],
+      "pham_vi": ["hoa10-nang-luong-hoa-hoc", "hoa10-toc-do-phan-ung", "hoa10-halogen"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1195,10 +1181,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa11-can-bang-hoa-hoc",
-        "hoa11-nitrogen-sulfur"
-      ],
+      "pham_vi": ["hoa11-can-bang-hoa-hoc", "hoa11-nitrogen-sulfur"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1225,11 +1208,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa11-can-bang-hoa-hoc",
-        "hoa11-nitrogen-sulfur",
-        "hoa11-dai-cuong-huu-co"
-      ],
+      "pham_vi": ["hoa11-can-bang-hoa-hoc", "hoa11-nitrogen-sulfur", "hoa11-dai-cuong-huu-co"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1256,10 +1235,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa11-hydrocarbon",
-        "hoa11-dan-xuat-halogen-alcohol-phenol"
-      ],
+      "pham_vi": ["hoa11-hydrocarbon", "hoa11-dan-xuat-halogen-alcohol-phenol"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1317,10 +1293,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa12-ester-lipid-xa-phong",
-        "hoa12-carbohydrate"
-      ],
+      "pham_vi": ["hoa12-ester-lipid-xa-phong", "hoa12-carbohydrate"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {
@@ -1379,10 +1352,7 @@
           "tong_diem": 1.5
         }
       ],
-      "pham_vi": [
-        "hoa12-pin-dien-va-dien-phan",
-        "hoa12-dai-cuong-kim-loai"
-      ],
+      "pham_vi": ["hoa12-pin-dien-va-dien-phan", "hoa12-dai-cuong-kim-loai"],
       "ti_le_muc_do": "Nhận biết: 40%, Thông hiểu: 30%, Vận dụng: 20%, Vận dụng cao: 10%"
     },
     {

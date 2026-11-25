@@ -3,9 +3,9 @@ import { Global, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { createClient } from '@supabase/supabase-js'
 
-import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { R2ObjectStorageAdapter } from '@/modules/object-storage/infrastructure/adapters/r2-object-storage.adapter'
 import { SupabaseObjectStorageAdapter } from '@/modules/object-storage/infrastructure/adapters/supabase-object-storage.adapter'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 
 import type { Env } from '@/app/config/env.schema'
 

@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react'
 
+import { PageSkeleton } from '@/components/page-skeleton'
 import {
   SiteBadge as Badge,
   SiteButton as Button,
@@ -30,7 +31,6 @@ import {
 import { A4_PORTRAIT_W, ExamEditor } from '@/components/student-kernel'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { PageSkeleton } from '@/components/page-skeleton'
 
 import type {
   ExamViewParts as Imported0,
@@ -46,10 +46,7 @@ export function ExamViewUi(
   },
 ) {
   const { SaveMenu, DocView, ReportExamButton } = props.parts
-  if (props.viewState === 2)
-    return (
-      <PageSkeleton variant="detail" />
-    )
+  if (props.viewState === 2) return <PageSkeleton variant="detail" />
   if (props.viewState === 0) {
     return (
       <div className="mx-auto max-w-[700px] px-5 py-20">

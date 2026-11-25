@@ -1,5 +1,23 @@
+import {
+  BarChart3,
+  BookOpen,
+  ChartColumn,
+  Cpu,
+  FileText,
+  Files,
+  FolderOpen,
+  GraduationCap,
+  History,
+  LayoutDashboard,
+  Library,
+  ListChecks,
+  Presentation,
+  Upload,
+  Users,
+  Wallet,
+} from 'lucide-react'
+
 import { matchPath } from '@/engine/compat/router'
-import { BarChart3, BookOpen, ChartColumn, Cpu, FileText, Files, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Presentation, Upload, Users, Wallet } from 'lucide-react'
 
 export const WORKSPACE_NAV = [
   { path: '/de-cua-toi', label: 'Đề của tôi', icon: FolderOpen, end: true },
@@ -24,8 +42,12 @@ export const ADMIN_NAV = [
 ]
 export type AppNavItem = (typeof WORKSPACE_NAV)[number]
 export const APP_ROUTE_PATTERNS = [
-  ...WORKSPACE_NAV.map((item) => item.path), ...EXPLORE_NAV.map((item) => item.path),
-  '/ho-so', '/tao-de-online/:id', '/tao-de-online/ket-qua/:id', '/admin/*',
+  ...WORKSPACE_NAV.map((item) => item.path),
+  ...EXPLORE_NAV.map((item) => item.path),
+  '/ho-so',
+  '/tao-de-online/:id',
+  '/tao-de-online/ket-qua/:id',
+  '/admin/*',
 ]
 export function isAppRoute(pathname: string) {
   return APP_ROUTE_PATTERNS.some((path) => matchPath({ path, end: true }, pathname))
@@ -34,7 +56,11 @@ export function appRouteTitle(pathname: string) {
   if (matchPath('/tao-de-online/ket-qua/:id', pathname)) return 'Bài nộp đề online'
   if (matchPath('/tao-de-online/:id', pathname)) return 'Biên soạn đề online'
   if (matchPath('/ho-so', pathname)) return 'Tài khoản'
-  return [...WORKSPACE_NAV, ...EXPLORE_NAV, ...ADMIN_NAV].find((item) => matchPath({ path: item.path, end: item.end }, pathname))?.label ?? 'Quản trị'
+  return (
+    [...WORKSPACE_NAV, ...EXPLORE_NAV, ...ADMIN_NAV].find((item) =>
+      matchPath({ path: item.path, end: item.end }, pathname),
+    )?.label ?? 'Quản trị'
+  )
 }
 
 export const CREATE_NAV = { path: '/soan-de', label: 'Soạn đề mới', icon: Presentation }

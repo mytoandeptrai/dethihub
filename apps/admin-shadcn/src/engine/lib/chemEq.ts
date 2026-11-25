@@ -9,6 +9,7 @@
  * - Tuỳ chọn cân bằng tự động bằng khử Gauss phân số chính xác (BigInt) trên ma trận bảo toàn nguyên tố & điện tích.
  */
 import { renderStructBody, subscript, type StructBody } from './chem'
+
 import type { ToolImage } from './toolSpec'
 
 const FAM = `font-family="'Times New Roman',serif"`
@@ -168,7 +169,8 @@ function splitArrows(line: string, lineNo: number): { sideRaws: string[]; arrows
     const kind: '->' | '<=>' = tok === '->' || tok === '→' ? '->' : '<=>'
     const lhs = line.slice(0, idx)
     const cond = extractCondition(line.slice(idx + tok.length))
-    if (!lhs.trim() || !cond.rhs.trim()) throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
+    if (!lhs.trim() || !cond.rhs.trim())
+      throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
     return { sideRaws: [lhs, cond.rhs], arrows: [{ kind, above: cond.above, below: cond.below }] }
   }
   if (primary.length > 1) {
@@ -192,27 +194,37 @@ function splitArrows(line: string, lineNo: number): { sideRaws: string[]; arrows
         sideRaws.push(seg)
       }
     }
-    if (sideRaws.some((s) => !s.trim())) throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
+    if (sideRaws.some((s) => !s.trim()))
+      throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
     return { sideRaws, arrows }
   }
   // dấu "=" kiểu cũ: ưu tiên "=" có khoảng trắng hai bên để tránh đụng nối đôi CH2=CH2
   const spacedEq = [...masked.matchAll(/(?:\s+=\s*|\s*=\s+)/g)]
-  if (spacedEq.length > 1) throw new Error(`Dòng ${lineNo}: Có nhiều dấu "=" trên cùng một phương trình`)
+  if (spacedEq.length > 1)
+    throw new Error(`Dòng ${lineNo}: Có nhiều dấu "=" trên cùng một phương trình`)
   if (spacedEq.length === 1) {
     const m = spacedEq[0]
     const eqAt = m.index! + m[0].indexOf('=')
     const lhs = line.slice(0, eqAt)
     const cond = extractCondition(line.slice(eqAt + 1))
-    if (!lhs.trim() || !cond.rhs.trim()) throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
-    return { sideRaws: [lhs, cond.rhs], arrows: [{ kind: '->', above: cond.above, below: cond.below }] }
+    if (!lhs.trim() || !cond.rhs.trim())
+      throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
+    return {
+      sideRaws: [lhs, cond.rhs],
+      arrows: [{ kind: '->', above: cond.above, below: cond.below }],
+    }
   }
   const anyEq = [...masked.matchAll(/=/g)]
   if (anyEq.length === 1 && !/\s/.test(masked.trim())) {
     const idx = anyEq[0].index!
     const lhs = line.slice(0, idx)
     const cond = extractCondition(line.slice(idx + 1))
-    if (!lhs.trim() || !cond.rhs.trim()) throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
-    return { sideRaws: [lhs, cond.rhs], arrows: [{ kind: '->', above: cond.above, below: cond.below }] }
+    if (!lhs.trim() || !cond.rhs.trim())
+      throw new Error(`Dòng ${lineNo}: Thiếu chất tham gia hoặc sản phẩm`)
+    return {
+      sideRaws: [lhs, cond.rhs],
+      arrows: [{ kind: '->', above: cond.above, below: cond.below }],
+    }
   }
   throw new Error(`Dòng ${lineNo}: Thiếu mũi tên phản ứng (->, <=> hoặc =)`)
 }
@@ -236,7 +248,11 @@ function extractCondition(rhsRaw: string): { rhs: string; above: string; below: 
         cond = markEnd[3]
       } else {
         const tightEnd = /^(.*?)\[([^\]]*)\]\s*$/s.exec(rhs)
-        if (tightEnd && (/([|,°]|t\^o|\bto\b|xt|đp|as|nhiệt|lạnh|đặc|loãng)/i.test(tightEnd[2]) || !tightEnd[1].trim())) {
+        if (
+          tightEnd &&
+          (/([|,°]|t\^o|\bto\b|xt|đp|as|nhiệt|lạnh|đặc|loãng)/i.test(tightEnd[2]) ||
+            !tightEnd[1].trim())
+        ) {
           rhs = tightEnd[1].trim()
           cond = tightEnd[2]
         }
@@ -263,7 +279,10 @@ function splitTerms(side: string, lineNo: number): string[] {
       }
       // 2) Điện tích không ghi "^" gắn liền cuối chất: Ag+ + Cl-, Ag+(dd) + Cl-(dd), ... + 2H+
       if (i > 0 && !/\s/.test(s[i - 1])) {
-        const rest = s.slice(i + 1).replace(/^\s*\((?:r|l|k|dd|aq|s|g)\)/, '').trimStart()
+        const rest = s
+          .slice(i + 1)
+          .replace(/^\s*\((?:r|l|k|dd|aq|s|g)\)/, '')
+          .trimStart()
         if (!rest || rest.startsWith('+')) {
           cur += ch
           continue
@@ -316,7 +335,12 @@ function parseTerm(raw: string, lineNo: number): Term {
         continue
       }
       // chữ v thường đứng cuối chất (BaSO4v, Fe(OH)3v, AgClv, Sv); tránh Lv (Livermori) và V hoa (V2O5)
-      if (s.length >= 2 && s.endsWith('v') && s[s.length - 2] !== 'L' && !/\s/.test(s[s.length - 2])) {
+      if (
+        s.length >= 2 &&
+        s.endsWith('v') &&
+        s[s.length - 2] !== 'L' &&
+        !/\s/.test(s[s.length - 2])
+      ) {
         mark = '↓'
         s = s.slice(0, -1).trim()
         continue
@@ -346,7 +370,8 @@ function parseTerm(raw: string, lineNo: number): Term {
         }
       }
     }
-    if (closeIdx < 0) throw new Error(`Dòng ${lineNo}: Thiếu dấu "}" đóng công thức cấu tạo ở "${raw.trim()}"`)
+    if (closeIdx < 0)
+      throw new Error(`Dòng ${lineNo}: Thiếu dấu "}" đóng công thức cấu tạo ở "${raw.trim()}"`)
     const inner = s.slice(1, closeIdx).trim()
     if (!inner) throw new Error(`Dòng ${lineNo}: Công thức cấu tạo "{}" đang để trống`)
     const tail = s.slice(closeIdx + 1).trim()
@@ -458,7 +483,10 @@ function parseGroupCounts(s: string): Map<string, number> | null {
   return i === s.length ? res : null
 }
 
-function parseFormulaCounts(formula: string, charge: string): { atoms: Map<string, number>; charge: number } | null {
+function parseFormulaCounts(
+  formula: string,
+  charge: string,
+): { atoms: Map<string, number>; charge: number } | null {
   if (formula === 'e') {
     return { atoms: new Map(), charge: charge ? parseChargeNum(charge) : -1 }
   }
@@ -505,7 +533,8 @@ const divF = (a: Frac, b: Frac) => mkFrac(a.n * b.d, a.d * b.n)
 
 function tryAutoBalance(eq: ParsedEq): string | null {
   // Bỏ qua dòng có nhiều mũi tên hoặc chứa chất cấu tạo {...}
-  if (eq.arrows.length > 1 || eq.sides.some((side) => side.some((t) => t.struct !== undefined))) return null
+  if (eq.arrows.length > 1 || eq.sides.some((side) => side.some((t) => t.struct !== undefined)))
+    return null
   const [lhs, rhs] = eq.sides
   // Chỉ tự cân bằng khi người dùng không ghi hệ số nào trên dòng
   if (lhs.some((t) => t.coeff) || rhs.some((t) => t.coeff)) return null
@@ -571,7 +600,8 @@ function tryAutoBalance(eq: ParsedEq): string | null {
   sol[f] = mkFrac(1n)
   for (const { r, c } of pivots) sol[c] = mkFrac(-mat[r][f].n, mat[r][f].d)
 
-  if (sol.some((x) => x.n === 0n)) return 'Không tìm được hệ số cân bằng dương cho mọi chất (đã giữ nguyên).'
+  if (sol.some((x) => x.n === 0n))
+    return 'Không tìm được hệ số cân bằng dương cho mọi chất (đã giữ nguyên).'
   const sign = sol[0].n > 0n ? 1n : -1n
   if (sol.some((x) => (x.n > 0n ? 1n : -1n) !== sign)) {
     return 'Không cân bằng được phương trình (hệ số trái dấu, đã giữ nguyên).'
@@ -639,7 +669,15 @@ function pushSubscripted(runs: TextRun[], raw: string) {
 
 type SidePiece =
   | { kind: 'runs'; runs: TextRun[]; w: number }
-  | { kind: 'struct'; frag: StructBody; scale: number; leftPad: number; w: number; aboveMid: number; belowMid: number }
+  | {
+      kind: 'struct'
+      frag: StructBody
+      scale: number
+      leftPad: number
+      w: number
+      aboveMid: number
+      belowMid: number
+    }
 
 function termRuns(t: Term, out: TextRun[]) {
   if (t.coeff) out.push({ text: t.coeff.includes('/') ? `${t.coeff} ` : t.coeff, kind: 'norm' })
@@ -661,7 +699,8 @@ function sideToPieces(terms: Term[], fs: number, lineNo: number): SidePiece[] {
   terms.forEach((t, idx) => {
     if (idx > 0) pending.push({ text: ' + ', kind: 'norm' })
     if (t.struct !== undefined) {
-      if (t.coeff) pending.push({ text: t.coeff.includes('/') ? `${t.coeff} ` : t.coeff, kind: 'norm' })
+      if (t.coeff)
+        pending.push({ text: t.coeff.includes('/') ? `${t.coeff} ` : t.coeff, kind: 'norm' })
       flush()
       let frag: StructBody
       try {
@@ -717,7 +756,13 @@ function condToRuns(raw: string): TextRun[] {
   return runs
 }
 
-function runsToSvgText(runs: TextRun[], x: number, y: number, fs: number, anchor: 'start' | 'middle' | 'end'): string {
+function runsToSvgText(
+  runs: TextRun[],
+  x: number,
+  y: number,
+  fs: number,
+  anchor: 'start' | 'middle' | 'end',
+): string {
   const subSz = f1(fs * 0.68)
   const stateSz = f1(fs * 0.76)
   const subDy = f1(fs * 0.24)
@@ -743,7 +788,13 @@ function runsToSvgText(runs: TextRun[], x: number, y: number, fs: number, anchor
   return `<text x="${f1(x)}" y="${f1(y)}" ${FAM} font-size="${fs}" fill="#111"${anchorAttr}>${inner}</text>`
 }
 
-function reactionArrowSvg(kind: '->' | '<=>', x0: number, x1: number, midY: number, fs: number): string {
+function reactionArrowSvg(
+  kind: '->' | '<=>',
+  x0: number,
+  x1: number,
+  midY: number,
+  fs: number,
+): string {
   const sw = Math.max(1.15, Math.round(fs * 0.078 * 100) / 100)
   if (kind === '->') {
     const headLen = Math.max(6.5, fs * 0.44)
@@ -780,7 +831,11 @@ function drawTrimmedRuns(runs: TextRun[], x: number, baseY: number, fs: number):
     trimmed[0].text = trimmed[0].text.slice(m[0].length)
     if (!trimmed[0].text) trimmed.shift()
   }
-  while (trimmed.length && trimmed[trimmed.length - 1].kind === 'norm' && trimmed[trimmed.length - 1].text.endsWith(' ')) {
+  while (
+    trimmed.length &&
+    trimmed[trimmed.length - 1].kind === 'norm' &&
+    trimmed[trimmed.length - 1].text.endsWith(' ')
+  ) {
     const last = trimmed[trimmed.length - 1]
     last.text = last.text.replace(/ +$/, '')
     if (!last.text) trimmed.pop()
@@ -788,7 +843,13 @@ function drawTrimmedRuns(runs: TextRun[], x: number, baseY: number, fs: number):
   return trimmed.length ? runsToSvgText(trimmed, x + leadW, baseY, fs, 'start') : ''
 }
 
-function drawSideAt(pieces: SidePiece[], x0: number, midY: number, baseY: number, fs: number): string {
+function drawSideAt(
+  pieces: SidePiece[],
+  x0: number,
+  midY: number,
+  baseY: number,
+  fs: number,
+): string {
   if (pieces.length === 1 && pieces[0].kind === 'runs') {
     return runsToSvgText(pieces[0].runs, x0, baseY, fs, 'start')
   }
@@ -840,7 +901,12 @@ export function renderChemEqSvg(spec: ChemEqSpec, desc: string): ToolImage {
       const arrowW = Math.max(minArrowW, Math.max(aboveW, belowW) + 22)
       const isRev = a.kind === '<=>'
       const aboveOff = midOff + (isRev ? 9 : 7) + (aboveRuns.some((r) => r.kind === 'sub') ? 2 : 0)
-      const belowOff = -midOff + (isRev ? 5.5 : 3.5) + 0.74 * condFs + 2.5 + (belowRuns.some((r) => r.kind === 'sup') ? 2 : 0)
+      const belowOff =
+        -midOff +
+        (isRev ? 5.5 : 3.5) +
+        0.74 * condFs +
+        2.5 +
+        (belowRuns.some((r) => r.kind === 'sup') ? 2 : 0)
       return { kind: a.kind, aboveRuns, belowRuns, arrowW, aboveOff, belowOff }
     })
 
@@ -859,7 +925,10 @@ export function renderChemEqSvg(spec: ChemEqSpec, desc: string): ToolImage {
       }
     }
 
-    const totalW = sideWs.reduce((s, w) => s + w, 0) + arrowInfos.reduce((s, a) => s + a.arrowW, 0) + arrowInfos.length * 2 * gap
+    const totalW =
+      sideWs.reduce((s, w) => s + w, 0) +
+      arrowInfos.reduce((s, a) => s + a.arrowW, 0) +
+      arrowInfos.length * 2 * gap
 
     return { eq, sidePieces, sideWs, arrowInfos, topFromMid, botFromMid, totalW }
   })
@@ -870,7 +939,10 @@ export function renderChemEqSvg(spec: ChemEqSpec, desc: string): ToolImage {
   const colR = singleRows.length ? Math.max(...singleRows.map((r) => r.sideWs[1])) : 0
   const singleAlignedW = singleRows.length ? colL + gap + colA + gap + colR : 0
   const multiMaxW = Math.max(0, ...rows.filter((r) => r.arrowInfos.length > 1).map((r) => r.totalW))
-  const contentW = align === 'center' ? Math.max(singleAlignedW, multiMaxW) : Math.max(...rows.map((r) => r.totalW))
+  const contentW =
+    align === 'center'
+      ? Math.max(singleAlignedW, multiMaxW)
+      : Math.max(...rows.map((r) => r.totalW))
 
   // khung ôm sát nội dung: phương trình ngắn không kèm khoảng trắng thừa hai bên
   const W = Math.ceil(contentW + padX * 2)
@@ -885,8 +957,10 @@ export function renderChemEqSvg(spec: ChemEqSpec, desc: string): ToolImage {
     const drawArrow = (a: (typeof r.arrowInfos)[number], x0: number, x1: number) => {
       const arrowMidX = (x0 + x1) / 2
       body += reactionArrowSvg(a.kind, x0, x1, midY, fs)
-      if (a.aboveRuns.length) body += runsToSvgText(a.aboveRuns, arrowMidX, baseY - a.aboveOff, condFs, 'middle')
-      if (a.belowRuns.length) body += runsToSvgText(a.belowRuns, arrowMidX, baseY + a.belowOff, condFs, 'middle')
+      if (a.aboveRuns.length)
+        body += runsToSvgText(a.aboveRuns, arrowMidX, baseY - a.aboveOff, condFs, 'middle')
+      if (a.belowRuns.length)
+        body += runsToSvgText(a.belowRuns, arrowMidX, baseY + a.belowOff, condFs, 'middle')
     }
 
     if (align === 'center' && r.arrowInfos.length === 1) {
@@ -920,5 +994,7 @@ export function renderChemEqSvg(spec: ChemEqSpec, desc: string): ToolImage {
 
   const H = Math.max(52, Math.ceil(yCursor + padY))
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${desc}<rect width="100%" height="100%" fill="#fff"/>${body}</svg>`
-  return warnings.length ? { svg, width: W, height: H, errors: warnings } : { svg, width: W, height: H }
+  return warnings.length
+    ? { svg, width: W, height: H, errors: warnings }
+    : { svg, width: W, height: H }
 }

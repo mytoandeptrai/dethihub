@@ -1,3 +1,14 @@
+import { TF_PARTS, groupAnswers, gridRows, tfParts } from '../lib/answerKey'
+
+import type {
+  ExamBlock,
+  FormatAttrs,
+  Mark,
+  MarkType,
+  RichText,
+  Span,
+  TableCellData,
+} from '@/engine/data/docTypes'
 /**
  * Chuyển đổi hai chiều giữa mô hình block `ExamBlock` và tài liệu TipTap (JSON).
  *
@@ -10,8 +21,6 @@
  * và `FormatAttrs` (align/lineHeight/indent/space/borders/shading).
  */
 import type { JSONContent } from '@tiptap/core'
-import type { ExamBlock, FormatAttrs, Mark, MarkType, RichText, Span, TableCellData } from '@/engine/data/docTypes'
-import { TF_PARTS, groupAnswers, gridRows, tfParts } from '../lib/answerKey'
 
 /* ------------------------------------------------------------------ *
  * Rich text helpers
@@ -56,7 +65,10 @@ export function splitRichLines(rt: RichText): RichText[] {
       : (rt as Array<Span | string>).map((s) => (typeof s === 'string' ? { text: s } : s))
   const lines: Span[][] = [[]]
   for (const s of spans) {
-    if (s.image) { lines[lines.length - 1].push(s); continue }
+    if (s.image) {
+      lines[lines.length - 1].push(s)
+      continue
+    }
     const parts = s.text.split('\n')
     parts.forEach((part, i) => {
       if (i > 0) lines.push([])
@@ -85,7 +97,8 @@ function columnToRich(column: JSONContent | undefined): RichText {
   return spans.every((s) => !s.marks?.length) ? spans.map((s) => s.text).join('') : spans
 }
 
-function walkInline(node: JSONContent | undefined, inherited: Mark[], out: Span[]): void {  if (!node) return
+function walkInline(node: JSONContent | undefined, inherited: Mark[], out: Span[]): void {
+  if (!node) return
   if (node.type === 'text') {
     const marks = [...inherited, ...marksOf(node)]
     out.push({ text: node.text ?? '', ...(marks.length ? { marks } : {}) })
@@ -94,7 +107,16 @@ function walkInline(node: JSONContent | undefined, inherited: Mark[], out: Span[
   // ảnh inline → span không chữ, giữ nguyên src/độ rộng
   if (node.type === 'image') {
     const a = node.attrs ?? {}
-    if (a.src) out.push({ text: '', image: { src: String(a.src), ...(a.alt ? { alt: String(a.alt) } : {}), ...(a.width ? { width: Number(a.width) } : {}), ...(a.plot ? { plot: String(a.plot) } : {}) } })
+    if (a.src)
+      out.push({
+        text: '',
+        image: {
+          src: String(a.src),
+          ...(a.alt ? { alt: String(a.alt) } : {}),
+          ...(a.width ? { width: Number(a.width) } : {}),
+          ...(a.plot ? { plot: String(a.plot) } : {}),
+        },
+      })
     return
   }
   // công thức inline → trả về đúng quy ước `$...$` của ExamBlock
@@ -359,8 +381,13 @@ export function tipTapToBlocks(doc: JSONContent): ExamBlock[] {
               .map((c) => {
                 const colSpan = Number(c.attrs?.colspan ?? 1)
                 const rowSpan = Number(c.attrs?.rowspan ?? 1)
-                const pAlign = c.content?.[0]?.attrs?.textAlign as TableCellData['align'] | undefined
-                const align = pAlign === 'left' || pAlign === 'center' || pAlign === 'right' ? pAlign : undefined
+                const pAlign = c.content?.[0]?.attrs?.textAlign as
+                  | TableCellData['align']
+                  | undefined
+                const align =
+                  pAlign === 'left' || pAlign === 'center' || pAlign === 'right'
+                    ? pAlign
+                    : undefined
                 return {
                   text: columnToRich(c),
                   ...(c.type === 'tableHeader' ? { header: true } : {}),
@@ -410,7 +437,8 @@ function answerKeyItems(node: JSONContent): Array<{ no: number; answer: RichText
       for (const r of rows.slice(1)) {
         const cells = r.content ?? []
         const no = cellText(cells[0])
-        if (/^\d+$/.test(no)) items.push({ no: Number(no), answer: cells.slice(1).map(cellText).join('') })
+        if (/^\d+$/.test(no))
+          items.push({ no: Number(no), answer: cells.slice(1).map(cellText).join('') })
       }
       continue
     }
@@ -428,15 +456,24 @@ function gridItems(rows: JSONContent[]): Array<{ no: number; answer: RichText }>
     // ô đầu là tableHeader ('Câu'/'Đáp án') → dữ liệu bắt đầu từ ô 1
     const start = noCells[0]?.type === 'tableHeader' ? 1 : 0
     // số câu hợp lệ: ô rỗng không phải câu 0 (Number('') === 0)
-    const nos = noCells.slice(start).map((c, k) => ({ k: start + k, text: plainText(richOf(c)).trim() })).filter((c) => /^\d+$/.test(c.text))
+    const nos = noCells
+      .slice(start)
+      .map((c, k) => ({ k: start + k, text: plainText(richOf(c)).trim() }))
+      .filter((c) => /^\d+$/.test(c.text))
     // đáp án: bỏ ô rỗng và ô nhãn "Đáp án" (bảng bị sửa tay hay lệch ô, đáp án không nằm đúng cột với số câu)
-    const answers = ansCells.slice(start).map((c, k) => ({ k: start + k, rt: richOf(c) })).filter((c) => {
-      const t = plainText(c.rt).trim()
-      return t && !/^đáp\s*án$/i.test(t)
-    })
+    const answers = ansCells
+      .slice(start)
+      .map((c, k) => ({ k: start + k, rt: richOf(c) }))
+      .filter((c) => {
+        const t = plainText(c.rt).trim()
+        return t && !/^đáp\s*án$/i.test(t)
+      })
     // khớp theo thứ tự khi số đáp án đúng bằng số câu (chịu được lệch cột); không thì khớp theo vị trí cột
-    if (answers.length === nos.length) nos.forEach((n, k) => items.push({ no: Number(n.text), answer: answers[k].rt }))
-    else for (const n of nos) if (n.k < ansCells.length) items.push({ no: Number(n.text), answer: richOf(ansCells[n.k]) })
+    if (answers.length === nos.length)
+      nos.forEach((n, k) => items.push({ no: Number(n.text), answer: answers[k].rt }))
+    else
+      for (const n of nos)
+        if (n.k < ansCells.length) items.push({ no: Number(n.text), answer: richOf(ansCells[n.k]) })
   }
   return items
 }
@@ -474,7 +511,15 @@ function richNodes(rt: RichText): JSONContent[] {
   const out: JSONContent[] = []
   for (const s of rt) {
     if (s.image) {
-      out.push({ type: 'image', attrs: { src: s.image.src, alt: s.image.alt ?? null, width: s.image.width ?? null, plot: s.image.plot ?? null } })
+      out.push({
+        type: 'image',
+        attrs: {
+          src: s.image.src,
+          alt: s.image.alt ?? null,
+          width: s.image.width ?? null,
+          plot: s.image.plot ?? null,
+        },
+      })
       continue
     }
     const marks = s.marks?.length
@@ -512,7 +557,10 @@ export function blocksToTipTap(blocks: ExamBlock[]): JSONContent {
           attrs: { id: `c${content.length}` },
           content: b.cols.slice(0, 3).map((rt) => ({
             type: 'examColumn',
-            content: splitRichLines(rt).map((line) => ({ type: 'paragraph', content: richNodes(line) })),
+            content: splitRichLines(rt).map((line) => ({
+              type: 'paragraph',
+              content: richNodes(line),
+            })),
           })),
         })
         break
@@ -564,7 +612,11 @@ export function blocksToTipTap(blocks: ExamBlock[]): JSONContent {
       case 'bullets':
         content.push({
           type: 'examBullets',
-          attrs: { id: `b${content.length}`, ordered: b.ordered ?? null, ...attrsFromFormat(b.format) },
+          attrs: {
+            id: `b${content.length}`,
+            ordered: b.ordered ?? null,
+            ...attrsFromFormat(b.format),
+          },
           content: b.items.map((item, i) => ({
             type: 'examBullet',
             attrs: { id: `bi${i}`, level: b.levels?.[i] || null },
@@ -643,16 +695,45 @@ export function blocksToTipTap(blocks: ExamBlock[]): JSONContent {
         const parts: JSONContent[] = []
         for (const g of groupAnswers(b.items)) {
           if (g.label)
-            parts.push({ type: 'paragraph', content: [{ type: 'text', text: g.label, marks: [{ type: 'bold' }, { type: 'italic' }] }] })
+            parts.push({
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: g.label, marks: [{ type: 'bold' }, { type: 'italic' }] },
+              ],
+            })
           const rows: JSONContent[] = []
           if (g.kind === 'tf') {
-            rows.push({ type: 'tableRow', content: [cell('tableHeader', txt('Câu')), ...TF_PARTS.map((p) => cell('tableHeader', txt(p)))] })
+            rows.push({
+              type: 'tableRow',
+              content: [
+                cell('tableHeader', txt('Câu')),
+                ...TF_PARTS.map((p) => cell('tableHeader', txt(p))),
+              ],
+            })
             for (const it of g.items)
-              rows.push({ type: 'tableRow', content: [cell('tableHeader', txt(String(it.no))), ...tfParts(it.answer).map((v) => cell('tableCell', txt(v)))] })
+              rows.push({
+                type: 'tableRow',
+                content: [
+                  cell('tableHeader', txt(String(it.no))),
+                  ...tfParts(it.answer).map((v) => cell('tableCell', txt(v))),
+                ],
+              })
           } else {
             for (const row of gridRows(g.items).rows) {
-              rows.push({ type: 'tableRow', content: [cell('tableHeader', txt('Câu')), ...row.map((it) => cell('tableCell', txt(it ? String(it.no) : '')))] })
-              rows.push({ type: 'tableRow', content: [cell('tableHeader', txt('Đáp án')), ...row.map((it) => cell('tableCell', it ? richNodes(it.answer) : []))] })
+              rows.push({
+                type: 'tableRow',
+                content: [
+                  cell('tableHeader', txt('Câu')),
+                  ...row.map((it) => cell('tableCell', txt(it ? String(it.no) : ''))),
+                ],
+              })
+              rows.push({
+                type: 'tableRow',
+                content: [
+                  cell('tableHeader', txt('Đáp án')),
+                  ...row.map((it) => cell('tableCell', it ? richNodes(it.answer) : [])),
+                ],
+              })
             }
           }
           parts.push({ type: 'table', content: rows })
@@ -761,7 +842,13 @@ export function buildTocFromDoc(doc: JSONContent): TocEntry[] {
       questionNo += 1
       const prompt = node.content?.find((c) => c.type?.endsWith('Prompt'))
       const text = plainText(richOf(prompt)).trim()
-      out.push({ index, level: 2, text: text || '(chưa có nội dung)', kind: 'question', no: questionNo })
+      out.push({
+        index,
+        level: 2,
+        text: text || '(chưa có nội dung)',
+        kind: 'question',
+        no: questionNo,
+      })
     }
   })
   return out

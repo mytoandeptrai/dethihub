@@ -10,7 +10,9 @@ export function useEditorContainer() {
   useEffect(() => {
     document.documentElement.dataset.editorEngine = ''
     setReady(true)
-    return () => { delete document.documentElement.dataset.editorEngine }
+    return () => {
+      delete document.documentElement.dataset.editorEngine
+    }
   }, [])
   return { ready }
 }

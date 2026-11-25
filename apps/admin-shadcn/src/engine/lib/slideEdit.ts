@@ -1,12 +1,13 @@
+import { parseAiObject } from './aiDeck'
+import { checkSlide, slideFromAi } from './slideAi'
+import { keepCustomBg } from './slideBackground'
+import { SLIDE_DESIGNS, designById, designTheme, type SlideDesign } from './slideDesigns'
 /**
  * AI sửa slide có sẵn qua LỆNH có cấu trúc (không để model viết lại slide):
  * model chỉ trả `{"action":"edit","commands":[...]}`, engine kiểm tra từng lệnh rồi dựng lại
  * slide bằng layout engine. Lệnh sai/lạ bị bỏ kèm lý do, không làm hỏng deck.
  */
 import { SLIDE_FONTS, slideFontByName } from './slideFonts'
-import { hasTextEffects, textEffectsOf } from './slideTextEffects'
-import type { Deck, DeckTheme, Slide, SlideElement, SlideTone } from '@/engine/store/docs'
-import { parseAiObject } from './aiDeck'
 import {
   SLIDE_LAYOUTS,
   composeLayout,
@@ -20,11 +21,18 @@ import {
   toneBackground,
   type SlideLayoutContent,
 } from './slideLayouts'
-import { checkSlide, slideFromAi } from './slideAi'
-import { keepCustomBg } from './slideBackground'
-import { DECK_THEMES, contrastRatio, mixHex, normalizeTheme, resolveThemeId, themeById } from './slideTheme'
-import { SLIDE_DESIGNS, designById, designTheme, type SlideDesign } from './slideDesigns'
 import { applySkin } from './slideSkins'
+import { hasTextEffects, textEffectsOf } from './slideTextEffects'
+import {
+  DECK_THEMES,
+  contrastRatio,
+  mixHex,
+  normalizeTheme,
+  resolveThemeId,
+  themeById,
+} from './slideTheme'
+
+import type { Deck, DeckTheme, Slide, SlideElement, SlideTone } from '@/engine/store/docs'
 
 export type SlideEditOp =
   | { op: 'set_theme'; theme: string }
@@ -45,18 +53,54 @@ export type SlideEditOp =
   | { op: 'rename_deck'; title: string }
 
 /** Phông cho phép: có đủ dấu tiếng Việt (Georgia/Cambria làm vỡ dấu nên không có). */
-export const EDIT_FONTS = SLIDE_FONTS.map(font => font.family)
+export const EDIT_FONTS = SLIDE_FONTS.map((font) => font.family)
 const TRANSITIONS = ['none', 'fade', 'slide', 'zoom']
 /** Field chữ của slide mà `edit_slide` được đổi (ảnh/đồ hoạ giữ nguyên, không cho AI đụng). */
 const EDITABLE_FIELDS = [
-  'title', 'kicker', 'subtitle', 'body', 'bullets', 'items', 'left', 'right', 'leftTitle', 'rightTitle',
-  'quote', 'author', 'steps', 'question', 'options', 'answer', 'problem', 'conclusion', 'explanation', 'rows', 'stats',
+  'title',
+  'kicker',
+  'subtitle',
+  'body',
+  'bullets',
+  'items',
+  'left',
+  'right',
+  'leftTitle',
+  'rightTitle',
+  'quote',
+  'author',
+  'steps',
+  'question',
+  'options',
+  'answer',
+  'problem',
+  'conclusion',
+  'explanation',
+  'rows',
+  'stats',
 ] as const
 const FIELD_LABEL: Record<string, string> = {
-  title: 'tiêu đề', kicker: 'nhãn', subtitle: 'phụ đề', body: 'nội dung', bullets: 'các ý', items: 'các thẻ',
-  left: 'cột trái', right: 'cột phải', leftTitle: 'nhãn cột trái', rightTitle: 'nhãn cột phải', quote: 'trích dẫn',
-  author: 'tác giả', steps: 'các bước', question: 'câu hỏi', options: 'phương án', answer: 'đáp án',
-  problem: 'đề bài', conclusion: 'kết luận', explanation: 'giải thích', rows: 'bảng', stats: 'số liệu',
+  title: 'tiêu đề',
+  kicker: 'nhãn',
+  subtitle: 'phụ đề',
+  body: 'nội dung',
+  bullets: 'các ý',
+  items: 'các thẻ',
+  left: 'cột trái',
+  right: 'cột phải',
+  leftTitle: 'nhãn cột trái',
+  rightTitle: 'nhãn cột phải',
+  quote: 'trích dẫn',
+  author: 'tác giả',
+  steps: 'các bước',
+  question: 'câu hỏi',
+  options: 'phương án',
+  answer: 'đáp án',
+  problem: 'đề bài',
+  conclusion: 'kết luận',
+  explanation: 'giải thích',
+  rows: 'bảng',
+  stats: 'số liệu',
 }
 const HEX = /^#[0-9a-f]{6}$/i
 
@@ -98,7 +142,11 @@ export function editSystemPrompt(context: string): string {
     '- {"op":"duplicate_slide","slide":3}\n' +
     '- {"op":"set_notes","slide":3,"notes":"ghi chú trình bày"}\n' +
     '- {"op":"rename_deck","title":"tên bài giảng"}\n' +
-    `- {"op":"set_layout","slide":3,"layout":"<id>"} — đổi bố cục một slide, giữ nội dung. Bố cục: ${SLIDE_LAYOUTS.filter((l) => !isEditorialLayout(l.id)).map((l) => `${l.id}=${l.name}`).join(', ')}\n` +
+    `- {"op":"set_layout","slide":3,"layout":"<id>"} — đổi bố cục một slide, giữ nội dung. Bố cục: ${SLIDE_LAYOUTS.filter(
+      (l) => !isEditorialLayout(l.id),
+    )
+      .map((l) => `${l.id}=${l.name}`)
+      .join(', ')}\n` +
     'Nếu yêu cầu KHÔNG phải sửa giao diện/thứ tự slide có sẵn (ví dụ soạn slide mới, viết lại nội dung), trả {"action":"none"}.\n' +
     `Bài trình bày hiện tại: ${context}`
   )
@@ -118,7 +166,12 @@ export function parseEditCommands(raw: string): { ops: SlideEditOp[]; errors: st
     const slides = c.slides === undefined ? undefined : isIndexList(c.slides) ? c.slides : null
     switch (c.op) {
       case 'apply_design': {
-        const id = typeof c.id === 'string' ? c.id.trim() : typeof c.design === 'string' ? c.design.trim() : ''
+        const id =
+          typeof c.id === 'string'
+            ? c.id.trim()
+            : typeof c.design === 'string'
+              ? c.design.trim()
+              : ''
         if (id) ops.push({ op: 'apply_design', id })
         else errors.push('apply_design thiếu "id"')
         break
@@ -147,8 +200,16 @@ export function parseEditCommands(raw: string): { ops: SlideEditOp[]; errors: st
         else errors.push('set_tone sai tông hoặc danh sách slide')
         break
       case 'set_transition':
-        if (typeof c.transition === 'string' && TRANSITIONS.includes(c.transition) && slides !== null) {
-          ops.push({ op: 'set_transition', transition: c.transition as 'none' | 'fade' | 'slide' | 'zoom', slides })
+        if (
+          typeof c.transition === 'string' &&
+          TRANSITIONS.includes(c.transition) &&
+          slides !== null
+        ) {
+          ops.push({
+            op: 'set_transition',
+            transition: c.transition as 'none' | 'fade' | 'slide' | 'zoom',
+            slides,
+          })
         } else errors.push('set_transition sai hiệu ứng hoặc danh sách slide')
         break
       case 'delete_slides':
@@ -156,20 +217,36 @@ export function parseEditCommands(raw: string): { ops: SlideEditOp[]; errors: st
         else errors.push('delete_slides thiếu danh sách slide')
         break
       case 'move_slide':
-        if (Number.isInteger(c.from) && Number.isInteger(c.to)) ops.push({ op: 'move_slide', from: c.from as number, to: c.to as number })
+        if (Number.isInteger(c.from) && Number.isInteger(c.to))
+          ops.push({ op: 'move_slide', from: c.from as number, to: c.to as number })
         else errors.push('move_slide thiếu from/to')
         break
       case 'edit_slide':
-        if (Number.isInteger(c.slide) && c.fields && typeof c.fields === 'object' && !Array.isArray(c.fields)) {
-          ops.push({ op: 'edit_slide', slide: c.slide as number, fields: c.fields as Record<string, unknown> })
+        if (
+          Number.isInteger(c.slide) &&
+          c.fields &&
+          typeof c.fields === 'object' &&
+          !Array.isArray(c.fields)
+        ) {
+          ops.push({
+            op: 'edit_slide',
+            slide: c.slide as number,
+            fields: c.fields as Record<string, unknown>,
+          })
         } else errors.push('edit_slide thiếu "slide" hoặc "fields"')
         break
       case 'set_layout':
-        if (Number.isInteger(c.slide) && typeof c.layout === 'string') ops.push({ op: 'set_layout', slide: c.slide as number, layout: c.layout })
+        if (Number.isInteger(c.slide) && typeof c.layout === 'string')
+          ops.push({ op: 'set_layout', slide: c.slide as number, layout: c.layout })
         else errors.push('set_layout thiếu "slide" hoặc "layout"')
         break
       case 'add_slide':
-        if (typeof c.layout === 'string' && c.fields && typeof c.fields === 'object' && !Array.isArray(c.fields)) {
+        if (
+          typeof c.layout === 'string' &&
+          c.fields &&
+          typeof c.fields === 'object' &&
+          !Array.isArray(c.fields)
+        ) {
           ops.push({
             op: 'add_slide',
             layout: c.layout,
@@ -183,11 +260,13 @@ export function parseEditCommands(raw: string): { ops: SlideEditOp[]; errors: st
         else errors.push('duplicate_slide thiếu "slide"')
         break
       case 'set_notes':
-        if (Number.isInteger(c.slide) && typeof c.notes === 'string') ops.push({ op: 'set_notes', slide: c.slide as number, notes: c.notes })
+        if (Number.isInteger(c.slide) && typeof c.notes === 'string')
+          ops.push({ op: 'set_notes', slide: c.slide as number, notes: c.notes })
         else errors.push('set_notes thiếu "slide" hoặc "notes"')
         break
       case 'rename_deck':
-        if (typeof c.title === 'string' && c.title.trim()) ops.push({ op: 'rename_deck', title: c.title.trim().slice(0, 120) })
+        if (typeof c.title === 'string' && c.title.trim())
+          ops.push({ op: 'rename_deck', title: c.title.trim().slice(0, 120) })
         else errors.push('rename_deck thiếu "title"')
         break
       default:
@@ -201,27 +280,50 @@ export function parseEditCommands(raw: string): { ops: SlideEditOp[]; errors: st
 export function recomposeSlide(theme: DeckTheme, slide: Slide, tone?: SlideTone): Slide {
   if (slide.html) return slide
   if (slide.layout && isLayoutId(slide.layout)) {
-    const cleanSlide: Slide = { ...slide, elements: slide.elements.filter((el) => !isDecorElement(el)) }
+    const cleanSlide: Slide = {
+      ...slide,
+      elements: slide.elements.filter((el) => !isDecorElement(el)),
+    }
     const t = tone ?? (isTone(slide.tone) ? slide.tone : defaultTone(slide.layout))
-    const previous = new Map(cleanSlide.elements.map(el => [el.id, el]))
-    const elements = composeLayout(theme, slide.layout, contentFromSlide(cleanSlide), t).map(el => {
-      const before = previous.get(el.id)
-      return el.type === 'text' && before && hasTextEffects(before) ? { ...el, ...textEffectsOf(before) } : el
-    })
+    const previous = new Map(cleanSlide.elements.map((el) => [el.id, el]))
+    const elements = composeLayout(theme, slide.layout, contentFromSlide(cleanSlide), t).map(
+      (el) => {
+        const before = previous.get(el.id)
+        return el.type === 'text' && before && hasTextEffects(before)
+          ? { ...el, ...textEffectsOf(before) }
+          : el
+      },
+    )
     if (elements.length > 0) {
       // Giữ lại phần tử người dùng tự thêm (hình khối, icon, chữ, ảnh thứ 2…) khi đổi thiết kế/bộ màu
       const userAdded = cleanSlide.elements.filter((el) => {
         if (isLayoutOwnedId(el.id)) return false
-        if (el.type === 'image' && elements.some((e) => e.type === 'image' && e.src === el.src)) return false
+        if (el.type === 'image' && elements.some((e) => e.type === 'image' && e.src === el.src))
+          return false
         if (el.type === 'table' && elements.some((e) => e.type === 'table')) return false
-        if (el.type === 'graphic' && elements.some((e) => e.type === 'graphic' && e.graphicId === el.graphicId)) return false
+        if (
+          el.type === 'graphic' &&
+          elements.some((e) => e.type === 'graphic' && e.graphicId === el.graphicId)
+        )
+          return false
         return true
       })
-      return keepCustomBg(slide, { ...slide, tone: t, background: toneBackground(theme, t), elements: [...elements, ...userAdded] }, theme.fg)
+      return keepCustomBg(
+        slide,
+        {
+          ...slide,
+          tone: t,
+          background: toneBackground(theme, t),
+          elements: [...elements, ...userAdded],
+        },
+        theme.fg,
+      )
     }
   }
   const kept = slide.elements.filter((el) => !isDecorElement(el))
-  return slide.customBg ? { ...slide, elements: kept } : { ...slide, background: theme.bg, elements: kept }
+  return slide.customBg
+    ? { ...slide, elements: kept }
+    : { ...slide, background: theme.bg, elements: kept }
 }
 
 /**
@@ -260,7 +362,19 @@ export function applyDeckDesign(deck: Deck, design: SlideDesign | null, palette?
 }
 
 // vị trí, kích thước, căn lề, cỡ chữ: thuộc bố cục — đổi thiết kế không đụng tới
-const GEOMETRY = ['x', 'y', 'w', 'h', 'rotation', 'fixedHeight', 'align', 'valign', 'fontSize', 'flipX', 'flipY'] as const
+const GEOMETRY = [
+  'x',
+  'y',
+  'w',
+  'h',
+  'rotation',
+  'fixedHeight',
+  'align',
+  'valign',
+  'fontSize',
+  'flipX',
+  'flipY',
+] as const
 
 /**
  * Thiết kế chỉ đổi kiểu, không đổi bố cục: lấy màu / phông / viền / nền / motif từ bản skin,
@@ -279,7 +393,10 @@ function keepGeometry(original: Slide, base: Slide, styled: Slide): Slide {
     return merged
   })
   const motifs = styled.elements.filter(
-    (el) => isDecorElement(el) && (el.id.startsWith('skin-motif-') || el.id.startsWith('decor-kit-')) && !base.elements.some((b) => b.id === el.id),
+    (el) =>
+      isDecorElement(el) &&
+      (el.id.startsWith('skin-motif-') || el.id.startsWith('decor-kit-')) &&
+      !base.elements.some((b) => b.id === el.id),
   )
   return { ...styled, elements: [...elements, ...motifs] }
 }
@@ -288,13 +405,19 @@ function keepGeometry(original: Slide, base: Slide, styled: Slide): Slide {
 export function describeSlide(slide: Slide, index: number): string {
   if (slide.html) return `${index + 1}. (slide HTML, không sửa được)`
   const { image: _image, image2: _image2, graphic: _graphic, ...content } = contentFromSlide(slide)
-  const json = JSON.stringify(content, (_k, v) => (v === undefined || (Array.isArray(v) && !v.length) ? undefined : v))
+  const json = JSON.stringify(content, (_k, v) =>
+    v === undefined || (Array.isArray(v) && !v.length) ? undefined : v,
+  )
   return `${index + 1}. [${slide.layout ?? 'slide'}] ${json.length > 600 ? json.slice(0, 600) + '…' : json}`
 }
 
 /** Nội dung slide dựng lại cho bố cục khác: field bố cục mới cần mà chưa có thì lấy từ danh sách ý. */
 function adaptContent(content: SlideLayoutContent): SlideLayoutContent {
-  const list = content.bullets?.length ? content.bullets : content.items?.length ? content.items : content.steps
+  const list = content.bullets?.length
+    ? content.bullets
+    : content.items?.length
+      ? content.items
+      : content.steps
   const next = { ...content }
   if (list?.length) {
     next.bullets ??= list
@@ -329,7 +452,10 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
   }
 
   for (const op of ops) {
-    if (html && ['set_theme', 'set_fonts', 'set_colors', 'set_tone', 'apply_design'].includes(op.op)) {
+    if (
+      html &&
+      ['set_theme', 'set_fonts', 'set_colors', 'set_tone', 'apply_design'].includes(op.op)
+    ) {
       summary.push('Bỏ qua: bài giảng HTML không đổi được giao diện bằng lệnh.')
       continue
     }
@@ -355,13 +481,25 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
         if (target) {
           // Phông người dùng/AI đã đặt riêng (khác mặc định của bộ màu hiện tại) được giữ khi đổi bộ màu.
           const current = DECK_THEMES.find((t) => t.id === resolveThemeId(theme.id))
-          const legacy = normalizeTheme({ ...theme, fonts: undefined, fontHeading: '', fontBody: '' })
+          const legacy = normalizeTheme({
+            ...theme,
+            fonts: undefined,
+            fontHeading: '',
+            fontBody: '',
+          })
           const fonts = { ...target.fonts! }
-          if (current?.fonts && ![current.fonts.heading, legacy.fonts.heading].includes(theme.fonts.heading)) fonts.heading = theme.fonts.heading
-          if (current?.fonts && ![current.fonts.body, legacy.fonts.body].includes(theme.fonts.body)) fonts.body = theme.fonts.body
-          restyle({ ...target, fontHeading: fonts.heading, fontBody: fonts.body, fonts }, `Đổi bộ màu sang ${target.name}.`)
-        }
-        else summary.push(`Bỏ qua: không có bộ màu "${op.theme}".`)
+          if (
+            current?.fonts &&
+            ![current.fonts.heading, legacy.fonts.heading].includes(theme.fonts.heading)
+          )
+            fonts.heading = theme.fonts.heading
+          if (current?.fonts && ![current.fonts.body, legacy.fonts.body].includes(theme.fonts.body))
+            fonts.body = theme.fonts.body
+          restyle(
+            { ...target, fontHeading: fonts.heading, fontBody: fonts.body, fonts },
+            `Đổi bộ màu sang ${target.name}.`,
+          )
+        } else summary.push(`Bỏ qua: không có bộ màu "${op.theme}".`)
         break
       }
       case 'set_fonts': {
@@ -409,13 +547,23 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
       }
       case 'set_tone': {
         const idx = pick(op.slides, next.slides.length)
-        next = { ...next, slides: next.slides.map((s, i) => (idx.includes(i + 1) ? recomposeSlide(theme, s, op.tone) : s)) }
+        next = {
+          ...next,
+          slides: next.slides.map((s, i) =>
+            idx.includes(i + 1) ? recomposeSlide(theme, s, op.tone) : s,
+          ),
+        }
         summary.push(`Đổi tông nền ${idx.length} slide.`)
         break
       }
       case 'set_transition': {
         const idx = pick(op.slides, next.slides.length)
-        next = { ...next, slides: next.slides.map((s, i) => (idx.includes(i + 1) ? { ...s, transition: op.transition } : s)) }
+        next = {
+          ...next,
+          slides: next.slides.map((s, i) =>
+            idx.includes(i + 1) ? { ...s, transition: op.transition } : s,
+          ),
+        }
         summary.push(`Đặt hiệu ứng chuyển slide cho ${idx.length} slide.`)
         break
       }
@@ -439,23 +587,51 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
           summary.push(`Bỏ qua: slide ${op.slide} không sửa nội dung được bằng lệnh.`)
           break
         }
-        const patch = Object.fromEntries(Object.entries(op.fields).filter(([k]) => (EDITABLE_FIELDS as readonly string[]).includes(k)))
+        const patch = Object.fromEntries(
+          Object.entries(op.fields).filter(([k]) =>
+            (EDITABLE_FIELDS as readonly string[]).includes(k),
+          ),
+        )
         if (!Object.keys(patch).length) {
           summary.push(`Bỏ qua: slide ${op.slide} không có field hợp lệ để sửa.`)
           break
         }
-        const { image, image2, imageCrop, image2Crop, graphic, ...current } = contentFromSlide(slide)
+        const { image, image2, imageCrop, image2Crop, graphic, ...current } =
+          contentFromSlide(slide)
         // checkSlide chuẩn hoá (cắt độ dài, giới hạn đậm, NBSP…) và báo field bắt buộc/ngân sách bị vi phạm
-        const check = checkSlide({ ...current, ...patch, layout: slide.layout, tone: slide.tone }, slide.layout, slide.tone)
+        const check = checkSlide(
+          { ...current, ...patch, layout: slide.layout, tone: slide.tone },
+          slide.layout,
+          slide.tone,
+        )
         if (check.errors.length) {
           summary.push(`Bỏ qua sửa slide ${op.slide}: ${check.errors.join('; ')}.`)
           break
         }
-        const built = slideFromAi({ ...check.page, image, image2, imageCrop, image2Crop, graphic: check.page.graphic ?? graphic }, theme)
-        const updated: Slide = { ...built, id: slide.id, notes: slide.notes, transition: slide.transition }
+        const built = slideFromAi(
+          {
+            ...check.page,
+            image,
+            image2,
+            imageCrop,
+            image2Crop,
+            graphic: check.page.graphic ?? graphic,
+          },
+          theme,
+        )
+        const updated: Slide = {
+          ...built,
+          id: slide.id,
+          notes: slide.notes,
+          transition: slide.transition,
+        }
         next = { ...next, slides: next.slides.map((s) => (s === slide ? updated : s)) }
-        const fields = Object.keys(patch).map((k) => FIELD_LABEL[k] ?? k).join(', ')
-        summary.push(`Sửa slide ${op.slide}: ${fields}.${check.readability.length ? ' (chữ khá dày, có thể co nhỏ)' : ''}`)
+        const fields = Object.keys(patch)
+          .map((k) => FIELD_LABEL[k] ?? k)
+          .join(', ')
+        summary.push(
+          `Sửa slide ${op.slide}: ${fields}.${check.readability.length ? ' (chữ khá dày, có thể co nhỏ)' : ''}`,
+        )
         break
       }
       case 'set_layout': {
@@ -473,13 +649,24 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
           break
         }
         const tone = defaultTone(op.layout)
-        const elements = composeLayout(theme, op.layout, adaptContent(contentFromSlide(slide)), tone)
+        const elements = composeLayout(
+          theme,
+          op.layout,
+          adaptContent(contentFromSlide(slide)),
+          tone,
+        )
         if (!elements.length) {
           summary.push(`Bỏ qua: nội dung slide ${op.slide} chưa đủ để dùng bố cục ${op.layout}.`)
           break
         }
-        const rawUpdated: Slide = keepCustomBg(slide, { ...slide, layout: op.layout, tone, background: toneBackground(theme, tone), elements }, theme.fg)
-        const updated = next.design ? applySkin(rawUpdated, next.design, theme, op.slide - 1, next.slides.length, true) : rawUpdated
+        const rawUpdated: Slide = keepCustomBg(
+          slide,
+          { ...slide, layout: op.layout, tone, background: toneBackground(theme, tone), elements },
+          theme.fg,
+        )
+        const updated = next.design
+          ? applySkin(rawUpdated, next.design, theme, op.slide - 1, next.slides.length, true)
+          : rawUpdated
         next = { ...next, slides: next.slides.map((s) => (s === slide ? updated : s)) }
         summary.push(`Đổi bố cục slide ${op.slide} sang ${op.layout}.`)
         break
@@ -489,15 +676,24 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
           summary.push(`Bỏ qua: không có bố cục "${op.layout}".`)
           break
         }
-        const patch = Object.fromEntries(Object.entries(op.fields).filter(([k]) => (EDITABLE_FIELDS as readonly string[]).includes(k)))
+        const patch = Object.fromEntries(
+          Object.entries(op.fields).filter(([k]) =>
+            (EDITABLE_FIELDS as readonly string[]).includes(k),
+          ),
+        )
         const check = checkSlide({ ...patch, layout: op.layout }, op.layout)
         if (check.errors.length) {
           summary.push(`Bỏ qua thêm slide: ${check.errors.join('; ')}.`)
           break
         }
         const built = slideFromAi(check.page, theme)
-        const at = Math.min(Math.max((op.position ?? next.slides.length + 1) - 1, 0), next.slides.length)
-        const styledBuilt = next.design ? applySkin(built, next.design, theme, at, next.slides.length + 1, true) : built
+        const at = Math.min(
+          Math.max((op.position ?? next.slides.length + 1) - 1, 0),
+          next.slides.length,
+        )
+        const styledBuilt = next.design
+          ? applySkin(built, next.design, theme, at, next.slides.length + 1, true)
+          : built
         const slides = [...next.slides]
         slides.splice(at, 0, styledBuilt)
         next = { ...next, slides }
@@ -523,7 +719,12 @@ export function applyEdits(deck: Deck, ops: SlideEditOp[]): EditResult {
           summary.push(`Bỏ qua: không có slide ${op.slide}.`)
           break
         }
-        next = { ...next, slides: next.slides.map((s) => (s === slide ? { ...s, notes: op.notes.trim() || undefined } : s)) }
+        next = {
+          ...next,
+          slides: next.slides.map((s) =>
+            s === slide ? { ...s, notes: op.notes.trim() || undefined } : s,
+          ),
+        }
         summary.push(`Cập nhật ghi chú trình bày slide ${op.slide}.`)
         break
       }

@@ -1,3 +1,6 @@
+import { slideFontByName, slideFontStack } from './slideFonts'
+import { textBoxHeight } from './slideMeasure'
+
 /**
  * Hình học hộp chữ của slide.
  *
@@ -9,8 +12,6 @@
  * dùng chung một nguồn (chặng 1 — typography engine).
  */
 import type { SlideElement } from '@/engine/store/docs'
-import { slideFontByName, slideFontStack } from './slideFonts'
-import { textBoxHeight } from './slideMeasure'
 
 export { textBoxHeight } from './slideMeasure'
 
@@ -27,7 +28,12 @@ export function elementHeight(el: SlideElement, inheritedFont?: string): number 
     el.w,
     el.fontSize ?? (el.variant === 'body' ? 2.4 : 3.6),
     el.lineHeight ?? 1.25,
-    { weight: el.fontWeight ?? (el.variant === 'body' ? 500 : 600), letterSpacing: el.letterSpacing, family, italic: family ? el.fontStyle === 'italic' : undefined },
+    {
+      weight: el.fontWeight ?? (el.variant === 'body' ? 500 : 600),
+      letterSpacing: el.letterSpacing,
+      family,
+      italic: family ? el.fontStyle === 'italic' : undefined,
+    },
   )
   return estimate > 0 ? Math.min(el.h, Math.max(4, estimate)) : el.h
 }

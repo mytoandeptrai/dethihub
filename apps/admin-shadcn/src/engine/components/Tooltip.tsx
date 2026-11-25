@@ -16,11 +16,13 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react'
+
 import { Portal } from '@/engine/components/Portal'
 
 export type TipSide = 'top' | 'bottom' | 'left' | 'right'
 
-const KBD_RE = /^(?:Ctrl|Cmd|Alt|Shift|Meta|Enter|Esc|Escape|Del|Delete|Backspace|Tab|Space|F\d{1,2})(?:[\s+]+(?:[A-Z0-9+\-−/]|Enter|Esc|Tab|Delete|Space|F\d{1,2})+)*$/i
+const KBD_RE =
+  /^(?:Ctrl|Cmd|Alt|Shift|Meta|Enter|Esc|Escape|Del|Delete|Backspace|Tab|Space|F\d{1,2})(?:[\s+]+(?:[A-Z0-9+\-−/]|Enter|Esc|Tab|Delete|Space|F\d{1,2})+)*$/i
 
 /** Tách phần phím tắt dạng `"Nhãn — Ctrl+G"` hoặc `"Nhãn (Ctrl+Z)"` sang `{ tip, kbd }`. */
 export function splitTipKbd(raw: string): { tip: string; kbd?: string } {
@@ -72,7 +74,9 @@ function readSide(el: Element): TipSide {
   return s === 'bottom' || s === 'left' || s === 'right' ? s : 'top'
 }
 
-function readTipData(el: HTMLElement): { text: string; jsxKey?: string; side: TipSide; kbd?: string } | null {
+function readTipData(
+  el: HTMLElement,
+): { text: string; jsxKey?: string; side: TipSide; kbd?: string } | null {
   const jsxKey = el.getAttribute('data-tip-id') ?? undefined
   const text = el.getAttribute('data-tip') ?? ''
   if (!jsxKey && !text.trim()) return null
@@ -94,7 +98,9 @@ function getTipZIndex(el: HTMLElement): number | null {
 
 /** Tìm phần tử `[data-tip]:disabled` dưới con trỏ (nút disabled không tự phát pointerover). */
 function findDisabledTipAt(container: Element, x: number, y: number): HTMLElement | null {
-  const list = container.querySelectorAll<HTMLElement>('[data-tip]:disabled, [data-tip-id]:disabled')
+  const list = container.querySelectorAll<HTMLElement>(
+    '[data-tip]:disabled, [data-tip-id]:disabled',
+  )
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
     const r = item.getBoundingClientRect()
@@ -111,10 +117,18 @@ function computePosition(target: DOMRect, tip: DOMRect, preferred: TipSide): Tip
 
   // Lật phía nếu không đủ chỗ
   let side = preferred
-  if (side === 'top' && target.top - h - GAP < PAD && vh - target.bottom > target.top) side = 'bottom'
-  else if (side === 'bottom' && target.bottom + h + GAP > vh - PAD && target.top > vh - target.bottom) side = 'top'
-  else if (side === 'left' && target.left - w - GAP < PAD && vw - target.right > target.left) side = 'right'
-  else if (side === 'right' && target.right + w + GAP > vw - PAD && target.left > vw - target.right) side = 'left'
+  if (side === 'top' && target.top - h - GAP < PAD && vh - target.bottom > target.top)
+    side = 'bottom'
+  else if (
+    side === 'bottom' &&
+    target.bottom + h + GAP > vh - PAD &&
+    target.top > vh - target.bottom
+  )
+    side = 'top'
+  else if (side === 'left' && target.left - w - GAP < PAD && vw - target.right > target.left)
+    side = 'right'
+  else if (side === 'right' && target.right + w + GAP > vw - PAD && target.left > vw - target.right)
+    side = 'left'
 
   let left = 0
   let top = 0
@@ -298,7 +312,10 @@ export function TooltipLayer() {
       const dis = findDisabledTipAt(t, e.clientX, e.clientY)
       if (dis) {
         scheduleHover(dis)
-      } else if (activeRef.current?.wasDisabled || (pendingEl.current && isElDisabled(pendingEl.current))) {
+      } else if (
+        activeRef.current?.wasDisabled ||
+        (pendingEl.current && isElDisabled(pendingEl.current))
+      ) {
         hide()
       }
     }
@@ -401,7 +418,14 @@ export function TooltipLayer() {
     })
     attrObs.observe(el, {
       attributes: true,
-      attributeFilter: ['data-tip', 'data-tip-id', 'data-tip-side', 'data-tip-kbd', 'disabled', 'aria-disabled'],
+      attributeFilter: [
+        'data-tip',
+        'data-tip-id',
+        'data-tip-side',
+        'data-tip-kbd',
+        'disabled',
+        'aria-disabled',
+      ],
     })
 
     const domObs = new MutationObserver(() => {
@@ -420,7 +444,11 @@ export function TooltipLayer() {
     const cur = activeRef.current
     const box = boxRef.current
     if (!cur || !box || !cur.el.isConnected) return
-    const next = computePosition(cur.el.getBoundingClientRect(), box.getBoundingClientRect(), cur.side)
+    const next = computePosition(
+      cur.el.getBoundingClientRect(),
+      box.getBoundingClientRect(),
+      cur.side,
+    )
     setPos(next)
   }, [])
 
@@ -460,19 +488,25 @@ export function TooltipLayer() {
           ['--tip-dy' as string]: `${pos?.dy ?? 0}px`,
           // ẩn: mờ dần + lùi nhẹ về phía nút; chuyển nút khi đang hiện: trượt vị trí
           opacity: out ? 0 : undefined,
-          transform: out ? `translate3d(${pos?.dx ?? 0}px, ${pos?.dy ?? 0}px, 0) scale(0.97)` : undefined,
+          transform: out
+            ? `translate3d(${pos?.dx ?? 0}px, ${pos?.dy ?? 0}px, 0) scale(0.97)`
+            : undefined,
           transition: [
             'opacity 120ms ease-out',
             'transform 120ms ease-out',
-            glide.current ? 'left 140ms cubic-bezier(0.2, 0.8, 0.2, 1), top 140ms cubic-bezier(0.2, 0.8, 0.2, 1)' : '',
-          ].filter(Boolean).join(', '),
+            glide.current
+              ? 'left 140ms cubic-bezier(0.2, 0.8, 0.2, 1), top 140ms cubic-bezier(0.2, 0.8, 0.2, 1)'
+              : '',
+          ]
+            .filter(Boolean)
+            .join(', '),
         }}
-        className="anim-tip pointer-events-none max-w-[260px] rounded-md bg-ink/95 px-2.5 py-1 text-[12px] font-medium leading-snug text-surface shadow-lift"
+        className="anim-tip bg-ink/95 text-surface shadow-lift pointer-events-none max-w-[260px] rounded-md px-2.5 py-1 text-[12px] leading-snug font-medium"
       >
         <div className="flex items-center gap-1.5">
           <span className="break-words">{jsxContent ?? tip.text}</span>
           {tip.kbd ? (
-            <kbd className="shrink-0 rounded-[4px] bg-surface/15 px-1 py-0.5 font-mono text-[10.5px] font-medium leading-none text-surface/90">
+            <kbd className="bg-surface/15 text-surface/90 shrink-0 rounded-[4px] px-1 py-0.5 font-mono text-[10.5px] leading-none font-medium">
               {tip.kbd}
             </kbd>
           ) : null}

@@ -4,7 +4,15 @@
  * `packages/element/src/types.ts`, `bounds.ts`, `collision.ts`, `transformHandles.ts`. Viết lại gọn, không chép nguyên.
  */
 
-export type Kind = 'rectangle' | 'ellipse' | 'diamond' | 'line' | 'arrow' | 'freedraw' | 'text' | 'image'
+export type Kind =
+  | 'rectangle'
+  | 'ellipse'
+  | 'diamond'
+  | 'line'
+  | 'arrow'
+  | 'freedraw'
+  | 'text'
+  | 'image'
 export type StrokeStyle = 'solid' | 'dashed' | 'dotted'
 /** glass: nền màu trong suốt có vệt sáng như mặt kính (vẽ riêng, không qua rough) */
 export type FillStyle = 'hachure' | 'solid' | 'glass'
@@ -101,7 +109,8 @@ export const isPage = (e: El) => !!e.page
 const loopCache = new WeakMap<El, { ver: number; v: Pt[] | null }>()
 /** các vòng lỗ của mảng màu (toạ độ trong hình) */
 export function regionHoles(e: El): Pt[][] {
-  const pts = e.points, hs = e.holes
+  const pts = e.points,
+    hs = e.holes
   if (!e.region || !pts || !hs?.length) return []
   return hs.map((st, i) => pts.slice(st, hs[i + 1] ?? pts.length))
 }
@@ -124,7 +133,8 @@ export function closedLoop(e: El): Pt[] | null {
 /** giao điểm hai đoạn ab, cd (null nếu không cắt) */
 function segCross(a: Pt, b: Pt, c: Pt, d: Pt): Pt | null {
   const o = (p: Pt, q: Pt, r: Pt) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
-  const d1 = o(a, b, c), d2 = o(a, b, d)
+  const d1 = o(a, b, c),
+    d2 = o(a, b, d)
   if (d1 * d2 >= 0 || o(c, d, a) * o(c, d, b) >= 0) return null
   const t = d1 / (d1 - d2)
   return [c[0] + (d[0] - c[0]) * t, c[1] + (d[1] - c[1]) * t]
@@ -133,7 +143,9 @@ function computeLoop(e: El, pts: Pt[]): Pt[] | null {
   const [x1, y1, x2, y2] = localBounds(e)
   const size = Math.hypot(x2 - x1, y2 - y1)
   if (size < 20) return null
-  const n = pts.length, a = pts[0], b = pts[n - 1]
+  const n = pts.length,
+    a = pts[0],
+    b = pts[n - 1]
   const k = Math.floor(n * 0.4)
   // 1. nét tự cắt: lấy chỗ cắt ngoài cùng (đoạn đầu sớm nhất × đoạn cuối muộn nhất) → vòng = giao điểm + phần giữa
   for (let i = 0; i < k; i++) {
@@ -146,15 +158,18 @@ function computeLoop(e: El, pts: Pt[]): Pt[] | null {
   if (Math.hypot(a[0] - b[0], a[1] - b[1]) < Math.max(16, size * 0.2)) return pts
   // 3. một đầu chạm lại thân nét: bỏ đoạn đuôi phía trước / phía sau điểm chạm
   const th = Math.max(12, size * 0.08)
-  for (let i = 0; i < k; i++) if (Math.hypot(b[0] - pts[i][0], b[1] - pts[i][1]) < th) return pts.slice(i)
-  for (let i = n - 1; i >= n - k; i--) if (Math.hypot(a[0] - pts[i][0], a[1] - pts[i][1]) < th) return pts.slice(0, i + 1)
+  for (let i = 0; i < k; i++)
+    if (Math.hypot(b[0] - pts[i][0], b[1] - pts[i][1]) < th) return pts.slice(i)
+  for (let i = n - 1; i >= n - k; i--)
+    if (Math.hypot(a[0] - pts[i][0], a[1] - pts[i][1]) < th) return pts.slice(0, i + 1)
   return null
 }
 /** đường gấp khúc khép kín (điểm cuối trùng điểm đầu) — tô được như đa giác */
 export function isClosedLine(e: El) {
   const p = e.points
   if (e.kind !== 'line' || !p || p.length < 4) return false
-  const a = p[0], b = p[p.length - 1]
+  const a = p[0],
+    b = p[p.length - 1]
   return Math.hypot(a[0] - b[0], a[1] - b[1]) < 0.5
 }
 
@@ -196,9 +211,15 @@ export function mutate(e: El, patch: Partial<El>) {
 /** khung chưa xoay (toạ độ cảnh) */
 export function localBounds(e: El): Bounds {
   if (e.points?.length) {
-    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity
+    let x1 = Infinity,
+      y1 = Infinity,
+      x2 = -Infinity,
+      y2 = -Infinity
     for (const [px, py] of e.points) {
-      x1 = Math.min(x1, px); y1 = Math.min(y1, py); x2 = Math.max(x2, px); y2 = Math.max(y2, py)
+      x1 = Math.min(x1, px)
+      y1 = Math.min(y1, py)
+      x2 = Math.max(x2, px)
+      y2 = Math.max(y2, py)
     }
     return [e.x + x1, e.y + y1, e.x + x2, e.y + y2]
   }
@@ -212,8 +233,10 @@ export function centerOf(e: El): Pt {
 
 export function rotate(p: Pt, c: Pt, a: number): Pt {
   if (!a) return p
-  const cos = Math.cos(a), sin = Math.sin(a)
-  const dx = p[0] - c[0], dy = p[1] - c[1]
+  const cos = Math.cos(a),
+    sin = Math.sin(a)
+  const dx = p[0] - c[0],
+    dy = p[1] - c[1]
   return [c[0] + dx * cos - dy * sin, c[1] + dx * sin + dy * cos]
 }
 
@@ -222,10 +245,19 @@ export function worldBounds(e: El): Bounds {
   const [x1, y1, x2, y2] = localBounds(e)
   if (!e.angle) return [x1, y1, x2, y2]
   const c = centerOf(e)
-  const pts = ([[x1, y1], [x2, y1], [x2, y2], [x1, y2]] as Pt[]).map((p) => rotate(p, c, e.angle))
+  const pts = (
+    [
+      [x1, y1],
+      [x2, y1],
+      [x2, y2],
+      [x1, y2],
+    ] as Pt[]
+  ).map((p) => rotate(p, c, e.angle))
   return [
-    Math.min(...pts.map((p) => p[0])), Math.min(...pts.map((p) => p[1])),
-    Math.max(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[1])),
+    Math.min(...pts.map((p) => p[0])),
+    Math.min(...pts.map((p) => p[1])),
+    Math.max(...pts.map((p) => p[0])),
+    Math.max(...pts.map((p) => p[1])),
   ]
 }
 
@@ -233,8 +265,10 @@ export function unionBounds(els: El[]): Bounds | null {
   if (!els.length) return null
   const bs = els.map(worldBounds)
   return [
-    Math.min(...bs.map((b) => b[0])), Math.min(...bs.map((b) => b[1])),
-    Math.max(...bs.map((b) => b[2])), Math.max(...bs.map((b) => b[3])),
+    Math.min(...bs.map((b) => b[0])),
+    Math.min(...bs.map((b) => b[1])),
+    Math.max(...bs.map((b) => b[2])),
+    Math.max(...bs.map((b) => b[3])),
   ]
 }
 
@@ -251,7 +285,10 @@ export function groupBlocks(els: El[]): Block[] {
   for (const e of els) {
     if (e.groupId) {
       let arr = byGroup.get(e.groupId)
-      if (!arr) { arr = []; byGroup.set(e.groupId, arr) }
+      if (!arr) {
+        arr = []
+        byGroup.set(e.groupId, arr)
+      }
       arr.push(e)
     } else singles.push(e)
   }
@@ -264,7 +301,15 @@ export function groupBlocks(els: El[]): Block[] {
   return out
 }
 
-export type AlignKind = 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom' | 'distX' | 'distY'
+export type AlignKind =
+  | 'left'
+  | 'centerX'
+  | 'right'
+  | 'top'
+  | 'centerY'
+  | 'bottom'
+  | 'distX'
+  | 'distY'
 
 /** căn thẳng hàng hoặc giãn đều các khối; trả về true nếu có phần tử thay đổi vị trí */
 export function alignBlocks(els: El[], kind: AlignKind): boolean {
@@ -281,7 +326,9 @@ export function alignBlocks(els: El[], kind: AlignKind): boolean {
     if (movable.length < 3) return false
     const i0 = kind === 'distX' ? 0 : 1
     const i1 = kind === 'distX' ? 2 : 3
-    const sorted = [...movable].sort((a, b) => (a.bounds[i0] + a.bounds[i1]) / 2 - (b.bounds[i0] + b.bounds[i1]) / 2)
+    const sorted = [...movable].sort(
+      (a, b) => (a.bounds[i0] + a.bounds[i1]) / 2 - (b.bounds[i0] + b.bounds[i1]) / 2,
+    )
     const span = sorted[sorted.length - 1].bounds[i1] - sorted[0].bounds[i0]
     const totalSize = sorted.reduce((s, b) => s + (b.bounds[i1] - b.bounds[i0]), 0)
     const gap = (span - totalSize) / (sorted.length - 1)
@@ -290,18 +337,20 @@ export function alignBlocks(els: El[], kind: AlignKind): boolean {
       const b = sorted[i]
       const delta = cur - b.bounds[i0]
       if (moveBlock(b, kind === 'distX' ? delta : 0, kind === 'distY' ? delta : 0)) changed = true
-      cur += (b.bounds[i1] - b.bounds[i0]) + gap
+      cur += b.bounds[i1] - b.bounds[i0] + gap
     }
     return changed
   }
   const all = unionBounds(els)
   if (!all) return false
   const [ax1, ay1, ax2, ay2] = all
-  const acx = (ax1 + ax2) / 2, acy = (ay1 + ay2) / 2
+  const acx = (ax1 + ax2) / 2,
+    acy = (ay1 + ay2) / 2
   for (const b of blocks) {
     if (b.locked) continue
     const [bx1, by1, bx2, by2] = b.bounds
-    let dx = 0, dy = 0
+    let dx = 0,
+      dy = 0
     if (kind === 'left') dx = ax1 - bx1
     else if (kind === 'centerX') dx = acx - (bx1 + bx2) / 2
     else if (kind === 'right') dx = ax2 - bx2
@@ -314,7 +363,8 @@ export function alignBlocks(els: El[], kind: AlignKind): boolean {
 }
 
 function distToSeg(p: Pt, a: Pt, b: Pt) {
-  const dx = b[0] - a[0], dy = b[1] - a[1]
+  const dx = b[0] - a[0],
+    dy = b[1] - a[1]
   const len = dx * dx + dy * dy
   const t = len ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len)) : 0
   return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy)
@@ -323,8 +373,10 @@ function distToSeg(p: Pt, a: Pt, b: Pt) {
 export function inPolygon(p: Pt, poly: Pt[]) {
   let inside = false
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i], [xj, yj] = poly[j]
-    if (yi > p[1] !== yj > p[1] && p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi) inside = !inside
+    const [xi, yi] = poly[i],
+      [xj, yj] = poly[j]
+    if (yi > p[1] !== yj > p[1] && p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi)
+      inside = !inside
   }
   return inside
 }
@@ -343,19 +395,32 @@ export function hitTest(e: El, p: Pt, tol: number): boolean {
       return true
     case 'rectangle': {
       if (filled) return true
-      const c: Pt[] = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]]
+      const c: Pt[] = [
+        [x1, y1],
+        [x2, y1],
+        [x2, y2],
+        [x1, y2],
+      ]
       return c.some((a, i) => distToSeg(q, a, c[(i + 1) % 4]) <= t)
     }
     case 'diamond': {
-      const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2
-      const c: Pt[] = [[cx, y1], [x2, cy], [cx, y2], [x1, cy]]
+      const cx = (x1 + x2) / 2,
+        cy = (y1 + y2) / 2
+      const c: Pt[] = [
+        [cx, y1],
+        [x2, cy],
+        [cx, y2],
+        [x1, cy],
+      ]
       if (filled && inPolygon(q, c)) return true
       return c.some((a, i) => distToSeg(q, a, c[(i + 1) % 4]) <= t)
     }
     case 'ellipse': {
-      const rx = (x2 - x1) / 2, ry = (y2 - y1) / 2
+      const rx = (x2 - x1) / 2,
+        ry = (y2 - y1) / 2
       if (rx < 1 || ry < 1) return true
-      const nx = (q[0] - x1 - rx) / rx, ny = (q[1] - y1 - ry) / ry
+      const nx = (q[0] - x1 - rx) / rx,
+        ny = (q[1] - y1 - ry) / ry
       const d = Math.hypot(nx, ny)
       if (filled && d <= 1) return true
       return Math.abs(d - 1) * Math.min(rx, ry) <= t
@@ -371,7 +436,8 @@ export function hitTest(e: El, p: Pt, tol: number): boolean {
       }
       const pts = (e.points ?? []).map(([px, py]) => [e.x + px, e.y + py] as Pt)
       if (pts.length === 1) return Math.hypot(q[0] - pts[0][0], q[1] - pts[0][1]) <= t
-      for (let i = 0; i < pts.length - 1; i++) if (distToSeg(q, pts[i], pts[i + 1]) <= t) return true
+      for (let i = 0; i < pts.length - 1; i++)
+        if (distToSeg(q, pts[i], pts[i + 1]) <= t) return true
       return false
     }
   }
@@ -382,22 +448,47 @@ export function hitTest(e: El, p: Pt, tol: number): boolean {
 export type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'rot' | 'p0' | 'p1'
 
 /** vị trí tay nắm trong hệ toạ độ của khung (chưa xoay) */
-export function handlePositions(b: Bounds, zoom: number, withRotate: boolean): Partial<Record<Handle, Pt>> {
+export function handlePositions(
+  b: Bounds,
+  zoom: number,
+  withRotate: boolean,
+): Partial<Record<Handle, Pt>> {
   const [x1, y1, x2, y2] = b
   const pad = 6 / zoom
-  const l = x1 - pad, r = x2 + pad, t = y1 - pad, bt = y2 + pad
-  const mx = (l + r) / 2, my = (t + bt) / 2
+  const l = x1 - pad,
+    r = x2 + pad,
+    t = y1 - pad,
+    bt = y2 + pad
+  const mx = (l + r) / 2,
+    my = (t + bt) / 2
   const h: Partial<Record<Handle, Pt>> = {
-    nw: [l, t], n: [mx, t], ne: [r, t], e: [r, my], se: [r, bt], s: [mx, bt], sw: [l, bt], w: [l, my],
+    nw: [l, t],
+    n: [mx, t],
+    ne: [r, t],
+    e: [r, my],
+    se: [r, bt],
+    s: [mx, bt],
+    sw: [l, bt],
+    w: [l, my],
   }
   // khung quá nhỏ thì bỏ tay nắm giữa cạnh cho đỡ chồng nhau
-  if ((r - l) * zoom < 40) { delete h.n; delete h.s }
-  if ((bt - t) * zoom < 40) { delete h.e; delete h.w }
+  if ((r - l) * zoom < 40) {
+    delete h.n
+    delete h.s
+  }
+  if ((bt - t) * zoom < 40) {
+    delete h.e
+    delete h.w
+  }
   if (withRotate) h.rot = [mx, t - 22 / zoom]
   return h
 }
 
-export interface FontOpt { font?: 'serif'; italic?: boolean; bold?: boolean }
+export interface FontOpt {
+  font?: 'serif'
+  italic?: boolean
+  bold?: boolean
+}
 export function measureText(text: string, fontSize: number, f?: FontOpt): { w: number; h: number } {
   const lines = text.split('\n')
   const w = Math.max(1, ...lines.map((l) => lineWidth(l, fontSize, f)))
@@ -405,7 +496,11 @@ export function measureText(text: string, fontSize: number, f?: FontOpt): { w: n
 }
 
 /** một đoạn chữ cùng kiểu: 0 thường, 1 chỉ số trên, -1 chỉ số dưới */
-export interface Run { t: string; lv: 0 | 1 | -1; it?: boolean }
+export interface Run {
+  t: string
+  lv: 0 | 1 | -1
+  it?: boolean
+}
 /** tách chỉ số: `H_2O`, `x^2`, `3d^{6}`, `T_{1}`, `x^12`. Không có `_`/`^` thì là một đoạn thường.
  *  Viết `\_` / `\^` để giữ nguyên ký tự. `\it{..}` đảo kiểu nghiêng cho đoạn trong ngoặc: `\it{T} (phút)`. */
 const IT = String.raw`\it{`
@@ -413,10 +508,13 @@ export function textRuns(line: string): Run[] {
   if (!line.includes(IT)) return subRuns(line)
   const out: Run[] = []
   let i = 0
-  for (let j; (j = line.indexOf(IT, i)) >= 0;) {
+  for (let j; (j = line.indexOf(IT, i)) >= 0; ) {
     const end = line.indexOf('}', j + 4)
     if (end < 0) break
-    out.push(...subRuns(line.slice(i, j)), ...subRuns(line.slice(j + 4, end)).map((r) => ({ ...r, it: true })))
+    out.push(
+      ...subRuns(line.slice(i, j)),
+      ...subRuns(line.slice(j + 4, end)).map((r) => ({ ...r, it: true })),
+    )
     i = end + 1
   }
   out.push(...subRuns(line.slice(i)))
@@ -434,12 +532,18 @@ function subRuns(line: string): Run[] {
   }
   for (let i = 0; i < line.length; i++) {
     const ch = line[i]
-    if (ch === '\\' && (line[i + 1] === '_' || line[i + 1] === '^')) { buf += line[++i]; continue }
+    if (ch === '\\' && (line[i + 1] === '_' || line[i + 1] === '^')) {
+      buf += line[++i]
+      continue
+    }
     if ((ch === '_' || ch === '^') && i + 1 < line.length) {
       let arg: string
       if (line[i + 1] === '{') {
         const end = line.indexOf('}', i + 2)
-        if (end < 0) { buf += ch; continue }
+        if (end < 0) {
+          buf += ch
+          continue
+        }
         arg = line.slice(i + 2, end)
         i = end
       } else if (/[\p{L}\p{N}+\-−*′']/u.test(line[i + 1])) {
@@ -448,8 +552,12 @@ function subRuns(line: string): Run[] {
         if (/\d/.test(line[j])) while (j + 1 < line.length && /\d/.test(line[j + 1])) j++
         arg = line.slice(i + 1, j + 1)
         i = j
-      } else { buf += ch; continue }
-      push(buf, 0); buf = ''
+      } else {
+        buf += ch
+        continue
+      }
+      push(buf, 0)
+      buf = ''
       push(arg, ch === '^' ? 1 : -1)
       continue
     }
@@ -470,7 +578,8 @@ export function lineWidth(line: string, fontSize: number, f?: FontOpt) {
 }
 
 /** kiểu chữ của một đoạn: `\it{}` đảo nghiêng so với cả khung chữ */
-export const runFont = (r: Run, f?: FontOpt): FontOpt | undefined => (r.it ? { ...f, italic: !f?.italic } : f)
+export const runFont = (r: Run, f?: FontOpt): FontOpt | undefined =>
+  r.it ? { ...f, italic: !f?.italic } : f
 
 export const LINE_HEIGHT = 1.25
 export const FONT_FAMILY = "'Be Vietnam Pro', system-ui, 'Segoe UI', sans-serif"

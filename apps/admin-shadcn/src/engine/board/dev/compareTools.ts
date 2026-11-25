@@ -3,8 +3,10 @@
  * Trên trình duyệt dev: `(await import('/src/board/dev/compareTools.ts')).compare()` hoặc `compare(['graph'])`.
  */
 import rough from 'roughjs'
+
 import { FIGURE_GUIDE, toolFromRaw } from '@/engine/lib/docRewrite'
 import { renderTool } from '@/engine/lib/toolSpec'
+
 import { drawElement, setImageLoadHandler } from '../render'
 import { svgToElements } from '../svgImport'
 
@@ -14,25 +16,69 @@ export function samples(): Record<string, unknown>[] {
   const seen = new Set<string>()
   const add = (raw: Record<string, unknown>) => {
     if (seen.has(raw.kind as string)) return
-    try { renderTool(toolFromRaw(raw)); out.push(raw); seen.add(raw.kind as string) } catch { /* mẫu không dựng được */ }
+    try {
+      renderTool(toolFromRaw(raw))
+      out.push(raw)
+      seen.add(raw.kind as string)
+    } catch {
+      /* mẫu không dựng được */
+    }
   }
-  add({ kind: 'scene', text: 'A(0; 0) B(4; 0) C(0; 3)\nAB, BC, CA\nvuông BAC\nkích thước AB "4 m"\ngóc ABC "α"' })
-  add({ kind: 'stats', chart: 'bar', data: 'Thứ 2; Thứ 3; Thứ 4\nLớp 10A: 30; 25; 28\nLớp 10B: 28; 22; 24' })
+  add({
+    kind: 'scene',
+    text: 'A(0; 0) B(4; 0) C(0; 3)\nAB, BC, CA\nvuông BAC\nkích thước AB "4 m"\ngóc ABC "α"',
+  })
+  add({
+    kind: 'stats',
+    chart: 'bar',
+    data: 'Thứ 2; Thứ 3; Thứ 4\nLớp 10A: 30; 25; 28\nLớp 10B: 28; 22; 24',
+  })
   add({ kind: 'probtree', text: "A: 0,3\n  B: 0,6\n  B': 0,4\nA': 0,7" })
   add({ kind: 'numberline', sets: '(-2; 3]\n(-oo; -1) ∪ [2; 5]' })
-  add({ kind: 'grouped', groups: '[150; 155): 4\n[155; 160): 7\n[160; 165]: 5', label: 'Chiều cao (cm)', freqLabel: 'Số HS', view: 'hist', polygon: true })
-  add({ kind: 'gas', axes: 'pV', states: '1: (1; 4)\n2: (4; 1)\n3: (4; 4)', processes: '1-2: đẳng nhiệt\n2-3: đẳng tích\n3-1: đẳng áp', ticks: 'symbol', showStates: true })
-  add({ kind: 'foodweb', text: 'Cỏ -> Thỏ, Chuột\nThỏ, Chuột -> Cáo', direction: 'bottom-up', nodeStyle: 'box', showLevels: true })
-  out.push({ kind: 'venn', sets: 'A, B, C', shade: "(A ∪ B ∪ C)' ∪ A \\ (B ∪ C)", universe: true, counts: '' })
+  add({
+    kind: 'grouped',
+    groups: '[150; 155): 4\n[155; 160): 7\n[160; 165]: 5',
+    label: 'Chiều cao (cm)',
+    freqLabel: 'Số HS',
+    view: 'hist',
+    polygon: true,
+  })
+  add({
+    kind: 'gas',
+    axes: 'pV',
+    states: '1: (1; 4)\n2: (4; 1)\n3: (4; 4)',
+    processes: '1-2: đẳng nhiệt\n2-3: đẳng tích\n3-1: đẳng áp',
+    ticks: 'symbol',
+    showStates: true,
+  })
+  add({
+    kind: 'foodweb',
+    text: 'Cỏ -> Thỏ, Chuột\nThỏ, Chuột -> Cáo',
+    direction: 'bottom-up',
+    nodeStyle: 'box',
+    showLevels: true,
+  })
+  out.push({
+    kind: 'venn',
+    sets: 'A, B, C',
+    shade: "(A ∪ B ∪ C)' ∪ A \\ (B ∪ C)",
+    universe: true,
+    counts: '',
+  })
   const re = /\{"kind":"\w+"/g
   let m: RegExpExecArray | null
   while ((m = re.exec(FIGURE_GUIDE))) {
-    let d = 0, j = m.index
+    let d = 0,
+      j = m.index
     for (; j < FIGURE_GUIDE.length; j++) {
       if (FIGURE_GUIDE[j] === '{') d++
       if (FIGURE_GUIDE[j] === '}' && !--d) break
     }
-    try { add(JSON.parse(FIGURE_GUIDE.slice(m.index, j + 1))) } catch { /* JSON mẫu có chỗ giữ chỗ */ }
+    try {
+      add(JSON.parse(FIGURE_GUIDE.slice(m.index, j + 1)))
+    } catch {
+      /* JSON mẫu có chỗ giữ chỗ */
+    }
   }
   return out
 }
@@ -41,7 +87,8 @@ export function compare(kinds?: string[], W = 380) {
   document.getElementById('tool-compare')?.remove()
   const box = document.createElement('div')
   box.id = 'tool-compare'
-  box.style.cssText = 'position:fixed;inset:0;overflow:auto;background:#ddd;z-index:99999;padding:8px'
+  box.style.cssText =
+    'position:fixed;inset:0;overflow:auto;background:#ddd;z-index:99999;padding:8px'
   document.body.appendChild(box)
   const redraws: (() => void)[] = []
   setImageLoadHandler(() => redraws.forEach((f) => f()))
@@ -58,7 +105,8 @@ export function compare(kinds?: string[], W = 380) {
     im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(img.svg)
     im.style.cssText = `width:${W}px;background:#fff`
     const c = document.createElement('canvas')
-    c.width = W * 2; c.height = H * 2
+    c.width = W * 2
+    c.height = H * 2
     c.style.cssText = `width:${W}px;height:${H}px;background:#fff`
     row.append(lab, im, c)
     box.appendChild(row)

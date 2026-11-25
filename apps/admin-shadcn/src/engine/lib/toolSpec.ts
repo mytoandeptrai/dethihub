@@ -1,31 +1,47 @@
+import {
+  renderChemGraphSvg,
+  renderElectronSvg,
+  renderStructSvg,
+  type ChemGraphSpec,
+  type ElectronSpec,
+  type StructSpec,
+} from './chem'
+import { renderChemEqSvg, type ChemEqSpec } from './chemEq'
+import { renderCircuitSvg, type CircuitSpec } from './circuit'
+import { renderFieldSvg, type FieldSpec } from './field'
+import { renderFoodWebSvg, type FoodWebSpec } from './foodweb'
+import { renderGasSvg, type GasSpec } from './gas'
+import { renderGeo2dSvg, renderGeo3dSvg, type Geo2dSpec, type Geo3dSpec } from './geometry'
+import { renderGroupedSvg, type GroupedSpec } from './grouped'
+import { renderLensSvg, type LensSpec } from './lens'
+import {
+  renderNumberLineSvg,
+  renderTreeSvg,
+  renderTrigSvg,
+  renderVennSvg,
+  type NumberLineSpec,
+  type TreeSpec,
+  type TrigSpec,
+  type VennSpec,
+} from './mathExtra'
+import { renderClockSvg, renderObjectsSvg, type ClockSpec, type ObjectsSpec } from './objects'
+import { renderOscSvg, type OscSpec } from './oscillation'
+import { renderOxySvg, type OxySpec } from './oxy'
+import { renderPedigreeSvg, type PedigreeSpec } from './pedigree'
+import { renderPhaseSvg, type PhaseSpec } from './phaseChange'
+import { renderInclineSvg, renderMotionSvg, type InclineSpec, type MotionSpec } from './physics'
 /**
  * Ảnh do tab "Công cụ" vẽ đều mang theo cấu hình ({kind, spec}) trong thẻ
  * <desc> của SVG (slide) hoặc attr `plot` của ảnh (soạn đề) — nhấp đúp là mở
  * lại đúng công cụ với cấu hình cũ. Ảnh đồ thị đời đầu chỉ có PlotSpec trần.
  */
 import { readPlotSpec, renderPlotSvg, type PlotSpec } from './plot'
-import { renderVarTableSvg, type VarTableSpec } from './varTable'
-import { renderGeo2dSvg, renderGeo3dSvg, type Geo2dSpec, type Geo3dSpec } from './geometry'
-import { renderSignTableSvg, type SignTableSpec } from './signTable'
-import { renderOxySvg, type OxySpec } from './oxy'
-import { renderStatsSvg, type StatsSpec } from './stats'
-import { renderCircuitSvg, type CircuitSpec } from './circuit'
-import { renderInclineSvg, renderMotionSvg, type InclineSpec, type MotionSpec } from './physics'
-import { renderNumberLineSvg, renderTreeSvg, renderTrigSvg, renderVennSvg, type NumberLineSpec, type TreeSpec, type TrigSpec, type VennSpec } from './mathExtra'
-import { renderGasSvg, type GasSpec } from './gas'
-import { renderSceneSvg, type SceneSpec } from './scene'
-import { renderChemGraphSvg, renderElectronSvg, renderStructSvg, type ChemGraphSpec, type ElectronSpec, type StructSpec } from './chem'
-import { renderChemEqSvg, type ChemEqSpec } from './chemEq'
-import { renderGroupedSvg, type GroupedSpec } from './grouped'
-import { renderTableSvg, type TableSpec } from './table'
-import { renderPhaseSvg, type PhaseSpec } from './phaseChange'
-import { renderOscSvg, type OscSpec } from './oscillation'
-import { renderLensSvg, type LensSpec } from './lens'
-import { renderPedigreeSvg, type PedigreeSpec } from './pedigree'
 import { renderPunnettSvg, type PunnettSpec } from './punnett'
-import { renderFoodWebSvg, type FoodWebSpec } from './foodweb'
-import { renderFieldSvg, type FieldSpec } from './field'
-import { renderClockSvg, renderObjectsSvg, type ClockSpec, type ObjectsSpec } from './objects'
+import { renderSceneSvg, type SceneSpec } from './scene'
+import { renderSignTableSvg, type SignTableSpec } from './signTable'
+import { renderStatsSvg, type StatsSpec } from './stats'
+import { renderTableSvg, type TableSpec } from './table'
+import { renderVarTableSvg, type VarTableSpec } from './varTable'
 
 export type ToolDoc =
   | { kind: 'graph'; spec: PlotSpec }
@@ -96,7 +112,10 @@ const n1 = (v: number) => String(Math.round(v * 10) / 10)
  * được thêm `transform="translate(dx dy)"` (thẻ đã có transform thì nối thêm,
  * đừng ghi đè). Renderer chỉ gắn `data-lbl`, không tự đọc labelPos.
  */
-export function applyLabelPos<T extends { svg: string }>(img: T, labelPos: LabelPos | undefined): T {
+export function applyLabelPos<T extends { svg: string }>(
+  img: T,
+  labelPos: LabelPos | undefined,
+): T {
   if (!labelPos || !img.svg.includes('data-lbl')) return img
   return {
     ...img,
@@ -202,7 +221,9 @@ export function readToolDoc(svgOrUrl: string | null | undefined): ToolDoc | null
   const m = /<desc>([^<]*)<\/desc>/.exec(svg)
   if (!m) return null
   const raw = m[1].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
-  return parseToolJson(raw) ?? (readPlotSpec(svg) ? { kind: 'graph', spec: readPlotSpec(svg)! } : null)
+  return (
+    parseToolJson(raw) ?? (readPlotSpec(svg) ? { kind: 'graph', spec: readPlotSpec(svg)! } : null)
+  )
 }
 
 /** đọc attr `plot` (JSON) của ảnh trong trang đề: {kind, spec}, {deTool}, hoặc PlotSpec trần đời đầu */

@@ -1,12 +1,22 @@
 /** Hộp công cụ Hoá: cấu hình electron, công thức cấu tạo, đồ thị, phương trình phản ứng. */
 import { useMemo, useRef, useState } from 'react'
-import { cn } from '@/engine/lib/cn'
+
 import { inputClass } from '@/engine/components/ui'
-import { type ToolDoc } from '@/engine/lib/toolSpec'
-import type { ChemGraphSpec, ElectronSpec, StructSpec } from '@/engine/lib/chem'
 import { CHEMEQ_DEFAULT, type ChemEqSpec } from '@/engine/lib/chemEq'
+import { cn } from '@/engine/lib/cn'
+import { type ToolDoc } from '@/engine/lib/toolSpec'
+
+import {
+  type Props,
+  type HelpGroups,
+  useRender,
+  HelpButton,
+  HelpCards,
+  TextBlock,
+} from './toolModalKit'
 import { Check, ToolShell, sectionTitle } from './ToolShell'
-import { type Props, type HelpGroups, useRender, HelpButton, HelpCards, TextBlock } from './toolModalKit'
+
+import type { ChemGraphSpec, ElectronSpec, StructSpec } from '@/engine/lib/chem'
 
 export function ElectronModal({ initial, submitLabel, onClose, onInsert }: Props<ElectronSpec>) {
   const [spec, setSpec] = useState<ElectronSpec>(initial ?? { element: 'Fe', valenceOnly: false })
@@ -17,12 +27,27 @@ export function ElectronModal({ initial, submitLabel, onClose, onInsert }: Props
     <>
       <section>
         <h3 className={sectionTitle}>Nguyên tố hoặc ion</h3>
-        <input className={cn(inputClass, 'h-9')} value={spec.element} onChange={(e) => set({ element: e.target.value })} aria-label="Nguyên tố" placeholder="Fe, 26, Fe3+, Cl-" />
-        <p className="mt-1.5 text-[12px] leading-snug text-ink-3">Kí hiệu (Fe), số hiệu (26) hoặc ion (Fe3+, Cl-). Có từ H đến Ba; đã tính Cr, Cu bán bão hoà.</p>
-        {error ? <p role="alert" className="mt-1.5 text-[12px] text-clay-deep">{error}</p> : null}
+        <input
+          className={cn(inputClass, 'h-9')}
+          value={spec.element}
+          onChange={(e) => set({ element: e.target.value })}
+          aria-label="Nguyên tố"
+          placeholder="Fe, 26, Fe3+, Cl-"
+        />
+        <p className="text-ink-3 mt-1.5 text-[12px] leading-snug">
+          Kí hiệu (Fe), số hiệu (26) hoặc ion (Fe3+, Cl-). Có từ H đến Ba; đã tính Cr, Cu bán bão
+          hoà.
+        </p>
+        {error ? (
+          <p role="alert" className="text-clay-deep mt-1.5 text-[12px]">
+            {error}
+          </p>
+        ) : null}
       </section>
       <section>
-        <Check checked={spec.valenceOnly} onChange={(valenceOnly) => set({ valenceOnly })}>Chỉ vẽ ô orbital lớp ngoài cùng</Check>
+        <Check checked={spec.valenceOnly} onChange={(valenceOnly) => set({ valenceOnly })}>
+          Chỉ vẽ ô orbital lớp ngoài cùng
+        </Check>
       </section>
     </>
   )
@@ -48,7 +73,10 @@ const STRUCT_HELP: HelpGroups = [
       { code: 'CH3-CH2-OH', what: 'Liên kết đơn: dấu gạch ngang' },
       { code: 'CH2=CH-CH3', what: 'Liên kết đôi: dấu bằng' },
       { code: 'CH≡C-CH3  hoặc  CH#C-CH3', what: 'Liên kết ba' },
-      { code: 'NH3^+   COO^-   O^-', what: 'Điện tích sau "^" (^+, ^-, ^2+, ^2-) thành chỉ số trên' },
+      {
+        code: 'NH3^+   COO^-   O^-',
+        what: 'Điện tích sau "^" (^+, ^-, ^2+, ^2-) thành chỉ số trên',
+      },
     ],
   },
   {
@@ -72,7 +100,9 @@ const STRUCT_HELP: HelpGroups = [
 ]
 
 export function StructModal({ initial, submitLabel, onClose, onInsert }: Props<StructSpec>) {
-  const [spec, setSpec] = useState<StructSpec>(initial ?? { formula: 'CH3-CH(CH3)-CH2-CH(OH)-CH3', style: 'condensed', number: false })
+  const [spec, setSpec] = useState<StructSpec>(
+    initial ?? { formula: 'CH3-CH(CH3)-CH2-CH(OH)-CH3', style: 'condensed', number: false },
+  )
   const set = (p: Partial<StructSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'struct', spec }), [spec])
   const { preview, error } = useRender(doc)
@@ -101,7 +131,9 @@ export function StructModal({ initial, submitLabel, onClose, onInsert }: Props<S
               onClick={() => set({ style: id })}
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                style === id ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                style === id
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {label}
@@ -133,7 +165,7 @@ export function StructModal({ initial, submitLabel, onClose, onInsert }: Props<S
               key={tok}
               type="button"
               onClick={() => insertToken(tok)}
-              className="rounded-[6px] border border-line px-2 py-0.5 text-[12px] text-ink-2 hover:border-ink-4"
+              className="border-line text-ink-2 hover:border-ink-4 rounded-[6px] border px-2 py-0.5 text-[12px]"
             >
               {label}
             </button>
@@ -141,7 +173,7 @@ export function StructModal({ initial, submitLabel, onClose, onInsert }: Props<S
           <button
             type="button"
             onClick={() => set({ formula: '[benzen](1:CH3)(4:NO2)' })}
-            className="rounded-[6px] border border-line px-2 py-0.5 text-[12px] text-ink-2 hover:border-ink-4"
+            className="border-line text-ink-2 hover:border-ink-4 rounded-[6px] border px-2 py-0.5 text-[12px]"
           >
             p-nitrotoluen
           </button>
@@ -163,7 +195,9 @@ export function StructModal({ initial, submitLabel, onClose, onInsert }: Props<S
               onClick={() => set({ ringStyle: id })}
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                ringStyle === id ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                ringStyle === id
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {label}
@@ -172,9 +206,13 @@ export function StructModal({ initial, submitLabel, onClose, onInsert }: Props<S
         </div>
       </section>
       <section className="space-y-1.5">
-        <Check checked={!!spec.number} onChange={(number) => set({ number })}>Đánh số mạch chính / đỉnh vòng</Check>
+        <Check checked={!!spec.number} onChange={(number) => set({ number })}>
+          Đánh số mạch chính / đỉnh vòng
+        </Check>
         {style === 'condensed' && (
-          <Check checked={drawRings} onChange={(v) => set({ drawRings: v })}>Vẽ C₆H₅ thành vòng</Check>
+          <Check checked={drawRings} onChange={(v) => set({ drawRings: v })}>
+            Vẽ C₆H₅ thành vòng
+          </Check>
         )}
       </section>
     </>
@@ -198,14 +236,24 @@ const CHEM_GRAPH_HELP: HelpGroups = [
   {
     group: 'Điểm',
     items: [
-      { code: '(0; 0) (0,3; 0,3) (0,6; 0)', what: 'Điểm (x; y), nối gấp khúc; số thập phân dùng dấu phẩy' },
+      {
+        code: '(0; 0) (0,3; 0,3) (0,6; 0)',
+        what: 'Điểm (x; y), nối gấp khúc; số thập phân dùng dấu phẩy',
+      },
       { code: 'Trục: n CO2, n↓', what: 'Chữ số sau chữ cái tự thành chỉ số dưới' },
     ],
   },
 ]
 
 export function ChemGraphModal({ initial, submitLabel, onClose, onInsert }: Props<ChemGraphSpec>) {
-  const [spec, setSpec] = useState<ChemGraphSpec>(initial ?? { xName: 'n CO2', yName: 'n CaCO3', points: '(0; 0) (0,3; 0,3) (0,6; 0)', dashed: true })
+  const [spec, setSpec] = useState<ChemGraphSpec>(
+    initial ?? {
+      xName: 'n CO2',
+      yName: 'n CaCO3',
+      points: '(0; 0) (0,3; 0,3) (0,6; 0)',
+      dashed: true,
+    },
+  )
   const set = (p: Partial<ChemGraphSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'chemgraph', spec }), [spec])
   const { preview, error } = useRender(doc)
@@ -222,17 +270,27 @@ export function ChemGraphModal({ initial, submitLabel, onClose, onInsert }: Prop
         label="Các điểm của đồ thị"
       />
       <section className="grid grid-cols-2 gap-2">
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Trục ngang
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.xName} onChange={(e) => set({ xName: e.target.value })} />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.xName}
+            onChange={(e) => set({ xName: e.target.value })}
+          />
         </label>
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Trục dọc
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.yName} onChange={(e) => set({ yName: e.target.value })} />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.yName}
+            onChange={(e) => set({ yName: e.target.value })}
+          />
         </label>
       </section>
       <section>
-        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>Nét đứt chiếu xuống hai trục</Check>
+        <Check checked={spec.dashed} onChange={(dashed) => set({ dashed })}>
+          Nét đứt chiếu xuống hai trục
+        </Check>
       </section>
     </>
   )
@@ -255,23 +313,37 @@ export function ChemGraphModal({ initial, submitLabel, onClose, onInsert }: Prop
  * Toán: đường tròn lượng giác, sơ đồ cây xác suất, trục số
  * ------------------------------------------------------------------ */
 
-
 const CHEMEQ_HELP: HelpGroups = [
   {
     group: 'Mũi tên & điều kiện',
     items: [
       { code: '->  hoặc  →  hoặc  =', what: 'Mũi tên một chiều' },
       { code: '<=>  hoặc  ⇌', what: 'Mũi tên thuận nghịch (hai nửa mũi tên)' },
-      { code: '[t°]   [to]   [t^o]', what: 'Điều kiện trên mũi tên (sau mũi tên hoặc cuối dòng khi có 1 mũi tên)' },
-      { code: '[t°, xt, p | Fe]   [-OH^- | +H^+]', what: 'Ngăn bằng "|" để ghi 2 tầng (trên | dưới), hỗ trợ điện tích ^+ / ^-' },
-      { code: 'A -> [đk1] B <=> [đk2] C', what: 'Nhiều mũi tên trên một dòng; điều kiện đặt ngay sau mỗi mũi tên' },
+      {
+        code: '[t°]   [to]   [t^o]',
+        what: 'Điều kiện trên mũi tên (sau mũi tên hoặc cuối dòng khi có 1 mũi tên)',
+      },
+      {
+        code: '[t°, xt, p | Fe]   [-OH^- | +H^+]',
+        what: 'Ngăn bằng "|" để ghi 2 tầng (trên | dưới), hỗ trợ điện tích ^+ / ^-',
+      },
+      {
+        code: 'A -> [đk1] B <=> [đk2] C',
+        what: 'Nhiều mũi tên trên một dòng; điều kiện đặt ngay sau mỗi mũi tên',
+      },
     ],
   },
   {
     group: 'Chất, cấu tạo, ion & kí hiệu',
     items: [
-      { code: '2H2O   Ca(OH)2', what: 'Hệ số đầu giữ cỡ thường; số sau chữ/ngoặc thành chỉ số dưới' },
-      { code: '{CH3-CH(NH3^+)-COO^-}   2{CH3-COOH}', what: 'Công thức cấu tạo trong {...}, giữ nhánh dọc và điện tích ^+ / ^-' },
+      {
+        code: '2H2O   Ca(OH)2',
+        what: 'Hệ số đầu giữ cỡ thường; số sau chữ/ngoặc thành chỉ số dưới',
+      },
+      {
+        code: '{CH3-CH(NH3^+)-COO^-}   2{CH3-COOH}',
+        what: 'Công thức cấu tạo trong {...}, giữ nhánh dọc và điện tích ^+ / ^-',
+      },
       { code: 'SO4^2-   Fe^3+   OH^-', what: 'Điện tích sau "^" thành chỉ số trên' },
       { code: 'H2^   hoặc   H2↑', what: 'Chất khí bay lên (↑)' },
       { code: 'BaSO4v   hoặc   BaSO4↓', what: 'Chất kết tủa (↓); V2O5 vẫn giữ nguyên V' },
@@ -280,9 +352,22 @@ const CHEMEQ_HELP: HelpGroups = [
   },
 ]
 
-const CHEMEQ_QUICK: Array<{ label: string; text: string; title: string; spaceBefore?: boolean; spaceAfter?: boolean; caretOffset?: number }> = [
+const CHEMEQ_QUICK: Array<{
+  label: string
+  text: string
+  title: string
+  spaceBefore?: boolean
+  spaceAfter?: boolean
+  caretOffset?: number
+}> = [
   { label: '→', text: '→', title: 'Chèn mũi tên một chiều', spaceBefore: true, spaceAfter: true },
-  { label: '⇌', text: '⇌', title: 'Chèn mũi tên thuận nghịch', spaceBefore: true, spaceAfter: true },
+  {
+    label: '⇌',
+    text: '⇌',
+    title: 'Chèn mũi tên thuận nghịch',
+    spaceBefore: true,
+    spaceAfter: true,
+  },
   { label: '[t°]', text: '[t°]', title: 'Chèn điều kiện nhiệt độ', spaceBefore: true },
   { label: '{ }', text: '{}', title: 'Chèn cặp ngoặc chất cấu tạo', caretOffset: 1 },
   { label: '↑', text: '↑', title: 'Chèn kí hiệu khí bay lên' },
@@ -307,7 +392,10 @@ export function ChemEqModal({ initial, submitLabel, onClose, onInsert }: Props<C
     const after = spec.equations.slice(end)
     const pre = q.spaceBefore && before.length > 0 && !/[\s\n]$/.test(before) ? ' ' : ''
     const post = q.spaceAfter && (!after.length || !/^\s/.test(after)) ? ' ' : ''
-    const inserted = q.caretOffset !== undefined && selected ? `${q.text.slice(0, q.caretOffset)}${selected}${q.text.slice(q.caretOffset)}` : q.text
+    const inserted =
+      q.caretOffset !== undefined && selected
+        ? `${q.text.slice(0, q.caretOffset)}${selected}${q.text.slice(q.caretOffset)}`
+        : q.text
     const next = before + pre + inserted + post + after
     set({ equations: next })
     requestAnimationFrame(() => {
@@ -342,7 +430,7 @@ export function ChemEqModal({ initial, submitLabel, onClose, onInsert }: Props<C
               type="button"
               data-tip={q.title}
               onClick={() => insertSnippet(q)}
-              className="rounded-[6px] border border-line bg-surface px-2.5 py-1 text-[12.5px] font-medium text-ink-2 transition-colors hover:border-clay hover:text-clay"
+              className="border-line bg-surface text-ink-2 hover:border-clay hover:text-clay rounded-[6px] border px-2.5 py-1 text-[12.5px] font-medium transition-colors"
             >
               {q.label}
             </button>
@@ -357,15 +445,19 @@ export function ChemEqModal({ initial, submitLabel, onClose, onInsert }: Props<C
           aria-label="Phương trình hoá học"
           aria-invalid={Boolean(error)}
           placeholder="2KMnO4 -> K2MnO4 + MnO2 + O2 [t°]"
-          className={cn(inputClass, 'w-full resize-y px-3 py-2 font-mono text-[13px] leading-relaxed', error && 'border-clay')}
+          className={cn(
+            inputClass,
+            'w-full resize-y px-3 py-2 font-mono text-[13px] leading-relaxed',
+            error && 'border-clay',
+          )}
         />
         {error ? (
-          <p role="alert" className="mt-1 text-[12px] leading-snug text-clay-deep">
+          <p role="alert" className="text-clay-deep mt-1 text-[12px] leading-snug">
             {error}
           </p>
         ) : null}
         {warnings.length > 0 && (
-          <ul className="mt-1.5 flex flex-col gap-0.5 rounded-[6px] bg-paper-2 px-2.5 py-1.5 text-[12px] leading-snug text-ink-2">
+          <ul className="bg-paper-2 text-ink-2 mt-1.5 flex flex-col gap-0.5 rounded-[6px] px-2.5 py-1.5 text-[12px] leading-snug">
             {warnings.map((w, i) => (
               <li key={i}>
                 Dòng {w.line}: {w.msg}
@@ -388,7 +480,7 @@ export function ChemEqModal({ initial, submitLabel, onClose, onInsert }: Props<C
           step={1}
           value={spec.fontSize}
           onChange={(e) => set({ fontSize: Number(e.target.value) })}
-          className="w-full accent-clay"
+          className="accent-clay w-full"
           aria-label="Cỡ chữ"
         />
       </section>
@@ -408,7 +500,9 @@ export function ChemEqModal({ initial, submitLabel, onClose, onInsert }: Props<C
               onClick={() => set({ align: id })}
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                spec.align === id ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                spec.align === id
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {label}

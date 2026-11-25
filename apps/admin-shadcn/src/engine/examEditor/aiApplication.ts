@@ -1,6 +1,8 @@
-import { blocksToTipTap, plainText, tipTapToBlocks } from './convert'
 import { keyIndex } from '@/engine/lib/aiDocContext'
+
+import { blocksToTipTap, plainText, tipTapToBlocks } from './convert'
 import { figureDoc, figureImageAttrs } from './toolImages'
+
 import type { ExamBlock, FormatAttrs, Mark, RichText, Span } from '@/engine/data/docTypes'
 import type { JSONContent } from '@tiptap/core'
 
@@ -55,32 +57,57 @@ function expandFigures(raw: unknown): unknown {
       const spans = typeof t === 'string' ? [{ text: t }] : Array.isArray(t) ? t : []
       return [{ ...block, text: [...spans, { text: '', image: { src, alt, width, plot } }] }]
     }
-    return [block,{ type: 'paragraph', text: [{ text: '', image: { src, alt, width, plot } }], format: { align: 'center' } }]
+    return [
+      block,
+      {
+        type: 'paragraph',
+        text: [{ text: '', image: { src, alt, width, plot } }],
+        format: { align: 'center' },
+      },
+    ]
   })
 }
 
 function sanitizeBlocks(raw: unknown): ExamBlock[] {
   if (!Array.isArray(raw)) return []
   // AI có lúc trả mảng trộn string + span; chuẩn hoá về Span[] để converter/export đọc được.
-  const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
-  const markTypes = new Set(['bold', 'italic', 'underline', 'strike', 'sub', 'super', 'highlight', 'textStyle', 'boxed'])
+  const object = (v: unknown): v is Record<string, unknown> =>
+    !!v && typeof v === 'object' && !Array.isArray(v)
+  const markTypes = new Set([
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'sub',
+    'super',
+    'highlight',
+    'textStyle',
+    'boxed',
+  ])
   const rich = (v: unknown): RichText => {
     if (typeof v === 'string') return v
     const spans = (Array.isArray(v) ? v : [v]).flatMap((s): Span[] => {
       if (typeof s === 'string') return [{ text: s }]
       if (!object(s)) return []
-      const image = object(s.image) && typeof s.image.src === 'string' && s.image.src ? s.image : undefined
+      const image =
+        object(s.image) && typeof s.image.src === 'string' && s.image.src ? s.image : undefined
       if (typeof s.text !== 'string' && !image) return []
       const span: Span = { text: typeof s.text === 'string' ? s.text : '' }
-      if (Array.isArray(s.marks)) span.marks = s.marks.flatMap((m): Mark[] =>
-        object(m) && typeof m.type === 'string' && markTypes.has(m.type)
-          ? [{ type: m.type as Mark['type'], ...(object(m.attrs) ? { attrs: m.attrs } : {}) }] : [])
-      if (image) span.image = {
-        src: String(image.src),
-        ...(typeof image.alt === 'string' ? { alt: image.alt } : {}),
-        ...(typeof image.width === 'number' && Number.isFinite(image.width) ? { width: image.width } : {}),
-        ...(typeof image.plot === 'string' ? { plot: image.plot } : {}),
-      }
+      if (Array.isArray(s.marks))
+        span.marks = s.marks.flatMap((m): Mark[] =>
+          object(m) && typeof m.type === 'string' && markTypes.has(m.type)
+            ? [{ type: m.type as Mark['type'], ...(object(m.attrs) ? { attrs: m.attrs } : {}) }]
+            : [],
+        )
+      if (image)
+        span.image = {
+          src: String(image.src),
+          ...(typeof image.alt === 'string' ? { alt: image.alt } : {}),
+          ...(typeof image.width === 'number' && Number.isFinite(image.width)
+            ? { width: image.width }
+            : {}),
+          ...(typeof image.plot === 'string' ? { plot: image.plot } : {}),
+        }
       return [span]
     })
     return spans.length ? spans : ''
@@ -154,7 +181,8 @@ function sanitizeBlocks(raw: unknown): ExamBlock[] {
         break
       case 'question': {
         // kind: 'tf' = đúng/sai (4 ý a–d), 'short' = trả lời ngắn (không có phương án); còn lại là trắc nghiệm A–D
-        let kind: 'tf' | 'short' | undefined = b.kind === 'tf' || b.kind === 'short' ? b.kind : undefined
+        let kind: 'tf' | 'short' | undefined =
+          b.kind === 'tf' || b.kind === 'short' ? b.kind : undefined
         // câu điền chỗ trống bằng chữ (đề đã có dòng chấm) không vẽ 4 ô đáp số của dạng trả lời ngắn
         if (kind === 'short' && /…{3,}|\.{5,}/.test(plainText(rich(b.text)))) kind = undefined
         out.push({
@@ -171,7 +199,12 @@ function sanitizeBlocks(raw: unknown): ExamBlock[] {
                   if (typeof o === 'string') return { label: letter, text: o }
                   const opt = (o ?? {}) as Record<string, unknown>
                   return {
-                    label: typeof opt.label === 'string' ? (kind === 'tf' ? opt.label.toLowerCase() : opt.label) : letter,
+                    label:
+                      typeof opt.label === 'string'
+                        ? kind === 'tf'
+                          ? opt.label.toLowerCase()
+                          : opt.label
+                        : letter,
                     text: rich(opt.text),
                     format: fmt(opt.format),
                   }
@@ -198,9 +231,10 @@ function sanitizeBlocks(raw: unknown): ExamBlock[] {
             typeof it === 'string'
               ? { no: i + 1, answer: it }
               : {
-                  no: typeof (it as Record<string, unknown>)?.no === 'number'
-                    ? ((it as Record<string, unknown>).no as number)
-                    : i + 1,
+                  no:
+                    typeof (it as Record<string, unknown>)?.no === 'number'
+                      ? ((it as Record<string, unknown>).no as number)
+                      : i + 1,
                   answer: rich((it as Record<string, unknown>)?.answer),
                 },
           ),
@@ -273,12 +307,18 @@ function hasQuestions(nodes: readonly JSONContent[]): boolean {
 export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSONContent) {
   const blocks = sanitizeBlocks(expandFigures(raw.blocks))
   const proposed = sanitizePatches(raw.patch)
-  const action: 'append' | 'patch' | 'replace' | 'none' = raw.action === 'append' || raw.action === 'patch' || raw.action === 'replace'
-    ? raw.action
-    : Array.isArray(raw.patch) && (raw.patch.length > 0 || blocks.length === 0) ? 'patch' : blocks.length ? 'replace' : 'none'
+  const action: 'append' | 'patch' | 'replace' | 'none' =
+    raw.action === 'append' || raw.action === 'patch' || raw.action === 'replace'
+      ? raw.action
+      : Array.isArray(raw.patch) && (raw.patch.length > 0 || blocks.length === 0)
+        ? 'patch'
+        : blocks.length
+          ? 'replace'
+          : 'none'
   const rank: Record<PatchOp, number> = { insertAfter: 0, replace: 1, delete: 1, insertBefore: 2 }
   const touched = new Set<number>()
-  const patches = proposed.filter((patch) => patch.index < (currentDocument?.content?.length ?? Infinity))
+  const patches = proposed
+    .filter((patch) => patch.index < (currentDocument?.content?.length ?? Infinity))
     .sort((a, b) => b.index - a.index || rank[a.op] - rank[b.op])
     .filter((patch) => {
       if (patch.op !== 'replace' && patch.op !== 'delete') return true
@@ -287,12 +327,22 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
       return true
     })
   type Entry = { node: JSONContent; block?: ExamBlock; sourceIndex?: number }
-  const entries = (items: ExamBlock[]): Entry[] => items.flatMap((block) => (blocksToTipTap([block]).content ?? []).map((node) => ({ node, block })))
-  const result: Entry[] = (currentDocument?.content ?? []).map((node, sourceIndex) => ({ node, sourceIndex }))
+  const entries = (items: ExamBlock[]): Entry[] =>
+    items.flatMap((block) =>
+      (blocksToTipTap([block]).content ?? []).map((node) => ({ node, block })),
+    )
+  const result: Entry[] = (currentDocument?.content ?? []).map((node, sourceIndex) => ({
+    node,
+    sourceIndex,
+  }))
   const questionChanges: number[] = []
   if (action === 'replace' && blocks.length) {
     const replacements = entries(blocks)
-    if (hasQuestions(result.map(({ node }) => node)) || hasQuestions(replacements.map(({ node }) => node))) questionChanges.push(0)
+    if (
+      hasQuestions(result.map(({ node }) => node)) ||
+      hasQuestions(replacements.map(({ node }) => node))
+    )
+      questionChanges.push(0)
     result.splice(0, result.length, ...replacements)
   }
   if (action === 'append') {
@@ -302,13 +352,22 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
   }
   if (action === 'patch') {
     const applications = patches.map((patch) => ({ patch, replacements: entries(patch.blocks) }))
-    questionChanges.push(...applications.filter(({ patch, replacements }) => {
-      const removed = patch.op === 'replace' || patch.op === 'delete'
-        ? currentDocument?.content?.slice(patch.index, patch.index + 1) ?? [] : []
-      return hasQuestions(removed) || hasQuestions(replacements.map(({ node }) => node))
-    }).map(({ patch }) => patch.index + (patch.op === 'insertAfter' ? 1 : 0)))
+    questionChanges.push(
+      ...applications
+        .filter(({ patch, replacements }) => {
+          const removed =
+            patch.op === 'replace' || patch.op === 'delete'
+              ? (currentDocument?.content?.slice(patch.index, patch.index + 1) ?? [])
+              : []
+          return hasQuestions(removed) || hasQuestions(replacements.map(({ node }) => node))
+        })
+        .map(({ patch }) => patch.index + (patch.op === 'insertAfter' ? 1 : 0)),
+    )
     for (const { patch, replacements } of applications) {
-      if (!currentDocument) { result.push(...replacements); continue }
+      if (!currentDocument) {
+        result.push(...replacements)
+        continue
+      }
       const at = patch.index + (patch.op === 'insertAfter' ? 1 : 0)
       result.splice(at, patch.op === 'replace' || patch.op === 'delete' ? 1 : 0, ...replacements)
     }
@@ -322,25 +381,43 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
       question++
       if (block) {
         numbers.set(block, question)
-      } else if (sourceIndex !== undefined && !questionChanges.some((index) => index <= sourceIndex)) untouchedNumbers.add(question)
+      } else if (
+        sourceIndex !== undefined &&
+        !questionChanges.some((index) => index <= sourceIndex)
+      )
+        untouchedNumbers.add(question)
     }
-    if (node.type === 'examEssay') { essay++; if (block) numbers.set(block, essay) }
+    if (node.type === 'examEssay') {
+      essay++
+      if (block) numbers.set(block, essay)
+    }
     node.content?.forEach((child) => visit(child, undefined, sourceIndex))
   }
   result.forEach(({ node, block, sourceIndex }) => visit(node, block, sourceIndex))
-  const suppliedKeys = result.flatMap(({ block }) => block?.type === 'answerKey' ? [block] : [])
+  const suppliedKeys = result.flatMap(({ block }) => (block?.type === 'answerKey' ? [block] : []))
   const remainingKeys = result.filter(({ node, block }) => !block && node.type === 'examAnswerKey')
-  const existingAnswers = remainingKeys.flatMap(({ node }) => tipTapToBlocks({ type: 'doc', content: [node] })
-    .flatMap((item) => item.type === 'answerKey' ? item.items : []).filter((item) => untouchedNumbers.has(item.no)))
+  const existingAnswers = remainingKeys.flatMap(({ node }) =>
+    tipTapToBlocks({ type: 'doc', content: [node] })
+      .flatMap((item) => (item.type === 'answerKey' ? item.items : []))
+      .filter((item) => untouchedNumbers.has(item.no)),
+  )
   const answers = new Map<number, { no: number; answer: RichText }>()
   existingAnswers.forEach((item) => answers.set(item.no, item))
   suppliedKeys.flatMap((block) => block.items).forEach((item) => answers.set(item.no, item))
-  const answerKeyWarning = questionChanges.length > 0 && (suppliedKeys.length === 0 || remainingKeys.length > 0)
-  const answerKeyWarningReason: 'missing-key' | 'extra-key' | undefined = !answerKeyWarning ? undefined : suppliedKeys.length ? 'extra-key' : 'missing-key'
+  const answerKeyWarning =
+    questionChanges.length > 0 && (suppliedKeys.length === 0 || remainingKeys.length > 0)
+  const answerKeyWarningReason: 'missing-key' | 'extra-key' | undefined = !answerKeyWarning
+    ? undefined
+    : suppliedKeys.length
+      ? 'extra-key'
+      : 'missing-key'
   return {
     action,
     blocks,
-    patches: patches.map((patch) => ({ ...patch, numbers: patch.blocks.map((block) => numbers.get(block) ?? 0) })),
+    patches: patches.map((patch) => ({
+      ...patch,
+      numbers: patch.blocks.map((block) => numbers.get(block) ?? 0),
+    })),
     numbers: blocks.map((block) => numbers.get(block) ?? 0),
     answers: [...answers.values()],
     answerKeyWarning,

@@ -15,10 +15,18 @@
  * ribbon cao 80px, ruler cao 20px, status bar cao 24px.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+
+import { splitTipKbd } from '@/engine/components/Tooltip'
 import { cn } from '@/engine/lib/cn'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
-import { splitTipKbd } from '@/engine/components/Tooltip'
-import { IconChevronDown, IconChevronLeft, IconChevronRight, IconSidebarLeft, IconSidebarRight } from './icons'
+
+import {
+  IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
+  IconSidebarLeft,
+  IconSidebarRight,
+} from './icons'
 import { useSlidingThumb } from './useSlidingThumb'
 
 /* ------------------------------------------------------------------ *
@@ -89,13 +97,7 @@ export function RibbonBody({ children, activeKey }: { children: ReactNode; activ
 }
 
 /** Một nhóm nút trong ribbon. Bản gốc không hiện nhãn nhóm dưới ribbon. */
-export function RibbonGroup({
-  label,
-  children,
-}: {
-  label: string
-  children: ReactNode
-}) {
+export function RibbonGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="ribbon-group" aria-label={label}>
       <div className="ribbon-group-items">{children}</div>
@@ -120,7 +122,7 @@ export function RibbonButton({
   disabled?: boolean
   active?: boolean
 }) {
-  const parsed = title ?? label ? splitTipKbd(title ?? label ?? '') : null
+  const parsed = (title ?? label) ? splitTipKbd(title ?? label ?? '') : null
   return (
     <button
       type="button"
@@ -154,7 +156,7 @@ export function RibbonIconButton({
   disabled?: boolean
   active?: boolean
 }) {
-  const parsed = title ?? label ? splitTipKbd(title ?? label ?? '') : null
+  const parsed = (title ?? label) ? splitTipKbd(title ?? label ?? '') : null
   return (
     <button
       type="button"
@@ -218,20 +220,17 @@ export function Ruler({
   }, [width, margin])
 
   /** kéo chung 1 marker: trả về giá trị px mới (làm tròn 5px) */
-  const startDrag = useCallback(
-    (e: React.MouseEvent, onMove: (dx: number) => void) => {
-      e.preventDefault()
-      const startX = e.clientX
-      const move = (ev: MouseEvent) => onMove(ev.clientX - startX)
-      const up = () => {
-        window.removeEventListener('mousemove', move)
-        window.removeEventListener('mouseup', up)
-      }
-      window.addEventListener('mousemove', move)
-      window.addEventListener('mouseup', up)
-    },
-    [],
-  )
+  const startDrag = useCallback((e: React.MouseEvent, onMove: (dx: number) => void) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const move = (ev: MouseEvent) => onMove(ev.clientX - startX)
+    const up = () => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseup', up)
+    }
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', up)
+  }, [])
 
   /**
    * Như Word: tam giác trên = dòng đầu; tam giác dưới (thụt treo) = các dòng sau, dòng đầu đứng yên;
@@ -241,12 +240,15 @@ export function Ruler({
     if (!onIndentChange) return
     startDrag(e, (dx) => {
       if (kind === 'first') {
-        onIndentChange({ indentFirstLine: Math.max(-indentLeft, Math.round((indentFirstLine + dx) / 5) * 5) })
+        onIndentChange({
+          indentFirstLine: Math.max(-indentLeft, Math.round((indentFirstLine + dx) / 5) * 5),
+        })
         return
       }
       const left = Math.max(0, Math.round((indentLeft + dx) / 5) * 5)
       if (kind === 'left') onIndentChange({ indentLeft: left })
-      else onIndentChange({ indentLeft: left, indentFirstLine: indentLeft + indentFirstLine - left })
+      else
+        onIndentChange({ indentLeft: left, indentFirstLine: indentLeft + indentFirstLine - left })
     })
   }
 
@@ -389,8 +391,12 @@ export function AiDock({
         >
           {/* mũi tên chỉ đúng hướng panel rút về: máy tính / máy tính bảng về cạnh của nó,
               điện thoại (panel trượt từ đáy lên) thì chỉ xuống */}
-          <span className="ai-dock__collapse-side">{side === 'right' ? <IconChevronRight size={16} /> : <IconChevronLeft size={16} />}</span>
-          <span className="ai-dock__collapse-down"><IconChevronDown size={18} /></span>
+          <span className="ai-dock__collapse-side">
+            {side === 'right' ? <IconChevronRight size={16} /> : <IconChevronLeft size={16} />}
+          </span>
+          <span className="ai-dock__collapse-down">
+            <IconChevronDown size={18} />
+          </span>
         </button>
       ) : (
         <button

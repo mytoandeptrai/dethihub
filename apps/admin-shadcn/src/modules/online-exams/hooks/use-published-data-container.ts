@@ -22,16 +22,12 @@ import {
 import { appPaths } from '@/config/app-paths'
 import { useClientReady, useSession, useUrlState } from '@/hooks'
 import { t } from '@/i18n/translate'
+import { DEMO_ROW, demoAttempts, PAGE } from '@/modules/online-exams/hooks/published-demo'
 import {
   publishedAttempt,
   publishedCount,
   publishedRow,
 } from '@/modules/online-exams/hooks/published-model'
-import {
-  DEMO_ROW,
-  demoAttempts,
-  PAGE,
-} from '@/modules/online-exams/hooks/published-demo'
 
 import type { lib_community_CommunityRow as CommunityRow } from '@online-exams-engine'
 

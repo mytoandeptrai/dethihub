@@ -3,7 +3,9 @@ export type EscapeLayerEntry = {
   onClose: () => void
 }
 
-export function createEscapeLayerStack(target: Pick<EventTarget, 'addEventListener' | 'removeEventListener'>) {
+export function createEscapeLayerStack(
+  target: Pick<EventTarget, 'addEventListener' | 'removeEventListener'>,
+) {
   const layers: EscapeLayerEntry[] = []
   const onKey = (event: Event) => {
     if ((event as KeyboardEvent).key !== 'Escape' || event.defaultPrevented) return

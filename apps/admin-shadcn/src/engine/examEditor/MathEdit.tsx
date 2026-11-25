@@ -1,7 +1,9 @@
 /** Bấm đúp vào công thức trong đề → mở hộp thoại Công thức điền sẵn LaTeX để sửa. */
 import { useEffect, useState } from 'react'
-import type { Editor } from '@tiptap/react'
+
 import { EquationDialog } from './InsertMenus'
+
+import type { Editor } from '@tiptap/react'
 
 export function MathEdit({ editor }: { editor: Editor | null }) {
   const [edit, setEdit] = useState<{ pos: number; latex: string } | null>(null)
@@ -32,10 +34,15 @@ export function MathEdit({ editor }: { editor: Editor | null }) {
       onSave={(latex) => {
         const node = editor.state.doc.nodeAt(edit.pos)
         if (node?.type.name !== 'inlineMath') return
-        editor.chain().focus().command(({ tr }) => {
-          tr.setNodeMarkup(edit.pos, undefined, { ...node.attrs, latex })
-          return true
-        }).setNodeSelection(edit.pos).run()
+        editor
+          .chain()
+          .focus()
+          .command(({ tr }) => {
+            tr.setNodeMarkup(edit.pos, undefined, { ...node.attrs, latex })
+            return true
+          })
+          .setNodeSelection(edit.pos)
+          .run()
       }}
     />
   )

@@ -1,7 +1,12 @@
 'use client'
 import { Suspense } from 'react'
 
-import { MyDocsFilterSelectUi, MyDocsItemMenuUi, MyDocsUi, WorkspaceLoadingUi } from '@/modules/workspace/components'
+import {
+  MyDocsFilterSelectUi,
+  MyDocsItemMenuUi,
+  MyDocsUi,
+  WorkspaceLoadingUi,
+} from '@/modules/workspace/components'
 import { MyDocsModel } from '@/modules/workspace/hooks'
 
 export function FilterSelectContainer(

@@ -1,4 +1,4 @@
-import { wait } from './adminShared'
+import { adminBankVision } from '@/apis/admin/requests'
 /**
  * Client cho trang Admin: kiểu dữ liệu + hàm gọi `/api/admin` (server/admin.ts).
  * Giao diện CHỈ dùng các hàm ở đây. Chế độ dữ liệu giả (mock) bật bằng `?mock=1` trên URL
@@ -6,7 +6,8 @@ import { wait } from './adminShared'
  * Kiểu ở đây phải khớp với `toRow` và các action trong server/admin.ts.
  */
 import { adminRequest } from '@/engine/compat/admin'
-import { adminBankVision } from '@/apis/admin/requests'
+
+import { wait } from './adminShared'
 import { applyPricing, type PricingConfig } from './pricing'
 
 export { AdminError, wait } from './adminShared'
@@ -89,7 +90,17 @@ export const isAdminMock = (): boolean => {
 }
 
 /** Nhớ kết quả các action chỉ đọc 60 giây để chuyển tab admin không phải tải lại; thao tác ghi xoá hết. */
-const READ_ACTIONS = new Set(['db.metrics', 'me', 'users.list', 'quota.get', 'storage.get', 'audit.list', 'settings.get', 'ai.stats', 'ai.errors'])
+const READ_ACTIONS = new Set([
+  'db.metrics',
+  'me',
+  'users.list',
+  'quota.get',
+  'storage.get',
+  'audit.list',
+  'settings.get',
+  'ai.stats',
+  'ai.errors',
+])
 const cache = new Map<string, { at: number; p: Promise<unknown> }>()
 export const clearAdminCache = () => cache.clear()
 
@@ -97,7 +108,11 @@ export const clearAdminCache = () => cache.clear()
  * Gọi một action của /api/admin. `read: true` = action chỉ đọc (được nhớ 60 giây);
  * mặc định đoán theo READ_ACTIONS. Action ghi xoá toàn bộ cache. Dùng được từ file api của giai đoạn khác.
  */
-export async function post<T>(action: string, body: Record<string, unknown> = {}, read = READ_ACTIONS.has(action)): Promise<T> {
+export async function post<T>(
+  action: string,
+  body: Record<string, unknown> = {},
+  read = READ_ACTIONS.has(action),
+): Promise<T> {
   if (!read) {
     cache.clear()
     return send<T>(action, body)
@@ -112,80 +127,112 @@ export async function post<T>(action: string, body: Record<string, unknown> = {}
 }
 
 async function send<T>(action: string, body: Record<string, unknown>): Promise<T> {
-  return await adminRequest(action, body) as T
+  return (await adminRequest(action, body)) as T
 }
 
 // ---------- API ----------
 
 /** Quyền của người đang đăng nhập. Không có quyền → ném AdminError 401/403 (giao diện hiện 404). */
 export async function getMe(): Promise<AdminMe> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetMe()
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetMe()
   return post('me')
 }
 
-export async function listUsers(opts: { q?: string; page?: number; perPage?: number } = {}): Promise<UserPage> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockListUsers(opts)
+export async function listUsers(
+  opts: { q?: string; page?: number; perPage?: number } = {},
+): Promise<UserPage> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockListUsers(opts)
   return post('users.list', opts)
 }
 
 /** hours bỏ trống = khoá vô thời hạn */
-export async function banUser(userId: string, opts: { reason?: string; hours?: number } = {}): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockBanUser(userId, opts)
+export async function banUser(
+  userId: string,
+  opts: { reason?: string; hours?: number } = {},
+): Promise<{ ok: true }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockBanUser(userId, opts)
   return post('users.ban', { userId, ...opts })
 }
 
 export async function unbanUser(userId: string): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockUnbanUser(userId)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockUnbanUser(userId)
   return post('users.unban', { userId })
 }
 
 /** Gỡ cờ theo dõi (xoá số lần vi phạm). Không tự mở khoá tài khoản. */
 export async function clearSecurityFlag(userId: string): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockClearSecurityFlag(userId)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockClearSecurityFlag(userId)
   return post('security.clear', { userId })
 }
 
 /** Xoá vĩnh viễn. confirmEmail phải trùng email tài khoản. Đề cộng đồng của họ vẫn giữ (không còn chủ). */
-export async function deleteUser(userId: string, confirmEmail: string): Promise<{ ok: true; filesRemoved: number }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockDeleteUser(userId, confirmEmail)
+export async function deleteUser(
+  userId: string,
+  confirmEmail: string,
+): Promise<{ ok: true; filesRemoved: number }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockDeleteUser(userId, confirmEmail)
   return post('users.delete', { userId, confirmEmail })
 }
 
 export async function getQuota(userId: string): Promise<UserQuota> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetQuota(userId)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetQuota(userId)
   return post('quota.get', { userId })
 }
 
 /** Cộng điểm AI: cộng dồn `tokens` vào số dư của người đó. Trả số dư mới. */
-export async function grantCredits(userId: string, tokens: number, note = ''): Promise<{ ok: true; balance: number }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGrantCredits(userId, tokens)
+export async function grantCredits(
+  userId: string,
+  tokens: number,
+  note = '',
+): Promise<{ ok: true; balance: number }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGrantCredits(userId, tokens)
   return post('credits.grant', { userId, tokens, note })
 }
 
 /** monthlyTokens null = không giới hạn */
-export function setQuota(userId: string, monthlyTokens: number | null, note = ''): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return wait({ ok: true as const })
+export function setQuota(
+  userId: string,
+  monthlyTokens: number | null,
+  note = '',
+): Promise<{ ok: true }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock()) return wait({ ok: true as const })
   return post('quota.set', { userId, monthlyTokens, note })
 }
 
 export function clearQuota(userId: string): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return wait({ ok: true as const })
+  if (process.env.NODE_ENV === 'development' && isAdminMock()) return wait({ ok: true as const })
   return post('quota.clear', { userId })
 }
 
 export async function getStorage(userId: string): Promise<UserStorage> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetStorage()
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetStorage()
   return post('storage.get', { userId })
 }
 
 /** maxBytes null = về mặc định 10 MB */
-export function setStorage(userId: string, maxBytes: number | null, note = ''): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return wait({ ok: true as const })
+export function setStorage(
+  userId: string,
+  maxBytes: number | null,
+  note = '',
+): Promise<{ ok: true }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock()) return wait({ ok: true as const })
   return post('storage.set', { userId, maxBytes, note })
 }
 
-export async function listAudit(opts: { page?: number; perPage?: number } = {}): Promise<{ items: AuditEntry[]; total: number; page: number; perPage: number }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockListAudit()
+export async function listAudit(
+  opts: { page?: number; perPage?: number } = {},
+): Promise<{ items: AuditEntry[]; total: number; page: number; perPage: number }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockListAudit()
   return post('audit.list', opts)
 }
 
@@ -255,46 +302,61 @@ export interface HealthReport {
 }
 
 export async function getSettings(): Promise<AppSettings> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetSettings()
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetSettings()
   return post('settings.get')
 }
 
 export async function setMaintenance(v: MaintenanceSetting): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockSetMaintenance(v)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockSetMaintenance(v)
   return post('settings.set', { key: 'maintenance', value: v })
 }
 
 /** AI đọc ảnh trang đề (1-4 ảnh JPEG), trả JSON câu hỏi dạng chuỗi. Chỉ admin. */
 export async function bankVision(images: string[]): Promise<{ content: string; model: string }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockBankVision()
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockBankVision()
   return adminBankVision({ body: { images } })
 }
 
 export async function setAnnouncements(items: Announcement[]): Promise<{ ok: true }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockSetAnnouncements(items)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockSetAnnouncements(items)
   return post('settings.set', { key: 'announcements', value: { items } })
 }
 
 export async function setPricing(v: PricingConfig): Promise<PricingConfig> {
   let saved = v
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) saved = (await import('./adminMock')).mockSetPricing(v)
-  else saved = (await post<{ ok: true; value: PricingConfig }>('settings.set', { key: 'pricing', value: v })).value
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    saved = (await import('./adminMock')).mockSetPricing(v)
+  else
+    saved = (
+      await post<{ ok: true; value: PricingConfig }>('settings.set', { key: 'pricing', value: v })
+    ).value
   applyPricing(saved)
   return saved
 }
 
 export async function setWelcomePoints(points: number): Promise<number> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return points
-  return (await post<{ ok: true; value: { points: number } }>('settings.set', { key: 'ai_welcome', value: { points } })).value.points
+  if (process.env.NODE_ENV === 'development' && isAdminMock()) return points
+  return (
+    await post<{ ok: true; value: { points: number } }>('settings.set', {
+      key: 'ai_welcome',
+      value: { points },
+    })
+  ).value.points
 }
 
 export async function getAiStats(days = 7): Promise<{ days: number; rows: AiStatRow[] }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetAiStats(days)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetAiStats(days)
   return post('ai.stats', { days })
 }
 
 export async function getAiErrors(limit = 30): Promise<{ items: AiErrorRow[]; freeEmpty: number }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetAiErrors(limit)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetAiErrors(limit)
   return post('ai.errors', { limit })
 }
 
@@ -318,20 +380,31 @@ export interface HealthService {
 }
 
 /** Các provider đã cấu hình, để hiện sẵn dòng kiểm tra. Không gọi thử nên không tốn token. */
-export async function getHealthTargets(): Promise<{ providers: HealthProvider[]; services: { supabase: HealthService; r2: HealthService } }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetHealthTargets()
+export async function getHealthTargets(): Promise<{
+  providers: HealthProvider[]
+  services: { supabase: HealthService; r2: HealthService }
+}> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetHealthTargets()
   return post('health.targets')
 }
 
 /** Lưu cấu hình provider, áp dụng cho cả app sau tối đa 30 giây. `apiKey` rỗng = giữ key đang dùng. */
-export async function saveAiProvider(v: { provider: string; model: string; endpoint: string; apiKey: string }): Promise<{ providers: HealthProvider[] }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockSaveAiProvider(v)
+export async function saveAiProvider(v: {
+  provider: string
+  model: string
+  endpoint: string
+  apiKey: string
+}): Promise<{ providers: HealthProvider[] }> {
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockSaveAiProvider(v)
   return post('ai.saveProvider', v)
 }
 
 /** Xoá cấu hình đã lưu, provider quay về biến môi trường. */
 export async function resetAiProvider(provider: string): Promise<{ providers: HealthProvider[] }> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockResetAiProvider(provider)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockResetAiProvider(provider)
   return post('ai.resetProvider', { provider })
 }
 
@@ -342,7 +415,8 @@ export type HealthResult = Partial<HealthReport> & { checkedAt: string }
  * `target` là 'supabase', 'r2' hoặc tên provider.
  */
 export async function runHealth(target?: string): Promise<HealthResult> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockRunHealth(target)
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockRunHealth(target)
   return post('health', target ? { target } : {})
 }
 
@@ -363,7 +437,8 @@ export interface DbStatus {
 
 /** CPU / RAM / ổ đĩa / kết nối của Postgres. Không tốn tiền; mất ~1 giây (lấy 2 mẫu CPU). */
 export async function getDbStatus(): Promise<DbStatus> {
-  if ((process.env.NODE_ENV === 'development') && isAdminMock()) return (await import('./adminMock')).mockGetDbStatus()
+  if (process.env.NODE_ENV === 'development' && isAdminMock())
+    return (await import('./adminMock')).mockGetDbStatus()
   return post('db.metrics')
 }
 

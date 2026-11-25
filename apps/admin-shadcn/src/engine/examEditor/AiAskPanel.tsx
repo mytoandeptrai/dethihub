@@ -3,8 +3,9 @@
  * thay vì soạn. Panel thế chỗ ô nhập, hỏi lần lượt từng câu, có ô tự nhập.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { extractJson } from '@/engine/lib/llm'
+
 import { cn } from '@/engine/lib/cn'
+import { extractJson } from '@/engine/lib/llm'
 
 export interface AiAskQuestion {
   q: string
@@ -34,10 +35,16 @@ export function parseAsk(raw: string): AiAsk | null {
         const o = x as Record<string, unknown>
         const q = typeof o?.q === 'string' ? o.q.trim() : ''
         const options = Array.isArray(o?.options)
-          ? o.options.filter((s): s is string => typeof s === 'string' && !!s.trim()).map((s) => s.trim())
+          ? o.options
+              .filter((s): s is string => typeof s === 'string' && !!s.trim())
+              .map((s) => s.trim())
           : []
         if (!q) return null
-        return { q, options: options.filter((s) => !/^(khác|tự nhập)/i.test(s)).slice(0, 6), multi: o.multi === true }
+        return {
+          q,
+          options: options.filter((s) => !/^(khác|tự nhập)/i.test(s)).slice(0, 6),
+          multi: o.multi === true,
+        }
       })
       .filter((x): x is AiAskQuestion => !!x)
       .slice(0, 4)
@@ -54,7 +61,8 @@ const FIG_NO = 'Không cần hình'
 const FIG_Q: AiAskQuestion = { q: 'Đề có cần hình minh hoạ không?', options: [FIG_YES, FIG_NO] }
 /** nói rõ cho model hiểu lựa chọn hình */
 const FIG_MEANING: Record<string, string> = {
-  [FIG_YES]: 'Có — chỉ vẽ hình (figure) cho câu nào phải nhìn hình mới làm được, không ép tỉ lệ câu có hình',
+  [FIG_YES]:
+    'Có — chỉ vẽ hình (figure) cho câu nào phải nhìn hình mới làm được, không ép tỉ lệ câu có hình',
   [FIG_NO]: 'Không — không thêm figure nào vào đề',
 }
 
@@ -68,7 +76,7 @@ export function askAnswerText(questions: AiAskQuestion[], answers: string[][]): 
   const lines = questions
     .map((q, i) =>
       answers[i]?.length
-        ? `${q.q.replace(/\?$/, '')}: ${answers[i].map((x) => (q === FIG_Q ? FIG_MEANING[x] ?? x : x)).join(', ')}`
+        ? `${q.q.replace(/\?$/, '')}: ${answers[i].map((x) => (q === FIG_Q ? (FIG_MEANING[x] ?? x) : x)).join(', ')}`
         : '',
     )
     .filter(Boolean)
@@ -86,7 +94,17 @@ export function askHistoryText(ask: AiAsk): string {
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <path d={dir === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
     </svg>
   )
@@ -124,7 +142,8 @@ export function AiAskPanel({
   /** đề Toán (theo yêu cầu gốc hoặc câu đã chọn) mà AI chưa hỏi về hình → thêm câu hình ở cuối */
   const questionsFor = (ans: string[][]): AiAskQuestion[] => {
     const askedFig = base.some((x) => /minh ho[ạa]|hình vẽ|có hình/i.test(x.q))
-    const math = figure && (/toán/i.test(request) || ans.some((a) => a.some((x) => /toán/i.test(x))))
+    const math =
+      figure && (/toán/i.test(request) || ans.some((a) => a.some((x) => /toán/i.test(x))))
     return !askedFig && math ? [...base, FIG_Q] : base
   }
   const questions = questionsFor(answers)
@@ -169,7 +188,11 @@ export function AiAskPanel({
 
   const choose = (opt: string) => {
     if (q.multi) {
-      setPicks((cur) => cur.map((p, i) => (i !== at ? p : p.includes(opt) ? p.filter((x) => x !== opt) : [...p, opt])))
+      setPicks((cur) =>
+        cur.map((p, i) =>
+          i !== at ? p : p.includes(opt) ? p.filter((x) => x !== opt) : [...p, opt],
+        ),
+      )
       return
     }
     const nextPicks = picks.map((p, i) => (i === at ? [opt] : p))
@@ -206,16 +229,40 @@ export function AiAskPanel({
 
   return (
     <div className="ai-composer">
-      <div className="ai-ask" ref={rootRef} tabIndex={-1} onKeyDown={onKey} onPointerDown={touch} onKeyDownCapture={touch} onInput={touch} role="group" aria-label="AI hỏi thêm">
+      <div
+        className="ai-ask"
+        ref={rootRef}
+        tabIndex={-1}
+        onKeyDown={onKey}
+        onPointerDown={touch}
+        onKeyDownCapture={touch}
+        onInput={touch}
+        role="group"
+        aria-label="AI hỏi thêm"
+      >
         <div className="ai-ask__head">
-          <span className="ai-ask__q" key={at}>{q.q}</span>
+          <span className="ai-ask__q" key={at}>
+            {q.q}
+          </span>
           {total > 1 ? (
             <span className="ai-ask__nav">
-              <button type="button" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Câu trước">
+              <button
+                type="button"
+                onClick={() => go(at - 1)}
+                disabled={at === 0}
+                aria-label="Câu trước"
+              >
                 <Chevron dir="left" />
               </button>
-              <span className="ai-ask__count">{at + 1}/{total}</span>
-              <button type="button" onClick={() => go(at + 1)} disabled={last || !answered} aria-label="Câu sau">
+              <span className="ai-ask__count">
+                {at + 1}/{total}
+              </span>
+              <button
+                type="button"
+                onClick={() => go(at + 1)}
+                disabled={last || !answered}
+                aria-label="Câu sau"
+              >
                 <Chevron dir="right" />
               </button>
             </span>
@@ -235,7 +282,23 @@ export function AiAskPanel({
                 onClick={() => choose(opt)}
               >
                 <span className={cn('ai-ask__key', q.multi && 'is-box')}>
-                  {on && q.multi ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5 9-10" /></svg> : i + 1}
+                  {on && q.multi ? (
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M5 12l5 5 9-10" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
                 </span>
                 <span className="ai-ask__label">{opt}</span>
               </button>
@@ -248,7 +311,9 @@ export function AiAskPanel({
                 ref={inputRef}
                 value={custom[at]}
                 placeholder="Nhập câu trả lời"
-                onChange={(e) => setCustom((cur) => cur.map((c, i) => (i === at ? e.target.value : c)))}
+                onChange={(e) =>
+                  setCustom((cur) => cur.map((c, i) => (i === at ? e.target.value : c)))
+                }
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && answered) {
                     e.preventDefault()
@@ -276,7 +341,12 @@ export function AiAskPanel({
             <span className="ai-ask__auto">Tự gửi sau {Math.ceil(left / 1000)} giây</span>
           ) : null}
           {q.multi || typing[at] || last ? (
-            <button type="button" className="ai-ask__next" disabled={!answered} onClick={() => advance()}>
+            <button
+              type="button"
+              className="ai-ask__next"
+              disabled={!answered}
+              onClick={() => advance()}
+            >
               {last ? 'Gửi' : 'Tiếp'}
             </button>
           ) : null}

@@ -1,9 +1,20 @@
-/** Bảng vẽ — kiểu dữ liệu, mặc định, bắt dính khi kéo (dùng chung cho trình soạn và giao diện). */
-import { DEFAULT_STYLE, type Bounds, type El, type Handle, type Kind, type Paper, type PenKind, type Pt, type Style, type FillStyle } from './scene'
-import { type Guide, type LaserTrail, type View } from './render'
 import { useBoards } from '@/engine/store/boards'
-import { type InstGuide } from './Instruments'
 
+import { type InstGuide } from './Instruments'
+import { type Guide, type LaserTrail, type View } from './render'
+/** Bảng vẽ — kiểu dữ liệu, mặc định, bắt dính khi kéo (dùng chung cho trình soạn và giao diện). */
+import {
+  DEFAULT_STYLE,
+  type Bounds,
+  type El,
+  type Handle,
+  type Kind,
+  type Paper,
+  type PenKind,
+  type Pt,
+  type Style,
+  type FillStyle,
+} from './scene'
 
 export type Tool = 'select' | 'hand' | Kind | 'eraser' | 'laser' | 'bucket'
 export type Slot = PenKind | 'shape' | 'text'
@@ -41,13 +52,37 @@ export interface Opts {
   /** đã chuyển hình sang nét thẳng mặc định (bảng lưu trước khi đổi mặc định còn giữ kiểu vẽ tay) */
   shapeStraight?: boolean
 }
-export interface Tip { sharp: number; sens: number }
+export interface Tip {
+  sharp: number
+  sens: number
+}
 export const DEFAULT_TIP: Tip = { sharp: 0.5, sens: 0.5 }
 export const CHALK_WHITE = '#f5f3ea'
 export const LIGHT_COLORS = ['#1e1e1e', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#7048e8']
 export const CHALK_COLORS = ['#f5f3ea', '#f7e07a', '#f4a6b8', '#9fd3f5', '#b7e4a7', '#f9b97a']
 
-export const DEFAULT_OPTS: Opts = { pen: 'ball', lastShape: 'rectangle', paper: 'plain', snap: true, eraseMode: 'stroke', eraseSize: 1, selectMode: 'box', recentShapes: ['rectangle', 'ellipse', 'arrow', 'line'], recentColors: [...LIGHT_COLORS], recentTextColors: [...LIGHT_COLORS], recentShapeColors: [...LIGHT_COLORS], recentHighlights: ['#fab005', '#82c91e', '#f783ac', '#4dabf7', '#ff922b'], penTips: {}, laserColor: '#ff3b30', laserSize: 1, bucketFill: '#a5d8ff', bucketStyle: 'solid', guides: true, keepTool: false, shapeStraight: true }
+export const DEFAULT_OPTS: Opts = {
+  pen: 'ball',
+  lastShape: 'rectangle',
+  paper: 'plain',
+  snap: true,
+  eraseMode: 'stroke',
+  eraseSize: 1,
+  selectMode: 'box',
+  recentShapes: ['rectangle', 'ellipse', 'arrow', 'line'],
+  recentColors: [...LIGHT_COLORS],
+  recentTextColors: [...LIGHT_COLORS],
+  recentShapeColors: [...LIGHT_COLORS],
+  recentHighlights: ['#fab005', '#82c91e', '#f783ac', '#4dabf7', '#ff922b'],
+  penTips: {},
+  laserColor: '#ff3b30',
+  laserSize: 1,
+  bucketFill: '#a5d8ff',
+  bucketStyle: 'solid',
+  guides: true,
+  keepTool: false,
+  shapeStraight: true,
+}
 
 /** mỗi loại bút / hình / chữ nhớ màu và độ dày riêng */
 export const DEFAULT_STYLES: Record<Slot, Style> = {
@@ -84,7 +119,14 @@ export function load(id: string): Saved | null {
 export type Drag =
   | { t: 'pan'; sx: number; sy: number; scrollX: number; scrollY: number }
   | { t: 'create'; el: El; start: Pt; guide?: InstGuide }
-  | { t: 'move'; start: Pt; orig: Map<string, Pt>; moved: boolean; origBounds: Bounds | null; candidates: Bounds[] }
+  | {
+      t: 'move'
+      start: Pt
+      orig: Map<string, Pt>
+      moved: boolean
+      origBounds: Bounds | null
+      candidates: Bounds[]
+    }
   | { t: 'marquee'; start: Pt; cur: Pt; base: Set<string> }
   | { t: 'resize'; handle: Handle; orig: El[]; ob: Bounds; single: boolean }
   | { t: 'endpoint'; index: number; el: El }
@@ -114,7 +156,11 @@ export function snapAxis(
     for (const mp of mPts) {
       for (const cp of cPts) {
         const d = cp - mp
-        if (Math.abs(d) < bestDist) { bestDist = Math.abs(d); bestDelta = d; snapped = true }
+        if (Math.abs(d) < bestDist) {
+          bestDist = Math.abs(d)
+          bestDelta = d
+          snapped = true
+        }
       }
     }
   }
@@ -146,7 +192,9 @@ export function snapAxis(
   }
   if (!snapped) return { delta: 0, guides: [] }
   const guides: Guide[] = []
-  const sm0 = mb[i0] + bestDelta, sm1 = mb[i1] + bestDelta, smc = (sm0 + sm1) / 2
+  const sm0 = mb[i0] + bestDelta,
+    sm1 = mb[i1] + bestDelta,
+    smc = (sm0 + sm1) / 2
   const sPts = [sm0, smc, sm1]
   const eps = 0.01
   const matchedPos = new Set<number>()
@@ -158,10 +206,24 @@ export function snapAxis(
     }
   }
   for (const pos of matchedPos) {
-    let from = mb[j0], to = mb[j1]
-    const marks: Pt[] = axis === 'x' ? [[pos, mb[j0]], [pos, mb[j1]]] : [[mb[j0], pos], [mb[j1], pos]]
+    let from = mb[j0],
+      to = mb[j1]
+    const marks: Pt[] =
+      axis === 'x'
+        ? [
+            [pos, mb[j0]],
+            [pos, mb[j1]],
+          ]
+        : [
+            [mb[j0], pos],
+            [mb[j1], pos],
+          ]
     for (const cb of candidates) {
-      if (Math.abs(cb[i0] - pos) <= eps || Math.abs((cb[i0] + cb[i1]) / 2 - pos) <= eps || Math.abs(cb[i1] - pos) <= eps) {
+      if (
+        Math.abs(cb[i0] - pos) <= eps ||
+        Math.abs((cb[i0] + cb[i1]) / 2 - pos) <= eps ||
+        Math.abs(cb[i1] - pos) <= eps
+      ) {
         from = Math.min(from, cb[j0])
         to = Math.max(to, cb[j1])
         if (axis === 'x') marks.push([pos, cb[j0]], [pos, cb[j1]])
@@ -188,25 +250,75 @@ export function computeSnap(
   thresh: number,
   lockAxis: 'x' | 'y' | null,
 ): { dx: number; dy: number; guides: Guide[] } {
-  const mb: Bounds = [origBounds[0] + dx, origBounds[1] + dy, origBounds[2] + dx, origBounds[3] + dy]
+  const mb: Bounds = [
+    origBounds[0] + dx,
+    origBounds[1] + dy,
+    origBounds[2] + dx,
+    origBounds[3] + dy,
+  ]
   const rx = lockAxis === 'y' ? { delta: 0, guides: [] } : snapAxis(mb, candidates, thresh, 'x')
   const ry = lockAxis === 'x' ? { delta: 0, guides: [] } : snapAxis(mb, candidates, thresh, 'y')
   return { dx: dx + rx.delta, dy: dy + ry.delta, guides: [...rx.guides, ...ry.guides] }
 }
 
 export const TOOL_KEYS: Record<string, Tool> = {
-  '1': 'select', v: 'select', h: 'hand', '2': 'rectangle', r: 'rectangle', '3': 'diamond', d: 'diamond',
-  '4': 'ellipse', o: 'ellipse', '5': 'arrow', a: 'arrow', '6': 'line', l: 'line', '7': 'freedraw', p: 'freedraw',
-  '8': 'text', t: 'text', '0': 'eraser', e: 'eraser', k: 'laser', g: 'bucket',
+  '1': 'select',
+  'v': 'select',
+  'h': 'hand',
+  '2': 'rectangle',
+  'r': 'rectangle',
+  '3': 'diamond',
+  'd': 'diamond',
+  '4': 'ellipse',
+  'o': 'ellipse',
+  '5': 'arrow',
+  'a': 'arrow',
+  '6': 'line',
+  'l': 'line',
+  '7': 'freedraw',
+  'p': 'freedraw',
+  '8': 'text',
+  't': 'text',
+  '0': 'eraser',
+  'e': 'eraser',
+  'k': 'laser',
+  'g': 'bucket',
 }
-export const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent)
+export const IS_MAC =
+  typeof navigator !== 'undefined' &&
+  /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent)
 export const MOD_KEY = IS_MAC ? '⌘' : 'Ctrl'
-export const SHAPE_KEYS: Partial<Record<Kind, string>> = { rectangle: 'R', diamond: 'D', ellipse: 'O', arrow: 'A', line: 'L' }
+export const SHAPE_KEYS: Partial<Record<Kind, string>> = {
+  rectangle: 'R',
+  diamond: 'D',
+  ellipse: 'O',
+  arrow: 'A',
+  line: 'L',
+}
 
-export const FILLS = ['transparent', '#ffc9c9', '#b2f2bb', '#a5d8ff', '#ffec99', '#fa5252', '#40c057', '#228be6', '#fab005', '#be4bdb']
+export const FILLS = [
+  'transparent',
+  '#ffc9c9',
+  '#b2f2bb',
+  '#a5d8ff',
+  '#ffec99',
+  '#fa5252',
+  '#40c057',
+  '#228be6',
+  '#fab005',
+  '#be4bdb',
+]
 
 export const CURSOR: Partial<Record<Handle, string>> = {
-  nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize',
-  n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', rot: 'grab', p0: 'move', p1: 'move',
+  nw: 'nwse-resize',
+  se: 'nwse-resize',
+  ne: 'nesw-resize',
+  sw: 'nesw-resize',
+  n: 'ns-resize',
+  s: 'ns-resize',
+  e: 'ew-resize',
+  w: 'ew-resize',
+  rot: 'grab',
+  p0: 'move',
+  p1: 'move',
 }
-

@@ -1,3 +1,5 @@
+import { tipTapToBlocks } from '@/engine/examEditor/convert'
+
 /**
  * Cho AI nhìn thấy đủ phần giáo viên nhắc tới: câu "câu 4", "bài 2", phần đang bôi đen
  * → gửi nguyên văn đầy đủ của khối (JSON ExamBlock: công thức, phương án, hình, đáp án),
@@ -7,7 +9,6 @@
  * sinh theo thứ tự lúc chuyển đổi nên trùng nhau sau khi chèn/sửa, đoạn thường thì không có id).
  */
 import type { JSONContent } from '@tiptap/core'
-import { tipTapToBlocks } from '@/engine/examEditor/convert'
 
 /** tối đa số khối gửi nguyên văn mỗi lượt (giáo viên nói "câu 1 đến 40" thì không gửi cả đề) */
 const MAX_FOCUS = 8
@@ -57,7 +58,8 @@ export function referencedNos(text: string): FocusRefs {
   const q = new Set<number>()
   const essay = new Set<number>()
   // không dùng \b cạnh chữ có dấu (xem bẫy trong context.md)
-  const re = /(^|[^\p{L}])(câu|bài)\s+(\d{1,3}(?:\s*(?:,|;|-|–|đến|tới|->|và|hoặc|&)\s*\d{1,3})*)/giu
+  const re =
+    /(^|[^\p{L}])(câu|bài)\s+(\d{1,3}(?:\s*(?:,|;|-|–|đến|tới|->|và|hoặc|&)\s*\d{1,3})*)/giu
   for (const m of text.matchAll(re)) {
     const target = m[2].toLowerCase() === 'bài' ? essay : q
     for (const n of numbersIn(m[3].trim())) target.add(n)
@@ -75,7 +77,9 @@ function stripImages(v: unknown): unknown {
       const img = val as { alt?: string; plot?: string }
       out.image = {
         alt: img.alt || 'ảnh',
-        ...(img.plot ? { figure: img.plot.length > MAX_PLOT ? `${img.plot.slice(0, MAX_PLOT)}…` : img.plot } : {}),
+        ...(img.plot
+          ? { figure: img.plot.length > MAX_PLOT ? `${img.plot.slice(0, MAX_PLOT)}…` : img.plot }
+          : {}),
       }
     } else out[k] = stripImages(val)
   }
@@ -91,13 +95,19 @@ export function fullBlockText(node: JSONContent, index: number): string {
 }
 
 const isImagePara = (n: JSONContent | undefined) =>
-  !!n && (n.type === 'paragraph' || n.type === 'examParagraph') && !!n.content?.some((c) => c.type === 'image')
+  !!n &&
+  (n.type === 'paragraph' || n.type === 'examParagraph') &&
+  !!n.content?.some((c) => c.type === 'image')
 
 /**
  * Vị trí các khối giáo viên nhắc tới: câu/bài theo số + vị trí trong `extra` (phần đang bôi đen).
  * Đoạn ảnh ngay sau một câu (hình của câu đó) đi kèm luôn.
  */
-export function focusIndices(doc: JSONContent | undefined, refs: FocusRefs, extra: number[] = []): number[] {
+export function focusIndices(
+  doc: JSONContent | undefined,
+  refs: FocusRefs,
+  extra: number[] = [],
+): number[] {
   const nodes = doc?.content ?? []
   const picked = new Set<number>()
   nodes.forEach((node, i) => {
@@ -126,5 +136,7 @@ export function blocksText(doc: JSONContent | undefined, indices: number[]): str
 /** Đoạn chèn vào lượt người dùng: nguyên văn các khối được nhắc tới (rỗng nếu không nhắc khối nào). */
 export function focusNote(doc: JSONContent | undefined, text: string): string {
   const body = blocksText(doc, focusIndices(doc, referencedNos(text)))
-  return body ? `\n\nNGUYÊN VĂN CÁC KHỐI ĐƯỢC NHẮC TỚI (JSON đầy đủ, dùng đúng id trong ngoặc vuông khi patch):\n${body}` : ''
+  return body
+    ? `\n\nNGUYÊN VĂN CÁC KHỐI ĐƯỢC NHẮC TỚI (JSON đầy đủ, dùng đúng id trong ngoặc vuông khi patch):\n${body}`
+    : ''
 }

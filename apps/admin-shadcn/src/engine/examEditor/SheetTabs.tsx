@@ -3,10 +3,17 @@
  * nền tab đang chọn là một "thẻ" trượt sang tab mới, giống thanh tab bên máy tính.
  */
 import { useRef, type ReactNode } from 'react'
+
 import { cn } from '@/engine/lib/cn'
+
 import { useSlidingThumb } from './useSlidingThumb'
 
-export function SheetTabs<T extends string>({ items, value, onChange, className }: {
+export function SheetTabs<T extends string>({
+  items,
+  value,
+  onChange,
+  className,
+}: {
   items: { id: T; label: string; icon?: ReactNode; testId?: string }[]
   value: T
   onChange: (id: T) => void
@@ -19,7 +26,7 @@ export function SheetTabs<T extends string>({ items, value, onChange, className 
       {thumb && (
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 rounded-lg bg-clay-soft transition-[transform,width] duration-200 ease-out motion-reduce:transition-none"
+          className="bg-clay-soft pointer-events-none absolute inset-y-0 rounded-lg transition-[transform,width] duration-200 ease-out motion-reduce:transition-none"
           style={{ width: thumb.w, transform: `translateX(${thumb.x}px)` }}
         />
       )}

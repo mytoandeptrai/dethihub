@@ -1,3 +1,5 @@
+import { contrastRatio, readableTextOn } from './slideTheme'
+
 /**
  * Chữ phải đọc được trên màu nền NGAY DƯỚI nó, không phải nền chung của bộ màu.
  * Nền dưới chữ = ô tô màu của chính chữ, nếu không thì hình khối đặc nằm dưới
@@ -6,20 +8,26 @@
  * Chỉ đổi lúc vẽ, không ghi vào dữ liệu bài.
  */
 import type { Slide, SlideElement } from '@/engine/store/docs'
-import { contrastRatio, readableTextOn } from './slideTheme'
 
 const MIN_RATIO = 3
 
 // Hai vùng chữ nằm về phía đậm của gradient. Giữa và phía còn lại giữ ảnh sáng.
 export const photoScrimFill = (position: 'bottom' | 'left') =>
-  'linear-gradient(' + (position === 'left' ? 270 : 180) + 'deg, #10121400 23%, #101214e6 66%, #101214fa 100%)'
+  'linear-gradient(' +
+  (position === 'left' ? 270 : 180) +
+  'deg, #10121400 23%, #101214e6 66%, #101214fa 100%)'
 
-export const PHOTO_CREDIT_FILL = 'linear-gradient(180deg, #10121400 0%, #101214e6 54%, #101214fa 100%)'
+export const PHOTO_CREDIT_FILL =
+  'linear-gradient(180deg, #10121400 0%, #101214e6 54%, #101214fa 100%)'
 
 // Nền sáng nhất ngay dưới vùng chữ khi ảnh gốc trắng hoàn toàn.
 const PHOTO_TEXT_BG = '#282a2c'
 
-export function photoScrimBackground(shape: SlideElement, x: number, y: number): string | undefined {
+export function photoScrimBackground(
+  shape: SlideElement,
+  x: number,
+  y: number,
+): string | undefined {
   const down = (y - shape.y) / shape.h
   if (shape.fill === PHOTO_CREDIT_FILL && down >= 0.54) return PHOTO_TEXT_BG
   if (shape.fill === photoScrimFill('bottom') && down >= 0.66) return PHOTO_TEXT_BG
@@ -38,7 +46,9 @@ function solidHex(css: string | undefined): string | null {
 }
 
 const order = (els: SlideElement[]) =>
-  els.map((el, i) => ({ el, i })).sort((a, b) => (a.el.zIndex ?? 0) - (b.el.zIndex ?? 0) || a.i - b.i)
+  els
+    .map((el, i) => ({ el, i }))
+    .sort((a, b) => (a.el.zIndex ?? 0) - (b.el.zIndex ?? 0) || a.i - b.i)
 
 function bgUnder(el: SlideElement, below: SlideElement[], slideBg: string): string {
   const own = solidHex(el.fill)
@@ -66,11 +76,17 @@ export function readableElements(slide: Slide, theme: { fg: string; bg: string }
     if (el.type !== 'text') return
     const color = solidHex(el.textColor ?? theme.fg)
     if (!color) return
-    const bg = bgUnder(el, sorted.slice(0, idx).map((x) => x.el), slideBg)
+    const bg = bgUnder(
+      el,
+      sorted.slice(0, idx).map((x) => x.el),
+      slideBg,
+    )
     if (contrastRatio(color, bg) >= MIN_RATIO) return
     const alt = contrastRatio(theme.fg, bg) >= MIN_RATIO ? theme.fg : readableTextOn(bg)
     fixed.set(el.id, alt)
   })
   if (!fixed.size) return slide.elements
-  return slide.elements.map((el) => (fixed.has(el.id) ? { ...el, textColor: fixed.get(el.id) } : el))
+  return slide.elements.map((el) =>
+    fixed.has(el.id) ? { ...el, textColor: fixed.get(el.id) } : el,
+  )
 }

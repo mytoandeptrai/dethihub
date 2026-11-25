@@ -7,8 +7,9 @@
  * Giữ Alt để tắt hít.
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+
 import { svgDataUrl } from '@/engine/lib/plot'
-import type { ToolImage } from '@/engine/lib/toolSpec'
+
 import {
   fitCoordTransform,
   fitCoordTransform3d,
@@ -22,6 +23,8 @@ import {
   type Snap3dResult,
   type SnapResult,
 } from './edgeSnap'
+
+import type { ToolImage } from '@/engine/lib/toolSpec'
 
 type DragState =
   | {
@@ -45,7 +48,15 @@ type DragState =
       lastSnap: Snap3dResult
     }
 
-export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; extras: string; onExtras: (v: string) => void }) {
+export function EdgeEditPreview({
+  img,
+  extras,
+  onExtras,
+}: {
+  img: ToolImage
+  extras: string
+  onExtras: (v: string) => void
+}) {
   const box = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const dragRef = useRef<DragState | null>(null)
@@ -75,17 +86,27 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
   }, [])
 
   const originSet = useMemo(() => new Set(pick.origins ?? []), [pick.origins])
-  const handles = useMemo(() => pick.points.filter((p) => originSet.has(p.name)), [pick.points, originSet])
+  const handles = useMemo(
+    () => pick.points.filter((p) => originSet.has(p.name)),
+    [pick.points, originSet],
+  )
   const ptMap = useMemo(() => new Map(pick.points.map((p) => [p.name, p])), [pick.points])
   const xform2d = useMemo(() => (is3d ? null : fitCoordTransform(pick.points)), [is3d, pick.points])
-  const xform3d = useMemo(() => (is3d ? fitCoordTransform3d(pick.points) : null), [is3d, pick.points])
+  const xform3d = useMemo(
+    () => (is3d ? fitCoordTransform3d(pick.points) : null),
+    [is3d, pick.points],
+  )
 
   const k0 = box.current ? w / box.current.getBoundingClientRect().width : w / 500
 
   const toVb = (clientX: number, clientY: number): { p: Pt; k: number; rect: DOMRect } => {
     const rect = box.current!.getBoundingClientRect()
     const k = w / rect.width
-    return { p: { x: minX + (clientX - rect.left) * k, y: minY + (clientY - rect.top) * k }, k, rect }
+    return {
+      p: { x: minX + (clientX - rect.left) * k, y: minY + (clientY - rect.top) * k },
+      k,
+      rect,
+    }
   }
 
   const hitHandle = (p: Pt, k: number): string | null => {
@@ -101,7 +122,13 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
     return best
   }
 
-  const paintDragDom = (d: DragState, k: number, clientX: number, clientY: number, rect: DOMRect) => {
+  const paintDragDom = (
+    d: DragState,
+    k: number,
+    clientX: number,
+    clientY: number,
+    rect: DOMRect,
+  ) => {
     const f = (n: number) => n.toFixed(1)
     const snap = d.lastSnap
     const movedPts = new Map<string, Pt>()
@@ -136,7 +163,10 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
       dotRef.current.setAttribute('cy', f(snap.vb.y))
     }
     if (guidesRef.current) {
-      guidesRef.current.setAttribute('d', snap.guides.map((g) => `M${f(g.x1)} ${f(g.y1)}L${f(g.x2)} ${f(g.y2)}`).join(''))
+      guidesRef.current.setAttribute(
+        'd',
+        snap.guides.map((g) => `M${f(g.x1)} ${f(g.y1)}L${f(g.x2)} ${f(g.y2)}`).join(''),
+      )
     }
     if (rightsRef.current) {
       if (d.kind === '2d') {
@@ -166,7 +196,13 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
     }
   }
 
-  const runSnap = (d: DragState, clientX: number, clientY: number, altKey: boolean, shiftKey: boolean) => {
+  const runSnap = (
+    d: DragState,
+    clientX: number,
+    clientY: number,
+    altKey: boolean,
+    shiftKey: boolean,
+  ) => {
     if (!box.current) return
     const { p, k, rect } = toVb(clientX, clientY)
     const rawVb = { x: p.x + d.offsetVb.x, y: p.y + d.offsetVb.y }
@@ -197,7 +233,10 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
         rawReal = [d.anchorReal[0], d.anchorReal[1], d.anchorReal[2] + dz]
       } else {
         const anchorVb = xf.toVb(d.anchorReal)
-        const effVb = { x: anchorVb.x + (rawVb.x - d.anchorRawVb.x), y: anchorVb.y + (rawVb.y - d.anchorRawVb.y) }
+        const effVb = {
+          x: anchorVb.x + (rawVb.x - d.anchorRawVb.x),
+          y: anchorVb.y + (rawVb.y - d.anchorRawVb.y),
+        }
         rawReal = xf.toRealHoriz(effVb, d.anchorReal[2])
       }
       const snap = snapDragPoint3d({
@@ -233,9 +272,19 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
     setHover(null)
     if (Math.hypot(finalSnap.vb.x - d.startPtVb.x, finalSnap.vb.y - d.startPtVb.y) > 2 * k) {
       if (d.kind === '2d') {
-        onExtras(savePointCoord(extras, d.name, d.lastSnap.real[0], d.lastSnap.real[1], d.lastSnap.snapped))
+        onExtras(
+          savePointCoord(
+            extras,
+            d.name,
+            d.lastSnap.real[0],
+            d.lastSnap.real[1],
+            d.lastSnap.snapped,
+          ),
+        )
       } else {
-        onExtras(savePointsCoord3d(extras, d.lastSnap.savePoints, d.lastSnap.mode, d.lastSnap.snapped))
+        onExtras(
+          savePointsCoord3d(extras, d.lastSnap.savePoints, d.lastSnap.mode, d.lastSnap.snapped),
+        )
       }
     }
   }
@@ -248,7 +297,10 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
     setHover(null)
   }
 
-  const latestRef = useRef<{ runSnap: typeof runSnap; finishDrag: typeof finishDrag }>({ runSnap, finishDrag })
+  const latestRef = useRef<{ runSnap: typeof runSnap; finishDrag: typeof finishDrag }>({
+    runSnap,
+    finishDrag,
+  })
   latestRef.current = { runSnap, finishDrag }
 
   useEffect(() => {
@@ -259,7 +311,8 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
         latestRef.current.runSnap(d, d.lastClient.x, d.lastClient.y, e.altKey, e.shiftKey)
       }
     }
-    const onWinUp = (e: PointerEvent) => latestRef.current.finishDrag(e.clientX, e.clientY, e.altKey, e.shiftKey)
+    const onWinUp = (e: PointerEvent) =>
+      latestRef.current.finishDrag(e.clientX, e.clientY, e.altKey, e.shiftKey)
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup', onKey)
     window.addEventListener('pointerup', onWinUp, { once: true })
@@ -282,7 +335,7 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
   return (
     <div
       ref={outer}
-      className="flex h-full w-full flex-col items-center justify-center rounded-[4px] border border-line bg-white"
+      className="border-line flex h-full w-full flex-col items-center justify-center rounded-[4px] border bg-white"
       style={{ containerType: 'size' }}
     >
       <div
@@ -291,7 +344,9 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
         style={{
           aspectRatio: `${w} / ${h}`,
           // giữ tỉ lệ px/đơn vị cố định suốt lúc chỉnh: cạnh kéo dài thì hình to ra thật, chỉ co lại khi chạm mép khung
-          width: scale ? `min(100cqw, 100cqh * ${w / h}, ${w * scale}px)` : `min(100cqw, 100cqh * ${w / h})`,
+          width: scale
+            ? `min(100cqw, 100cqh * ${w / h}, ${w * scale}px)`
+            : `min(100cqw, 100cqh * ${w / h})`,
         }}
       >
         <img
@@ -316,7 +371,12 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
             const startPtVb = { x: pt.x, y: pt.y }
             const offsetVb = { x: pt.x - p.x, y: pt.y - p.y }
             if (is3d) {
-              const behavior = getDrag3dBehavior({ dragName: name, base: pick.base, top: pick.top, footOf: pick.footOf })
+              const behavior = getDrag3dBehavior({
+                dragName: name,
+                base: pick.base,
+                top: pick.top,
+                footOf: pick.footOf,
+              })
               const startReal: P3 = [pt.v[0], pt.v[1], pt.v[2] ?? 0]
               const lastShift = behavior.allowVert && e.shiftKey
               const snap = snapDragPoint3d({
@@ -438,7 +498,7 @@ export function EdgeEditPreview({ img, extras, onExtras }: { img: ToolImage; ext
         {draggingName && (
           <div
             ref={tipRef}
-            className="pointer-events-none absolute z-10 whitespace-pre rounded-[6px] border border-clay-line bg-surface/95 px-2 py-1 font-mono text-[11.5px] font-medium text-ink shadow-soft"
+            className="border-clay-line bg-surface/95 text-ink shadow-soft pointer-events-none absolute z-10 rounded-[6px] border px-2 py-1 font-mono text-[11.5px] font-medium whitespace-pre"
           />
         )}
       </div>

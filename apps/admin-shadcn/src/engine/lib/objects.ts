@@ -29,12 +29,15 @@ export interface ObjectsSpec {
   groups: ObjectsGroup[]
 }
 
-export const OBJECTS_DEFAULT: ObjectsSpec = { groups: [{ container: 'basket', item: 'apple', each: 5, count: 3 }] }
+export const OBJECTS_DEFAULT: ObjectsSpec = {
+  groups: [{ container: 'basket', item: 'apple', each: 5, count: 3 }],
+}
 
 const FAM = `font-family="'Times New Roman',serif"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f1 = (n: number) => Math.round(n * 10) / 10
-const clampInt = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(Number.isFinite(v) ? v : lo)))
+const clampInt = (v: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(hi, Math.round(Number.isFinite(v) ? v : lo)))
 
 const ITEM_H = 50
 const CONT_H = 120
@@ -66,7 +69,11 @@ const spriteW = (id: string | undefined, h: number) => {
 const nameOf = new Map<string, string>()
 
 function missing(id: string, x: number, y: number, w: number, h: number) {
-  const name = OBJECTS[id] ?? CONTAINERS[id]?.name ?? nameOf.get(id) ?? id.replace(/^x-/, '').replace(/-/g, ' ')
+  const name =
+    OBJECTS[id] ??
+    CONTAINERS[id]?.name ??
+    nameOf.get(id) ??
+    id.replace(/^x-/, '').replace(/-/g, ' ')
   return (
     `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" rx="6" fill="#fff" stroke="#888" stroke-dasharray="4 3"/>` +
     `<text x="${f1(x + w / 2)}" y="${f1(y + h / 2 + 4)}" text-anchor="middle" font-size="11" fill="#666" ${FAM}>${esc(name)}</text>`
@@ -129,11 +136,16 @@ function containerBox(g: ObjectsGroup, used: Set<string>): Box {
         }
         counts.forEach((k, j) => {
           const t = rows === 1 ? 0.6 : j / (rows - 1)
-          const base = inside ? MY - RY * 0.25 + t * RY * 0.95 : rows === 1 ? MY + RY * 0.15 : MY - RY * 0.3 + t * RY * 0.75
+          const base = inside
+            ? MY - RY * 0.25 + t * RY * 0.95
+            : rows === 1
+              ? MY + RY * 0.15
+              : MY - RY * 0.3 + t * RY * 0.75
           const bottom = base + ih * (inside ? 0.32 : 0.04)
           const step = iw * 0.85
           const rowW = iw + step * (k - 1)
-          for (let i = 0; i < k; i++) out += spriteUse(g.item!, MX - rowW / 2 + i * step, bottom - ih, ih, used)
+          for (let i = 0; i < k; i++)
+            out += spriteUse(g.item!, MX - rowW / 2 + i * step, bottom - ih, ih, used)
         })
         if (inside) {
           // thành trước của rổ: vẽ lại đồ chứa, chỉ giữ phần dưới mép trước của miệng
@@ -186,8 +198,9 @@ export function objectGroupFromRaw(raw: Record<string, unknown>, index: number):
   const group = `Nhóm ${index + 1}`
   const name = String(raw.item ?? '').trim()
   // Tên tiếng Anh hợp lệ có thể dùng để lấy vật ngoài kho qua kho dùng chung.
-  const dynamic = name && !Object.hasOwn(OBJECTS, name) && typeof raw.en === 'string' ? dynamicId(raw.en) : null
-  const item = dynamic ?? (name ? resolveSpriteId(name) ?? undefined : undefined)
+  const dynamic =
+    name && !Object.hasOwn(OBJECTS, name) && typeof raw.en === 'string' ? dynamicId(raw.en) : null
+  const item = dynamic ?? (name ? (resolveSpriteId(name) ?? undefined) : undefined)
   if (name && !item) throw new Error(`${group}: không có đồ vật "${name}" trong kho hình.`)
 
   const container = String(raw.container ?? '').trim() || undefined
@@ -196,16 +209,27 @@ export function objectGroupFromRaw(raw: Record<string, unknown>, index: number):
   }
 
   const count = Number(raw.count ?? 1)
-  const label = typeof raw.label === 'string' || typeof raw.label === 'number' ? String(raw.label) : undefined
+  const label =
+    typeof raw.label === 'string' || typeof raw.label === 'number' ? String(raw.label) : undefined
   const hasEach = raw.each != null && String(raw.each).trim() !== ''
   let each = hasEach ? Number(raw.each) : 0
   if (!hasEach) {
     if (item) {
       // total là tổng của các nhóm giống nhau. Nhãn số biểu thị số lượng trên từng nhóm.
-      const total = raw.total == null || String(raw.total).trim() === '' ? undefined : Number(raw.total)
+      const total =
+        raw.total == null || String(raw.total).trim() === '' ? undefined : Number(raw.total)
       each = total !== undefined ? total / count : Number(label)
-      if (!Number.isInteger(each) || each < 1 || each > 20 || !Number.isInteger(count) || count < 1 || count > 10) {
-        throw new Error(`${group}: thiếu each (số vật mỗi nhóm). Cần số lượng hợp lệ hoặc total chia đều cho count.`)
+      if (
+        !Number.isInteger(each) ||
+        each < 1 ||
+        each > 20 ||
+        !Number.isInteger(count) ||
+        count < 1 ||
+        count > 10
+      ) {
+        throw new Error(
+          `${group}: thiếu each (số vật mỗi nhóm). Cần số lượng hợp lệ hoặc total chia đều cho count.`,
+        )
       }
     } else if (!container || !label?.trim()) {
       throw new Error(`${group}: thiếu each (số vật mỗi nhóm) hoặc nhãn cho đồ chứa.`)
@@ -224,10 +248,15 @@ export function normalizeObjects(spec: ObjectsSpec): ObjectsSpec {
     .filter((g) => !g.item || OBJECTS[g.item] || DYNAMIC_ID.test(g.item))
     .map((g) => ({
       item: g.item && (OBJECTS[g.item] || DYNAMIC_ID.test(g.item)) ? g.item : undefined,
-      itemName: g.item && DYNAMIC_ID.test(g.item) && g.itemName ? String(g.itemName).slice(0, 40) : undefined,
+      itemName:
+        g.item && DYNAMIC_ID.test(g.item) && g.itemName
+          ? String(g.itemName).slice(0, 40)
+          : undefined,
       // túi, gói… (chỉ ghi số) không vẽ được đồ bên trong: có đồ vật thì vẽ thành nhóm rời cho đủ số
       container:
-        g.container && CONTAINERS[g.container] && !(CONTAINERS[g.container].placement === 'label' && g.item && Number(g.each) > 0)
+        g.container &&
+        CONTAINERS[g.container] &&
+        !(CONTAINERS[g.container].placement === 'label' && g.item && Number(g.each) > 0)
           ? g.container
           : undefined,
       each: clampInt(Number(g.each), 0, 20),
@@ -241,7 +270,9 @@ export function normalizeObjects(spec: ObjectsSpec): ObjectsSpec {
 /** tải / nhờ server vẽ các đồ vật kho dùng chung có trong cấu hình (gọi trước khi vẽ chính thức) */
 export async function prepareObjects(spec: ObjectsSpec): Promise<void> {
   await loadSprites()
-  await ensureSprites((spec.groups ?? []).map((g) => g.item ?? '').filter((id) => DYNAMIC_ID.test(id)))
+  await ensureSprites(
+    (spec.groups ?? []).map((g) => g.item ?? '').filter((id) => DYNAMIC_ID.test(id)),
+  )
 }
 
 /** hình trong <defs> để `<use href="#sp-id">` (vector: bóng trắng + nét; kho dùng chung: ảnh PNG đã tách nền) */
@@ -280,7 +311,11 @@ export function resolveSpriteId(name: string): string | null {
   for (const [id, n] of Object.entries(OBJECTS)) {
     const f = fold(n)
     if (f === q || id === q.replace(/ /g, '_')) return id
-    if (!hit && (f.replace(CLASSIFIER, '') === q.replace(CLASSIFIER, '') || f.split(' / ').includes(q))) hit = id
+    if (
+      !hit &&
+      (f.replace(CLASSIFIER, '') === q.replace(CLASSIFIER, '') || f.split(' / ').includes(q))
+    )
+      hit = id
   }
   return hit
 }
@@ -289,7 +324,9 @@ export function resolveSpriteId(name: string): string | null {
 export function sceneSpriteIds(text: string): string[] {
   const out: string[] = []
   for (const line of text.split('\n')) {
-    const m = /^\s*hình\s+(.+?)\s+[A-Za-z0-9_'-]+\s*$/u.exec(line.replace(/"[^"]*"|“[^”]*”/g, '').trim())
+    const m = /^\s*hình\s+(.+?)\s+[A-Za-z0-9_'-]+\s*$/u.exec(
+      line.replace(/"[^"]*"|“[^”]*”/g, '').trim(),
+    )
     const id = m ? resolveSpriteId(m[1]) : null
     if (id) out.push(id)
   }
@@ -301,7 +338,11 @@ export async function prepareToolDoc(doc: { kind: string; spec: unknown }): Prom
   if (doc.kind === 'objects') return prepareObjects(doc.spec as ObjectsSpec)
   if (doc.kind === 'scene') {
     await loadSprites()
-    await ensureSprites(sceneSpriteIds((doc.spec as { text?: string }).text ?? '').filter((id) => DYNAMIC_ID.test(id)))
+    await ensureSprites(
+      sceneSpriteIds((doc.spec as { text?: string }).text ?? '').filter((id) =>
+        DYNAMIC_ID.test(id),
+      ),
+    )
   }
 }
 
@@ -317,7 +358,13 @@ export function renderObjectsSvg(raw: ObjectsSpec, desc: string) {
   spec.groups.forEach((g, gi) => {
     for (let i = 0; i < g.count; i++) {
       const box = g.container ? containerBox(g, used) : clusterBox(g, used)
-      const gapBefore = lines[lines.length - 1].length ? (i === 0 && gi > 0 ? GROUP_GAP : g.container ? GAP : GAP * 2) : 0
+      const gapBefore = lines[lines.length - 1].length
+        ? i === 0 && gi > 0
+          ? GROUP_GAP
+          : g.container
+            ? GAP
+            : GAP * 2
+        : 0
       if (lineW + gapBefore + box.w > MAX_W && lines[lines.length - 1].length) {
         lines.push([{ box, gapBefore: 0 }])
         lineW = box.w
@@ -327,7 +374,10 @@ export function renderObjectsSvg(raw: ObjectsSpec, desc: string) {
       }
     }
   })
-  const lineSizes = lines.map((l) => ({ w: l.reduce((s, it) => s + it.gapBefore + it.box.w, 0), h: Math.max(...l.map((it) => it.box.h)) }))
+  const lineSizes = lines.map((l) => ({
+    w: l.reduce((s, it) => s + it.gapBefore + it.box.w, 0),
+    h: Math.max(...l.map((it) => it.box.h)),
+  }))
   const W = Math.max(...lineSizes.map((s) => s.w)) + PAD * 2
   const H = lineSizes.reduce((s, l) => s + l.h, 0) + (lines.length - 1) * 24 + PAD * 2
   let body = ''
@@ -367,7 +417,10 @@ export function renderClockSvg(spec: ClockSpec, desc: string) {
   const R = 96
   const hour = clampInt(spec.hour, 0, 23) % 12
   const minute = clampInt(spec.minute, 0, 59)
-  const pt = (deg: number, r: number) => [C + r * Math.sin((deg * Math.PI) / 180), C - r * Math.cos((deg * Math.PI) / 180)]
+  const pt = (deg: number, r: number) => [
+    C + r * Math.sin((deg * Math.PI) / 180),
+    C - r * Math.cos((deg * Math.PI) / 180),
+  ]
   let body = `<circle cx="${C}" cy="${C}" r="${R}" fill="#fff" stroke="#111" stroke-width="3"/>`
   for (let i = 0; i < 60; i++) {
     const major = i % 5 === 0
@@ -384,7 +437,10 @@ export function renderClockSvg(spec: ClockSpec, desc: string) {
     const [x, y] = pt(deg, len)
     return `<line x1="${C}" y1="${C}" x2="${f1(x)}" y2="${f1(y)}" stroke="#111" stroke-width="${w}" stroke-linecap="round"/>`
   }
-  body += hand((hour + minute / 60) * 30, 50, 5) + hand(minute * 6, 76, 3) + `<circle cx="${C}" cy="${C}" r="4.5" fill="#111"/>`
+  body +=
+    hand((hour + minute / 60) * 30, 50, 5) +
+    hand(minute * 6, 76, 3) +
+    `<circle cx="${C}" cy="${C}" r="4.5" fill="#111"/>`
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">${desc}<rect width="100%" height="100%" fill="#fff"/>${body}</svg>`
   return { svg, width: S, height: S }
 }

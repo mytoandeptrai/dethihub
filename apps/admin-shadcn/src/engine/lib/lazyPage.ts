@@ -12,7 +12,9 @@ const KEY = 'derou.chunk-reload-at'
 /** lỗi do không tải được file JS (khác với lỗi trong code) */
 export function isChunkError(err: unknown): boolean {
   const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err)
-  return /dynamically imported module|Importing a module script failed|Failed to fetch|error loading dynamically|ChunkLoadError|Unable to preload CSS|text\/html/i.test(msg)
+  return /dynamically imported module|Importing a module script failed|Failed to fetch|error loading dynamically|ChunkLoadError|Unable to preload CSS|text\/html/i.test(
+    msg,
+  )
 }
 
 /** tải lại trang để lấy bản mới — tối đa một lần mỗi 30 giây (tránh vòng lặp khi mạng hỏng thật) */

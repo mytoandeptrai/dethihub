@@ -7,8 +7,10 @@
  * Mọi thao tác chỉ sửa chữ trong ô lệnh, renderer vẽ lại — chèn/sửa/xuất vẫn như cũ.
  */
 import { useMemo, useRef, useState } from 'react'
-import { svgDataUrl } from '@/engine/lib/plot'
+
 import { parseAngle, TRIG_GEOM } from '@/engine/lib/mathExtra'
+import { svgDataUrl } from '@/engine/lib/plot'
+
 import type { ToolImage } from '@/engine/lib/toolSpec'
 
 const TAU = 2 * Math.PI
@@ -77,7 +79,15 @@ function draggablePoints(text: string): DragPt[] {
   return out
 }
 
-export function TrigPickPreview({ img, angles, onAngles }: { img: ToolImage; angles: string; onAngles: (v: string) => void }) {
+export function TrigPickPreview({
+  img,
+  angles,
+  onAngles,
+}: {
+  img: ToolImage
+  angles: string
+  onAngles: (v: string) => void
+}) {
   const box = useRef<HTMLDivElement>(null)
   const vb = /viewBox="([-\d.]+) ([-\d.]+) ([-\d.]+) ([-\d.]+)"/.exec(img.svg)
   const [minX, minY, w, h] = vb ? vb.slice(1).map(Number) : [0, 0, img.width, img.height]
@@ -148,10 +158,16 @@ export function TrigPickPreview({ img, angles, onAngles }: { img: ToolImage; ang
 
   const ghost = drag ? drag.a : hover && hover.onPt === null ? hover.a : null
   const g = ghost === null ? null : at(ghost)
-  const tipText = ghost === null ? null : `${drag && pts[drag.idx]?.name ? `${pts[drag.idx].name}: ` : ''}${fmtAngle(ghost)}`
+  const tipText =
+    ghost === null
+      ? null
+      : `${drag && pts[drag.idx]?.name ? `${pts[drag.idx].name}: ` : ''}${fmtAngle(ghost)}`
 
   return (
-    <div className="flex h-full w-full items-center justify-center" style={{ containerType: 'size' }}>
+    <div
+      className="flex h-full w-full items-center justify-center"
+      style={{ containerType: 'size' }}
+    >
       <div
         ref={box}
         className="relative select-none"
@@ -160,12 +176,23 @@ export function TrigPickPreview({ img, angles, onAngles }: { img: ToolImage; ang
           width: `min(100cqw, 100cqh * ${(0.9 * w) / h}, ${w * 1.6}px)`,
         }}
       >
-        <img src={svgDataUrl(img.svg)} alt="Xem trước" draggable={false} className="block h-full w-full rounded-[4px] border border-line bg-white" />
+        <img
+          src={svgDataUrl(img.svg)}
+          alt="Xem trước"
+          draggable={false}
+          className="border-line block h-full w-full rounded-[4px] border bg-white"
+        />
         <svg
           viewBox={`${minX} ${minY} ${w} ${h}`}
           className="absolute inset-0 h-full w-full touch-none"
           style={{
-            cursor: drag ? 'grabbing' : hover?.onPt != null ? 'grab' : hover ? 'crosshair' : 'default',
+            cursor: drag
+              ? 'grabbing'
+              : hover?.onPt != null
+                ? 'grab'
+                : hover
+                  ? 'crosshair'
+                  : 'default',
           }}
           onPointerMove={(e) => {
             const pr = probe(e)
@@ -174,7 +201,13 @@ export function TrigPickPreview({ img, angles, onAngles }: { img: ToolImage; ang
               if (a !== drag.a || !drag.moved) setDrag({ ...drag, a, moved: true })
               return
             }
-            setHover(pr.onPt !== null ? { a: pts[pr.onPt].a, onPt: pr.onPt } : pr.nearRing ? { a: snapAngle(pr.a, e.altKey), onPt: null } : null)
+            setHover(
+              pr.onPt !== null
+                ? { a: pts[pr.onPt].a, onPt: pr.onPt }
+                : pr.nearRing
+                  ? { a: snapAngle(pr.a, e.altKey), onPt: null }
+                  : null,
+            )
           }}
           onPointerLeave={() => !drag && setHover(null)}
           onPointerDown={(e) => {
@@ -220,14 +253,30 @@ export function TrigPickPreview({ img, angles, onAngles }: { img: ToolImage; ang
           })}
           {g && (
             <>
-              <line x1={cx} y1={cy} x2={g.x} y2={g.y} stroke="var(--color-clay, #b5532a)" strokeWidth={1} strokeDasharray="4 3" />
-              {!drag && <circle cx={g.x} cy={g.y} r={4} fill="var(--color-clay, #b5532a)" fillOpacity={0.55} />}
+              <line
+                x1={cx}
+                y1={cy}
+                x2={g.x}
+                y2={g.y}
+                stroke="var(--color-clay, #b5532a)"
+                strokeWidth={1}
+                strokeDasharray="4 3"
+              />
+              {!drag && (
+                <circle
+                  cx={g.x}
+                  cy={g.y}
+                  r={4}
+                  fill="var(--color-clay, #b5532a)"
+                  fillOpacity={0.55}
+                />
+              )}
             </>
           )}
         </svg>
         {g && tipText && (
           <div
-            className="pointer-events-none absolute z-10 -translate-y-full whitespace-nowrap rounded-[6px] border border-line bg-surface/95 px-2 py-0.5 font-mono text-[12px] font-medium text-ink shadow-soft"
+            className="border-line bg-surface/95 text-ink shadow-soft pointer-events-none absolute z-10 -translate-y-full rounded-[6px] border px-2 py-0.5 font-mono text-[12px] font-medium whitespace-nowrap"
             style={{
               left: `${((g.x - minX) / w) * 100}%`,
               top: `calc(${((g.y - minY) / h) * 100}% - 10px)`,
@@ -236,8 +285,9 @@ export function TrigPickPreview({ img, angles, onAngles }: { img: ToolImage; ang
             {tipText}
           </div>
         )}
-        <p className="pointer-events-none absolute -bottom-6 left-0 right-0 text-center text-[11.5px] text-ink-3">
-          Bấm lên đường tròn để thêm điểm · kéo điểm để đổi góc · bấm đúp để xoá · giữ Alt để tắt hít
+        <p className="text-ink-3 pointer-events-none absolute right-0 -bottom-6 left-0 text-center text-[11.5px]">
+          Bấm lên đường tròn để thêm điểm · kéo điểm để đổi góc · bấm đúp để xoá · giữ Alt để tắt
+          hít
         </p>
       </div>
     </div>

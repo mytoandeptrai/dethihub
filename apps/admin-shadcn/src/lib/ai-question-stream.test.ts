@@ -1,15 +1,38 @@
 import { describe, expect, it } from 'vitest'
 
-import { isAiDocumentReplyComplete, parseAiDocumentReply, QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
+import {
+  isAiDocumentReplyComplete,
+  parseAiDocumentReply,
+  QuestionStreamParser,
+  selectedExamPayload,
+} from './ai-question-stream'
 
 describe('question stream parser', () => {
   it.each([
-    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}', false],
-    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}', false],
-    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp.', false],
-    ['{"action":"replace","blocks":[{"type":"question","text":"Ví dụ "x"}]} phần còn lại của câu hỏi chưa xong', false],
-    [String.raw`{"action":"replace","blocks":[{"type":"question","text":"Giải thích "(0, 1] và $2 \times 3$" trong câu."}]}`, false],
-    ['{"action":"replace","blocks":[{"type":"question","text":"Giải thích "đoạn mã" trong câu."}]}', false],
+    [
+      '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}',
+      false,
+    ],
+    [
+      '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}',
+      false,
+    ],
+    [
+      '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp.',
+      false,
+    ],
+    [
+      '{"action":"replace","blocks":[{"type":"question","text":"Ví dụ "x"}]} phần còn lại của câu hỏi chưa xong',
+      false,
+    ],
+    [
+      String.raw`{"action":"replace","blocks":[{"type":"question","text":"Giải thích "(0, 1] và $2 \times 3$" trong câu."}]}`,
+      false,
+    ],
+    [
+      '{"action":"replace","blocks":[{"type":"question","text":"Giải thích "đoạn mã" trong câu."}]}',
+      false,
+    ],
   ])('rejects drafts requiring unescaped-quote recovery: %s', (source, expected) => {
     expect(isAiDocumentReplyComplete(String(source))).toBe(expected)
   })
@@ -21,12 +44,12 @@ describe('question stream parser', () => {
     expect(parseAiDocumentReply(source)?.blocks).toEqual([{ type: 'question', text }])
   })
 
-  it.each([
-    '{"blocks":[]} trailing unfinished text',
-    '{"blocks":[]} {"blocks":[',
-  ])('does not accept a complete prefix while ignoring unfinished content: %s', (source) => {
-    expect(isAiDocumentReplyComplete(source)).toBe(false)
-  })
+  it.each(['{"blocks":[]} trailing unfinished text', '{"blocks":[]} {"blocks":['])(
+    'does not accept a complete prefix while ignoring unfinished content: %s',
+    (source) => {
+      expect(isAiDocumentReplyComplete(source)).toBe(false)
+    },
+  )
 
   it.each([
     ['$' + String.raw`\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot` + '$'],
@@ -40,7 +63,9 @@ describe('question stream parser', () => {
     expect(parser.questions[0]?.prompt).toBe(math)
     parser.finish()
     expect(parser.questions[0]?.prompt).toBe(math)
-    expect(parseAiDocumentReply(JSON.stringify({ blocks: [{ type: 'question', text: math }] }))?.blocks).toEqual([{ type: 'question', text: math }])
+    expect(
+      parseAiDocumentReply(JSON.stringify({ blocks: [{ type: 'question', text: math }] }))?.blocks,
+    ).toEqual([{ type: 'question', text: math }])
   })
 
   it('does not reinterpret valid escapes after an unpaired currency dollar', () => {
@@ -72,18 +97,38 @@ describe('question stream parser', () => {
   })
 
   it('recovers bare LaTeX escapes split across chunks in a legacy replace reply', () => {
-    const source = String.raw`{"action":"replace","say":"Đề đã sẵn sàng","blocks":[{"type":"heading","text":"ĐỀ TOÁN"},{"type":"question","no":1,"text":"Tính $BH \\cdot CH$ và $\\sqrt{2}$, $\\frac{1}{2}$","options":[]}]}`.replaceAll('\\\\', '\\')
+    const source =
+      String.raw`{"action":"replace","say":"Đề đã sẵn sàng","blocks":[{"type":"heading","text":"ĐỀ TOÁN"},{"type":"question","no":1,"text":"Tính $BH \\cdot CH$ và $\\sqrt{2}$, $\\frac{1}{2}$","options":[]}]}`.replaceAll(
+        '\\\\',
+        '\\',
+      )
     const parser = new QuestionStreamParser()
     for (const char of source) parser.push(char)
     expect(parser.questions).toHaveLength(1)
-    expect(parser.questions[0]?.prompt).toBe(String.raw`Tính $BH \cdot CH$ và $\sqrt{2}$, $\frac{1}{2}$`)
+    expect(parser.questions[0]?.prompt).toBe(
+      String.raw`Tính $BH \cdot CH$ và $\sqrt{2}$, $\frac{1}{2}$`,
+    )
     expect(parser.blocks).toHaveLength(2)
     expect(parseAiDocumentReply(source)?.action).toBe('replace')
   })
 
   it('recovers a fenced append reply with non-question blocks without damaging escaped text', () => {
-    const source = '```json\n' + String.raw`{"action":"append","say":"Gửi thầy/cô **Lời giải chi tiết**","blocks":[{"type":"divider"},{"type":"heading","text":"LỜI GIẢI CHI TIẾT","level":1},{"type":"paragraph","text":"**Lời giải câu 1**\n$AH^2 = BH \cdot CH$, $\sqrt{2}$"}]}` + '\n```'
-    expect(parseAiDocumentReply(source)).toMatchObject({ action: 'append', blocks: [{ type: 'divider' }, { type: 'heading' }, { type: 'paragraph', text: String.raw`**Lời giải câu 1**` + '\n' + String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$` }] })
+    const source =
+      '```json\n' +
+      String.raw`{"action":"append","say":"Gửi thầy/cô **Lời giải chi tiết**","blocks":[{"type":"divider"},{"type":"heading","text":"LỜI GIẢI CHI TIẾT","level":1},{"type":"paragraph","text":"**Lời giải câu 1**\n$AH^2 = BH \cdot CH$, $\sqrt{2}$"}]}` +
+      '\n```'
+    expect(parseAiDocumentReply(source)).toMatchObject({
+      action: 'append',
+      blocks: [
+        { type: 'divider' },
+        { type: 'heading' },
+        {
+          type: 'paragraph',
+          text:
+            String.raw`**Lời giải câu 1**` + '\n' + String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$`,
+        },
+      ],
+    })
     expect(parseAiDocumentReply('Hello')).toBeNull()
     expect(parseAiDocumentReply('')).toBeNull()
     expect(parseAiDocumentReply('{broken}')).toBeNull()
@@ -91,12 +136,20 @@ describe('question stream parser', () => {
 
   it('retains math delimiters when converting rich-text questions for preview', () => {
     const parser = new QuestionStreamParser()
-    parser.push(JSON.stringify({ blocks: [{ type: 'question', text: [{ text: 'Evaluate ' }, { math: 'x^2' }] }] }))
+    parser.push(
+      JSON.stringify({
+        blocks: [{ type: 'question', text: [{ text: 'Evaluate ' }, { math: 'x^2' }] }],
+      }),
+    )
     expect(parser.questions[0]?.prompt).toBe('Evaluate $x^2$')
   })
 
   it('preserves correctly escaped backslashes, newlines, quotes and unicode', () => {
-    const value = { action: 'append', say: 'Line 1\n"Line 2"', blocks: [{ type: 'question', text: String.raw`$\frac{1}{2} + \sqrt{2}$` + '\n∀' }] }
+    const value = {
+      action: 'append',
+      say: 'Line 1\n"Line 2"',
+      blocks: [{ type: 'question', text: String.raw`$\frac{1}{2} + \sqrt{2}$` + '\n∀' }],
+    }
     const parser = new QuestionStreamParser()
     for (const char of JSON.stringify(value)) parser.push(char)
     parser.finish()
@@ -108,7 +161,9 @@ describe('question stream parser', () => {
     const parser = new QuestionStreamParser()
     parser.push('```json\n{"blocks":[{"type":"question","no":1,"text":"A } \\\" B","options":[]},')
     expect(parser.questions).toHaveLength(1)
-    parser.push('{"type":"question","no":2,"text":"incomplete","options":[{"label":"A","text":"yes"}')
+    parser.push(
+      '{"type":"question","no":2,"text":"incomplete","options":[{"label":"A","text":"yes"}',
+    )
     expect(parser.questions).toHaveLength(1)
     parser.push(']}]}\n```')
     expect(parser.questions.map((question) => question.number)).toEqual([1, 2])
@@ -129,11 +184,21 @@ describe('question stream parser', () => {
 
   it('inserts only selected complete questions and their answer-key entries', () => {
     const parser = new QuestionStreamParser()
-    parser.push(JSON.stringify({ blocks: [
-      { type: 'question', no: 1, text: 'First', options: [] },
-      { type: 'question', no: 2, text: 'Second', options: [] },
-      { type: 'answerKey', items: [{ no: 1, answer: 'A' }, { no: 2, answer: 'B' }] },
-    ] }))
+    parser.push(
+      JSON.stringify({
+        blocks: [
+          { type: 'question', no: 1, text: 'First', options: [] },
+          { type: 'question', no: 2, text: 'Second', options: [] },
+          {
+            type: 'answerKey',
+            items: [
+              { no: 1, answer: 'A' },
+              { no: 2, answer: 'B' },
+            ],
+          },
+        ],
+      }),
+    )
     const payload = JSON.parse(selectedExamPayload(parser.questions.slice(1), parser.blocks))
     expect(payload.action).toBe('append')
     expect(payload.blocks).toEqual([

@@ -6,10 +6,12 @@
  * và được chuyển thành block đề / slide ở call site.
  */
 import { useEffect, useRef, useState } from 'react'
+
+import { IMPORT_ACCEPT } from '@/engine/lib/importFile'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
+
 import { IconPlus } from './icons'
 import { popoverStyle, useAnchoredPopover } from './useAnchoredPopover'
-import { IMPORT_ACCEPT } from '@/engine/lib/importFile'
 
 export interface FileMenuExtra {
   label: string
@@ -52,7 +54,16 @@ function IconTray({ up = false }: { up?: boolean }) {
   )
 }
 
-export function FileMenu({ kind, onNew, onImport, onDownload, downloadHint, downloadNote, extra, importInputRef }: FileMenuProps) {
+export function FileMenu({
+  kind,
+  onNew,
+  onImport,
+  onDownload,
+  downloadHint,
+  downloadNote,
+  extra,
+  importInputRef,
+}: FileMenuProps) {
   const [open, setOpen] = useState(false)
   const popAnim = useAnimatedPresence(open, 140)
   const [busy, setBusy] = useState(false)
@@ -175,7 +186,9 @@ export function FileMenu({ kind, onNew, onImport, onDownload, downloadHint, down
               <IconTray />
             </span>
             <span className="file-menu__text">
-              <span className="file-menu__label">{kind === 'exam' ? 'Xuất Word' : 'Tải xuống file'}</span>
+              <span className="file-menu__label">
+                {kind === 'exam' ? 'Xuất Word' : 'Tải xuống file'}
+              </span>
               <span className="file-menu__hint">{downloadHint}</span>
             </span>
           </button>
@@ -210,7 +223,10 @@ export function FileMenu({ kind, onNew, onImport, onDownload, downloadHint, down
       )}
 
       <input
-        ref={(element) => { fileRef.current = element; if (importInputRef) importInputRef.current = element }}
+        ref={(element) => {
+          fileRef.current = element
+          if (importInputRef) importInputRef.current = element
+        }}
         type="file"
         accept={IMPORT_ACCEPT}
         hidden

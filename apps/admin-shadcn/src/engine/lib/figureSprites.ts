@@ -8,14 +8,18 @@
  */
 import { mediaGetFigure } from '@/apis/media/requests'
 
-export type Sprite = { w: number; h: number; ink: string; body: string; href?: undefined } | { w: number; h: number; href: string; ink?: undefined; body?: undefined }
+export type Sprite =
+  | { w: number; h: number; ink: string; body: string; href?: undefined }
+  | { w: number; h: number; href: string; ink?: undefined; body?: undefined }
 
 let lib: Record<string, Sprite> | null = null
 let loading: Promise<Record<string, Sprite>> | null = null
 const dynamic: Record<string, Sprite> = {}
 
 export function loadSprites(): Promise<Record<string, Sprite>> {
-  return (loading ??= import('@/engine/data/figureSprites.json').then((m) => (lib = m.default as Record<string, Sprite>)))
+  return (loading ??= import('@/engine/data/figureSprites.json').then(
+    (m) => (lib = m.default as Record<string, Sprite>),
+  ))
 }
 
 /** null khi kho chưa nạp xong hoặc không có hình này */
@@ -124,11 +128,13 @@ async function cutOut(blob: Blob): Promise<Sprite | null> {
   const wall = new Uint8Array(w * h)
   for (let y = 0; y < h; y++)
     for (let x = 0; x < w; x++)
-      if (ink[y * w + x]) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-        const X = x + dx
-        const Y = y + dy
-        if (X >= 0 && Y >= 0 && X < w && Y < h) wall[Y * w + X] = 1
-      }
+      if (ink[y * w + x])
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            const X = x + dx
+            const Y = y + dy
+            if (X >= 0 && Y >= 0 && X < w && Y < h) wall[Y * w + X] = 1
+          }
   const outside = new Uint8Array(w * h)
   const stack: number[] = []
   for (let x = 0; x < w; x++) stack.push(x, (h - 1) * w + x)

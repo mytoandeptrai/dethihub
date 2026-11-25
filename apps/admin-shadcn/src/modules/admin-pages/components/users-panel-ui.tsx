@@ -1,5 +1,4 @@
 'use client'
-import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import {
   lib_llm_TOKENS_PER_POINT as TOKENS_PER_POINT,
   components_appIcons_TrashIcon as TrashIcon,
@@ -7,6 +6,7 @@ import {
 import { cn } from '@workspace/ui/lib/utils'
 import { Ban, Check, Coins, Lock, Search, ShieldAlert, Unlock, Users, X } from 'lucide-react'
 
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import {
   Avatar,
   SiteBadge as Badge,
@@ -17,7 +17,6 @@ import {
   PageHeader,
   Pager,
   Segmented,
-
   Toolbar,
   inputClass,
 } from '@/components/product-ui'
@@ -424,7 +423,9 @@ export function UsersPanelUserDetailDrawerUi(
               </div>
 
               {quotaLoading ? (
-                <LoadingRegion><FormSkeleton /></LoadingRegion>
+                <LoadingRegion>
+                  <FormSkeleton />
+                </LoadingRegion>
               ) : (
                 <div className="border-line-2 bg-sunken/40 space-y-4 rounded-[8px] border p-4">
                   <div>
@@ -974,7 +975,9 @@ export function UsersPanelStorageSectionUi(
             </div>
           </div>
         ) : (
-          <LoadingRegion><FormSkeleton /></LoadingRegion>
+          <LoadingRegion>
+            <FormSkeleton />
+          </LoadingRegion>
         )}
       </section>
     )

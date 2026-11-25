@@ -1,5 +1,6 @@
-import type { DeckFooter, Slide, SlideElement } from '../store/docs'
 import { stripBold } from './slideMath'
+
+import type { DeckFooter, Slide, SlideElement } from '../store/docs'
 
 export interface TextFormatSample {
   fontWeight?: number
@@ -24,7 +25,35 @@ export const UNICODE_SUBSCRIPTS = ['₁', '₂', 'ₙ'] as const
 export const SLIDE_SYMBOLS: ReadonlyArray<{ label: string; chars: readonly string[] }> = [
   {
     label: 'Toán',
-    chars: ['±', '×', '÷', '≠', '≈', '≤', '≥', '∞', '√', '∑', '∫', 'π', '∈', '∉', '⊂', '∪', '∩', '∅', '∀', '∃', '⇒', '⇔', '∠', '⊥', '∥', '△', '°'],
+    chars: [
+      '±',
+      '×',
+      '÷',
+      '≠',
+      '≈',
+      '≤',
+      '≥',
+      '∞',
+      '√',
+      '∑',
+      '∫',
+      'π',
+      '∈',
+      '∉',
+      '⊂',
+      '∪',
+      '∩',
+      '∅',
+      '∀',
+      '∃',
+      '⇒',
+      '⇔',
+      '∠',
+      '⊥',
+      '∥',
+      '△',
+      '°',
+    ],
   },
   {
     label: 'Hy Lạp',
@@ -50,7 +79,11 @@ export function normalizeSlideHref(raw: string): string | null {
   if (!trimmed || /\s/.test(trimmed)) return null
   const hasExplicitScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)
   if (hasExplicitScheme && !/^https?:/i.test(trimmed)) return null
-  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : hasExplicitScheme ? null : `https://${trimmed}`
+  const candidate = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : hasExplicitScheme
+      ? null
+      : `https://${trimmed}`
   if (!candidate) return null
   try {
     const url = new URL(candidate)

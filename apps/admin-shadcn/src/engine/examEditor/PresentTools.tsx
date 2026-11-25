@@ -1,6 +1,16 @@
+import {
+  Eraser,
+  MousePointer2,
+  Pause,
+  PenLine,
+  Play,
+  RotateCcw,
+  ScrollText,
+  Sparkle,
+} from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Eraser, MousePointer2, Pause, PenLine, Play, RotateCcw, ScrollText, Sparkle } from 'lucide-react'
+
 import { TrashIcon } from '@/engine/components/appIcons'
 import { cn } from '@/engine/lib/cn'
 
@@ -53,8 +63,10 @@ export function usePresentTools(presenting: boolean) {
     color,
     setColor,
     ink,
-    addStroke: (slideId: string, s: InkStroke) => setInk((m) => ({ ...m, [slideId]: [...(m[slideId] ?? []), s] })),
-    removeStroke: (slideId: string, i: number) => setInk((m) => ({ ...m, [slideId]: (m[slideId] ?? []).filter((_, k) => k !== i) })),
+    addStroke: (slideId: string, s: InkStroke) =>
+      setInk((m) => ({ ...m, [slideId]: [...(m[slideId] ?? []), s] })),
+    removeStroke: (slideId: string, i: number) =>
+      setInk((m) => ({ ...m, [slideId]: (m[slideId] ?? []).filter((_, k) => k !== i) })),
     clearSlide: (slideId: string) => setInk((m) => ({ ...m, [slideId]: [] })),
     timer,
   }
@@ -68,7 +80,10 @@ export function formatElapsed(ms: number) {
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 }
 
-const pathOf = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${(x * 1600).toFixed(1)} ${(y * 900).toFixed(1)}`).join(' ')
+const pathOf = (pts: [number, number][]) =>
+  pts
+    .map(([x, y], i) => `${i ? 'L' : 'M'}${(x * 1600).toFixed(1)} ${(y * 900).toFixed(1)}`)
+    .join(' ')
 
 /** Lớp phủ đúng bằng khung slide 16:9: vẽ nét, tẩy, chấm laser. tool = none thì không bắt chuột. */
 export function InkLayer({
@@ -91,7 +106,10 @@ export function InkLayer({
 
   const at = (e: React.PointerEvent): [number, number] => {
     const r = ref.current!.getBoundingClientRect()
-    return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]
+    return [
+      Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+      Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)),
+    ]
   }
 
   return (
@@ -101,7 +119,14 @@ export function InkLayer({
       className="absolute inset-0 z-[5] h-full w-full"
       style={{
         pointerEvents: active ? 'auto' : 'none',
-        cursor: tool === 'pen' ? 'crosshair' : tool === 'laser' ? 'none' : tool === 'eraser' ? 'cell' : undefined,
+        cursor:
+          tool === 'pen'
+            ? 'crosshair'
+            : tool === 'laser'
+              ? 'none'
+              : tool === 'eraser'
+                ? 'cell'
+                : undefined,
         touchAction: active ? 'none' : undefined,
       }}
       onClick={(e) => active && e.stopPropagation()}
@@ -120,7 +145,12 @@ export function InkLayer({
       onPointerUp={(e) => {
         if (!active) return
         e.stopPropagation()
-        if (draft && draft.points.length) onAdd(draft.points.length === 1 ? { ...draft, points: [draft.points[0], draft.points[0]] } : draft)
+        if (draft && draft.points.length)
+          onAdd(
+            draft.points.length === 1
+              ? { ...draft, points: [draft.points[0], draft.points[0]] }
+              : draft,
+          )
         setDraft(null)
       }}
       onPointerLeave={() => setLaser(null)}
@@ -134,7 +164,10 @@ export function InkLayer({
           strokeWidth={6}
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ cursor: tool === 'eraser' ? 'pointer' : undefined, pointerEvents: tool === 'eraser' ? 'stroke' : 'none' }}
+          style={{
+            cursor: tool === 'eraser' ? 'pointer' : undefined,
+            pointerEvents: tool === 'eraser' ? 'stroke' : 'none',
+          }}
           onPointerDown={(e) => {
             if (tool !== 'eraser' || i >= strokes.length) return
             e.stopPropagation()
@@ -174,10 +207,25 @@ export function PresentToolbar({
   const pick = (t: PresentTool) => setTool(tool === t ? 'none' : t)
   return (
     <div className="flex items-center gap-1.5">
-      <button type="button" aria-label="Con trỏ" data-tip="Con trỏ" aria-pressed={tool === 'none'} onClick={() => setTool('none')} className={cn(toolBtn, tool === 'none' && 'bg-white/15')}>
+      <button
+        type="button"
+        aria-label="Con trỏ"
+        data-tip="Con trỏ"
+        aria-pressed={tool === 'none'}
+        onClick={() => setTool('none')}
+        className={cn(toolBtn, tool === 'none' && 'bg-white/15')}
+      >
         <MousePointer2 className="size-5" />
       </button>
-      <button type="button" aria-label="Bút vẽ" data-tip="Bút vẽ" data-tip-kbd="P" aria-pressed={tool === 'pen'} onClick={() => pick('pen')} className={cn(toolBtn, tool === 'pen' && 'bg-white/15')}>
+      <button
+        type="button"
+        aria-label="Bút vẽ"
+        data-tip="Bút vẽ"
+        data-tip-kbd="P"
+        aria-pressed={tool === 'pen'}
+        onClick={() => pick('pen')}
+        className={cn(toolBtn, tool === 'pen' && 'bg-white/15')}
+      >
         <PenLine className="size-5" />
       </button>
       {tool === 'pen' && (
@@ -188,31 +236,77 @@ export function PresentToolbar({
               type="button"
               aria-label={`Màu ${c}`}
               onClick={() => setColor(c)}
-              className={cn('size-5 rounded-full border border-white/40', color === c && 'ring-2 ring-white ring-offset-1 ring-offset-transparent')}
+              className={cn(
+                'size-5 rounded-full border border-white/40',
+                color === c && 'ring-2 ring-white ring-offset-1 ring-offset-transparent',
+              )}
               style={{ background: c }}
             />
           ))}
         </div>
       )}
-      <button type="button" aria-label="Bút laser" data-tip="Bút laser" data-tip-kbd="L" aria-pressed={tool === 'laser'} onClick={() => pick('laser')} className={cn(toolBtn, tool === 'laser' && 'bg-white/15')}>
+      <button
+        type="button"
+        aria-label="Bút laser"
+        data-tip="Bút laser"
+        data-tip-kbd="L"
+        aria-pressed={tool === 'laser'}
+        onClick={() => pick('laser')}
+        className={cn(toolBtn, tool === 'laser' && 'bg-white/15')}
+      >
         <Sparkle className="size-5" />
       </button>
-      <button type="button" aria-label="Tẩy nét" data-tip="Tẩy nét" data-tip-kbd="E" aria-pressed={tool === 'eraser'} onClick={() => pick('eraser')} className={cn(toolBtn, tool === 'eraser' && 'bg-white/15')}>
+      <button
+        type="button"
+        aria-label="Tẩy nét"
+        data-tip="Tẩy nét"
+        data-tip-kbd="E"
+        aria-pressed={tool === 'eraser'}
+        onClick={() => pick('eraser')}
+        className={cn(toolBtn, tool === 'eraser' && 'bg-white/15')}
+      >
         <Eraser className="size-5" />
       </button>
-      <button type="button" aria-label="Xoá hết nét trên slide" data-tip="Xoá hết nét trên slide" onClick={() => tools.clearSlide(slideId)} className={toolBtn}>
+      <button
+        type="button"
+        aria-label="Xoá hết nét trên slide"
+        data-tip="Xoá hết nét trên slide"
+        onClick={() => tools.clearSlide(slideId)}
+        className={toolBtn}
+      >
         <TrashIcon className="size-5" />
       </button>
       <span className="mx-2 h-6 w-px bg-white/20" />
-      <span className="tnum min-w-[3.5rem] text-center text-[15px] font-semibold text-white">{formatElapsed(timer.elapsed)}</span>
-      <button type="button" aria-label={timer.paused ? 'Chạy đồng hồ' : 'Dừng đồng hồ'} data-tip={timer.paused ? 'Chạy đồng hồ' : 'Dừng đồng hồ'} onClick={timer.toggle} className={toolBtn}>
+      <span className="tnum min-w-[3.5rem] text-center text-[15px] font-semibold text-white">
+        {formatElapsed(timer.elapsed)}
+      </span>
+      <button
+        type="button"
+        aria-label={timer.paused ? 'Chạy đồng hồ' : 'Dừng đồng hồ'}
+        data-tip={timer.paused ? 'Chạy đồng hồ' : 'Dừng đồng hồ'}
+        onClick={timer.toggle}
+        className={toolBtn}
+      >
         {timer.paused ? <Play className="size-5" /> : <Pause className="size-5" />}
       </button>
-      <button type="button" aria-label="Đặt lại đồng hồ" data-tip="Đặt lại đồng hồ" onClick={timer.reset} className={toolBtn}>
+      <button
+        type="button"
+        aria-label="Đặt lại đồng hồ"
+        data-tip="Đặt lại đồng hồ"
+        onClick={timer.reset}
+        className={toolBtn}
+      >
         <RotateCcw className="size-5" />
       </button>
       <span className="mx-2 h-6 w-px bg-white/20" />
-      <button type="button" aria-label="Màn người trình bày" data-tip="Màn người trình bày (cửa sổ riêng, có ghi chú)" aria-pressed={presenterOpen} onClick={onOpenPresenter} className={cn(toolBtn, presenterOpen && 'bg-white/15')}>
+      <button
+        type="button"
+        aria-label="Màn người trình bày"
+        data-tip="Màn người trình bày (cửa sổ riêng, có ghi chú)"
+        aria-pressed={presenterOpen}
+        onClick={onOpenPresenter}
+        className={cn(toolBtn, presenterOpen && 'bg-white/15')}
+      >
         <ScrollText className="size-5" />
       </button>
     </div>
@@ -265,7 +359,8 @@ export function PresenterWindow({
     w.document.body.style.background = '#1f2430'
     w.document.body.innerHTML = ''
     const onKey = (e: KeyboardEvent) => {
-      if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) nav.current.onNext()
+      if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key))
+        nav.current.onNext()
       else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) nav.current.onPrev()
     }
     w.addEventListener('keydown', onKey)
@@ -281,28 +376,77 @@ export function PresenterWindow({
   }, [open])
 
   if (!open || (!win && !inline)) return null
-  const btn: React.CSSProperties = { flex: 1, padding: '12px 0', fontSize: 16, fontWeight: 600, borderRadius: 8, border: 'none', background: '#3b4252', color: '#fff', cursor: 'pointer' }
+  const btn: React.CSSProperties = {
+    flex: 1,
+    padding: '12px 0',
+    fontSize: 16,
+    fontWeight: 600,
+    borderRadius: 8,
+    border: 'none',
+    background: '#3b4252',
+    color: '#fff',
+    cursor: 'pointer',
+  }
   const body = (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#e5e7eb', padding: 20, display: 'flex', flexDirection: 'column', gap: 14, height: '100%', boxSizing: 'border-box' }}>
+    <div
+      style={{
+        fontFamily: 'system-ui, sans-serif',
+        color: '#e5e7eb',
+        padding: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        height: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <span style={{ fontSize: 15, opacity: 0.7 }}>Slide {index + 1} / {total}</span>
-        <span style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#fff' }}>{formatElapsed(elapsed)}</span>
+        <span style={{ fontSize: 15, opacity: 0.7 }}>
+          Slide {index + 1} / {total}
+        </span>
+        <span
+          style={{
+            fontSize: 32,
+            fontWeight: 700,
+            fontVariantNumeric: 'tabular-nums',
+            color: '#fff',
+          }}
+        >
+          {formatElapsed(elapsed)}
+        </span>
       </div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>{title || '(không có tiêu đề)'}</div>
-      <div style={{ flex: 1, overflow: 'auto', background: '#2a3040', borderRadius: 10, padding: 16, fontSize: 18, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
+      <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>
+        {title || '(không có tiêu đề)'}
+      </div>
+      <div
+        style={{
+          flex: 1,
+          overflow: 'auto',
+          background: '#2a3040',
+          borderRadius: 10,
+          padding: 16,
+          fontSize: 18,
+          lineHeight: 1.55,
+          whiteSpace: 'pre-wrap',
+        }}
+      >
         {notes.trim() || <span style={{ opacity: 0.5 }}>Slide này chưa có ghi chú.</span>}
       </div>
       <div style={{ fontSize: 14, opacity: 0.7 }}>Tiếp theo: {nextTitle ?? 'hết bài'}</div>
       <div style={{ display: 'flex', gap: 10 }}>
-        <button type="button" style={btn} onClick={onPrev}>← Trước</button>
-        <button type="button" style={{ ...btn, background: '#b45309' }} onClick={onNext}>Sau →</button>
+        <button type="button" style={btn} onClick={onPrev}>
+          ← Trước
+        </button>
+        <button type="button" style={{ ...btn, background: '#b45309' }} onClick={onNext}>
+          Sau →
+        </button>
       </div>
     </div>
   )
   if (!win)
     return (
       <div
-        className="absolute left-4 top-4 z-30 h-[60vh] w-[380px] overflow-hidden rounded-xl shadow-2xl"
+        className="absolute top-4 left-4 z-30 h-[60vh] w-[380px] overflow-hidden rounded-xl shadow-2xl"
         style={{ background: '#1f2430' }}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}

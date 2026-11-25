@@ -1,19 +1,42 @@
+import { ChevronRight } from 'lucide-react'
 /** Menu chuột phải dùng chung (slide): hiện tại chỗ chuột, tự lật vào trong khung nhìn, có menu con. */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronRight } from 'lucide-react'
+
 import { Portal } from '@/engine/components/Portal'
 
 export type MenuEntry =
-  | { label: string; icon?: ReactNode; hint?: string; disabled?: boolean; onClick?: () => void; children?: MenuEntry[] }
+  | {
+      label: string
+      icon?: ReactNode
+      hint?: string
+      disabled?: boolean
+      onClick?: () => void
+      children?: MenuEntry[]
+    }
   | 'sep'
 
 export type MenuState = { x: number; y: number; items: MenuEntry[] } | null
 
 /** bỏ vạch ngăn thừa ở đầu/cuối hoặc đứng liền nhau */
-const tidy = (items: MenuEntry[]) => items.filter((it, i, a) => it !== 'sep' || (i > 0 && i < a.length - 1 && a[i - 1] !== 'sep'))
+const tidy = (items: MenuEntry[]) =>
+  items.filter((it, i, a) => it !== 'sep' || (i > 0 && i < a.length - 1 && a[i - 1] !== 'sep'))
 
 /** Một bảng menu đặt tại (x, y); `alt` = toạ độ x khi phải lật sang trái (menu con). */
-function MenuPanel({ x, y, alt, items, onDone, root }: { x: number; y: number; alt?: number; items: MenuEntry[]; onDone: () => void; root?: boolean }) {
+function MenuPanel({
+  x,
+  y,
+  alt,
+  items,
+  onDone,
+  root,
+}: {
+  x: number
+  y: number
+  alt?: number
+  items: MenuEntry[]
+  onDone: () => void
+  root?: boolean
+}) {
   const ref = useRef<HTMLDivElement>(null)
   const [place, setPlace] = useState<{ x: number; y: number } | null>(null)
   const [sub, setSub] = useState<{ index: number; x: number; y: number; alt: number } | null>(null)
@@ -23,7 +46,8 @@ function MenuPanel({ x, y, alt, items, onDone, root }: { x: number; y: number; a
     if (!ref.current) return
     const r = ref.current.getBoundingClientRect()
     const nx = x + r.width > window.innerWidth - 8 ? Math.max(8, (alt ?? x) - r.width) : x
-    const ny = y + r.height > window.innerHeight - 8 ? Math.max(8, window.innerHeight - 8 - r.height) : y
+    const ny =
+      y + r.height > window.innerHeight - 8 ? Math.max(8, window.innerHeight - 8 - r.height) : y
     setPlace({ x: nx, y: ny })
   }, [x, y, alt, items])
   useEffect(() => () => window.clearTimeout(timer.current), [])
@@ -43,7 +67,11 @@ function MenuPanel({ x, y, alt, items, onDone, root }: { x: number; y: number; a
         role="menu"
         aria-label={root ? 'Menu chuột phải' : undefined}
         data-ctx-menu
-        style={{ left: (place ?? { x }).x, top: (place ?? { y }).y, visibility: place ? 'visible' : 'hidden' }}
+        style={{
+          left: (place ?? { x }).x,
+          top: (place ?? { y }).y,
+          visibility: place ? 'visible' : 'hidden',
+        }}
         onContextMenu={(e) => e.preventDefault()}
       >
         {list.map((it, i) =>
@@ -79,16 +107,26 @@ function MenuPanel({ x, y, alt, items, onDone, root }: { x: number; y: number; a
               <span className="ctx-item__icon">{it.icon}</span>
               <span className="rb-color-item__label">{it.label}</span>
               {it.hint && <kbd className="ctx-item__hint">{it.hint}</kbd>}
-              {it.children && <ChevronRight className="ctx-item__chev" size={15} strokeWidth={1.8} />}
+              {it.children && (
+                <ChevronRight className="ctx-item__chev" size={15} strokeWidth={1.8} />
+              )}
             </button>
           ),
         )}
       </div>
-      {sub && list[sub.index] !== 'sep' && (list[sub.index] as { children?: MenuEntry[] }).children && (
-        <div onMouseEnter={() => window.clearTimeout(timer.current)}>
-          <MenuPanel x={sub.x} y={sub.y} alt={sub.alt} items={(list[sub.index] as { children: MenuEntry[] }).children} onDone={onDone} />
-        </div>
-      )}
+      {sub &&
+        list[sub.index] !== 'sep' &&
+        (list[sub.index] as { children?: MenuEntry[] }).children && (
+          <div onMouseEnter={() => window.clearTimeout(timer.current)}>
+            <MenuPanel
+              x={sub.x}
+              y={sub.y}
+              alt={sub.alt}
+              items={(list[sub.index] as { children: MenuEntry[] }).children}
+              onDone={onDone}
+            />
+          </div>
+        )}
     </>
   )
 }
@@ -97,7 +135,8 @@ export function ContextMenu({ menu, onClose }: { menu: MenuState; onClose: () =>
   useEffect(() => {
     if (!menu) return
     const close = (e: Event) => {
-      if (e instanceof MouseEvent && (e.target as HTMLElement | null)?.closest?.('[data-ctx-menu]')) return
+      if (e instanceof MouseEvent && (e.target as HTMLElement | null)?.closest?.('[data-ctx-menu]'))
+        return
       onClose()
     }
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -116,7 +155,14 @@ export function ContextMenu({ menu, onClose }: { menu: MenuState; onClose: () =>
   if (!menu) return null
   return (
     <Portal>
-      <MenuPanel key={`${menu.x},${menu.y}`} x={menu.x} y={menu.y} items={menu.items} onDone={onClose} root />
+      <MenuPanel
+        key={`${menu.x},${menu.y}`}
+        x={menu.x}
+        y={menu.y}
+        items={menu.items}
+        onDone={onClose}
+        root
+      />
     </Portal>
   )
 }

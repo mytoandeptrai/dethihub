@@ -53,7 +53,6 @@ function setup(id: string) {
   return { editor, entry, node, pos }
 }
 
-
 afterEach(() => {
   for (const editor of editors.splice(0)) editor.destroy()
 })
@@ -115,7 +114,15 @@ const expected: Record<string, Record<string, unknown>> = {
 function changed(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
-      if (typeof value === 'string') return [key, /^\d+$/.test(value.trim()) ? String(Number(value) + 1) : value ? `${value} sửa` : 'Đã sửa']
+      if (typeof value === 'string')
+        return [
+          key,
+          /^\d+$/.test(value.trim())
+            ? String(Number(value) + 1)
+            : value
+              ? `${value} sửa`
+              : 'Đã sửa',
+        ]
       if (typeof value === 'boolean') return [key, !value]
       if (typeof value === 'number')
         return [key, key === 'level' && value === 2 ? 1 : value === 3 ? 2 : value + 1]
@@ -127,7 +134,8 @@ function changed(values: Record<string, unknown>): Record<string, unknown> {
 function cleared(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
-      if (typeof value === 'string') return [key, key === 'label' || /^\d+$/.test(value.trim()) ? value : '']
+      if (typeof value === 'string')
+        return [key, key === 'label' || /^\d+$/.test(value.trim()) ? value : '']
       if (typeof value === 'boolean') return [key, false]
       if (typeof value === 'number')
         return [
@@ -154,24 +162,36 @@ describe('template block registry', () => {
     expect(() => entry.write(editor.state.tr, pos, node, { tables: [] })).toThrow()
     expect(editor.state.doc.nodeAt(pos)!.eq(node)).toBe(true)
   })
-  it.each(['question', 'truefalse'])('rejects inspector structural changes to fixed %s items', (id) => {
-    const { editor, entry, node, pos } = setup(id)
-    const key = id === 'question' ? 'options' : 'statements'
-    const items = entry.read(node)[key] as { label: string; text: string }[]
-    const relabeled = [{ label: 'Z', text: items[0]!.text }, ...items.slice(1)]
-    for (const changedItems of [items.slice(1), [...items, { label: 'E', text: 'Extra' }], items.toReversed(), relabeled]) {
-      expect(() => entry.write(editor.state.tr, pos, node, { [key]: changedItems })).toThrow()
-    }
-  })
+  it.each(['question', 'truefalse'])(
+    'rejects inspector structural changes to fixed %s items',
+    (id) => {
+      const { editor, entry, node, pos } = setup(id)
+      const key = id === 'question' ? 'options' : 'statements'
+      const items = entry.read(node)[key] as { label: string; text: string }[]
+      const relabeled = [{ label: 'Z', text: items[0]!.text }, ...items.slice(1)]
+      for (const changedItems of [
+        items.slice(1),
+        [...items, { label: 'E', text: 'Extra' }],
+        items.toReversed(),
+        relabeled,
+      ]) {
+        expect(() => entry.write(editor.state.tr, pos, node, { [key]: changedItems })).toThrow()
+      }
+    },
+  )
   it('preserves every header code line and edits only the first code slot', () => {
     const { editor, entry, node, pos } = setup('header')
     const header = node.toJSON() as JSONContent
     const lines = header.content![0]!.content!
     lines.splice(1, 0, { type: 'paragraph', content: [{ type: 'text', text: 'Mã đề: 101' }] })
-    lines.push({ type: 'paragraph', content: [{ type: 'text', text: 'Mã đề: 202', marks: [{ type: 'italic' }] }] })
+    lines.push({
+      type: 'paragraph',
+      content: [{ type: 'text', text: 'Mã đề: 202', marks: [{ type: 'italic' }] }],
+    })
     editor.commands.setContent({ type: 'doc', content: [header] })
     const original = editor.state.doc.firstChild!
-    const untouched = entry.write(editor.state.tr, pos, original, { soGiaoDuc: 'New department' }).doc.firstChild!
+    const untouched = entry.write(editor.state.tr, pos, original, { soGiaoDuc: 'New department' })
+      .doc.firstChild!
     expect(untouched.child(0).childCount).toBe(5)
     expect(untouched.child(0).lastChild!.toJSON()).toEqual(original.child(0).lastChild!.toJSON())
     const updated = entry.write(editor.state.tr, pos, original, { maDe: '303' }).doc.firstChild!
@@ -195,10 +215,14 @@ describe('template block registry', () => {
     editor.commands.setContent({ type: 'doc', content: [marked] })
     const original = editor.state.doc.firstChild!
     const values = entry.read(original) as { rows: { label: string; value: string }[] }
-    const expectedNodes = Array.from({ length: 3 }, (_, index) => original.child(index)).filter((_, index) => index !== removed)
+    const expectedNodes = Array.from({ length: 3 }, (_, index) => original.child(index)).filter(
+      (_, index) => index !== removed,
+    )
     const rows = values.rows.filter((_, index) => index !== removed)
     const updated = entry.write(editor.state.tr, pos, original, { rows }).doc.firstChild!
-    expectedNodes.forEach((row, index) => expect(updated.child(index).toJSON()).toEqual(row.toJSON()))
+    expectedNodes.forEach((row, index) =>
+      expect(updated.child(index).toJSON()).toEqual(row.toJSON()),
+    )
   })
   it('covers the catalog in order with Vietnamese labels and matching schema metadata', () => {
     expect(BLOCK_SCHEMAS.map(({ id, label }) => ({ id, label }))).toEqual(
@@ -222,7 +246,9 @@ describe('template block registry', () => {
       if (template.id === 'question' || template.id === 'truefalse') {
         const key = template.id === 'question' ? 'options' : 'statements'
         const original = entry.read(node)[key] as { label: string }[]
-        ;(values[key] as { label: string }[]).forEach((item, index) => { item.label = original[index]!.label })
+        ;(values[key] as { label: string }[]).forEach((item, index) => {
+          item.label = original[index]!.label
+        })
       }
       const tr = entry.write(editor.state.tr, pos, node, values)
       editor.view.dispatch(tr)

@@ -1,3 +1,4 @@
+import { Undo2 } from 'lucide-react'
 /**
  * Ảnh xem trước hình học bấm/kéo được:
  * - bấm lên cạnh → điểm mới trên cạnh (hít vào trung điểm, 1/3, 1/4…);
@@ -6,17 +7,24 @@
  * (nét khuất tự tính), nên chèn/xuất/nhấp đúp sửa vẫn như cũ.
  */
 import { useRef, useState } from 'react'
+
 import { EscapeLayer } from '@/engine/components/EscapeLayer'
-import { Undo2 } from 'lucide-react'
 import { svgDataUrl } from '@/engine/lib/plot'
+
 import type { ToolImage } from '@/engine/lib/toolSpec'
 
 type Pt = { x: number; y: number }
 /** chỗ bấm trúng: điểm có sẵn, hoặc điểm trên cạnh AB tại tỉ lệ t (tính từ A) */
 /** special: chân đường cao / trung điểm / chân phân giác kẻ từ đỉnh đang kéo */
 type Special = 'alt' | 'mid' | 'bis'
-type Hit = { kind: 'point'; name: string; at: Pt } | { kind: 'edge'; a: string; b: string; t: number; at: Pt; special?: Special }
-const SPECIAL_LABEL: Record<Special, string> = { alt: 'đường cao', mid: 'trung tuyến', bis: 'phân giác' }
+type Hit =
+  | { kind: 'point'; name: string; at: Pt }
+  | { kind: 'edge'; a: string; b: string; t: number; at: Pt; special?: Special }
+const SPECIAL_LABEL: Record<Special, string> = {
+  alt: 'đường cao',
+  mid: 'trung tuyến',
+  bis: 'phân giác',
+}
 
 const SNAPS: Array<[number, string]> = [
   [1 / 2, '1/2'],
@@ -31,7 +39,15 @@ function ratioText(t: number): string {
   return SNAPS.find(([v]) => Math.abs(v - t) < 1e-9)?.[1] ?? String(Math.round(t * 10) / 10)
 }
 
-export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras: string; onExtras: (v: string) => void }) {
+export function PickPreview({
+  img,
+  extras,
+  onExtras,
+}: {
+  img: ToolImage
+  extras: string
+  onExtras: (v: string) => void
+}) {
   const box = useRef<HTMLDivElement>(null)
   const [hover, setHover] = useState<Hit | null>(null)
   const [drag, setDrag] = useState<{ from: Hit; to: Pt } | null>(null)
@@ -93,7 +109,9 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
           [0.5, 'mid'],
           [fA / (fA + fB), 'bis'],
         ]
-        const c = cands.filter(([v]) => v > 0.02 && v < 0.98).sort((x, y) => Math.abs(x[0] - t) - Math.abs(y[0] - t))[0]
+        const c = cands
+          .filter(([v]) => v > 0.02 && v < 0.98)
+          .sort((x, y) => Math.abs(x[0] - t) - Math.abs(y[0] - t))[0]
         if (c && Math.abs(c[0] - t) * len < 16 * k) {
           t = c[0]
           special = c[1]
@@ -123,7 +141,11 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
     if (same) return same.name
     const name = NAME_POOL.find((n) => !used.has(n)) ?? `M${used.size}`
     used.add(name)
-    lines.push(Math.abs(hit.t - 1 / 2) < 1e-9 ? `${name} = trung điểm ${hit.a}${hit.b}` : `${name} = ${hit.a}${hit.b} ${ratioText(hit.t)}`)
+    lines.push(
+      Math.abs(hit.t - 1 / 2) < 1e-9
+        ? `${name} = trung điểm ${hit.a}${hit.b}`
+        : `${name} = ${hit.a}${hit.b} ${ratioText(hit.t)}`,
+    )
     return name
   }
 
@@ -135,7 +157,9 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
     const known = pick.tris.find((t) => tri.every((x) => t.includes(x)))
     if (known) {
       // tam giác có sẵn trên hình (2D: tam giác mẫu không cần ghi "trong")
-      lines.push(`${kind.cmd} ${v}${name}${pick.tris.length === 1 ? '' : ` trong ${known.join('')}`}`)
+      lines.push(
+        `${kind.cmd} ${v}${name}${pick.tris.length === 1 ? '' : ` trong ${known.join('')}`}`,
+      )
       return
     }
     // đỉnh và cạnh không cùng một mặt tam giác: vẫn dựng được, ghi rõ tam giác
@@ -151,13 +175,21 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
   const undo = () => onExtras(extras.replace(/\s+$/, '').split('\n').slice(0, -1).join('\n'))
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-2" style={{ containerType: 'size' }}>
+    <div
+      className="flex h-full w-full flex-col items-center justify-center gap-2"
+      style={{ containerType: 'size' }}
+    >
       <div
         ref={box}
         className="relative select-none"
         style={{ aspectRatio: `${w} / ${h}`, width: `min(100cqw, (100cqh - 32px) * ${w / h})` }}
       >
-        <img src={svgDataUrl(img.svg)} alt="Xem trước" draggable={false} className="block h-full w-full rounded-[4px] border border-line bg-white" />
+        <img
+          src={svgDataUrl(img.svg)}
+          alt="Xem trước"
+          draggable={false}
+          className="border-line block h-full w-full rounded-[4px] border bg-white"
+        />
         <svg
           viewBox={`${minX} ${minY} ${w} ${h}`}
           className="absolute inset-0 h-full w-full touch-none"
@@ -182,7 +214,11 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
             const { p, k } = toVb(e)
             const moved = Math.hypot(p.x - drag.from.at.x, p.y - drag.from.at.y) > 12 * k
             const end = moved ? hitTest(p, k, drag.from) : null
-            if (!moved && drag.from.kind === 'point' && pick.tris.some((t) => t.includes((drag.from as { name: string }).name))) {
+            if (
+              !moved &&
+              drag.from.kind === 'point' &&
+              pick.tris.some((t) => t.includes((drag.from as { name: string }).name))
+            ) {
               setDrag(null)
               setMenu({ name: drag.from.name, at: drag.from.at })
               return
@@ -197,7 +233,11 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
             const a = ensurePoint(drag.from, lines)
             if (end) {
               const b = ensurePoint(end, lines)
-              if (b !== a && !pick.segs.some((s) => (s.a === a && s.b === b) || (s.a === b && s.b === a))) lines.push(`${a}${b}`)
+              if (
+                b !== a &&
+                !pick.segs.some((s) => (s.a === a && s.b === b) || (s.a === b && s.b === a))
+              )
+                lines.push(`${a}${b}`)
             }
             setDrag(null)
             commit(lines)
@@ -217,10 +257,25 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
           )}
           {hover && (
             <g>
-              <circle cx={hover.at.x} cy={hover.at.y} r={5 * k0} fill="var(--color-clay)" fillOpacity={0.85} />
+              <circle
+                cx={hover.at.x}
+                cy={hover.at.y}
+                r={5 * k0}
+                fill="var(--color-clay)"
+                fillOpacity={0.85}
+              />
               {hover.kind === 'edge' && (
-                <text x={hover.at.x + 8 * k0} y={hover.at.y - 8 * k0} fontSize={12 * k0} fill="var(--color-clay)">
-                  {hover.special ? `${SPECIAL_LABEL[hover.special]} từ ${drag?.from.kind === 'point' ? drag.from.name : ''}` : Math.abs(hover.t - 1 / 2) < 1e-9 ? `trung điểm ${hover.a}${hover.b}` : `${ratioText(hover.t)} ${hover.a}${hover.b} (từ ${hover.a})`}
+                <text
+                  x={hover.at.x + 8 * k0}
+                  y={hover.at.y - 8 * k0}
+                  fontSize={12 * k0}
+                  fill="var(--color-clay)"
+                >
+                  {hover.special
+                    ? `${SPECIAL_LABEL[hover.special]} từ ${drag?.from.kind === 'point' ? drag.from.name : ''}`
+                    : Math.abs(hover.t - 1 / 2) < 1e-9
+                      ? `trung điểm ${hover.a}${hover.b}`
+                      : `${ratioText(hover.t)} ${hover.a}${hover.b} (từ ${hover.a})`}
                 </text>
               )}
             </g>
@@ -243,7 +298,11 @@ export function PickPreview({ img, extras, onExtras }: { img: ToolImage; extras:
         )}
       </div>
       {extras.trim() && (
-        <button type="button" onClick={undo} className="flex items-center gap-1 text-[12px] text-clay hover:underline">
+        <button
+          type="button"
+          onClick={undo}
+          className="text-clay flex items-center gap-1 text-[12px] hover:underline"
+        >
           <Undo2 className="size-3.5" /> Bỏ thao tác vừa rồi
         </button>
       )}
@@ -279,37 +338,45 @@ function VertexMenu({
   const free = (prefer: string[]) => [...prefer, ...NAME_POOL].find((n) => !used.has(n)) ?? 'X'
   return (
     <EscapeLayer onClose={onClose}>
-    <div
-      role="menu"
-      className="absolute z-10 min-w-[190px] rounded-[8px] border border-line bg-surface p-1 text-[13px] shadow-float"
-      style={{ left: `${left}%`, top: `${top}%`, transform: `translate(${left > 60 ? '-100%' : '8px'}, 8px)` }}
-      onPointerDown={(e) => e.stopPropagation()}
-    >
-      <p className="px-2 pb-1 pt-0.5 text-[11.5px] font-semibold text-ink-3">Kẻ từ đỉnh {name}</p>
-      {tris.map((t) => (
-        <div key={t.join('')}>
-          {!single && <p className="px-2 pt-1 text-[11px] text-ink-4">trong tam giác {t.join('')}</p>}
-          {KINDS.map((k) => {
-            const n = free(k.prefer)
-            return (
-              <button
-                key={k.cmd}
-                type="button"
-                role="menuitem"
-                onClick={() => onPick(`${k.cmd} ${name}${n}${single ? '' : ` trong ${t.join('')}`}`)}
-                className="flex w-full items-center justify-between gap-3 rounded-[5px] px-2 py-1.5 text-left text-ink-2 hover:bg-clay-tint hover:text-clay"
-              >
-                {k.label}
-                <span className="font-serif italic text-ink-3">
-                  {name}
-                  {n}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      ))}
-    </div>
+      <div
+        role="menu"
+        className="border-line bg-surface shadow-float absolute z-10 min-w-[190px] rounded-[8px] border p-1 text-[13px]"
+        style={{
+          left: `${left}%`,
+          top: `${top}%`,
+          transform: `translate(${left > 60 ? '-100%' : '8px'}, 8px)`,
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <p className="text-ink-3 px-2 pt-0.5 pb-1 text-[11.5px] font-semibold">Kẻ từ đỉnh {name}</p>
+        {tris.map((t) => (
+          <div key={t.join('')}>
+            {!single && (
+              <p className="text-ink-4 px-2 pt-1 text-[11px]">trong tam giác {t.join('')}</p>
+            )}
+            {KINDS.map((k) => {
+              const n = free(k.prefer)
+              return (
+                <button
+                  key={k.cmd}
+                  type="button"
+                  role="menuitem"
+                  onClick={() =>
+                    onPick(`${k.cmd} ${name}${n}${single ? '' : ` trong ${t.join('')}`}`)
+                  }
+                  className="text-ink-2 hover:bg-clay-tint hover:text-clay flex w-full items-center justify-between gap-3 rounded-[5px] px-2 py-1.5 text-left"
+                >
+                  {k.label}
+                  <span className="text-ink-3 font-serif italic">
+                    {name}
+                    {n}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        ))}
+      </div>
     </EscapeLayer>
   )
 }

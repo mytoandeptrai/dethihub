@@ -3,8 +3,8 @@ import { Input } from '@workspace/ui/components/input'
 import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
-import { appPaths } from '@/config/app-paths'
 import { FormSkeleton, LoadingRegion } from '@/components/page-skeleton'
+import { appPaths } from '@/config/app-paths'
 
 import type { useAuthFormContainer } from '@/modules/auth/shared/hooks'
 
@@ -95,7 +95,9 @@ const AuthFormUi = ({
             {title}
           </h2>
           {isSessionLoading ? (
-            <LoadingRegion><FormSkeleton /></LoadingRegion>
+            <LoadingRegion>
+              <FormSkeleton />
+            </LoadingRegion>
           ) : resetInvalid ? (
             <div className="space-y-5">
               <p>{t('invalidReset')}</p>

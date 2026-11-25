@@ -1,21 +1,29 @@
 /** Slide — hiển thị phần tử (chữ tự co, hình, biểu đồ, ảnh thu nhỏ slide). */
 import { useEffect, useId, useLayoutEffect, useReducer, useRef, useState } from 'react'
-import { parseSlideVideo } from '@/engine/lib/slideVideo'
-import { slideBgStyle } from '@/engine/lib/slideBackground'
-import { FRAME_PLACEHOLDER, photoFrameClip, photoFrameRadius, shapeClipOf } from '@/engine/lib/slideShapes'
-import { isPresetShape, isStrokeOnlyShape, presetPaths, prstOf } from '@/engine/lib/slidePresets'
-import { graphicById } from '@/engine/lib/slideGraphics'
-import { GraphicFill, SlideIcon } from './LazyAssets'
-import { hasRich } from '@/engine/lib/slideMath'
-import { shouldShowSlideFooter } from '@/engine/lib/slideFormat'
-import { gradientLine, textArcLayout } from '@/engine/lib/slideTextEffects'
-import { ensureFonts, slideFontStack } from '@/engine/lib/slideFonts'
+
 import { cn } from '@/engine/lib/cn'
-import type { DeckFooter, Slide, SlideElement } from '@/engine/store/docs'
-import { HtmlSlideFrame } from './HtmlSlide'
-import { readableTextOn, type ResolvedTheme } from '@/engine/lib/slideTheme'
+import { slideBgStyle } from '@/engine/lib/slideBackground'
 import { readableElements } from '@/engine/lib/slideContrast'
+import { ensureFonts, slideFontStack } from '@/engine/lib/slideFonts'
+import { shouldShowSlideFooter } from '@/engine/lib/slideFormat'
+import { graphicById } from '@/engine/lib/slideGraphics'
+import { hasRich } from '@/engine/lib/slideMath'
+import { isPresetShape, isStrokeOnlyShape, presetPaths, prstOf } from '@/engine/lib/slidePresets'
+import {
+  FRAME_PLACEHOLDER,
+  photoFrameClip,
+  photoFrameRadius,
+  shapeClipOf,
+} from '@/engine/lib/slideShapes'
+import { gradientLine, textArcLayout } from '@/engine/lib/slideTextEffects'
+import { readableTextOn, type ResolvedTheme } from '@/engine/lib/slideTheme'
+import { parseSlideVideo } from '@/engine/lib/slideVideo'
+
+import { HtmlSlideFrame } from './HtmlSlide'
+import { GraphicFill, SlideIcon } from './LazyAssets'
 import { revealStyle, slideMathHtml, decorStyle } from './slideViewHelpers'
+
+import type { DeckFooter, Slide, SlideElement } from '@/engine/store/docs'
 
 export function SlideFooterView({
   footer,
@@ -60,7 +68,9 @@ export function SlideThumb({
   footer?: DeckFooter
   slideIndex?: number
 }) {
-  useEffect(() => { if (!slide.html) void ensureFonts({ theme, slides: [slide] }) }, [slide, theme])
+  useEffect(() => {
+    if (!slide.html) void ensureFonts({ theme, slides: [slide] })
+  }, [slide, theme])
   if (slide.html) return <HtmlSlideFrame html={slide.html} />
   return (
     <div
@@ -160,7 +170,15 @@ export function FitText({
       stopFonts()
       ro.disconnect()
     }
-  }, [children, html, baseSize, style.fontFamily, style.fontWeight, style.fontStyle, style.letterSpacing])
+  }, [
+    children,
+    html,
+    baseSize,
+    style.fontFamily,
+    style.fontWeight,
+    style.fontStyle,
+    style.letterSpacing,
+  ])
 
   const box: React.CSSProperties = {
     ...style,
@@ -169,11 +187,13 @@ export function FitText({
     overflow: 'hidden',
   }
   const gradient = effects?.textGradient
-  const ink: React.CSSProperties = gradient ? {
-    backgroundImage: `linear-gradient(${gradient.angle}deg, ${gradient.from}, ${gradient.to})`,
-    backgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-  } : {}
+  const ink: React.CSSProperties = gradient
+    ? {
+        backgroundImage: `linear-gradient(${gradient.angle}deg, ${gradient.from}, ${gradient.to})`,
+        backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+      }
+    : {}
   const stroke = effects?.textStroke
   const shadow = effects?.textShadow
   if (stroke) {
@@ -186,9 +206,14 @@ export function FitText({
     else ink.textShadow = offset
   }
   if (stroke || gradient || shadow) {
-    const content = html === undefined ? children : <span dangerouslySetInnerHTML={{ __html: html }} />
+    const content =
+      html === undefined ? children : <span dangerouslySetInnerHTML={{ __html: html }} />
     const hi = highlightSpanStyle(highlight)
-    return <div ref={ref} style={box}><div style={ink}>{hi ? <span style={hi}>{content}</span> : content}</div></div>
+    return (
+      <div ref={ref} style={box}>
+        <div style={ink}>{hi ? <span style={hi}>{content}</span> : content}</div>
+      </div>
+    )
   }
   const hi = highlightSpanStyle(highlight)
   // Công thức (hoặc tô sáng) nằm trong một khối div bọc ngoài để span inline ôm sát
@@ -237,7 +262,13 @@ export const fontStack = slideFontStack
 /** Đường nối cong (connector): S-curve tiếp tuyến ngang trong hộp phần tử; lật dọc bằng `flipY`. */
 export function ConnectorSvg({ el, theme }: { el: SlideElement; theme: ResolvedTheme }) {
   return (
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%" style={{ overflow: 'visible', display: 'block' }}>
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      width="100%"
+      height="100%"
+      style={{ overflow: 'visible', display: 'block' }}
+    >
       <path
         d="M0,0 C50,0 50,100 100,100"
         fill="none"
@@ -256,7 +287,8 @@ export function ConnectorSvg({ el, theme }: { el: SlideElement; theme: ResolvedT
  */
 export function shapeCss(el: SlideElement, theme: ResolvedTheme): React.CSSProperties {
   // hình dựng sẵn vẽ bằng SVG (PresetSvg): chỉ cần độ đục và bóng (drop-shadow theo đúng đường viền hình)
-  if (isPresetShape(el.shape)) return { opacity: el.opacity, filter: SHADOW_FILTERS[shadowLevelOf(el, theme)] }
+  if (isPresetShape(el.shape))
+    return { opacity: el.opacity, filter: SHADOW_FILTERS[shadowLevelOf(el, theme)] }
   const isLine = el.shape === 'line'
   const border = isLine ? 0 : (el.border ?? theme.border)
   const clip = shapeClipOf(el)
@@ -264,16 +296,27 @@ export function shapeCss(el: SlideElement, theme: ResolvedTheme): React.CSSPrope
   return {
     background: clip && border ? borderColor : (el.fill ?? theme.accent),
     // bo góc / viền tính theo khung slide rộng 1000px (cqw) để thumbnail thu nhỏ đúng tỉ lệ, không bo tròn quá tay
-    borderRadius: el.shape === 'ellipse' ? '50%' : el.shape === 'round' ? `${(el.radius ?? theme.radius) / 10}cqw` : 0,
+    borderRadius:
+      el.shape === 'ellipse'
+        ? '50%'
+        : el.shape === 'round'
+          ? `${(el.radius ?? theme.radius) / 10}cqw`
+          : 0,
     clipPath: clip,
     boxShadow: isLine ? undefined : shadowCss(el, theme),
-    border: !clip && border ? `max(1px, ${border / 10}cqw) ${el.borderStyle ?? 'solid'} ${borderColor}` : undefined,
+    border:
+      !clip && border
+        ? `max(1px, ${border / 10}cqw) ${el.borderStyle ?? 'solid'} ${borderColor}`
+        : undefined,
     opacity: el.opacity,
   }
 }
 
 export const isHollowShape = (el: SlideElement) =>
-  el.type === 'shape' && el.shape !== 'line' && !el.text && (el.fill === 'transparent' || el.fill === 'none')
+  el.type === 'shape' &&
+  el.shape !== 'line' &&
+  !el.text &&
+  (el.fill === 'transparent' || el.fill === 'none')
 /** vùng nhận chuột của hình rỗng: dải viền rộng 10px quanh mép trong (evenodd khoét phần giữa) */
 export const HOLLOW_HIT =
   'polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 10px 10px, 10px calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) 10px, 10px 10px)'
@@ -302,22 +345,56 @@ export function shadowCss(el: SlideElement, theme: ResolvedTheme): string | unde
 
 /** mẫu nét đứt/chấm theo độ dày viền (đơn vị px của SVG) */
 export const dashOf = (style: SlideElement['borderStyle'], width: number): string | undefined =>
-  style === 'dashed' ? `${width * 3} ${width * 2}` : style === 'dotted' ? `0 ${width * 2}` : undefined
+  style === 'dashed'
+    ? `${width * 3} ${width * 2}`
+    : style === 'dotted'
+      ? `0 ${width * 2}`
+      : undefined
 
 /** Hình dựng sẵn (OOXML prst) vẽ bằng SVG: nền, nét, và phần chỉ có nét/chỉ có nền của từng hình. */
 export function PresetSvg({ el, theme }: { el: SlideElement; theme: ResolvedTheme }) {
   const { W, H, both, fillOnly, strokeOnly } = presetPaths(prstOf(el.shape), el.w, el.h)
   const fill = el.fill ?? theme.accent
   const border = el.border ?? theme.border ?? 0
-  const outline = border ? el.borderColor ?? theme.borderColor : 'none'
-  const common = { vectorEffect: 'non-scaling-stroke' as const, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const }
+  const outline = border ? (el.borderColor ?? theme.borderColor) : 'none'
+  const common = {
+    vectorEffect: 'non-scaling-stroke' as const,
+    strokeLinejoin: 'round' as const,
+    strokeLinecap: 'round' as const,
+  }
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', display: 'block' }}>
-      {both && <path d={both} fill={isStrokeOnlyShape(el.shape) ? 'none' : fill} stroke={outline} strokeWidth={border} strokeDasharray={dashOf(el.borderStyle, border)} {...common} />}
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        overflow: 'visible',
+        display: 'block',
+      }}
+    >
+      {both && (
+        <path
+          d={both}
+          fill={isStrokeOnlyShape(el.shape) ? 'none' : fill}
+          stroke={outline}
+          strokeWidth={border}
+          strokeDasharray={dashOf(el.borderStyle, border)}
+          {...common}
+        />
+      )}
       {fillOnly && <path d={fillOnly} fill={fill} stroke="none" />}
       {strokeOnly && (
         // nét của đường nối/cung: dùng màu tô làm màu nét nếu hình không có nền
-        <path d={strokeOnly} fill="none" stroke={both || fillOnly ? outline : fill} strokeWidth={both || fillOnly ? border || 2 : Math.max(border, 3)} {...common} />
+        <path
+          d={strokeOnly}
+          fill="none"
+          stroke={both || fillOnly ? outline : fill}
+          strokeWidth={both || fillOnly ? border || 2 : Math.max(border, 3)}
+          {...common}
+        />
       )}
     </svg>
   )
@@ -329,12 +406,31 @@ export function shapeInner(el: SlideElement, theme: ResolvedTheme): React.ReactN
   const border = el.shape === 'line' ? 0 : (el.border ?? theme.border)
   const clip = shapeClipOf(el)
   if (!clip || !border) return null
-  return <div style={{ position: 'absolute', inset: border, background: el.fill ?? theme.accent, clipPath: clip }} />
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: border,
+        background: el.fill ?? theme.accent,
+        clipPath: clip,
+      }}
+    />
+  )
 }
 
-function CurvedText({ el, family, color, style }: { el: SlideElement; family: string; color: string; style: React.CSSProperties }) {
+function CurvedText({
+  el,
+  family,
+  color,
+  style,
+}: {
+  el: SlideElement
+  family: string
+  color: string
+  style: React.CSSProperties
+}) {
   const id = useId()
-  const [, refresh] = useReducer(n => n + 1, 0)
+  const [, refresh] = useReducer((n) => n + 1, 0)
   useEffect(() => refitOnFonts(refresh), [family])
   const arc = textArcLayout(el, family)
   if (!arc) return null
@@ -344,13 +440,27 @@ function CurvedText({ el, family, color, style }: { el: SlideElement; family: st
   const gx = (x: number) => (x - arc.x) / arc.scale
   const gy = (y: number) => (y - arc.y) / arc.scale
   return (
-    <svg role="img" aria-label={arc.text} viewBox={`0 0 ${arc.w} ${arc.h}`} style={{ ...style, display: 'block', overflow: 'hidden' }}>
+    <svg
+      role="img"
+      aria-label={arc.text}
+      viewBox={`0 0 ${arc.w} ${arc.h}`}
+      style={{ ...style, display: 'block', overflow: 'hidden' }}
+    >
       <defs>
         <path id={id} d={arc.path} />
-        {gradient && <linearGradient id={`${id}-ink`} gradientUnits="userSpaceOnUse" x1={gx(x1)} y1={gy(y1)} x2={gx(x2)} y2={gy(y2)}>
-          <stop stopColor={gradient.from} />
-          <stop offset="1" stopColor={gradient.to} />
-        </linearGradient>}
+        {gradient && (
+          <linearGradient
+            id={`${id}-ink`}
+            gradientUnits="userSpaceOnUse"
+            x1={gx(x1)}
+            y1={gy(y1)}
+            x2={gx(x2)}
+            y2={gy(y2)}
+          >
+            <stop stopColor={gradient.from} />
+            <stop offset="1" stopColor={gradient.to} />
+          </linearGradient>
+        )}
       </defs>
       <g transform={`translate(${arc.x} ${arc.y}) scale(${arc.scale})`}>
         <text
@@ -366,9 +476,15 @@ function CurvedText({ el, family, color, style }: { el: SlideElement; family: st
           fontSize={arc.size}
           letterSpacing={arc.spacing}
           textDecoration={el.textDecoration}
-          style={{ filter: shadow ? `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})` : undefined }}
+          style={{
+            filter: shadow
+              ? `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`
+              : undefined,
+          }}
         >
-          <textPath href={`#${id}`} startOffset="50%">{arc.text}</textPath>
+          <textPath href={`#${id}`} startOffset="50%">
+            {arc.text}
+          </textPath>
         </text>
       </g>
     </svg>
@@ -378,7 +494,15 @@ function CurvedText({ el, family, color, style }: { el: SlideElement; family: st
 /** Chữ nằm trong hình khối (căn giữa, tự co cho vừa); màu mặc định đọc được trên màu tô. */
 export function ShapeText({ el, theme }: { el: SlideElement; theme: ResolvedTheme }) {
   if (!el.text?.trim() || el.shape === 'line') return null
-  if (el.textArc) return <CurvedText el={{ ...el, w: el.w * 0.76, h: el.h * 0.8, align: el.align ?? 'center' }} family={fontStack(el.fontFamily ?? theme.fonts.body)} color={el.textColor ?? readableTextOn(el.fill ?? theme.accent)} style={{ position: 'absolute', top: '10%', left: '12%', width: '76%', height: '80%' }} />
+  if (el.textArc)
+    return (
+      <CurvedText
+        el={{ ...el, w: el.w * 0.76, h: el.h * 0.8, align: el.align ?? 'center' }}
+        family={fontStack(el.fontFamily ?? theme.fonts.body)}
+        color={el.textColor ?? readableTextOn(el.fill ?? theme.accent)}
+        style={{ position: 'absolute', top: '10%', left: '12%', width: '76%', height: '80%' }}
+      />
+    )
   return (
     <FitText
       effects={el}
@@ -404,12 +528,33 @@ export function ShapeText({ el, theme }: { el: SlideElement; theme: ResolvedThem
 }
 
 /** Video: `live` (trình chiếu) thì phát được; bản soạn / ảnh thu nhỏ chỉ hiện ảnh bìa + nút phát */
-export function VideoView({ el, theme, live, style }: { el: SlideElement; theme: ResolvedTheme; live?: boolean; style?: React.CSSProperties }) {
+export function VideoView({
+  el,
+  theme,
+  live,
+  style,
+}: {
+  el: SlideElement
+  theme: ResolvedTheme
+  live?: boolean
+  style?: React.CSSProperties
+}) {
   const v = parseSlideVideo(el.src)
-  const box: React.CSSProperties = { ...style, overflow: 'hidden', borderRadius: '0.6cqw', background: '#000' }
+  const box: React.CSSProperties = {
+    ...style,
+    overflow: 'hidden',
+    borderRadius: '0.6cqw',
+    background: '#000',
+  }
   if (v && live) {
     return v.kind === 'file' ? (
-      <video src={v.url} controls playsInline preload="metadata" style={{ ...box, objectFit: 'contain' }} />
+      <video
+        src={v.url}
+        controls
+        playsInline
+        preload="metadata"
+        style={{ ...box, objectFit: 'contain' }}
+      />
     ) : (
       <iframe
         src={v.embed}
@@ -422,17 +567,45 @@ export function VideoView({ el, theme, live, style }: { el: SlideElement; theme:
     )
   }
   return (
-    <div style={{ ...box, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+    <div
+      style={{
+        ...box,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff',
+      }}
+    >
       {v?.kind === 'youtube' ? (
-        <img src={v.thumb} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img
+          src={v.thumb}
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
       ) : null}
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6cqw' }}>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.6cqw',
+        }}
+      >
         <svg viewBox="0 0 68 48" style={{ width: '6cqw', height: 'auto' }} aria-hidden>
           <rect width="68" height="48" rx="12" fill={v ? '#000a' : theme.accent} />
           <path d="M27 14v20l18-10z" fill="#fff" />
         </svg>
         {!v ? (
-          <span style={{ fontSize: '1.6cqw', fontFamily: fontStack(theme.fonts.body), opacity: 0.85 }}>
+          <span
+            style={{ fontSize: '1.6cqw', fontFamily: fontStack(theme.fonts.body), opacity: 0.85 }}
+          >
             {el.src ? 'Link video không hợp lệ' : 'Dán link video'}
           </span>
         ) : null}
@@ -442,8 +615,17 @@ export function VideoView({ el, theme, live, style }: { el: SlideElement; theme:
 }
 
 /** Style của `<img>` bên trong khung ảnh: có `crop` thì phóng to + dời đúng vùng cắt, không thì `cover`. */
-export function imageImgStyle(crop?: SlideElement['crop'], position?: SlideElement['imagePosition']): React.CSSProperties {
-  if (!crop) return { width: '100%', height: '100%', objectFit: 'cover', objectPosition: position ? `${position.x}% ${position.y}%` : undefined }
+export function imageImgStyle(
+  crop?: SlideElement['crop'],
+  position?: SlideElement['imagePosition'],
+): React.CSSProperties {
+  if (!crop)
+    return {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      objectPosition: position ? `${position.x}% ${position.y}%` : undefined,
+    }
   const visW = Math.max(10, 100 - crop.l - crop.r)
   const visH = Math.max(10, 100 - crop.t - crop.b)
   return {
@@ -465,25 +647,53 @@ export function imageStyleParts(el: SlideElement, theme: ResolvedTheme) {
   const borderW = el.border ?? 0
   const borderColor = el.borderColor ?? theme.borderColor ?? theme.fg
   const borderStyle = el.borderStyle ?? 'solid'
-  const borderRadius = frameRadius ?? (clip ? 0 : el.radius !== undefined ? `${el.radius / 10}cqw` : '1cqw')
+  const borderRadius =
+    frameRadius ?? (clip ? 0 : el.radius !== undefined ? `${el.radius / 10}cqw` : '1cqw')
   // Khung cắt đa giác (clip-path polygon) không dùng được viền CSS trực tiếp; các khung bo góc thuần dùng borderRadius để viền bám sát mép.
   const canCssBorder = !clip || !!frameRadius
-  const cssBorder = borderW > 0 && canCssBorder ? `max(1px, ${borderW / 10}cqw) ${borderStyle} ${borderColor}` : undefined
+  const cssBorder =
+    borderW > 0 && canCssBorder
+      ? `max(1px, ${borderW / 10}cqw) ${borderStyle} ${borderColor}`
+      : undefined
   const polygonBorder = borderW > 0 && !!clip && !frameRadius && el.shape !== 'pill'
   const shadowFilter = SHADOW_FILTERS[el.shadowLevel ?? 0]
-  return { clip, frameRadius, borderW, borderColor, borderStyle, borderRadius, cssBorder, polygonBorder, shadowFilter }
+  return {
+    clip,
+    frameRadius,
+    borderW,
+    borderColor,
+    borderStyle,
+    borderRadius,
+    cssBorder,
+    polygonBorder,
+    shadowFilter,
+  }
 }
 
-export function SlideElView({ el, theme, revealStep, live, embedded }: { el: SlideElement; theme: ResolvedTheme; revealStep?: number; live?: boolean; embedded?: boolean }) {
-  const style: React.CSSProperties = embedded ? { position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' } : {
-    position: 'absolute',
-    left: `${el.x}%`,
-    top: `${el.y}%`,
-    width: `${el.w}%`,
-    height: `${el.h}%`,
-    zIndex: el.zIndex,
-    transform: elTransform(el),
-  }
+export function SlideElView({
+  el,
+  theme,
+  revealStep,
+  live,
+  embedded,
+}: {
+  el: SlideElement
+  theme: ResolvedTheme
+  revealStep?: number
+  live?: boolean
+  embedded?: boolean
+}) {
+  const style: React.CSSProperties = embedded
+    ? { position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }
+    : {
+        position: 'absolute',
+        left: `${el.x}%`,
+        top: `${el.y}%`,
+        width: `${el.w}%`,
+        height: `${el.h}%`,
+        zIndex: el.zIndex,
+        transform: elTransform(el),
+      }
   const isBody = el.variant === 'body'
 
   if (el.type === 'text') {
@@ -492,7 +702,22 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
     const lines = el.lineStep && revealStep !== undefined ? (el.text ?? '').split('\n') : null
     const lineHi = highlightSpanStyle(el.highlight)
     if (el.textArc && el.text?.trim()) {
-      return <CurvedText el={el} family={fontStack(el.fontFamily ?? (isBody ? theme.fonts.body : theme.fonts.heading))} color={el.textColor ?? theme.fg} style={{ ...style, ...(lines ? revealStyle((el.lineStep ?? 0) <= (revealStep ?? 0), el.anim, el.animMs) : {}), transform: style.transform, background: el.fill, borderRadius: el.fill ? '0.6cqw' : undefined }} />
+      return (
+        <CurvedText
+          el={el}
+          family={fontStack(el.fontFamily ?? (isBody ? theme.fonts.body : theme.fonts.heading))}
+          color={el.textColor ?? theme.fg}
+          style={{
+            ...style,
+            ...(lines
+              ? revealStyle((el.lineStep ?? 0) <= (revealStep ?? 0), el.anim, el.animMs)
+              : {}),
+            transform: style.transform,
+            background: el.fill,
+            borderRadius: el.fill ? '0.6cqw' : undefined,
+          }}
+        />
+      )
     }
     return (
       <FitText
@@ -522,10 +747,17 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
       >
         {lines
           ? lines.map((line, i) => (
-              <div key={i} style={revealStyle((el.lineStep ?? 0) + i <= (revealStep ?? 0), el.anim, el.animMs)}>
+              <div
+                key={i}
+                style={revealStyle((el.lineStep ?? 0) + i <= (revealStep ?? 0), el.anim, el.animMs)}
+              >
                 {lineHi ? (
                   <span style={lineHi}>
-                    {hasRich(line) ? <span dangerouslySetInnerHTML={{ __html: slideMathHtml(line) }} /> : line || '\u00a0'}
+                    {hasRich(line) ? (
+                      <span dangerouslySetInnerHTML={{ __html: slideMathHtml(line) }} />
+                    ) : (
+                      line || '\u00a0'
+                    )}
                   </span>
                 ) : hasRich(line) ? (
                   <span dangerouslySetInnerHTML={{ __html: slideMathHtml(line) }} />
@@ -541,7 +773,17 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
 
   if (el.type === 'icon') {
     if (!el.assetId) return null
-    return <SlideIcon id={el.assetId} style={{ ...style, opacity: el.opacity, padding: '1%', color: el.textColor ?? theme.accent }} />
+    return (
+      <SlideIcon
+        id={el.assetId}
+        style={{
+          ...style,
+          opacity: el.opacity,
+          padding: '1%',
+          color: el.textColor ?? theme.accent,
+        }}
+      />
+    )
   }
 
   if (el.type === 'connector') {
@@ -556,7 +798,11 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
     if (!el.graphicId || !graphicById(el.graphicId)) return null
     return (
       <div
-        style={{ ...style, opacity: el.opacity, padding: graphicById(el.graphicId)?.category === 'ornament' ? 0 : '1%' }}
+        style={{
+          ...style,
+          opacity: el.opacity,
+          padding: graphicById(el.graphicId)?.category === 'ornament' ? 0 : '1%',
+        }}
       >
         <GraphicFill id={el.graphicId} ink={el.textColor ?? theme.fg} fill={el.fill} />
       </div>
@@ -586,8 +832,11 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
           alignItems: 'center',
           justifyContent: 'center',
           // khung chờ ảnh ở bản xem là panel theme (nét đứt chỉ có ở bản chỉnh sửa)
-          background: el.src ? undefined : `linear-gradient(135deg, ${theme.surface} 0 48%, ${theme.accent}22 48% 54%, ${theme.surface} 54% 100%)`,
-          border: parts.cssBorder ?? (el.src || parts.clip ? undefined : `1px solid ${theme.accent}66`),
+          background: el.src
+            ? undefined
+            : `linear-gradient(135deg, ${theme.surface} 0 48%, ${theme.accent}22 48% 54%, ${theme.surface} 54% 100%)`,
+          border:
+            parts.cssBorder ?? (el.src || parts.clip ? undefined : `1px solid ${theme.accent}66`),
           borderRadius: parts.polygonBorder ? 0 : parts.borderRadius,
           clipPath: parts.frameRadius ? undefined : parts.clip,
           overflow: 'hidden',
@@ -601,7 +850,11 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
         {el.src ? (
           <img src={el.src} alt="" style={imageImgStyle(el.crop, el.imagePosition)} />
         ) : parts.clip ? (
-          <img src={FRAME_PLACEHOLDER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img
+            src={FRAME_PLACEHOLDER}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         ) : (
           'Ảnh minh hoạ'
         )}
@@ -657,8 +910,7 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
                 <td
                   key={ci}
                   style={{
-                    borderBottom:
-                      ri < rowCount - 1 ? `1px solid ${theme.muted}` : undefined,
+                    borderBottom: ri < rowCount - 1 ? `1px solid ${theme.muted}` : undefined,
                     borderRight: ci < r.length - 1 ? `1px solid ${theme.muted}` : undefined,
                     padding: '0.5em 0.7em',
                     background:
@@ -677,8 +929,7 @@ export function SlideElView({ el, theme, revealStep, live, embedded }: { el: Sli
     )
   }
 
-  if (el.type === 'chart')
-    return <ChartView el={el} colors={theme.chart} />
+  if (el.type === 'chart') return <ChartView el={el} colors={theme.chart} />
 
   return null
 }
@@ -895,7 +1146,9 @@ export function AutoFitText({
       let s = baseSize
       const fits = (px: number) => {
         ta.style.fontSize = `${px}cqw`
-        return middle && box ? need() <= box.clientHeight + 1 : ta.scrollHeight <= ta.clientHeight + 1
+        return middle && box
+          ? need() <= box.clientHeight + 1
+          : ta.scrollHeight <= ta.clientHeight + 1
       }
       if (!fits(s)) while (s > min && !fits(s)) s -= 0.1
       // giữ 2 chữ số: compose-time đã fit tới 0,01cqw, làm tròn lên 0,1 sẽ
@@ -933,7 +1186,9 @@ export function AutoFitText({
             width: '100%',
             height: '100%',
             padding: background ? '1.5% 3%' : '1%',
-            ...(middle ? { display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' } : {}),
+            ...(middle
+              ? { display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }
+              : {}),
             color: color ?? 'inherit',
             background,
             borderRadius: background ? '0.6cqw' : undefined,
@@ -964,7 +1219,10 @@ export function AutoFitText({
       tabIndex={locked ? -1 : undefined}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={cn('w-full resize-none overflow-hidden bg-transparent p-[1%] outline-none', !middle && 'h-full')}
+      className={cn(
+        'w-full resize-none overflow-hidden bg-transparent p-[1%] outline-none',
+        !middle && 'h-full',
+      )}
       style={{
         color: color ?? 'inherit',
         background: middle ? undefined : background,

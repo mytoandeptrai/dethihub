@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@workspace/ui/components/table'
 import React from 'react'
+
 import { t } from '@/i18n/translate'
 
 import type { ColumnDef } from '@tanstack/react-table'
@@ -52,7 +53,11 @@ export function DataTable<TData>({
 
   return (
     <div className="rounded-md border" aria-busy={isLoading}>
-      {isLoading ? <span role="status" className="sr-only">{t('loading.label')}</span> : null}
+      {isLoading ? (
+        <span role="status" className="sr-only">
+          {t('loading.label')}
+        </span>
+      ) : null}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

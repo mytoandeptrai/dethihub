@@ -5,12 +5,25 @@
  * → nếu chạm mép khung thì vùng hở (không tô) → lấy đường viền ngoài của vùng làm đa giác.
  */
 import rough from 'roughjs'
+
 import { drawElement } from './render'
 import { closedLoop, isPage, regionHoles, type El, type Pt } from './scene'
 
-export interface RegionView { zoom: number; scrollX: number; scrollY: number }
+export interface RegionView {
+  zoom: number
+  scrollX: number
+  scrollY: number
+}
 
-interface Walls { key: string; data: Uint8Array; w: number; h: number; s: number; ox: number; oy: number }
+interface Walls {
+  key: string
+  data: Uint8Array
+  w: number
+  h: number
+  s: number
+  ox: number
+  oy: number
+}
 let walls: Walls | null = null
 
 /** tối đa ~2 triệu điểm ảnh cho lớp tường (màn lớn thì hạ độ phân giải) */
@@ -19,7 +32,8 @@ const MAX_PX = 2_000_000
 function buildWalls(els: El[], view: RegionView, cw: number, ch: number, key: string): Walls {
   if (walls?.key === key) return walls
   const k = Math.min(1, Math.sqrt(MAX_PX / Math.max(1, cw * ch)))
-  const w = Math.max(1, Math.round(cw * k)), h = Math.max(1, Math.round(ch * k))
+  const w = Math.max(1, Math.round(cw * k)),
+    h = Math.max(1, Math.round(ch * k))
   const s = view.zoom * k
   const c = document.createElement('canvas')
   c.width = w
@@ -32,8 +46,13 @@ function buildWalls(els: El[], view: RegionView, cw: number, ch: number, key: st
   for (const e of els) {
     if (isPage(e) || e.kind === 'text' || e.kind === 'image' || e.region) continue
     drawElement(ctx, rc, {
-      ...e, id: `${e.id}~wall`, fill: 'transparent', stroke: '#000', opacity: 100,
-      strokeWidth: Math.max(e.strokeWidth, minW), pen: e.pen === 'highlight' ? 'marker' : e.pen,
+      ...e,
+      id: `${e.id}~wall`,
+      fill: 'transparent',
+      stroke: '#000',
+      opacity: 100,
+      strokeWidth: Math.max(e.strokeWidth, minW),
+      pen: e.pen === 'highlight' ? 'marker' : e.pen,
     })
   }
   const img = ctx.getImageData(0, 0, w, h).data
@@ -44,30 +63,51 @@ function buildWalls(els: El[], view: RegionView, cw: number, ch: number, key: st
 }
 
 /** vùng kín: viền ngoài + các lỗ bên trong (vd. hình tròn nhỏ nằm giữa hình vuông), toạ độ cảnh */
-export interface Region { outer: Pt[]; holes: Pt[][] }
+export interface Region {
+  outer: Pt[]
+  holes: Pt[][]
+}
 
 /** vùng kín chứa p (toạ độ cảnh); null nếu p nằm trên nét hoặc vùng hở */
-export function regionAt(els: El[], view: RegionView, cw: number, ch: number, key: string, p: Pt): Region | null {
+export function regionAt(
+  els: El[],
+  view: RegionView,
+  cw: number,
+  ch: number,
+  key: string,
+  p: Pt,
+): Region | null {
   const { data, w, h, s, ox, oy } = buildWalls(els, view, cw, ch, key)
   traceW = w
-  const x0 = Math.floor((p[0] + ox) * s), y0 = Math.floor((p[1] + oy) * s)
+  const x0 = Math.floor((p[0] + ox) * s),
+    y0 = Math.floor((p[1] + oy) * s)
   if (x0 < 0 || y0 < 0 || x0 >= w || y0 >= h || data[y0 * w + x0]) return null
 
   // loang 4 hướng; chạm mép khung nhìn = vùng hở
   const m = new Uint8Array(w * h)
   const q = new Int32Array(w * h)
-  let head = 0, tail = 0
+  let head = 0,
+    tail = 0
   q[tail++] = y0 * w + x0
   m[y0 * w + x0] = 1
-  let bx0 = x0, by0 = y0, bx1 = x0, by1 = y0
+  let bx0 = x0,
+    by0 = y0,
+    bx1 = x0,
+    by1 = y0
   while (head < tail) {
     const i = q[head++]
-    const x = i % w, y = (i - x) / w
+    const x = i % w,
+      y = (i - x) / w
     if (x === 0 || y === 0 || x === w - 1 || y === h - 1) return null
-    if (x < bx0) bx0 = x; else if (x > bx1) bx1 = x
-    if (y < by0) by0 = y; else if (y > by1) by1 = y
+    if (x < bx0) bx0 = x
+    else if (x > bx1) bx1 = x
+    if (y < by0) by0 = y
+    else if (y > by1) by1 = y
     for (const j of [i - 1, i + 1, i - w, i + w]) {
-      if (!m[j] && !data[j]) { m[j] = 1; q[tail++] = j }
+      if (!m[j] && !data[j]) {
+        m[j] = 1
+        q[tail++] = j
+      }
     }
   }
   if (tail < 30) return null
@@ -84,21 +124,42 @@ export function regionAt(els: El[], view: RegionView, cw: number, ch: number, ke
   }
 
   // khung bao của vùng (đã nở), rộng thêm 1px để mép khung chắc chắn nằm ngoài vùng
-  const X0 = Math.max(0, bx0 - grow - 1), Y0 = Math.max(0, by0 - grow - 1)
-  const X1 = Math.min(w - 1, bx1 + grow + 1), Y1 = Math.min(h - 1, by1 + grow + 1)
-  const toScene = (r: Pt[]) => simplify(r, 0.8).map(([x, y]) => [(x + 0.5) / s - ox, (y + 0.5) / s - oy] as Pt)
+  const X0 = Math.max(0, bx0 - grow - 1),
+    Y0 = Math.max(0, by0 - grow - 1)
+  const X1 = Math.min(w - 1, bx1 + grow + 1),
+    Y1 = Math.min(h - 1, by1 + grow + 1)
+  const toScene = (r: Pt[]) =>
+    simplify(r, 0.8).map(([x, y]) => [(x + 0.5) / s - ox, (y + 0.5) / s - oy] as Pt)
 
-  const outerRing = traceOuter((x, y) => x >= 0 && y >= 0 && x < w && y < h && m[y * w + x] === 1, firstIn(m, w, X0, Y0, X1, Y1, 1))
+  const outerRing = traceOuter(
+    (x, y) => x >= 0 && y >= 0 && x < w && y < h && m[y * w + x] === 1,
+    firstIn(m, w, X0, Y0, X1, Y1, 1),
+  )
   if (outerRing.length < 4) return null
 
   // lỗ = phần không thuộc vùng mà không thông ra mép khung: loang "bên ngoài" từ mép khung,
   // phần còn sót lại (bị vùng bao kín) là lỗ
   const lab = new Int32Array(w * h) // 0 chưa xét, -1 bên ngoài, >0 số hiệu lỗ
   head = tail = 0
-  const pushOut = (i: number) => { if (!m[i] && !lab[i]) { lab[i] = -1; q[tail++] = i } }
-  for (let x = X0; x <= X1; x++) { pushOut(Y0 * w + x); pushOut(Y1 * w + x) }
-  for (let y = Y0; y <= Y1; y++) { pushOut(y * w + X0); pushOut(y * w + X1) }
-  const inBox = (j: number) => { const x = j % w, y = (j - x) / w; return x >= X0 && x <= X1 && y >= Y0 && y <= Y1 }
+  const pushOut = (i: number) => {
+    if (!m[i] && !lab[i]) {
+      lab[i] = -1
+      q[tail++] = i
+    }
+  }
+  for (let x = X0; x <= X1; x++) {
+    pushOut(Y0 * w + x)
+    pushOut(Y1 * w + x)
+  }
+  for (let y = Y0; y <= Y1; y++) {
+    pushOut(y * w + X0)
+    pushOut(y * w + X1)
+  }
+  const inBox = (j: number) => {
+    const x = j % w,
+      y = (j - x) / w
+    return x >= X0 && x <= X1 && y >= Y0 && y <= Y1
+  }
   while (head < tail) {
     const i = q[head++]
     for (const j of [i - 1, i + 1, i - w, i + w]) if (inBox(j)) pushOut(j)
@@ -115,12 +176,19 @@ export function regionAt(els: El[], view: RegionView, cw: number, ch: number, ke
       q[tail++] = i0
       while (head < tail) {
         const i = q[head++]
-        for (const j of [i - 1, i + 1, i - w, i + w]) if (!m[j] && !lab[j]) { lab[j] = id; q[tail++] = j }
+        for (const j of [i - 1, i + 1, i - w, i + w])
+          if (!m[j] && !lab[j]) {
+            lab[j] = id
+            q[tail++] = j
+          }
       }
       // bỏ lỗ li ti (vụn nét, chấm nhỏ)
       if (tail < 25) continue
       const k = id
-      const ring = traceOuter((xx, yy) => xx >= 0 && yy >= 0 && xx < w && yy < h && lab[yy * w + xx] === k, i0)
+      const ring = traceOuter(
+        (xx, yy) => xx >= 0 && yy >= 0 && xx < w && yy < h && lab[yy * w + xx] === k,
+        i0,
+      )
       if (ring.length >= 4) holes.push(toScene(ring))
     }
   }
@@ -128,8 +196,17 @@ export function regionAt(els: El[], view: RegionView, cw: number, ch: number, ke
 }
 
 /** điểm đầu tiên (theo hàng) trong khung có giá trị v — nằm trên viền ngoài */
-function firstIn(m: Uint8Array, w: number, X0: number, Y0: number, X1: number, Y1: number, v: number) {
-  for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) if (m[y * w + x] === v) return y * w + x
+function firstIn(
+  m: Uint8Array,
+  w: number,
+  X0: number,
+  Y0: number,
+  X1: number,
+  Y1: number,
+  v: number,
+) {
+  for (let y = Y0; y <= Y1; y++)
+    for (let x = X0; x <= X1; x++) if (m[y * w + x] === v) return y * w + x
   return -1
 }
 
@@ -138,18 +215,32 @@ let traceW = 1
  *  `start` phải là điểm đầu tiên của mảng theo thứ tự hàng → chắc chắn nằm trên viền ngoài */
 function traceOuter(inM: (x: number, y: number) => boolean, start: number): Pt[] {
   if (start < 0) return []
-  const D: Pt[] = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
+  const D: Pt[] = [
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+  ]
   const w = traceW
-  const sx = start % w, sy = (start - sx) / w
-  let x = sx, y = sy, back = 4
+  const sx = start % w,
+    sy = (start - sx) / w
+  let x = sx,
+    y = sy,
+    back = 4
   const out: Pt[] = [[x, y]]
   for (let n = 0; n < 4_000_000; n++) {
     let moved = false
     for (let k = 1; k <= 8; k++) {
       const d = (back + k) % 8
-      const nx = x + D[d][0], ny = y + D[d][1]
+      const nx = x + D[d][0],
+        ny = y + D[d][1]
       if (inM(nx, ny)) {
-        x = nx; y = ny
+        x = nx
+        y = ny
         back = (d + 4) % 8
         moved = true
         break
@@ -165,14 +256,25 @@ function traceOuter(inM: (x: number, y: number) => boolean, start: number): Pt[]
 function simplify(pts: Pt[], eps: number): Pt[] {
   if (pts.length < 8) return pts
   const rdp = (a: number, b: number, keep: boolean[]) => {
-    const [ax, ay] = pts[a], [bx, by] = pts[b]
-    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1
-    let far = -1, best = eps
+    const [ax, ay] = pts[a],
+      [bx, by] = pts[b]
+    const dx = bx - ax,
+      dy = by - ay,
+      len = Math.hypot(dx, dy) || 1
+    let far = -1,
+      best = eps
     for (let i = a + 1; i < b; i++) {
       const d = Math.abs((pts[i][0] - ax) * dy - (pts[i][1] - ay) * dx) / len
-      if (d > best) { best = d; far = i }
+      if (d > best) {
+        best = d
+        far = i
+      }
     }
-    if (far >= 0) { keep[far] = true; rdp(a, far, keep); rdp(far, b, keep) }
+    if (far >= 0) {
+      keep[far] = true
+      rdp(a, far, keep)
+      rdp(far, b, keep)
+    }
   }
   const mid = Math.floor(pts.length / 2)
   const keep = pts.map(() => false)
@@ -184,7 +286,8 @@ function simplify(pts: Pt[], eps: number): Pt[] {
 
 export function polyArea(pts: Pt[]) {
   let a = 0
-  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) a += (pts[j][0] + pts[i][0]) * (pts[j][1] - pts[i][1])
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++)
+    a += (pts[j][0] + pts[i][0]) * (pts[j][1] - pts[i][1])
   return Math.abs(a / 2)
 }
 
@@ -204,46 +307,73 @@ export function regionArea(r: Region) {
 
 /** các miền (vòng ngoài + lỗ) của tập điểm thoả `inside`, lấy mẫu lưới bước `step` trong khung [x0, y0, x1, y1].
  *  Dùng cho vùng tô của SVG cắt bằng mask / clip (miền gạch biểu đồ Ven). Toạ độ trả về cùng hệ với `inside`. */
-export function regionsOf(inside: (x: number, y: number) => boolean, x0: number, y0: number, x1: number, y1: number, step: number): Region[] {
+export function regionsOf(
+  inside: (x: number, y: number) => boolean,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  step: number,
+): Region[] {
   // chừa 1 ô trống quanh mép để viền ngoài luôn khép
-  const w = Math.ceil((x1 - x0) / step) + 3, h = Math.ceil((y1 - y0) / step) + 3
+  const w = Math.ceil((x1 - x0) / step) + 3,
+    h = Math.ceil((y1 - y0) / step) + 3
   if (w * h > MAX_PX) return []
   const m = new Uint8Array(w * h)
-  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
-    if (inside(x0 + (x - 0.5) * step, y0 + (y - 0.5) * step)) m[y * w + x] = 1
-  }
+  for (let y = 1; y < h - 1; y++)
+    for (let x = 1; x < w - 1; x++) {
+      if (inside(x0 + (x - 0.5) * step, y0 + (y - 0.5) * step)) m[y * w + x] = 1
+    }
   traceW = w
   const lab = new Int32Array(w * h) // >0 số hiệu miền, <0 số hiệu ô trống (−1 = bên ngoài)
   const q = new Int32Array(w * h)
   const fill = (i0: number, v: number, want: number) => {
-    let head = 0, tail = 0
-    lab[i0] = v; q[tail++] = i0
+    let head = 0,
+      tail = 0
+    lab[i0] = v
+    q[tail++] = i0
     while (head < tail) {
       const i = q[head++]
       const x = i % w
       for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w]) {
-        if (j >= 0 && j < w * h && !lab[j] && m[j] === want) { lab[j] = v; q[tail++] = j }
+        if (j >= 0 && j < w * h && !lab[j] && m[j] === want) {
+          lab[j] = v
+          q[tail++] = j
+        }
       }
     }
     return tail
   }
   fill(0, -1, 0)
-  const toScene = (r: Pt[]) => simplify(r, 0.6).map(([x, y]) => [x0 + (x - 0.5) * step, y0 + (y - 0.5) * step] as Pt)
+  const toScene = (r: Pt[]) =>
+    simplify(r, 0.6).map(([x, y]) => [x0 + (x - 0.5) * step, y0 + (y - 0.5) * step] as Pt)
   const out: Region[] = []
-  let id = 0, hid = -1
+  let id = 0,
+    hid = -1
   for (let i = 0; i < w * h; i++) {
     if (lab[i]) continue
     if (m[i]) {
       const k = ++id
-      if (fill(i, k, 1) < 6) { out.push({ outer: [], holes: [] }); continue }
-      out.push({ outer: toScene(traceOuter((x, y) => x >= 0 && y >= 0 && x < w && y < h && lab[y * w + x] === k, i)), holes: [] })
+      if (fill(i, k, 1) < 6) {
+        out.push({ outer: [], holes: [] })
+        continue
+      }
+      out.push({
+        outer: toScene(
+          traceOuter((x, y) => x >= 0 && y >= 0 && x < w && y < h && lab[y * w + x] === k, i),
+        ),
+        holes: [],
+      })
     } else {
       const k = --hid
       const n = fill(i, k, 0)
       // ô bên trái điểm đầu (theo hàng) của lỗ thuộc miền bao quanh nó
       const owner = lab[i - 1]
       if (n < 6 || owner <= 0) continue
-      const ring = traceOuter((x, y) => x >= 0 && y >= 0 && x < w && y < h && lab[y * w + x] === k, i)
+      const ring = traceOuter(
+        (x, y) => x >= 0 && y >= 0 && x < w && y < h && lab[y * w + x] === k,
+        i,
+      )
       if (ring.length >= 4) out[owner - 1].holes.push(toScene(ring))
     }
   }

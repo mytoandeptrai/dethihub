@@ -21,7 +21,8 @@ export class ApiClientError extends Error {
     this.detail = raw.detail ?? raw.title
     this.userMessage = this.detail
     this.errors = raw.errors ?? []
-    if ('refundedTokens' in raw && typeof raw.refundedTokens === 'number' && raw.refundedTokens > 0) this.refundedTokens = raw.refundedTokens
+    if ('refundedTokens' in raw && typeof raw.refundedTokens === 'number' && raw.refundedTokens > 0)
+      this.refundedTokens = raw.refundedTokens
   }
 }
 

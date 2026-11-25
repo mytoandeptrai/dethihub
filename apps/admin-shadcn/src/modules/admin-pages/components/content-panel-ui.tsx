@@ -1,9 +1,9 @@
 'use client'
-import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import { components_appIcons_TrashIcon as TrashIcon } from '@admin-pages-engine'
 import { cn } from '@workspace/ui/lib/utils'
 import { AlertTriangle, Check, Eye, FileText, HardDrive, RefreshCw, Search, X } from 'lucide-react'
 
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import {
   SiteBadge as Badge,
   SiteButton as Button,
@@ -14,7 +14,6 @@ import {
   Pager,
   Segmented,
   SiteSelect,
-
   Toolbar,
   inputClass,
 } from '@/components/product-ui'
@@ -493,7 +492,9 @@ export function ContentPanelExamDrawerUi(
             </h3>
 
             {loadingDoc ? (
-              <LoadingRegion><FormSkeleton /></LoadingRegion>
+              <LoadingRegion>
+                <FormSkeleton />
+              </LoadingRegion>
             ) : questions.length > 0 ? (
               <div className="space-y-3">
                 {questions.map((q: any, idx: number) => (
@@ -996,7 +997,9 @@ export function ContentPanelFeedbackTabUi(
         <Card className="border-line shadow-soft overflow-hidden border">
           <div className="divide-line-2 divide-y">
             {loading && feedback.length === 0 ? (
-              <LoadingRegion><FormSkeleton /></LoadingRegion>
+              <LoadingRegion>
+                <FormSkeleton />
+              </LoadingRegion>
             ) : feedback.length === 0 ? (
               <div className="py-12 text-center">
                 <EmptyState title={translate('adminPagesCopy.m276')} description="" />

@@ -27,7 +27,11 @@ export class QuotaRepositoryImpl implements QuotaRepositoryPort {
     return row?.requests ?? 0
   }
 
-  async upsertOverride(userId: string, monthlyTokens: number | null, note: string | null): Promise<void> {
+  async upsertOverride(
+    userId: string,
+    monthlyTokens: number | null,
+    note: string | null,
+  ): Promise<void> {
     await this.prisma.aiQuotaOverride.upsert({
       where: { userId },
       create: { userId, monthlyTokens, note },

@@ -1,8 +1,9 @@
+import { callLlm, extractJson } from '@/engine/lib/llm'
+
 /**
  * Logic dựng Ma trận đề và Bản đặc tả theo mẫu Bộ GD&ĐT (CV 7991/BGDĐT-GDTrH, mẫu THPT 2025 ba phần, TT 27/2020 tiểu học).
  */
 import type { ExamBlock, ExamDoc, TableBlock, TableCellData } from '@/engine/data/docTypes'
-import { callLlm, extractJson } from '@/engine/lib/llm'
 
 export type MucDo = 'NB' | 'TH' | 'VD' | 'VDC' | 'M1' | 'M2' | 'M3'
 
@@ -93,12 +94,15 @@ export const DEFAULT_SCORE_CONFIG = (subject: string): MatrixScoreConfig => ({
 const plain = (rt: unknown): string => {
   if (!rt) return ''
   if (typeof rt === 'string') return rt
-  if (Array.isArray(rt)) return rt.map((s) => (typeof s === 'string' ? s : s.text ?? '')).join('')
+  if (Array.isArray(rt)) return rt.map((s) => (typeof s === 'string' ? s : (s.text ?? ''))).join('')
   return ''
 }
 
 /** Rút trích câu hỏi từ ExamDoc để đưa vào bảng phân loại. */
-export function extractQuestionsFromDoc(doc: ExamDoc, defaultChapter = 'Khác'): QuestionClassified[] {
+export function extractQuestionsFromDoc(
+  doc: ExamDoc,
+  defaultChapter = 'Khác',
+): QuestionClassified[] {
   const out: QuestionClassified[] = []
   let qNo = 0
   let essayNo = 0
@@ -163,11 +167,14 @@ export async function classifyQuestionsWithAi(
 ): Promise<QuestionClassified[]> {
   const isTieuHoc = grade <= 5
   const user = buildClassificationUserPrompt(questions)
-  const res = await callLlm(
-    [{ role: 'user', content: user }],
-    { temperature: 0.1, signal, task: { name: 'ma-tran', input: { subject, grade, chapters } } },
-  )
-  const parsed = extractJson<{ items?: Array<{ no?: number; chuDe?: string; mucDo?: string | string[]; yeuCau?: string }> }>(res.content)
+  const res = await callLlm([{ role: 'user', content: user }], {
+    temperature: 0.1,
+    signal,
+    task: { name: 'ma-tran', input: { subject, grade, chapters } },
+  })
+  const parsed = extractJson<{
+    items?: Array<{ no?: number; chuDe?: string; mucDo?: string | string[]; yeuCau?: string }>
+  }>(res.content)
   const items = Array.isArray(parsed?.items) ? parsed.items : []
 
   const itemMap = new Map<number, { chuDe?: string; mucDo?: string | string[]; yeuCau?: string }>()
@@ -210,7 +217,9 @@ export async function classifyQuestionsWithAi(
     }
 
     const defaultSingle = isTieuHoc ? ('M1' as MucDo) : ('NB' as MucDo)
-    const defaultTf: [MucDo, MucDo, MucDo, MucDo] = isTieuHoc ? ['M1', 'M1', 'M2', 'M2'] : ['NB', 'NB', 'TH', 'TH']
+    const defaultTf: [MucDo, MucDo, MucDo, MucDo] = isTieuHoc
+      ? ['M1', 'M1', 'M2', 'M2']
+      : ['NB', 'NB', 'TH', 'TH']
 
     let mucDo = q.mucDo
     let mucDoTf = q.mucDoTf
@@ -235,7 +244,7 @@ export async function classifyQuestionsWithAi(
       }
     }
 
-    const yeuCau = (typeof ai.yeuCau === 'string' && ai.yeuCau.trim()) ? ai.yeuCau.trim() : q.yeuCau
+    const yeuCau = typeof ai.yeuCau === 'string' && ai.yeuCau.trim() ? ai.yeuCau.trim() : q.yeuCau
 
     return {
       ...q,
@@ -248,7 +257,10 @@ export async function classifyQuestionsWithAi(
 }
 
 /** Tính tổng điểm toàn đề */
-export function computeTotalScore(questions: QuestionClassified[], config: MatrixScoreConfig): number {
+export function computeTotalScore(
+  questions: QuestionClassified[],
+  config: MatrixScoreConfig,
+): number {
   let sum = 0
   for (const q of questions) {
     if (q.kind === 'mcq') sum += config.mcqPoint
@@ -411,7 +423,8 @@ export function buildMatrixData(
           .reduce((acc, q) => acc + (q.score || 0), 0)
       }
       partScoreTotals[key] = Math.round(sc * 100) / 100
-      partPercentTotals[key] = grandTotalScore > 0 ? Math.round((sc / grandTotalScore) * 1000) / 10 : 0
+      partPercentTotals[key] =
+        grandTotalScore > 0 ? Math.round((sc / grandTotalScore) * 1000) / 10 : 0
     }
   }
 
@@ -432,7 +445,8 @@ export function buildMatrixData(
     }
     levelCounts[l.key] = cSum
     levelScores[l.key] = Math.round(sSum * 100) / 100
-    levelPercents[l.key] = grandTotalScore > 0 ? Math.round((sSum / grandTotalScore) * 1000) / 10 : 0
+    levelPercents[l.key] =
+      grandTotalScore > 0 ? Math.round((sSum / grandTotalScore) * 1000) / 10 : 0
   }
 
   return {
@@ -507,7 +521,13 @@ export function buildSpecData(
     const qs = questions.filter((q) => (q.chuDe || 'Khác') === chuDe)
 
     // Gom câu hỏi theo yêu cầu cần đạt (hoặc theo câu nếu yêu cầu rỗng)
-    const mapYeuCau = new Map<string, { qs: QuestionClassified[]; tfItems: Array<{ q: QuestionClassified; opt: string; level: MucDo }> }>()
+    const mapYeuCau = new Map<
+      string,
+      {
+        qs: QuestionClassified[]
+        tfItems: Array<{ q: QuestionClassified; opt: string; level: MucDo }>
+      }
+    >()
 
     for (const q of qs) {
       const yKey = q.yeuCau.trim() || `Yêu cầu cần đạt của ${q.label}`
@@ -624,8 +644,17 @@ export function buildMatrixTableBlock(data: MatrixData): TableBlock {
     }
     rowCells.push(
       { text: String(r.totalCount), align: 'center' },
-      { text: r.totalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }), align: 'center' },
-      { text: `${r.percent.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`, align: 'center' },
+      {
+        text: r.totalScore.toLocaleString('vi-VN', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 2,
+        }),
+        align: 'center',
+      },
+      {
+        text: `${r.percent.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`,
+        align: 'center',
+      },
     )
     rows.push(rowCells)
   }
@@ -642,7 +671,14 @@ export function buildMatrixTableBlock(data: MatrixData): TableBlock {
   }
   rSumCount.push(
     { text: String(data.summary.grandTotalCount), header: true, align: 'center' },
-    { text: data.summary.grandTotalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }), header: true, align: 'center' },
+    {
+      text: data.summary.grandTotalScore.toLocaleString('vi-VN', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 2,
+      }),
+      header: true,
+      align: 'center',
+    },
     { text: '100%', header: true, align: 'center' },
   )
   rows.push(rSumCount)
@@ -655,7 +691,10 @@ export function buildMatrixTableBlock(data: MatrixData): TableBlock {
     for (const l of p.levels) {
       const val = data.summary.partScoreTotals[`${p.id}_${l.key}`] || 0
       rSumScore.push({
-        text: val > 0 ? val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : '-',
+        text:
+          val > 0
+            ? val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+            : '-',
         header: true,
         align: 'center',
       })
@@ -663,7 +702,14 @@ export function buildMatrixTableBlock(data: MatrixData): TableBlock {
   }
   rSumScore.push(
     { text: '-', header: true, align: 'center' },
-    { text: data.summary.grandTotalScore.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }), header: true, align: 'center' },
+    {
+      text: data.summary.grandTotalScore.toLocaleString('vi-VN', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 2,
+      }),
+      header: true,
+      align: 'center',
+    },
     { text: '100%', header: true, align: 'center' },
   )
   rows.push(rSumScore)
@@ -676,7 +722,10 @@ export function buildMatrixTableBlock(data: MatrixData): TableBlock {
     for (const l of p.levels) {
       const val = data.summary.partPercentTotals[`${p.id}_${l.key}`] || 0
       rSumPercent.push({
-        text: val > 0 ? `${val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : '-',
+        text:
+          val > 0
+            ? `${val.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+            : '-',
         header: true,
         align: 'center',
       })
@@ -704,7 +753,12 @@ export function buildSpecTableBlock(data: SpecData): TableBlock {
     { text: 'TT', header: true, rowSpan: 2, align: 'center' },
     { text: 'Chủ đề', header: true, rowSpan: 2, align: 'center' },
     { text: 'Yêu cầu cần đạt', header: true, rowSpan: 2, align: 'center' },
-    { text: 'Số câu hỏi theo mức độ nhận thức', header: true, colSpan: data.levels.length, align: 'center' },
+    {
+      text: 'Số câu hỏi theo mức độ nhận thức',
+      header: true,
+      colSpan: data.levels.length,
+      align: 'center',
+    },
     { text: 'Câu số', header: true, rowSpan: 2, align: 'center' },
   ]
   rows.push(r1)
@@ -758,7 +812,10 @@ export function buildMatrixAndSpecExamDoc(
     {
       type: 'paragraph',
       text: [
-        { text: `MÔN: ${meta.subject.toUpperCase()} – LỚP ${meta.grade}`, marks: [{ type: 'bold' }] },
+        {
+          text: `MÔN: ${meta.subject.toUpperCase()} – LỚP ${meta.grade}`,
+          marks: [{ type: 'bold' }],
+        },
         ...(meta.duration ? [{ text: `  •  Thời gian: ${meta.duration}` }] : []),
         ...(meta.schoolYear ? [{ text: `  •  Năm học: ${meta.schoolYear}` }] : []),
       ],
@@ -775,7 +832,10 @@ export function buildMatrixAndSpecExamDoc(
     {
       type: 'paragraph',
       text: [
-        { text: `MÔN: ${meta.subject.toUpperCase()} – LỚP ${meta.grade}`, marks: [{ type: 'bold' }] },
+        {
+          text: `MÔN: ${meta.subject.toUpperCase()} – LỚP ${meta.grade}`,
+          marks: [{ type: 'bold' }],
+        },
       ],
       format: { align: 'center' },
     },

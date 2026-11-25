@@ -1,20 +1,5 @@
-/**
- * Hợp đồng sinh **một** slide (chặng 26b).
- *
- * Mỗi slide được gọi riêng với prompt ngắn (layout của dàn ý + brief + style),
- * rồi chuẩn hoá/kiểm tra trước khi dựng bằng layout engine. Sai field bắt buộc
- * thì sửa đúng một lần; vẫn sai thì bỏ slide thay vì chèn nội dung rác.
- */
-import type { AiSlidePayload } from './aiDeck'
-import type { DeckPlan, DeckPlanSlide } from './aiDeck'
-import type { Deck, DeckTheme, Slide, SlideElement, SlideTone } from '@/engine/store/docs'
-import { normalizeTheme, themeById, type ResolvedTheme } from './slideTheme'
-import { hasTextEffects, sanitizeTextStyle, textEffectsOf } from './slideTextEffects'
 import { keepCustomBg } from './slideBackground'
-import { stylePackById } from './slideStyles'
 import { defaultDecorKit, isDecorKitId } from './slideDecor'
-import { subjectById, subjectRulesBlock } from './slideSubjects'
-import { fixMathEscapes, limitBold, mathToPlain } from './slideMath'
 import { graphicShortlistText, graphicFits, isGraphicId, searchGraphics } from './slideGraphics'
 import {
   composeLayout,
@@ -32,6 +17,22 @@ import {
   type SlideLayoutContent,
   type SlideLayoutId,
 } from './slideLayouts'
+import { fixMathEscapes, limitBold, mathToPlain } from './slideMath'
+import { stylePackById } from './slideStyles'
+import { subjectById, subjectRulesBlock } from './slideSubjects'
+import { hasTextEffects, sanitizeTextStyle, textEffectsOf } from './slideTextEffects'
+import { normalizeTheme, themeById, type ResolvedTheme } from './slideTheme'
+
+/**
+ * Hợp đồng sinh **một** slide (chặng 26b).
+ *
+ * Mỗi slide được gọi riêng với prompt ngắn (layout của dàn ý + brief + style),
+ * rồi chuẩn hoá/kiểm tra trước khi dựng bằng layout engine. Sai field bắt buộc
+ * thì sửa đúng một lần; vẫn sai thì bỏ slide thay vì chèn nội dung rác.
+ */
+import type { AiSlidePayload } from './aiDeck'
+import type { DeckPlan, DeckPlanSlide } from './aiDeck'
+import type { Deck, DeckTheme, Slide, SlideElement, SlideTone } from '@/engine/store/docs'
 
 const clean = (value: unknown, max: number): string | undefined => {
   if (typeof value !== 'string') return undefined
@@ -46,7 +47,9 @@ const MAX_CREDIT = 140
 const BAR_LABEL_MAX = 42
 const BAR_VALUE_MAX = 1_000_000_000_000
 const cleanSingleLine = (value: unknown, max: number) =>
-  typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max).trimEnd() || undefined : undefined
+  typeof value === 'string'
+    ? value.trim().replace(/\s+/g, ' ').slice(0, max).trimEnd() || undefined
+    : undefined
 
 const cleanList = (value: unknown, maxItems: number, maxLen: number): string[] | undefined => {
   if (!Array.isArray(value)) return undefined
@@ -72,38 +75,60 @@ export interface SlideCheck {
 export function sanitizeSlide(raw: unknown, layout: string, tone?: SlideTone): AiSlidePayload {
   const id = isLayoutId(layout) ? layout : 'bullets'
   const source =
-    raw && typeof raw === 'object' && !Array.isArray(raw)
-      ? (raw as Record<string, unknown>)
-      : {}
-  const entries = source.textStyles && typeof source.textStyles === 'object' ? Object.entries(source.textStyles).slice(0, 48) : []
-  const textStyles = Object.fromEntries(entries.filter(([key]) => /^[a-z][a-z0-9-]{0,63}$/.test(key)).map(([key, value]) => [key, sanitizeTextStyle(value)]))
+    raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {}
+  const entries =
+    source.textStyles && typeof source.textStyles === 'object'
+      ? Object.entries(source.textStyles).slice(0, 48)
+      : []
+  const textStyles = Object.fromEntries(
+    entries
+      .filter(([key]) => /^[a-z][a-z0-9-]{0,63}$/.test(key))
+      .map(([key, value]) => [key, sanitizeTextStyle(value)]),
+  )
   const aiTone = isTone(source.tone) ? source.tone : undefined
   const limits = BUDGETS[id].fields
   const editorial = isEditorialLayout(id)
-  const title = clean(source.title, editorial ? limits?.title ?? 80 : 160)
+  const title = clean(source.title, editorial ? (limits?.title ?? 80) : 160)
   const kicker = clean(source.kicker, id === 'bignum' ? limits!.kicker! : 80)
-  const subtitle = clean(source.subtitle, id === 'bignum' || id === 'photo-full' ? limits!.subtitle! : 240)
+  const subtitle = clean(
+    source.subtitle,
+    id === 'bignum' || id === 'photo-full' ? limits!.subtitle! : 240,
+  )
   const rawCredit = cleanSingleLine(source.credit, MAX_CREDIT)
   const credit = editorial ? stripPhotoSources(rawCredit) : rawCredit
-  const position = (value: unknown) => typeof value === 'number' && Number.isFinite(value)
-    ? Math.min(100, Math.max(0, value))
-    : undefined
-  const extra = id === 'bignum' || id === 'photo-full'
-    ? { focusX: position(source.focusX), focusY: position(source.focusY) }
-    : {}
-  const bars = id === 'bars' && Array.isArray(source.bars)
-    ? source.bars.flatMap((item) => {
-        if (!item || typeof item !== 'object') return []
-        const { label: rawLabel, value, color } = item as Record<string, unknown>
-        const label = cleanSingleLine(rawLabel, BAR_LABEL_MAX)
-        if (!label || typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > BAR_VALUE_MAX) return []
-        return [{
-          label,
-          value,
-          ...(typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color) ? { color } : {}),
-        }]
-      }).slice(0, 6)
-    : undefined
+  const position = (value: unknown) =>
+    typeof value === 'number' && Number.isFinite(value)
+      ? Math.min(100, Math.max(0, value))
+      : undefined
+  const extra =
+    id === 'bignum' || id === 'photo-full'
+      ? { focusX: position(source.focusX), focusY: position(source.focusY) }
+      : {}
+  const bars =
+    id === 'bars' && Array.isArray(source.bars)
+      ? source.bars
+          .flatMap((item) => {
+            if (!item || typeof item !== 'object') return []
+            const { label: rawLabel, value, color } = item as Record<string, unknown>
+            const label = cleanSingleLine(rawLabel, BAR_LABEL_MAX)
+            if (
+              !label ||
+              typeof value !== 'number' ||
+              !Number.isFinite(value) ||
+              value < 0 ||
+              value > BAR_VALUE_MAX
+            )
+              return []
+            return [
+              {
+                label,
+                value,
+                ...(typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color) ? { color } : {}),
+              },
+            ]
+          })
+          .slice(0, 6)
+      : undefined
   const body = clean(source.body, 1200)
   const bullets = cleanList(source.bullets, 6, 220)
   const items = cleanList(source.items, 6, 220)
@@ -115,10 +140,14 @@ export function sanitizeSlide(raw: unknown, layout: string, tone?: SlideTone): A
   const author = clean(source.author, 80)
   const image = clean(source.image, 2000)
   const imagePrompt = editorial ? cleanSingleLine(source.imagePrompt, 280) : undefined
-  const image2Prompt = id === 'photo-compare' ? cleanSingleLine(source.image2Prompt, 280) : undefined
+  const image2Prompt =
+    id === 'photo-compare' ? cleanSingleLine(source.image2Prompt, 280) : undefined
   const graphic =
     isGraphicId(source.graphic) &&
-    graphicFits(source.graphic, [title, kicker, subtitle, body, ...(bullets ?? []), ...(items ?? [])].join(' '))
+    graphicFits(
+      source.graphic,
+      [title, kicker, subtitle, body, ...(bullets ?? []), ...(items ?? [])].join(' '),
+    )
       ? source.graphic
       : undefined
   const steps = cleanList(source.steps, 6, 160)
@@ -146,26 +175,29 @@ export function sanitizeSlide(raw: unknown, layout: string, tone?: SlideTone): A
         .slice(0, 4)
     : undefined
 
-  const answer =
-    typeof source.answer === 'number' ? source.answer : clean(source.answer, 120)
+  const answer = typeof source.answer === 'number' ? source.answer : clean(source.answer, 120)
 
   return {
     layout: id,
     ...(Object.keys(textStyles).length ? { textStyles } : {}),
     ...(credit ? { credit } : {}),
     ...extra,
-    ...(id === 'bignum' ? {
-      value: cleanSingleLine(source.value, limits!.value!),
-      label: clean(source.label, limits!.label!),
-    } : {}),
+    ...(id === 'bignum'
+      ? {
+          value: cleanSingleLine(source.value, limits!.value!),
+          label: clean(source.label, limits!.label!),
+        }
+      : {}),
     ...(id === 'photo-full' && (source.textPosition === 'left' || source.textPosition === 'bottom')
       ? { textPosition: source.textPosition }
       : {}),
-    ...(id === 'photo-compare' ? {
-      image2: clean(source.image2, 2000),
-      caption: clean(source.caption, limits!.caption!),
-      caption2: clean(source.caption2, limits!.caption2!),
-    } : {}),
+    ...(id === 'photo-compare'
+      ? {
+          image2: clean(source.image2, 2000),
+          caption: clean(source.caption, limits!.caption!),
+          caption2: clean(source.caption2, limits!.caption2!),
+        }
+      : {}),
     ...(bars?.length ? { bars } : {}),
     ...((tone ?? aiTone) ? { tone: tone ?? aiTone } : {}),
     ...(title ? { title } : {}),
@@ -208,8 +240,22 @@ interface Budget {
   total: number
   fields?: Partial<
     Record<
-      | 'title' | 'kicker' | 'subtitle' | 'body' | 'quote' | 'author' | 'question' | 'leftTitle' | 'rightTitle'
-      | 'problem' | 'conclusion' | 'explanation' | 'value' | 'label' | 'caption' | 'caption2',
+      | 'title'
+      | 'kicker'
+      | 'subtitle'
+      | 'body'
+      | 'quote'
+      | 'author'
+      | 'question'
+      | 'leftTitle'
+      | 'rightTitle'
+      | 'problem'
+      | 'conclusion'
+      | 'explanation'
+      | 'value'
+      | 'label'
+      | 'caption'
+      | 'caption2',
       number
     >
   >
@@ -223,15 +269,15 @@ interface Budget {
 }
 
 const BUDGETS: Record<SlideLayoutId, Budget> = {
-  title: { total: 260, fields: { title: 80, kicker: 50, subtitle: 110 } },
-  section: { total: 220, fields: { title: 60, kicker: 50, subtitle: 100 } },
-  statement: { total: 160, fields: { body: 100, kicker: 40, author: 40 } },
-  bullets: {
+  'title': { total: 260, fields: { title: 80, kicker: 50, subtitle: 110 } },
+  'section': { total: 220, fields: { title: 60, kicker: 50, subtitle: 100 } },
+  'statement': { total: 160, fields: { body: 100, kicker: 40, author: 40 } },
+  'bullets': {
     total: 460,
     fields: { title: 80, kicker: 50 },
     lists: [{ field: 'bullets', max: 4, itemMax: 110 }],
   },
-  cards: {
+  'cards': {
     total: 460,
     fields: { title: 80, kicker: 50 },
     lists: [{ field: 'items', max: 4, itemMax: 100 }],
@@ -244,7 +290,7 @@ const BUDGETS: Record<SlideLayoutId, Budget> = {
       { field: 'right', max: 3, itemMax: 100 },
     ],
   },
-  comparison: {
+  'comparison': {
     total: 660,
     fields: { title: 80, leftTitle: 30, rightTitle: 30 },
     lists: [
@@ -252,14 +298,14 @@ const BUDGETS: Record<SlideLayoutId, Budget> = {
       { field: 'right', max: 3, itemMax: 70 },
     ],
   },
-  quote: { total: 220, fields: { quote: 160, author: 50 } },
-  closing: { total: 260, fields: { title: 80, subtitle: 110 } },
-  agenda: {
+  'quote': { total: 220, fields: { quote: 160, author: 50 } },
+  'closing': { total: 260, fields: { title: 80, subtitle: 110 } },
+  'agenda': {
     total: 420,
     fields: { title: 80, kicker: 50 },
     lists: [{ field: 'items', max: 5, itemMax: 60 }],
   },
-  table: { total: 500, fields: { title: 80 }, table: { rows: 6, cell: 40 } },
+  'table': { total: 500, fields: { title: 80 }, table: { rows: 6, cell: 40 } },
   'image-left': {
     total: 380,
     fields: { title: 80 },
@@ -271,46 +317,46 @@ const BUDGETS: Record<SlideLayoutId, Budget> = {
     lists: [{ field: 'bullets', max: 4, itemMax: 90 }],
   },
   'image-full': { total: 260, fields: { title: 80, body: 120 } },
-  stats: { total: 380, fields: { title: 80 }, stats: { label: 45 } },
+  'stats': { total: 380, fields: { title: 80 }, stats: { label: 45 } },
   'stat-image': { total: 420, fields: { title: 80 }, stats: { label: 45 } },
-  bignum: { total: 208, fields: { kicker: 42, value: 24, label: 52, subtitle: 90 } },
+  'bignum': { total: 208, fields: { kicker: 42, value: 24, label: 52, subtitle: 90 } },
   'photo-full': { total: 180, fields: { title: 80, subtitle: 100 } },
   'photo-compare': { total: 230, fields: { title: 80, caption: 75, caption2: 75 } },
-  bars: { total: 332, fields: { title: 80 } },
-  rules: { total: 560, fields: { title: 70, kicker: 40 }, stats: { label: 120 } },
+  'bars': { total: 332, fields: { title: 80 } },
+  'rules': { total: 560, fields: { title: 70, kicker: 40 }, stats: { label: 120 } },
   'editorial-text': {
     total: 620,
     fields: { title: 70, kicker: 40, body: 200 },
     lists: [{ field: 'bullets', max: 3, itemMax: 190 }],
   },
-  manifesto: { total: 260, fields: { body: 190, kicker: 40, author: 60 } },
-  timeline: {
+  'manifesto': { total: 260, fields: { body: 190, kicker: 40, author: 60 } },
+  'timeline': {
     total: 420,
     fields: { title: 80 },
     lists: [{ field: 'steps', max: 5, itemMax: 60 }],
   },
-  cycle: {
+  'cycle': {
     // chữ nằm trong vòng tròn nên mỗi bước phải ngắn
     total: 260,
     fields: { title: 80 },
     lists: [{ field: 'steps', max: 5, itemMax: 36 }],
   },
-  mindmap: {
+  'mindmap': {
     total: 520,
     fields: { title: 80, body: 40 },
     lists: [{ field: 'items', max: 6, itemMax: 90 }],
   },
-  quiz: {
+  'quiz': {
     total: 520,
     fields: { question: 140, kicker: 50, explanation: 150 },
     lists: [{ field: 'options', max: 4, itemMax: 60 }],
   },
-  example: {
+  'example': {
     total: 520,
     fields: { title: 80, problem: 170, conclusion: 90 },
     lists: [{ field: 'steps', max: 4, itemMax: 70 }],
   },
-  hook: {
+  'hook': {
     total: 280,
     fields: { title: 80, kicker: 50, body: 150 },
     lists: [{ field: 'items', max: 3, itemMax: 30 }],
@@ -445,7 +491,10 @@ export function validateSlide(page: AiSlidePayload, layout: string): string[] {
       break
     case 'rules':
       need(!!page.title, 'thiếu "title"')
-      need((page.stats ?? []).filter((stat) => !!stat.value && !!stat.label).length >= 3, '"stats" cần 3–5 hàng có cả "value" và "label"')
+      need(
+        (page.stats ?? []).filter((stat) => !!stat.value && !!stat.label).length >= 3,
+        '"stats" cần 3–5 hàng có cả "value" và "label"',
+      )
       break
     case 'editorial-text':
       need(!!page.title, 'thiếu "title"')
@@ -532,43 +581,43 @@ const FIELD_HINTS: Partial<Record<keyof SlideLayoutContent, string>> = {
   problem: '"problem" — đề bài/yêu cầu của ví dụ (chuỗi ≤ 170)',
   conclusion: '"conclusion" — kết luận/đáp số một dòng (≤ 90)',
   explanation: '"explanation" — giải thích ngắn vì sao đáp án đúng (≤ 150)',
-  value: '"value" — con số / mốc / giá trị nổi bật, ngắn (≤ 24 ký tự, vd "08:15", "12.187", "2021", "70%")',
+  value:
+    '"value" — con số / mốc / giá trị nổi bật, ngắn (≤ 24 ký tự, vd "08:15", "12.187", "2021", "70%")',
   label: '"label" — nhãn nói con số đó là gì (≤ 52 ký tự)',
-  focusX: '"focusX" — số 0–100, vị trí ngang của chủ thể trong ảnh (50 = giữa); chỉ điền khi có ảnh',
+  focusX:
+    '"focusX" — số 0–100, vị trí ngang của chủ thể trong ảnh (50 = giữa); chỉ điền khi có ảnh',
   focusY: '"focusY" — số 0–100, vị trí dọc của chủ thể trong ảnh (40 thường hợp với chân dung)',
   image2: '"image2" — để trống (app tự lấy ảnh thứ hai)',
   caption: '"caption" — chú thích ảnh bên trái (≤ 75 ký tự: nêu ai / đâu / năm nào)',
   caption2: '"caption2" — chú thích ảnh bên phải (≤ 75 ký tự)',
-  textPosition: '"textPosition" — "bottom" (chữ dưới ảnh) hoặc "left" (chữ cột trái) tuỳ chủ thể nằm đâu trong ảnh',
+  textPosition:
+    '"textPosition" — "bottom" (chữ dưới ảnh) hoặc "left" (chữ cột trái) tuỳ chủ thể nằm đâu trong ảnh',
   bars: '"bars" — mảng 2–6 dòng {"label","value","color"}; value là SỐ (không đơn vị), color tuỳ chọn dạng "#rrggbb"; xếp từ lớn đến nhỏ',
 }
 
 /** Lưu ý riêng của từng layout, chèn sau danh sách field. */
 const LAYOUT_NOTES: Partial<Record<SlideLayoutId, string>> = {
-  mindmap:
+  'mindmap':
     '- Sơ đồ tư duy: "body" là chủ đề trung tâm (≤ 40 ký tự); "items" là 3–6 nhánh, mỗi nhánh viết dạng "Nhãn nhánh: ý con 1; ý con 2" (nhãn ≤ 25 ký tự, tối đa 3 ý con, mỗi ý con ≤ 28 ký tự, ngăn bằng dấu chấm phẩy). KHÔNG đưa toạ độ.\n',
-  statement:
+  'statement':
     '- Thông điệp lớn: "body" là MỘT câu ngắn (≤ 90 ký tự) hoặc một kết quả/công thức, nêu đúng ý chính; không liệt kê, không giải thích dài (phần giải thích dành cho slide khác).\n',
-  example:
+  'example':
     '- Ví dụ mẫu: "steps" 2–4 bước giải, mỗi bước một phép biến đổi/ý có số liệu cụ thể; "conclusion" nêu kết quả cuối. Lời giải phải ĐÚNG, tự kiểm tra lại phép tính.\n',
-  hook:
-    '- Mở bài: "body" là câu hỏi/tình huống gần gũi kết thúc bằng câu hỏi; "items" là 2–3 gợi ý ngắn (≤ 30 ký tự) dẫn học sinh tới bài mới.\n',
-  bignum:
+  'hook': '- Mở bài: "body" là câu hỏi/tình huống gần gũi kết thúc bằng câu hỏi; "items" là 2–3 gợi ý ngắn (≤ 30 ký tự) dẫn học sinh tới bài mới.\n',
+  'bignum':
     '- Số nổi bật: "value" là CON SỐ chính của cả slide (một mốc, một kết quả, một tỉ lệ), đúng sự thật, không bịa; "label" nói số đó là gì; "subtitle" thêm một dòng bối cảnh. Có "imagePrompt" thì ảnh nằm bên phải.\n',
   'photo-full':
     '- Ảnh tràn nền: dùng cho slide mở đầu, chuyển chương hoặc khoảnh khắc nhấn mạnh; tiêu đề ngắn, giàu cảm xúc, đọc như một câu lớn trên ảnh. Chủ thể ảnh nằm bên nào thì đặt chữ ở bên kia ("textPosition").\n',
   'photo-compare':
     '- So sánh hai ảnh: trước / sau, xưa / nay, hai đối tượng; mỗi ảnh một "caption" nói rõ ai, đâu, khi nào; hai mô tả ảnh phải cùng góc nhìn để đặt cạnh nhau hợp lý.\n',
-  bars:
-    '- Biểu đồ thanh: chỉ dùng số liệu có thật và hợp lý, ghi nguồn ở "credit"; số liệu minh hoạ phải ghi "ví dụ" trong "credit". Thanh đầu là giá trị lớn nhất.\n',
-  rules:
+  'bars': '- Biểu đồ thanh: chỉ dùng số liệu có thật và hợp lý, ghi nguồn ở "credit"; số liệu minh hoạ phải ghi "ví dụ" trong "credit". Thanh đầu là giá trị lớn nhất.\n',
+  'rules':
     '- Danh sách kẻ dòng: "stats" là 3–5 hàng; "value" là mốc/nhãn NGẮN bên trái (ngày tháng, năm, số thứ tự, tên riêng; ≤ 18 ký tự), "label" là nội dung một câu bên phải. Dùng cho dòng thời gian, các bước, các nhân vật, các nguyên nhân. KHÔNG dùng "bullets".\n',
   'editorial-text':
     '- Chữ biên tập: "title" nêu thẳng kết luận của slide; "bullets" là 1–3 đoạn văn ngắn (mỗi đoạn một ý, có dữ kiện cụ thể), KHÔNG gạch đầu dòng, không liệt kê vụn.\n',
-  manifesto:
+  'manifesto':
     '- Câu chủ đề: "body" là MỘT câu mạnh (≤ 150 ký tự) — luận điểm, câu hỏi mở bài, trích dẫn có nguồn hoặc lời kết; "author" là nguồn trích hoặc dòng phụ ngắn (bỏ trống nếu không có). Không giải thích thêm.\n',
-  quiz:
-    '- Quiz: chỉ MỘT đáp án đúng chắc chắn; "explanation" nêu lý do ngắn gọn (kể cả vì sao các phương án khác sai khi cần).\n',
+  'quiz': '- Quiz: chỉ MỘT đáp án đúng chắc chắn; "explanation" nêu lý do ngắn gọn (kể cả vì sao các phương án khác sai khi cần).\n',
 }
 
 const LIST_LABEL: Record<'bullets' | 'items' | 'left' | 'right' | 'steps' | 'options', string> = {
@@ -593,12 +642,22 @@ function budgetLine(id: SlideLayoutId): string {
   return `NGÂN SÁCH CHỮ: ${parts.join('; ')}.`
 }
 
-const GRAPHIC_LAYOUTS = new Set(['title', 'section', 'closing', 'hook', 'bullets', 'image-left', 'image-right'])
+const GRAPHIC_LAYOUTS = new Set([
+  'title',
+  'section',
+  'closing',
+  'hook',
+  'bullets',
+  'image-left',
+  'image-right',
+])
 
 /** Phần riêng của một slide: layout, field, ngân sách chữ, gợi ý đồ hoạ. */
 function slideSpecBlock(slide: DeckPlanSlide, pro = false): string {
   const layout = SLIDE_LAYOUTS.find((item) => item.id === slide.layout) ?? SLIDE_LAYOUTS[2]
-  const fields = layout.fields.flatMap((field) => FIELD_HINTS[field] ? ['- ' + FIELD_HINTS[field]] : []).join('\n')
+  const fields = layout.fields
+    .flatMap((field) => (FIELD_HINTS[field] ? ['- ' + FIELD_HINTS[field]] : []))
+    .join('\n')
   const supportsGraphic = GRAPHIC_LAYOUTS.has(layout.id)
   const isImageLayout = layout.id === 'image-left' || layout.id === 'image-right'
   const hints = supportsGraphic
@@ -632,7 +691,9 @@ function proSpecBlock(id: SlideLayoutId): string {
       ? '- "imagePrompt" — mô tả ảnh cần vẽ (≤ 280 ký tự, tiếng Anh, một câu): chủ thể cụ thể, bối cảnh, ánh sáng, ống kính; ' +
         'phong cách ảnh chụp thật (documentary / editorial photograph), KHÔNG chữ, KHÔNG logo, KHÔNG người nổi tiếng có thật, ' +
         'chủ thể nằm ở giữa hoặc lệch trái / phải đúng như "focusX", chừa vùng trống cho chữ.\n' +
-        (id === 'photo-compare' ? '- "image2Prompt" — mô tả ảnh thứ hai, cùng góc nhìn với "imagePrompt".\n' : '')
+        (id === 'photo-compare'
+          ? '- "image2Prompt" — mô tả ảnh thứ hai, cùng góc nhìn với "imagePrompt".\n'
+          : '')
       : '')
   )
 }
@@ -642,7 +703,10 @@ function graphicBlock(plan: DeckPlan, slides: DeckPlanSlide[]): string {
   return (
     '\n\nĐỒ HOẠ CÓ SẴN — chọn MỘT id khớp chủ đề cho field "graphic" ' +
     '(nhanh, đúng màu, không tốn lượt vẽ ảnh):\n' +
-    graphicShortlistText(subjectById(plan.subject)?.graphicGroups, slides.map((s) => `${s.title} ${s.brief ?? ''}`)) +
+    graphicShortlistText(
+      subjectById(plan.subject)?.graphicGroups,
+      slides.map((s) => `${s.title} ${s.brief ?? ''}`),
+    ) +
     '\n- "graphic" chỉ dùng id trong danh sách trên; KHÔNG bịa id mới.\n' +
     '- Chọn theo NGHĨA CỦA NỘI DUNG slide, không theo hình tượng chung của môn (vd: cái cân không hợp với ƯCLN). ' +
     'NÊN chọn một hình: hình gần nghĩa (cùng chủ đề, cùng hoạt động — vd: mục tiêu → cờ đích, luyện tập → bút chì, ' +
@@ -674,7 +738,7 @@ function deckContextBlock(plan: DeckPlan): string {
     'kiểu "quan trọng", "hiệu quả", "đa dạng"; cắt từ nối và giải thích dài.\n' +
     '- Nếu layout có nhãn lớn (số liệu, bước, câu trích), chọn giá trị làm điểm nhấn của slide.\n' +
     '- Nhấn mạnh từ khoá bằng **đậm**: mỗi ý chọn 1–2 cụm quan trọng nhất (thuật ngữ, con số, kết quả; mỗi cụm ≤ 5 từ), ' +
-      'ví dụ "tìm **ước chung** rồi lấy số **lớn nhất**". KHÔNG bôi đậm cả câu, KHÔNG dùng trong tiêu đề, KHÔNG lồng vào công thức $...$.\n' +
+    'ví dụ "tìm **ước chung** rồi lấy số **lớn nhất**". KHÔNG bôi đậm cả câu, KHÔNG dùng trong tiêu đề, KHÔNG lồng vào công thức $...$.\n' +
     '- Bám đúng brief của slide; không lặp ý các slide khác.\n' +
     '- Không bịa số liệu thật; số liệu minh hoạ phải ghi rõ "ví dụ".\n' +
     '- Công thức đơn giản (x², √, ≤, →, π, α) viết bằng ký tự Unicode. Công thức có phân số, căn dài, ' +
@@ -714,7 +778,8 @@ export function pageSystemPrompt(
     slideSpecBlock(slide, pro) +
     (GRAPHIC_LAYOUTS.has(slide.layout) ? graphicBlock(plan, [slide]) : '') +
     deckContextBlock(plan) +
-    'SLIDE CẦN VIẾT: ' + slideHeading(plan, slide, index)
+    'SLIDE CẦN VIẾT: ' +
+    slideHeading(plan, slide, index)
   )
 }
 
@@ -725,7 +790,10 @@ export function pageSystemPrompt(
 export function batchSystemPrompt(plan: DeckPlan, indices: number[], pro = false): string {
   const needsGraphic = indices.some((i) => GRAPHIC_LAYOUTS.has(plan.slides[i].layout))
   const specs = indices
-    .map((i) => `### SLIDE ${slideHeading(plan, plan.slides[i], i)}${slideSpecBlock(plan.slides[i], pro)}`)
+    .map(
+      (i) =>
+        `### SLIDE ${slideHeading(plan, plan.slides[i], i)}${slideSpecBlock(plan.slides[i], pro)}`,
+    )
     .join('\n\n')
   return (
     'Bạn là trợ lý AI của trình soạn bài trình bày tiếng Việt. Viết nội dung cho ' +
@@ -734,7 +802,12 @@ export function batchSystemPrompt(plan: DeckPlan, indices: number[], pro = false
     'không bọc markdown, không chữ ngoài JSON.' +
     // phần giống nhau giữa các lượt đặt TRƯỚC (cache prompt của nhà cung cấp chỉ khớp phần đầu trùng nhau)
     deckContextBlock(plan) +
-    (needsGraphic ? graphicBlock(plan, indices.map((i) => plan.slides[i])) : '') +
+    (needsGraphic
+      ? graphicBlock(
+          plan,
+          indices.map((i) => plan.slides[i]),
+        )
+      : '') +
     `CÁC SLIDE CẦN VIẾT (mỗi slide tuân thủ đúng layout, field, ngân sách chữ của nó):\n\n${specs}\n`
   )
 }
@@ -800,9 +873,12 @@ export function readabilityIssues(page: AiSlidePayload, layout: string): string[
   for (const el of composeLayout(themeById('sang'), id, contentOfPage(page), tone)) {
     if (el.type !== 'text' || !el.text || SMALL_BY_DESIGN.test(el.id)) continue
     const ratio = fitRatio(el)
-    if (ratio === undefined || ratio >= READABLE_SHRINK || (el.fontSize ?? 0) >= READABLE_MIN) continue
+    if (ratio === undefined || ratio >= READABLE_SHRINK || (el.fontSize ?? 0) >= READABLE_MIN)
+      continue
     const excerpt = el.text.replace(/\s+/g, ' ').slice(0, 36)
-    issues.push(`chữ "${excerpt}…" quá dài cho khung, bị co còn ${Math.round(ratio * 100)}% — rút ngắn ý này`)
+    issues.push(
+      `chữ "${excerpt}…" quá dài cho khung, bị co còn ${Math.round(ratio * 100)}% — rút ngắn ý này`,
+    )
   }
   return issues.slice(0, 3)
 }
@@ -861,7 +937,9 @@ function contentOfPage(page: AiSlidePayload): SlideLayoutContent {
  */
 export function stripPhotoSources(credit: string | undefined): string | undefined {
   if (!credit) return credit
-  const kept = credit.split(/\s*[·;|]\s*/).filter((part) => part && !/ảnh|wikimedia|commons|getty|shutterstock/i.test(part))
+  const kept = credit
+    .split(/\s*[·;|]\s*/)
+    .filter((part) => part && !/ảnh|wikimedia|commons|getty|shutterstock/i.test(part))
   return kept.length ? kept.join(' · ') : undefined
 }
 
@@ -877,18 +955,35 @@ export function mergePhotoCredit(current: string | undefined, photoCredit: strin
  * các phần tử của slide nên chữ người dùng đã sửa trong lúc chờ ảnh không mất;
  * layout không dựng được thì giữ nguyên slide.
  */
-export function withImage(slide: Slide, theme: DeckTheme, image: string, slot: 'image' | 'image2' = 'image', photoCredit?: string): Slide {
+export function withImage(
+  slide: Slide,
+  theme: DeckTheme,
+  image: string,
+  slot: 'image' | 'image2' = 'image',
+  photoCredit?: string,
+): Slide {
   const layout = slide.layout
   if (!layout || !isLayoutId(layout)) return slide
   const content = { ...contentFromSlide(slide), [slot]: image }
   if (photoCredit) content.credit = mergePhotoCredit(content.credit, photoCredit)
   const elements = composeLayout(theme, layout, content, slide.tone)
-  return elements.length ? { ...slide, elements: elements.map(el => {
-    const before = slide.elements.find(entry => entry.id === el.id)
-    return el.type === 'text' && before?.type === 'text' && (hasTextEffects(before) || before.fontFamily)
-      ? { ...el, ...textEffectsOf(before), ...(before.fontFamily ? { fontFamily: before.fontFamily } : {}) }
-      : el
-  }) } : slide
+  return elements.length
+    ? {
+        ...slide,
+        elements: elements.map((el) => {
+          const before = slide.elements.find((entry) => entry.id === el.id)
+          return el.type === 'text' &&
+            before?.type === 'text' &&
+            (hasTextEffects(before) || before.fontFamily)
+            ? {
+                ...el,
+                ...textEffectsOf(before),
+                ...(before.fontFamily ? { fontFamily: before.fontFamily } : {}),
+              }
+            : el
+        }),
+      }
+    : slide
 }
 
 /** Dựng một slide AI bằng layout engine; layout lạ rơi về title + bullets. */
@@ -906,8 +1001,7 @@ export function slideFromAi(page: AiSlidePayload, theme: ResolvedTheme): Slide {
   }
   content.credit = cleanSingleLine(content.credit, MAX_CREDIT)
   const tone = isTone(page.tone) ? page.tone : defaultTone(layout ?? 'bullets')
-  const composed =
-    layout && isLayoutId(layout) ? composeLayout(theme, layout, content, tone) : []
+  const composed = layout && isLayoutId(layout) ? composeLayout(theme, layout, content, tone) : []
   if (composed.length > 0) {
     return {
       id: newId(),
@@ -917,7 +1011,13 @@ export function slideFromAi(page: AiSlidePayload, theme: ResolvedTheme): Slide {
       layout,
       tone,
       ...(page.decorKit ? { decorKit: page.decorKit } : {}),
-      elements: page.textStyles ? composed.map(el => el.type === 'text' && Object.hasOwn(page.textStyles!, el.id) ? { ...el, ...sanitizeTextStyle(page.textStyles![el.id]) } : el) : composed,
+      elements: page.textStyles
+        ? composed.map((el) =>
+            el.type === 'text' && Object.hasOwn(page.textStyles!, el.id)
+              ? { ...el, ...sanitizeTextStyle(page.textStyles![el.id]) }
+              : el,
+          )
+        : composed,
     }
   }
 
@@ -982,7 +1082,11 @@ function recompose(slides: Slide[], theme: ResolvedTheme): Slide[] {
       const tone = isTone(slide.tone) ? slide.tone : defaultTone(slide.layout)
       const elements = composeLayout(theme, slide.layout, contentFromSlide(slide), tone)
       if (elements.length > 0) {
-        return keepCustomBg(slide, { ...slide, tone, background: toneBackground(theme, tone), elements }, theme.fg)
+        return keepCustomBg(
+          slide,
+          { ...slide, tone, background: toneBackground(theme, tone), elements },
+          theme.fg,
+        )
       }
     }
     return slide.customBg ? slide : { ...slide, background: theme.bg }
@@ -1004,7 +1108,9 @@ export function appendSlidesToDeck(
   const nextTheme = plan?.theme ? themeById(plan.theme) : currentTheme
   const themeChanged = nextTheme.id !== currentTheme.id
   const kit = plan?.decorKit
-  const pagesWithDecor = kit ? pages.map((page) => ({ ...page, decorKit: page.decorKit ?? kit })) : pages
+  const pagesWithDecor = kit
+    ? pages.map((page) => ({ ...page, decorKit: page.decorKit ?? kit }))
+    : pages
   const added = pagesWithDecor.map((page) => slideFromAi(page, nextTheme))
   // Bộ chưa đặt tên thì lấy tên bài từ dàn ý AI.
   const aiTitle = plan?.title?.trim().slice(0, 120)
@@ -1014,10 +1120,7 @@ export function appendSlidesToDeck(
       ...(rename ? { title: aiTitle } : {}),
       ...(themeChanged ? { theme: nextTheme } : {}),
       ...(plan?.style ? { style: plan.style } : {}),
-      slides: [
-        ...(themeChanged ? recompose(latest.slides, nextTheme) : latest.slides),
-        ...added,
-      ],
+      slides: [...(themeChanged ? recompose(latest.slides, nextTheme) : latest.slides), ...added],
     },
     added,
   }

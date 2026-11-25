@@ -1,9 +1,10 @@
+import { contrastRatio, readableTextOn } from './slideTheme'
+
 /**
  * Nền slide do người dùng tô (màu đặc hoặc chuyển sắc). `Slide.background` là chuỗi CSS `background`;
  * `customBg` đánh dấu nền riêng để đổi chủ đề/dựng lại bố cục không ghi đè mất.
  */
 import type { Slide, SlideElement } from '@/engine/store/docs'
-import { contrastRatio, readableTextOn } from './slideTheme'
 
 export const BACKGROUNDS: Array<{ label: string; value: string }> = [
   { label: 'Trắng', value: '#ffffff' },
@@ -36,14 +37,18 @@ export const firstColor = (bg: string, fallback = '#ffffff'): string => colorsOf
 export function gradientSvg(bg: string): string | null {
   const m = /^linear-gradient\(\s*(-?\d+)deg\s*,\s*(.+)\)$/i.exec(bg)
   if (!m) return null
-  const stops = m[2].split(',').map((stop) => /^\s*(#[0-9a-f]{6})([0-9a-f]{2})?(?:\s+(\d+(?:\.\d+)?)%)?\s*$/i.exec(stop))
+  const stops = m[2]
+    .split(',')
+    .map((stop) => /^\s*(#[0-9a-f]{6})([0-9a-f]{2})?(?:\s+(\d+(?:\.\d+)?)%)?\s*$/i.exec(stop))
   if (stops.length < 2 || stops.some((stop) => !stop)) return null
-  const markup = stops.map((stop, i) => {
-    const [, color, alpha, offset] = stop!
-    const at = offset === undefined ? i / (stops.length - 1) : offset + '%'
-    const opacity = alpha ? ' stop-opacity="' + parseInt(alpha, 16) / 255 + '"' : ''
-    return '<stop offset="' + at + '" stop-color="' + color + '"' + opacity + '/>'
-  }).join('')
+  const markup = stops
+    .map((stop, i) => {
+      const [, color, alpha, offset] = stop!
+      const at = offset === undefined ? i / (stops.length - 1) : offset + '%'
+      const opacity = alpha ? ' stop-opacity="' + parseInt(alpha, 16) / 255 + '"' : ''
+      return '<stop offset="' + at + '" stop-color="' + color + '"' + opacity + '/>'
+    })
+    .join('')
   const rad = (Number(m[1]) * Math.PI) / 180
   const [sin, cos] = [Math.sin(rad), Math.cos(rad)]
   return (
@@ -66,7 +71,13 @@ export function withBackground(slide: Slide, background: string, fg: string): Sl
   const onPanel = (el: SlideElement) => {
     const [cx, cy] = [el.x + el.w / 2, el.y + el.h / 2]
     return slide.elements.some(
-      (o) => o !== el && ((o.type === 'shape' && o.fill) || (o.type === 'text' && o.fill)) && cx >= o.x && cx <= o.x + o.w && cy >= o.y && cy <= o.y + o.h,
+      (o) =>
+        o !== el &&
+        ((o.type === 'shape' && o.fill) || (o.type === 'text' && o.fill)) &&
+        cx >= o.x &&
+        cx <= o.x + o.w &&
+        cy >= o.y &&
+        cy <= o.y + o.h,
     )
   }
   const elements = slide.elements.map((el) => {

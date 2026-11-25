@@ -16,7 +16,10 @@ export async function communityExamAuthors(options: Types.CommunityExamAuthorsIn
 }
 
 export async function communityExamCommunityDoc(options: Types.CommunityExamCommunityDocInput) {
-  const { data } = await apiClient.GET('/api/exams/community/{id}', { ...options, cache: 'no-store' })
+  const { data } = await apiClient.GET('/api/exams/community/{id}', {
+    ...options,
+    cache: 'no-store',
+  })
   return data as unknown as Record<string, unknown>
 }
 

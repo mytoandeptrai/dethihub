@@ -1,6 +1,8 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+
 import { cn } from '@/engine/lib/cn'
+
 import { inputClass } from './ui'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
@@ -9,7 +11,8 @@ export interface SiteSelectOption<K extends string> {
   label: string
 }
 
-const fold = (text: string) => text.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd')
+const fold = (text: string) =>
+  text.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd')
 
 /** Ô chọn dùng chung. Trong vùng cuộn, `inline` dành chỗ cho danh sách ngay dưới nút. */
 export function SiteSelect<K extends string>({
@@ -44,7 +47,8 @@ export function SiteSelect<K extends string>({
   const listId = useId()
   const selected = options.find((o) => o.value === value)
   const needle = fold(query.trim())
-  const visible = searchable && needle ? options.filter((o) => fold(o.label).includes(needle)) : options
+  const visible =
+    searchable && needle ? options.filter((o) => fold(o.label).includes(needle)) : options
 
   useEffect(() => {
     if (!open) return
@@ -63,57 +67,85 @@ export function SiteSelect<K extends string>({
     const buttons = Array.from(listRef.current?.querySelectorAll('button') ?? [])
     if (!buttons.length) return
     const index = buttons.indexOf(e.target as HTMLButtonElement)
-    const next = e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length - 1
-      : e.key === 'ArrowDown' ? Math.min(index + 1, buttons.length - 1)
-      : e.key === 'ArrowUp' ? (index < 0 ? buttons.length - 1 : Math.max(index - 1, 0)) : -1
+    const next =
+      e.key === 'Home'
+        ? 0
+        : e.key === 'End'
+          ? buttons.length - 1
+          : e.key === 'ArrowDown'
+            ? Math.min(index + 1, buttons.length - 1)
+            : e.key === 'ArrowUp'
+              ? index < 0
+                ? buttons.length - 1
+                : Math.max(index - 1, 0)
+              : -1
     if (next < 0) return
     e.preventDefault()
     buttons[next].focus()
   }
 
   return (
-    <Popover open={open} onOpenChange={(next) => {
-      if (next) setQuery('')
-      setOpen(next)
-    }}>
-    <div
-      ref={rootRef}
-      className={cn('relative', inline && '[&>[data-radix-popper-content-wrapper]]:static! [&>[data-radix-popper-content-wrapper]]:transform-none! [&>[data-radix-popper-content-wrapper]]:min-w-0!', className)}
-      onBlur={inline || searchable ? (e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)
-      } : undefined}
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setQuery('')
+        setOpen(next)
+      }}
     >
-      <PopoverTrigger asChild>
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-label={label}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={open ? listId : undefined}
-        onKeyDown={(e) => {
-          if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-          if (open) return moveFocus(e)
-          e.preventDefault()
-          setQuery('')
-          setOpen(true)
-          const last = e.key === 'ArrowUp'
-          requestAnimationFrame(() => {
-            const buttons = listRef.current?.querySelectorAll('button')
-            if (buttons?.length) buttons[last ? buttons.length - 1 : 0].focus()
-          })
-        }}
-        className={triggerClassName ?? cn(
-          'flex w-full items-center justify-between rounded-lg border border-line-2 bg-white font-semibold text-ink transition-[colors,box-shadow] duration-150 hover:border-clay-line focus-visible:border-clay focus-visible:outline-none focus-visible:shadow-ring',
-          inline ? 'h-8 gap-2 px-2 text-[13px]' : 'h-11 gap-3 px-4 text-[14.5px]',
+      <div
+        ref={rootRef}
+        className={cn(
+          'relative',
+          inline &&
+            '[&>[data-radix-popper-content-wrapper]]:static! [&>[data-radix-popper-content-wrapper]]:min-w-0! [&>[data-radix-popper-content-wrapper]]:transform-none!',
+          className,
         )}
+        onBlur={
+          inline || searchable
+            ? (e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)
+              }
+            : undefined
+        }
       >
-        <span className="truncate">{selected?.label}</span>
-        <ChevronDown
-          className={cn('shrink-0 transition-transform duration-200', triggerClassName ? 'size-3.5' : 'size-4 text-ink-3', open && 'rotate-180')}
-        />
-      </button>
-      </PopoverTrigger>
+        <PopoverTrigger asChild>
+          <button
+            ref={triggerRef}
+            type="button"
+            aria-label={label}
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            aria-controls={open ? listId : undefined}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+              if (open) return moveFocus(e)
+              e.preventDefault()
+              setQuery('')
+              setOpen(true)
+              const last = e.key === 'ArrowUp'
+              requestAnimationFrame(() => {
+                const buttons = listRef.current?.querySelectorAll('button')
+                if (buttons?.length) buttons[last ? buttons.length - 1 : 0].focus()
+              })
+            }}
+            className={
+              triggerClassName ??
+              cn(
+                'border-line-2 text-ink hover:border-clay-line focus-visible:border-clay flex w-full items-center justify-between rounded-lg border bg-white font-semibold transition-[colors,box-shadow] duration-150 focus-visible:shadow-ring focus-visible:outline-none',
+                inline ? 'h-8 gap-2 px-2 text-[13px]' : 'h-11 gap-3 px-4 text-[14.5px]',
+              )
+            }
+          >
+            <span className="truncate">{selected?.label}</span>
+            <ChevronDown
+              className={cn(
+                'shrink-0 transition-transform duration-200',
+                triggerClassName ? 'size-3.5' : 'text-ink-3 size-4',
+                open && 'rotate-180',
+              )}
+            />
+          </button>
+        </PopoverTrigger>
 
         <PopoverContent
           portalled={false}
@@ -132,9 +164,8 @@ export function SiteSelect<K extends string>({
             triggerRef.current?.focus({ preventScroll: true })
           }}
           className={cn(
-            'w-max min-w-[var(--radix-popover-trigger-width)] rounded-xl border border-line bg-white p-1.5 shadow-float',
-            inline ? 'mt-1 w-full'
-              : up ? 'min-w-[9.5rem]' : '',
+            'border-line shadow-float w-max min-w-[var(--radix-popover-trigger-width)] rounded-xl border bg-white p-1.5',
+            inline ? 'mt-1 w-full' : up ? 'min-w-[9.5rem]' : '',
           )}
         >
           {searchable && (
@@ -162,7 +193,10 @@ export function SiteSelect<K extends string>({
             role="listbox"
             aria-label={label}
             onKeyDown={moveFocus}
-            className={cn('overflow-y-auto', inline ? 'max-h-[min(14rem,35dvh)] overscroll-contain' : 'max-h-[308px]')}
+            className={cn(
+              'overflow-y-auto',
+              inline ? 'max-h-[min(14rem,35dvh)] overscroll-contain' : 'max-h-[308px]',
+            )}
           >
             {visible.map((o) => {
               const active = o.value === value
@@ -172,11 +206,15 @@ export function SiteSelect<K extends string>({
                     type="button"
                     onClick={() => pick(o)}
                     className={cn(
-                      'flex w-full items-center justify-between rounded-lg text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-clay/30 active:bg-clay-soft',
-                      inline ? 'min-h-8 gap-2 px-2 py-1 text-[13px] break-words'
-                        : up ? 'min-h-8 gap-4 whitespace-nowrap px-2.5 py-1.5 text-[13px]'
-                        : 'gap-6 whitespace-nowrap px-3.5 py-2.5 text-[14.5px]',
-                      active ? 'bg-clay-tint font-semibold text-clay hover:bg-clay-soft' : 'text-ink-2 hover:bg-sunken hover:text-ink',
+                      'focus-visible:ring-clay/30 active:bg-clay-soft flex w-full items-center justify-between rounded-lg text-left transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
+                      inline
+                        ? 'min-h-8 gap-2 px-2 py-1 text-[13px] break-words'
+                        : up
+                          ? 'min-h-8 gap-4 px-2.5 py-1.5 text-[13px] whitespace-nowrap'
+                          : 'gap-6 px-3.5 py-2.5 text-[14.5px] whitespace-nowrap',
+                      active
+                        ? 'bg-clay-tint text-clay hover:bg-clay-soft font-semibold'
+                        : 'text-ink-2 hover:bg-sunken hover:text-ink',
                     )}
                   >
                     <span className="min-w-0">{o.label}</span>
@@ -186,9 +224,13 @@ export function SiteSelect<K extends string>({
               )
             })}
           </ul>
-          {visible.length === 0 && <p role="status" className="px-2 py-1 text-[13px] text-ink-3">Không tìm thấy</p>}
+          {visible.length === 0 && (
+            <p role="status" className="text-ink-3 px-2 py-1 text-[13px]">
+              Không tìm thấy
+            </p>
+          )}
         </PopoverContent>
-    </div>
+      </div>
     </Popover>
   )
 }

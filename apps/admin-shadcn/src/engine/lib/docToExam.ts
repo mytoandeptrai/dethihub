@@ -1,6 +1,7 @@
+import { formatTrueFalse, normalizeShort, parseTrueFalse } from './grading'
+
 import type { EssayBlock, ExamDoc, QuestionBlock, RichText } from '@/engine/data/docTypes'
 import type { Exam, Question, QuestionImage, Section, Subject } from '@/engine/data/types'
-import { formatTrueFalse, normalizeShort, parseTrueFalse } from './grading'
 
 /**
  * Chữ của một đoạn rich text cho đề tương tác: giữ công thức `$…$`, đậm/nghiêng/gạch chân
@@ -45,7 +46,9 @@ function toPlain(rt: RichText | undefined): string {
  * Ảnh đầu tiên chèn trong đề bài: nằm trước mọi chữ thì xếp trên đề bài, còn lại xếp dưới.
  * Các ảnh còn lại (và ảnh trong phương án) đi vào chữ dạng `![alt|rộng%](src)` (xem `toRich`).
  */
-function promptImage(...parts: Array<RichText | undefined>): (QuestionImage & { _from?: unknown }) | undefined {
+function promptImage(
+  ...parts: Array<RichText | undefined>
+): (QuestionImage & { _from?: unknown }) | undefined {
   for (const rt of parts) {
     if (!rt || typeof rt === 'string') continue
     const at = rt.findIndex((sp) => sp.image)
@@ -54,15 +57,28 @@ function promptImage(...parts: Array<RichText | undefined>): (QuestionImage & { 
     const first = !rt.slice(0, at).some((sp) => sp.text.trim())
     // width trong trang đề là px; đề tương tác dùng % — quy theo bề ngang chữ trang A4 (~643px)
     const pct = width ? Math.min(100, Math.max(10, Math.round((width / 643) * 100))) : undefined
-    return { src, _from: rt[at].image, position: first ? 'top' : 'bottom', ...(alt ? { alt } : {}), ...(plot ? { plot } : {}), ...(pct ? { width: pct } : {}) }
+    return {
+      src,
+      _from: rt[at].image,
+      position: first ? 'top' : 'bottom',
+      ...(alt ? { alt } : {}),
+      ...(plot ? { plot } : {}),
+      ...(pct ? { width: pct } : {}),
+    }
   }
   return undefined
 }
 
 /** Đề bài + ảnh chính; ảnh chính không lặp lại trong chữ. */
-function withImage(...parts: Array<RichText | undefined>): { prompt: string; image?: QuestionImage } {
+function withImage(...parts: Array<RichText | undefined>): {
+  prompt: string
+  image?: QuestionImage
+} {
   const img = promptImage(...parts)
-  const prompt = parts.map((p) => toRich(p, img?._from).trim()).filter(Boolean).join('\n')
+  const prompt = parts
+    .map((p) => toRich(p, img?._from).trim())
+    .filter(Boolean)
+    .join('\n')
   if (!img) return { prompt }
   const { _from, ...image } = img
   void _from
@@ -96,7 +112,8 @@ function explanations(blocks: ExamDoc['blocks']): Map<string, string> {
   let cur = ''
   for (const b of blocks.slice(at + 1)) {
     if (at < 0) break
-    const lines = b.type === 'paragraph' ? [toPlain(b.text)] : b.type === 'bullets' ? b.items.map(toPlain) : []
+    const lines =
+      b.type === 'paragraph' ? [toPlain(b.text)] : b.type === 'bullets' ? b.items.map(toPlain) : []
     for (const line of lines) {
       const m = line.match(/^\s*(Câu|Bài)\s*(\d+)\s*[.:)–-]?\s*([\s\S]*)$/i)
       if (m) {
@@ -231,10 +248,15 @@ export function docToExam(doc: ExamDoc, id: string): Exam {
   // tên đề: tab còn tên mặc định thì lấy dòng tiêu đề trong trang
   const heading = doc.blocks.find((b) => b.type === 'title')
   const headTitle = heading && 'text' in heading ? toPlain(heading.text as RichText).trim() : ''
-  const title = (!doc.title.trim() || doc.title === 'Đề thi mới') && headTitle ? headTitle : doc.title
+  const title =
+    (!doc.title.trim() || doc.title === 'Đề thi mới') && headTitle ? headTitle : doc.title
   // thời gian: dòng "Thời gian … N phút" ghi trong trang thắng giá trị mặc định
-  const pageText = doc.blocks.flatMap((b) => ('text' in b && b.type !== 'question' && b.type !== 'essay' ? [toPlain(b.text as RichText)] : []))
-  const timeLine = pageText.map((t) => /thời gian[^\d]{0,30}(\d{1,3})\s*phút/i.exec(t)?.[1]).find(Boolean)
+  const pageText = doc.blocks.flatMap((b) =>
+    'text' in b && b.type !== 'question' && b.type !== 'essay' ? [toPlain(b.text as RichText)] : [],
+  )
+  const timeLine = pageText
+    .map((t) => /thời gian[^\d]{0,30}(\d{1,3})\s*phút/i.exec(t)?.[1])
+    .find(Boolean)
 
   return {
     id,

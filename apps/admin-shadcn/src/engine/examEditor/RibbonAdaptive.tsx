@@ -1,12 +1,20 @@
+import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  ChevronDown,
+  MoreHorizontal,
+  Plus,
+  X,
+} from 'lucide-react'
+import { Wrench } from 'lucide-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ChevronDown, MoreHorizontal, Plus, X } from 'lucide-react'
+
 import { cn } from '@/engine/lib/cn'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
-import { RibbonGroup } from './Layout'
-import { SheetTabs } from './SheetTabs'
-import { popoverStyle, useAnchoredPopover } from './useAnchoredPopover'
-import type { FormatState } from './formatState'
+
 import {
   IconBullets,
   IconChevronDown,
@@ -20,7 +28,11 @@ import {
   IconSave,
   IconUndo,
 } from './icons'
-import { Wrench } from 'lucide-react'
+import { RibbonGroup } from './Layout'
+import { SheetTabs } from './SheetTabs'
+import { popoverStyle, useAnchoredPopover } from './useAnchoredPopover'
+
+import type { FormatState } from './formatState'
 
 export interface RibbonGroupDef {
   id: string
@@ -134,7 +146,9 @@ export function TabletRibbonBody({
         ))}
         {overflowGroups.length > 0 && (
           <>
-            {(expandedGroups.length > 0 || collapsedGroups.length > 0) && <span className="ribbon-sep" />}
+            {(expandedGroups.length > 0 || collapsedGroups.length > 0) && (
+              <span className="ribbon-sep" />
+            )}
             <OverflowGroupsButton groups={overflowGroups} />
           </>
         )}
@@ -237,7 +251,10 @@ function OverflowGroupsButton({ groups }: { groups: RibbonGroupDef[] }) {
       </button>
       {popAnim.mounted && (
         <div
-          className={cn('ribbon-group-pop ribbon-group-pop--multi', popAnim.closing ? 'pop-out' : 'pop-in')}
+          className={cn(
+            'ribbon-group-pop ribbon-group-pop--multi',
+            popAnim.closing ? 'pop-out' : 'pop-in',
+          )}
           style={popoverStyle(pos)}
           role="region"
           aria-label="Thêm công cụ"
@@ -504,7 +521,10 @@ export function PhoneRibbon({
               </span>
             </button>
             {colorAnim.mounted && (
-              <div className={cn('rb-color-menu', colorAnim.closing ? 'pop-out' : 'pop-in')} style={{ ...popoverStyle(colorPop.pos), width: 'auto', minWidth: 176 }}>
+              <div
+                className={cn('rb-color-menu', colorAnim.closing ? 'pop-out' : 'pop-in')}
+                style={{ ...popoverStyle(colorPop.pos), width: 'auto', minWidth: 176 }}
+              >
                 <div className="rb-color-grid">
                   {themeColors.map((c) => (
                     <button
@@ -541,25 +561,37 @@ export function PhoneRibbon({
               <IconBullets size={17} />
             </button>
             {listAnim.mounted && (
-              <div className={cn('rb-color-menu', listAnim.closing ? 'pop-out' : 'pop-in')} style={{ ...popoverStyle(listPop.pos), minWidth: 196 }}>
+              <div
+                className={cn('rb-color-menu', listAnim.closing ? 'pop-out' : 'pop-in')}
+                style={{ ...popoverStyle(listPop.pos), minWidth: 196 }}
+              >
                 <button
                   type="button"
                   className="rb-color-item ribbon-phone-menu-item"
-                  onClick={() => { onInsertTemplate('bullets'); setOpenPop(null) }}
+                  onClick={() => {
+                    onInsertTemplate('bullets')
+                    setOpenPop(null)
+                  }}
                 >
                   <IconBullets size={16} /> Gạch đầu dòng
                 </button>
                 <button
                   type="button"
                   className="rb-color-item ribbon-phone-menu-item"
-                  onClick={() => { onInsertTemplate('numbered'); setOpenPop(null) }}
+                  onClick={() => {
+                    onInsertTemplate('numbered')
+                    setOpenPop(null)
+                  }}
                 >
                   <IconNumbered size={16} /> Đánh số
                 </button>
                 <button
                   type="button"
                   className="rb-color-item ribbon-phone-menu-item"
-                  onClick={() => { onInsertTemplate('multilevel'); setOpenPop(null) }}
+                  onClick={() => {
+                    onInsertTemplate('multilevel')
+                    setOpenPop(null)
+                  }}
                 >
                   <IconMultilevel size={16} /> Nhiều cấp
                 </button>
@@ -567,14 +599,20 @@ export function PhoneRibbon({
                 <button
                   type="button"
                   className="rb-color-item ribbon-phone-menu-item"
-                  onClick={() => { onIndentInc(); setOpenPop(null) }}
+                  onClick={() => {
+                    onIndentInc()
+                    setOpenPop(null)
+                  }}
                 >
                   <IconIndentInc size={16} /> Tăng thụt lề
                 </button>
                 <button
                   type="button"
                   className="rb-color-item ribbon-phone-menu-item"
-                  onClick={() => { onIndentDec(); setOpenPop(null) }}
+                  onClick={() => {
+                    onIndentDec()
+                    setOpenPop(null)
+                  }}
                 >
                   <IconIndentDec size={16} /> Giảm thụt lề
                 </button>
@@ -598,32 +636,59 @@ export function PhoneRibbon({
               <AlignIcon className="size-[17px]" />
             </button>
             {alignAnim.mounted && (
-              <div className={cn('rb-color-menu', alignAnim.closing ? 'pop-out' : 'pop-in')} style={{ ...popoverStyle(alignPop.pos), minWidth: 164 }}>
+              <div
+                className={cn('rb-color-menu', alignAnim.closing ? 'pop-out' : 'pop-in')}
+                style={{ ...popoverStyle(alignPop.pos), minWidth: 164 }}
+              >
                 <button
                   type="button"
-                  className={cn('rb-color-item ribbon-phone-menu-item', format.align === 'left' && 'font-semibold text-clay-deep')}
-                  onClick={() => { onAlign('left'); setOpenPop(null) }}
+                  className={cn(
+                    'rb-color-item ribbon-phone-menu-item',
+                    format.align === 'left' && 'text-clay-deep font-semibold',
+                  )}
+                  onClick={() => {
+                    onAlign('left')
+                    setOpenPop(null)
+                  }}
                 >
                   <AlignLeft className="size-4" /> Căn trái
                 </button>
                 <button
                   type="button"
-                  className={cn('rb-color-item ribbon-phone-menu-item', format.align === 'center' && 'font-semibold text-clay-deep')}
-                  onClick={() => { onAlign('center'); setOpenPop(null) }}
+                  className={cn(
+                    'rb-color-item ribbon-phone-menu-item',
+                    format.align === 'center' && 'text-clay-deep font-semibold',
+                  )}
+                  onClick={() => {
+                    onAlign('center')
+                    setOpenPop(null)
+                  }}
                 >
                   <AlignCenter className="size-4" /> Căn giữa
                 </button>
                 <button
                   type="button"
-                  className={cn('rb-color-item ribbon-phone-menu-item', format.align === 'right' && 'font-semibold text-clay-deep')}
-                  onClick={() => { onAlign('right'); setOpenPop(null) }}
+                  className={cn(
+                    'rb-color-item ribbon-phone-menu-item',
+                    format.align === 'right' && 'text-clay-deep font-semibold',
+                  )}
+                  onClick={() => {
+                    onAlign('right')
+                    setOpenPop(null)
+                  }}
                 >
                   <AlignRight className="size-4" /> Căn phải
                 </button>
                 <button
                   type="button"
-                  className={cn('rb-color-item ribbon-phone-menu-item', format.align === 'justify' && 'font-semibold text-clay-deep')}
-                  onClick={() => { onAlign('justify'); setOpenPop(null) }}
+                  className={cn(
+                    'rb-color-item ribbon-phone-menu-item',
+                    format.align === 'justify' && 'text-clay-deep font-semibold',
+                  )}
+                  onClick={() => {
+                    onAlign('justify')
+                    setOpenPop(null)
+                  }}
                 >
                   <AlignJustify className="size-4" /> Căn đều
                 </button>
@@ -648,64 +713,74 @@ export function PhoneRibbon({
       )}
 
       {/* Bottom sheet chứa toàn bộ nhóm của các tab */}
-      {sheetAnim.mounted && createPortal(
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div
-            className={cn('fixed inset-0 bg-black/40 backdrop-blur-xs', sheetAnim.closing ? 'backdrop-out' : 'backdrop-in')}
-            onClick={() => setSheetTab(null)}
-            aria-hidden="true"
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Công cụ soạn đề"
-            className={cn(
-              'relative z-10 flex max-h-[82dvh] w-full flex-col rounded-t-2xl border-t border-line bg-surface shadow-2xl pb-[max(0.75rem,env(safe-area-inset-bottom))]',
-              sheetAnim.closing ? 'sheet-out-down' : 'sheet-in-up',
-            )}
-          >
-            <div className="flex items-center justify-center pt-2.5 pb-1">
-              <div className="h-1 w-10 rounded-full bg-line" />
-            </div>
-
-            <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
-              <SheetTabs className="min-w-0 flex-1 overflow-x-auto no-scrollbar" items={PHONE_SHEET_TABS.map((t) => ({ id: t.id, label: t.label }))} value={shownSheetTab} onChange={(id) => setSheetTab(id)} />
-              <button
-                type="button"
-                onClick={() => setSheetTab(null)}
-                aria-label="Đóng"
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink-3 hover:bg-paper-2 hover:text-ink"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
+      {sheetAnim.mounted &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex flex-col justify-end">
             <div
-              className="ribbon-phone-sheet-body min-h-0 flex-1 overflow-y-auto p-3 space-y-3"
-              onClick={(e) => {
-                const target = e.target as HTMLElement
-                // tự đóng sheet nếu bấm nút thực thi trực tiếp (trừ dropdown/popover/input)
-                const btn = target.closest('button')
-                if (
-                  btn &&
-                  !btn.closest('.rb-drop') &&
-                  !btn.closest('.rb-color-drop') &&
-                  !btn.classList.contains('rb-dropdown-trigger')
-                ) {
-                  setSheetTab(null)
-                }
-              }}
+              className={cn(
+                'fixed inset-0 bg-black/40 backdrop-blur-xs',
+                sheetAnim.closing ? 'backdrop-out' : 'backdrop-in',
+              )}
+              onClick={() => setSheetTab(null)}
+              aria-hidden="true"
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Công cụ soạn đề"
+              className={cn(
+                'border-line bg-surface relative z-10 flex max-h-[82dvh] w-full flex-col rounded-t-2xl border-t pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl',
+                sheetAnim.closing ? 'sheet-out-down' : 'sheet-in-up',
+              )}
             >
-              {(groupsByTab[shownSheetTab] ?? []).map((g) => (
-                <section key={g.id} className="ribbon-phone-sheet-group">
-                  <h3 className="ribbon-phone-sheet-group__title">{g.label}</h3>
-                  <div className="ribbon-phone-sheet-group__items">{g.render()}</div>
-                </section>
-              ))}
+              <div className="flex items-center justify-center pt-2.5 pb-1">
+                <div className="bg-line h-1 w-10 rounded-full" />
+              </div>
+
+              <div className="border-line flex items-center justify-between gap-2 border-b px-3 py-2">
+                <SheetTabs
+                  className="no-scrollbar min-w-0 flex-1 overflow-x-auto"
+                  items={PHONE_SHEET_TABS.map((t) => ({ id: t.id, label: t.label }))}
+                  value={shownSheetTab}
+                  onChange={(id) => setSheetTab(id)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setSheetTab(null)}
+                  aria-label="Đóng"
+                  className="text-ink-3 hover:bg-paper-2 hover:text-ink flex size-9 shrink-0 items-center justify-center rounded-lg"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              <div
+                className="ribbon-phone-sheet-body min-h-0 flex-1 space-y-3 overflow-y-auto p-3"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement
+                  // tự đóng sheet nếu bấm nút thực thi trực tiếp (trừ dropdown/popover/input)
+                  const btn = target.closest('button')
+                  if (
+                    btn &&
+                    !btn.closest('.rb-drop') &&
+                    !btn.closest('.rb-color-drop') &&
+                    !btn.classList.contains('rb-dropdown-trigger')
+                  ) {
+                    setSheetTab(null)
+                  }
+                }}
+              >
+                {(groupsByTab[shownSheetTab] ?? []).map((g) => (
+                  <section key={g.id} className="ribbon-phone-sheet-group">
+                    <h3 className="ribbon-phone-sheet-group__title">{g.label}</h3>
+                    <div className="ribbon-phone-sheet-group__items">{g.render()}</div>
+                  </section>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>,
-      document.body)}
+          </div>,
+          document.body,
+        )}
     </>
   )
 }

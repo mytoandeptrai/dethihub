@@ -34,7 +34,9 @@ function kindOf(name: string): Kind {
   if (/^C/.test(name)) return 'C'
   if (/^L/.test(name)) return 'L'
   if (/^(E|ξ|ℰ)/.test(name)) return 'E'
-  throw new Error(`Không rõ linh kiện "${name}" — tên phải bắt đầu bằng R, Rb, Đ, A, V, K, C, L hoặc E`)
+  throw new Error(
+    `Không rõ linh kiện "${name}" — tên phải bắt đầu bằng R, Rb, Đ, A, V, K, C, L hoặc E`,
+  )
 }
 
 function parseExpr(src: string): Node {
@@ -86,7 +88,10 @@ function parseExpr(src: string): Node {
     }
     let name = ''
     while (i < src.length && !/[\s()=/,;]/.test(src[i]) && !isSerAt(i)) name += src[i++]
-    if (!name) throw new Error(i >= src.length ? 'Mạch đang bỏ dở ở cuối' : `Không đọc được chỗ "${src.slice(i, i + 6)}"`)
+    if (!name)
+      throw new Error(
+        i >= src.length ? 'Mạch đang bỏ dở ở cuối' : `Không đọc được chỗ "${src.slice(i, i + 6)}"`,
+      )
     let value = ''
     if (src[i] === '(') {
       let depth = 0
@@ -103,7 +108,15 @@ function parseExpr(src: string): Node {
       if (src[i] === '=') {
         i++
         const s = i
-        while (i < src.length && src[i] !== ')' && src[i] !== ',' && src[i] !== ';' && !src.startsWith('//', i) && !isSerAt(i)) i++
+        while (
+          i < src.length &&
+          src[i] !== ')' &&
+          src[i] !== ',' &&
+          src[i] !== ';' &&
+          !src.startsWith('//', i) &&
+          !isSerAt(i)
+        )
+          i++
         value = src.slice(s, i)
       }
     }
@@ -131,7 +144,8 @@ function parseExpr(src: string): Node {
   }
   const n = series()
   ws()
-  if (i < src.length) throw new Error(src[i] === ')' ? 'Thừa dấu ")"' : `Không đọc được chỗ "${src.slice(i, i + 6)}"`)
+  if (i < src.length)
+    throw new Error(src[i] === ')' ? 'Thừa dấu ")"' : `Không đọc được chỗ "${src.slice(i, i + 6)}"`)
   return n
 }
 
@@ -143,7 +157,8 @@ const FAM = `font-family="'Times New Roman',serif"`
 const SW = `stroke="#111" stroke-width="1.6" fill="none"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const tw = (s: string, px = 14) => [...s].length * px * 0.55
-const line = (x1: number, y1: number, x2: number, y2: number) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${SW}/>`
+const line = (x1: number, y1: number, x2: number, y2: number) =>
+  `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${SW}/>`
 const dot = (x: number, y: number) => `<circle cx="${x}" cy="${y}" r="3" fill="#111"/>`
 
 /** R1 → R in nghiêng, 1 chỉ số dưới */
@@ -166,13 +181,20 @@ function symbol(kind: Kind, cx: number, y: number, value: string): string {
         `<path d="M${cx + 14} ${y - 14} l-8 1.5 l5 5 z" fill="#111"/>`
       )
     case 'D':
-      return `<circle cx="${cx}" cy="${y}" r="11" fill="#fff" ${SW.replace('fill="none"', '')}/>` + line(cx - 7.8, y - 7.8, cx + 7.8, y + 7.8) + line(cx - 7.8, y + 7.8, cx + 7.8, y - 7.8)
+      return (
+        `<circle cx="${cx}" cy="${y}" r="11" fill="#fff" ${SW.replace('fill="none"', '')}/>` +
+        line(cx - 7.8, y - 7.8, cx + 7.8, y + 7.8) +
+        line(cx - 7.8, y + 7.8, cx + 7.8, y - 7.8)
+      )
     case 'A':
     case 'V':
       return `<circle cx="${cx}" cy="${y}" r="12" fill="#fff" stroke="#111" stroke-width="1.6"/><text x="${cx}" y="${y + 5}" ${FAM} font-size="15" font-weight="bold" text-anchor="middle">${kind}</text>`
     case 'K': {
       const closed = /đóng|dong|closed/i.test(value)
-      return `<circle cx="${cx - 14}" cy="${y}" r="2.5" fill="#111"/><circle cx="${cx + 14}" cy="${y}" r="2.5" fill="#fff" stroke="#111" stroke-width="1.4"/>` + line(cx - 14, y, cx + 13, closed ? y : y - 13)
+      return (
+        `<circle cx="${cx - 14}" cy="${y}" r="2.5" fill="#111"/><circle cx="${cx + 14}" cy="${y}" r="2.5" fill="#fff" stroke="#111" stroke-width="1.4"/>` +
+        line(cx - 14, y, cx + 13, closed ? y : y - 13)
+      )
     }
     case 'C':
       return `<line x1="${cx - 4}" y1="${y - 12}" x2="${cx - 4}" y2="${y + 12}" stroke="#111" stroke-width="2.4"/><line x1="${cx + 4}" y1="${y - 12}" x2="${cx + 4}" y2="${y + 12}" stroke="#111" stroke-width="2.4"/>`
@@ -205,7 +227,13 @@ const ptLabel = (name: string, x: number, y: number) =>
 
 function layout(n: Node, values: boolean, bare = false): Box {
   if (n.t === 'pt') {
-    return { w: 16, h: 50, a: 30, draw: (x, y) => line(x, y + 30, x + 16, y + 30) + dot(x + 8, y + 30) + ptLabel(n.name, x + 8, y + 18) }
+    return {
+      w: 16,
+      h: 50,
+      a: 30,
+      draw: (x, y) =>
+        line(x, y + 30, x + 16, y + 30) + dot(x + 8, y + 30) + ptLabel(n.name, x + 8, y + 18),
+    }
   }
   if (n.t === 'bridge') return bridge(n.items, values)
   if (n.t === 'el') {
@@ -222,14 +250,17 @@ function layout(n: Node, values: boolean, bare = false): Box {
         const cx = x + w / 2
         const wy = y + a
         const half = HALF[n.kind]
-        const top = n.kind === 'Rb' || n.kind === 'L' || n.kind === 'E' ? 16 : n.kind === 'C' ? 14 : 13
+        const top =
+          n.kind === 'Rb' || n.kind === 'L' || n.kind === 'E' ? 16 : n.kind === 'C' ? 14 : 13
         return (
           line(x, wy, cx - half, wy) +
           line(cx + half, wy, x + w, wy) +
           symbol(n.kind, cx, wy, n.value) +
           // ampe kế / vôn kế tên trùng chữ trong vòng tròn thì khỏi ghi lại
           (bare || n.name === n.kind ? '' : nameSvg(n.name, cx, wy - top - 5)) +
-          (val ? `<text x="${cx}" y="${wy + 30}" ${FAM} font-size="13" text-anchor="middle">${esc(val)}</text>` : '')
+          (val
+            ? `<text x="${cx}" y="${wy + 30}" ${FAM} font-size="13" text-anchor="middle">${esc(val)}</text>`
+            : '')
         )
       },
     }
@@ -274,7 +305,9 @@ function layout(n: Node, values: boolean, bare = false): Box {
       const l = x + pad
       const r = x + pad + W
       let out = line(x, y + a, l, y + a) + line(r, y + a, r + pad, y + a)
-      out += line(l, y + wires[0], l, y + wires[wires.length - 1]) + line(r, y + wires[0], r, y + wires[wires.length - 1])
+      out +=
+        line(l, y + wires[0], l, y + wires[wires.length - 1]) +
+        line(r, y + wires[0], r, y + wires[wires.length - 1])
       kids.forEach((k, i) => {
         const kx = l + (W - k.w) / 2
         const wy = y + wires[i]
@@ -327,7 +360,11 @@ function bridge(items: Node[], values: boolean): Box {
         const lx = l + (colL - left.w) / 2
         const rx = l + colL + g + (colR - right.w) / 2
         return (
-          line(l, wy, lx, wy) + left.draw(lx, wy - left.a) + line(lx + left.w, wy, rx, wy) + right.draw(rx, wy - right.a) + line(rx + right.w, wy, r, wy)
+          line(l, wy, lx, wy) +
+          left.draw(lx, wy - left.a) +
+          line(lx + left.w, wy, rx, wy) +
+          right.draw(rx, wy - right.a) +
+          line(rx + right.w, wy, r, wy)
         )
       }
       out += row(k1, k2, y + wT) + row(k3, k4, y + wB)
@@ -338,8 +375,13 @@ function bridge(items: Node[], values: boolean): Box {
       out += `<g transform="rotate(90 ${xm} ${cy})">${mb.draw(xm - mb.w / 2, cy - mb.a)}</g>`
       if (midEl) {
         const val = values && midEl.kind !== 'K' ? midEl.value : ''
-        if (midEl.name !== midEl.kind) out += nameSvg(midEl.name, xm + 30, cy + (val ? -2 : 5)).replace('text-anchor="middle"', 'text-anchor="start"')
-        if (val) out += `<text x="${xm + 22}" y="${cy + 16}" ${FAM} font-size="13">${esc(val)}</text>`
+        if (midEl.name !== midEl.kind)
+          out += nameSvg(midEl.name, xm + 30, cy + (val ? -2 : 5)).replace(
+            'text-anchor="middle"',
+            'text-anchor="start"',
+          )
+        if (val)
+          out += `<text x="${xm + 22}" y="${cy + 16}" ${FAM} font-size="13">${esc(val)}</text>`
       }
       out += dot(xm, y + wT) + dot(xm, y + wB) + dot(l, y + a) + dot(r, y + a)
       out += ptLabel('M', xm, y + wT - 10) + ptLabel('N', xm, y + wB + 20)
@@ -348,9 +390,13 @@ function bridge(items: Node[], values: boolean): Box {
   }
 }
 
-const hasSource = (n: Node): boolean => (n.t === 'el' ? n.kind === 'E' : n.t === 'pt' ? false : n.items.some(hasSource))
+const hasSource = (n: Node): boolean =>
+  n.t === 'el' ? n.kind === 'E' : n.t === 'pt' ? false : n.items.some(hasSource)
 
-export function renderCircuitSvg(spec: CircuitSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderCircuitSvg(
+  spec: CircuitSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   let source: { name: string; label: string } | null = null
   const parts: string[] = []
   for (const raw of spec.text.split('\n')) {
@@ -391,47 +437,49 @@ export function renderCircuitSvg(spec: CircuitSpec, desc: string): { svg: string
   } else {
     b += line(x0 - side, yb, cx - 6, yb) + line(cx + 6, yb, x1 + side, yb) + symbol('E', cx, yb, '')
   }
-  if (label) b += `<text x="${cx}" y="${yb + 28}" ${FAM} font-size="14" font-style="italic" text-anchor="middle">${esc(label)}</text>`
+  if (label)
+    b += `<text x="${cx}" y="${yb + 28}" ${FAM} font-size="14" font-style="italic" text-anchor="middle">${esc(label)}</text>`
   const H = yb + (label ? 40 : 20)
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${desc}<rect width="100%" height="100%" fill="#fff"/>${b}</svg>`
   return { svg, width: W, height: H }
 }
 
-export const CIRCUIT_HELP: Array<{ group: string; items: Array<{ code: string; what: string }> }> = [
-  {
-    group: 'Ghép mạch',
-    items: [
-      { code: 'R1 - R2', what: 'Nối tiếp: dấu gạch ngang' },
-      { code: 'R1 // R2', what: 'Song song: hai gạch chéo' },
-      { code: 'R1 - (R2 // R3)', what: 'Ngoặc để gom một cụm' },
-      { code: '(R1 - R2) // (R3 - R4)', what: 'Hai nhánh, mỗi nhánh có hai điện trở' },
-      { code: '(R2 // V)', what: 'Vôn kế mắc song song với R2' },
-      { code: 'cầu(R1, R2, R3, R4, R5)', what: 'Mạch cầu: R1–R2 trên, R3–R4 dưới, R5 nối M–N' },
-      { code: '@A - R1 - @B', what: 'Ghi tên điểm nút A, B trên dây' },
-    ],
-  },
-  {
-    group: 'Giá trị',
-    items: [
-      { code: 'R1=4Ω  hoặc  R1(4Ω)', what: 'Ghi dưới linh kiện; bỏ trống thì không ghi' },
-      { code: 'Đ(6V-3W)', what: 'Đèn ghi số định mức' },
-      { code: 'K(đóng)', what: 'Khoá đóng; mặc định khoá mở' },
-    ],
-  },
-  {
-    group: 'Nguồn (dòng riêng)',
-    items: [
-      { code: 'nguồn E = 12 V, r = 1 Ω', what: 'Pin/acquy ở cạnh dưới, ghi chữ bên dưới' },
-      { code: 'nguồn U = 12 V', what: 'Hai đầu để hở (+ −), hiệu điện thế U' },
-      { code: 'E1 - R1 - E2', what: 'Hoặc đặt nguồn ngay trong mạch' },
-    ],
-  },
-  {
-    group: 'Linh kiện (theo chữ đầu tên)',
-    items: [
-      { code: 'R  Rb', what: 'Điện trở, biến trở' },
-      { code: 'Đ  A  V', what: 'Bóng đèn, ampe kế, vôn kế' },
-      { code: 'K  C  L  E', what: 'Khoá, tụ điện, cuộn cảm, nguồn' },
-    ],
-  },
-]
+export const CIRCUIT_HELP: Array<{ group: string; items: Array<{ code: string; what: string }> }> =
+  [
+    {
+      group: 'Ghép mạch',
+      items: [
+        { code: 'R1 - R2', what: 'Nối tiếp: dấu gạch ngang' },
+        { code: 'R1 // R2', what: 'Song song: hai gạch chéo' },
+        { code: 'R1 - (R2 // R3)', what: 'Ngoặc để gom một cụm' },
+        { code: '(R1 - R2) // (R3 - R4)', what: 'Hai nhánh, mỗi nhánh có hai điện trở' },
+        { code: '(R2 // V)', what: 'Vôn kế mắc song song với R2' },
+        { code: 'cầu(R1, R2, R3, R4, R5)', what: 'Mạch cầu: R1–R2 trên, R3–R4 dưới, R5 nối M–N' },
+        { code: '@A - R1 - @B', what: 'Ghi tên điểm nút A, B trên dây' },
+      ],
+    },
+    {
+      group: 'Giá trị',
+      items: [
+        { code: 'R1=4Ω  hoặc  R1(4Ω)', what: 'Ghi dưới linh kiện; bỏ trống thì không ghi' },
+        { code: 'Đ(6V-3W)', what: 'Đèn ghi số định mức' },
+        { code: 'K(đóng)', what: 'Khoá đóng; mặc định khoá mở' },
+      ],
+    },
+    {
+      group: 'Nguồn (dòng riêng)',
+      items: [
+        { code: 'nguồn E = 12 V, r = 1 Ω', what: 'Pin/acquy ở cạnh dưới, ghi chữ bên dưới' },
+        { code: 'nguồn U = 12 V', what: 'Hai đầu để hở (+ −), hiệu điện thế U' },
+        { code: 'E1 - R1 - E2', what: 'Hoặc đặt nguồn ngay trong mạch' },
+      ],
+    },
+    {
+      group: 'Linh kiện (theo chữ đầu tên)',
+      items: [
+        { code: 'R  Rb', what: 'Điện trở, biến trở' },
+        { code: 'Đ  A  V', what: 'Bóng đèn, ampe kế, vôn kế' },
+        { code: 'K  C  L  E', what: 'Khoá, tụ điện, cuộn cảm, nguồn' },
+      ],
+    },
+  ]

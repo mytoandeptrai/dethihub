@@ -1,3 +1,14 @@
+import {
+  ChevronLeft,
+  ChevronRight,
+  LayoutTemplate,
+  Shapes,
+  Smile,
+  Sparkles,
+  Upload,
+  Wrench,
+  X,
+} from 'lucide-react'
 /**
  * Cột trái của trình soạn slide, kiểu Canva: thanh icon hẹp + một panel trượt
  * ra cạnh thanh đó. Panel đẩy sân giấy sang phải chứ không che slide đang sửa.
@@ -7,9 +18,24 @@
  * nhóm) và Tải lên (ảnh của giáo viên). Ô tìm kiếm ở Đồ hoạ và Icon lọc theo tên.
  */
 import { memo, useMemo, useRef, useState, useEffect, type ReactNode } from 'react'
-import { ChevronLeft, ChevronRight, LayoutTemplate, Shapes, Smile, Sparkles, Upload, Wrench, X } from 'lucide-react'
+
+import { Segmented } from '@/engine/components/Segmented'
+import { uid } from '@/engine/data/docTypes'
 import { cn } from '@/engine/lib/cn'
-import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
+import { uploadImage } from '@/engine/lib/mediaStore'
+import { svgDataUrl } from '@/engine/lib/plot'
+import { SLIDE_ASSET_IDS, SLIDE_ASSETS } from '@/engine/lib/slideAssets'
+import {
+  ALL_GRAPHICS as GRAPHICS,
+  GRAPHIC_CATEGORY_LABEL,
+  findGraphics,
+  graphicById,
+  graphicMarkup,
+  matchesWords,
+  searchGraphics,
+  type GraphicCategory,
+} from '@/engine/lib/slideGraphics'
+import { iconLibrary, loadSlideIcons } from '@/engine/lib/slideIcons'
 import {
   SLIDE_LAYOUTS,
   composeLayout,
@@ -19,27 +45,23 @@ import {
   type SlideLayoutDef,
   type SlideLayoutId,
 } from '@/engine/lib/slideLayouts'
-import { normalizeTheme, type ResolvedTheme } from '@/engine/lib/slideTheme'
-import type { SlideDesign } from '@/engine/lib/slideDesigns'
-import { Segmented } from '@/engine/components/Segmented'
-import { SlideDesignGrid } from './SlideDesignGrid'
-import { SlideThumb } from './slideRender'
-import { NavRailIndicator } from './NavRailIndicator'
-import { PanelContentTransition } from './PanelContentTransition'
-import { SLIDE_ASSET_IDS, SLIDE_ASSETS } from '@/engine/lib/slideAssets'
-import { iconLibrary, loadSlideIcons } from '@/engine/lib/slideIcons'
-import { useGraphicsReady, useSlideIconsReady } from './LazyAssets'
-import { ALL_GRAPHICS as GRAPHICS, GRAPHIC_CATEGORY_LABEL, findGraphics, graphicById, graphicMarkup, matchesWords, searchGraphics, type GraphicCategory } from '@/engine/lib/slideGraphics'
 import { PRESET_GROUPS, defaultBox, shapeNameOf } from '@/engine/lib/slidePresets'
 import { FRAME_PLACEHOLDER, PHOTO_FRAMES, dragImage } from '@/engine/lib/slideShapes'
-import { uid } from '@/engine/data/docTypes'
-import { uploadImage } from '@/engine/lib/mediaStore'
+import { normalizeTheme, type ResolvedTheme } from '@/engine/lib/slideTheme'
+import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
 import { useUploads } from '@/engine/store/uploads'
-import type { DeckTheme, Slide, SlideElement } from '@/engine/store/docs'
+
+import { useGraphicsReady, useSlideIconsReady } from './LazyAssets'
+import { NavRailIndicator } from './NavRailIndicator'
+import { PanelContentTransition } from './PanelContentTransition'
 import { ShapeGallery, ShapePreview, visibleGroups } from './ShapeGallery'
-import { useSlideViewport } from './useSlideViewport'
+import { SlideDesignGrid } from './SlideDesignGrid'
+import { SlideThumb } from './slideRender'
 import { ToolsPanel } from './tools/ToolsPanel'
-import { svgDataUrl } from '@/engine/lib/plot'
+import { useSlideViewport } from './useSlideViewport'
+
+import type { SlideDesign } from '@/engine/lib/slideDesigns'
+import type { DeckTheme, Slide, SlideElement } from '@/engine/store/docs'
 
 type PanelId = 'templates' | 'elements' | 'icons' | 'uploads' | 'tools'
 
@@ -99,8 +121,12 @@ function SlideSidePanelImpl({
   onOpenAi,
 }: SlideSidePanelProps) {
   const [active, setActive] = useState<PanelId | null>(null)
-  useEffect(() => { if (toolPanelOpen) setActive(null) }, [toolPanelOpen])
-  useEffect(() => { if (active) onLibraryOpen?.() }, [active, onLibraryOpen])
+  useEffect(() => {
+    if (toolPanelOpen) setActive(null)
+  }, [toolPanelOpen])
+  useEffect(() => {
+    if (active) onLibraryOpen?.()
+  }, [active, onLibraryOpen])
   // panel cuối cùng đã mở: giữ nội dung trong lúc trượt đóng (và giữ vị trí cuộn khi mở lại)
   const [last, setLast] = useState<PanelId | null>(null)
   useEffect(() => {
@@ -123,7 +149,9 @@ function SlideSidePanelImpl({
 
   const renderPanelBody = (tabId: PanelId, isMobileSheet: boolean) => (
     <>
-      {!canInsert && <p className="px-3 pt-2 text-[12px] text-ink-3">Mở một slide để thêm nội dung vào đó.</p>}
+      {!canInsert && (
+        <p className="text-ink-3 px-3 pt-2 text-[12px]">Mở một slide để thêm nội dung vào đó.</p>
+      )}
       {/* ô tìm kiếm nằm ngoài vùng cuộn (kiểu Canva): thanh cuộn chỉ chạy qua phần nội dung bên dưới */}
       <div className="flex min-h-0 flex-1 flex-col">
         {tabId === 'templates' && (
@@ -133,11 +161,27 @@ function SlideSidePanelImpl({
             designDisabled={designDisabled}
             onApplyDesign={onApplyDesign}
             openDesignsSignal={openDesignsSignal}
-            onPick={isMobileSheet ? (id) => { onAddLayoutSlide(id); setActive(null) } : onAddLayoutSlide}
+            onPick={
+              isMobileSheet
+                ? (id) => {
+                    onAddLayoutSlide(id)
+                    setActive(null)
+                  }
+                : onAddLayoutSlide
+            }
           />
         )}
-        {tabId === 'elements' && <ElementsPanel accent={accent} canInsert={canInsert} hint={hint} onInsert={isMobileSheet ? insertAndClose : onInsert} />}
-        {tabId === 'icons' && <IconsPanel canInsert={canInsert} onInsert={isMobileSheet ? insertAndClose : onInsert} />}
+        {tabId === 'elements' && (
+          <ElementsPanel
+            accent={accent}
+            canInsert={canInsert}
+            hint={hint}
+            onInsert={isMobileSheet ? insertAndClose : onInsert}
+          />
+        )}
+        {tabId === 'icons' && (
+          <IconsPanel canInsert={canInsert} onInsert={isMobileSheet ? insertAndClose : onInsert} />
+        )}
         {tabId === 'tools' && (
           <Scroll>
             <ToolsPanel
@@ -146,12 +190,29 @@ function SlideSidePanelImpl({
                 // giữ đúng tỉ lệ ảnh trên khung 16:9 (toạ độ phần trăm)
                 const w = 46
                 const h = (w * img.height * 16) / (img.width * 9)
-                ;(isMobileSheet ? insertAndClose : onInsert)({ id: uid(), type: 'image', src: svgDataUrl(img.svg), x: (100 - w) / 2, y: (100 - h) / 2, w, h })
+                ;(isMobileSheet ? insertAndClose : onInsert)({
+                  id: uid(),
+                  type: 'image',
+                  src: svgDataUrl(img.svg),
+                  x: (100 - w) / 2,
+                  y: (100 - h) / 2,
+                  w,
+                  h,
+                })
               }}
             />
           </Scroll>
         )}
-        {tabId === 'uploads' && <Scroll><div className="pt-3"><UploadsPanel canInsert={canInsert} onInsert={isMobileSheet ? insertAndClose : onInsert} /></div></Scroll>}
+        {tabId === 'uploads' && (
+          <Scroll>
+            <div className="pt-3">
+              <UploadsPanel
+                canInsert={canInsert}
+                onInsert={isMobileSheet ? insertAndClose : onInsert}
+              />
+            </div>
+          </Scroll>
+        )}
       </div>
     </>
   )
@@ -165,28 +226,39 @@ function SlideSidePanelImpl({
       <>
         {phoneBackdrop.mounted && (
           <div
-            className={cn('fixed inset-0 z-30 bg-black/25', phoneBackdrop.closing ? 'backdrop-out' : 'backdrop-in')}
+            className={cn(
+              'fixed inset-0 z-30 bg-black/25',
+              phoneBackdrop.closing ? 'backdrop-out' : 'backdrop-in',
+            )}
             aria-hidden="true"
             onClick={() => setActive(null)}
           />
         )}
         {/* tấm trượt từ đáy lên, nằm trên thanh tab */}
         <div
-          className="fixed inset-x-0 bottom-14 z-40 flex h-[68dvh] max-h-[calc(100dvh-64px)] flex-col rounded-t-2xl border-t border-line bg-surface shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.35)] transition-transform duration-200 ease-out motion-reduce:transition-none"
+          className="border-line bg-surface fixed inset-x-0 bottom-14 z-40 flex h-[68dvh] max-h-[calc(100dvh-64px)] flex-col rounded-t-2xl border-t shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.35)] transition-transform duration-200 ease-out motion-reduce:transition-none"
           style={{ transform: active ? 'translateY(0)' : 'translateY(calc(100% + 56px))' }}
           inert={!active}
           aria-label={current?.title}
           role="dialog"
         >
           <div className="flex shrink-0 items-center justify-between px-3 pt-2">
-            <span className="text-[14px] font-semibold text-ink">{current?.title}</span>
-            <button type="button" aria-label="Đóng" onClick={() => setActive(null)} className="flex min-h-[36px] min-w-[36px] items-center justify-center rounded-md p-1.5 text-ink-2 hover:bg-paper-2">
+            <span className="text-ink text-[14px] font-semibold">{current?.title}</span>
+            <button
+              type="button"
+              aria-label="Đóng"
+              onClick={() => setActive(null)}
+              className="text-ink-2 hover:bg-paper-2 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-md p-1.5"
+            >
               <X className="size-5" />
             </button>
           </div>
           {current && renderPanelBody(current.id, true)}
         </div>
-        <nav aria-label="Thư viện slide" className="fixed inset-x-0 bottom-0 z-40 flex h-14 items-stretch justify-around border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]">
+        <nav
+          aria-label="Thư viện slide"
+          className="border-line bg-surface fixed inset-x-0 bottom-0 z-40 flex h-14 items-stretch justify-around border-t pb-[env(safe-area-inset-bottom)]"
+        >
           {toolRail}
           {PANELS.map(({ id, label, Icon }) => (
             <button
@@ -197,7 +269,10 @@ function SlideSidePanelImpl({
                 setLast(id)
               }}
               aria-pressed={active === id}
-              className={cn('flex flex-1 flex-col items-center justify-center gap-0.5 whitespace-nowrap text-[11px] font-medium max-[359px]:text-[10px]', active === id ? 'text-clay' : 'text-ink-3')}
+              className={cn(
+                'flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium whitespace-nowrap max-[359px]:text-[10px]',
+                active === id ? 'text-clay' : 'text-ink-3',
+              )}
             >
               <Icon className="size-5" strokeWidth={1.7} />
               {label}
@@ -210,7 +285,7 @@ function SlideSidePanelImpl({
                 setActive(null)
                 onOpenAi()
               }}
-              className="flex flex-1 flex-col items-center justify-center gap-0.5 whitespace-nowrap text-[11px] font-medium text-clay max-[359px]:text-[10px]"
+              className="text-clay flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium whitespace-nowrap max-[359px]:text-[10px]"
             >
               <Sparkles className="size-5" strokeWidth={1.7} />
               Trợ lý AI
@@ -225,7 +300,14 @@ function SlideSidePanelImpl({
 
   return (
     <div className="relative flex min-h-0 shrink-0">
-      <nav ref={navRef} aria-label="Thư viện slide" className={cn('relative z-[45] flex flex-col items-center gap-2 overflow-y-auto border-r border-line bg-surface py-3 [scrollbar-width:none]', isTablet ? 'w-[56px]' : 'w-[64px]')}>
+      <nav
+        ref={navRef}
+        aria-label="Thư viện slide"
+        className={cn(
+          'border-line bg-surface relative z-[45] flex flex-col items-center gap-2 overflow-y-auto border-r py-3 [scrollbar-width:none]',
+          isTablet ? 'w-[56px]' : 'w-[64px]',
+        )}
+      >
         <NavRailIndicator containerRef={navRef} activeId={active} />
         {toolRail}
         {PANELS.map(({ id, label, Icon }) => (
@@ -239,12 +321,17 @@ function SlideSidePanelImpl({
             }}
             aria-pressed={active === id}
             className={cn(
-              'relative z-10 flex flex-col items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-0.5 py-2.5 text-[11px] leading-none tracking-[-0.01em] transition-colors duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none',
+              'relative z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl px-0.5 py-2.5 text-[11px] leading-none tracking-[-0.01em] whitespace-nowrap transition-colors duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none',
               isTablet ? 'w-[48px]' : 'w-[54px]',
-              active === id ? 'font-semibold text-clay-deep' : 'font-medium text-ink-3 hover:bg-paper-2 hover:text-ink',
+              active === id
+                ? 'text-clay-deep font-semibold'
+                : 'text-ink-3 hover:bg-paper-2 hover:text-ink font-medium',
             )}
           >
-            <Icon className="size-5 transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none" strokeWidth={active === id ? 2.1 : 1.7} />
+            <Icon
+              className="size-5 transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none"
+              strokeWidth={active === id ? 2.1 : 1.7}
+            />
             {label}
           </button>
         ))}
@@ -254,7 +341,10 @@ function SlideSidePanelImpl({
         <>
           {tabletDrawer.mounted && (
             <div
-              className={cn('fixed inset-0 z-30 bg-black/20', tabletDrawer.closing ? 'backdrop-out' : 'backdrop-in')}
+              className={cn(
+                'fixed inset-0 z-30 bg-black/20',
+                tabletDrawer.closing ? 'backdrop-out' : 'backdrop-in',
+              )}
               aria-hidden="true"
               onClick={() => setActive(null)}
             />
@@ -262,20 +352,20 @@ function SlideSidePanelImpl({
           {tabletDrawer.mounted && current && (
             <aside
               className={cn(
-                'absolute bottom-0 top-0 z-40 flex w-[280px] max-w-[calc(100vw-64px)] min-h-0 flex-col border-r border-line bg-surface shadow-[8px_0_32px_-8px_rgb(0_0_0/0.25)]',
+                'border-line bg-surface absolute top-0 bottom-0 z-40 flex min-h-0 w-[280px] max-w-[calc(100vw-64px)] flex-col border-r shadow-[8px_0_32px_-8px_rgb(0_0_0/0.25)]',
                 tabletDrawer.closing ? 'drawer-out-left' : 'drawer-in-left',
               )}
               style={{ left: railW }}
               aria-label={current.title}
               role="dialog"
             >
-              <div className="flex shrink-0 items-center justify-between border-b border-line px-3 py-2">
-                <span className="text-[13px] font-semibold text-ink">{current.title}</span>
+              <div className="border-line flex shrink-0 items-center justify-between border-b px-3 py-2">
+                <span className="text-ink text-[13px] font-semibold">{current.title}</span>
                 <button
                   type="button"
                   aria-label="Đóng panel"
                   onClick={() => setActive(null)}
-                  className="flex min-h-[36px] min-w-[36px] items-center justify-center rounded-md text-ink-2 hover:bg-paper-2"
+                  className="text-ink-2 hover:bg-paper-2 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-md"
                 >
                   <X className="size-4" />
                 </button>
@@ -293,8 +383,12 @@ function SlideSidePanelImpl({
             data-tip="Đóng panel"
             tabIndex={active ? 0 : -1}
             onClick={() => setActive(null)}
-            className="absolute top-1/2 z-30 flex h-12 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white text-ink-2 shadow-sm transition-[left,opacity] duration-200 ease-out hover:text-clay motion-reduce:transition-none"
-            style={{ left: railW + (active ? 280 : 0), opacity: active ? 1 : 0, pointerEvents: active ? 'auto' : 'none' }}
+            className="border-line text-ink-2 hover:text-clay absolute top-1/2 z-30 flex h-12 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-white shadow-sm transition-[left,opacity] duration-200 ease-out motion-reduce:transition-none"
+            style={{
+              left: railW + (active ? 280 : 0),
+              opacity: active ? 1 : 0,
+              pointerEvents: active ? 'auto' : 'none',
+            }}
           >
             <ChevronLeft className="size-4" />
           </button>
@@ -304,13 +398,16 @@ function SlideSidePanelImpl({
             style={{ width: active ? 280 : 0 }}
             inert={!active}
           >
-          {current && (
-            <aside className="flex h-full w-[280px] min-h-0 flex-col border-r border-line bg-surface" aria-label={current.title}>
-              <PanelContentTransition activeTab={active} tabOrder={PANELS.map((p) => p.id)}>
-                {(tabId) => renderPanelBody(tabId as PanelId, false)}
-              </PanelContentTransition>
-            </aside>
-          )}
+            {current && (
+              <aside
+                className="border-line bg-surface flex h-full min-h-0 w-[280px] flex-col border-r"
+                aria-label={current.title}
+              >
+                <PanelContentTransition activeTab={active} tabOrder={PANELS.map((p) => p.id)}>
+                  {(tabId) => renderPanelBody(tabId as PanelId, false)}
+                </PanelContentTransition>
+              </aside>
+            )}
           </div>
         </>
       )}
@@ -321,12 +418,28 @@ function SlideSidePanelImpl({
 export const SlideSidePanel = memo(SlideSidePanelImpl)
 
 /** `keep`: nhớ vị trí cuộn — mở "Xem tất cả" rồi quay lại thì về đúng chỗ đang lướt */
-function Scroll({ children, keep }: { children: React.ReactNode; keep?: React.MutableRefObject<number> }) {
+function Scroll({
+  children,
+  keep,
+}: {
+  children: React.ReactNode
+  keep?: React.MutableRefObject<number>
+}) {
   const restore = (node: HTMLDivElement | null) => {
     if (node && keep) node.scrollTop = keep.current
   }
   return (
-    <div ref={keep ? restore : undefined} onScroll={keep ? (e) => { keep.current = e.currentTarget.scrollTop } : undefined} className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+    <div
+      ref={keep ? restore : undefined}
+      onScroll={
+        keep
+          ? (e) => {
+              keep.current = e.currentTarget.scrollTop
+            }
+          : undefined
+      }
+      className="min-h-0 flex-1 overflow-y-auto px-3 pb-3"
+    >
       {children}
     </div>
   )
@@ -340,7 +453,15 @@ const norm = (value: string) =>
     .replace(/đ/gi, 'd')
     .toLowerCase()
 
-function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+function SearchBox({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+}) {
   return (
     <input
       type="search"
@@ -348,16 +469,24 @@ function SearchBox({ value, onChange, placeholder }: { value: string; onChange: 
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={placeholder}
-      className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-[14px] shadow-sm outline-none focus:border-clay"
+      className="border-line focus:border-clay w-full rounded-md border bg-white px-3 py-2.5 text-[14px] shadow-sm outline-none"
     />
   )
 }
 
 /** nhóm có tiêu đề, hiện hết (không gập) để nhìn toàn bộ thư viện */
-function Section({ id, title, children }: { id?: string; title?: string; children: React.ReactNode }) {
+function Section({
+  id,
+  title,
+  children,
+}: {
+  id?: string
+  title?: string
+  children: React.ReactNode
+}) {
   return (
     <section id={id} className="mb-3">
-      {title && <h4 className="mb-1.5 px-1 text-[12px] font-semibold text-ink-3">{title}</h4>}
+      {title && <h4 className="text-ink-3 mb-1.5 px-1 text-[12px] font-semibold">{title}</h4>}
       {children}
     </section>
   )
@@ -462,14 +591,17 @@ function LayoutCard({
       type="button"
       data-tip={layout.description}
       onClick={() => onPick(layout.id)}
-      className="group flex flex-col items-center gap-1.5 rounded-lg border border-line bg-surface p-1.5 text-center transition-all duration-150 hover:border-clay hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay"
+      className="group border-line bg-surface hover:border-clay focus-visible:ring-clay flex flex-col items-center gap-1.5 rounded-lg border p-1.5 text-center transition-all duration-150 hover:shadow-sm focus-visible:ring-2 focus-visible:outline-none"
     >
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[4px] border border-line/60 bg-paper transition-transform duration-150 group-hover:-translate-y-[1px] group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] pointer-events-none select-none">
+      <div className="border-line/60 bg-paper pointer-events-none relative aspect-[16/9] w-full overflow-hidden rounded-[4px] border transition-transform duration-150 select-none group-hover:-translate-y-[1px] group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
         {slide ? (
           <LazyThumb render={() => <SlideThumb slide={slide} theme={theme} />} />
         ) : (
           <div className="flex size-full items-center justify-center">
-            <span className={cn('slide-layout-thumb', `slide-layout-thumb--${layout.id}`)} aria-hidden>
+            <span
+              className={cn('slide-layout-thumb', `slide-layout-thumb--${layout.id}`)}
+              aria-hidden
+            >
               <i />
               <i />
               <i />
@@ -477,7 +609,7 @@ function LayoutCard({
           </div>
         )}
       </div>
-      <small className="w-full truncate px-0.5 text-[12px] font-medium text-ink transition-colors group-hover:text-clay">
+      <small className="text-ink group-hover:text-clay w-full truncate px-0.5 text-[12px] font-medium transition-colors">
         {layout.name}
       </small>
     </button>
@@ -527,46 +659,43 @@ function TemplatesPanel({
   }
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="shrink-0 border-b border-line bg-surface px-3 pb-2.5 pt-3">
+      <div className="border-line bg-surface shrink-0 border-b px-3 pt-3 pb-2.5">
         <Segmented
           value={mode}
           onChange={changeMode}
           label="Chế độ mẫu"
-          className="w-full flex [&>button]:flex-1 [&>button]:justify-center"
+          className="flex w-full [&>button]:flex-1 [&>button]:justify-center"
           options={[
             { key: 'layouts', label: 'Bố cục' },
             { key: 'designs', label: 'Bộ màu' },
           ]}
         />
       </div>
-    <Scroll>
-      <div key={mode} className="anim-template-fade pt-3">
-        {mode === 'designs' ? (
-          <SlideDesignGrid
-            activeDesignId={activeDesignId}
-            disabled={designDisabled}
-            onSelect={onApplyDesign}
-          />
-        ) : LAYOUT_GROUPS.map((group) => (
-          <Section key={group.title} title={group.title}>
-            <div className="grid grid-cols-2 gap-2">
-              {group.layouts.map((id) => {
-                const layout = LAYOUT_MAP.get(id)
-                if (!layout) return null
-                return (
-                  <LayoutCard
-                    key={id}
-                    layout={layout}
-                    theme={resolvedTheme}
-                    onPick={onPick}
-                  />
-                )
-              })}
-            </div>
-          </Section>
-        ))}
-      </div>
-    </Scroll>
+      <Scroll>
+        <div key={mode} className="anim-template-fade pt-3">
+          {mode === 'designs' ? (
+            <SlideDesignGrid
+              activeDesignId={activeDesignId}
+              disabled={designDisabled}
+              onSelect={onApplyDesign}
+            />
+          ) : (
+            LAYOUT_GROUPS.map((group) => (
+              <Section key={group.title} title={group.title}>
+                <div className="grid grid-cols-2 gap-2">
+                  {group.layouts.map((id) => {
+                    const layout = LAYOUT_MAP.get(id)
+                    if (!layout) return null
+                    return (
+                      <LayoutCard key={id} layout={layout} theme={resolvedTheme} onPick={onPick} />
+                    )
+                  })}
+                </div>
+              </Section>
+            ))
+          )}
+        </div>
+      </Scroll>
     </div>
   )
 }
@@ -574,8 +703,7 @@ function TemplatesPanel({
 /* ------------------------------------------------------------------ *
  * Đồ hoạ: hình khối (theo nhóm) và đồ hoạ vector (theo chủ đề)
  * ------------------------------------------------------------------ */
-const GRAPHIC_CATEGORIES = (Object.keys(GRAPHIC_CATEGORY_LABEL) as GraphicCategory[])
-
+const GRAPHIC_CATEGORIES = Object.keys(GRAPHIC_CATEGORY_LABEL) as GraphicCategory[]
 
 const PREVIEW_COUNT = 4
 /** hình quen thuộc nhất, hiện ở hàng xem trước */
@@ -596,9 +724,13 @@ const loadRecent = (): string[] => {
 function RowHead({ title, onMore }: { title: string; onMore?: () => void }) {
   return (
     <div className="mb-1 flex items-center justify-between px-1">
-      <h4 className="text-[12px] font-semibold text-ink-3">{title}</h4>
+      <h4 className="text-ink-3 text-[12px] font-semibold">{title}</h4>
       {onMore && (
-        <button type="button" onClick={onMore} className="flex items-center text-[12px] text-ink-3 hover:text-clay">
+        <button
+          type="button"
+          onClick={onMore}
+          className="text-ink-3 hover:text-clay flex items-center text-[12px]"
+        >
           Xem tất cả <ChevronRight className="size-3.5" />
         </button>
       )}
@@ -606,7 +738,17 @@ function RowHead({ title, onMore }: { title: string; onMore?: () => void }) {
   )
 }
 
-function ElementsPanel({ accent, canInsert, hint, onInsert }: { accent: string; canInsert: boolean; hint: string; onInsert: (el: SlideElement) => void }) {
+function ElementsPanel({
+  accent,
+  canInsert,
+  hint,
+  onInsert,
+}: {
+  accent: string
+  canInsert: boolean
+  hint: string
+  onInsert: (el: SlideElement) => void
+}) {
   const [query, setQuery] = useState('')
   /** đang xem trang con của một nhóm đồ hoạ ('shapes' = toàn bộ hình khối) */
   const [open, setOpen] = useState<GraphicCategory | 'shapes' | 'frames' | null>(null)
@@ -621,11 +763,30 @@ function ElementsPanel({ accent, canInsert, hint, onInsert }: { accent: string; 
     if (!canInsert) return
     if (prst.startsWith('line')) {
       const lineArrow = prst === 'line' ? 'none' : prst === 'lineArrow' ? 'end' : 'both'
-      onInsert({ id: uid(), type: 'shape', shape: 'line', x: 20, y: 47.5, w: 60, h: 5, fill: accent, border: 4, lineArrow })
+      onInsert({
+        id: uid(),
+        type: 'shape',
+        shape: 'line',
+        x: 20,
+        y: 47.5,
+        w: 60,
+        h: 5,
+        fill: accent,
+        border: 4,
+        lineArrow,
+      })
       return
     }
     const box = defaultBox(prst)
-    onInsert({ id: uid(), type: 'shape', shape: shapeNameOf(prst), x: (100 - box.w) / 2, y: (100 - box.h) / 2, ...box, fill: accent })
+    onInsert({
+      id: uid(),
+      type: 'shape',
+      shape: shapeNameOf(prst),
+      x: (100 - box.w) / 2,
+      y: (100 - box.h) / 2,
+      ...box,
+      fill: accent,
+    })
   }
 
   const insertGraphic = (graphicId: string) => {
@@ -649,10 +810,12 @@ function ElementsPanel({ accent, canInsert, hint, onInsert }: { accent: string; 
   }
 
   const items = (cat: GraphicCategory) => GRAPHICS.filter((g) => g.category === cat)
-  const recentItems = recent.map((id) => graphicById(id)).filter((g): g is NonNullable<typeof g> => Boolean(g))
+  const recentItems = recent
+    .map((id) => graphicById(id))
+    .filter((g): g is NonNullable<typeof g> => Boolean(g))
 
   const header = (
-    <div className="shrink-0 border-b border-line bg-surface px-3 pb-2.5 pt-3">
+    <div className="border-line bg-surface shrink-0 border-b px-3 pt-3 pb-2.5">
       <SearchBox value={query} onChange={setQuery} placeholder="Tìm hình khối hoặc đồ hoạ" />
     </div>
   )
@@ -685,7 +848,7 @@ function ElementsPanel({ accent, canInsert, hint, onInsert }: { accent: string; 
               </Section>
             ))}
             {byCat.length === 0 && frameHits.length === 0 && visibleGroups(q).length === 0 && (
-              <p className="text-[12px] text-ink-3">Không có đồ hoạ nào khớp.</p>
+              <p className="text-ink-3 text-[12px]">Không có đồ hoạ nào khớp.</p>
             )}
           </div>
         </Scroll>
@@ -697,78 +860,103 @@ function ElementsPanel({ accent, canInsert, hint, onInsert }: { accent: string; 
   if (open) {
     return (
       <>
-        <div className="flex shrink-0 items-center gap-1 border-b border-line bg-surface px-2 py-2.5">
-          <button type="button" onClick={() => setOpen(null)} aria-label="Quay lại" className="rounded-md p-1 text-ink-2 hover:bg-paper-2 hover:text-clay">
+        <div className="border-line bg-surface flex shrink-0 items-center gap-1 border-b px-2 py-2.5">
+          <button
+            type="button"
+            onClick={() => setOpen(null)}
+            aria-label="Quay lại"
+            className="text-ink-2 hover:bg-paper-2 hover:text-clay rounded-md p-1"
+          >
             <ChevronLeft className="size-5" />
           </button>
-          <h3 className="text-[14px] font-semibold text-ink">{open === 'shapes' ? 'Hình khối' : open === 'frames' ? 'Khung ảnh' : GRAPHIC_CATEGORY_LABEL[open]}</h3>
+          <h3 className="text-ink text-[14px] font-semibold">
+            {open === 'shapes'
+              ? 'Hình khối'
+              : open === 'frames'
+                ? 'Khung ảnh'
+                : GRAPHIC_CATEGORY_LABEL[open]}
+          </h3>
         </div>
         <Scroll>
           <div className="pt-3">
-            {open === 'shapes' ? <ShapeGallery onPick={pickShape} scroll={false} /> : open === 'frames' ? <FrameGrid frames={PHOTO_FRAMES} onInsert={onInsert} /> : <GraphicGrid items={items(open)} onPick={insertGraphic} />}
+            {open === 'shapes' ? (
+              <ShapeGallery onPick={pickShape} scroll={false} />
+            ) : open === 'frames' ? (
+              <FrameGrid frames={PHOTO_FRAMES} onInsert={onInsert} />
+            ) : (
+              <GraphicGrid items={items(open)} onPick={insertGraphic} />
+            )}
           </div>
         </Scroll>
       </>
     )
   }
 
-  const shapePreview = PRESET_GROUPS.flatMap((g) => g.shapes).filter((s) => PREVIEW_SHAPES.includes(s.prst))
+  const shapePreview = PRESET_GROUPS.flatMap((g) => g.shapes).filter((s) =>
+    PREVIEW_SHAPES.includes(s.prst),
+  )
 
   return (
     <>
       {header}
       <Scroll keep={listScroll}>
-      <div className="pt-3">
-        {recentItems.length > 0 && (
-          <Section>
-            <RowHead title="Dùng gần đây" />
-            <GraphicGrid items={recentItems.slice(0, PREVIEW_COUNT * 2)} onPick={insertGraphic} />
-          </Section>
-        )}
-        {suggested.length > 0 && (
-          <Section>
-            <RowHead title="Gợi ý cho slide này" />
-            <GraphicGrid items={suggested} onPick={insertGraphic} />
-          </Section>
-        )}
-        <Section>
-          <RowHead title="Hình khối" onMore={() => setOpen('shapes')} />
-          <div className="flex flex-wrap gap-1" onMouseDown={(e) => e.preventDefault()}>
-            {shapePreview.map((s) => (
-              <button
-                key={s.prst}
-                type="button"
-                data-tip={s.label}
-                aria-label={s.label}
-                onClick={() => pickShape(s.prst)}
-                className="flex size-[40px] items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-paper-2 hover:text-clay"
-              >
-                <ShapePreview prst={s.prst} />
-              </button>
-            ))}
-          </div>
-        </Section>
-        <Section>
-          <RowHead title="Khung ảnh" onMore={() => setOpen('frames')} />
-          <FrameGrid frames={PHOTO_FRAMES.slice(0, PREVIEW_COUNT)} onInsert={onInsert} />
-        </Section>
-        {GRAPHIC_CATEGORIES.map((cat) => {
-          const list = items(cat)
-          if (list.length === 0) return null
-          return (
-            <Section key={cat}>
-              <RowHead title={GRAPHIC_CATEGORY_LABEL[cat]} onMore={() => setOpen(cat)} />
-              <GraphicGrid items={list.slice(0, PREVIEW_COUNT)} onPick={insertGraphic} />
+        <div className="pt-3">
+          {recentItems.length > 0 && (
+            <Section>
+              <RowHead title="Dùng gần đây" />
+              <GraphicGrid items={recentItems.slice(0, PREVIEW_COUNT * 2)} onPick={insertGraphic} />
             </Section>
-          )
-        })}
-      </div>
+          )}
+          {suggested.length > 0 && (
+            <Section>
+              <RowHead title="Gợi ý cho slide này" />
+              <GraphicGrid items={suggested} onPick={insertGraphic} />
+            </Section>
+          )}
+          <Section>
+            <RowHead title="Hình khối" onMore={() => setOpen('shapes')} />
+            <div className="flex flex-wrap gap-1" onMouseDown={(e) => e.preventDefault()}>
+              {shapePreview.map((s) => (
+                <button
+                  key={s.prst}
+                  type="button"
+                  data-tip={s.label}
+                  aria-label={s.label}
+                  onClick={() => pickShape(s.prst)}
+                  className="text-ink-2 hover:bg-paper-2 hover:text-clay flex size-[40px] items-center justify-center rounded-md transition-colors"
+                >
+                  <ShapePreview prst={s.prst} />
+                </button>
+              ))}
+            </div>
+          </Section>
+          <Section>
+            <RowHead title="Khung ảnh" onMore={() => setOpen('frames')} />
+            <FrameGrid frames={PHOTO_FRAMES.slice(0, PREVIEW_COUNT)} onInsert={onInsert} />
+          </Section>
+          {GRAPHIC_CATEGORIES.map((cat) => {
+            const list = items(cat)
+            if (list.length === 0) return null
+            return (
+              <Section key={cat}>
+                <RowHead title={GRAPHIC_CATEGORY_LABEL[cat]} onMore={() => setOpen(cat)} />
+                <GraphicGrid items={list.slice(0, PREVIEW_COUNT)} onPick={insertGraphic} />
+              </Section>
+            )
+          })}
+        </div>
       </Scroll>
     </>
   )
 }
 
-function FrameGrid({ frames, onInsert }: { frames: typeof PHOTO_FRAMES; onInsert: (el: SlideElement) => void }) {
+function FrameGrid({
+  frames,
+  onInsert,
+}: {
+  frames: typeof PHOTO_FRAMES
+  onInsert: (el: SlideElement) => void
+}) {
   return (
     <div className="grid grid-cols-4 gap-2" onMouseDown={(e) => e.preventDefault()}>
       {frames.map((f) => (
@@ -777,10 +965,17 @@ function FrameGrid({ frames, onInsert }: { frames: typeof PHOTO_FRAMES; onInsert
           type="button"
           data-tip={`${f.label} · kéo ảnh vào khung`}
           aria-label={f.label}
-          onClick={() => onInsert({ id: uid(), type: 'image', shape: f.id, x: 37.5, y: 22.5, w: 25, h: 44.4 })}
-          className="flex aspect-square items-center justify-center rounded-md p-1 transition-colors hover:bg-paper-2"
+          onClick={() =>
+            onInsert({ id: uid(), type: 'image', shape: f.id, x: 37.5, y: 22.5, w: 25, h: 44.4 })
+          }
+          className="hover:bg-paper-2 flex aspect-square items-center justify-center rounded-md p-1 transition-colors"
         >
-          <img src={FRAME_PLACEHOLDER} alt="" className="size-full object-cover" style={{ clipPath: f.clip }} />
+          <img
+            src={FRAME_PLACEHOLDER}
+            alt=""
+            className="size-full object-cover"
+            style={{ clipPath: f.clip }}
+          />
         </button>
       ))}
     </div>
@@ -798,7 +993,13 @@ const cachedMarkup = (id: string) => {
   return m
 }
 
-function GraphicGrid({ items, onPick }: { items: Array<{ id: string; name: string }>; onPick: (id: string) => void }) {
+function GraphicGrid({
+  items,
+  onPick,
+}: {
+  items: Array<{ id: string; name: string }>
+  onPick: (id: string) => void
+}) {
   useGraphicsReady()
   return (
     <div className="grid grid-cols-4 gap-1.5">
@@ -809,10 +1010,13 @@ function GraphicGrid({ items, onPick }: { items: Array<{ id: string; name: strin
           data-tip={g.name}
           aria-label={g.name}
           onClick={() => onPick(g.id)}
-          className="flex aspect-square items-center justify-center rounded-md p-1.5 text-ink-2 transition-colors hover:bg-paper-2 hover:text-clay"
+          className="text-ink-2 hover:bg-paper-2 hover:text-clay flex aspect-square items-center justify-center rounded-md p-1.5 transition-colors"
         >
           {/* SVG lấy từ registry đồ hoạ của dự án (không phải nội dung người dùng) */}
-          <span className="size-full [&>svg]:size-full" dangerouslySetInnerHTML={{ __html: cachedMarkup(g.id) }} />
+          <span
+            className="size-full [&>svg]:size-full"
+            dangerouslySetInnerHTML={{ __html: cachedMarkup(g.id) }}
+          />
         </button>
       ))}
     </div>
@@ -822,7 +1026,13 @@ function GraphicGrid({ items, onPick }: { items: Array<{ id: string; name: strin
 /* ------------------------------------------------------------------ *
  * Icon: biểu tượng đơn sắc, chia nhóm theo môn/chủ đề, tìm theo tên và từ khoá
  * ------------------------------------------------------------------ */
-function IconsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (el: SlideElement) => void }) {
+function IconsPanel({
+  canInsert,
+  onInsert,
+}: {
+  canInsert: boolean
+  onInsert: (el: SlideElement) => void
+}) {
   const [query, setQuery] = useState('')
   const q = norm(query.trim())
   const ready = useSlideIconsReady()
@@ -836,7 +1046,8 @@ function IconsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (el
     ],
     [ready],
   )
-  const matches = (i: (typeof all)[number]) => !q || norm([i.id, i.group, ...i.tags].join(' ')).includes(q)
+  const matches = (i: (typeof all)[number]) =>
+    !q || norm([i.id, i.group, ...i.tags].join(' ')).includes(q)
   const hits = all.filter(matches)
   const groups = Array.from(new Set(hits.map((i) => i.group)))
 
@@ -847,8 +1058,12 @@ function IconsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (el
 
   return (
     <>
-      <div className="shrink-0 border-b border-line bg-surface px-3 pb-2.5 pt-3">
-        <SearchBox value={query} onChange={setQuery} placeholder="Tìm icon, ví dụ: sách, hoá, xe, hoa" />
+      <div className="border-line bg-surface shrink-0 border-b px-3 pt-3 pb-2.5">
+        <SearchBox
+          value={query}
+          onChange={setQuery}
+          placeholder="Tìm icon, ví dụ: sách, hoá, xe, hoa"
+        />
       </div>
       <Scroll>
         <div className="pt-3">
@@ -864,7 +1079,7 @@ function IconsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (el
                       data-tip={tags[0]}
                       aria-label={tags[0]}
                       onClick={() => insert(id)}
-                      className="flex aspect-square items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-paper-2 hover:text-clay"
+                      className="text-ink-2 hover:bg-paper-2 hover:text-clay flex aspect-square items-center justify-center rounded-md transition-colors"
                     >
                       <Icon size={24} weight="duotone" />
                     </button>
@@ -872,7 +1087,9 @@ function IconsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (el
               </div>
             </Section>
           ))}
-          {q && hits.length === 0 && <p className="text-[12px] text-ink-3">Không có icon nào khớp.</p>}
+          {q && hits.length === 0 && (
+            <p className="text-ink-3 text-[12px]">Không có icon nào khớp.</p>
+          )}
         </div>
       </Scroll>
     </>
@@ -888,7 +1105,13 @@ interface UploadedImage {
   ratio: number
 }
 
-function UploadsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (el: SlideElement) => void }) {
+function UploadsPanel({
+  canInsert,
+  onInsert,
+}: {
+  canInsert: boolean
+  onInsert: (el: SlideElement) => void
+}) {
   const images = useUploads((s) => s.items)
   const addUpload = useUploads((s) => s.add)
   const removeUpload = useUploads((s) => s.remove)
@@ -897,13 +1120,23 @@ function UploadsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (
 
   const insert = (img: UploadedImage) => {
     const w = 40
-    onInsert({ id: uid(), type: 'image', src: img.src, x: (100 - w) / 2, y: 26, w, h: Math.min(60, w * img.ratio * (16 / 9)) })
+    onInsert({
+      id: uid(),
+      type: 'image',
+      src: img.src,
+      x: (100 - w) / 2,
+      y: 26,
+      w,
+      h: Math.min(60, w * img.ratio * (16 / 9)),
+    })
   }
 
   const onFile = async (file: File) => {
     setError(null)
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return setError('Chỉ nhận ảnh PNG, JPG hoặc WebP.')
-    if (file.size > MAX_UPLOAD_BYTES) return setError('Ảnh quá 8 MB. Hãy thu nhỏ trước khi tải lên.')
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type))
+      return setError('Chỉ nhận ảnh PNG, JPG hoặc WebP.')
+    if (file.size > MAX_UPLOAD_BYTES)
+      return setError('Ảnh quá 8 MB. Hãy thu nhỏ trước khi tải lên.')
     setBusy(true)
     try {
       const img = await readImage(file)
@@ -927,7 +1160,7 @@ function UploadsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (
     <div>
       <label
         className={cn(
-          'flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-line-2 px-3 py-5 text-center text-[12.5px] text-ink-3 transition-colors hover:border-clay hover:text-clay',
+          'border-line-2 text-ink-3 hover:border-clay hover:text-clay flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed px-3 py-5 text-center text-[12.5px] transition-colors',
           (!canInsert || busy) && 'pointer-events-none opacity-50',
         )}
       >
@@ -944,11 +1177,15 @@ function UploadsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (
           }}
         />
       </label>
-      {error && <p role="alert" className="mt-2 text-[12px] text-clay">{error}</p>}
+      {error && (
+        <p role="alert" className="text-clay mt-2 text-[12px]">
+          {error}
+        </p>
+      )}
 
       {images.length > 0 && (
         <>
-          <h4 className="mb-1.5 mt-4 text-[11.5px] font-semibold text-ink-3">Ảnh của bạn</h4>
+          <h4 className="text-ink-3 mt-4 mb-1.5 text-[11.5px] font-semibold">Ảnh của bạn</h4>
           <div className="grid grid-cols-2 gap-2">
             {images.map((img) => (
               <div key={img.id} className="group relative">
@@ -958,20 +1195,26 @@ function UploadsPanel({ canInsert, onInsert }: { canInsert: boolean; onInsert: (
                   onClick={() => insert(img)}
                   data-tip="Chèn vào slide"
                   aria-label="Chèn vào slide"
-                  className="block w-full overflow-hidden rounded-md border border-line bg-white p-1 transition-colors hover:border-clay disabled:opacity-40"
+                  className="border-line hover:border-clay block w-full overflow-hidden rounded-md border bg-white p-1 transition-colors disabled:opacity-40"
                 >
-                  <img src={img.src} alt="" loading="lazy" className="aspect-video w-full object-contain" onDragStart={(e) => {
-                    e.dataTransfer.setData('text/uri-list', img.src)
-                    dragImage.src = img.src
-                  }}
-                  onDragEnd={() => (dragImage.src = '')} />
+                  <img
+                    src={img.src}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-video w-full object-contain"
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('text/uri-list', img.src)
+                      dragImage.src = img.src
+                    }}
+                    onDragEnd={() => (dragImage.src = '')}
+                  />
                 </button>
                 <button
                   type="button"
                   onClick={() => removeUpload(img.id)}
                   data-tip="Xoá khỏi danh sách (slide đã chèn không đổi)"
                   aria-label="Xoá ảnh khỏi danh sách"
-                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-white/90 text-ink-3 opacity-0 shadow-soft transition-opacity hover:text-clay focus-visible:opacity-100 group-hover:opacity-100"
+                  className="text-ink-3 shadow-soft hover:text-clay absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-white/90 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                 >
                   <X className="size-3" />
                 </button>

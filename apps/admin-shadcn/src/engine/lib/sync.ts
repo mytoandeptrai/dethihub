@@ -1,3 +1,8 @@
+import {
+  workspaceItemList,
+  workspaceItemSave,
+  removeWorkspaceItems,
+} from '@/apis/workspace/requests'
 /**
  * Đồng bộ dữ liệu của từng người lên bảng `user_items` (owner_id, kind, id, data) của Supabase.
  * `localStorage` của từng store vẫn là bản đệm: chưa đăng nhập hay mất mạng vẫn soạn được, có mạng thì đẩy lên.
@@ -7,18 +12,19 @@
  * Sau đó mỗi thay đổi được đẩy lên sau ~1,5 giây, từng mục một request nên một mục quá lớn không chặn các mục khác.
  */
 import { currentSession, getSession } from '@/engine/lib/auth-session'
-import { workspaceItemList, workspaceItemSave, removeWorkspaceItems } from '@/apis/workspace/requests'
+
 import type { WorkspaceItemListInput } from '@/apis/workspace/types'
 type WorkspaceKind = WorkspaceItemListInput['params']['query']['kind']
+import { IDB_PREFIX, toRemote } from '@/engine/board/imgStore'
 import { uploadImage } from '@/engine/lib/mediaStore'
-import { useUploads, type Upload } from '@/engine/store/uploads'
+import { pendingBoardSaves, useBoards, type BoardItem } from '@/engine/store/boards'
 import { useDocStore, type Deck } from '@/engine/store/docs'
 import { useOnline } from '@/engine/store/online'
+import { quotaMessage, useSyncStatus } from '@/engine/store/syncStatus'
+import { useUploads, type Upload } from '@/engine/store/uploads'
+
 import type { ExamDoc } from '@/engine/data/docTypes'
 import type { OnlineItem } from '@/engine/lib/onlineExam'
-import { pendingBoardSaves, useBoards, type BoardItem } from '@/engine/store/boards'
-import { IDB_PREFIX, toRemote } from '@/engine/board/imgStore'
-import { quotaMessage, useSyncStatus } from '@/engine/store/syncStatus'
 
 interface Item {
   id: string
@@ -67,15 +73,17 @@ const SPECS: Spec<any>[] = [
 /** bảng vẽ: ảnh còn là khoá IndexedDB hay data URL thì đẩy lên kho file, thay bằng đường dẫn */
 async function boardImagesToRemote(b: BoardItem, upload: ImageUpload): Promise<BoardItem | null> {
   let changed = false
-  const elements = await Promise.all(b.data.elements.map(async (e) => {
-    const src = typeof e.src === 'string' ? e.src : ''
-    if (!src) return e
-    const url = await toRemote(src, upload)
-    if (!url && src.startsWith(IDB_PREFIX)) throw new Error('Không đọc được ảnh bảng vẽ.')
-    if (!url || url === src) return e
-    changed = true
-    return { ...e, src: url }
-  }))
+  const elements = await Promise.all(
+    b.data.elements.map(async (e) => {
+      const src = typeof e.src === 'string' ? e.src : ''
+      if (!src) return e
+      const url = await toRemote(src, upload)
+      if (!url && src.startsWith(IDB_PREFIX)) throw new Error('Không đọc được ảnh bảng vẽ.')
+      if (!url || url === src) return e
+      changed = true
+      return { ...e, src: url }
+    }),
+  )
   return changed ? { ...b, data: { ...b.data, elements } } : null
 }
 
@@ -109,8 +117,12 @@ const metaKey = (kind: string) => `dethinhbien-sync-${kind}`
 const readMeta = (kind: string): Meta | null => {
   try {
     const m = JSON.parse(localStorage.getItem(metaKey(kind)) ?? 'null') as Meta | null
-    return m && typeof m.owner === 'string' && Array.isArray(m.synced) &&
-      (m.unowned === undefined || Array.isArray(m.unowned)) ? m : null
+    return m &&
+      typeof m.owner === 'string' &&
+      Array.isArray(m.synced) &&
+      (m.unowned === undefined || Array.isArray(m.unowned))
+      ? m
+      : null
   } catch {
     return null
   }
@@ -119,7 +131,8 @@ const writeMeta = (kind: string, m: Meta) => {
   try {
     localStorage.setItem(metaKey(kind), JSON.stringify(m))
   } catch (err) {
-    if ((process.env.NODE_ENV === 'development')) console.warn('Không lưu được meta đồng bộ', kind, err)
+    if (process.env.NODE_ENV === 'development')
+      console.warn('Không lưu được meta đồng bộ', kind, err)
   }
 }
 
@@ -159,7 +172,10 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
   const meta = readMeta(kind)
   const first = await currentSession({ keepOnError: true })
   if (!first || first.user.id !== owner || !active()) throw new Error('Phiên đồng bộ đã kết thúc.')
-  const remote = await workspaceItemList({ params: { query: { kind: kind as WorkspaceKind } }, signal }) as unknown as Row[]
+  const remote = (await workspaceItemList({
+    params: { query: { kind: kind as WorkspaceKind } },
+    signal,
+  })) as unknown as Row[]
   if (!active()) throw new Error('Phiên đồng bộ đã kết thúc.')
 
   const ownMeta = meta?.owner === owner ? meta : null
@@ -168,16 +184,22 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
   const local = new Map((meta && !ownMeta ? [] : spec.get()).map((it) => [it.id, it]))
   // Thiếu meta: giữ mục chưa rõ chủ trên máy (kể cả khi trùng id), chặn đẩy/xoá
   // trên máy chủ. Ghi danh sách này cùng owner sau khi kéo, để lần sau vẫn chặn.
-  const unowned = new Set([...(meta ? ownMeta?.unowned ?? [] : local.keys())].filter((id) => {
-    const item = local.get(id)
-    return item && sent.get(id) !== fingerprint(item)
-  }))
+  const unowned = new Set(
+    [...(meta ? (ownMeta?.unowned ?? []) : local.keys())].filter((id) => {
+      const item = local.get(id)
+      return item && sent.get(id) !== fingerprint(item)
+    }),
+  )
   const merged = new Map<string, T>()
   for (const r of remote) {
     const mine = local.get(r.id)
-    merged.set(r.id, mine && (unowned.has(r.id) || mine.updatedAt > r.data.updatedAt) ? mine : (r.data as T))
+    merged.set(
+      r.id,
+      mine && (unowned.has(r.id) || mine.updatedAt > r.data.updatedAt) ? mine : (r.data as T),
+    )
   }
-  for (const [id, it] of local) if (!sent.has(id) && (!synced.has(id) || unowned.has(id))) merged.set(id, it)
+  for (const [id, it] of local)
+    if (!sent.has(id) && (!synced.has(id) || unowned.has(id))) merged.set(id, it)
 
   const save = () => writeMeta(kind, { owner, synced: [...sent.keys()], unowned: [...unowned] })
   save()
@@ -199,17 +221,24 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
       const before = fingerprint(it)
       if (sent.get(it.id) === before) continue
       try {
-        const slim = (spec.prepare && (await spec.prepare(it, upload))) || (await externalizeImages(it, upload))
+        const slim =
+          (spec.prepare && (await spec.prepare(it, upload))) ||
+          (await externalizeImages(it, upload))
         if (!active()) return false
         if (slim) {
           // Chỉ ghi lại vào store nếu mục chưa đổi trong lúc tải ảnh.
           const live = spec.get().find((x) => x.id === it.id)
-          if (live && fingerprint(live) === before) spec.set(spec.get().map((x) => (x.id === it.id ? slim : x)))
+          if (live && fingerprint(live) === before)
+            spec.set(spec.get().map((x) => (x.id === it.id ? slim : x)))
           it = slim
         }
         const fp = fingerprint(it)
         if (sent.get(it.id) !== fp) {
-          await workspaceItemSave({ params: { path: { kind: kind as WorkspaceKind, id: it.id } }, body: { data: it as unknown as Record<string, unknown> }, signal })
+          await workspaceItemSave({
+            params: { path: { kind: kind as WorkspaceKind, id: it.id } },
+            body: { data: it as unknown as Record<string, unknown> },
+            signal,
+          })
           if (!active()) return false
           sent.set(it.id, fp)
         }
@@ -222,7 +251,9 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
       }
     }
     const gone = [...sent.keys()].filter((id) => !ids.has(id) && !unowned.has(id))
-    for (const id of [...blocked.keys()]) if (id.startsWith(`${kind}:`) && !ids.has(id.slice(kind.length + 1))) noteQuota(kind, id.slice(kind.length + 1), null)
+    for (const id of [...blocked.keys()])
+      if (id.startsWith(`${kind}:`) && !ids.has(id.slice(kind.length + 1)))
+        noteQuota(kind, id.slice(kind.length + 1), null)
     if (gone.length && active()) {
       await removeWorkspaceItems(kind as WorkspaceKind, gone, signal)
       if (!active()) return false
@@ -236,14 +267,20 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
   const pending = () => {
     const items = spec.get()
     const ids = new Set(items.map((item) => item.id))
-    return items.some((item) => !unowned.has(item.id) && sent.get(item.id) !== fingerprint(item))
-      || [...sent.keys()].some((id) => !unowned.has(id) && !ids.has(id))
+    return (
+      items.some((item) => !unowned.has(item.id) && sent.get(item.id) !== fingerprint(item)) ||
+      [...sent.keys()].some((id) => !unowned.has(id) && !ids.has(id))
+    )
   }
 
   const drain = async () => {
     do {
       clearTimeout(timer)
-      running ??= push().catch(() => false).finally(() => { running = undefined })
+      running ??= push()
+        .catch(() => false)
+        .finally(() => {
+          running = undefined
+        })
       if (!(await running) || !active()) return false
     } while (pending())
     return true
@@ -253,10 +290,14 @@ async function syncKind<T extends Item>(spec: Spec<T>, run: SyncRun): Promise<Fl
     clearTimeout(timer)
     timer = setTimeout(() => void drain(), DELAY)
   })
-  signal.addEventListener('abort', () => {
-    unsub()
-    clearTimeout(timer)
-  }, { once: true })
+  signal.addEventListener(
+    'abort',
+    () => {
+      unsub()
+      clearTimeout(timer)
+    },
+    { once: true },
+  )
 
   void drain()
   return async () => (await drain()) && !spec.get().some((item) => unowned.has(item.id))
@@ -292,17 +333,20 @@ function syncFor(owner: string): SyncRun {
       controller.abort()
       if (run === next) run = undefined
     },
-    kinds: () => Promise.all(SPECS.map((spec) => {
-      let job = kinds.get(spec.kind)
-      if (!job) {
-        job = syncKind(spec, next).catch(() => {
-          kinds.delete(spec.kind)
-          return null
-        })
-        kinds.set(spec.kind, job)
-      }
-      return job
-    })),
+    kinds: () =>
+      Promise.all(
+        SPECS.map((spec) => {
+          let job = kinds.get(spec.kind)
+          if (!job) {
+            job = syncKind(spec, next).catch(() => {
+              kinds.delete(spec.kind)
+              return null
+            })
+            kinds.set(spec.kind, job)
+          }
+          return job
+        }),
+      ),
   }
   return (run = next)
 }
@@ -334,7 +378,9 @@ export async function flushSync(): Promise<{ ok: boolean }> {
       } while (revision !== current.revision)
       return saves.every(Boolean) && pendingBoardSaves.size === 0
     }
-    const timeout = new Promise<false>((resolve) => { timer = setTimeout(() => resolve(false), 8000) })
+    const timeout = new Promise<false>((resolve) => {
+      timer = setTimeout(() => resolve(false), 8000)
+    })
     return { ok: await Promise.race([flush(), timeout]).catch(() => false) }
   } finally {
     clearTimeout(timer)

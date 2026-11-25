@@ -1,3 +1,3 @@
-import {MyUploadsContainer} from '@/modules/profile'
+import { MyUploadsContainer } from '@/modules/profile'
 
 export default MyUploadsContainer

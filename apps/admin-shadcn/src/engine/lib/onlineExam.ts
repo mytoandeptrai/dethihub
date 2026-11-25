@@ -1,11 +1,26 @@
+import {
+  SUBJECTS,
+  TYPE_LABEL,
+  type Exam,
+  type ExamSettings,
+  type Question,
+  type QuestionType,
+  type Section,
+  type Subject,
+} from '@/engine/data/types'
+import {
+  formatTrueFalse,
+  normalizeShort,
+  parseTrueFalse,
+  SHORT_MAX_CHARS,
+} from '@/engine/lib/grading'
+import { useApp } from '@/engine/store/app'
+
 /**
  * Đề tạo online: giáo viên tự nhập từng câu (không qua trình soạn Word), lưu trong lịch sử trên máy
  * (`store/online.ts`), có thể làm thử và đăng lên cộng đồng. Đề đăng giữ nguyên `Exam` kèm cài đặt.
  */
 import type { ExamDoc } from '@/engine/data/docTypes'
-import { SUBJECTS, TYPE_LABEL, type Exam, type ExamSettings, type Question, type QuestionType, type Section, type Subject } from '@/engine/data/types'
-import { formatTrueFalse, normalizeShort, parseTrueFalse, SHORT_MAX_CHARS } from '@/engine/lib/grading'
-import { useApp } from '@/engine/store/app'
 
 export interface OnlineMeta {
   title: string
@@ -43,10 +58,23 @@ const round2 = (n: number) => Math.round(n * 100) / 100
 const uid = () => Math.random().toString(36).slice(2, 10)
 
 export function defaultMeta(): OnlineMeta {
-  return { title: '', subject: SUBJECTS[0], grade: 'Lớp 12', school: '', year: '2026 – 2027', term: 'Giữa kỳ I', durationMinutes: 45 }
+  return {
+    title: '',
+    subject: SUBJECTS[0],
+    grade: 'Lớp 12',
+    school: '',
+    year: '2026 – 2027',
+    term: 'Giữa kỳ I',
+    durationMinutes: 45,
+  }
 }
 
-const DEFAULT_POINTS: Record<string, number> = { 'trac-nghiem': 0.25, 'dung-sai': 1, 'tra-loi-ngan': 0.25, 'tu-luan': 1 }
+const DEFAULT_POINTS: Record<string, number> = {
+  'trac-nghiem': 0.25,
+  'dung-sai': 1,
+  'tra-loi-ngan': 0.25,
+  'tu-luan': 1,
+}
 
 export function newQuestion(type: QuestionType, prompt = ''): Question {
   const q: Question = { id: uid(), number: 0, type, prompt, points: DEFAULT_POINTS[type] ?? 1 }
@@ -63,7 +91,8 @@ export function convertQuestion(q: Question, type: QuestionType): Question {
 
 /** Xếp lại theo dạng (trắc nghiệm → đúng/sai → trả lời ngắn → tự luận), giữ thứ tự trong cùng dạng, đánh số 1..n. */
 export function sortQuestions(questions: Question[]): Question[] {
-  const rank = (q: Question) => Math.max(0, ONLINE_TYPES.indexOf(q.type === 'tu-luan-dong' ? 'tu-luan' : q.type))
+  const rank = (q: Question) =>
+    Math.max(0, ONLINE_TYPES.indexOf(q.type === 'tu-luan-dong' ? 'tu-luan' : q.type))
   return questions
     .map((q, i) => ({ q, i }))
     .sort((a, b) => rank(a.q) - rank(b.q) || a.i - b.i)
@@ -87,13 +116,16 @@ export function questionIssue(q: Question): string | null {
   if (q.type === 'tra-loi-ngan') {
     const a = normalizeShort(q.answer)
     if (!NUMERIC.test(a)) return 'Đáp án phải là một số, ví dụ 12, -3,5.'
-    if (a.length > SHORT_MAX_CHARS) return `Đáp án tối đa ${SHORT_MAX_CHARS} ký tự (kể cả dấu âm và dấu phẩy).`
+    if (a.length > SHORT_MAX_CHARS)
+      return `Đáp án tối đa ${SHORT_MAX_CHARS} ký tự (kể cả dấu âm và dấu phẩy).`
   }
-  if (q.type !== 'tu-luan' && q.type !== 'tu-luan-dong' && !(q.points > 0)) return 'Điểm phải lớn hơn 0.'
+  if (q.type !== 'tu-luan' && q.type !== 'tu-luan-dong' && !(q.points > 0))
+    return 'Điểm phải lớn hơn 0.'
   return null
 }
 
-export const totalOf = (questions: Question[]) => round2(questions.reduce((n, q) => n + q.points, 0))
+export const totalOf = (questions: Question[]) =>
+  round2(questions.reduce((n, q) => n + q.points, 0))
 
 /** Chia đều thang 10 cho các câu. */
 export function evenPoints(questions: Question[]): Question[] {
@@ -153,8 +185,14 @@ export function examToDraft(exam: Exam): Pick<OnlineItem, 'meta' | 'questions' |
         s.questions.map((q) => {
           const type = q.type === 'tu-luan-dong' ? 'tu-luan' : q.type
           // đáp án đúng/sai về dạng chuẩn "ĐSĐS" như ô nhập
-          const parsed = type === 'dung-sai' ? parseTrueFalse(q.answer, q.options?.length ?? 0) : null
-          return { ...q, type, answer: type === 'dung-sai' ? (parsed ? formatTrueFalse(parsed) : undefined) : q.answer, id: uid() }
+          const parsed =
+            type === 'dung-sai' ? parseTrueFalse(q.answer, q.options?.length ?? 0) : null
+          return {
+            ...q,
+            type,
+            answer: type === 'dung-sai' ? (parsed ? formatTrueFalse(parsed) : undefined) : q.answer,
+            id: uid(),
+          }
         }),
       ),
     ),

@@ -1,3 +1,5 @@
+import { GRAPHIC_META, type GraphicMeta } from './graphicsMeta'
+
 /**
  * Registry đồ hoạ vector (chặng 2). Dữ liệu thô nằm ở `graphics.ts` (sinh tự
  * động từ contact sheet bằng `scripts/import-graphics.mjs`).
@@ -7,7 +9,6 @@
  * giữ nguyên khối fill pastel như bản thiết kế.
  */
 import type { GraphicCategory } from './graphics'
-import { GRAPHIC_META, type GraphicMeta } from './graphicsMeta'
 
 export type { GraphicCategory, GraphicMeta }
 
@@ -150,7 +151,10 @@ export function searchGraphics(text: string, limit = 8): GraphicMeta[] {
     .map((entry) => entry.graphic)
 }
 
-const wordsOf = (text: string) => norm(text).split(/[^a-z0-9]+/).filter(Boolean)
+const wordsOf = (text: string) =>
+  norm(text)
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
 
 /**
  * Tìm cho panel Đồ hoạ (gồm cả hoạ tiết): MỌI từ gõ vào phải khớp đầu một từ trong tên/từ khoá
@@ -184,7 +188,11 @@ export const matchesWords = (text: string, query: string): boolean => {
 }
 
 const words = (text: string): Set<string> =>
-  new Set(norm(text).split(/[^a-z0-9]+/).filter((word) => word.length >= 3))
+  new Set(
+    norm(text)
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length >= 3),
+  )
 
 /**
  * Đồ hoạ AI chọn có khớp nghĩa slide không: tên/từ khoá/id của hình phải chung ít nhất một từ
@@ -218,7 +226,9 @@ export function graphicMainColor(id: string | undefined): string {
 /** SVG sẵn sàng nhúng: đổi màu nét và (tuỳ chọn) màu chủ đạo, ép phủ kín hộp chứa. */
 /** màu từ JSON slide (có thể do người khác soạn): chỉ nhận dạng #rgb/#rrggbb/tên màu, sai thì dùng mặc định */
 const safeColor = (c: string | undefined, fallback?: string) =>
-  c && /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{3,20}|rgba?\([\d\s.,%]+\))$/.test(c.trim()) ? c.trim() : fallback
+  c && /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{3,20}|rgba?\([\d\s.,%]+\))$/.test(c.trim())
+    ? c.trim()
+    : fallback
 
 export function graphicMarkup(id: string, inkIn = GRAPHIC_INK, mainIn?: string): string {
   const ink = safeColor(inkIn, GRAPHIC_INK) as string
@@ -230,7 +240,10 @@ export function graphicMarkup(id: string, inkIn = GRAPHIC_INK, mainIn?: string):
     void loadGraphics()
     return ''
   }
-  let svg = raw.replace(/^<svg /, '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" ')
+  let svg = raw.replace(
+    /^<svg /,
+    '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" ',
+  )
   const dominant = main ? dominantFill(svg) : null
   if (main && dominant) svg = svg.replaceAll(`fill="${dominant}"`, `fill="${main}"`)
   return svg.replaceAll(GRAPHIC_INK, ink)
@@ -245,7 +258,10 @@ export function graphicMarkup(id: string, inkIn = GRAPHIC_INK, mainIn?: string):
  * Danh mục đồ hoạ RÚT GỌN cho một lượt gọi: đủ nhóm chính của môn + nhóm lớp học (dùng chung),
  * cộng các hình khớp từ khoá của từng slide trong lượt. Danh mục đầy đủ ~8.000 ký tự, gửi lại ở mọi lượt.
  */
-export function graphicShortlistText(categories: readonly string[] | undefined, queries: string[]): string {
+export function graphicShortlistText(
+  categories: readonly string[] | undefined,
+  queries: string[],
+): string {
   const keep = new Set(categories?.length ? [categories[0], 'class'] : ['class'])
   const picked = new Map<string, GraphicMeta>()
   for (const g of SLIDE_GRAPHICS) if (keep.has(g.category)) picked.set(g.id, g)

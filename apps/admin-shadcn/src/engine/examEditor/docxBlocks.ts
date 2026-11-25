@@ -34,14 +34,17 @@ import {
   type IRunOptions,
   type ParagraphChild,
 } from 'docx'
-import type { ExamBlock, ExamDoc, FormatAttrs, RichText, Span } from '@/engine/data/docTypes'
-import type { SummaryAnswerData } from '@/engine/lib/shuffleExam'
+
+import { TF_PARTS, groupAnswers, gridRows, tfParts } from '@/engine/lib/answerKey'
 import { latexToMath } from '@/engine/lib/latexMath'
 import { toDataUrl } from '@/engine/lib/mediaStore'
+
 import { estimateChoiceCols } from './choiceCols'
-import type { BandSetup, PageNumberSetup } from './pageSetup'
 import { splitRichLines } from './convert'
-import { TF_PARTS, groupAnswers, gridRows, tfParts } from '@/engine/lib/answerKey'
+
+import type { BandSetup, PageNumberSetup } from './pageSetup'
+import type { ExamBlock, ExamDoc, FormatAttrs, RichText, Span } from '@/engine/data/docTypes'
+import type { SummaryAnswerData } from '@/engine/lib/shuffleExam'
 
 /** Các tuỳ chọn của `docx` đều readonly; ta dựng dần nên cần bản ghi được. */
 type Mut<T> = { -readonly [K in keyof T]: T[K] }
@@ -80,7 +83,6 @@ function halfPoints(v: unknown): number | undefined {
   const n = Number(m[1])
   return Math.round(m[2]?.toLowerCase() === 'px' ? n * 1.5 : n * 2)
 }
-
 
 /* ---------------------------- ảnh trong dòng ---------------------------- */
 
@@ -123,7 +125,12 @@ function decodeImage(src: string): Decoded | null {
         continue
       }
       if (mk >= 0xc0 && mk <= 0xcf && mk !== 0xc4 && mk !== 0xc8 && mk !== 0xcc) {
-        return { type: 'jpg', data: d, w: (d[i + 7] << 8) | d[i + 8], h: (d[i + 5] << 8) | d[i + 6] }
+        return {
+          type: 'jpg',
+          data: d,
+          w: (d[i + 7] << 8) | d[i + 8],
+          h: (d[i + 5] << 8) | d[i + 6],
+        }
       }
       i += 2 + ((d[i + 2] << 8) | d[i + 3])
     }
@@ -137,13 +144,23 @@ const IMG_DEFAULT_MAX_PX = 529 // ~14 cm
 function imageRun(img: NonNullable<Span['image']>): ParagraphChild[] {
   const dec = decodeImage(img.src)
   if (!dec || !dec.w || !dec.h) return []
-  let w = img.width && img.width > 0 ? Math.min(img.width, IMG_MAX_PX) : Math.min(dec.w, IMG_DEFAULT_MAX_PX)
+  let w =
+    img.width && img.width > 0
+      ? Math.min(img.width, IMG_MAX_PX)
+      : Math.min(dec.w, IMG_DEFAULT_MAX_PX)
   let h = (w * dec.h) / dec.w
   if (h > 900) {
     h = 900
     w = (h * dec.w) / dec.h
   }
-  return [new ImageRun({ type: dec.type, data: dec.data, transformation: { width: Math.round(w), height: Math.round(h) }, altText: { name: 'image', description: img.alt ?? '', title: img.alt ?? '' } })]
+  return [
+    new ImageRun({
+      type: dec.type,
+      data: dec.data,
+      transformation: { width: Math.round(w), height: Math.round(h) },
+      altText: { name: 'image', description: img.alt ?? '', title: img.alt ?? '' },
+    }),
+  ]
 }
 
 /**
@@ -156,7 +173,13 @@ export async function inlineDocImages<T>(value: T): Promise<T> {
     const o = value as Record<string, unknown>
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(o)) {
-      if (k === 'image' && v && typeof v === 'object' && typeof (v as { src?: unknown }).src === 'string' && 'text' in o) {
+      if (
+        k === 'image' &&
+        v &&
+        typeof v === 'object' &&
+        typeof (v as { src?: unknown }).src === 'string' &&
+        'text' in o
+      ) {
         const img = v as NonNullable<Span['image']>
         try {
           out[k] = { ...img, src: await toDataUrl(img.src) }
@@ -206,7 +229,10 @@ function spanRuns(s: Span, base: Base): ParagraphChild[] {
         opts.shading = { type: ShadingType.CLEAR, color: 'auto', fill: hex(a.color) ?? 'FFF3A3' }
         break
       case 'textStyle': {
-        const font = typeof a.fontFamily === 'string' ? a.fontFamily.split(',')[0].replace(/["']/g, '').trim() : undefined
+        const font =
+          typeof a.fontFamily === 'string'
+            ? a.fontFamily.split(',')[0].replace(/["']/g, '').trim()
+            : undefined
         if (font) opts.font = font
         const size = halfPoints(a.fontSize)
         if (size) opts.size = size
@@ -220,7 +246,10 @@ function spanRuns(s: Span, base: Base): ParagraphChild[] {
   const out: ParagraphChild[] = []
   let at = 0
   const text = (t: string) => {
-    if (t) t.split('\n').forEach((line, i) => out.push(new TextRun({ ...opts, text: line, break: i > 0 ? 1 : undefined })))
+    if (t)
+      t.split('\n').forEach((line, i) =>
+        out.push(new TextRun({ ...opts, text: line, break: i > 0 ? 1 : undefined })),
+      )
   }
   for (const m of s.text.matchAll(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g)) {
     text(s.text.slice(at, m.index))
@@ -233,7 +262,10 @@ function spanRuns(s: Span, base: Base): ParagraphChild[] {
 
 /** Rich text → các run; `string` và mảng trộn string + span đều nhận. */
 function runs(rt: RichText, base: Base = {}): ParagraphChild[] {
-  const spans: Span[] = typeof rt === 'string' ? [{ text: rt }] : (rt as Array<Span | string>).map((s) => (typeof s === 'string' ? { text: s } : s))
+  const spans: Span[] =
+    typeof rt === 'string'
+      ? [{ text: rt }]
+      : (rt as Array<Span | string>).map((s) => (typeof s === 'string' ? { text: s } : s))
   return spans.flatMap((s) => spanRuns(s, base))
 }
 
@@ -269,14 +301,18 @@ function fmtOpts(f: FormatAttrs | undefined): IParagraphOptions {
 }
 
 /** Có ảnh (hoặc xuống dòng mềm) thì căn trái: căn đều sẽ giãn cả dòng đứng trước chỗ ngắt. */
-const hasImage = (rt: RichText) => typeof rt !== 'string' && (rt as Array<Span | string>).some((s) => typeof s !== 'string' && s.image)
+const hasImage = (rt: RichText) =>
+  typeof rt !== 'string' &&
+  (rt as Array<Span | string>).some((s) => typeof s !== 'string' && s.image)
 const justify = (rt: RichText) => (hasImage(rt) ? AlignmentType.LEFT : AlignmentType.BOTH)
 
 /** Tách ảnh khỏi đề bài để đặt vào ô bên cạnh (chỉ khi imagePosition là left/right). */
 function sideImage(text: RichText, pos: 'left' | 'right' | undefined) {
   if (!pos || typeof text === 'string') return null
   const spans = text as Array<Span | string>
-  const imgs = spans.filter((s): s is Span => typeof s !== 'string' && !!s.image && !!decodeImage(s.image.src))
+  const imgs = spans.filter(
+    (s): s is Span => typeof s !== 'string' && !!s.image && !!decodeImage(s.image.src),
+  )
   if (!imgs.length) return null
   return { pos, imgs, rest: spans.filter((s) => !imgs.includes(s as Span)) as RichText }
 }
@@ -285,9 +321,13 @@ function sideImage(text: RichText, pos: 'left' | 'right' | undefined) {
 function leadImage(text: RichText) {
   if (typeof text === 'string') return null
   const spans = text as Array<Span | string>
-  const at = spans.findIndex((s) => (typeof s === 'string' ? s.trim() !== '' : !s.image && s.text.trim() !== ''))
+  const at = spans.findIndex((s) =>
+    typeof s === 'string' ? s.trim() !== '' : !s.image && s.text.trim() !== '',
+  )
   if (at <= 0) return null
-  const imgs = spans.slice(0, at).filter((s): s is Span => typeof s !== 'string' && !!s.image && !!decodeImage(s.image.src))
+  const imgs = spans
+    .slice(0, at)
+    .filter((s): s is Span => typeof s !== 'string' && !!s.image && !!decodeImage(s.image.src))
   return imgs.length ? { imgs, rest: spans.slice(at) as RichText } : null
 }
 
@@ -302,7 +342,9 @@ function trailImage(text: RichText) {
     at--
   }
   if (at === 0 || at === spans.length) return null
-  const imgs = spans.slice(at).filter((s): s is Span => typeof s !== 'string' && !!s.image && !!decodeImage(s.image.src))
+  const imgs = spans
+    .slice(at)
+    .filter((s): s is Span => typeof s !== 'string' && !!s.image && !!decodeImage(s.image.src))
   return imgs.length ? { imgs, rest: spans.slice(0, at) as RichText } : null
 }
 
@@ -310,17 +352,26 @@ function trailImage(text: RichText) {
 function sideTable(pos: 'left' | 'right', textParas: Paragraph[], imgs: Span[]) {
   const px = Math.min(Math.max(...imgs.map((s) => s.image?.width ?? 0), 1) || 1, IMG_MAX_PX)
   const imgW = Math.min(Math.round(px * PX) + 200, Math.round(CONTENT_W * 0.5))
-  const imgCell = plainCell(imgW, imgs.map((s) => para(imageRun(s.image!), { alignment: AlignmentType.CENTER })))
+  const imgCell = plainCell(
+    imgW,
+    imgs.map((s) => para(imageRun(s.image!), { alignment: AlignmentType.CENTER })),
+  )
   const txt = plainCell(CONTENT_W - imgW, textParas)
-  const [a, b, wa, wb] = pos === 'left' ? [imgCell, txt, imgW, CONTENT_W - imgW] : [txt, imgCell, CONTENT_W - imgW, imgW]
+  const [a, b, wa, wb] =
+    pos === 'left' ? [imgCell, txt, imgW, CONTENT_W - imgW] : [txt, imgCell, CONTENT_W - imgW, imgW]
   return borderless([new TableRow({ children: [a, b] })], [wa, wb])
 }
 
-const para = (children: ParagraphChild[], o: IParagraphOptions = {}) => new Paragraph({ ...o, children })
+const para = (children: ParagraphChild[], o: IParagraphOptions = {}) =>
+  new Paragraph({ ...o, children })
 
 /** Ô bảng không viền; mỗi dòng (`\n`) của rich text là một đoạn riêng. */
 function plainCell(width: number, lines: Paragraph[]) {
-  return new TableCell({ width: { size: width, type: WidthType.DXA }, borders: NO_BORDERS, children: lines.length ? lines : [para([])] })
+  return new TableCell({
+    width: { size: width, type: WidthType.DXA },
+    borders: NO_BORDERS,
+    children: lines.length ? lines : [para([])],
+  })
 }
 
 function borderless(rows: TableRow[], widths: number[], indent = 0) {
@@ -340,7 +391,11 @@ const chunk = <T>(arr: T[], n: number): T[][] => {
   return out
 }
 
-const fmt = (n: number) => n.toLocaleString('vi-VN', { minimumFractionDigits: n % 1 === 0 ? 0 : 1, maximumFractionDigits: 1 })
+const fmt = (n: number) =>
+  n.toLocaleString('vi-VN', {
+    minimumFractionDigits: n % 1 === 0 ? 0 : 1,
+    maximumFractionDigits: 1,
+  })
 
 interface Ctx {
   q: number
@@ -358,10 +413,18 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       const cell = (rt: RichText, w: number) =>
         plainCell(
           w,
-          splitRichLines(rt).map((line) => para(runs(line, { bold: true, size: 23 }), { alignment: AlignmentType.CENTER })),
+          splitRichLines(rt).map((line) =>
+            para(runs(line, { bold: true, size: 23 }), { alignment: AlignmentType.CENTER }),
+          ),
         )
       const left = Math.round(CONTENT_W * 0.31)
-      return [borderless([new TableRow({ children: [cell(b.left, left), cell(b.right, CONTENT_W - left)] })], [left, CONTENT_W - left]), para([], { spacing: { after: 90 } })]
+      return [
+        borderless(
+          [new TableRow({ children: [cell(b.left, left), cell(b.right, CONTENT_W - left)] })],
+          [left, CONTENT_W - left],
+        ),
+        para([], { spacing: { after: 90 } }),
+      ]
     }
 
     case 'columns': {
@@ -369,13 +432,31 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       const w = Math.floor(ctx.contentW / n)
       const widths = b.cols.map(() => w)
       return [
-        borderless([new TableRow({ children: b.cols.map((rt) => plainCell(w, splitRichLines(rt).map((line) => para(runs(line, { size: SIZE }))))) })], widths),
+        borderless(
+          [
+            new TableRow({
+              children: b.cols.map((rt) =>
+                plainCell(
+                  w,
+                  splitRichLines(rt).map((line) => para(runs(line, { size: SIZE }))),
+                ),
+              ),
+            }),
+          ],
+          widths,
+        ),
         para([], { spacing: { after: 90 } }),
       ]
     }
 
     case 'title':
-      return [para(runs(b.text, { bold: true, size: 30, caps: true }), { alignment: AlignmentType.CENTER, spacing: { after: 90 }, ...fmtOpts(b.format) })]
+      return [
+        para(runs(b.text, { bold: true, size: 30, caps: true }), {
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 90 },
+          ...fmtOpts(b.format),
+        }),
+      ]
 
     case 'meta':
       return [
@@ -390,7 +471,12 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       ]
 
     case 'student':
-      return [para(runs(b.text, { size: 25 }), { spacing: { before: 120, after: 150 }, ...fmtOpts(b.format) })]
+      return [
+        para(runs(b.text, { size: 25 }), {
+          spacing: { before: 120, after: 150 },
+          ...fmtOpts(b.format),
+        }),
+      ]
 
     case 'heading': {
       const level = b.level ?? 1
@@ -407,13 +493,23 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
     }
 
     case 'paragraph':
-      return [para(runs(b.text), { alignment: AlignmentType.BOTH, spacing: { after: 90 }, ...fmtOpts(b.format) })]
+      return [
+        para(runs(b.text), {
+          alignment: AlignmentType.BOTH,
+          spacing: { after: 90 },
+          ...fmtOpts(b.format),
+        }),
+      ]
 
     case 'bullets': {
       const instance = ++ctx.lists
       return b.items.map((item, n) =>
         para(runs(item), {
-          numbering: { reference: b.ordered ? 'ord' : 'bul', level: Math.min(b.levels?.[n] ?? 0, 2), instance },
+          numbering: {
+            reference: b.ordered ? 'ord' : 'bul',
+            level: Math.min(b.levels?.[n] ?? 0, 2),
+            instance,
+          },
           ...fmtOpts(b.format),
         }),
       )
@@ -425,7 +521,12 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       return [
         borderless(
           chunk(b.cells, cols).map(
-            (row) => new TableRow({ children: Array.from({ length: cols }, (_, i) => plainCell(w, row[i] != null ? [para(runs(row[i]), fmtOpts(b.format))] : [])) }),
+            (row) =>
+              new TableRow({
+                children: Array.from({ length: cols }, (_, i) =>
+                  plainCell(w, row[i] != null ? [para(runs(row[i]), fmtOpts(b.format))] : []),
+                ),
+              }),
           ),
           Array(cols).fill(w),
         ),
@@ -438,15 +539,30 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       const lead = side ? null : leadImage(b.text)
       const trail = side || lead ? null : trailImage(b.text)
       const headText = side ? side.rest : lead ? lead.rest : trail ? trail.rest : b.text
-      const pre: Out[] = lead ? [para(lead.imgs.flatMap((s) => imageRun(s.image!)), { spacing: { before: 120 }, keepNext: true, ...fmtOpts(b.format) })] : []
-      const headPara = para([new TextRun({ text: `Câu ${ctx.q}. `, bold: true }), ...runs(headText)], {
-        alignment: justify(headText),
-        spacing: { before: 120, after: 45 },
-        keepNext: true,
-        ...fmtOpts(b.format),
-      })
+      const pre: Out[] = lead
+        ? [
+            para(
+              lead.imgs.flatMap((s) => imageRun(s.image!)),
+              { spacing: { before: 120 }, keepNext: true, ...fmtOpts(b.format) },
+            ),
+          ]
+        : []
+      const headPara = para(
+        [new TextRun({ text: `Câu ${ctx.q}. `, bold: true }), ...runs(headText)],
+        {
+          alignment: justify(headText),
+          spacing: { before: 120, after: 45 },
+          keepNext: true,
+          ...fmtOpts(b.format),
+        },
+      )
       const trailParas = trail
-        ? [para(trail.imgs.flatMap((s) => imageRun(s.image!)), { alignment: AlignmentType.CENTER, spacing: { after: 45 }, keepNext: true })]
+        ? [
+            para(
+              trail.imgs.flatMap((s) => imageRun(s.image!)),
+              { alignment: AlignmentType.CENTER, spacing: { after: 45 }, keepNext: true },
+            ),
+          ]
         : []
       const head: Out = side ? sideTable(side.pos, [headPara], side.imgs) : headPara
       // trả lời ngắn: 4 ô trống điền đáp số
@@ -460,7 +576,15 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
             rows: [
               new TableRow({
                 height: { value: box, rule: HeightRule.EXACT },
-                children: Array.from({ length: 4 }, () => new TableCell({ width: { size: box, type: WidthType.DXA }, borders: BOX, children: [para([])] })),
+                children: Array.from(
+                  { length: 4 },
+                  () =>
+                    new TableCell({
+                      width: { size: box, type: WidthType.DXA },
+                      borders: BOX,
+                      children: [para([])],
+                    }),
+                ),
               }),
             ],
             width: { size: box * 4, type: WidthType.DXA },
@@ -477,16 +601,29 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       const cols = tf ? 1 : estimateChoiceCols(b.options.map((o) => o.text))
       // xếp cột bằng điểm dừng tab (không dùng bảng): mở trong Word không hiện lưới / tay nắm bảng
       const w = Math.floor((CONTENT_W - OPT_INDENT) / cols)
-      const item = (o: (typeof b.options)[number]) => [new TextRun({ text: `${o.label}${tf ? ')' : '.'} `, bold: true }), ...runs(o.text)]
+      const item = (o: (typeof b.options)[number]) => [
+        new TextRun({ text: `${o.label}${tf ? ')' : '.'} `, bold: true }),
+        ...runs(o.text),
+      ]
       const lines = chunk(b.options, cols).map((row, r, all) => {
         const last = r === all.length - 1
         const spacing = { after: last ? 90 : 30 }
-        if (cols === 1) return para(item(row[0]), { ...fmtOpts(row[0].format), indent: { left: OPT_INDENT }, spacing })
+        if (cols === 1)
+          return para(item(row[0]), {
+            ...fmtOpts(row[0].format),
+            indent: { left: OPT_INDENT },
+            spacing,
+          })
         return para(
-          row.flatMap((o, i) => (i ? [new TextRun({ children: [new Tab()] }), ...item(o)] : item(o))),
+          row.flatMap((o, i) =>
+            i ? [new TextRun({ children: [new Tab()] }), ...item(o)] : item(o),
+          ),
           {
             indent: { left: OPT_INDENT },
-            tabStops: Array.from({ length: cols - 1 }, (_, i) => ({ type: TabStopType.LEFT, position: OPT_INDENT + w * (i + 1) })),
+            tabStops: Array.from({ length: cols - 1 }, (_, i) => ({
+              type: TabStopType.LEFT,
+              position: OPT_INDENT + w * (i + 1),
+            })),
             spacing,
           },
         )
@@ -499,14 +636,31 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
       const side = sideImage(b.text, b.imagePosition)
       const lead = side ? null : leadImage(b.text)
       const headText = side ? side.rest : lead ? lead.rest : b.text
-      const pre: Out[] = lead ? [para(lead.imgs.flatMap((s) => imageRun(s.image!)), { spacing: { before: 120 }, keepNext: true, ...fmtOpts(b.format) })] : []
-      const headPara = para([new TextRun({ text: `Bài ${ctx.essay}${b.score ? ` (${fmt(b.score)} điểm)` : ''}. `, bold: true }), ...runs(headText)], {
-        alignment: justify(headText),
-        spacing: { before: 120, after: 45 },
-        ...fmtOpts(b.format),
-      })
+      const pre: Out[] = lead
+        ? [
+            para(
+              lead.imgs.flatMap((s) => imageRun(s.image!)),
+              { spacing: { before: 120 }, keepNext: true, ...fmtOpts(b.format) },
+            ),
+          ]
+        : []
+      const headPara = para(
+        [
+          new TextRun({
+            text: `Bài ${ctx.essay}${b.score ? ` (${fmt(b.score)} điểm)` : ''}. `,
+            bold: true,
+          }),
+          ...runs(headText),
+        ],
+        {
+          alignment: justify(headText),
+          spacing: { before: 120, after: 45 },
+          ...fmtOpts(b.format),
+        },
+      )
       const out: Out[] = [...pre, side ? sideTable(side.pos, [headPara], side.imgs) : headPara]
-      for (const s of b.sub ?? []) out.push(para(runs(s), { indent: { left: OPT_INDENT }, spacing: { after: 45 } }))
+      for (const s of b.sub ?? [])
+        out.push(para(runs(s), { indent: { left: OPT_INDENT }, spacing: { after: 45 } }))
       return out
     }
 
@@ -520,12 +674,24 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
           shading: shade ? { type: ShadingType.CLEAR, color: 'auto', fill: 'F2F2F2' } : undefined,
           children: [para(children, { alignment: AlignmentType.CENTER })],
         })
-      const head = (text: string, width = labelW) => cell([new TextRun({ text, bold: true, size: 24 })], width, true)
+      const head = (text: string, width = labelW) =>
+        cell([new TextRun({ text, bold: true, size: 24 })], width, true)
       const table = (rows: TableRow[], cols: number[]) =>
-        new Table({ rows, width: { size: cols.reduce((a, c) => a + c, 0), type: WidthType.DXA }, columnWidths: cols, layout: TableLayoutType.FIXED })
+        new Table({
+          rows,
+          width: { size: cols.reduce((a, c) => a + c, 0), type: WidthType.DXA },
+          columnWidths: cols,
+          layout: TableLayoutType.FIXED,
+        })
       const out: Array<Paragraph | Table> = [para([], { spacing: { after: 60 } })]
       for (const g of groupAnswers(b.items)) {
-        if (g.label) out.push(para([new TextRun({ text: g.label, bold: true, italics: true })], { spacing: { before: 120, after: 60 }, keepNext: true }))
+        if (g.label)
+          out.push(
+            para([new TextRun({ text: g.label, bold: true, italics: true })], {
+              spacing: { before: 120, after: 60 },
+              keepNext: true,
+            }),
+          )
         if (g.kind === 'tf') {
           const w = 1300
           out.push(
@@ -535,7 +701,12 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
                 ...g.items.map(
                   (it) =>
                     new TableRow({
-                      children: [head(String(it.no)), ...tfParts(it.answer).map((v) => cell([new TextRun({ text: v, bold: true, size: 24 })], w))],
+                      children: [
+                        head(String(it.no)),
+                        ...tfParts(it.answer).map((v) =>
+                          cell([new TextRun({ text: v, bold: true, size: 24 })], w),
+                        ),
+                      ],
                     }),
                 ),
               ],
@@ -548,8 +719,20 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
           out.push(
             table(
               rows.flatMap((row) => [
-                new TableRow({ children: [head('Câu'), ...row.map((c) => cell(c ? [new TextRun({ text: String(c.no), size: 24 })] : [], w))] }),
-                new TableRow({ children: [head('Đáp án'), ...row.map((c) => cell(c ? runs(c.answer, { bold: true, size: 24 }) : [], w))] }),
+                new TableRow({
+                  children: [
+                    head('Câu'),
+                    ...row.map((c) =>
+                      cell(c ? [new TextRun({ text: String(c.no), size: 24 })] : [], w),
+                    ),
+                  ],
+                }),
+                new TableRow({
+                  children: [
+                    head('Đáp án'),
+                    ...row.map((c) => cell(c ? runs(c.answer, { bold: true, size: 24 }) : [], w)),
+                  ],
+                }),
               ]),
               [labelW, ...Array(per).fill(w)],
             ),
@@ -562,9 +745,18 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
 
     case 'rubric': {
       return [
-        ...(b.title ? [para(runs(b.title, { bold: true, size: 25, caps: true }), { spacing: { before: 180, after: 120 }, keepNext: true })] : []),
+        ...(b.title
+          ? [
+              para(runs(b.title, { bold: true, size: 25, caps: true }), {
+                spacing: { before: 180, after: 120 },
+                keepNext: true,
+              }),
+            ]
+          : []),
         // nhãn "1." đã nằm trong dữ liệu, không đánh số tự động nữa (tránh "1. 1.")
-        ...b.items.map((i) => para([new TextRun({ text: `${i.label} `, bold: true }), ...runs(i.text)])),
+        ...b.items.map((i) =>
+          para([new TextRun({ text: `${i.label} `, bold: true }), ...runs(i.text)]),
+        ),
       ]
     }
 
@@ -573,12 +765,24 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
 
     case 'toc':
       return [
-        para(runs('MỤC LỤC', { bold: true, size: 26 }), { alignment: AlignmentType.CENTER, spacing: { after: 120 } }),
-        new TableOfContents('Mục lục', { hyperlink: true, useAppliedParagraphOutlineLevel: true, headingStyleRange: '1-3' }),
+        para(runs('MỤC LỤC', { bold: true, size: 26 }), {
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 120 },
+        }),
+        new TableOfContents('Mục lục', {
+          hyperlink: true,
+          useAppliedParagraphOutlineLevel: true,
+          headingStyleRange: '1-3',
+        }),
       ]
 
     case 'divider':
-      return [para([], { border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: '999999', space: 1 } }, spacing: { before: 120, after: 120 } })]
+      return [
+        para([], {
+          border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: '999999', space: 1 } },
+          spacing: { before: 120, after: 120 },
+        }),
+      ]
 
     case 'table': {
       const occupied = new Set<string>()
@@ -623,7 +827,12 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
           const fill = hex(c.shading) ?? (c.header ? 'F2F2F2' : undefined)
           const paras = (lines.length ? lines : ['']).map((l) =>
             para(runs(l, { bold: c.header, size: SIZE }), {
-              alignment: c.align === 'center' ? AlignmentType.CENTER : c.align === 'right' ? AlignmentType.RIGHT : AlignmentType.LEFT,
+              alignment:
+                c.align === 'center'
+                  ? AlignmentType.CENTER
+                  : c.align === 'right'
+                    ? AlignmentType.RIGHT
+                    : AlignmentType.LEFT,
               spacing: { before: 30, after: 30 },
             }),
           )
@@ -659,7 +868,14 @@ function blockToDocx(b: ExamBlock, ctx: Ctx): Out[] {
 export type DocxMargins = { top: number; right: number; bottom: number; left: number }
 const twip = (cm: number) => Math.round(cm * 567)
 
-export type DocxOpts = { landscape?: boolean; paper?: { w: number; h: number }; margins?: DocxMargins; pageNumber?: PageNumberSetup; header?: BandSetup; footer?: BandSetup }
+export type DocxOpts = {
+  landscape?: boolean
+  paper?: { w: number; h: number }
+  margins?: DocxMargins
+  pageNumber?: PageNumberSetup
+  header?: BandSetup
+  footer?: BandSetup
+}
 
 /**
  * Đầu/chân trang: một đoạn có tab giữa + phải, ô số trang là trường PAGE.
@@ -684,8 +900,17 @@ function bandSection(opts: DocxOpts | undefined, contentW: number) {
     }
     const slots = { left: runs('left'), center: runs('center'), right: runs('right') }
     return new Paragraph({
-      tabStops: [{ type: TabStopType.CENTER, position: Math.round(contentW / 2) }, { type: TabStopType.RIGHT, position: contentW }],
-      children: [...slots.left, new TextRun({ children: [new Tab()] }), ...slots.center, new TextRun({ children: [new Tab()] }), ...slots.right],
+      tabStops: [
+        { type: TabStopType.CENTER, position: Math.round(contentW / 2) },
+        { type: TabStopType.RIGHT, position: contentW },
+      ],
+      children: [
+        ...slots.left,
+        new TextRun({ children: [new Tab()] }),
+        ...slots.center,
+        new TextRun({ children: [new Tab()] }),
+        ...slots.right,
+      ],
     })
   }
   let titlePage = false
@@ -693,15 +918,25 @@ function bandSection(opts: DocxOpts | undefined, contentW: number) {
     const d = para(place, 2)
     const f = para(place, 1)
     if (!d && !f) return undefined
-    const make = (p: Paragraph | null) => (place === 'top' ? new Header({ children: [p ?? new Paragraph({})] }) : new Footer({ children: [p ?? new Paragraph({})] }))
-    const differs = !!d !== !!f || (!!pn?.show && pn.from > 1 && (pn.place ?? 'bottom') === place) ||
+    const make = (p: Paragraph | null) =>
+      place === 'top'
+        ? new Header({ children: [p ?? new Paragraph({})] })
+        : new Footer({ children: [p ?? new Paragraph({})] })
+    const differs =
+      !!d !== !!f ||
+      (!!pn?.show && pn.from > 1 && (pn.place ?? 'bottom') === place) ||
       !!(place === 'top' ? opts?.header : opts?.footer)?.skipFirst
     if (differs) titlePage = true
     return differs ? { default: make(d), first: make(f) } : { default: make(d) }
   }
   const headers = build('top') as { default: Header; first?: Header } | undefined
   const footers = build('bottom') as { default: Footer; first?: Footer } | undefined
-  return { titlePage, start: pn?.show ? Math.max(0, pn.startAt - pn.from + 1) : undefined, headers, footers }
+  return {
+    titlePage,
+    start: pn?.show ? Math.max(0, pn.startAt - pn.from + 1) : undefined,
+    headers,
+    footers,
+  }
 }
 
 export function buildDocx(doc: ExamDoc, opts?: DocxOpts): Document {
@@ -717,7 +952,11 @@ export function buildDocx(doc: ExamDoc, opts?: DocxOpts): Document {
   const ctx: Ctx = { q: 0, essay: 0, lists: 0, contentW }
   const pn = bandSection(opts, contentW)
   const children = doc.blocks.flatMap((b) => blockToDocx(b, ctx))
-  const level = (i: number, format: (typeof LevelFormat)[keyof typeof LevelFormat], text: string) => ({
+  const level = (
+    i: number,
+    format: (typeof LevelFormat)[keyof typeof LevelFormat],
+    text: string,
+  ) => ({
     level: i,
     format,
     text,
@@ -729,11 +968,32 @@ export function buildDocx(doc: ExamDoc, opts?: DocxOpts): Document {
     creator: 'Đề Thi Hub',
     // mục lục là trường TOC: Word hỏi cập nhật trường khi mở để điền số trang
     ...(doc.blocks.some((b) => b.type === 'toc') ? { features: { updateFields: true } } : {}),
-    styles: { default: { document: { run: { font: 'Times New Roman', size: SIZE }, paragraph: { spacing: { line: 360 } } } } },
+    styles: {
+      default: {
+        document: {
+          run: { font: 'Times New Roman', size: SIZE },
+          paragraph: { spacing: { line: 360 } },
+        },
+      },
+    },
     numbering: {
       config: [
-        { reference: 'bul', levels: [level(0, LevelFormat.BULLET, '•'), level(1, LevelFormat.BULLET, '–'), level(2, LevelFormat.BULLET, '·')] },
-        { reference: 'ord', levels: [level(0, LevelFormat.DECIMAL, '%1.'), level(1, LevelFormat.LOWER_LETTER, '%2.'), level(2, LevelFormat.LOWER_ROMAN, '%3.')] },
+        {
+          reference: 'bul',
+          levels: [
+            level(0, LevelFormat.BULLET, '•'),
+            level(1, LevelFormat.BULLET, '–'),
+            level(2, LevelFormat.BULLET, '·'),
+          ],
+        },
+        {
+          reference: 'ord',
+          levels: [
+            level(0, LevelFormat.DECIMAL, '%1.'),
+            level(1, LevelFormat.LOWER_LETTER, '%2.'),
+            level(2, LevelFormat.LOWER_ROMAN, '%3.'),
+          ],
+        },
       ],
     },
     sections: [
@@ -741,7 +1001,11 @@ export function buildDocx(doc: ExamDoc, opts?: DocxOpts): Document {
         properties: {
           page: {
             size: landscape
-              ? { width: Math.min(sw, sh), height: Math.max(sw, sh), orientation: PageOrientation.LANDSCAPE }
+              ? {
+                  width: Math.min(sw, sh),
+                  height: Math.max(sw, sh),
+                  orientation: PageOrientation.LANDSCAPE,
+                }
               : { width: sw, height: sh },
             margin,
             ...(pn.start !== undefined ? { pageNumbers: { start: pn.start } } : {}),
@@ -774,7 +1038,11 @@ export function buildAnswerSheetDocx(code: string, pngDataUrl: string): Document
               type: dec.type,
               data: dec.data,
               transformation: { width: w, height: h },
-              altText: { name: `phieu-${code}`, description: `Phiếu trả lời mã đề ${code}`, title: `Phiếu trả lời mã đề ${code}` },
+              altText: {
+                name: `phieu-${code}`,
+                description: `Phiếu trả lời mã đề ${code}`,
+                title: `Phiếu trả lời mã đề ${code}`,
+              },
             }),
           ],
           { alignment: AlignmentType.CENTER, spacing: { before: 0, after: 0, line: 240 } },
@@ -787,7 +1055,12 @@ export function buildAnswerSheetDocx(code: string, pngDataUrl: string): Document
     creator: 'Đề Thi Hub',
     sections: [
       {
-        properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: margin, bottom: margin, left: margin, right: margin } } },
+        properties: {
+          page: {
+            size: { width: PAGE_W, height: PAGE_H },
+            margin: { top: margin, bottom: margin, left: margin, right: margin },
+          },
+        },
         children,
       },
     ],
@@ -804,7 +1077,12 @@ export function buildSummaryDocx(doc: ExamDoc, summary: SummaryAnswerData): Docu
       width: { size: width, type: WidthType.DXA },
       borders: BOX,
       shading: shade ? { type: ShadingType.CLEAR, color: 'auto', fill: 'F2F2F2' } : undefined,
-      children: [para([new TextRun({ text, bold, size: 22 })], { alignment: AlignmentType.CENTER, spacing: { before: 30, after: 30, line: 260 } })],
+      children: [
+        para([new TextRun({ text, bold, size: 22 })], {
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 30, after: 30, line: 260 },
+        }),
+      ],
     })
 
   const buildTables = (firstColLabel: string, rows: SummaryAnswerData['byOriginal']) => {
@@ -817,13 +1095,19 @@ export function buildSummaryDocx(doc: ExamDoc, summary: SummaryAnswerData): Docu
       const widths = [firstW, ...grp.map(() => colW)]
       const headerRow = new TableRow({
         tableHeader: true,
-        children: [cell(firstColLabel, firstW, true, true), ...grp.map((ci) => cell(`Mã ${summary.codes[ci]}`, colW, true, true))],
+        children: [
+          cell(firstColLabel, firstW, true, true),
+          ...grp.map((ci) => cell(`Mã ${summary.codes[ci]}`, colW, true, true)),
+        ],
       })
       const dataRows = rows.map(
         (r) =>
           new TableRow({
             cantSplit: true,
-            children: [cell(`Câu ${r.no}`, firstW, true, true), ...grp.map((ci) => cell(r.answers[ci] || '?', colW, false, true))],
+            children: [
+              cell(`Câu ${r.no}`, firstW, true, true),
+              ...grp.map((ci) => cell(r.answers[ci] || '?', colW, false, true)),
+            ],
           }),
       )
       out.push(
@@ -840,33 +1124,73 @@ export function buildSummaryDocx(doc: ExamDoc, summary: SummaryAnswerData): Docu
   }
 
   const children: Out[] = [
-    para([new TextRun({ text: 'BẢNG ĐÁP ÁN TỔNG HỢP CÁC MÃ ĐỀ', bold: true, size: 28, allCaps: true })], {
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
-    }),
-    para([new TextRun({ text: `${doc.title}${doc.subject ? ` • Môn: ${doc.subject}` : ''}`, italics: true, size: 24 })], {
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 180 },
-    }),
+    para(
+      [
+        new TextRun({
+          text: 'BẢNG ĐÁP ÁN TỔNG HỢP CÁC MÃ ĐỀ',
+          bold: true,
+          size: 28,
+          allCaps: true,
+        }),
+      ],
+      {
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 60 },
+      },
+    ),
+    para(
+      [
+        new TextRun({
+          text: `${doc.title}${doc.subject ? ` • Môn: ${doc.subject}` : ''}`,
+          italics: true,
+          size: 24,
+        }),
+      ],
+      {
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 180 },
+      },
+    ),
     para([new TextRun({ text: '1. Bảng đáp án theo thứ tự câu đề gốc', bold: true, size: 25 })], {
       spacing: { before: 120, after: 80 },
       keepNext: true,
     }),
     ...buildTables('Câu (gốc)', summary.byOriginal),
-    para([new TextRun({ text: '2. Bảng đáp án theo thứ tự câu từng mã đề (chấm tay)', bold: true, size: 25 })], {
-      spacing: { before: 160, after: 80 },
-      keepNext: true,
-    }),
+    para(
+      [
+        new TextRun({
+          text: '2. Bảng đáp án theo thứ tự câu từng mã đề (chấm tay)',
+          bold: true,
+          size: 25,
+        }),
+      ],
+      {
+        spacing: { before: 160, after: 80 },
+        keepNext: true,
+      },
+    ),
     ...buildTables('Câu', summary.byVersion),
   ]
 
   return new Document({
     title: `${doc.title} - Bảng đáp án tổng hợp`,
     creator: 'Đề Thi Hub',
-    styles: { default: { document: { run: { font: 'Times New Roman', size: SIZE }, paragraph: { spacing: { line: 300 } } } } },
+    styles: {
+      default: {
+        document: {
+          run: { font: 'Times New Roman', size: SIZE },
+          paragraph: { spacing: { line: 300 } },
+        },
+      },
+    },
     sections: [
       {
-        properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN_V, bottom: MARGIN_V, left: MARGIN_H, right: MARGIN_H } } },
+        properties: {
+          page: {
+            size: { width: PAGE_W, height: PAGE_H },
+            margin: { top: MARGIN_V, bottom: MARGIN_V, left: MARGIN_H, right: MARGIN_H },
+          },
+        },
         children,
       },
     ],

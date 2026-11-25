@@ -2,10 +2,14 @@
 import { Extension } from '@tiptap/core'
 import { NodeSelection } from '@tiptap/pm/state'
 import { CellSelection } from '@tiptap/pm/tables'
-import type { Editor } from '@tiptap/core'
+
 import { getTopBlock } from './formatState'
 
-function tableTarget(editor: Editor): { pos: number; node: ReturnType<typeof editor.state.doc.nodeAt> } | null {
+import type { Editor } from '@tiptap/core'
+
+function tableTarget(
+  editor: Editor,
+): { pos: number; node: ReturnType<typeof editor.state.doc.nodeAt> } | null {
   const $from = editor.state.selection.$from
   for (let depth = $from.depth; depth > 0; depth--) {
     const node = $from.node(depth)
@@ -41,7 +45,8 @@ export function deleteCurrentTable(editor: Editor): boolean {
   const answerKey = (() => {
     let found: { pos: number; size: number } | undefined
     state.doc.forEach((child, offset) => {
-      if (!found && child.type.name === 'examAnswerKey') found = { pos: offset, size: child.nodeSize }
+      if (!found && child.type.name === 'examAnswerKey')
+        found = { pos: offset, size: child.nodeSize }
     })
     return found
   })()
@@ -84,7 +89,11 @@ function deleteSelectedObject(editor: Editor): boolean {
       return editor.commands.deleteSelection()
     }
   }
-  if (selection instanceof CellSelection && selection.isRowSelection() && selection.isColSelection()) {
+  if (
+    selection instanceof CellSelection &&
+    selection.isRowSelection() &&
+    selection.isColSelection()
+  ) {
     return deleteCurrentTable(editor)
   }
   return false

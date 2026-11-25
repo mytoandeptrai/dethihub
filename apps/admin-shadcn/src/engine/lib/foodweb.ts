@@ -83,33 +83,42 @@ export const DEFAULT_FOODWEB_CHAIN: FoodWebSpec = {
   connectDecomposers: true,
 }
 
-export const FOODWEB_HELP: Array<{ group: string; items: Array<{ code: string; what: string }> }> = [
-  {
-    group: 'Cú pháp cơ bản',
-    items: [
-      { code: 'Cỏ -> Thỏ -> Cáo', what: 'Chuỗi thức ăn: mũi tên chỉ chiều năng lượng' },
-      { code: 'Cỏ -> Thỏ, Chuột, Châu chấu', what: 'Một loài bị nhiều loài ăn (dấu phẩy)' },
-      { code: 'Thỏ, Chuột -> Cáo', what: 'Nhiều loài làm thức ăn cho một loài' },
-      { code: 'Vi sinh vật: phân giải', what: 'Đặt riêng làm sinh vật phân giải' },
-    ],
-  },
-  {
-    group: 'Ẩn tên làm câu hỏi',
-    items: [
-      { code: '[A]  hoặc  ?A', what: 'Ô ẩn tên, hiện chữ A (dạng câu hỏi "A là loài nào")' },
-      { code: 'Cỏ -> [A] -> [B] -> Cáo', what: 'Nối các ô ẩn vào lưới thức ăn' },
-    ],
-  },
-  {
-    group: 'Tuỳ chọn',
-    items: [
-      { code: 'Bậc dinh dưỡng', what: 'Bậc 1 dưới cùng (hoặc trái qua phải); tự tính bậc cao nhất' },
-      { code: 'SV phân giải', what: 'Tách riêng bên phải/đáy, tuỳ chọn nối mũi tên từ mọi loài' },
-    ],
-  },
-]
+export const FOODWEB_HELP: Array<{ group: string; items: Array<{ code: string; what: string }> }> =
+  [
+    {
+      group: 'Cú pháp cơ bản',
+      items: [
+        { code: 'Cỏ -> Thỏ -> Cáo', what: 'Chuỗi thức ăn: mũi tên chỉ chiều năng lượng' },
+        { code: 'Cỏ -> Thỏ, Chuột, Châu chấu', what: 'Một loài bị nhiều loài ăn (dấu phẩy)' },
+        { code: 'Thỏ, Chuột -> Cáo', what: 'Nhiều loài làm thức ăn cho một loài' },
+        { code: 'Vi sinh vật: phân giải', what: 'Đặt riêng làm sinh vật phân giải' },
+      ],
+    },
+    {
+      group: 'Ẩn tên làm câu hỏi',
+      items: [
+        { code: '[A]  hoặc  ?A', what: 'Ô ẩn tên, hiện chữ A (dạng câu hỏi "A là loài nào")' },
+        { code: 'Cỏ -> [A] -> [B] -> Cáo', what: 'Nối các ô ẩn vào lưới thức ăn' },
+      ],
+    },
+    {
+      group: 'Tuỳ chọn',
+      items: [
+        {
+          code: 'Bậc dinh dưỡng',
+          what: 'Bậc 1 dưới cùng (hoặc trái qua phải); tự tính bậc cao nhất',
+        },
+        { code: 'SV phân giải', what: 'Tách riêng bên phải/đáy, tuỳ chọn nối mũi tên từ mọi loài' },
+      ],
+    },
+  ]
 
-function normalizeKey(token: string): { key: string; name: string; isPlaceholder: boolean; label?: string } {
+function normalizeKey(token: string): {
+  key: string
+  name: string
+  isPlaceholder: boolean
+  label?: string
+} {
   const t = token.trim()
   if (t.startsWith('?') && t.length > 1) {
     const label = t.slice(1).trim()
@@ -159,7 +168,9 @@ export function parseFoodWeb(text: string): ParsedFoodWeb {
     if (!line || line.startsWith('#') || line.startsWith('//')) return
 
     // 1. Kiểm tra khai báo nhóm / vai trò: "Tên loài: phân giải"
-    const roleMatch = line.match(/^([^:->→]+?)\s*:\s*(phân giải|sv\s*phân giải|sinh vật\s*phân giải|decomposer)\s*$/i)
+    const roleMatch = line.match(
+      /^([^:->→]+?)\s*:\s*(phân giải|sv\s*phân giải|sinh vật\s*phân giải|decomposer)\s*$/i,
+    )
     if (roleMatch) {
       ensureNode(roleMatch[1], true)
       return
@@ -178,8 +189,14 @@ export function parseFoodWeb(text: string): ParsedFoodWeb {
       }
 
       for (let i = 0; i < parts.length - 1; i++) {
-        const srcParts = parts[i].split(',').map((s) => s.trim()).filter(Boolean)
-        const tgtParts = parts[i + 1].split(',').map((s) => s.trim()).filter(Boolean)
+        const srcParts = parts[i]
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+        const tgtParts = parts[i + 1]
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
         if (!srcParts.length || !tgtParts.length) {
           errors.push({ line: ln, msg: 'Mũi tên thiếu loài trước hoặc sau "->"' })
           continue
@@ -211,13 +228,19 @@ export function parseFoodWeb(text: string): ParsedFoodWeb {
     }
 
     // 3. Dòng chỉ có danh sách loài đơn lẻ không có mũi tên
-    const singleItems = line.split(',').map((s) => s.trim()).filter(Boolean)
+    const singleItems = line
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
     if (singleItems.length) {
       for (const item of singleItems) {
         ensureNode(item, false)
       }
     } else {
-      errors.push({ line: ln, msg: 'Dòng không đúng cú pháp (cần "Loài A -> Loài B" hoặc "Loài: phân giải")' })
+      errors.push({
+        line: ln,
+        msg: 'Dòng không đúng cú pháp (cần "Loài A -> Loài B" hoặc "Loài: phân giải")',
+      })
     }
   })
 
@@ -249,7 +272,9 @@ export function parseFoodWeb(text: string): ParsedFoodWeb {
         hasCycle = true
         cycleEdges.add(`${u}->${v}`)
         const cycleStartIndex = cyclePath.indexOf(v)
-        const loopNodes = [...cyclePath.slice(cycleStartIndex), v].map((k) => nodeMap.get(k)?.name ?? k)
+        const loopNodes = [...cyclePath.slice(cycleStartIndex), v].map(
+          (k) => nodeMap.get(k)?.name ?? k,
+        )
         const edgeObj = edges.find((e) => e.fromKey === u && e.toKey === v)
         errors.push({
           line: edgeObj?.line ?? 1,
@@ -403,15 +428,34 @@ function lineIntersectsBox(
 
   // Giao điểm với 4 cạnh
   const edges = [
-    [{ x: box.x0, y: box.y0 }, { x: box.x1, y: box.y0 }],
-    [{ x: box.x1, y: box.y0 }, { x: box.x1, y: box.y1 }],
-    [{ x: box.x1, y: box.y1 }, { x: box.x0, y: box.y1 }],
-    [{ x: box.x0, y: box.y1 }, { x: box.x0, y: box.y0 }],
+    [
+      { x: box.x0, y: box.y0 },
+      { x: box.x1, y: box.y0 },
+    ],
+    [
+      { x: box.x1, y: box.y0 },
+      { x: box.x1, y: box.y1 },
+    ],
+    [
+      { x: box.x1, y: box.y1 },
+      { x: box.x0, y: box.y1 },
+    ],
+    [
+      { x: box.x0, y: box.y1 },
+      { x: box.x0, y: box.y0 },
+    ],
   ]
-  const ccw = (a: { x: number; y: number }, b: { x: number; y: number }, c: { x: number; y: number }) =>
-    (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
-  const intersect = (a: { x: number; y: number }, b: { x: number; y: number }, c: { x: number; y: number }, d: { x: number; y: number }) =>
-    ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d)
+  const ccw = (
+    a: { x: number; y: number },
+    b: { x: number; y: number },
+    c: { x: number; y: number },
+  ) => (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
+  const intersect = (
+    a: { x: number; y: number },
+    b: { x: number; y: number },
+    c: { x: number; y: number },
+    d: { x: number; y: number },
+  ) => ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d)
 
   return edges.some(([ea, eb]) => intersect(p1, p2, ea, eb))
 }
@@ -428,15 +472,23 @@ function bezierIntersectsBox(
 ): boolean {
   for (let t = 0.1; t <= 0.9; t += 0.1) {
     const mt = 1 - t
-    const x = mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x
-    const y = mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y
+    const x =
+      mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x
+    const y =
+      mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y
     if (x >= box.x0 && x <= box.x1 && y >= box.y0 && y <= box.y1) return true
   }
   return false
 }
 
 export function renderFoodWebSvg(spec: FoodWebSpec, desc: string): ToolImage {
-  const { text = '', direction = 'bottom-up', nodeStyle = 'box', showLevels = false, connectDecomposers = true } = spec
+  const {
+    text = '',
+    direction = 'bottom-up',
+    nodeStyle = 'box',
+    showLevels = false,
+    connectDecomposers = true,
+  } = spec
 
   const parsed = parseFoodWeb(text)
   const { nodes, edges, errors, maxLevel } = parsed
@@ -695,7 +747,11 @@ export function renderFoodWebSvg(spec: FoodWebSpec, desc: string): ToolImage {
           const testCp2 = { x: pEnd.x + off, y: pEnd.y + 25 }
           let collides = false
           for (const [k, box] of boxes) {
-            if (k !== u.key && k !== v.key && bezierIntersectsBox(pStart, testCp1, testCp2, pEnd, box)) {
+            if (
+              k !== u.key &&
+              k !== v.key &&
+              bezierIntersectsBox(pStart, testCp1, testCp2, pEnd, box)
+            ) {
               collides = true
               break
             }
@@ -745,7 +801,11 @@ export function renderFoodWebSvg(spec: FoodWebSpec, desc: string): ToolImage {
           const testCp2 = { x: pEnd.x - 25, y: pEnd.y + off }
           let collides = false
           for (const [k, box] of boxes) {
-            if (k !== u.key && k !== v.key && bezierIntersectsBox(pStart, testCp1, testCp2, pEnd, box)) {
+            if (
+              k !== u.key &&
+              k !== v.key &&
+              bezierIntersectsBox(pStart, testCp1, testCp2, pEnd, box)
+            ) {
               collides = true
               break
             }
@@ -766,7 +826,12 @@ export function renderFoodWebSvg(spec: FoodWebSpec, desc: string): ToolImage {
   if (decomposers.length > 0) {
     const dec = decomposers[0] // Sinh vật phân giải chính
     // Nếu connectDecomposers=true thì nối từ mọi loài dinh dưỡng; nếu không chỉ nối loài có cạnh chỉ định
-    const targets = connectDecomposers ? trophicNodes : edges.filter((e) => e.toKey === dec.key).map((e) => nodes.get(e.fromKey)!).filter(Boolean)
+    const targets = connectDecomposers
+      ? trophicNodes
+      : edges
+          .filter((e) => e.toKey === dec.key)
+          .map((e) => nodes.get(e.fromKey)!)
+          .filter(Boolean)
 
     for (const src of targets) {
       if (src.key === dec.key) continue
@@ -818,5 +883,7 @@ export function renderFoodWebSvg(spec: FoodWebSpec, desc: string): ToolImage {
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">${desc}<rect width="100%" height="100%" fill="#fff"/>${out}</svg>`
 
-  return errors.length ? { svg, width: svgW, height: svgH, errors } : { svg, width: svgW, height: svgH }
+  return errors.length
+    ? { svg, width: svgW, height: svgH, errors }
+    : { svg, width: svgW, height: svgH }
 }

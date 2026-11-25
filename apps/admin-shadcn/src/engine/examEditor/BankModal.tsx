@@ -1,21 +1,24 @@
+import { Search, X } from 'lucide-react'
 /**
  * Kho câu hỏi trong trình soạn: danh sách card bên trái, chi tiết câu đang xem bên phải.
  * Tick checkbox để chọn; các câu đã chọn được chèn một lần tại con trỏ, theo thứ tự chọn.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Editor } from '@tiptap/core'
-import { Search, X } from 'lucide-react'
-import { SiteSelect } from '@/engine/components/SiteSelect'
+
 import { MathText } from '@/engine/components/MathText'
+import { SiteSelect } from '@/engine/components/SiteSelect'
 import { Badge, Button, Checkbox, inputClass } from '@/engine/components/ui'
 import { BANK, loadFullBank, type BankEntry } from '@/engine/data/bank'
 import { LEVEL_LABEL, levelOf, type BankLevel } from '@/engine/data/bankLevel'
 import { GRADES, SUBJECTS, TYPE_LABEL, type QuestionType } from '@/engine/data/types'
 import { cn } from '@/engine/lib/cn'
 import { formatPoints } from '@/engine/lib/math'
+
 import { bankSelectionTemplate } from './bankQuestions'
 import { insertBlockTemplate } from './templates'
 import { figureDoc, figureImageAttrs, pngifyToolImages } from './toolImages'
+
+import type { Editor } from '@tiptap/core'
 
 /** ảnh hình vẽ của câu (vẽ một lần, nhớ lại theo id) */
 const figureCache = new Map<string, { src: string; alt: string } | null>()
@@ -33,26 +36,43 @@ function figureOf(entry: BankEntry) {
 const PAGE_SIZE = 20
 
 /** Dòng cuối danh sách: lọt vào khung nhìn (trước khoảng 300px) thì báo để nạp thêm câu. */
-function LoadMoreSentinel({ root, onVisible, children }: { root: React.RefObject<HTMLDivElement | null>; onVisible: () => void; children: React.ReactNode }) {
+function LoadMoreSentinel({
+  root,
+  onVisible,
+  children,
+}: {
+  root: React.RefObject<HTMLDivElement | null>
+  onVisible: () => void
+  children: React.ReactNode
+}) {
   const ref = useRef<HTMLParagraphElement>(null)
   const cb = useRef(onVisible)
   cb.current = onVisible
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && cb.current(), { root: root.current, rootMargin: '0px 0px 300px 0px' })
+    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && cb.current(), {
+      root: root.current,
+      rootMargin: '0px 0px 300px 0px',
+    })
     io.observe(el)
     return () => io.disconnect()
   }, [root])
   return (
-    <p ref={ref} className="pt-4 text-center text-[12px] text-ink-4">
+    <p ref={ref} className="text-ink-4 pt-4 text-center text-[12px]">
       {children}
     </p>
   )
 }
 
-const SUBJECT_OPTIONS = [{ value: '', label: 'Mọi môn' }, ...SUBJECTS.map((s) => ({ value: s, label: s }))]
-const GRADE_OPTIONS = [{ value: '', label: 'Mọi lớp' }, ...GRADES.map((g) => ({ value: g, label: g }))]
+const SUBJECT_OPTIONS = [
+  { value: '', label: 'Mọi môn' },
+  ...SUBJECTS.map((s) => ({ value: s, label: s })),
+]
+const GRADE_OPTIONS = [
+  { value: '', label: 'Mọi lớp' },
+  ...GRADES.map((g) => ({ value: g, label: g })),
+]
 /**
  * Giải thích câu Đúng/Sai viết liền "a) … Đúng. b) … Sai." → tách từng ý, bóc
  * kết luận cuối ý. Không thấy đủ a), b) theo thứ tự (ngoài công thức) thì trả null.
@@ -71,7 +91,8 @@ function splitByItems(
     const key = want[marks.length]
     if (!key || text[i] !== key || (i > 0 && !/\s/.test(text[i - 1]))) continue
     if (text[i + 1] === ')') marks.push({ key, at: i, end: i + 2 })
-    else if (/^ (Đúng|Sai|Đ\s*:|S\s*:)/.test(text.slice(i + 1, i + 7))) marks.push({ key, at: i, end: i + 1 })
+    else if (/^ (Đúng|Sai|Đ\s*:|S\s*:)/.test(text.slice(i + 1, i + 7)))
+      marks.push({ key, at: i, end: i + 1 })
   }
   if (marks.length < 2) return null
   // đáp án dạng "ĐSSĐ" → kết luận từng ý khi giải thích không ghi
@@ -170,20 +191,22 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-2 md:p-4"
+      className="bg-ink/30 fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4"
       onMouseDown={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Kho câu hỏi"
-        className="anim-pop flex h-[96dvh] md:h-[min(780px,92vh)] w-full max-w-[1120px] flex-col overflow-hidden rounded-[8px] bg-surface shadow-float"
+        className="anim-pop bg-surface shadow-float flex h-[96dvh] w-full max-w-[1120px] flex-col overflow-hidden rounded-[8px] md:h-[min(780px,92vh)]"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 px-4 py-3 md:px-7 md:pb-4 md:pt-6">
+        <div className="flex items-start justify-between gap-4 px-4 py-3 md:px-7 md:pt-6 md:pb-4">
           <div>
-            <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] text-ink">Kho câu hỏi</h2>
-            <p className="mt-1 text-[13.5px] text-ink-3">
+            <h2 className="font-display text-ink text-[22px] font-semibold tracking-[-0.01em]">
+              Kho câu hỏi
+            </h2>
+            <p className="text-ink-3 mt-1 text-[13.5px]">
               Tick các câu cần dùng, rồi chèn một lần tại vị trí con trỏ.
             </p>
           </div>
@@ -191,7 +214,7 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="flex size-9 shrink-0 items-center justify-center rounded-[6px] text-ink-3 transition-colors hover:bg-sunken hover:text-ink"
+            className="text-ink-3 hover:bg-sunken hover:text-ink flex size-9 shrink-0 items-center justify-center rounded-[6px] transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -199,7 +222,7 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
 
         <div className="flex flex-wrap items-center gap-2 px-4 pb-3 md:px-7 md:pb-5">
           <div className="relative min-w-[200px] flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-4" />
+            <Search className="text-ink-4 pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -207,16 +230,42 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
               className={inputClass + ' h-11 pl-11'}
             />
           </div>
-          <SiteSelect value={subject} options={SUBJECT_OPTIONS} onChange={setSubject} label="Lọc theo môn" className="w-[150px]" />
-          <SiteSelect value={grade} options={GRADE_OPTIONS} onChange={setGrade} label="Lọc theo lớp" className="w-[130px]" />
-          <SiteSelect value={type} options={TYPE_OPTIONS} onChange={setType} label="Lọc theo loại" className="w-[160px]" />
-          <SiteSelect value={level} options={LEVEL_OPTIONS} onChange={setLevel} label="Lọc theo độ khó" className="w-[140px]" />
+          <SiteSelect
+            value={subject}
+            options={SUBJECT_OPTIONS}
+            onChange={setSubject}
+            label="Lọc theo môn"
+            className="w-[150px]"
+          />
+          <SiteSelect
+            value={grade}
+            options={GRADE_OPTIONS}
+            onChange={setGrade}
+            label="Lọc theo lớp"
+            className="w-[130px]"
+          />
+          <SiteSelect
+            value={type}
+            options={TYPE_OPTIONS}
+            onChange={setType}
+            label="Lọc theo loại"
+            className="w-[160px]"
+          />
+          <SiteSelect
+            value={level}
+            options={LEVEL_OPTIONS}
+            onChange={setLevel}
+            label="Lọc theo độ khó"
+            className="w-[140px]"
+          />
         </div>
 
-        <div className="grid min-h-0 flex-1 border-t border-line grid-rows-[1fr_1fr] md:grid-rows-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-          <div ref={listRef} className="min-h-0 overflow-y-auto p-4 md:border-r md:border-line">
+        <div className="border-line grid min-h-0 flex-1 grid-rows-[1fr_1fr] border-t md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:grid-rows-1">
+          <div ref={listRef} className="md:border-line min-h-0 overflow-y-auto p-4 md:border-r">
             {results.length === 0 ? (
-              <p className="px-3 py-10 text-center text-[14px] text-ink-3">Không có câu nào khớp bộ lọc.</p>
+              <p className="text-ink-3 px-3 py-10 text-center text-[14px]">
+                Không có câu nào khớp bộ lọc.
+              </p>
             ) : (
               <ul className="flex flex-col gap-2.5">
                 {results.slice(0, shownCount).map((b) => {
@@ -226,8 +275,10 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
                     <li
                       key={b.id}
                       className={cn(
-                        'relative rounded-[8px] border bg-surface transition-colors',
-                        active ? 'border-clay/50 bg-clay-tint/50' : 'border-line-2 hover:border-ink-4',
+                        'bg-surface relative rounded-[8px] border transition-colors',
+                        active
+                          ? 'border-clay/50 bg-clay-tint/50'
+                          : 'border-line-2 hover:border-ink-4',
                       )}
                     >
                       <button
@@ -236,18 +287,19 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
                         className="flex w-full gap-3 px-4 py-3.5 pr-12 text-left"
                       >
                         <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap gap-1.5">
-                          <Badge tone="clay">{b.subject}</Badge>
-                          <Badge tone="outline">{TYPE_LABEL[b.type]}</Badge>
-                          <LevelChip entry={b} />
-                          {b.figure || b.image ? <Badge tone="honey">Có hình</Badge> : null}
-                        </div>
-                        <div className="mt-2.5 line-clamp-2 text-[14.5px] leading-snug text-ink">
-                          <MathText as="span">{b.prompt}</MathText>
-                        </div>
-                        <p className="mt-2 text-[12px] font-medium text-ink-3 tnum">
-                          {b.grades.includes('all') ? 'Mọi lớp' : b.grades.join(', ')} · {formatPoints(b.points)}đ
-                        </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            <Badge tone="clay">{b.subject}</Badge>
+                            <Badge tone="outline">{TYPE_LABEL[b.type]}</Badge>
+                            <LevelChip entry={b} />
+                            {b.figure || b.image ? <Badge tone="honey">Có hình</Badge> : null}
+                          </div>
+                          <div className="text-ink mt-2.5 line-clamp-2 text-[14.5px] leading-snug">
+                            <MathText as="span">{b.prompt}</MathText>
+                          </div>
+                          <p className="text-ink-3 tnum mt-2 text-[12px] font-medium">
+                            {b.grades.includes('all') ? 'Mọi lớp' : b.grades.join(', ')} ·{' '}
+                            {formatPoints(b.points)}đ
+                          </p>
                         </div>
                         {b.figure || b.image ? <FigureThumb entry={b} /> : null}
                       </button>
@@ -255,7 +307,7 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
                         checked={checked}
                         onChange={() => toggle(b.id)}
                         aria-label="Chọn câu này"
-                        className="absolute right-3 top-3 p-1"
+                        className="absolute top-3 right-3 p-1"
                       />
                     </li>
                   )
@@ -279,9 +331,10 @@ export function BankModal({ editor, onClose }: { editor: Editor; onClose: () => 
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 md:px-7 md:py-4">
-          <p className="text-[13.5px] text-ink-3">
-            <span className="font-semibold text-ink tnum">{selected.length}</span> câu đã chọn · chèn theo thứ tự chọn
+        <div className="border-line flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 md:px-7 md:py-4">
+          <p className="text-ink-3 text-[13.5px]">
+            <span className="text-ink tnum font-semibold">{selected.length}</span> câu đã chọn ·
+            chèn theo thứ tự chọn
           </p>
           <div className="flex items-center gap-2.5">
             <Button variant="outline" onClick={onClose}>
@@ -310,12 +363,12 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
         <Badge tone="outline">{formatPoints(entry.points)}đ</Badge>
       </div>
 
-      <div className="mt-4 text-[16.5px] leading-relaxed text-ink">
+      <div className="text-ink mt-4 text-[16.5px] leading-relaxed">
         <MathText as="div">{entry.prompt}</MathText>
       </div>
 
       {figure ? (
-        <div className="mt-4 flex justify-center rounded-[6px] border border-line-2 bg-white p-3">
+        <div className="border-line-2 mt-4 flex justify-center rounded-[6px] border bg-white p-3">
           <img src={figure.src} alt={figure.alt} className="max-h-[280px] max-w-full" />
         </div>
       ) : null}
@@ -343,7 +396,11 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
                 <span className="pt-0.5">
                   <MathText as="span">{o.text}</MathText>
                 </span>
-                {correct ? <span className="ml-auto shrink-0 pt-0.5 text-[12px] font-semibold text-sage">Đáp án đúng</span> : null}
+                {correct ? (
+                  <span className="text-sage ml-auto shrink-0 pt-0.5 text-[12px] font-semibold">
+                    Đáp án đúng
+                  </span>
+                ) : null}
               </li>
             )
           })}
@@ -355,13 +412,21 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
           {entry.options.map((o, i) => {
             const v = entry.answer?.[i]
             return (
-              <li key={o.key} className="flex items-start gap-3 rounded-[6px] border border-line-2 px-4 py-3 text-[14.5px] text-ink-2">
-                <span className="shrink-0 pt-0.5 font-semibold text-ink-3">{o.key})</span>
+              <li
+                key={o.key}
+                className="border-line-2 text-ink-2 flex items-start gap-3 rounded-[6px] border px-4 py-3 text-[14.5px]"
+              >
+                <span className="text-ink-3 shrink-0 pt-0.5 font-semibold">{o.key})</span>
                 <span className="pt-0.5">
                   <MathText as="span">{o.text}</MathText>
                 </span>
                 {v ? (
-                  <span className={cn('ml-auto shrink-0 pt-0.5 text-[12px] font-semibold', v === 'Đ' ? 'text-sage' : 'text-clay')}>
+                  <span
+                    className={cn(
+                      'ml-auto shrink-0 pt-0.5 text-[12px] font-semibold',
+                      v === 'Đ' ? 'text-sage' : 'text-clay',
+                    )}
+                  >
                     {v === 'Đ' ? 'Đúng' : 'Sai'}
                   </span>
                 ) : null}
@@ -372,15 +437,15 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
       ) : null}
 
       {entry.type === 'tra-loi-ngan' && entry.answer ? (
-        <p className="mt-5 rounded-[6px] border border-sage/40 bg-sage-soft px-4 py-3 text-[14.5px] text-ink">
+        <p className="border-sage/40 bg-sage-soft text-ink mt-5 rounded-[6px] border px-4 py-3 text-[14.5px]">
           Đáp án: <span className="font-semibold">{entry.answer}</span>
         </p>
       ) : null}
 
       {entry.solution?.length ? (
         <section className="mt-6">
-          <h3 className="text-[13px] font-semibold text-ink-2">Lời giải</h3>
-          <div className="mt-2 flex flex-col gap-2 text-[14.5px] leading-relaxed text-ink-2">
+          <h3 className="text-ink-2 text-[13px] font-semibold">Lời giải</h3>
+          <div className="text-ink-2 mt-2 flex flex-col gap-2 text-[14.5px] leading-relaxed">
             {entry.solution.map((line, i) => (
               <MathText key={i} as="div">
                 {line}
@@ -392,12 +457,18 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
 
       {entry.explanation ? (
         <section className="mt-6">
-          <h3 className="text-[13px] font-semibold text-ink-2">Giải thích</h3>
+          <h3 className="text-ink-2 text-[13px] font-semibold">Giải thích</h3>
           {(() => {
-            const parts = entry.type === 'dung-sai' ? splitByItems(entry.explanation, typeof entry.answer === 'string' ? entry.answer : undefined) : null
+            const parts =
+              entry.type === 'dung-sai'
+                ? splitByItems(
+                    entry.explanation,
+                    typeof entry.answer === 'string' ? entry.answer : undefined,
+                  )
+                : null
             if (!parts) {
               return (
-                <div className="mt-2 text-[14.5px] leading-relaxed text-ink-2">
+                <div className="text-ink-2 mt-2 text-[14.5px] leading-relaxed">
                   <MathText as="div">{entry.explanation}</MathText>
                 </div>
               )
@@ -405,16 +476,28 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
             return (
               <div className="mt-2 space-y-2">
                 {parts.intro ? (
-                  <div className="text-[14.5px] leading-relaxed text-ink-2">
+                  <div className="text-ink-2 text-[14.5px] leading-relaxed">
                     <MathText as="div">{parts.intro}</MathText>
                   </div>
                 ) : null}
                 {parts.items.map((it) => (
-                  <div key={it.key} className="flex gap-3 rounded-[6px] border border-line px-3.5 py-2.5 text-[14.5px] leading-relaxed text-ink-2">
-                    <span className="shrink-0 font-semibold text-ink">{it.key})</span>
-                    <MathText as="div" className="min-w-0 flex-1">{it.text}</MathText>
+                  <div
+                    key={it.key}
+                    className="border-line text-ink-2 flex gap-3 rounded-[6px] border px-3.5 py-2.5 text-[14.5px] leading-relaxed"
+                  >
+                    <span className="text-ink shrink-0 font-semibold">{it.key})</span>
+                    <MathText as="div" className="min-w-0 flex-1">
+                      {it.text}
+                    </MathText>
                     {it.verdict ? (
-                      <span className={cn('shrink-0 self-start text-[12.5px] font-semibold', it.verdict === 'Đúng' ? 'text-sage' : 'text-clay')}>{it.verdict}</span>
+                      <span
+                        className={cn(
+                          'shrink-0 self-start text-[12.5px] font-semibold',
+                          it.verdict === 'Đúng' ? 'text-sage' : 'text-clay',
+                        )}
+                      >
+                        {it.verdict}
+                      </span>
                     ) : null}
                   </div>
                 ))}
@@ -425,7 +508,7 @@ function QuestionDetail({ entry }: { entry: BankEntry }) {
       ) : null}
 
       {entry.tags.length ? (
-        <p className="mt-6 text-[12px] text-ink-4">{entry.tags.map((t) => `#${t}`).join('  ')}</p>
+        <p className="text-ink-4 mt-6 text-[12px]">{entry.tags.map((t) => `#${t}`).join('  ')}</p>
       ) : null}
     </div>
   )
@@ -438,13 +521,18 @@ function FigureThumb({ entry }: { entry: BankEntry }) {
   useEffect(() => {
     const el = ref.current
     if (!el || seen) return
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setSeen(true), { rootMargin: '200px' })
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setSeen(true), {
+      rootMargin: '200px',
+    })
     io.observe(el)
     return () => io.disconnect()
   }, [seen])
   const fig = seen ? figureOf(entry) : null
   return (
-    <div ref={ref} className="flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-line-2 bg-white p-1">
+    <div
+      ref={ref}
+      className="border-line-2 flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] border bg-white p-1"
+    >
       {fig ? <img src={fig.src} alt={fig.alt} className="max-h-full max-w-full" /> : null}
     </div>
   )

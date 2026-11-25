@@ -14,7 +14,8 @@ export function renderMath(input: string): string {
 
   // split on $$...$$ first, then $...$
   // ảnh chèn giữa chữ (đề tương tác): ![alt|rộng%](src)
-  const token = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|!\[[^\]\n]*\]\((?:https?:|data:image\/|\/)[^)\s]+\))/g
+  const token =
+    /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|!\[[^\]\n]*\]\((?:https?:|data:image\/|\/)[^)\s]+\))/g
   let match: RegExpExecArray | null
 
   while ((match = token.exec(input)) !== null) {
@@ -67,7 +68,6 @@ export function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;')
 }
 
-
 /** Vietnamese-friendly number formatting for the UI (1.234,5). */
 export function formatNumber(n: number, digits = 2): string {
   return n.toLocaleString('vi-VN', {
@@ -75,4 +75,3 @@ export function formatNumber(n: number, digits = 2): string {
     maximumFractionDigits: digits,
   })
 }
-

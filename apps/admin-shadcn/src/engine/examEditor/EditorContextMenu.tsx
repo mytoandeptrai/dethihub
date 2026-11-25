@@ -1,8 +1,8 @@
 /** Menu chuột phải trong trình soạn đề, giống Word: thanh định dạng nhanh + lệnh cắt/dán, bảng, liên kết. */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import type { Editor } from '@tiptap/react'
+
 import { Portal } from '@/engine/components/Portal'
-import { LinkDialog } from './InsertMenus'
+
 import {
   IconAlignCenter,
   IconAlignJustify,
@@ -25,6 +25,9 @@ import {
   IconSplitCells,
   IconTableDelete,
 } from './icons'
+import { LinkDialog } from './InsertMenus'
+
+import type { Editor } from '@tiptap/react'
 
 const MOD = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform) ? '⌘' : 'Ctrl+'
 
@@ -79,12 +82,20 @@ export function EditorContextMenu({ editor }: { editor: Editor | null }) {
     if (!pos || !ref.current) return
     const r = ref.current.getBoundingClientRect()
     const x = pos.x + r.width > window.innerWidth - 8 ? Math.max(8, pos.x - r.width) : pos.x
-    const y = pos.y + r.height > window.innerHeight - 8 ? Math.max(8, window.innerHeight - 8 - r.height) : pos.y
+    const y =
+      pos.y + r.height > window.innerHeight - 8
+        ? Math.max(8, window.innerHeight - 8 - r.height)
+        : pos.y
     setPlace({ x, y })
   }, [pos])
 
   if (!editor || editor.isDestroyed) return null
-  if (!pos) return link ? <Portal><LinkDialog editor={editor} initialHref={link.href} onClose={() => setLink(null)} /></Portal> : null
+  if (!pos)
+    return link ? (
+      <Portal>
+        <LinkDialog editor={editor} initialHref={link.href} onClose={() => setLink(null)} />
+      </Portal>
+    ) : null
 
   const empty = editor.state.selection.empty
   const inTable = editor.isActive('table')
@@ -114,14 +125,44 @@ export function EditorContextMenu({ editor }: { editor: Editor | null }) {
   const fmt: Array<[string, ReactNode, boolean, () => void]> = [
     ['Đậm', <b key="b">B</b>, editor.isActive('bold'), () => chain().toggleBold().run()],
     ['Nghiêng', <i key="i">I</i>, editor.isActive('italic'), () => chain().toggleItalic().run()],
-    ['Gạch chân', <u key="u">U</u>, editor.isActive('underline'), () => chain().toggleUnderline().run()],
-    ['Căn trái', <IconAlignLeft key="l" size={16} />, editor.isActive({ textAlign: 'left' }), () => chain().setTextAlign('left').run()],
-    ['Căn giữa', <IconAlignCenter key="c" size={16} />, editor.isActive({ textAlign: 'center' }), () => chain().setTextAlign('center').run()],
-    ['Căn phải', <IconAlignRight key="r" size={16} />, editor.isActive({ textAlign: 'right' }), () => chain().setTextAlign('right').run()],
-    ['Căn đều', <IconAlignJustify key="j" size={16} />, editor.isActive({ textAlign: 'justify' }), () => chain().setTextAlign('justify').run()],
+    [
+      'Gạch chân',
+      <u key="u">U</u>,
+      editor.isActive('underline'),
+      () => chain().toggleUnderline().run(),
+    ],
+    [
+      'Căn trái',
+      <IconAlignLeft key="l" size={16} />,
+      editor.isActive({ textAlign: 'left' }),
+      () => chain().setTextAlign('left').run(),
+    ],
+    [
+      'Căn giữa',
+      <IconAlignCenter key="c" size={16} />,
+      editor.isActive({ textAlign: 'center' }),
+      () => chain().setTextAlign('center').run(),
+    ],
+    [
+      'Căn phải',
+      <IconAlignRight key="r" size={16} />,
+      editor.isActive({ textAlign: 'right' }),
+      () => chain().setTextAlign('right').run(),
+    ],
+    [
+      'Căn đều',
+      <IconAlignJustify key="j" size={16} />,
+      editor.isActive({ textAlign: 'justify' }),
+      () => chain().setTextAlign('justify').run(),
+    ],
   ]
 
-  const item = (icon: ReactNode, label: string, onClick: () => void, opts?: { hint?: string; disabled?: boolean }) => (
+  const item = (
+    icon: ReactNode,
+    label: string,
+    onClick: () => void,
+    opts?: { hint?: string; disabled?: boolean },
+  ) => (
     <button
       key={label}
       type="button"
@@ -145,7 +186,11 @@ export function EditorContextMenu({ editor }: { editor: Editor | null }) {
         className="rb-color-menu ctx-menu"
         role="menu"
         aria-label="Menu chuột phải"
-        style={{ left: (place ?? pos).x, top: (place ?? pos).y, visibility: place ? 'visible' : 'hidden' }}
+        style={{
+          left: (place ?? pos).x,
+          top: (place ?? pos).y,
+          visibility: place ? 'visible' : 'hidden',
+        }}
         onContextMenu={(e) => e.preventDefault()}
       >
         <div className="ctx-fmt">
@@ -164,19 +209,39 @@ export function EditorContextMenu({ editor }: { editor: Editor | null }) {
           ))}
         </div>
         {sep('s0')}
-        {item(<IconCut size={16} />, 'Cắt', () => document.execCommand('cut'), { hint: `${MOD}X`, disabled: empty })}
-        {item(<IconCopy size={16} />, 'Sao chép', () => document.execCommand('copy'), { hint: `${MOD}C`, disabled: empty })}
+        {item(<IconCut size={16} />, 'Cắt', () => document.execCommand('cut'), {
+          hint: `${MOD}X`,
+          disabled: empty,
+        })}
+        {item(<IconCopy size={16} />, 'Sao chép', () => document.execCommand('copy'), {
+          hint: `${MOD}C`,
+          disabled: empty,
+        })}
         {item(<IconPaste size={16} />, 'Dán', () => void paste(false), { hint: `${MOD}V` })}
-        {item(<IconPasteText size={16} />, 'Dán chỉ giữ chữ', () => void paste(true), { hint: `${MOD}⇧V` })}
+        {item(<IconPasteText size={16} />, 'Dán chỉ giữ chữ', () => void paste(true), {
+          hint: `${MOD}⇧V`,
+        })}
         {inTable && (
           <>
             {sep('s1')}
-            {item(<IconRowInsertAbove size={16} />, 'Chèn hàng phía trên', () => chain().addRowBefore().run())}
-            {item(<IconRowInsertBelow size={16} />, 'Chèn hàng phía dưới', () => chain().addRowAfter().run())}
-            {item(<IconColInsertLeft size={16} />, 'Chèn cột bên trái', () => chain().addColumnBefore().run())}
-            {item(<IconColInsertRight size={16} />, 'Chèn cột bên phải', () => chain().addColumnAfter().run())}
-            {item(<IconMergeCells size={16} />, 'Gộp ô', () => chain().mergeCells().run(), { disabled: !editor.can().mergeCells() })}
-            {item(<IconSplitCells size={16} />, 'Tách ô', () => chain().splitCell().run(), { disabled: !editor.can().splitCell() })}
+            {item(<IconRowInsertAbove size={16} />, 'Chèn hàng phía trên', () =>
+              chain().addRowBefore().run(),
+            )}
+            {item(<IconRowInsertBelow size={16} />, 'Chèn hàng phía dưới', () =>
+              chain().addRowAfter().run(),
+            )}
+            {item(<IconColInsertLeft size={16} />, 'Chèn cột bên trái', () =>
+              chain().addColumnBefore().run(),
+            )}
+            {item(<IconColInsertRight size={16} />, 'Chèn cột bên phải', () =>
+              chain().addColumnAfter().run(),
+            )}
+            {item(<IconMergeCells size={16} />, 'Gộp ô', () => chain().mergeCells().run(), {
+              disabled: !editor.can().mergeCells(),
+            })}
+            {item(<IconSplitCells size={16} />, 'Tách ô', () => chain().splitCell().run(), {
+              disabled: !editor.can().splitCell(),
+            })}
             {item(<IconRowDelete size={16} />, 'Xoá hàng', () => chain().deleteRow().run())}
             {item(<IconColDelete size={16} />, 'Xoá cột', () => chain().deleteColumn().run())}
             {item(<IconTableDelete size={16} />, 'Xoá bảng', () => chain().deleteTable().run())}
@@ -184,13 +249,22 @@ export function EditorContextMenu({ editor }: { editor: Editor | null }) {
         )}
         {sep('s2')}
         {item(<IconLink size={16} />, inLink ? 'Sửa liên kết' : 'Chèn liên kết', () => {
-          const href = inLink ? (editor.getAttributes('link').href as string | undefined) : undefined
+          const href = inLink
+            ? (editor.getAttributes('link').href as string | undefined)
+            : undefined
           if (inLink) chain().extendMarkRange('link').run()
           setLink({ href })
         })}
-        {inLink && item(<IconLink size={16} />, 'Bỏ liên kết', () => chain().extendMarkRange('link').unsetLink().run())}
-        {item(<IconClearFormat size={16} />, 'Xoá định dạng', () => chain().unsetAllMarks().run(), { disabled: empty })}
-        {item(<IconSelectAll size={16} />, 'Chọn tất cả', () => chain().selectAll().run(), { hint: `${MOD}A` })}
+        {inLink &&
+          item(<IconLink size={16} />, 'Bỏ liên kết', () =>
+            chain().extendMarkRange('link').unsetLink().run(),
+          )}
+        {item(<IconClearFormat size={16} />, 'Xoá định dạng', () => chain().unsetAllMarks().run(), {
+          disabled: empty,
+        })}
+        {item(<IconSelectAll size={16} />, 'Chọn tất cả', () => chain().selectAll().run(), {
+          hint: `${MOD}A`,
+        })}
       </div>
     </Portal>
   )

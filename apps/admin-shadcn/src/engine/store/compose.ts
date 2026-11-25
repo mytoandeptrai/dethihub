@@ -6,12 +6,15 @@
  * Tài liệu đã lưu nằm ở `useDocStore().myDocs` — store này chỉ giữ phiên làm việc.
  */
 import { create } from 'zustand'
-import type { JSONContent } from '@tiptap/core'
-import { useDocStore } from './docs'
-import { blocksToTipTap, tipTapToBlocks } from '@/engine/examEditor/convert'
+
 import { emptyDoc, uid, type DocKind, type ExamDoc } from '@/engine/data/docTypes'
-import { emptyDeck, type Deck } from './docs'
+import { blocksToTipTap, tipTapToBlocks } from '@/engine/examEditor/convert'
 import { docStatus, type DocStatus } from '@/engine/lib/docStatus'
+
+import { useDocStore } from './docs'
+import { emptyDeck, type Deck } from './docs'
+
+import type { JSONContent } from '@tiptap/core'
 
 export interface OpenTab {
   id: string
@@ -157,8 +160,7 @@ export const useComposeStore = create<ComposeStore>()((set, get) => ({
       const tabs = s.tabs.filter((t) => t.id !== id)
       const { [id]: _removedContent, ...contents } = s.contents
       const { [id]: _removedDeck, ...decks } = s.decks
-      const activeId =
-        s.activeId === id ? (tabs[tabs.length - 1]?.id ?? null) : s.activeId
+      const activeId = s.activeId === id ? (tabs[tabs.length - 1]?.id ?? null) : s.activeId
       return { tabs, contents, decks, activeId }
     }),
 
@@ -166,8 +168,13 @@ export const useComposeStore = create<ComposeStore>()((set, get) => ({
 
   renameTab: (id, title) =>
     set((s) => ({
-      tabs: s.tabs.map((t) => (t.id === id && t.title !== title ? { ...t, title, dirty: true } : t)),
-      decks: s.decks[id] && s.decks[id].title !== title ? { ...s.decks, [id]: { ...s.decks[id], title } } : s.decks,
+      tabs: s.tabs.map((t) =>
+        t.id === id && t.title !== title ? { ...t, title, dirty: true } : t,
+      ),
+      decks:
+        s.decks[id] && s.decks[id].title !== title
+          ? { ...s.decks, [id]: { ...s.decks[id], title } }
+          : s.decks,
     })),
 
   setTabStatus: (id, value) => {
@@ -211,7 +218,12 @@ export const useComposeStore = create<ComposeStore>()((set, get) => ({
       const existing = store.myDecks.find((d) => d.id === id)
       // tab chưa từng sửa và chưa có trong Home thì không tạo bản ghi rỗng
       if (!tab.dirty && !existing) return
-      store.saveDeckById({ ...deck, status: docStatus(existing ? existing.status : deck.status), title: tab.title, updatedAt: now })
+      store.saveDeckById({
+        ...deck,
+        status: docStatus(existing ? existing.status : deck.status),
+        title: tab.title,
+        updatedAt: now,
+      })
     } else {
       const content = s.contents[id]
       if (!content) return

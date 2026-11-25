@@ -1,6 +1,6 @@
-import { PageSkeleton } from '@/components/page-skeleton'
 import { Suspense } from 'react'
 
+import { PageSkeleton } from '@/components/page-skeleton'
 import { CommunityContainer } from '@/modules/community'
 
 export default function CommunityPage() {

@@ -15,9 +15,16 @@ export function activateInsertedBlock(editor: Editor, pos: number, templateId?: 
   if (entry) {
     let found = false
     editor.state.doc.forEach((node, offset) => {
-      if (!found && offset >= pos && entry.match(node)) { target = offset; found = true }
+      if (!found && offset >= pos && entry.match(node)) {
+        target = offset
+        found = true
+      }
     })
   }
   if (!editor.state.doc.nodeAt(target)) return
-  editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, target)).setMeta(INSPECTOR_INSERT_META, target))
+  editor.view.dispatch(
+    editor.state.tr
+      .setSelection(NodeSelection.create(editor.state.doc, target))
+      .setMeta(INSPECTOR_INSERT_META, target),
+  )
 }

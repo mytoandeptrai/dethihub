@@ -27,7 +27,13 @@ export const draftPreviewFixture = {
       text: 'Cho $AH^2 = BH \\cdot CH$, BH = 9 và CH = 16. Tính AH.',
       options: [],
     },
-    { type: 'answerKey', items: [{ no: 1, answer: 'D' }, { no: 2, answer: '12' }] },
+    {
+      type: 'answerKey',
+      items: [
+        { no: 1, answer: 'D' },
+        { no: 2, answer: '12' },
+      ],
+    },
     { type: 'divider' },
     {
       type: 'paragraph',

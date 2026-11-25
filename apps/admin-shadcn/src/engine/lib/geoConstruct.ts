@@ -59,7 +59,10 @@ function num(s: string): number | null {
 }
 
 function parseNumStrict(s: string): number | null {
-  const t = s.trim().replace(/[−–]/g, '-').replace(',', '.')
+  const t = s
+    .trim()
+    .replace(/[−–]/g, '-')
+    .replace(',', '.')
   const m = /^(-?\d+(?:\.\d+)?)(?:\s*\/\s*(-?\d+(?:\.\d+)?))?$/.exec(t)
   if (!m) return null
   const v = m[2] ? Number(m[1]) / Number(m[2]) : Number(m[1])
@@ -76,7 +79,11 @@ function parseCoordTuple(inner: string): number[] | null {
 const COORD_HEAD = /^[A-Z][0-9]*'*\s*(?:=\s*)?\(/
 const COORD_ONE = /([A-Z][0-9]*'*)\s*(?:=\s*)?\(([^()]*)\)/g
 const cleanConstructLine = (raw: string) =>
-  raw.replace(/[′’]/g, "'").replace(/\s*\/\/\s*kéo\s*$/i, '').replace(/\s+/g, ' ').trim()
+  raw
+    .replace(/[′’]/g, "'")
+    .replace(/\s*\/\/\s*kéo\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 
 function parseCoordLine(
   s: string,
@@ -199,7 +206,11 @@ export interface ConstructOptions {
  * `known`: tên → toạ độ các điểm đã có trên hình. Trả về các điểm/đoạn dựng
  * thêm; dòng lỗi được bỏ qua (các dòng khác vẫn vẽ).
  */
-export function construct(text: string, known: Map<string, Vec>, opts: ConstructOptions = {}): Construction {
+export function construct(
+  text: string,
+  known: Map<string, Vec>,
+  opts: ConstructOptions = {},
+): Construction {
   const pts = new Map(known)
   const out: Construction = {
     points: [],
@@ -308,11 +319,15 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
       const ps = getAll([v, b, c])
       if (!ps) return
       const [A, B, C] = ps
-      if (pts.has(newName) && !out.points.some((q) => q.name === newName)) return err(`điểm ${newName} đã có trên hình — đặt tên khác, ví dụ: ${kind} ${v}K`)
+      if (pts.has(newName) && !out.points.some((q) => q.name === newName))
+        return err(`điểm ${newName} đã có trên hình — đặt tên khác, ví dụ: ${kind} ${v}K`)
       let p: Vec
       if (kind === 'trung tuyến') {
         p = vmul(vadd(B, C), 0.5)
-        out.equals.push([[b, newName], [newName, c]])
+        out.equals.push([
+          [b, newName],
+          [newName, c],
+        ])
       } else if (kind === 'đường cao') {
         p = footLine(A, B, C)
         out.rights.push({ at: newName, u: v, v: vlen(vsub(C, p)) > vlen(vsub(B, p)) ? c : b })
@@ -343,7 +358,7 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
       if (!ps) return
       const [B, C] = ps
       const third = inTri?.find((x) => x !== b && x !== c)
-      const T = third ? pts.get(third) ?? null : null
+      const T = third ? (pts.get(third) ?? null) : null
       const d = perpDir(T, B, C)
       if (!d) return err('hình không gian: ghi thêm mặt phẳng, ví dụ: trung trực BC trong ABC')
       const I = vmul(vadd(B, C), 0.5)
@@ -354,7 +369,10 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
       const p2 = hidden(vsub(I, vmul(d, half)))
       seg(p1, p2)
       out.rights.push({ at: iName, u: p1, v: c })
-      out.equals.push([[b, iName], [iName, c]])
+      out.equals.push([
+        [b, iName],
+        [iName, c],
+      ])
       return
     }
 
@@ -389,7 +407,9 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
         c = ps[0]
         r = ns.length === 2 ? vlen(vsub(ps[1], ps[0])) : vlen(vsub(ps[2], ps[1]))
       } else {
-        return err('ví dụ: đường tròn (O, OA) · đường tròn ngoại tiếp ABC · đường tròn đường kính AB')
+        return err(
+          'ví dụ: đường tròn (O, OA) · đường tròn ngoại tiếp ABC · đường tròn đường kính AB',
+        )
       }
       if (!c || r < 1e-9) return err('bán kính bằng 0')
       out.circles.push({ c, r })
@@ -397,7 +417,9 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
     }
 
     // ---------- qua M song song / vuông góc AB (cắt CD tại N)
-    const thr = body.match(/^qua\s+([A-Z][0-9]*'*)\s+(song song|\/\/|∥|vuông góc|⊥)\s+(?:với\s+)?(.+)$/i)
+    const thr = body.match(
+      /^qua\s+([A-Z][0-9]*'*)\s+(song song|\/\/|∥|vuông góc|⊥)\s+(?:với\s+)?(.+)$/i,
+    )
     if (thr) {
       const [, m, how, rest] = thr
       const cut = rest.match(/^(.*?)\s*cắt\s+(.+?)\s+tại\s+([A-Z][0-9]*'*)\s*$/i)
@@ -432,7 +454,8 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
       // trong không gian: kiểm hai đường có thật sự cắt nhau
       if (dim === 3) {
         const onL2 = footLine(N, ps2[0], ps2[1])
-        if (vlen(vsub(onL2, N)) > 1e-6 * (1 + vlen(vsub(ps2[1], ps2[0])))) return err(`đường qua ${m} không cắt ${line2.join('')} (chéo nhau)`)
+        if (vlen(vsub(onL2, N)) > 1e-6 * (1 + vlen(vsub(ps2[1], ps2[0]))))
+          return err(`đường qua ${m} không cắt ${line2.join('')} (chéo nhau)`)
       }
       addPoint(nName, N)
       seg(m, nName)
@@ -470,7 +493,8 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
       if (!text) return err('nội dung nhãn trống — ví dụ: nhãn AB "4 km"')
       const clean = rest.replace(quoted[0], ' ').trim()
       const ns = names(clean)
-      if (ns.length !== 2 || ns.join('') !== clean.replace(/[\s-]+/g, '')) return err('ví dụ: nhãn AB "4 km"')
+      if (ns.length !== 2 || ns.join('') !== clean.replace(/[\s-]+/g, ''))
+        return err('ví dụ: nhãn AB "4 km"')
       if (!getAll(ns)) return
       out.labels.push({ a: ns[0], b: ns[1], text })
       return
@@ -492,7 +516,8 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
         clean = clean.replace(sideM[0], ' ').trim()
       }
       const ns = names(clean)
-      if (ns.length !== 2 || ns.join('') !== clean.replace(/[\s-]+/g, '')) return err('ví dụ: kích thước BC "7 km"')
+      if (ns.length !== 2 || ns.join('') !== clean.replace(/[\s-]+/g, ''))
+        return err('ví dụ: kích thước BC "7 km"')
       if (!getAll(ns)) return
       out.dims.push({ a: ns[0], b: ns[1], text, side })
       return
@@ -502,10 +527,12 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
     const extLine = body.match(
       /^(?:(?:đường|duong)(?:\s+(?:thẳng|thang))?\s+(.+?)\s+(?:kéo\s+dài|keo\s+dai)|(.+?)\s+(?:kéo\s+dài|keo\s+dai)|(?:kéo\s+dài|keo\s+dai)\s+(.+?))(?:\s+(đứt|dut|liền|lien))?$/i,
     )
-    const extRay = !extLine ? body.match(/^tia\s+(.+?)(?:\s+(?:kéo\s+dài|keo\s+dai))?(?:\s+(đứt|dut|liền|lien))?$/i) : null
+    const extRay = !extLine
+      ? body.match(/^tia\s+(.+?)(?:\s+(?:kéo\s+dài|keo\s+dai))?(?:\s+(đứt|dut|liền|lien))?$/i)
+      : null
     if (extLine || extRay) {
       if (dim !== 2) return err('kéo dài đường/tia chỉ dùng cho hình phẳng')
-      const arg = (extLine ? extLine[1] ?? extLine[2] ?? extLine[3] : extRay![1]).trim()
+      const arg = (extLine ? (extLine[1] ?? extLine[2] ?? extLine[3]) : extRay![1]).trim()
       const styleWord = (extLine ? extLine[4] : extRay![2])?.toLowerCase()
       const dashed = styleWord === 'đứt' || styleWord === 'dut'
       const ns = names(arg)
@@ -543,7 +570,10 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
         if (ns.length < 2) return err('trọng tâm cần các đỉnh, ví dụ: G = trọng tâm ABC')
         const ps = getAll(ns)
         if (!ps) return
-        p = vmul(ps.reduce((acc, q) => vadd(acc, q)), 1 / ps.length)
+        p = vmul(
+          ps.reduce((acc, q) => vadd(acc, q)),
+          1 / ps.length,
+        )
       } else if (/trực tâm/.test(r)) {
         const ps = tri3()
         if (!ps) return
@@ -561,7 +591,8 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
         p = incenter(ps[0], ps[1], ps[2])
       } else if (/hình chiếu|^hc\b|chân/.test(r)) {
         const [from, ...target] = ns
-        if (!from || target.length < 2) return err('ví dụ: H = hình chiếu S lên (ABCD) hoặc K = hình chiếu A lên SB')
+        if (!from || target.length < 2)
+          return err('ví dụ: H = hình chiếu S lên (ABCD) hoặc K = hình chiếu A lên SB')
         const P = get(from)
         const T = getAll(target)
         if (!P || !T) return
@@ -602,7 +633,11 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
 
     // ---------- đoạn bằng nhau
     if (/^(bằng|=)/.test(lower)) {
-      const pairs = s.replace(/^(bằng|=)/i, '').split(/[\s,;=]+/).filter(Boolean).map(names)
+      const pairs = s
+        .replace(/^(bằng|=)/i, '')
+        .split(/[\s,;=]+/)
+        .filter(Boolean)
+        .map(names)
       if (pairs.length < 2 || pairs.some((p) => p.length !== 2)) return err('ví dụ: bằng SM MC')
       if (!getAll(pairs.flat())) return
       out.equals.push(pairs.map((p) => [p[0], p[1]] as [string, string]))
@@ -618,21 +653,34 @@ export function construct(text: string, known: Map<string, Vec>, opts: Construct
       if (!groups.length) return err('ví dụ: vectơ AB hoặc vectơ AC "u"')
       for (const g of groups) {
         const ns = names(g)
-        if (ns.length !== 2 || ns.join('') !== g) return err(`"${g}": vectơ cần đúng 2 điểm, ví dụ vectơ AB`)
+        if (ns.length !== 2 || ns.join('') !== g)
+          return err(`"${g}": vectơ cần đúng 2 điểm, ví dụ vectơ AB`)
         if (!getAll(ns)) return
         seg(ns[0], ns[1], false)
-        out.vecs.push({ a: ns[0], b: ns[1], ...(q && groups.length === 1 ? { name: q[1].trim() } : {}) })
+        out.vecs.push({
+          a: ns[0],
+          b: ns[1],
+          ...(q && groups.length === 1 ? { name: q[1].trim() } : {}),
+        })
       }
       return
     }
 
     // ---------- nối đoạn: "AM, MN đứt"
-    const dashed = /(^|\s)(đứt|dut)(\s|$)/.test(lower) ? true : /(^|\s)(liền|lien)(\s|$)/.test(lower) ? false : undefined
-    const groups = s.replace(/(^|\s)(đứt|liền|dut|lien|nối|noi)(?=\s|$)/gi, ' ').split(/[\s,;]+/).filter(Boolean)
+    const dashed = /(^|\s)(đứt|dut)(\s|$)/.test(lower)
+      ? true
+      : /(^|\s)(liền|lien)(\s|$)/.test(lower)
+        ? false
+        : undefined
+    const groups = s
+      .replace(/(^|\s)(đứt|liền|dut|lien|nối|noi)(?=\s|$)/gi, ' ')
+      .split(/[\s,;]+/)
+      .filter(Boolean)
     if (!groups.length) return
     for (const g of groups) {
       const ns = names(g)
-      if (ns.join('') !== g || ns.length < 2) return err(`không hiểu "${g}" — bấm dấu ? cạnh "Dựng thêm" để xem các lệnh`)
+      if (ns.join('') !== g || ns.length < 2)
+        return err(`không hiểu "${g}" — bấm dấu ? cạnh "Dựng thêm" để xem các lệnh`)
       if (!getAll(ns)) return
       // "SAB" = các đoạn SA, AB (đường gấp khúc)
       for (let i = 0; i + 1 < ns.length; i++) seg(ns[i], ns[i + 1], dashed)
@@ -684,11 +732,26 @@ export const GEO_HELP: Array<{ group: string; items: Array<{ code: string; what:
   {
     group: 'Toạ độ, nhãn, kích thước',
     items: [
-      { code: 'A(0; 4) hoặc A = (0; 4)', what: 'Đặt điểm 2D (hình phẳng; trùng tên đỉnh mẫu sẽ ghi đè)' },
-      { code: 'S(1; 0,5; 2) hoặc S = (1; 0,5; 2)', what: 'Đặt điểm 3D (hình không gian; trùng tên đỉnh mẫu sẽ ghi đè)' },
-      { code: 'nhãn AB "4 km"', what: 'Ghi chữ cạnh đoạn AB, hình phẳng (hỗ trợ chỉ số x_1, kéo chỉnh được)' },
-      { code: 'kích thước BC "7 km"', what: 'Đoạn kích thước nét đứt hai mũi tên, hình phẳng (thêm trên/dưới/trái/phải)' },
-      { code: 'đường BC kéo dài', what: 'Kéo dài đoạn BC ra hai phía, hình phẳng (hoặc "tia BC" quá C)' },
+      {
+        code: 'A(0; 4) hoặc A = (0; 4)',
+        what: 'Đặt điểm 2D (hình phẳng; trùng tên đỉnh mẫu sẽ ghi đè)',
+      },
+      {
+        code: 'S(1; 0,5; 2) hoặc S = (1; 0,5; 2)',
+        what: 'Đặt điểm 3D (hình không gian; trùng tên đỉnh mẫu sẽ ghi đè)',
+      },
+      {
+        code: 'nhãn AB "4 km"',
+        what: 'Ghi chữ cạnh đoạn AB, hình phẳng (hỗ trợ chỉ số x_1, kéo chỉnh được)',
+      },
+      {
+        code: 'kích thước BC "7 km"',
+        what: 'Đoạn kích thước nét đứt hai mũi tên, hình phẳng (thêm trên/dưới/trái/phải)',
+      },
+      {
+        code: 'đường BC kéo dài',
+        what: 'Kéo dài đoạn BC ra hai phía, hình phẳng (hoặc "tia BC" quá C)',
+      },
     ],
   },
   {

@@ -124,9 +124,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht1-cac-so-tu-0-den-10",
-          "kien_thuc_duoc_dung": [
-            "Kinh nghiệm đếm đồ vật trong đời sống hằng ngày"
-          ],
+          "kien_thuc_duoc_dung": ["Kinh nghiệm đếm đồ vật trong đời sống hằng ngày"],
           "luu_y_ra_de": "Chỉ dùng số trong phạm vi 10; bài tập gắn với đồ vật, hình ảnh quen thuộc; không ra bài tính.",
           "pham_vi_so": "Các số từ 0 đến 10",
           "ten": "Các số từ 0 đến 10",
@@ -159,9 +157,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht1-lam-quen-voi-mot-so-hinh-phang",
-          "kien_thuc_duoc_dung": [
-            "Đếm, đọc, viết các số trong phạm vi 10 (chương 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Đếm, đọc, viết các số trong phạm vi 10 (chương 1)"],
           "luu_y_ra_de": "Chỉ nhận biết bằng trực quan, không yêu cầu định nghĩa hay đo đạc; hình vẽ phải rõ ràng, không gây nhầm lẫn giữa các hình.",
           "pham_vi_so": "Các số đến 10 (đếm hình)",
           "ten": "Làm quen với một số hình phẳng",
@@ -194,9 +190,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht1-phep-cong-phep-tru-trong-pham-vi-10",
-          "kien_thuc_duoc_dung": [
-            "Đếm, đọc, viết, so sánh các số trong phạm vi 10 (chương 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Đếm, đọc, viết, so sánh các số trong phạm vi 10 (chương 1)"],
           "luu_y_ra_de": "Kết quả không vượt quá 10; bài toán có lời văn gắn với tình huống quen thuộc, chỉ một phép tính.",
           "pham_vi_so": "Các số đến 10",
           "ten": "Phép cộng, phép trừ trong phạm vi 10",
@@ -228,9 +222,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht1-lam-quen-voi-mot-so-hinh-khoi",
-          "kien_thuc_duoc_dung": [
-            "Nhận biết hình phẳng (chương 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Nhận biết hình phẳng (chương 2)"],
           "luu_y_ra_de": "Chỉ nhận biết bằng trực quan và đồ vật thật; không yêu cầu đếm mặt, cạnh của khối.",
           "pham_vi_so": "Các số đến 10",
           "ten": "Làm quen với một số hình khối",
@@ -260,9 +252,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht1-on-tap-hoc-ki-1",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-4"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-4"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối học kì 1 là toàn bộ chương 1-5; không ra nội dung học kì 2.",
           "pham_vi_so": "Các số đến 10",
           "ten": "Ôn tập học kì 1",
@@ -295,9 +285,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht1-cac-so-den-100",
-          "kien_thuc_duoc_dung": [
-            "Đếm, đọc, viết, so sánh các số trong phạm vi 10 (chương 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Đếm, đọc, viết, so sánh các số trong phạm vi 10 (chương 1)"],
           "luu_y_ra_de": "Chỉ dùng số đến 100; chưa yêu cầu viết số thành tổng các chục và đơn vị ở dạng bài tập phức tạp.",
           "pham_vi_so": "Các số đến 100",
           "ten": "Các số đến 100",
@@ -331,9 +319,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht1-do-dai-va-do-do-dai",
-          "kien_thuc_duoc_dung": [
-            "Đọc, viết các số đến 100 (chương 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc, viết các số đến 100 (chương 6)"],
           "luu_y_ra_de": "Chỉ dùng đơn vị xăng-ti-mét; số đo trong phạm vi 100 cm; không ra bài đổi đơn vị.",
           "pham_vi_so": "Các số đến 100; đơn vị xăng-ti-mét (cm)",
           "ten": "Độ dài và đo độ dài",
@@ -403,9 +389,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht1-thoi-gian-gio-va-lich",
-          "kien_thuc_duoc_dung": [
-            "Đọc các số đến 12 (chương 1, 6)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc các số đến 12 (chương 1, 6)"],
           "luu_y_ra_de": "Chỉ xem giờ đúng (kim phút chỉ số 12); không ra giờ hơn, giờ kém hay tính thời gian.",
           "pham_vi_so": "Các số đến 100 (xem giờ đúng, các ngày trong tuần)",
           "ten": "Thời gian. Giờ và lịch",
@@ -426,18 +410,13 @@
             "Bài 40. Ôn tập hình học và đo lường",
             "Bài 41. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Phép cộng, phép trừ có nhớ (lớp 2)",
-            "Các số đến 1000 (lớp 2)"
-          ],
+          "chua_duoc_dung": ["Phép cộng, phép trừ có nhớ (lớp 2)", "Các số đến 1000 (lớp 2)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp cuối năm: đọc, viết, so sánh số; cộng, trừ (không nhớ) trong phạm vi 100; nhận biết hình; đo độ dài; xem giờ đúng"
           ],
           "hoc_ky": 2,
           "id": "tht1-on-tap-cuoi-nam",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-9"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-9"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối năm là toàn bộ chương 1-10; không ra nội dung lớp 2.",
           "pham_vi_so": "Các số đến 100",
           "ten": "Ôn tập cuối năm",
@@ -559,9 +538,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht2-lam-quen-voi-khoi-luong-dung-tich",
-          "kien_thuc_duoc_dung": [
-            "Đọc các số đến 100 (lớp 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc các số đến 100 (lớp 1)"],
           "luu_y_ra_de": "Chỉ nhận biết đơn vị và thực hành cân, đong; không ra bài đổi đơn vị.",
           "pham_vi_so": "Các số đến 100; ki-lô-gam (kg), lít (l)",
           "ten": "Làm quen với khối lượng, dung tích",
@@ -669,9 +646,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht2-ngay-gio-gio-phut-ngay-thang",
-          "kien_thuc_duoc_dung": [
-            "Xem giờ đúng trên đồng hồ, các ngày trong tuần (lớp 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Xem giờ đúng trên đồng hồ, các ngày trong tuần (lớp 1)"],
           "luu_y_ra_de": "Chỉ xem giờ đúng và giờ rưỡi; không ra tính khoảng thời gian hay xem đồng hồ điện tử phức tạp.",
           "pham_vi_so": "Các số đến 100 (ngày, giờ, phút, tháng)",
           "ten": "Ngày - giờ, giờ - phút, ngày - tháng",
@@ -693,18 +668,13 @@
             "Bài 35. Ôn tập đo lường",
             "Bài 36. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Phép nhân, phép chia (học kì 2)",
-            "Các số đến 1000 (học kì 2)"
-          ],
+          "chua_duoc_dung": ["Phép nhân, phép chia (học kì 2)", "Các số đến 1000 (học kì 2)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp học kì 1: cộng, trừ trong phạm vi 20, 100; hình phẳng; đo lường"
           ],
           "hoc_ky": 1,
           "id": "tht2-on-tap-hoc-ki-1",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-6"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-6"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối học kì 1 là toàn bộ chương 1-7; không ra nội dung học kì 2.",
           "pham_vi_so": "Các số đến 100",
           "ten": "Ôn tập học kì 1",
@@ -742,9 +712,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht2-phep-nhan-phep-chia",
-          "kien_thuc_duoc_dung": [
-            "Phép cộng trong phạm vi 100 (lớp 1, chương 1-4)"
-          ],
+          "kien_thuc_duoc_dung": ["Phép cộng trong phạm vi 100 (lớp 1, chương 1-4)"],
           "luu_y_ra_de": "Chỉ bảng nhân 2, 5 và bảng chia 2, 5; tuyệt đối không ra bảng nhân, bảng chia khác; phép chia chỉ chia hết.",
           "pham_vi_so": "Các số đến 100 (nhân 2, 5; chia 2, 5)",
           "ten": "Phép nhân, phép chia",
@@ -761,10 +729,7 @@
           ]
         },
         {
-          "cac_bai": [
-            "Bài 46. Khối trụ, khối cầu",
-            "Bài 47. Luyện tập chung"
-          ],
+          "cac_bai": ["Bài 46. Khối trụ, khối cầu", "Bài 47. Luyện tập chung"],
           "chua_duoc_dung": [
             "Khối lập phương, khối hộp chữ nhật ở mức đo, tính (lớp 5)",
             "Hình trụ ở mức tính diện tích, thể tích (lớp 5)"
@@ -775,9 +740,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht2-lam-quen-voi-hinh-khoi",
-          "kien_thuc_duoc_dung": [
-            "Nhận biết khối lập phương, khối hộp chữ nhật (lớp 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Nhận biết khối lập phương, khối hộp chữ nhật (lớp 1)"],
           "luu_y_ra_de": "Chỉ nhận biết bằng trực quan; không yêu cầu đếm mặt, cạnh hay tính toán với khối.",
           "pham_vi_so": "Các số đến 100",
           "ten": "Làm quen với hình khối",
@@ -786,9 +749,7 @@
             "CTST": "(đối chiếu mục lục)",
             "KNTT": "Chủ đề 9. Làm quen với hình khối"
           },
-          "yeu_cau_can_dat": [
-            "Nhận biết và gọi tên được khối trụ, khối cầu"
-          ]
+          "yeu_cau_can_dat": ["Nhận biết và gọi tên được khối trụ, khối cầu"]
         },
         {
           "cac_bai": [
@@ -811,9 +772,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht2-cac-so-trong-pham-vi-1000",
-          "kien_thuc_duoc_dung": [
-            "Đọc, viết, so sánh các số đến 100 (lớp 1, chương 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc, viết, so sánh các số đến 100 (lớp 1, chương 1)"],
           "luu_y_ra_de": "Chỉ dùng số đến 1000; chưa yêu cầu phép tính trong phạm vi 1000 ở chủ đề này.",
           "pham_vi_so": "Các số đến 1000",
           "ten": "Các số trong phạm vi 1000",
@@ -847,10 +806,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht2-do-dai-va-don-vi-do-do-dai-tien-viet-nam",
-          "kien_thuc_duoc_dung": [
-            "Đơn vị xăng-ti-mét (lớp 1)",
-            "Đọc các số đến 1000 (chương 10)"
-          ],
+          "kien_thuc_duoc_dung": ["Đơn vị xăng-ti-mét (lớp 1)", "Đọc các số đến 1000 (chương 10)"],
           "luu_y_ra_de": "Chỉ dùng dm, m, km ở mức nhận biết và đo đơn giản; tiền Việt Nam chỉ nhận biết mệnh giá, chưa đổi tiền phức tạp.",
           "pham_vi_so": "Các số đến 1000; đề-xi-mét (dm), mét (m), ki-lô-mét (km); tiền Việt Nam",
           "ten": "Độ dài và đơn vị đo độ dài. Tiền Việt Nam",
@@ -920,9 +876,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht2-lam-quen-voi-yeu-to-thong-ke-xac-suat",
-          "kien_thuc_duoc_dung": [
-            "Đếm, đọc các số đến 1000 (chương 10)"
-          ],
+          "kien_thuc_duoc_dung": ["Đếm, đọc các số đến 1000 (chương 10)"],
           "luu_y_ra_de": "Chỉ đọc biểu đồ tranh đơn giản và nhận biết khả năng xảy ra; không ra bài tính xác suất.",
           "pham_vi_so": "Các số đến 1000",
           "ten": "Làm quen với yếu tố thống kê, xác suất",
@@ -957,9 +911,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht2-on-tap-cuoi-nam",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-13"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-13"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối năm là toàn bộ chương 1-14; phép nhân, phép chia chỉ bảng 2, 5; không ra nội dung lớp 3.",
           "pham_vi_so": "Các số đến 1000",
           "ten": "Ôn tập cuối năm",
@@ -1047,9 +999,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht3-bang-nhan-bang-chia",
-          "kien_thuc_duoc_dung": [
-            "Bảng nhân, bảng chia 2, 3, 4, 5 (lớp 2, chương 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Bảng nhân, bảng chia 2, 3, 4, 5 (lớp 2, chương 1)"],
           "luu_y_ra_de": "Chỉ bảng nhân, bảng chia đến 9; phép chia chỉ chia hết; 'một phần mấy' chỉ ở mức một phần hai, một phần ba, một phần tư... của một số cụ thể.",
           "pham_vi_so": "Các số đến 1000 (bảng nhân, bảng chia 2-9)",
           "ten": "Bảng nhân, bảng chia",
@@ -1232,18 +1182,13 @@
             "Bài 43. Ôn tập hình học và đo lường",
             "Bài 44. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Các số đến 10000 (học kì 2)",
-            "Chu vi, diện tích hình (học kì 2)"
-          ],
+          "chua_duoc_dung": ["Các số đến 10000 (học kì 2)", "Chu vi, diện tích hình (học kì 2)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp học kì 1: số đến 1000; nhân, chia trong phạm vi 100, 1000; biểu thức số; hình học; đo lường"
           ],
           "hoc_ky": 1,
           "id": "tht3-on-tap-hoc-ki-1",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-6"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-6"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối học kì 1 là toàn bộ chương 1-7; không ra nội dung học kì 2.",
           "pham_vi_so": "Các số đến 1000",
           "ten": "Ôn tập học kì 1",
@@ -1277,9 +1222,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht3-cac-so-den-10000",
-          "kien_thuc_duoc_dung": [
-            "Đọc, viết, so sánh các số đến 1000 (lớp 2, chương 1)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc, viết, so sánh các số đến 1000 (lớp 2, chương 1)"],
           "luu_y_ra_de": "Chữ số La Mã chỉ ở mức đọc các số quen thuộc (I đến XX); làm tròn chỉ đến hàng chục, hàng trăm.",
           "pham_vi_so": "Các số đến 10000",
           "ten": "Các số đến 10000",
@@ -1387,9 +1330,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht3-cac-so-den-100000",
-          "kien_thuc_duoc_dung": [
-            "Đọc, viết, so sánh các số đến 10000 (chương 8)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc, viết, so sánh các số đến 10000 (chương 8)"],
           "luu_y_ra_de": "Làm tròn chỉ đến hàng nghìn, hàng chục nghìn; chưa làm tròn đến hàng trăm nghìn.",
           "pham_vi_so": "Các số đến 100000",
           "ten": "Các số đến 100000",
@@ -1553,18 +1494,13 @@
             "Bài 80. Ôn tập bảng số liệu, khả năng xảy ra của một sự kiện",
             "Bài 81. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Số có nhiều chữ số đến lớp triệu (lớp 4)",
-            "Phân số (lớp 4)"
-          ],
+          "chua_duoc_dung": ["Số có nhiều chữ số đến lớp triệu (lớp 4)", "Phân số (lớp 4)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp cuối năm: số đến 100000; cộng, trừ, nhân, chia trong phạm vi 100000; chu vi, diện tích; bảng số liệu; khả năng xảy ra"
           ],
           "hoc_ky": 2,
           "id": "tht3-on-tap-cuoi-nam",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-15"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-15"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối năm là toàn bộ chương 1-16; nhân, chia chỉ với số có một chữ số; không ra nội dung lớp 4.",
           "pham_vi_so": "Các số đến 100000",
           "ten": "Ôn tập cuối năm",
@@ -1597,10 +1533,7 @@
             "Bài 5. Giải bài toán có ba bước tính",
             "Bài 6. Luyện tập chung"
           ],
-          "chua_duoc_dung": [
-            "Số có nhiều chữ số đến lớp triệu (chương 3)",
-            "Phân số (chương 10)"
-          ],
+          "chua_duoc_dung": ["Số có nhiều chữ số đến lớp triệu (chương 3)", "Phân số (chương 10)"],
           "dang_bai_dien_hinh": [
             "Đọc, viết, so sánh số đến 100000",
             "Tính giá trị biểu thức chứa chữ khi thay chữ bằng số",
@@ -1644,9 +1577,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht4-goc-va-don-vi-do-goc",
-          "kien_thuc_duoc_dung": [
-            "Nhận biết góc, góc vuông, góc không vuông (lớp 3)"
-          ],
+          "kien_thuc_duoc_dung": ["Nhận biết góc, góc vuông, góc không vuông (lớp 3)"],
           "luu_y_ra_de": "Chỉ đo góc bằng thước đo góc và nhận biết loại góc theo số đo; không yêu cầu vẽ góc với số đo cho trước ở mức khó.",
           "pham_vi_so": "Các số đến 100000 (đo góc bằng độ)",
           "ten": "Góc và đơn vị đo góc",
@@ -1682,9 +1613,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht4-so-co-nhieu-chu-so",
-          "kien_thuc_duoc_dung": [
-            "Đọc, viết, so sánh các số đến 100000 (lớp 3)"
-          ],
+          "kien_thuc_duoc_dung": ["Đọc, viết, so sánh các số đến 100000 (lớp 3)"],
           "luu_y_ra_de": "Chỉ đến lớp triệu; làm tròn chỉ đến hàng trăm nghìn; lỗi hay gặp: nhầm hàng, lớp khi đọc số.",
           "pham_vi_so": "Số có nhiều chữ số (đến lớp triệu)",
           "ten": "Số có nhiều chữ số",
@@ -1795,9 +1724,7 @@
           ],
           "hoc_ky": 1,
           "id": "tht4-duong-thang-vuong-goc-duong-thang-song-song",
-          "kien_thuc_duoc_dung": [
-            "Góc vuông (lớp 3); góc và đơn vị đo góc (chương 2)"
-          ],
+          "kien_thuc_duoc_dung": ["Góc vuông (lớp 3); góc và đơn vị đo góc (chương 2)"],
           "luu_y_ra_de": "Chỉ nhận biết và thực hành vẽ đơn giản; chưa yêu cầu tính chu vi, diện tích hình bình hành, hình thoi.",
           "pham_vi_so": "Số có nhiều chữ số",
           "ten": "Đường thẳng vuông góc. Đường thẳng song song",
@@ -1820,18 +1747,13 @@
             "Bài 36. Ôn tập đo lường",
             "Bài 37. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Phép nhân, phép chia (học kì 2)",
-            "Phân số (học kì 2)"
-          ],
+          "chua_duoc_dung": ["Phép nhân, phép chia (học kì 2)", "Phân số (học kì 2)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp học kì 1: số đến lớp triệu; cộng, trừ số có nhiều chữ số; góc; đường thẳng; đo lường"
           ],
           "hoc_ky": 1,
           "id": "tht4-on-tap-hoc-ki-1",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-6"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-6"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối học kì 1 là toàn bộ chương 1-7; không ra nội dung học kì 2.",
           "pham_vi_so": "Số có nhiều chữ số (đến lớp triệu)",
           "ten": "Ôn tập học kì 1",
@@ -1910,9 +1832,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht4-lam-quen-voi-yeu-to-thong-ke-xac-suat",
-          "kien_thuc_duoc_dung": [
-            "Bảng số liệu; khả năng xảy ra của một sự kiện (lớp 3)"
-          ],
+          "kien_thuc_duoc_dung": ["Bảng số liệu; khả năng xảy ra của một sự kiện (lớp 3)"],
           "luu_y_ra_de": "Chỉ đọc biểu đồ cột đơn giản và đếm số lần xuất hiện; không ra bài tính xác suất.",
           "pham_vi_so": "Số có nhiều chữ số",
           "ten": "Làm quen với yếu tố thống kê, xác suất",
@@ -1949,10 +1869,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht4-phan-so",
-          "kien_thuc_duoc_dung": [
-            "Một phần mấy (lớp 3)",
-            "Phép chia số tự nhiên (chương 8)"
-          ],
+          "kien_thuc_duoc_dung": ["Một phần mấy (lớp 3)", "Phép chia số tự nhiên (chương 8)"],
           "luu_y_ra_de": "Rút gọn đến khi tử và mẫu không còn chia hết cho số nào lớn hơn 1; so sánh phân số khác mẫu phải quy đồng trước.",
           "pham_vi_so": "Phân số (tử số, mẫu số; phân số bằng nhau)",
           "ten": "Phân số",
@@ -1985,9 +1902,7 @@
           ],
           "hoc_ky": 2,
           "id": "tht4-phep-cong-phep-tru-phan-so",
-          "kien_thuc_duoc_dung": [
-            "Rút gọn, quy đồng mẫu số, so sánh phân số (chương 10)"
-          ],
+          "kien_thuc_duoc_dung": ["Rút gọn, quy đồng mẫu số, so sánh phân số (chương 10)"],
           "luu_y_ra_de": "Lỗi hay gặp: cộng, trừ phân số khác mẫu bằng cách cộng luôn tử với tử, mẫu với mẫu; phải quy đồng mẫu số trước.",
           "pham_vi_so": "Phân số (cộng, trừ)",
           "ten": "Phép cộng, phép trừ phân số",
@@ -2048,18 +1963,13 @@
             "Bài 72. Ôn tập một số yếu tố thống kê và xác suất",
             "Bài 73. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Số thập phân (lớp 5)",
-            "Hỗn số (lớp 5)"
-          ],
+          "chua_duoc_dung": ["Số thập phân (lớp 5)", "Hỗn số (lớp 5)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp cuối năm: số tự nhiên đến lớp triệu; bốn phép tính số tự nhiên; phân số và bốn phép tính phân số; hình học; đo lường; thống kê, xác suất"
           ],
           "hoc_ky": 2,
           "id": "tht4-on-tap-cuoi-nam",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-12"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-12"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối năm là toàn bộ chương 1-13; không ra nội dung lớp 5.",
           "pham_vi_so": "Số tự nhiên đến lớp triệu; phân số",
           "ten": "Ôn tập cuối năm",
@@ -2284,18 +2194,13 @@
             "Bài 34. Ôn tập đo lường",
             "Bài 35. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Tỉ số, tỉ số phần trăm (học kì 2)",
-            "Thể tích (học kì 2)"
-          ],
+          "chua_duoc_dung": ["Tỉ số, tỉ số phần trăm (học kì 2)", "Thể tích (học kì 2)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp học kì 1: số thập phân; các phép tính với số thập phân; hình phẳng; chu vi, diện tích; đo lường"
           ],
           "hoc_ky": 1,
           "id": "tht5-on-tap-hoc-ki-1",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-5"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-5"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối học kì 1 là toàn bộ chương 1-6; không ra nội dung học kì 2.",
           "pham_vi_so": "Số thập phân",
           "ten": "Ôn tập học kì 1",
@@ -2516,17 +2421,13 @@
             "Bài 74. Ôn tập một số yếu tố thống kê và xác suất",
             "Bài 75. Ôn tập chung"
           ],
-          "chua_duoc_dung": [
-            "Kiến thức lớp 6 (số nguyên, phân số ở mức THCS)"
-          ],
+          "chua_duoc_dung": ["Kiến thức lớp 6 (số nguyên, phân số ở mức THCS)"],
           "dang_bai_dien_hinh": [
             "Đề ôn tập tổng hợp cuối năm: số tự nhiên, phân số, số thập phân; các phép tính; tỉ số, tỉ số phần trăm; hình học; đo lường; chuyển động đều; thống kê, xác suất"
           ],
           "hoc_ky": 2,
           "id": "tht5-on-tap-cuoi-nam",
-          "kien_thuc_duoc_dung": [
-            "Toàn bộ kiến thức chương 1-11"
-          ],
+          "kien_thuc_duoc_dung": ["Toàn bộ kiến thức chương 1-11"],
           "luu_y_ra_de": "Phạm vi đề kiểm tra cuối năm là toàn bộ chương 1-12; đây là đề cuối cấp tiểu học, cần bao quát đủ các mạch kiến thức.",
           "pham_vi_so": "Số tự nhiên, phân số, số thập phân",
           "ten": "Ôn tập cuối năm",
@@ -2661,11 +2562,7 @@
     {
       "cau_truc": "3 mức theo Thông tư 27/2020/TT-BGDĐT: Mức 1 (nhận biết, nhắc lại hoặc mô tả được nội dung đã học); Mức 2 (kết nối, sắp xếp được một số nội dung đã học để giải quyết vấn đề); Mức 3 (vận dụng được các nội dung đã học để giải quyết một số vấn đề mới hoặc đưa ra những phản hồi hợp lí trong học tập và trong cuộc sống). Đề gồm trắc nghiệm khách quan và tự luận; thời gian 40 phút. Phạm vi giữa kì là ước lượng theo phân phối chương trình, nhà trường có thể dịch chuyển.",
       "lop": 4,
-      "pham_vi": [
-        "tht4-on-tap-va-bo-sung",
-        "tht4-goc-va-don-vi-do-goc",
-        "tht4-so-co-nhieu-chu-so"
-      ],
+      "pham_vi": ["tht4-on-tap-va-bo-sung", "tht4-goc-va-don-vi-do-goc", "tht4-so-co-nhieu-chu-so"],
       "ten": "Đề kiểm tra giữa học kì 1 lớp 4",
       "thoi_gian_phut": 40
     },
@@ -2719,11 +2616,7 @@
     {
       "cau_truc": "3 mức theo Thông tư 27/2020/TT-BGDĐT: Mức 1 (nhận biết, nhắc lại hoặc mô tả được nội dung đã học); Mức 2 (kết nối, sắp xếp được một số nội dung đã học để giải quyết vấn đề); Mức 3 (vận dụng được các nội dung đã học để giải quyết một số vấn đề mới hoặc đưa ra những phản hồi hợp lí trong học tập và trong cuộc sống). Đề gồm trắc nghiệm khách quan và tự luận; thời gian 40 phút. Phạm vi giữa kì là ước lượng theo phân phối chương trình, nhà trường có thể dịch chuyển.",
       "lop": 5,
-      "pham_vi": [
-        "tht5-on-tap-va-bo-sung",
-        "tht5-so-thap-phan",
-        "tht5-mot-so-don-vi-do-dien-tich"
-      ],
+      "pham_vi": ["tht5-on-tap-va-bo-sung", "tht5-so-thap-phan", "tht5-mot-so-don-vi-do-dien-tich"],
       "ten": "Đề kiểm tra giữa học kì 1 lớp 5",
       "thoi_gian_phut": 40
     },

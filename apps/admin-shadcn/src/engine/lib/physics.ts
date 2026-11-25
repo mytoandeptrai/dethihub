@@ -7,7 +7,10 @@
 const FAM = `font-family="'Times New Roman',serif"`
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f1 = (n: number) => Math.round(n * 10) / 10
-const fmt = (n: number) => String(Math.round(n * 1000) / 1000).replace('.', ',').replace('-', '−')
+const fmt = (n: number) =>
+  String(Math.round(n * 1000) / 1000)
+    .replace('.', ',')
+    .replace('-', '−')
 const ARROW = `<defs><marker id="pharr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111"/></marker></defs>`
 
 /* ------------------------------------------------------------------ *
@@ -45,7 +48,8 @@ export function parseMotionPoints(text: string): Array<[number, number]> {
   }
   checkGap(text.slice(end))
   if (out.length < 2) throw new Error('Cần ít nhất 2 điểm dạng (t; giá trị), vd. (0; 0) (2; 4)')
-  for (let i = 1; i < out.length; i++) if (out[i][0] < out[i - 1][0]) throw new Error('Thời gian t phải tăng dần')
+  for (let i = 1; i < out.length; i++)
+    if (out[i][0] < out[i - 1][0]) throw new Error('Thời gian t phải tăng dần')
   return out
 }
 
@@ -56,7 +60,10 @@ function step(span: number) {
   return [1, 2, 5, 10].map((k) => k * p).find((s) => s >= raw) ?? p * 10
 }
 
-export function renderMotionSvg(spec: MotionSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderMotionSvg(
+  spec: MotionSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const pts = parseMotionPoints(spec.points)
   const tMax = Math.max(...pts.map((p) => p[0]))
   const yMaxV = Math.max(0, ...pts.map((p) => p[1]))
@@ -97,8 +104,10 @@ export function renderMotionSvg(spec: MotionSpec, desc: string): { svg: string; 
   if (spec.dashed)
     for (const [t, v] of pts) {
       if (t === 0 && v === 0) continue
-      if (t !== 0) b += `<path d="M${f1(X(t))} ${f1(Y(v))}V${f1(y0)}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
-      if (v !== 0) b += `<path d="M${left} ${f1(Y(v))}H${f1(X(t))}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
+      if (t !== 0)
+        b += `<path d="M${f1(X(t))} ${f1(Y(v))}V${f1(y0)}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
+      if (v !== 0)
+        b += `<path d="M${left} ${f1(Y(v))}H${f1(X(t))}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
     }
   b += `<path d="M${pts.map(([t, v]) => `${f1(X(t))} ${f1(Y(v))}`).join('L')}" fill="none" stroke="#111" stroke-width="2"/>`
   return wrap(W, H, desc, b)
@@ -122,7 +131,10 @@ export interface InclineSpec {
   showAngle: boolean
 }
 
-export function renderInclineSvg(spec: InclineSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderInclineSvg(
+  spec: InclineSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const a = (Math.min(60, Math.max(10, spec.angle || 30)) * Math.PI) / 180
   const W = 440
   const base = 340
@@ -146,13 +158,25 @@ export function renderInclineSvg(spec: InclineSpec, desc: string): { svg: string
   const u: [number, number] = [-Math.cos(a), -Math.sin(a)] // dọc dốc, hướng lên
   const n: [number, number] = [-Math.sin(a), Math.cos(a)].map((v) => -v) as [number, number] // pháp tuyến hướng ra ngoài
   const s = 46
-  const mid: [number, number] = [C[0] + u[0] * base * 0.5 / Math.cos(a), yb + u[1] * base * 0.5 / Math.cos(a)]
-  const p = (k: number, m: number): [number, number] => [mid[0] + u[0] * k + n[0] * m, mid[1] + u[1] * k + n[1] * m]
+  const mid: [number, number] = [
+    C[0] + (u[0] * base * 0.5) / Math.cos(a),
+    yb + (u[1] * base * 0.5) / Math.cos(a),
+  ]
+  const p = (k: number, m: number): [number, number] => [
+    mid[0] + u[0] * k + n[0] * m,
+    mid[1] + u[1] * k + n[1] * m,
+  ]
   const box = [p(-s / 2, 0), p(s / 2, 0), p(s / 2, s), p(-s / 2, s)]
   b += `<path d="M${box.map((q) => `${f1(q[0])} ${f1(q[1])}`).join('L')}Z" fill="#fff" stroke="#111" stroke-width="1.6"/>`
   const G = p(0, s / 2)
   b += `<circle cx="${f1(G[0])}" cy="${f1(G[1])}" r="2.5" fill="#111"/>`
-  const arrow = (from: [number, number], d: [number, number], len: number, name: string, side = 1) => {
+  const arrow = (
+    from: [number, number],
+    d: [number, number],
+    len: number,
+    name: string,
+    side = 1,
+  ) => {
     const to: [number, number] = [from[0] + d[0] * len, from[1] + d[1] * len]
     const lx = to[0] + d[0] * 10 + -d[1] * 12 * side
     const ly = to[1] + d[1] * 10 + d[0] * 12 * side + 5
@@ -167,8 +191,10 @@ export function renderInclineSvg(spec: InclineSpec, desc: string): { svg: string
   if (spec.P) b += arrow(G, [0, 1], 70, 'P')
   if (spec.N) b += arrow(p(0, s), n, 56, 'N', -1)
   const along = (d: Dir): [number, number] => (d === 'up' ? u : [-u[0], -u[1]])
-  if (spec.fms !== 'none') b += arrow(p(spec.fms === 'up' ? s / 2 : -s / 2, 0), along(spec.fms), 50, 'Fms')
-  if (spec.F !== 'none') b += arrow(p(spec.F === 'up' ? s / 2 : -s / 2, s * 0.7), along(spec.F), 60, 'F', -1)
+  if (spec.fms !== 'none')
+    b += arrow(p(spec.fms === 'up' ? s / 2 : -s / 2, 0), along(spec.fms), 50, 'Fms')
+  if (spec.F !== 'none')
+    b += arrow(p(spec.F === 'up' ? s / 2 : -s / 2, s * 0.7), along(spec.F), 60, 'F', -1)
   return wrap(W, H, desc, b)
 }
 

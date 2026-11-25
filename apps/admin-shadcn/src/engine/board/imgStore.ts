@@ -21,12 +21,15 @@ function db() {
 }
 
 function tx<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>) {
-  return db().then((d) => new Promise<T>((ok, fail) => {
-    if (discarding) return fail(new Error('Đang dọn ảnh bảng vẽ.'))
-    const r = fn(d.transaction(STORE, mode).objectStore(STORE))
-    r.onsuccess = () => ok(r.result)
-    r.onerror = () => fail(r.error)
-  }))
+  return db().then(
+    (d) =>
+      new Promise<T>((ok, fail) => {
+        if (discarding) return fail(new Error('Đang dọn ảnh bảng vẽ.'))
+        const r = fn(d.transaction(STORE, mode).objectStore(STORE))
+        r.onsuccess = () => ok(r.result)
+        r.onerror = () => fail(r.error)
+      }),
+  )
 }
 
 /** khoá theo nội dung (FNV-1a lấy mẫu) — cùng ảnh thì cùng khoá */
@@ -93,7 +96,10 @@ export async function unstash(k: string): Promise<string> {
   const hit = srcs.get(k)
   if (hit) return hit
   const src = (await tx<string | undefined>('readonly', (s) => s.get(k))) ?? ''
-  if (src) { srcs.set(k, src); keys.set(src, k) }
+  if (src) {
+    srcs.set(k, src)
+    keys.set(src, k)
+  }
   return src
 }
 
@@ -104,7 +110,10 @@ export const cachedSrc = (k: string) => srcs.get(k)
  * Chuẩn bị ảnh để đồng bộ: khoá `idb:` hay data URL → đẩy lên kho file (`upload`), nhớ đường dẫn.
  * Trả đường dẫn, hoặc null nếu không đổi được (giữ nguyên, lần sau thử lại).
  */
-export async function toRemote(src: string, upload: (dataUrl: string) => Promise<string>): Promise<string | null> {
+export async function toRemote(
+  src: string,
+  upload: (dataUrl: string) => Promise<string>,
+): Promise<string | null> {
   const isKey = src.startsWith(IDB_PREFIX)
   if (!isKey && !src.startsWith('data:image/')) return null
   const k = isKey ? src : (keys.get(src) ?? keyOf(src))

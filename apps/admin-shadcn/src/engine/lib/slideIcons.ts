@@ -1,9 +1,10 @@
+import { SLIDE_ASSETS, isSlideAssetId } from './slideAssets'
+
 /**
  * Icon trên slide, tải sau: thư viện ~300 icon Phosphor (`slideIconLibrary.ts`) nặng ~1 MB nên tách chunk,
  * trang slide mở trước rồi icon về sau. Bộ 27 icon của layout/AI (`slideAssets`) vẫn có ngay.
  */
 import type { Icon } from '@phosphor-icons/react'
-import { SLIDE_ASSETS, isSlideAssetId } from './slideAssets'
 
 type Library = typeof import('./slideIconLibrary')
 let lib: Library | null = null

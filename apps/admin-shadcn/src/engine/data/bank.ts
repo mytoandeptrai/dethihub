@@ -1,5 +1,6 @@
-import type { Option, QuestionImage, QuestionType, Subject } from './types'
 import { BANK_FIGURES } from './bankFigures'
+
+import type { Option, QuestionImage, QuestionType, Subject } from './types'
 
 /** Kho đầy đủ: BANK + câu THPT (bankThpt.ts, bankThpt2.ts, bankThpt3.ts) tải sau để không nặng gói tải đầu trang. */
 export interface BankOverrideRow {
@@ -56,12 +57,11 @@ export function mergeBank(staticBank: BankEntry[], overrides: BankOverrideRow[])
 let staticBankPromise: Promise<BankEntry[]> | null = null
 /** Tải toàn bộ kho tĩnh (không gộp với Supabase) */
 export function loadStaticBank(): Promise<BankEntry[]> {
-  staticBankPromise ??= Promise.all([import('./bankThpt'), import('./bankThpt2'), import('./bankThpt3')]).then(([a, b, c]) => [
-    ...BANK,
-    ...a.BANK_THPT,
-    ...b.BANK_THPT2,
-    ...c.BANK_THPT3,
-  ])
+  staticBankPromise ??= Promise.all([
+    import('./bankThpt'),
+    import('./bankThpt2'),
+    import('./bankThpt3'),
+  ]).then(([a, b, c]) => [...BANK, ...a.BANK_THPT, ...b.BANK_THPT2, ...c.BANK_THPT3])
   return staticBankPromise
 }
 
@@ -69,8 +69,14 @@ async function fetchBankOverrides(timeoutMs = 4000): Promise<BankOverrideRow[] |
   try {
     const { bankOverrides } = await import('@/apis/bank/requests')
     const rows = await bankOverrides({ signal: AbortSignal.timeout(timeoutMs) })
-    return rows.map((row) => ({ id: row.id, data: row.data as unknown as BankEntry | null, status: row.status }))
-  } catch { return null }
+    return rows.map((row) => ({
+      id: row.id,
+      data: row.data as unknown as BankEntry | null,
+      status: row.status,
+    }))
+  } catch {
+    return null
+  }
 }
 
 let fullBank: Promise<BankEntry[]> | null = null
@@ -192,7 +198,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$65\,000$ đồng' },
     ],
     answer: 'C',
-    explanation: '$75\,000 \\times 20\\% = 15\,000$ đồng. Giá bán: $75\,000 - 15\,000 = 60\,000$ đồng.',
+    explanation:
+      '$75\,000 \\times 20\\% = 15\,000$ đồng. Giá bán: $75\,000 - 15\,000 = 60\,000$ đồng.',
     points: 0.5,
     tags: ['tỉ lệ thuế', 'phần trăm'],
     variable: true,
@@ -275,8 +282,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 7'],
     type: 'trac-nghiem',
-    prompt:
-      'Biểu thức $A = 2x^2 - 3x + 1$ có giá trị bằng $0$ khi $x$ thuộc tập hợp nào sau đây?',
+    prompt: 'Biểu thức $A = 2x^2 - 3x + 1$ có giá trị bằng $0$ khi $x$ thuộc tập hợp nào sau đây?',
     options: [
       { key: 'A', text: '$\\{0;\\ \\dfrac{1}{2}\\}$' },
       { key: 'B', text: '$\\{1;\\ 2\\}$' },
@@ -380,7 +386,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$180^\\circ$' },
     ],
     answer: 'A',
-    explanation: 'Góc ngoài bằng tổng hai góc trong không kề nó, nên tổng hai góc còn lại là $120^\\circ$.',
+    explanation:
+      'Góc ngoài bằng tổng hai góc trong không kề nó, nên tổng hai góc còn lại là $120^\\circ$.',
     points: 0.25,
     tags: ['hình học', 'góc'],
     variable: true,
@@ -408,8 +415,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt:
-      'Khai triển $(x - 2)^3$ ta được:',
+    prompt: 'Khai triển $(x - 2)^3$ ta được:',
     options: [
       { key: 'A', text: '$x^3 - 6x^2 + 12x - 8$' },
       { key: 'B', text: '$x^3 - 2x^2 + 4x - 8$' },
@@ -417,8 +423,7 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$x^3 + 6x^2 + 12x + 8$' },
     ],
     answer: 'A',
-    explanation:
-      'Theo công thức $(a-b)^3 = a^3 - 3a^2b + 3ab^2 - b^3$, với $a = x$, $b = 2$.',
+    explanation: 'Theo công thức $(a-b)^3 = a^3 - 3a^2b + 3ab^2 - b^3$, với $a = x$, $b = 2$.',
     points: 0.5,
     tags: ['hằng đẳng thức'],
     variable: true,
@@ -428,8 +433,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt:
-      'Phương trình $x^2 - 5x + 6 = 0$ có tập nghiệm là:',
+    prompt: 'Phương trình $x^2 - 5x + 6 = 0$ có tập nghiệm là:',
     options: [
       { key: 'A', text: '$\\{2; 3\\}$' },
       { key: 'B', text: '$\\{-2; -3\\}$' },
@@ -447,7 +451,8 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt: 'Diện tích hình thang có hai cạnh đáy $7\\,\\text{cm}$ và $11\\,\\text{cm}$, chiều cao $6\\,\\text{cm}$ là:',
+    prompt:
+      'Diện tích hình thang có hai cạnh đáy $7\\,\\text{cm}$ và $11\\,\\text{cm}$, chiều cao $6\\,\\text{cm}$ là:',
     options: [
       { key: 'A', text: '$54\\,\\text{cm}^2$' },
       { key: 'B', text: '$42\\,\\text{cm}^2$' },
@@ -483,8 +488,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt:
-      'Tính diện tích hình tròn có bán kính $r = 5\\,\\text{cm}$, lấy $\\pi = 3{,}14$.',
+    prompt: 'Tính diện tích hình tròn có bán kính $r = 5\\,\\text{cm}$, lấy $\\pi = 3{,}14$.',
     options: [
       { key: 'A', text: '$25\\,\\text{cm}^2$' },
       { key: 'B', text: '$31{,}4\\,\\text{cm}^2$' },
@@ -597,8 +601,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 9'],
     type: 'trac-nghiem',
-    prompt:
-      'Gieo một con xúc xắc cân đối đồng chất. Xác suất sự kiện “xuất hiện mặt $6$” bằng:',
+    prompt: 'Gieo một con xúc xắc cân đối đồng chất. Xác suất sự kiện “xuất hiện mặt $6$” bằng:',
     options: [
       { key: 'A', text: '$\\dfrac{1}{3}$' },
       { key: 'B', text: '$\\dfrac{1}{6}$' },
@@ -625,7 +628,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$122^\\circ$' },
     ],
     answer: 'D',
-    explanation: 'Hai góc kề bên trong có tổng bằng $180^\\circ$, nên góc cần tìm là $180^\\circ - 58^\\circ = 122^\\circ$.',
+    explanation:
+      'Hai góc kề bên trong có tổng bằng $180^\\circ$, nên góc cần tìm là $180^\\circ - 58^\\circ = 122^\\circ$.',
     points: 0.25,
     tags: ['hình học', 'góc'],
     variable: true,
@@ -635,8 +639,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Tìm giá trị nhỏ nhất của biểu thức $P = x^2 - 2x + 3$ với $x \\in \\mathbb{R}$.',
+    prompt: 'Tìm giá trị nhỏ nhất của biểu thức $P = x^2 - 2x + 3$ với $x \\in \\mathbb{R}$.',
     answer: '$P_{\\min} = 2$, đạt được khi $x = 1$.',
     explanation:
       'Dùng biến đổi hoàn hảo để tách số không đổi, rồi dùng điều kiện bình phương không âm.',
@@ -655,8 +658,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Giải phương trình $x^2 - 5x + 6 = 0$ bằng cách dùng hệ thức Viết.',
+    prompt: 'Giải phương trình $x^2 - 5x + 6 = 0$ bằng cách dùng hệ thức Viết.',
     answer: '$x_1 = 2,\\ x_2 = 3$.',
     explanation: 'Dùng hệ thức Viết để tìm nhanh tổng và tích các nghiệm.',
     points: 1,
@@ -692,7 +694,8 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt: 'Cho $\\vec{a} = (2; -1)$ và $\\vec{b} = (-1; 3)$. Tích số chấm $\\vec{a} \\cdot \\vec{b}$ bằng:',
+    prompt:
+      'Cho $\\vec{a} = (2; -1)$ và $\\vec{b} = (-1; 3)$. Tích số chấm $\\vec{a} \\cdot \\vec{b}$ bằng:',
     options: [
       { key: 'A', text: '$-1$' },
       { key: 'B', text: '$1$' },
@@ -718,7 +721,7 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Vô số' },
     ],
     answer: 'A',
-    explanation: '$\\Delta\' = 1 - 5 = -4 < 0$ nên phương trình không có nghiệm thực.',
+    explanation: "$\\Delta' = 1 - 5 = -4 < 0$ nên phương trình không có nghiệm thực.",
     points: 0.25,
     tags: ['phương trình bậc hai', 'delta'],
     variable: true,
@@ -755,7 +758,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$120^\\circ$' },
     ],
     answer: 'A',
-    explanation: '$\\cos 30^\\circ = \\dfrac{\\sqrt{3}}{2}$ và $\\varphi \\in [0^\\circ; 180^\\circ]$.',
+    explanation:
+      '$\\cos 30^\\circ = \\dfrac{\\sqrt{3}}{2}$ và $\\varphi \\in [0^\\circ; 180^\\circ]$.',
     points: 0.25,
     tags: ['vector', 'góc'],
     variable: false,
@@ -765,8 +769,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt:
-      'Hàm số $y = -x^2 + 4x - 3$ đạt giá trị lớn nhất tại $x$ bằng:',
+    prompt: 'Hàm số $y = -x^2 + 4x - 3$ đạt giá trị lớn nhất tại $x$ bằng:',
     options: [
       { key: 'A', text: '$1$' },
       { key: 'B', text: '$2$' },
@@ -774,7 +777,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$4$' },
     ],
     answer: 'B',
-    explanation: 'Parabol quay xuống, đỉnh có hoành độ $x = -\\dfrac{b}{2a} = -\\dfrac{4}{2 \\cdot (-1)} = 2$.',
+    explanation:
+      'Parabol quay xuống, đỉnh có hoành độ $x = -\\dfrac{b}{2a} = -\\dfrac{4}{2 \\cdot (-1)} = 2$.',
     points: 0.5,
     tags: ['hàm số', 'parabol', 'gtln'],
     variable: true,
@@ -804,13 +808,13 @@ export const BANK: BankEntry[] = [
     type: 'trac-nghiem',
     prompt: 'Đạo hàm của hàm số $y = \\sin 2x$ là:',
     options: [
-      { key: 'A', text: '$y\' = 2\\cos 2x$' },
-      { key: 'B', text: '$y\' = \\cos 2x$' },
-      { key: 'C', text: '$y\' = -2\\cos 2x$' },
-      { key: 'D', text: '$y\' = 2\\sin 2x$' },
+      { key: 'A', text: "$y' = 2\\cos 2x$" },
+      { key: 'B', text: "$y' = \\cos 2x$" },
+      { key: 'C', text: "$y' = -2\\cos 2x$" },
+      { key: 'D', text: "$y' = 2\\sin 2x$" },
     ],
     answer: 'A',
-    explanation: 'Đạo hàm của $\\sin u$ là $u\' \\cos u$; với $u = 2x$ thì $u\' = 2$.',
+    explanation: "Đạo hàm của $\\sin u$ là $u' \\cos u$; với $u = 2x$ thì $u' = 2$.",
     points: 0.25,
     tags: ['đạo hàm', 'lượng giác'],
     variable: true,
@@ -828,7 +832,7 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$2$' },
     ],
     answer: 'A',
-    explanation: '$y\' = -\\dfrac{1}{x^2}$, tại $x = 2$ ta được $y\'(2) = -\\dfrac{1}{4}$.',
+    explanation: "$y' = -\\dfrac{1}{x^2}$, tại $x = 2$ ta được $y'(2) = -\\dfrac{1}{4}$.",
     points: 0.25,
     tags: ['đạo hàm', 'phân thức'],
     variable: true,
@@ -856,8 +860,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 11'],
     type: 'trac-nghiem',
-    prompt:
-      'Hàm số $f(x) = x^3 - 3x^2 + 2$ nghịch biến trên khoảng nào?',
+    prompt: 'Hàm số $f(x) = x^3 - 3x^2 + 2$ nghịch biến trên khoảng nào?',
     options: [
       { key: 'A', text: '$(-\\infty; 1)$' },
       { key: 'B', text: '$(1; 3)$' },
@@ -866,7 +869,7 @@ export const BANK: BankEntry[] = [
     ],
     answer: 'A',
     explanation:
-      '$f\'(x) = 3x^2 - 6x = 3x(x - 2) < 0$ khi $x < 1$ hoặc $x > 2$; còn nghịch biến trên $(1; 2)$ và $(2; +\\infty)$.',
+      "$f'(x) = 3x^2 - 6x = 3x(x - 2) < 0$ khi $x < 1$ hoặc $x > 2$; còn nghịch biến trên $(1; 2)$ và $(2; +\\infty)$.",
     points: 0.5,
     tags: ['đạo hàm', 'nghịch biến'],
     variable: true,
@@ -876,15 +879,14 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 11'],
     type: 'tu-luan',
-    prompt:
-      'Tính đạo hàm của hàm số $y = \\cos(x^2 + 1)$.',
-    answer: '$y\' = -2x \\sin(x^2 + 1)$.',
+    prompt: 'Tính đạo hàm của hàm số $y = \\cos(x^2 + 1)$.',
+    answer: "$y' = -2x \\sin(x^2 + 1)$.",
     explanation: 'Áp dụng quy tắc chuỗi cho đạo hàm lượng giác.',
     points: 0.5,
     solution: [
-      'Đạo hàm của $\\cos u$ là $-\\sin u \\cdot u\'$.',
-      'Ở đây $u = x^2 + 1$ nên $u\' = 2x$.',
-      'Suy ra $y\' = -\\sin(x^2 + 1) \\cdot 2x = -2x\\sin(x^2 + 1)$.',
+      "Đạo hàm của $\\cos u$ là $-\\sin u \\cdot u'$.",
+      "Ở đây $u = x^2 + 1$ nên $u' = 2x$.",
+      "Suy ra $y' = -\\sin(x^2 + 1) \\cdot 2x = -2x\\sin(x^2 + 1)$.",
     ],
     tags: ['đạo hàm', 'lượng giác'],
     variable: true,
@@ -914,13 +916,13 @@ export const BANK: BankEntry[] = [
     type: 'trac-nghiem',
     prompt: 'Đạo hàm của $y = \\ln(2x + 1)$ là:',
     options: [
-      { key: 'A', text: '$y\' = \\dfrac{1}{2x + 1}$' },
-      { key: 'B', text: '$y\' = \\dfrac{2}{2x + 1}$' },
-      { key: 'C', text: '$y\' = \\dfrac{1}{x}$' },
-      { key: 'D', text: '$y\' = \\dfrac{2}{x}$' },
+      { key: 'A', text: "$y' = \\dfrac{1}{2x + 1}$" },
+      { key: 'B', text: "$y' = \\dfrac{2}{2x + 1}$" },
+      { key: 'C', text: "$y' = \\dfrac{1}{x}$" },
+      { key: 'D', text: "$y' = \\dfrac{2}{x}$" },
     ],
     answer: 'B',
-    explanation: '$y\' = \\dfrac{1}{2x + 1} \\cdot 2 = \\dfrac{2}{2x + 1}$.',
+    explanation: "$y' = \\dfrac{1}{2x + 1} \\cdot 2 = \\dfrac{2}{2x + 1}$.",
     points: 0.25,
     tags: ['đạo hàm', 'logarit'],
     variable: true,
@@ -938,7 +940,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Không xác định' },
     ],
     answer: 'C',
-    explanation: '$\\lim_{x \\to 0} \\dfrac{\\sin 3x}{x} = 3 \\lim_{x \\to 0} \\dfrac{\\sin 3x}{3x} = 3$.',
+    explanation:
+      '$\\lim_{x \\to 0} \\dfrac{\\sin 3x}{x} = 3 \\lim_{x \\to 0} \\dfrac{\\sin 3x}{3x} = 3$.',
     points: 0.5,
     tags: ['giới hạn'],
     variable: true,
@@ -984,8 +987,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 12'],
     type: 'trac-nghiem',
-    prompt:
-      'Trong không gian, mặt cầu có tâm $I$ và bán kính $R = 5$. Nếu $IA = 13$ thì $A$ nằm:',
+    prompt: 'Trong không gian, mặt cầu có tâm $I$ và bán kính $R = 5$. Nếu $IA = 13$ thì $A$ nằm:',
     options: [
       { key: 'A', text: 'ngoài mặt cầu' },
       { key: 'B', text: 'trên mặt cầu' },
@@ -1003,8 +1005,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 12'],
     type: 'trac-nghiem',
-    prompt:
-      'Tính $\\displaystyle\\int_0^{\\frac{\\pi}{2}} \\sin x\\,dx$. Kết quả bằng:',
+    prompt: 'Tính $\\displaystyle\\int_0^{\\frac{\\pi}{2}} \\sin x\\,dx$. Kết quả bằng:',
     options: [
       { key: 'A', text: '$0$' },
       { key: 'B', text: '$1$' },
@@ -1012,7 +1013,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$2$' },
     ],
     answer: 'B',
-    explanation: '$\\int_0^{\\frac{\\pi}{2}} \\sin x\\,dx = [-\\cos x]_0^{\\frac{\\pi}{2}} = -0 + 1 = 1$.',
+    explanation:
+      '$\\int_0^{\\frac{\\pi}{2}} \\sin x\\,dx = [-\\cos x]_0^{\\frac{\\pi}{2}} = -0 + 1 = 1$.',
     points: 0.5,
     tags: ['tích phân'],
     variable: false,
@@ -1028,8 +1030,8 @@ export const BANK: BankEntry[] = [
     explanation: 'Khảo sát dấu đạo hàm để tìm các điểm tới hạn rồi so sánh giá trị.',
     points: 1.5,
     solution: [
-      '$f\'(x) = 3x^2 - 3 = 3(x-1)(x+1)$.',
-      '$f\'(x) = 0$ khi $x = \\pm 1$. Bảng biến thiên trên $[-2; 2]$ cho các điểm tới hạn $x = -1$ và $x = 1$.',
+      "$f'(x) = 3x^2 - 3 = 3(x-1)(x+1)$.",
+      "$f'(x) = 0$ khi $x = \\pm 1$. Bảng biến thiên trên $[-2; 2]$ cho các điểm tới hạn $x = -1$ và $x = 1$.",
       'Giá trị: $f(-2) = -2$, $f(-1) = 2$, $f(1) = -2$, $f(2) = 2$.',
       'Vậy $\\max f = 2$ tại $x = \\pm 2$ và $x = -1$; $\\min f = -2$ tại $x = 1$ và $x = -2$.',
     ],
@@ -1041,8 +1043,7 @@ export const BANK: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 12'],
     type: 'tu-luan-dong',
-    prompt:
-      'Chứng minh rằng với mọi $x > 0$ ta có $\\dfrac{1}{x} + x \\geq 2$.',
+    prompt: 'Chứng minh rằng với mọi $x > 0$ ta có $\\dfrac{1}{x} + x \\geq 2$.',
     answer: 'Bất đẳng thức đúng với mọi $x > 0$, dấu bằng xảy ra khi $x = 1$.',
     explanation: 'Dùng bất đẳng thức AM-GM cho hai số dương.',
     points: 1,
@@ -1062,11 +1063,11 @@ export const BANK: BankEntry[] = [
     prompt:
       'Tìm tất cả các giá trị của tham số $m$ để phương trình $x^2 - 2(m + 1)x + m^2 + 2 = 0$ có hai nghiệm phân biệt.',
     answer: '$m > \\dfrac{1}{2}$.',
-    explanation: 'Dùng điều kiện $\\Delta\' > 0$ cho phương trình bậc hai có hai nghiệm phân biệt.',
+    explanation: "Dùng điều kiện $\\Delta' > 0$ cho phương trình bậc hai có hai nghiệm phân biệt.",
     points: 1.5,
     solution: [
-      'Điều kiện để phương trình có hai nghiệm phân biệt là $\\Delta\' > 0$.',
-      '$\\Delta\' = (m+1)^2 - (m^2 + 2) = m^2 + 2m + 1 - m^2 - 2 = 2m - 1$.',
+      "Điều kiện để phương trình có hai nghiệm phân biệt là $\\Delta' > 0$.",
+      "$\\Delta' = (m+1)^2 - (m^2 + 2) = m^2 + 2m + 1 - m^2 - 2 = 2m - 1$.",
       'Suy ra $2m - 1 > 0 \\Leftrightarrow m > \\dfrac{1}{2}$.',
       'Vậy phương trình có hai nghiệm phân biệt khi và chỉ khi $m > \\dfrac{1}{2}$.',
     ],
@@ -1080,7 +1081,8 @@ export const BANK: BankEntry[] = [
     subject: 'Vật lí',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt: 'Một vật có khối lượng $5\\,\\text{kg}$ được đặt trên mặt phẳng nằm ngang. Lực ma sát trượt có giá trị $10\\,\\text{N}$. Gia tốc của vật là:',
+    prompt:
+      'Một vật có khối lượng $5\\,\\text{kg}$ được đặt trên mặt phẳng nằm ngang. Lực ma sát trượt có giá trị $10\\,\\text{N}$. Gia tốc của vật là:',
     options: [
       { key: 'A', text: '$0{,}2\\,\\text{m/s}^2$' },
       { key: 'B', text: '$2\\,\\text{m/s}^2$' },
@@ -1088,7 +1090,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$0{,}5\\,\\text{m/s}^2$' },
     ],
     answer: 'B',
-    explanation: '$F_{ma sát} = ma \\Rightarrow a = \\dfrac{F}{m} = \\dfrac{10}{5} = 2\\,\\text{m/s}^2$.',
+    explanation:
+      '$F_{ma sát} = ma \\Rightarrow a = \\dfrac{F}{m} = \\dfrac{10}{5} = 2\\,\\text{m/s}^2$.',
     points: 0.5,
     tags: ['cơ học', 'lực ma sát'],
     variable: true,
@@ -1098,7 +1101,8 @@ export const BANK: BankEntry[] = [
     subject: 'Vật lí',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt: 'Một người đẩy một bao tải lên xe đẩy bằng lực $150\\,\\text{N}$ đi quãng đường $20\\,\\text{m}$. Công của lực đẩy là:',
+    prompt:
+      'Một người đẩy một bao tải lên xe đẩy bằng lực $150\\,\\text{N}$ đi quãng đường $20\\,\\text{m}$. Công của lực đẩy là:',
     options: [
       { key: 'A', text: '$7{,}5\\,\\text{J}$' },
       { key: 'B', text: '$75\\,\\text{J}$' },
@@ -1116,8 +1120,7 @@ export const BANK: BankEntry[] = [
     subject: 'Vật lí',
     grades: ['Lớp 8'],
     type: 'trac-nghiem',
-    prompt:
-      'Câu nào sau đây là nguồn nhiệt?',
+    prompt: 'Câu nào sau đây là nguồn nhiệt?',
     options: [
       { key: 'A', text: 'Mặt trời' },
       { key: 'B', text: 'Cây khô' },
@@ -1154,8 +1157,7 @@ export const BANK: BankEntry[] = [
     subject: 'Vật lí',
     grades: ['Lớp 9'],
     type: 'trac-nghiem',
-    prompt:
-      'Khi tăng tần số âm thanh, hiện tượng sẽ xảy ra với âm thanh là:',
+    prompt: 'Khi tăng tần số âm thanh, hiện tượng sẽ xảy ra với âm thanh là:',
     options: [
       { key: 'A', text: 'trầm hơn' },
       { key: 'B', text: 'cao hơn' },
@@ -1201,7 +1203,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$9\\,\\text{s}$' },
     ],
     answer: 'B',
-    explanation: '$36\\,\\text{km/h} = 10\\,\\text{m/s}$. Thời gian dừng: $t = \\dfrac{|v_0|}{|a|} = \\dfrac{10}{4} = 2{,}5\\,\\text{s}$.',
+    explanation:
+      '$36\\,\\text{km/h} = 10\\,\\text{m/s}$. Thời gian dừng: $t = \\dfrac{|v_0|}{|a|} = \\dfrac{10}{4} = 2{,}5\\,\\text{s}$.',
     points: 0.5,
     tags: ['động lực học', 'chuyển động đều biến tốc'],
     variable: true,
@@ -1220,7 +1223,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$10\\,\\text{s}$' },
     ],
     answer: 'B',
-    explanation: '$h = \\dfrac{1}{2}gt^2$, với $g = 10\\,\\text{m/s}^2$: $t = \\sqrt{\\dfrac{2 \\times 20}{10}} = 2\\,\\text{s}$.',
+    explanation:
+      '$h = \\dfrac{1}{2}gt^2$, với $g = 10\\,\\text{m/s}^2$: $t = \\sqrt{\\dfrac{2 \\times 20}{10}} = 2\\,\\text{s}$.',
     points: 0.5,
     tags: ['ném ngang', 'chuyển động'],
     variable: true,
@@ -1239,7 +1243,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$4\\,\\text{N}$' },
     ],
     answer: 'B',
-    explanation: '$F = BIL \\sin\\alpha$, với dây vuông góc từ trường nên $\\sin\\alpha = 1$: $F = 0{,}5 \\times 2 \\times 1 = 1\\,\\text{N}$.',
+    explanation:
+      '$F = BIL \\sin\\alpha$, với dây vuông góc từ trường nên $\\sin\\alpha = 1$: $F = 0{,}5 \\times 2 \\times 1 = 1\\,\\text{N}$.',
     points: 0.5,
     tags: ['điện từ', 'lực từ'],
     variable: true,
@@ -1258,7 +1263,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$1600\\,\\text{W}$' },
     ],
     answer: 'C',
-    explanation: '$\\eta = \\dfrac{P_{cơ}}{P_{điện}} \\Rightarrow P_{điện} = \\dfrac{800}{0{,}8} = 1000\\,\\text{W}$.',
+    explanation:
+      '$\\eta = \\dfrac{P_{cơ}}{P_{điện}} \\Rightarrow P_{điện} = \\dfrac{800}{0{,}8} = 1000\\,\\text{W}$.',
     points: 0.5,
     tags: ['điện từ', 'hiệu suất'],
     variable: true,
@@ -1277,7 +1283,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'không phụ thuộc góc tới' },
     ],
     answer: 'B',
-    explanation: 'Khi đi từ môi trường nạt sang loãng, ánh sáng bị lệch ra xa pháp tuyến nên góc khúc xạ nhỏ hơn góc tới.',
+    explanation:
+      'Khi đi từ môi trường nạt sang loãng, ánh sáng bị lệch ra xa pháp tuyến nên góc khúc xạ nhỏ hơn góc tới.',
     points: 0.5,
     tags: ['quang học', 'khúc xạ'],
     variable: false,
@@ -1296,7 +1303,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$5\\,\\text{Hz}$' },
     ],
     answer: 'C',
-    explanation: 'Số sóng $n = \\dfrac{1{,}2}{0{,}4} = 3$, suy ra $f = \\dfrac{v}{\\lambda} = \\dfrac{3 \\times 0{,}4}{0{,}4} = 3\\,\\text{Hz}$.',
+    explanation:
+      'Số sóng $n = \\dfrac{1{,}2}{0{,}4} = 3$, suy ra $f = \\dfrac{v}{\\lambda} = \\dfrac{3 \\times 0{,}4}{0{,}4} = 3\\,\\text{Hz}$.',
     points: 0.5,
     tags: ['sóng cơ', 'bước sóng'],
     variable: true,
@@ -1327,7 +1335,8 @@ export const BANK: BankEntry[] = [
     prompt:
       'Giải và biện luận phương trình $\\dfrac{x^2}{9} + \\dfrac{1}{x - 3} = 0$ với $x \\neq 3$.',
     answer: 'Phương trình không có nghiệm thực.',
-    explanation: 'Sau khi quy đồng mẫu, phương trình dẫn đến một phương trình bậc hai có $\\Delta < 0$ và một nghiệm loại.',
+    explanation:
+      'Sau khi quy đồng mẫu, phương trình dẫn đến một phương trình bậc hai có $\\Delta < 0$ và một nghiệm loại.',
     points: 1.5,
     solution: [
       'Điều kiện xác định: $x \\neq 3$.',
@@ -1403,8 +1412,14 @@ export const BANK: BankEntry[] = [
     prompt: 'Phản ứng nào sau đây là phản ứng phân hủy?',
     options: [
       { key: 'A', text: '$2H_2 + O_2 \\rightarrow 2H_2O$' },
-      { key: 'B', text: '$\\text{CaCO}_3 \\xrightarrow{t^\\circ} \\text{CaO} + \\text{CO}_2 \\uparrow$' },
-      { key: 'C', text: '$\\text{HCl} + \\text{NaOH} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O}$' },
+      {
+        key: 'B',
+        text: '$\\text{CaCO}_3 \\xrightarrow{t^\\circ} \\text{CaO} + \\text{CO}_2 \\uparrow$',
+      },
+      {
+        key: 'C',
+        text: '$\\text{HCl} + \\text{NaOH} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O}$',
+      },
       { key: 'D', text: '$\\text{Fe} + \\text{CuSO}_4 \\rightarrow \\text{FeSO}_4 + \\text{Cu}$' },
     ],
     answer: 'B',
@@ -1426,7 +1441,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: '$4\\,\\text{mol}$' },
     ],
     answer: 'A',
-    explanation: '$M(\\text{O}_2) = 32\\,\\text{g/mol}$, nên $n = \\dfrac{8}{32} = 0{,}25\\,\\text{mol}$.',
+    explanation:
+      '$M(\\text{O}_2) = 32\\,\\text{g/mol}$, nên $n = \\dfrac{8}{32} = 0{,}25\\,\\text{mol}$.',
     points: 0.5,
     tags: ['mole', 'stoichiometry'],
     variable: true,
@@ -1436,7 +1452,8 @@ export const BANK: BankEntry[] = [
     subject: 'Hoá học',
     grades: ['Lớp 9'],
     type: 'trac-nghiem',
-    prompt: 'Trong dung dịch, các ion $\\text{Na}^+$ và $\\text{Cl}^-$ không bị ảnh hưởng của điện. Điều này chứng minh phân tử $\\text{NaCl}$ tồn tại trong dung dịch dưới dạng:',
+    prompt:
+      'Trong dung dịch, các ion $\\text{Na}^+$ và $\\text{Cl}^-$ không bị ảnh hưởng của điện. Điều này chứng minh phân tử $\\text{NaCl}$ tồn tại trong dung dịch dưới dạng:',
     options: [
       { key: 'A', text: 'phân tử riêng biệt' },
       { key: 'B', text: 'cặp ion' },
@@ -1498,7 +1515,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Các electron trong cùng nguyên tử có cùng năng lượng' },
     ],
     answer: 'B',
-    explanation: 'Theo nguyên lý Pauli, mỗi obital có nhiều nhất $2$ electron và chúng phải có spin đối nhau.',
+    explanation:
+      'Theo nguyên lý Pauli, mỗi obital có nhiều nhất $2$ electron và chúng phải có spin đối nhau.',
     points: 0.5,
     tags: ['cấu tạo nguyên tử', 'obital', 'pauli'],
     variable: false,
@@ -1508,7 +1526,8 @@ export const BANK: BankEntry[] = [
     subject: 'Hoá học',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt: 'Trong phản ứng $\\text{Na} + \\text{Cl}_2 \\rightarrow \\text{NaCl}$, sodium đóng vai trò:',
+    prompt:
+      'Trong phản ứng $\\text{Na} + \\text{Cl}_2 \\rightarrow \\text{NaCl}$, sodium đóng vai trò:',
     options: [
       { key: 'A', text: 'chất khử' },
       { key: 'B', text: 'chất oxi hóa' },
@@ -1570,7 +1589,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Áp suất' },
     ],
     answer: 'B',
-    explanation: 'Nhiệt phản ứng là nhiệt lượng thu hoặc toả ra trong phản ứng hóa học, được đo bằng kJ/mol.',
+    explanation:
+      'Nhiệt phản ứng là nhiệt lượng thu hoặc toả ra trong phản ứng hóa học, được đo bằng kJ/mol.',
     points: 0.25,
     tags: ['năng lượng hóa học', 'nhiệt phản ứng'],
     variable: false,
@@ -1647,7 +1667,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Hệ cơ quan' },
     ],
     answer: 'A',
-    explanation: 'Tế bào là đơn vị cấu tạo nhỏ nhất; mô, cơ quan, hệ cơ quan đều do tế bào tạo thành.',
+    explanation:
+      'Tế bào là đơn vị cấu tạo nhỏ nhất; mô, cơ quan, hệ cơ quan đều do tế bào tạo thành.',
     points: 0.25,
     tags: ['tế bào', 'sinh học cơ thể'],
     variable: false,
@@ -1675,7 +1696,8 @@ export const BANK: BankEntry[] = [
     subject: 'Sinh học',
     grades: ['Lớp 7'],
     type: 'trac-nghiem',
-    prompt: 'Trong quang hợp, chất nào được tạo ra từ nước và có vai trò làm nhiên liệu cho sự sống?',
+    prompt:
+      'Trong quang hợp, chất nào được tạo ra từ nước và có vai trò làm nhiên liệu cho sự sống?',
     options: [
       { key: 'A', text: 'Oxi' },
       { key: 'B', text: 'Đường' },
@@ -1683,7 +1705,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Nitơ' },
     ],
     answer: 'B',
-    explanation: 'Quang hợp tạo đường (glucose) là nhiên liệu và là nguyên liệu để tạo các hợp chất hữu cơ.',
+    explanation:
+      'Quang hợp tạo đường (glucose) là nhiên liệu và là nguyên liệu để tạo các hợp chất hữu cơ.',
     points: 0.25,
     tags: ['dinh dưỡng', 'quang hợp'],
     variable: false,
@@ -1729,7 +1752,8 @@ export const BANK: BankEntry[] = [
     subject: 'Sinh học',
     grades: ['Lớp 9'],
     type: 'trac-nghiem',
-    prompt: 'Ở người, bộ nhiễm thể tiềm mặt có $2n = 46$ nhiễm sắc thể. Số nhiễm sắc thể trong một tinh trùng là:',
+    prompt:
+      'Ở người, bộ nhiễm thể tiềm mặt có $2n = 46$ nhiễm sắc thể. Số nhiễm sắc thể trong một tinh trùng là:',
     options: [
       { key: 'A', text: '$23$' },
       { key: 'B', text: '$24$' },
@@ -1747,7 +1771,8 @@ export const BANK: BankEntry[] = [
     subject: 'Sinh học',
     grades: ['Lớp 9'],
     type: 'trac-nghiem',
-    prompt: 'Genetic có cấu trúc dạng thang xoắn kép nằm trong nhân tế bào. Một gen dài $5100$ đơn vị cặp base có chứa:',
+    prompt:
+      'Genetic có cấu trúc dạng thang xoắn kép nằm trong nhân tế bào. Một gen dài $5100$ đơn vị cặp base có chứa:',
     options: [
       { key: 'A', text: '$1700$ cặp base' },
       { key: 'B', text: '$2550$ cặp base' },
@@ -1792,7 +1817,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'giáo là sinh vật sản xuất' },
     ],
     answer: 'B',
-    explanation: 'Cáo nằm ở bậc cao nhất trong chuỗi này; cỏ là sinh vật sản xuất, thỏ là bậc tiêu thụ nhất.',
+    explanation:
+      'Cáo nằm ở bậc cao nhất trong chuỗi này; cỏ là sinh vật sản xuất, thỏ là bậc tiêu thụ nhất.',
     points: 0.5,
     tags: ['sinh thái', 'chuỗi thức ăn'],
     variable: false,
@@ -1824,7 +1850,8 @@ export const BANK: BankEntry[] = [
     prompt:
       'Giải thích vì sao tỉ lệ kiểu hình của thế hệ sau không còn bằng $3 : 1$ như ở thế hệ $F_1$ trong phép lai hai cá thể dị hợp.',
     answer: 'Do lai chéo các cá thể không đồng nhất về kiểu gen nên tỉ lệ ở thế hệ sau bị lệch.',
-    explanation: 'Ở $F_1$ các cá thể có kiểu gen lệch nhau, khi lai ngẫu nhiên sẽ xuất hiện các tổ hợp gen mới.',
+    explanation:
+      'Ở $F_1$ các cá thể có kiểu gen lệch nhau, khi lai ngẫu nhiên sẽ xuất hiện các tổ hợp gen mới.',
     points: 1,
     solution: [
       'Ở thế hệ $F_1$, tỉ lệ kiểu gen là $1\\text{AA} : 2\\text{Aa} : 1\\text{aa}$, các cá thể không giống nhau về kiểu gen.',
@@ -1843,8 +1870,7 @@ export const BANK: BankEntry[] = [
     type: 'tu-luan',
     prompt:
       'Đọc đoạn văn sau:\n\n“Trời tháng Mười mưa rào rạo từng cơn, gió rít qua khe cửa sổ, làm những chén trà trong bàn bỗng dưng bốc khói. Bà cụ ngồi im bên bếp lò, tay lần tràng hạt, mắt lim dim nhìn lửa.”\n\nCâu 1. Đoạn văn trên tả không khí và thời gian như thế nào?',
-    answer:
-      'Không khí u ám, lạnh lẽo, mưa gió dữ dội; thời gian là buổi tối mùa thu (tháng Mười).',
+    answer: 'Không khí u ám, lạnh lẽo, mưa gió dữ dội; thời gian là buổi tối mùa thu (tháng Mười).',
     explanation: 'Câu hỏi đọc hiểu về hoàn cảnh, thời gian và không khí.',
     points: 1,
     solution: [
@@ -1917,8 +1943,7 @@ export const BANK: BankEntry[] = [
     subject: 'Ngữ văn',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Câu 1. Vì sao nói “Tiếng Việt là ngôn ngữ giàu và phong phú”? Nêu ít nhất hai căn cứ.',
+    prompt: 'Câu 1. Vì sao nói “Tiếng Việt là ngôn ngữ giàu và phong phú”? Nêu ít nhất hai căn cứ.',
     answer:
       'Vì tiếng Việt có nguồn gốc kép (tiếng Việt bản địa và tiếng Hán), kho từ vựng phong phú, có hệ thống ngữ pháp và các phương tiện ngữ pháp đa dạng.',
     explanation: 'Câu hỏi tổng hợp về vị trí và đặc trưng của tiếng Việt.',
@@ -1955,8 +1980,7 @@ export const BANK: BankEntry[] = [
     subject: 'Ngữ văn',
     grades: ['Lớp 8'],
     type: 'tu-luan',
-    prompt:
-      'Câu 1. Nêu mối quan hệ giữa hai vế trong câu “Tuy nhà nhỏ mà đầy ắp tiếng cười”.',
+    prompt: 'Câu 1. Nêu mối quan hệ giữa hai vế trong câu “Tuy nhà nhỏ mà đầy ắp tiếng cười”.',
     answer:
       'Hai vế có quan hệ nhân — quả: “nhà nhỏ” là nguyên nhân, “đầy ắp tiếng cười” là kết quả.',
     explanation: 'Câu hỏi về quan hệ giữa các cụm từ trong câu.',
@@ -1976,8 +2000,7 @@ export const BANK: BankEntry[] = [
     type: 'tu-luan-dong',
     prompt:
       'Viết một đoạn văn khoảng 150–200 chữ về kỷ niệm đáng nhớ nhất của em trong thời gian học sinh.',
-    answer:
-      'Bài làm tự do; cần có một sự việc cụ thể, chi tiết xúc cảm, kết thúc bằng suy nghĩ.',
+    answer: 'Bài làm tự do; cần có một sự việc cụ thể, chi tiết xúc cảm, kết thúc bằng suy nghĩ.',
     explanation: 'Câu hỏi tự luận động, đánh giá năng lực viết bài.',
     points: 2,
     solution: [
@@ -1993,8 +2016,7 @@ export const BANK: BankEntry[] = [
     subject: 'Ngữ văn',
     grades: ['Lớp 9'],
     type: 'tu-luan-dong',
-    prompt:
-      'Phân tích đặc điểm nội dung và nghệ thuật của bài thơ “Lạc Long Quân” (Nguyễn Du).',
+    prompt: 'Phân tích đặc điểm nội dung và nghệ thuật của bài thơ “Lạc Long Quân” (Nguyễn Du).',
     answer:
       'Tác phẩm ngợi cao nỗi nhớ quê hương và đồng đội của Lạc Long Quân, thể hiện tâm hồn Việt và tinh thần yêu nước, yêu thương gia đình.',
     explanation: 'Câu hỏi phân tích tác phẩm, cần cân đối giữa nội dung và nghệ thuật.',
@@ -2169,7 +2191,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'is go' },
     ],
     answer: 'B',
-    explanation: 'In the simple present, the verb takes -s when the subject is third person singular (“she”).',
+    explanation:
+      'In the simple present, the verb takes -s when the subject is third person singular (“she”).',
     points: 0.25,
     tags: ['grammar', 'simple present'],
     variable: true,
@@ -2308,8 +2331,7 @@ export const BANK: BankEntry[] = [
     type: 'tu-luan',
     prompt:
       'Write a short paragraph (about 60–80 words) describing your favourite subject at school and explain why you like it.',
-    answer:
-      'Bài viết tự do; cần nêu môn, lý do thích và một ví dụ cụ thể.',
+    answer: 'Bài viết tự do; cần nêu môn, lý do thích và một ví dụ cụ thể.',
     explanation: 'Câu hỏi viết bài, kiểm tra khả năng diễn đạt bằng tiếng Anh.',
     points: 1,
     solution: [
@@ -2327,8 +2349,7 @@ export const BANK: BankEntry[] = [
     subject: 'Lịch sử',
     grades: ['Lớp 8'],
     type: 'tu-luan',
-    prompt:
-      'Nêu nguyên nhân và ý nghĩa của việc thành lập Đảng Cộng sản Việt Nam năm 1930.',
+    prompt: 'Nêu nguyên nhân và ý nghĩa của việc thành lập Đảng Cộng sản Việt Nam năm 1930.',
     answer:
       'Nguyên nhân: chủ nghĩa Mác-Lênin và phong trào công nhân quốc tế tác động; hoạt động của Hội Viện Nam Cách mạng thanh niên và các đảng phái dân chủ; tình hình đất nước; ý nghĩa: mở đường cho cách mạng Việt Nam, đánh dấu sự ra đời của chủ nghĩa Mác-Lênin ở Việt Nam.',
     explanation: 'Câu hỏi lịch sử trọng tâm về sự kiện trọng đại.',
@@ -2346,8 +2367,7 @@ export const BANK: BankEntry[] = [
     subject: 'Lịch sử',
     grades: ['Lớp 8'],
     type: 'tu-luan',
-    prompt:
-      'Trình bày diễn biến của Cuộc khởi nghĩa Yên Bái (1930) và ý nghĩa lịch sử của nó.',
+    prompt: 'Trình bày diễn biến của Cuộc khởi nghĩa Yên Bái (1930) và ý nghĩa lịch sử của nó.',
     answer:
       'Diễn biến: đêm 9 – 10/9/1930, nghĩa quân Yên Bái tấn công các đồn và nha mạc. Ý nghĩa: là cuộc khởi nghĩa vũ trang đầu tiên của chủ nghĩa Mác-Lênin ở Việt Nam, đánh dấu bước đầu chuyển từ đấu tranh chính trị sang đấu tranh vũ trang.',
     explanation: 'Câu hỏi về một sự kiện lịch sử cụ thể.',
@@ -2384,8 +2404,7 @@ export const BANK: BankEntry[] = [
     subject: 'Lịch sử',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Nêu tình hình Việt Nam sau Chiến tranh thế giới thứ hai (1945 – 1946).',
+    prompt: 'Nêu tình hình Việt Nam sau Chiến tranh thế giới thứ hai (1945 – 1946).',
     answer:
       'Nước ta giành được độc lập nhưng đối mặt với khó khăn: kinh tế kiệt quệ, nạn đói, bệnh tật; giặc quân Pháp tập kích lên vực; nội bộ chưa đồng đều.',
     explanation: 'Câu hỏi về bối cảnh lịch sử sau 1945.',
@@ -2403,8 +2422,7 @@ export const BANK: BankEntry[] = [
     subject: 'Lịch sử',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Trình bày ý nghĩa và tầm quan trọng của Đại hội XI của Đảng (tháng 1/1976).',
+    prompt: 'Trình bày ý nghĩa và tầm quan trọng của Đại hội XI của Đảng (tháng 1/1976).',
     answer:
       'Đại hội XI đánh dấu sự ra đời của Đảng Cộng sản Việt Nam mới ở miền Nam; xác định tính chất, mục tiêu định hướng xã hội và nhiệm vụ của cách mạng miền Nam trong giai đoạn mới; hoàn thành công việc thống nhất đất nước về mặt tổ chức.',
     explanation: 'Câu hỏi về sự kiện Đại hội Đảng.',
@@ -2462,8 +2480,7 @@ export const BANK: BankEntry[] = [
     subject: 'Địa lí',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Vì sao dân số cư trú đông ở Đồng bằng sông Hồng và các vùng ven biển?',
+    prompt: 'Vì sao dân số cư trú đông ở Đồng bằng sông Hồng và các vùng ven biển?',
     answer:
       'Vì đây là nơi có điều kiện tự nhiên thuận lợi: đất phù sa màu mỡ, nước ngọt dồi dào, thuận lợi giao thông; đồng thời có lịch sử cư trú lâu đời, dân cư tập trung, hoạt động sản xuất phát triển.',
     explanation: 'Câu hỏi về phân bố dân cư.',
@@ -2500,8 +2517,7 @@ export const BANK: BankEntry[] = [
     subject: 'Địa lí',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Phân tích sự chuyển dịch cơ cấu kinh tế của Việt Nam trong giai đoạn 1990 – 2020.',
+    prompt: 'Phân tích sự chuyển dịch cơ cấu kinh tế của Việt Nam trong giai đoạn 1990 – 2020.',
     answer:
       'Nông nghiệp giảm tỷ trọng, công nghiệp và xây dựng tăng mạnh, dịch vụ tăng; kinh tế chuyển từ nông nghiệp sang công nghiệp – dịch vụ, thị trường vốn tăng trưởng nhanh.',
     explanation: 'Câu hỏi về sự chuyển dịch cơ cấu kinh tế.',
@@ -2529,7 +2545,8 @@ export const BANK: BankEntry[] = [
       { key: 'D', text: 'Người sử dụng' },
     ],
     answer: 'B',
-    explanation: 'Hệ điều hành gồm phần cứng và phần mềm; các chương trình ứng dụng thuộc phần mềm.',
+    explanation:
+      'Hệ điều hành gồm phần cứng và phần mềm; các chương trình ứng dụng thuộc phần mềm.',
     points: 0.25,
     tags: ['phần mềm', 'hệ điều hành'],
     variable: false,
@@ -2595,7 +2612,10 @@ export const BANK: BankEntry[] = [
     type: 'trac-nghiem',
     prompt: 'Cơ sở dữ liệu là gì?',
     options: [
-      { key: 'A', text: 'Một tập hợp các dữ liệu có liên quan được tổ chức theo một trật tự nhất định' },
+      {
+        key: 'A',
+        text: 'Một tập hợp các dữ liệu có liên quan được tổ chức theo một trật tự nhất định',
+      },
       { key: 'B', text: 'Một phần mềm dùng để gõ văn bản' },
       { key: 'C', text: 'Một thiết bị xuất dữ liệu' },
       { key: 'D', text: 'Một loại mạng xã hội' },
@@ -2685,8 +2705,7 @@ export const BANK: BankEntry[] = [
     subject: 'Tin học',
     grades: ['Lớp 9'],
     type: 'tu-luan',
-    prompt:
-      'Nêu các thao tác cơ bản để bảo vệ máy tính và dữ liệu cá nhân khỏi virus và mã độc.',
+    prompt: 'Nêu các thao tác cơ bản để bảo vệ máy tính và dữ liệu cá nhân khỏi virus và mã độc.',
     answer:
       'Cài đặt và cập nhật phần mềm diệt virus thường xuyên; không mở tệp lạ, tệp đính kèm không rõ nguồn gốc; không tải phần mềm lậu từ nguồn không tin cậy; sao lưu dữ liệu thường xuyên; dùng mật khẩu mạnh và không chia sẻ thông tin cá nhân.',
     explanation: 'Câu hỏi về an toàn thông tin.',
@@ -2737,7 +2756,9 @@ export function pickQuestions(opts: {
 
   // trac-nghiem first when the caller did not constrain the type
   if (!opts.type) {
-    pool = [...pool].sort((a, b) => (a.type === 'trac-nghiem' ? 0 : 1) - (b.type === 'trac-nghiem' ? 0 : 1))
+    pool = [...pool].sort(
+      (a, b) => (a.type === 'trac-nghiem' ? 0 : 1) - (b.type === 'trac-nghiem' ? 0 : 1),
+    )
   }
 
   if (pool.length <= opts.count) return pool

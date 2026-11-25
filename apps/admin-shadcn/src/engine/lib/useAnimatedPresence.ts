@@ -15,8 +15,7 @@ export function useAnimatedPresence(open: boolean, exitMs = 180) {
     }
     if (!mounted) return
     const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const delay = reduced ? 0 : exitMs
     const id = window.setTimeout(() => setMounted(false), delay)
     return () => window.clearTimeout(id)

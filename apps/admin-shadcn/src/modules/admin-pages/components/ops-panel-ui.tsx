@@ -1,9 +1,9 @@
 'use client'
-import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { Activity, Check, RefreshCw } from 'lucide-react'
 
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import {
   SiteBadge as Badge,
   SiteButton as Button,
@@ -102,7 +102,11 @@ export function OpsPanelOpsPanelUi(
               ) : null}
             </div>
             <div className="flex items-center gap-3">
-              {loadingSettings ? <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion> : null}
+              {loadingSettings ? (
+                <LoadingRegion>
+                  <Skeleton className="h-8 w-24" />
+                </LoadingRegion>
+              ) : null}
               <Segmented<'maint' | 'notice'>
                 value={opsTab}
                 onChange={setOpsTab}
@@ -343,7 +347,9 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m152')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
+                  <LoadingRegion>
+                    <Skeleton className="h-8 w-24" />
+                  </LoadingRegion>
                 ) : (
                   <span className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]">
                     {formatNumber(totalCalls)}
@@ -356,7 +362,9 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m153')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
+                  <LoadingRegion>
+                    <Skeleton className="h-8 w-24" />
+                  </LoadingRegion>
                 ) : (
                   <span className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]">
                     {errorRateStr}
@@ -369,7 +377,9 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m154')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
+                  <LoadingRegion>
+                    <Skeleton className="h-8 w-24" />
+                  </LoadingRegion>
                 ) : (
                   <span
                     className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]"
@@ -385,7 +395,9 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m155')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
+                  <LoadingRegion>
+                    <Skeleton className="h-8 w-24" />
+                  </LoadingRegion>
                 ) : (
                   <span className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]">
                     {totalCostStr}
@@ -546,7 +558,9 @@ export function OpsPanelOpsPanelUi(
           </div>
 
           {loadingErrors ? (
-            <LoadingRegion><FormSkeleton /></LoadingRegion>
+            <LoadingRegion>
+              <FormSkeleton />
+            </LoadingRegion>
           ) : aiErrors.length === 0 ? (
             <div className="py-8">
               <EmptyState

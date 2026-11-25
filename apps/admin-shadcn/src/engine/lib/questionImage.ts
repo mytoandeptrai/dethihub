@@ -1,5 +1,6 @@
-import type { Question } from '@/engine/data/types'
 import { uploadImage } from './mediaStore'
+
+import type { Question } from '@/engine/data/types'
 
 const MAX_SIDE = 1280
 /** ảnh nhỏ giữ nguyên, ảnh lớn thu về tối đa 1280px rồi nén JPEG (đề lưu trong máy, localStorage có hạn) */
@@ -59,7 +60,13 @@ export const pastedImage = (e: { clipboardData: DataTransfer | null }): File | n
  * chưa cấu hình R2 hay lỗi thì giữ data URL.
  */
 export async function uploadQuestionImages(questions: Question[]): Promise<Question[]> {
-  const todo = [...new Set(questions.map((q) => q.image?.src).filter((s): s is string => Boolean(s?.startsWith('data:'))))]
+  const todo = [
+    ...new Set(
+      questions
+        .map((q) => q.image?.src)
+        .filter((s): s is string => Boolean(s?.startsWith('data:'))),
+    ),
+  ]
   const done = new Map<string, string>()
   let next = 0
   await Promise.all(
@@ -70,5 +77,9 @@ export async function uploadQuestionImages(questions: Question[]): Promise<Quest
       }
     }),
   )
-  return questions.map((q) => (q.image && done.has(q.image.src) ? { ...q, image: { ...q.image, src: done.get(q.image.src)! } } : q))
+  return questions.map((q) =>
+    q.image && done.has(q.image.src)
+      ? { ...q, image: { ...q.image, src: done.get(q.image.src)! } }
+      : q,
+  )
 }

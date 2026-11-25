@@ -3,9 +3,10 @@
  * Mỗi kết quả là một range {from, to} trong doc tọa độ.
  */
 import { Extension } from '@tiptap/core'
-import type { Node as PMNode } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
+
+import type { Node as PMNode } from '@tiptap/pm/model'
 
 export interface SearchMatch {
   from: number
@@ -80,7 +81,11 @@ export function createSearchPlugin() {
         new Plugin<SearchState>({
           key: searchPluginKey,
           state: {
-            init: () => ({ query: { text: '', matchCase: false, wholeWord: false }, matches: [], active: -1 }),
+            init: () => ({
+              query: { text: '', matchCase: false, wholeWord: false },
+              matches: [],
+              active: -1,
+            }),
             apply(tr, prev) {
               const meta = tr.getMeta(searchPluginKey) as Partial<SearchState> | undefined
               if (meta) {
@@ -103,7 +108,8 @@ export function createSearchPlugin() {
               if (!s || !s.matches.length) return DecorationSet.empty
               const decos = s.matches.map((m: SearchMatch, i: number) =>
                 Decoration.inline(m.from, m.to, {
-                  class: i === s.active ? 'doc-search-hit doc-search-hit--active' : 'doc-search-hit',
+                  class:
+                    i === s.active ? 'doc-search-hit doc-search-hit--active' : 'doc-search-hit',
                 }),
               )
               return DecorationSet.create(state.doc, decos)

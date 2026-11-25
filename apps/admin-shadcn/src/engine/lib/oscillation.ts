@@ -5,16 +5,7 @@ import { ARROW, FAM, esc, f1, fmt, wrap } from './physics'
 
 export type OscMode = 'osc' | 'ac' | 'standing'
 export type OscQty = 'x' | 'v' | 'a'
-export type OscStartX0 =
-  | 'A'
-  | '-A'
-  | '0'
-  | 'A/2'
-  | '-A/2'
-  | 'A√2/2'
-  | '-A√2/2'
-  | 'A√3/2'
-  | '-A√3/2'
+export type OscStartX0 = 'A' | '-A' | '0' | 'A/2' | '-A/2' | 'A√2/2' | '-A√2/2' | 'A√3/2' | '-A√3/2'
 
 export type OscStart =
   | { by: 'state'; x0: OscStartX0; dir: 'up' | 'down' }
@@ -104,7 +95,7 @@ export const OSC_DEFAULT: OscSpec = {
 }
 
 const X0_ABS_PHI: Record<OscStartX0, number> = {
-  A: 0,
+  'A': 0,
   '-A': Math.PI,
   '0': Math.PI / 2,
   'A/2': Math.PI / 3,
@@ -155,7 +146,11 @@ function startToPhi(start: OscStart): number {
 }
 
 /** Tính biên độ li độ A (cm), tần số góc ω (rad/s) và pha ban đầu φ (rad) của x = A·cos(ωt + φ). */
-export function oscParams(spec: Pick<OscSpec, 'A' | 'period' | 'start'>): { A: number; omega: number; phi: number } {
+export function oscParams(spec: Pick<OscSpec, 'A' | 'period' | 'start'>): {
+  A: number
+  omega: number
+  phi: number
+} {
   if (!Number.isFinite(spec.A) || spec.A <= 0) throw new Error('Biên độ A phải lớn hơn 0')
   const { omega } = oscPeriod(spec)
   const phi = startToPhi(spec.start)
@@ -174,8 +169,22 @@ export function oscCurveParams(
   })
   const { T } = oscPeriod(spec)
   const qty = override?.qty ?? spec.qty
-  if (qty === 'v') return { qty, amp: base.omega * base.A, omega: base.omega, phi: normPhi(base.phi + Math.PI / 2), T }
-  if (qty === 'a') return { qty, amp: base.omega * base.omega * base.A, omega: base.omega, phi: normPhi(base.phi + Math.PI), T }
+  if (qty === 'v')
+    return {
+      qty,
+      amp: base.omega * base.A,
+      omega: base.omega,
+      phi: normPhi(base.phi + Math.PI / 2),
+      T,
+    }
+  if (qty === 'a')
+    return {
+      qty,
+      amp: base.omega * base.omega * base.A,
+      omega: base.omega,
+      phi: normPhi(base.phi + Math.PI),
+      T,
+    }
   return { qty, amp: base.A, omega: base.omega, phi: base.phi, T }
 }
 
@@ -186,10 +195,15 @@ export function fmtOscNum(n: number): string {
   const dec = abs < 0.05 ? 4 : abs < 0.5 ? 3 : 2
   const k = 10 ** dec
   const r = Math.round(n * k) / k
-  return String(Math.abs(r) < 1e-9 ? 0 : r).replace('.', ',').replace('-', '−')
+  return String(Math.abs(r) < 1e-9 ? 0 : r)
+    .replace('.', ',')
+    .replace('-', '−')
 }
 
-function matchPiFraction(ratio: number, dens: readonly number[]): { num: number; den: number } | null {
+function matchPiFraction(
+  ratio: number,
+  dens: readonly number[],
+): { num: number; den: number } | null {
   for (const den of dens) {
     const num = Math.round(ratio * den)
     if (Math.abs(ratio - num / den) < 1e-6) return { num, den }
@@ -263,11 +277,18 @@ export function acEquation(spec: Pick<OscSpec, 'ac'>): { u: string; i: string } 
 }
 
 /** Tính bước sóng λ, vị trí các nút và các bụng của sóng dừng. */
-export function standingInfo(st: StandingSpec): { lambda: number; nodes: number[]; antinodes: number[] } {
-  if (!Number.isFinite(st.length) || st.length <= 0) throw new Error('Chiều dài dây ℓ phải lớn hơn 0')
-  if (!Number.isInteger(st.k) || st.k < 1 || st.k > 10) throw new Error('Số bó sóng k phải là số nguyên từ 1 đến 10')
+export function standingInfo(st: StandingSpec): {
+  lambda: number
+  nodes: number[]
+  antinodes: number[]
+} {
+  if (!Number.isFinite(st.length) || st.length <= 0)
+    throw new Error('Chiều dài dây ℓ phải lớn hơn 0')
+  if (!Number.isInteger(st.k) || st.k < 1 || st.k > 10)
+    throw new Error('Số bó sóng k phải là số nguyên từ 1 đến 10')
   if (!Number.isFinite(st.A) || st.A <= 0) throw new Error('Biên độ bụng A phải lớn hơn 0')
-  const lambda = st.ends === 'fixed-fixed' ? (2 * st.length) / st.k : (4 * st.length) / (2 * st.k - 1)
+  const lambda =
+    st.ends === 'fixed-fixed' ? (2 * st.length) / st.k : (4 * st.length) / (2 * st.k - 1)
   const nodeCount = st.ends === 'fixed-fixed' ? st.k + 1 : st.k
   const nodes = Array.from({ length: nodeCount }, (_, idx) => (idx * lambda) / 2)
   const antinodes = Array.from({ length: st.k }, (_, idx) => ((idx + 0.5) * lambda) / 2)
@@ -276,14 +297,21 @@ export function standingInfo(st: StandingSpec): { lambda: number; nodes: number[
 
 /** Đọc số hoặc biểu thức đơn giản có dấu phẩy thập phân, phân số, √2/√3, pi/π (không dùng eval). */
 export function parseOscExpr(raw: string, allowPi = true): number {
-  let s = raw.trim().replace(/,/g, '.').replace(/[−–]/g, '-').replace(/\s+/g, '')
+  let s = raw
+    .trim()
+    .replace(/,/g, '.')
+    .replace(/[−–]/g, '-')
+    .replace(/\s+/g, '')
   if (!s) return NaN
   const piRe = /pi|π/gi
   if (!allowPi && piRe.test(s)) return NaN
   const [numPart, denPart, ...rest] = s.split('/')
   if (rest.length > 0 || !numPart || (s.includes('/') && !denPart)) return NaN
   const evalFactor = (part: string): number => {
-    const tokens = part.replace(/\*/g, '').replace(/(pi|π)/gi, 'π').replace(/sqrt\(?(\d+)\)?/gi, '√$1')
+    const tokens = part
+      .replace(/\*/g, '')
+      .replace(/(pi|π)/gi, 'π')
+      .replace(/sqrt\(?(\d+)\)?/gi, '√$1')
     const m = /^([+-]?)(\d*(?:\.\d+)?)(?:√(\d+))?(π?)$/.exec(tokens)
     if (!m || (!m[2] && !m[3] && !m[4])) return NaN
     const sign = m[1] === '-' ? -1 : 1
@@ -304,11 +332,15 @@ function formatAxisText(raw: string): string {
     esc(txt)
       .replace(/_\{([^{}]+)\}|_([\p{L}\p{N}]+)/gu, (_, braced?: string, plain?: string) => {
         const s = braced ?? plain ?? ''
-        return /^\d+$/.test(s) ? [...s].map((c) => SUB[Number(c)]).join('') : `<tspan baseline-shift="sub" font-size="70%">${s}</tspan>`
+        return /^\d+$/.test(s)
+          ? [...s].map((c) => SUB[Number(c)]).join('')
+          : `<tspan baseline-shift="sub" font-size="70%">${s}</tspan>`
       })
       .replace(/\^\{([^{}]+)\}|\^([+-]?\d+)/g, (_, braced?: string, plain?: string) => {
         const s = braced ?? plain ?? ''
-        return /^\d+$/.test(s) ? [...s].map((c) => SUP[Number(c)]).join('') : `<tspan baseline-shift="super" font-size="70%">${s}</tspan>`
+        return /^\d+$/.test(s)
+          ? [...s].map((c) => SUP[Number(c)]).join('')
+          : `<tspan baseline-shift="super" font-size="70%">${s}</tspan>`
       })
   const idx = raw.indexOf('(')
   if (idx > 0) {
@@ -429,8 +461,14 @@ function renderAcSvg(spec: OscSpec, desc: string): { svg: string; width: number;
     const isHalf = Math.abs(Math.abs(fr) - 0.5) < 1e-9
     b += `<path d="M${left - 3} ${py}H${left + 3}" stroke="#111" stroke-width="1.1"/>`
     b += `<path d="M${right - 3} ${py}H${right + 3}" stroke="#1d4ed8" stroke-width="1.1"/>`
-    const uLabel = ac.ticks === 'symbol' ? `${sign}U₀${isHalf ? '/2' : ''}` : fmtAcAmp(Math.abs(fr) * ac.U0).replace(/^/, sign)
-    const iLabel = ac.ticks === 'symbol' ? `${sign}I₀${isHalf ? '/2' : ''}` : fmtAcAmp(Math.abs(fr) * ac.I0).replace(/^/, sign)
+    const uLabel =
+      ac.ticks === 'symbol'
+        ? `${sign}U₀${isHalf ? '/2' : ''}`
+        : fmtAcAmp(Math.abs(fr) * ac.U0).replace(/^/, sign)
+    const iLabel =
+      ac.ticks === 'symbol'
+        ? `${sign}I₀${isHalf ? '/2' : ''}`
+        : fmtAcAmp(Math.abs(fr) * ac.I0).replace(/^/, sign)
     b += `<text x="${left - 7}" y="${f1(py + 4.5)}" ${FAM} font-size="12.5"${ac.ticks === 'symbol' ? ' font-style="italic"' : ''} text-anchor="end">${esc(uLabel)}</text>`
     b += `<text x="${right + 7}" y="${f1(py + 4.5)}" ${FAM} font-size="12.5" fill="#1d4ed8"${ac.ticks === 'symbol' ? ' font-style="italic"' : ''} text-anchor="start">${esc(iLabel)}</text>`
   }
@@ -478,10 +516,42 @@ function renderAcSvg(spec: OscSpec, desc: string): { svg: string; width: number;
     const tx = X(tk.t)
     const w = tk.text.length * 7.2 + 4
     const candidates = [
-      { ax: tx, ay: y0 + 17, anchor: 'middle', x0: tx - w / 2, x1: tx + w / 2, by0: y0 + 5, by1: y0 + 19 },
-      { ax: tx, ay: y0 - 7, anchor: 'middle', x0: tx - w / 2, x1: tx + w / 2, by0: y0 - 19, by1: y0 - 5 },
-      { ax: tx - 4, ay: y0 + 17, anchor: 'end', x0: tx - w - 4, x1: tx - 4, by0: y0 + 5, by1: y0 + 19 },
-      { ax: tx + 4, ay: y0 + 17, anchor: 'start', x0: tx + 4, x1: tx + w + 4, by0: y0 + 5, by1: y0 + 19 },
+      {
+        ax: tx,
+        ay: y0 + 17,
+        anchor: 'middle',
+        x0: tx - w / 2,
+        x1: tx + w / 2,
+        by0: y0 + 5,
+        by1: y0 + 19,
+      },
+      {
+        ax: tx,
+        ay: y0 - 7,
+        anchor: 'middle',
+        x0: tx - w / 2,
+        x1: tx + w / 2,
+        by0: y0 - 19,
+        by1: y0 - 5,
+      },
+      {
+        ax: tx - 4,
+        ay: y0 + 17,
+        anchor: 'end',
+        x0: tx - w - 4,
+        x1: tx - 4,
+        by0: y0 + 5,
+        by1: y0 + 19,
+      },
+      {
+        ax: tx + 4,
+        ay: y0 + 17,
+        anchor: 'start',
+        x0: tx + 4,
+        x1: tx + w + 4,
+        by0: y0 + 5,
+        by1: y0 + 19,
+      },
     ]
     let best = candidates[0]
     let bestScore = Infinity
@@ -492,7 +562,8 @@ function renderAcSvg(spec: OscSpec, desc: string): { svg: string; width: number;
         if (c.x0 < box.x1 + 3 && c.x1 + 3 > box.x0 && c.by0 < box.y1 && c.by1 > box.y0) score += 500
       }
       for (const p of allCurvePts) {
-        if (p.px >= c.x0 - 2 && p.px <= c.x1 + 2 && p.py >= c.by0 - 2 && p.py <= c.by1 + 2) score += 1
+        if (p.px >= c.x0 - 2 && p.px <= c.x1 + 2 && p.py >= c.by0 - 2 && p.py <= c.by1 + 2)
+          score += 1
       }
       if (score < bestScore) {
         bestScore = score
@@ -505,7 +576,8 @@ function renderAcSvg(spec: OscSpec, desc: string): { svg: string; width: number;
   }
 
   // 6. Vẽ đường u (nét liền) và i (nét đứt)
-  const toPath = (pts: SampledPoint[]) => pts.map((p, idx) => `${idx ? 'L' : 'M'}${f1(p.px)} ${f1(p.py)}`).join('')
+  const toPath = (pts: SampledPoint[]) =>
+    pts.map((p, idx) => `${idx ? 'L' : 'M'}${f1(p.px)} ${f1(p.py)}`).join('')
   b += `<path data-curve="u" d="${toPath(ptsU)}" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`
   b += `<path data-curve="i" d="${toPath(ptsI)}" fill="none" stroke="#1d4ed8" stroke-width="1.8" stroke-dasharray="6 4" stroke-linejoin="round" stroke-linecap="round"/>`
 
@@ -563,7 +635,10 @@ function renderAcSvg(spec: OscSpec, desc: string): { svg: string; width: number;
   return wrap(W, H, desc, b)
 }
 
-function renderStandingSvg(spec: OscSpec, desc: string): { svg: string; width: number; height: number } {
+function renderStandingSvg(
+  spec: OscSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const st = spec.standing ?? STANDING_DEFAULT
   const { lambda, nodes, antinodes } = standingInfo(st)
 
@@ -631,7 +706,8 @@ function renderStandingSvg(spec: OscSpec, desc: string): { svg: string; width: n
       const px = f1(X(nx))
       const attrVal = Math.round(nx * 1e6) / 1e6
       b += `<circle cx="${px}" cy="${y0}" r="3.8" fill="#111" data-node="${attrVal}"/>`
-      const lx = idx === 0 ? px + 8 : idx === nodes.length - 1 && st.ends === 'fixed-fixed' ? px - 8 : px
+      const lx =
+        idx === 0 ? px + 8 : idx === nodes.length - 1 && st.ends === 'fixed-fixed' ? px - 8 : px
       b += `<text x="${lx}" y="${y0 + 16}" ${FAM} font-size="13" font-style="italic" text-anchor="middle">N</text>`
     }
   }
@@ -664,7 +740,10 @@ function renderStandingSvg(spec: OscSpec, desc: string): { svg: string; width: n
   return wrap(W, H, desc, b)
 }
 
-export function renderOscSvg(spec: OscSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderOscSvg(
+  spec: OscSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   if (spec.mode === 'ac') return renderAcSvg(spec, desc)
   if (spec.mode === 'standing') return renderStandingSvg(spec, desc)
   const c1 = oscCurveParams(spec)
@@ -737,7 +816,11 @@ export function renderOscSvg(spec: OscSpec, desc: string): { svg: string; width:
   const symBase = c1.qty === 'x' ? 'A' : c1.qty === 'v' ? 'ωA' : 'ω²A'
   const symSame = Math.abs(yMax - c1.amp) < 1e-9
   const symRatio = Math.round((yMax / c1.amp) * 100) / 100
-  const symTop = symSame ? symBase : Number.isInteger(symRatio) ? `${symRatio}${symBase}` : fmtOscNum(yMax)
+  const symTop = symSame
+    ? symBase
+    : Number.isInteger(symRatio)
+      ? `${symRatio}${symBase}`
+      : fmtOscNum(yMax)
   for (const v of yTicks) {
     const py = f1(Y(v))
     b += `<path d="M${left - 3} ${py}H${left + 3}" stroke="#111" stroke-width="1.1"/>`
@@ -760,7 +843,9 @@ export function renderOscSvg(spec: OscSpec, desc: string): { svg: string; width:
 
   // 4. Lấy mẫu đường cong (vẽ đường 2 trước nếu liền, hoặc vẽ sau nếu nét đứt; lấy mẫu trước để tránh nhãn đè nét)
   const pts1 = sampleCurve(c1.amp, c1.omega, c1.phi, T, spec.tEnd, X, Y)
-  const pts2 = c2Raw ? sampleCurve(c2Raw.amp * c2Scale, c2Raw.omega, c2Raw.phi, T, spec.tEnd, X, Y) : null
+  const pts2 = c2Raw
+    ? sampleCurve(c2Raw.amp * c2Scale, c2Raw.omega, c2Raw.phi, T, spec.tEnd, X, Y)
+    : null
   const allCurvePts = pts2 ? [...pts1, ...pts2] : pts1
 
   // 5. Vạch chia và nhãn trục ngang (tránh đè đường cong và nhãn khác)
@@ -804,12 +889,60 @@ export function renderOscSvg(spec: OscSpec, desc: string): { svg: string; width:
     const tx = X(tk.t)
     const w = tk.text.length * 7.2 + 4
     const candidates = [
-      { ax: tx, ay: y0 + 17, anchor: 'middle', x0: tx - w / 2, x1: tx + w / 2, by0: y0 + 5, by1: y0 + 19 },
-      { ax: tx, ay: y0 - 7, anchor: 'middle', x0: tx - w / 2, x1: tx + w / 2, by0: y0 - 19, by1: y0 - 5 },
-      { ax: tx - 4, ay: y0 + 17, anchor: 'end', x0: tx - w - 4, x1: tx - 4, by0: y0 + 5, by1: y0 + 19 },
-      { ax: tx + 4, ay: y0 + 17, anchor: 'start', x0: tx + 4, x1: tx + w + 4, by0: y0 + 5, by1: y0 + 19 },
-      { ax: tx - 4, ay: y0 - 7, anchor: 'end', x0: tx - w - 4, x1: tx - 4, by0: y0 - 19, by1: y0 - 5 },
-      { ax: tx + 4, ay: y0 - 7, anchor: 'start', x0: tx + 4, x1: tx + w + 4, by0: y0 - 19, by1: y0 - 5 },
+      {
+        ax: tx,
+        ay: y0 + 17,
+        anchor: 'middle',
+        x0: tx - w / 2,
+        x1: tx + w / 2,
+        by0: y0 + 5,
+        by1: y0 + 19,
+      },
+      {
+        ax: tx,
+        ay: y0 - 7,
+        anchor: 'middle',
+        x0: tx - w / 2,
+        x1: tx + w / 2,
+        by0: y0 - 19,
+        by1: y0 - 5,
+      },
+      {
+        ax: tx - 4,
+        ay: y0 + 17,
+        anchor: 'end',
+        x0: tx - w - 4,
+        x1: tx - 4,
+        by0: y0 + 5,
+        by1: y0 + 19,
+      },
+      {
+        ax: tx + 4,
+        ay: y0 + 17,
+        anchor: 'start',
+        x0: tx + 4,
+        x1: tx + w + 4,
+        by0: y0 + 5,
+        by1: y0 + 19,
+      },
+      {
+        ax: tx - 4,
+        ay: y0 - 7,
+        anchor: 'end',
+        x0: tx - w - 4,
+        x1: tx - 4,
+        by0: y0 - 19,
+        by1: y0 - 5,
+      },
+      {
+        ax: tx + 4,
+        ay: y0 - 7,
+        anchor: 'start',
+        x0: tx + 4,
+        x1: tx + w + 4,
+        by0: y0 - 19,
+        by1: y0 - 5,
+      },
     ]
     let best = candidates[0]
     let bestScore = Infinity
@@ -820,7 +953,8 @@ export function renderOscSvg(spec: OscSpec, desc: string): { svg: string; width:
         if (c.x0 < box.x1 + 3 && c.x1 + 3 > box.x0 && c.by0 < box.y1 && c.by1 > box.y0) score += 500
       }
       for (const p of allCurvePts) {
-        if (p.px >= c.x0 - 2 && p.px <= c.x1 + 2 && p.py >= c.by0 - 2 && p.py <= c.by1 + 2) score += 1
+        if (p.px >= c.x0 - 2 && p.px <= c.x1 + 2 && p.py >= c.by0 - 2 && p.py <= c.by1 + 2)
+          score += 1
       }
       if (score < bestScore) {
         bestScore = score
@@ -833,7 +967,8 @@ export function renderOscSvg(spec: OscSpec, desc: string): { svg: string; width:
   }
 
   // 6. Vẽ đường cong
-  const toPath = (pts: SampledPoint[]) => pts.map((p, i) => `${i ? 'L' : 'M'}${f1(p.px)} ${f1(p.py)}`).join('')
+  const toPath = (pts: SampledPoint[]) =>
+    pts.map((p, i) => `${i ? 'L' : 'M'}${f1(p.px)} ${f1(p.py)}`).join('')
   b += `<path d="${toPath(pts1)}" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`
   if (pts2 && spec.second) {
     const dash = spec.second.dashed ? ' stroke-dasharray="6 4"' : ''

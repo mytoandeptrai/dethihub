@@ -128,9 +128,7 @@
             "Nhận biết được những hình có trục đối xứng, những hình có tâm đối xứng trong thực tiễn (biển báo giao thông, lá cây, hoa văn, kiến trúc)",
             "Gấp hình hoặc gấp giấy để xác định trục đối xứng và tâm đối xứng"
           ],
-          "kien_thuc_duoc_dung": [
-            "Khái niệm hình có trục đối xứng, hình có tâm đối xứng"
-          ],
+          "kien_thuc_duoc_dung": ["Khái niệm hình có trục đối xứng, hình có tâm đối xứng"],
           "chua_duoc_dung": [
             "Tọa độ của điểm đối xứng trên mặt phẳng Oxy",
             "Phép biến hình, phép đối xứng trục, đối xứng tâm bằng công thức hình học 11"
@@ -2006,9 +2004,7 @@
             "Công thức tính giá trị đại diện $x_i = \\frac{a_i + a_{i+1}}{2}$, số trung bình $\\bar{x}$, phương sai $s^2$ ghép nhóm",
             "số trung bình, tứ phân vị của mẫu ghép nhóm (lớp 11)"
           ],
-          "chua_duoc_dung": [
-            "Phân phối xác suất liên tục Gauss (đường cong chuẩn)"
-          ],
+          "chua_duoc_dung": ["Phân phối xác suất liên tục Gauss (đường cong chuẩn)"],
           "dang_bai_dien_hinh": [
             "Xác định khoảng biến thiên và khoảng tứ phân vị cho bảng mẫu số liệu ghép nhóm cho trước",
             "Tính phương sai và độ lệch chuẩn của bảng phân bố tần số ghép nhóm",
@@ -2112,9 +2108,7 @@
             "Công thức nhân xác suất tổng quát",
             "Công thức xác suất toàn phần và Công thức Bayes"
           ],
-          "chua_duoc_dung": [
-            "Số phức"
-          ],
+          "chua_duoc_dung": ["Số phức"],
           "dang_bai_dien_hinh": [
             "Tính xác suất có điều kiện $P(A|B)$ từ bảng số liệu thống kê hoặc từ mô hình sơ đồ hình cây",
             "Tính xác suất một người bị mắc bệnh khi kết quả xét nghiệm là dương tính (Bài toán xét nghiệm Y tế dùng công thức Bayes)",
@@ -2165,12 +2159,7 @@
     },
     {
       "loai": "Đề kiểm tra Giữa kỳ 1 / Cuối kỳ 1 / Giữa kỳ 2 / Cuối kỳ 2 (THCS: Lớp 6, 7, 8, 9)",
-      "lop": [
-        6,
-        7,
-        8,
-        9
-      ],
+      "lop": [6, 7, 8, 9],
       "thoi_gian_phut": 90,
       "phan": [
         {
@@ -2191,11 +2180,7 @@
     },
     {
       "loai": "Đề kiểm tra Giữa kỳ 1 / Cuối kỳ 1 / Giữa kỳ 2 / Cuối kỳ 2 (THPT: Lớp 10, 11, 12 định kỳ)",
-      "lop": [
-        10,
-        11,
-        12
-      ],
+      "lop": [10, 11, 12],
       "thoi_gian_phut": 90,
       "phan": [
         {

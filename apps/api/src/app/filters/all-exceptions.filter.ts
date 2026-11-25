@@ -89,9 +89,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Map Prisma known request errors to an appropriate HttpException, then re-delegate
     if (exception instanceof Prisma.PrismaClientKnownRequestError && this.problemDetailsFilter) {
       const httpException = mapPrismaError(exception)
-      this.logger.warn(
-        `[DB] code=${exception.code} meta=${JSON.stringify(exception.meta ?? {})}`,
-      )
+      this.logger.warn(`[DB] code=${exception.code} meta=${JSON.stringify(exception.meta ?? {})}`)
       return this.problemDetailsFilter.catch(httpException, host)
     }
 

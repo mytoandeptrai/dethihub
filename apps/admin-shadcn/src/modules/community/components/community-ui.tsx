@@ -92,7 +92,7 @@ export function CommunityUi(
 
         <Toolbar className="flex-col items-stretch">
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-4" />
+            <Search className="text-ink-4 pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -133,7 +133,7 @@ export function CommunityUi(
             <button
               type="button"
               onClick={clearFilters}
-              className="inline-flex items-center gap-1 rounded-full bg-clay-soft px-2.5 py-1 text-[12px] font-semibold text-clay transition-colors hover:bg-clay/15"
+              className="bg-clay-soft text-clay hover:bg-clay/15 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold transition-colors"
             >
               <X className="size-3" />
               {t('communityCopy.m415')}
@@ -142,7 +142,7 @@ export function CommunityUi(
         </FilterChips>
 
         {openError ? (
-          <p role="alert" className="mb-6 text-[13.5px] font-medium text-clay-deep">
+          <p role="alert" className="text-clay-deep mb-6 text-[13.5px] font-medium">
             {openError}
           </p>
         ) : null}
@@ -201,27 +201,27 @@ export function CommunityPublishModalUi(
     const { onClose, loggedIn, docs, online, busyId, publishLocalDoc, publishOnline, error } = props
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-5 backdrop-blur-sm"
+        className="bg-ink/40 fixed inset-0 z-50 flex items-center justify-center px-5 backdrop-blur-sm"
         onClick={onClose}
       >
         <div
           role="dialog"
           aria-modal="true"
           aria-label={t('communityCopy.m411')}
-          className="anim-pop w-full max-w-[520px] rounded-[8px] bg-surface p-7 shadow-float"
+          className="anim-pop bg-surface shadow-float w-full max-w-[520px] rounded-[8px] p-7"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="font-display text-[22px] font-semibold text-ink">
+              <h2 className="font-display text-ink text-[22px] font-semibold">
                 {t('communityCopy.m418')}
               </h2>
-              <p className="mt-1.5 text-[14px] text-ink-3">{t('communityCopy.m419')}</p>
+              <p className="text-ink-3 mt-1.5 text-[14px]">{t('communityCopy.m419')}</p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sunken text-ink-3 transition-colors hover:text-ink"
+              className="bg-sunken text-ink-3 hover:text-ink flex size-9 shrink-0 items-center justify-center rounded-full transition-colors"
               aria-label={t('communityCopy.m329')}
             >
               <X className="size-4" />
@@ -231,20 +231,20 @@ export function CommunityPublishModalUi(
           {loggedIn ? (
             docs.length === 0 && online.length === 0 ? (
               <div className="mt-7 space-y-5">
-                <p className="text-[14.5px] text-ink-2">{t('communityCopy.m421')}</p>
+                <p className="text-ink-2 text-[14.5px]">{t('communityCopy.m421')}</p>
                 <Link to={appPaths.editor.href}>
                   <Button variant="outline">{t('communityCopy.m422')}</Button>
                 </Link>
               </div>
             ) : (
-              <ul className="mt-6 max-h-[360px] divide-y divide-line overflow-y-auto">
+              <ul className="divide-line mt-6 max-h-[360px] divide-y overflow-y-auto">
                 {online.map((it) => (
                   <li key={`o-${it.id}`} className="flex items-center gap-4 py-3.5">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-semibold text-ink">
+                      <p className="text-ink truncate text-[15px] font-semibold">
                         {it.meta.title.trim() || t('communityCopy.m91')}
                       </p>
-                      <p className="mt-0.5 text-[12.5px] text-ink-3">
+                      <p className="text-ink-3 mt-0.5 text-[12.5px]">
                         {t('communityCopy.m423')}
                         {it.meta.subject}
                         {t('communityCopy.m130')}
@@ -274,8 +274,8 @@ export function CommunityPublishModalUi(
                 {docs.map((d) => (
                   <li key={d.id} className="flex items-center gap-4 py-3.5">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-semibold text-ink">{d.title}</p>
-                      <p className="mt-0.5 text-[12.5px] text-ink-3">
+                      <p className="text-ink truncate text-[15px] font-semibold">{d.title}</p>
+                      <p className="text-ink-3 mt-0.5 text-[12.5px]">
                         {d.subject}
                         {t('communityCopy.m130')}
                         {d.grade}
@@ -299,7 +299,7 @@ export function CommunityPublishModalUi(
             )
           ) : (
             <div className="mt-7 space-y-5">
-              <p className="text-[14.5px] text-ink-2">{t('communityCopy.m420')}</p>
+              <p className="text-ink-2 text-[14.5px]">{t('communityCopy.m420')}</p>
               <Link to={appPaths.auth.login.href}>
                 <Button variant="primary">{t('communityCopy.m107')}</Button>
               </Link>
@@ -307,7 +307,7 @@ export function CommunityPublishModalUi(
           )}
 
           {error ? (
-            <p role="alert" className="mt-4 text-[13.5px] font-medium text-clay-deep">
+            <p role="alert" className="text-clay-deep mt-4 text-[13.5px] font-medium">
               {error}
             </p>
           ) : null}
@@ -328,14 +328,14 @@ export function CommunityExamCardUi(
     return (
       <Card
         asChild
-        className="anim-delay group flex min-w-0 flex-col overflow-hidden rounded-xl transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lift motion-reduce:transform-none motion-reduce:transition-none"
+        className="anim-delay group hover:shadow-lift flex min-w-0 flex-col overflow-hidden rounded-xl transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
       >
         <article style={{ '--delay': `${Math.min(index, 8) * 0.05}s` } as React.CSSProperties}>
           <button
             type="button"
             onClick={item.onView}
             disabled={busy}
-            className="relative flex min-h-36 w-full flex-col justify-between gap-4 overflow-hidden border-b border-line bg-sunken/50 p-5 text-left"
+            className="border-line bg-sunken/50 relative flex min-h-36 w-full flex-col justify-between gap-4 overflow-hidden border-b p-5 text-left"
           >
             <div className="relative flex items-start justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -344,16 +344,16 @@ export function CommunityExamCardUi(
                 {item.mine ? <Badge tone="sage">{t('communityCopy.m428')}</Badge> : null}
                 <KeyBadge item={item} />
               </div>
-              <span className="shrink-0 text-[12px] font-semibold text-ink-3">{item.grade}</span>
+              <span className="text-ink-3 shrink-0 text-[12px] font-semibold">{item.grade}</span>
             </div>
             <div className="relative min-w-0">
               <p
                 data-tip={item.title}
-                className="line-clamp-2 font-display text-[16px] font-semibold leading-snug tracking-[-0.01em] text-ink"
+                className="font-display text-ink line-clamp-2 text-[16px] leading-snug font-semibold tracking-[-0.01em]"
               >
                 {item.title}
               </p>
-              <p className="mt-1 truncate text-[12px] text-ink-3">
+              <p className="text-ink-3 mt-1 truncate text-[12px]">
                 {item.school || t('communityCopy.m92')}
               </p>
             </div>
@@ -370,14 +370,14 @@ export function CommunityExamCardUi(
                 />
                 <span
                   data-tip={authorName}
-                  className="min-w-0 truncate text-[12.5px] font-medium text-ink-2"
+                  className="text-ink-2 min-w-0 truncate text-[12.5px] font-medium"
                 >
                   {authorName}
                 </span>
               </div>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[12px] font-medium text-ink-3">
+            <div className="text-ink-3 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[12px] font-medium">
               <span className="tnum flex items-center gap-1.5 whitespace-nowrap">
                 <Sparkles className="size-3.5 shrink-0" />
                 {item.questions}
@@ -395,7 +395,7 @@ export function CommunityExamCardUi(
             </div>
 
             {item.preview ? (
-              <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-ink-3">
+              <p className="text-ink-3 mt-3 line-clamp-2 text-[13px] leading-relaxed">
                 <MathText as="span" className="inline">
                   {item.preview}
                 </MathText>
@@ -406,7 +406,7 @@ export function CommunityExamCardUi(
               <Button
                 variant="soft"
                 size="sm"
-                className="w-full justify-center whitespace-nowrap px-2.5 sm:px-3.5"
+                className="w-full justify-center px-2.5 whitespace-nowrap sm:px-3.5"
                 onClick={item.onView}
                 disabled={busy}
               >
@@ -415,7 +415,7 @@ export function CommunityExamCardUi(
               <Button
                 variant="clay"
                 size="sm"
-                className="w-full justify-center whitespace-nowrap px-2.5 sm:px-3.5"
+                className="w-full justify-center px-2.5 whitespace-nowrap sm:px-3.5"
                 onClick={item.onQuiz}
                 disabled={busy}
                 data-tip={t('communityCopy.m72')}
@@ -457,7 +457,7 @@ export function CommunityExamRowUi(
   if (props.viewState === 0) {
     const { item, busy, authorName } = props
     return (
-      <div className="flex flex-col gap-3 border-b border-line-2 px-5 py-4 last:border-0 hover:bg-canvas/60 md:flex-row md:items-center md:gap-4">
+      <div className="border-line-2 hover:bg-canvas/60 flex flex-col gap-3 border-b px-5 py-4 last:border-0 md:flex-row md:items-center md:gap-4">
         <button
           type="button"
           onClick={item.onView}
@@ -466,11 +466,11 @@ export function CommunityExamRowUi(
         >
           <span
             data-tip={item.title}
-            className="line-clamp-2 font-display text-[16px] font-semibold text-ink transition-colors hover:text-clay"
+            className="font-display text-ink hover:text-clay line-clamp-2 text-[16px] font-semibold transition-colors"
           >
             {item.title}
             {item.mine ? (
-              <span className="ml-2 inline-block whitespace-nowrap align-middle text-[11.5px] font-semibold text-honey">
+              <span className="text-honey ml-2 inline-block align-middle text-[11.5px] font-semibold whitespace-nowrap">
                 {t('communityCopy.m407')}
               </span>
             ) : null}
@@ -480,12 +480,12 @@ export function CommunityExamRowUi(
               </Badge>
             ) : null}
             {item.missingKeys ? (
-              <span className="ml-2 inline-block whitespace-nowrap align-middle text-[11.5px] font-semibold text-ink-3">
+              <span className="text-ink-3 ml-2 inline-block align-middle text-[11.5px] font-semibold whitespace-nowrap">
                 {keyLabel(item)}
               </span>
             ) : null}
           </span>
-          <span className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px] text-ink-3">
+          <span className="text-ink-3 mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px]">
             {item.author ? (
               <>
                 <Avatar
@@ -496,11 +496,11 @@ export function CommunityExamRowUi(
                 />
                 <span
                   data-tip={authorName}
-                  className="min-w-0 max-w-[45%] shrink truncate font-medium text-ink-2"
+                  className="text-ink-2 max-w-[45%] min-w-0 shrink truncate font-medium"
                 >
                   {authorName}
                 </span>
-                <span aria-hidden="true" className="shrink-0 text-ink-4">
+                <span aria-hidden="true" className="text-ink-4 shrink-0">
                   {t('communityCopy.m64')}
                 </span>
               </>
@@ -515,7 +515,7 @@ export function CommunityExamRowUi(
           </span>
         </button>
         <div className="flex flex-wrap items-center justify-between gap-3 md:shrink-0 md:flex-nowrap md:gap-4">
-          <div className="flex items-center gap-3.5 whitespace-nowrap text-[12.5px] font-medium text-ink-3">
+          <div className="text-ink-3 flex items-center gap-3.5 text-[12.5px] font-medium whitespace-nowrap">
             <span className="tnum">
               {item.questions}
               {t('communityCopy.m65')}
@@ -572,12 +572,12 @@ export function CommunityViewToggleUi(
         ref={ref}
         role="radiogroup"
         aria-label={t('communityCopy.m433')}
-        className="relative flex h-11 shrink-0 items-center rounded-[8px] bg-sunken p-[3px]"
+        className="bg-sunken relative flex h-11 shrink-0 items-center rounded-[8px] p-[3px]"
       >
         {thumb ? (
           <span
             aria-hidden
-            className="absolute inset-y-[3px] left-0 rounded-[6px] bg-surface shadow-soft transition-[transform,width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="bg-surface shadow-soft absolute inset-y-[3px] left-0 rounded-[6px] transition-[transform,width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             style={{ transform: `translateX(${thumb.x}px)`, width: thumb.w }}
           />
         ) : null}

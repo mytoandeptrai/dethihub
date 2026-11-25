@@ -5,7 +5,14 @@
  * `SlideElement.shape` giữ nguyên 7 tên cũ (rect, round, ellipse, triangle, arrow, star, heart) để deck cũ đọc được;
  * mọi hình khác lưu thẳng tên prst (vd. `hexagon`, `flowChartDecision`) và vẽ bằng SVG ở đây.
  */
-import { connectorBezier, connectorPoints, isConnectorPreset, isPillPreset, presetPath, presetPolygon } from './vendor/presetGeometry'
+import {
+  connectorBezier,
+  connectorPoints,
+  isConnectorPreset,
+  isPillPreset,
+  presetPath,
+  presetPolygon,
+} from './vendor/presetGeometry'
 
 /** Tên cũ ↔ prst; các tên này vẫn vẽ bằng CSS như trước (giữ bo góc theo bộ màu…). */
 const LEGACY_TO_PRST: Record<string, string> = {
@@ -17,18 +24,23 @@ const LEGACY_TO_PRST: Record<string, string> = {
   star: 'star5',
   heart: 'heart',
 }
-const PRST_TO_LEGACY = Object.fromEntries(Object.entries(LEGACY_TO_PRST).map(([legacy, prst]) => [prst, legacy]))
+const PRST_TO_LEGACY = Object.fromEntries(
+  Object.entries(LEGACY_TO_PRST).map(([legacy, prst]) => [prst, legacy]),
+)
 
 /** Tên lưu trong `SlideElement.shape` ứng với một prst của thư viện. */
 export const shapeNameOf = (prst: string): string => PRST_TO_LEGACY[prst] ?? prst
 /** prst OOXML ứng với `SlideElement.shape` (để vẽ và xuất PPTX). */
-export const prstOf = (shape: string | undefined): string => LEGACY_TO_PRST[shape ?? 'rect'] ?? shape ?? 'rect'
+export const prstOf = (shape: string | undefined): string =>
+  LEGACY_TO_PRST[shape ?? 'rect'] ?? shape ?? 'rect'
 
 /** Hình được vẽ bằng SVG ở đây (không phải 7 hình cũ hay đường thẳng của app). */
-export const isPresetShape = (shape: string | undefined): boolean => !!shape && shape !== 'line' && !(shape in LEGACY_TO_PRST)
+export const isPresetShape = (shape: string | undefined): boolean =>
+  !!shape && shape !== 'line' && !(shape in LEGACY_TO_PRST)
 
 /** Đường nối gấp khúc/cong chỉ có nét, không có nền. */
-export const isStrokeOnlyShape = (shape: string | undefined): boolean => isConnectorPreset(prstOf(shape))
+export const isStrokeOnlyShape = (shape: string | undefined): boolean =>
+  isConnectorPreset(prstOf(shape))
 
 type Group = { group: string; shapes: Array<{ prst: string; label: string }> }
 const g = (group: string, items: Record<string, string>): Group => ({
@@ -165,7 +177,8 @@ export const PRESET_GROUPS: Group[] = [
 export const PRESET_COUNT = PRESET_GROUPS.reduce((n, grp) => n + grp.shapes.length, 0)
 
 /** Hình dài (mũi tên ngang, băng rôn, sơ đồ khối, chú thích…) chèn vào hộp ngang; còn lại hộp vuông. */
-const WIDE = /Arrow$|^chevron$|^homePlate$|^ribbon|^wave|^doubleWave|^flowChart(Process|AlternateProcess|PredefinedProcess|Document|Multidocument|Terminator|ManualInput|Display|Delay|PunchedTape|Preparation|InternalStorage)|Callout$|^(rect|roundRect|snip|round[12])|^(parallelogram|trapezoid|plaque|frame|bevel|foldedCorner|Connector)/
+const WIDE =
+  /Arrow$|^chevron$|^homePlate$|^ribbon|^wave|^doubleWave|^flowChart(Process|AlternateProcess|PredefinedProcess|Document|Multidocument|Terminator|ManualInput|Display|Delay|PunchedTape|Preparation|InternalStorage)|Callout$|^(rect|roundRect|snip|round[12])|^(parallelogram|trapezoid|plaque|frame|bevel|foldedCorner|Connector)/
 export const defaultBox = (prst: string): { w: number; h: number } =>
   WIDE.test(prst) || isConnectorPreset(prst) ? { w: 34, h: 28 } : { w: 22, h: 39.1 }
 
@@ -185,23 +198,34 @@ export interface PresetPaths {
 
 const polygonPath = (pts: number[]): string => {
   let d = ''
-  for (let i = 0; i < pts.length; i += 2) d += `${i ? 'L' : 'M'} ${pts[i].toFixed(2)} ${pts[i + 1].toFixed(2)} `
+  for (let i = 0; i < pts.length; i += 2)
+    d += `${i ? 'L' : 'M'} ${pts[i].toFixed(2)} ${pts[i + 1].toFixed(2)} `
   return `${d}Z`
 }
 
 /** Đường vẽ của một hình theo hộp `w`×`h` (% slide); `adjust` là giá trị chỉnh OOXML (thiếu = mặc định). */
-export function presetPaths(prst: string, w: number, h: number, adjust?: Record<string, number>): PresetPaths {
+export function presetPaths(
+  prst: string,
+  w: number,
+  h: number,
+  adjust?: Record<string, number>,
+): PresetPaths {
   const { W, H } = refSize(w, h)
   if (isConnectorPreset(prst)) {
     const pts = connectorPoints(prst, W, H, false, false, adjust)
     if (/^curved/.test(prst)) {
       const bez = connectorBezier(pts)
       let d = `M ${pts[0].toFixed(2)} ${pts[1].toFixed(2)} `
-      for (let i = 0; i < bez.length; i += 6) d += `C ${bez.slice(i, i + 6).map((n) => n.toFixed(2)).join(' ')} `
+      for (let i = 0; i < bez.length; i += 6)
+        d += `C ${bez
+          .slice(i, i + 6)
+          .map((n) => n.toFixed(2))
+          .join(' ')} `
       return { W, H, strokeOnly: d }
     }
     let d = ''
-    for (let i = 0; i < pts.length; i += 2) d += `${i ? 'L' : 'M'} ${pts[i].toFixed(2)} ${pts[i + 1].toFixed(2)} `
+    for (let i = 0; i < pts.length; i += 2)
+      d += `${i ? 'L' : 'M'} ${pts[i].toFixed(2)} ${pts[i + 1].toFixed(2)} `
     return { W, H, strokeOnly: d }
   }
   if (prst === 'ellipse') {
@@ -210,11 +234,19 @@ export function presetPaths(prst: string, w: number, h: number, adjust?: Record<
   }
   if (prst === 'roundRect') {
     const r = Math.min(W, H) / 6 // mặc định OOXML: 16,667% cạnh ngắn
-    return { W, H, both: `M ${r} 0 H ${W - r} A ${r} ${r} 0 0 1 ${W} ${r} V ${H - r} A ${r} ${r} 0 0 1 ${W - r} ${H} H ${r} A ${r} ${r} 0 0 1 0 ${H - r} V ${r} A ${r} ${r} 0 0 1 ${r} 0 Z` }
+    return {
+      W,
+      H,
+      both: `M ${r} 0 H ${W - r} A ${r} ${r} 0 0 1 ${W} ${r} V ${H - r} A ${r} ${r} 0 0 1 ${W - r} ${H} H ${r} A ${r} ${r} 0 0 1 0 ${H - r} V ${r} A ${r} ${r} 0 0 1 ${r} 0 Z`,
+    }
   }
   if (isPillPreset(prst)) {
     const r = Math.min(W, H) / 2
-    return { W, H, both: `M ${r} 0 H ${W - r} A ${r} ${r} 0 0 1 ${W - r} ${H} H ${r} A ${r} ${r} 0 0 1 ${r} 0 Z` }
+    return {
+      W,
+      H,
+      both: `M ${r} 0 H ${W - r} A ${r} ${r} 0 0 1 ${W - r} ${H} H ${r} A ${r} ${r} 0 0 1 ${r} 0 Z`,
+    }
   }
   const poly = presetPolygon(prst, W, H, adjust)
   if (poly && poly.length >= 6) return { W, H, both: polygonPath(poly) }

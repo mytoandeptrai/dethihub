@@ -31,7 +31,8 @@ const INTERVAL = /[[(]\s*-?[\d.,]+\s*;\s*-?[\d.,]+\s*[\])]/g
 
 function splitCats(line: string): string[] {
   const iv = line.match(INTERVAL)
-  if (iv && (iv.length >= 2 || iv[0] === line)) return iv.map((s) => s.replace(/\s+/g, ' ').replace(/;\s*/, '; '))
+  if (iv && (iv.length >= 2 || iv[0] === line))
+    return iv.map((s) => s.replace(/\s+/g, ' ').replace(/;\s*/, '; '))
   return line
     .split(/[;|\t]/)
     .map((s) => s.trim())
@@ -61,14 +62,16 @@ export function parseStats(text: string): Parsed {
       .map((s) => s.trim())
       .filter(Boolean)
       .map((s) => Number(s.replace(',', '.')))
-    if (vals.some((v) => !Number.isFinite(v))) throw new Error(`Dòng "${name}" có giá trị không phải số`)
+    if (vals.some((v) => !Number.isFinite(v)))
+      throw new Error(`Dòng "${name}" có giá trị không phải số`)
     series.push({ name, vals })
   }
   if (!series.length) throw new Error('Thêm ít nhất một dòng số liệu, vd. Số học sinh: 3; 5; 7')
   const n = Math.max(...series.map((s) => s.vals.length))
   if (!cats.length) cats = Array.from({ length: n }, (_, i) => String(i + 1))
   for (const s of series)
-    if (s.vals.length !== cats.length) throw new Error(`Dòng "${s.name}" có ${s.vals.length} số, nhưng có ${cats.length} nhãn`)
+    if (s.vals.length !== cats.length)
+      throw new Error(`Dòng "${s.name}" có ${s.vals.length} số, nhưng có ${cats.length} nhãn`)
   return { cats, series }
 }
 
@@ -97,9 +100,12 @@ const DEFS =
 
 function mark(kind: string, x: number, y: number) {
   const r = 4
-  if (kind === 'square') return `<rect x="${f1(x - r)}" y="${f1(y - r)}" width="${2 * r}" height="${2 * r}" fill="#222"/>`
-  if (kind === 'triangle') return `<path d="M${f1(x)} ${f1(y - r - 1)}L${f1(x + r + 1)} ${f1(y + r)}L${f1(x - r - 1)} ${f1(y + r)}Z" fill="#222"/>`
-  if (kind === 'diamond') return `<path d="M${f1(x)} ${f1(y - r - 1)}L${f1(x + r + 1)} ${f1(y)}L${f1(x)} ${f1(y + r + 1)}L${f1(x - r - 1)} ${f1(y)}Z" fill="#222"/>`
+  if (kind === 'square')
+    return `<rect x="${f1(x - r)}" y="${f1(y - r)}" width="${2 * r}" height="${2 * r}" fill="#222"/>`
+  if (kind === 'triangle')
+    return `<path d="M${f1(x)} ${f1(y - r - 1)}L${f1(x + r + 1)} ${f1(y + r)}L${f1(x - r - 1)} ${f1(y + r)}Z" fill="#222"/>`
+  if (kind === 'diamond')
+    return `<path d="M${f1(x)} ${f1(y - r - 1)}L${f1(x + r + 1)} ${f1(y)}L${f1(x)} ${f1(y + r + 1)}L${f1(x - r - 1)} ${f1(y)}Z" fill="#222"/>`
   return `<circle cx="${f1(x)}" cy="${f1(y)}" r="${r}" fill="#fff" stroke="#222" stroke-width="1.6"/>`
 }
 
@@ -111,36 +117,59 @@ function wrap(W: number, H: number, desc: string, body: string) {
   }
 }
 
-function legend(series: Parsed['series'], x: number, y: number, kind: 'fill' | 'mark'): { svg: string; w: number } {
+function legend(
+  series: Parsed['series'],
+  x: number,
+  y: number,
+  kind: 'fill' | 'mark',
+): { svg: string; w: number } {
   let svg = ''
   let cx = x
   series.forEach((s, i) => {
-    if (kind === 'fill') svg += `<rect x="${f1(cx)}" y="${f1(y - 10)}" width="16" height="12" fill="${FILLS[i % FILLS.length]}" stroke="#222" stroke-width="1"/>`
-    else svg += `<path d="M${f1(cx)} ${f1(y - 4)}h18" stroke="#222" stroke-width="1.5"/>${mark(MARKS[i % MARKS.length], cx + 9, y - 4)}`
+    if (kind === 'fill')
+      svg += `<rect x="${f1(cx)}" y="${f1(y - 10)}" width="16" height="12" fill="${FILLS[i % FILLS.length]}" stroke="#222" stroke-width="1"/>`
+    else
+      svg += `<path d="M${f1(cx)} ${f1(y - 4)}h18" stroke="#222" stroke-width="1.5"/>${mark(MARKS[i % MARKS.length], cx + 9, y - 4)}`
     svg += `<text x="${f1(cx + 22)}" y="${f1(y)}" ${FONT}>${esc(s.name)}</text>`
     cx += 30 + [...s.name].length * 7.5 + 14
   })
   return { svg, w: cx - x }
 }
 
-export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderStatsSvg(
+  spec: StatsSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const { cats, series } = parseStats(spec.data)
   const top = spec.title ? 34 : 14
-  const title = (W: number) => (spec.title ? `<text x="${W / 2}" y="22" ${FAM} font-size="16" font-weight="bold" text-anchor="middle">${esc(spec.title)}</text>` : '')
+  const title = (W: number) =>
+    spec.title
+      ? `<text x="${W / 2}" y="22" ${FAM} font-size="16" font-weight="bold" text-anchor="middle">${esc(spec.title)}</text>`
+      : ''
 
   /* ---------- bảng ---------- */
   if (spec.chart === 'table') {
-    const firstW = Math.max(90, ...series.map((s) => [...s.name].length * 8 + 20), [...(spec.xLabel || 'Nhóm')].length * 8 + 20)
+    const firstW = Math.max(
+      90,
+      ...series.map((s) => [...s.name].length * 8 + 20),
+      [...(spec.xLabel || 'Nhóm')].length * 8 + 20,
+    )
     const cw = Math.max(52, ...cats.map((c) => [...c].length * 8 + 16))
     const W = firstW + cw * cats.length
     const rh = 32
     const H = top + rh * (series.length + 1) + 2
     let b = title(W)
-    const rows = [{ name: spec.xLabel || 'Nhóm', cells: cats }, ...series.map((s) => ({ name: s.name, cells: s.vals.map(fmt) }))]
+    const rows = [
+      { name: spec.xLabel || 'Nhóm', cells: cats },
+      ...series.map((s) => ({ name: s.name, cells: s.vals.map(fmt) })),
+    ]
     rows.forEach((r, i) => {
       const y = top + i * rh
       b += `<text x="${firstW / 2}" y="${y + 21}" ${FONT} text-anchor="middle">${esc(r.name)}</text>`
-      r.cells.forEach((c, j) => (b += `<text x="${firstW + cw * j + cw / 2}" y="${y + 21}" ${FONT} text-anchor="middle">${esc(c)}</text>`))
+      r.cells.forEach(
+        (c, j) =>
+          (b += `<text x="${firstW + cw * j + cw / 2}" y="${y + 21}" ${FONT} text-anchor="middle">${esc(c)}</text>`),
+      )
     })
     let grid = `M0.75 ${top}H${W - 0.75}V${H - 1.25}H0.75Z`
     for (let i = 1; i <= series.length; i++) grid += `M0 ${top + i * rh}H${W}`
@@ -158,7 +187,15 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
     const R = 110
     const cx = 150
     const cy = top + R + 26
-    const shades = ['#4d4d4d', 'url(#sthatch)', '#c8c8c8', 'url(#stdots)', '#ffffff', '#888888', '#e8e8e8']
+    const shades = [
+      '#4d4d4d',
+      'url(#sthatch)',
+      '#c8c8c8',
+      'url(#stdots)',
+      '#ffffff',
+      '#888888',
+      '#e8e8e8',
+    ]
     let b = ''
     let a0 = -Math.PI / 2
     const lab: string[] = []
@@ -176,7 +213,9 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
         const pct = fmt((v / sum) * 100) + '%'
         const lx = cx + (R + 18) * Math.cos(am)
         const ly = cy + (R + 18) * Math.sin(am)
-        lab.push(`<text x="${f1(lx)}" y="${f1(ly + 5)}" ${FONT} text-anchor="${Math.cos(am) > 0.3 ? 'start' : Math.cos(am) < -0.3 ? 'end' : 'middle'}" data-lbl="val:0:${i}">${pct}</text>`)
+        lab.push(
+          `<text x="${f1(lx)}" y="${f1(ly + 5)}" ${FONT} text-anchor="${Math.cos(am) > 0.3 ? 'start' : Math.cos(am) < -0.3 ? 'end' : 'middle'}" data-lbl="val:0:${i}">${pct}</text>`,
+        )
       }
       a0 = a1
     })
@@ -188,7 +227,9 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
     })
     const W = Math.max(440, 340 + Math.max(...cats.map((c) => [...c].length * 7.5)))
     const H = Math.max(cy + R + 30, top + 24 * cats.length + 20)
-    const t = spec.title ? `<text x="${cx}" y="22" ${FAM} font-size="16" font-weight="bold" text-anchor="middle">${esc(spec.title)}</text>` : ''
+    const t = spec.title
+      ? `<text x="${cx}" y="22" ${FAM} font-size="16" font-weight="bold" text-anchor="middle">${esc(spec.title)}</text>`
+      : ''
     return wrap(W, H, desc, t + b + lab.join('') + leg)
   }
 
@@ -208,9 +249,14 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
   const origin =
     spec.chart === 'line' &&
     nums.length > 1 &&
-    nums.every((v, i) => Number.isFinite(v) && cats[i].trim() !== '' && (i === 0 || v > nums[i - 1])) &&
+    nums.every(
+      (v, i) => Number.isFinite(v) && cats[i].trim() !== '' && (i === 0 || v > nums[i - 1]),
+    ) &&
     nums[0] === 0
-  const cx = (i: number) => (origin ? left + (nums[i] / nums[nums.length - 1]) * (plotW - slot / 2) : left + i * slot + slot / 2)
+  const cx = (i: number) =>
+    origin
+      ? left + (nums[i] / nums[nums.length - 1]) * (plotW - slot / 2)
+      : left + i * slot + slot / 2
   const plotH = 230
   // chú thích + chỗ cho mũi tên và tên trục đứng
   const legH = (ns > 1 ? 26 : 0) + 22
@@ -241,9 +287,11 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
     series[0].vals.forEach((v, i) => {
       const x = left + i * slot
       b += `<rect x="${f1(x)}" y="${f1(Y(v))}" width="${slot}" height="${f1(y0 - Y(v))}" fill="#c8c8c8" stroke="#222" stroke-width="1.2"/>`
-      if (spec.values) b += `<text x="${f1(x + slot / 2)}" y="${f1(Y(v) - 5)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="val:0:${i}">${fmt(v)}</text>`
+      if (spec.values)
+        b += `<text x="${f1(x + slot / 2)}" y="${f1(Y(v) - 5)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="val:0:${i}">${fmt(v)}</text>`
       b += `<text x="${f1(x)}" y="${y0 + 18}" ${FAM} font-size="13" text-anchor="middle">${esc(bounds[i]?.[0] ?? '')}</text>`
-      if (i === cats.length - 1) b += `<text x="${f1(x + slot)}" y="${y0 + 18}" ${FAM} font-size="13" text-anchor="middle">${esc(bounds[i]?.[1] ?? '')}</text>`
+      if (i === cats.length - 1)
+        b += `<text x="${f1(x + slot)}" y="${y0 + 18}" ${FAM} font-size="13" text-anchor="middle">${esc(bounds[i]?.[1] ?? '')}</text>`
     })
   } else if (spec.chart === 'line') {
     series.forEach((s, si) => {
@@ -256,7 +304,10 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
     if (spec.values)
       cats.forEach((_, i) => {
         const x = cx(i)
-        const col = series.map((s, si) => ({ si, v: s.vals[i], y: Y(s.vals[i]) })).filter((p) => Number.isFinite(p.v) && !(origin && i === 0 && p.v === 0)).sort((p, q) => p.y - q.y)
+        const col = series
+          .map((s, si) => ({ si, v: s.vals[i], y: Y(s.vals[i]) }))
+          .filter((p) => Number.isFinite(p.v) && !(origin && i === 0 && p.v === 0))
+          .sort((p, q) => p.y - q.y)
         let prev = -Infinity
         for (const p of col) {
           let ty = p.y - 9
@@ -271,7 +322,8 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
       s.vals.forEach((v, i) => {
         const x = left + i * slot + (slot - bw * ns) / 2 + si * bw
         b += `<rect x="${f1(x)}" y="${f1(Y(v))}" width="${f1(bw)}" height="${f1(y0 - Y(v))}" fill="${FILLS[si % FILLS.length]}" stroke="#222" stroke-width="1.1"/>`
-        if (spec.values) b += `<text x="${f1(x + bw / 2)}" y="${f1(Y(v) - 5)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="val:${si}:${i}">${fmt(v)}</text>`
+        if (spec.values)
+          b += `<text x="${f1(x + bw / 2)}" y="${f1(Y(v) - 5)}" ${FAM} font-size="13" text-anchor="middle" data-lbl="val:${si}:${i}">${fmt(v)}</text>`
       })
     })
   }
@@ -284,7 +336,9 @@ export function renderStatsSvg(spec: StatsSpec, desc: string): { svg: string; wi
   // trục
   b += `<path d="M${left} ${y0}H${left + plotW + 22}" stroke="#222" stroke-width="1.2" marker-end="url(#starr)"/>`
   b += `<path d="M${left} ${y0}V${top + legH - 14}" stroke="#222" stroke-width="1.2" marker-end="url(#starr)"/>`
-  if (spec.yLabel) b += `<text x="${left + 8}" y="${top + legH - 8}" ${FAM} font-size="13" data-lbl="ax:y">${esc(spec.yLabel)}</text>`
-  if (spec.xLabel) b += `<text x="${left + plotW + 26}" y="${y0 + 36}" ${FAM} font-size="13" text-anchor="end" data-lbl="ax:x">${esc(spec.xLabel)}</text>`
+  if (spec.yLabel)
+    b += `<text x="${left + 8}" y="${top + legH - 8}" ${FAM} font-size="13" data-lbl="ax:y">${esc(spec.yLabel)}</text>`
+  if (spec.xLabel)
+    b += `<text x="${left + plotW + 26}" y="${y0 + 36}" ${FAM} font-size="13" text-anchor="end" data-lbl="ax:x">${esc(spec.xLabel)}</text>`
   return wrap(W, H, desc, b)
 }

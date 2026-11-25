@@ -1,17 +1,18 @@
+import { mediaReadPages, extractFile } from '@/apis/media/requests'
+import { plainText } from '@/engine/examEditor/convert'
 /**
  * Nguồn cho AI soạn đề: CHỈ những gì giáo viên tự đưa vào — tệp đính kèm hoặc nguồn chọn trong "Thêm nguồn".
  * Không tự dò đề đã lưu hay tìm web (giáo viên không thêm nguồn mà AI vẫn lôi đề khác vào là sai ý;
  * tìm web đi qua nút "Tìm trên web" riêng). Không có nguồn — dùng kiến thức chung, phải cảnh báo.
  */
 import { apiFetch } from '@/engine/lib/apiFetch'
-import { mediaReadPages, extractFile } from '@/apis/media/requests'
-import { ApiClientError } from '@/lib/api-error'
 import { AiQuotaError, reportQuota } from '@/engine/lib/llm'
 import { MAX_PDF_PAGES, renderPdfPages } from '@/engine/lib/pdfPages'
 import { sourcePrompt as promptOf, sourceRule as ruleOf } from '@/engine/lib/prompts/sources'
-import type { ExamBlock, ExamDoc, RichText } from '@/engine/data/docTypes'
-import { plainText } from '@/engine/examEditor/convert'
 import { useDocStore } from '@/engine/store/docs'
+import { ApiClientError } from '@/lib/api-error'
+
+import type { ExamBlock, ExamDoc, RichText } from '@/engine/data/docTypes'
 
 export interface SourceFile {
   name: string
@@ -57,7 +58,8 @@ export const isPdf = (name: string, mime?: string) =>
   /\.pdf$/i.test(name) || mime === 'application/pdf'
 
 export const isDocx = (name: string, mime?: string) =>
-  /\.docx$/i.test(name) || mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  /\.docx$/i.test(name) ||
+  mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
 export function pdfTextNeedsVision(text: string): boolean {
   const normalized = text.trim().normalize('NFC')
@@ -69,12 +71,29 @@ export function pdfTextNeedsVision(text: string): boolean {
   if (splitLetters >= 3 && splitLetters > words.length * PDF_SPLIT_LETTER_RATIO) return true
 
   // Hình có thể biến mất khỏi bản tách chữ, kể cả khi câu dẫn vẫn đọc được.
-  if (/hình\s+(?:vẽ|minh họa|bên|dưới đây)|(?:đồ thị|biểu đồ|sơ đồ)\s+(?:bên|sau|dưới đây)|bảng biến thiên/iu.test(normalized)) return true
+  if (
+    /hình\s+(?:vẽ|minh họa|bên|dưới đây)|(?:đồ thị|biểu đồ|sơ đồ)\s+(?:bên|sau|dưới đây)|bảng biến thiên/iu.test(
+      normalized,
+    )
+  )
+    return true
   if (/[∫∑√≤≥≠±₀-₉]|[×÷→⇌]\s*[\dA-Z]/u.test(normalized)) return true
-  if (/(?<![\p{L}\d])(?:[A-Za-z]|\d+)\s*(?:[²³]|[=+−]\s*[\w(−-])|(?:^|\n)\s*[A-D]\.\s*=/u.test(normalized)) return true
+  if (
+    /(?<![\p{L}\d])(?:[A-Za-z]|\d+)\s*(?:[²³]|[=+−]\s*[\w(−-])|(?:^|\n)\s*[A-D]\.\s*=/u.test(
+      normalized,
+    )
+  )
+    return true
 
-  const mathLines = normalized.split(/\r?\n/).filter((line) => /^(?:[A-Za-z\d+−–-]|=.+)$/u.test(line.trim())).length
-  return mathLines >= 2 && /đồ thị|hình (?:chóp|lập phương|hộp|không gian)|hàm số|phân số|phương trình|công thức|phản ứng/iu.test(normalized)
+  const mathLines = normalized
+    .split(/\r?\n/)
+    .filter((line) => /^(?:[A-Za-z\d+−–-]|=.+)$/u.test(line.trim())).length
+  return (
+    mathLines >= 2 &&
+    /đồ thị|hình (?:chóp|lập phương|hộp|không gian)|hàm số|phân số|phương trình|công thức|phản ứng/iu.test(
+      normalized,
+    )
+  )
 }
 
 type SourceReadOptions = { onProgress?: (message: string) => void; signal?: AbortSignal }
@@ -93,7 +112,10 @@ export async function readVisionPages(
     const label = batch.length > 1 ? `${i + 1}-${i + batch.length}` : `${i + 1}`
     onProgress?.(`Đang đọc trang ${label}/${pages.length}…`)
     try {
-      const payload = await mediaReadPages({ body: { images: batch.map((page) => page.toDataURL('image/jpeg', 0.82)) }, signal })
+      const payload = await mediaReadPages({
+        body: { images: batch.map((page) => page.toDataURL('image/jpeg', 0.82)) },
+        signal,
+      })
       signal?.throwIfAborted()
       reportQuota(payload?.quota)
       const text = payload.text.trim()
@@ -101,7 +123,8 @@ export async function readVisionPages(
       texts.push(text)
     } catch (err) {
       signal?.throwIfAborted()
-      if (err instanceof ApiClientError && err.status === 429 && /quota/i.test(err.code ?? '')) throw new AiQuotaError(err.message)
+      if (err instanceof ApiClientError && err.status === 429 && /quota/i.test(err.code ?? ''))
+        throw new AiQuotaError(err.message)
       if (requireAll || err instanceof AiQuotaError) throw err
       failed.push(label)
     }
@@ -110,11 +133,18 @@ export async function readVisionPages(
   const warning = [
     total > MAX_PDF_PAGES ? `Chỉ đọc ${MAX_PDF_PAGES}/${total} trang đầu.` : '',
     failed.length ? `Không đọc được trang ${failed.join(', ')}.` : '',
-  ].filter(Boolean).join(' ')
+  ]
+    .filter(Boolean)
+    .join(' ')
   return { text: texts.join('\n\n'), warning: warning || undefined }
 }
 
-export async function readPdfByVision(file: File, onProgress?: SourceReadOptions['onProgress'], signal?: AbortSignal, requireAll = false) {
+export async function readPdfByVision(
+  file: File,
+  onProgress?: SourceReadOptions['onProgress'],
+  signal?: AbortSignal,
+  requireAll = false,
+) {
   signal?.throwIfAborted()
   const { pages, total } = await renderPdfPages(file)
   return readVisionPages(pages, total, { onProgress, signal, requireAll })
@@ -124,7 +154,13 @@ export async function extractAttachment(
   file: File,
   /** .docx: giữ ký tự đánh dấu chữ nổi bật (U+E000/U+E001) — dùng khi tách đề để tìm đáp án được tô/đậm */
   marks = false,
-): Promise<{ text: string; kind?: string; slides?: string[]; images?: string[]; warning?: string }> {
+): Promise<{
+  text: string
+  kind?: string
+  slides?: string[]
+  images?: string[]
+  warning?: string
+}> {
   const payload = await extractFile(file, marks)
   return {
     text: payload?.text ?? '',
@@ -135,7 +171,12 @@ export async function extractAttachment(
   }
 }
 
-async function extractSourceFile(file: File, name: string, warnings: string[], options: SourceReadOptions) {
+async function extractSourceFile(
+  file: File,
+  name: string,
+  warnings: string[],
+  options: SourceReadOptions,
+) {
   options.signal?.throwIfAborted()
   if (isDocx(file.name, file.type)) {
     try {
@@ -143,7 +184,8 @@ async function extractSourceFile(file: File, name: string, warnings: string[], o
       const blocks = await docxToBlocks(file, { imagePlaceholders: true })
       options.signal?.throwIfAborted()
       const { text, imageCount } = docxBlocksToSourceText(blocks)
-      if (imageCount) warnings.push(`${name}: có ${imageCount} hình, AI không đọc được nội dung hình.`)
+      if (imageCount)
+        warnings.push(`${name}: có ${imageCount} hình, AI không đọc được nội dung hình.`)
       return { text }
     } catch {
       options.signal?.throwIfAborted()
@@ -156,18 +198,24 @@ async function extractSourceFile(file: File, name: string, warnings: string[], o
   if (isPdf(file.name, file.type) && (!hasText || pdfTextNeedsVision(extracted.text))) {
     options.onProgress?.(`Đang chuẩn bị đọc ${name} bằng ảnh…`)
     try {
-      const { text, warning } = await readPdfByVision(file, options.onProgress, options.signal, hasText)
+      const { text, warning } = await readPdfByVision(
+        file,
+        options.onProgress,
+        options.signal,
+        hasText,
+      )
       if (!text) throw new Error(warning || 'Không nhận được nội dung từ ảnh.')
       warnings.push(`${name}: đọc bằng AI nhìn ảnh.`)
       if (warning) warnings.push(`${name}: ${warning}`)
       return { text, warning }
     } catch (err) {
       options.signal?.throwIfAborted()
-      const warning = err instanceof AiQuotaError
-        ? 'PDF này cần AI đọc bằng ảnh nhưng không đủ điểm, kết quả có thể sai công thức và hình.'
-        : hasText
-          ? 'Không đọc được PDF bằng ảnh. Dùng chữ tách từ PDF, kết quả có thể sai công thức và hình.'
-          : 'Không đọc được PDF bằng ảnh.'
+      const warning =
+        err instanceof AiQuotaError
+          ? 'PDF này cần AI đọc bằng ảnh nhưng không đủ điểm, kết quả có thể sai công thức và hình.'
+          : hasText
+            ? 'Không đọc được PDF bằng ảnh. Dùng chữ tách từ PDF, kết quả có thể sai công thức và hình.'
+            : 'Không đọc được PDF bằng ảnh.'
       warnings.push(`${name}: ${warning}`)
       if (!hasText) return { text: extracted.text, warning }
     }
@@ -220,25 +268,48 @@ function blockText(b: ExamBlock, rt = plainText, cellText = rt): string {
 export function docxBlocksToSourceText(blocks: ExamBlock[]): { text: string; imageCount: number } {
   let imageCount = 0
   const richText = (value: RichText, singleLine = false) => {
-    const renderText = (text: string) => singleLine ? text.replace(/\r?\n/g, ' ') : text
+    const renderText = (text: string) => (singleLine ? text.replace(/\r?\n/g, ' ') : text)
     if (typeof value === 'string') return renderText(value)
-    return value.map((span) => {
-      if (!span.image) return renderText(span.text)
-      imageCount += 1
-      return '\n[Hình]\n'
-    }).join('')
+    return value
+      .map((span) => {
+        if (!span.image) return renderText(span.text)
+        imageCount += 1
+        return '\n[Hình]\n'
+      })
+      .join('')
   }
-  const text = blocks.map((b) => blockText(b, (v) => richText(v), (v) => richText(v, true)))
-    .filter(Boolean).join('\n').replace(/[ \t]*\n[ \t]*/g, '\n').replace(/\n{2,}/g, '\n').trim()
+  const text = blocks
+    .map((b) =>
+      blockText(
+        b,
+        (v) => richText(v),
+        (v) => richText(v, true),
+      ),
+    )
+    .filter(Boolean)
+    .join('\n')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .trim()
   return { text, imageCount }
 }
 
 function docText(doc: ExamDoc): string {
-  const text = doc.blocks.map((b) => blockText(b)).filter(Boolean).join('\n')
+  const text = doc.blocks
+    .map((b) => blockText(b))
+    .filter(Boolean)
+    .join('\n')
   if (text || !doc.online) return text
   // đề tạo online đăng cộng đồng: blocks rỗng, nội dung nằm trong đề tương tác
   return doc.online.sections
-    .flatMap((sec) => sec.questions.map((q) => [`Câu ${q.number}. ${q.prompt}`, ...(q.options ?? []).map((o) => `${o.key}. ${o.text}`)].join('\n')))
+    .flatMap((sec) =>
+      sec.questions.map((q) =>
+        [
+          `Câu ${q.number}. ${q.prompt}`,
+          ...(q.options ?? []).map((o) => `${o.key}. ${o.text}`),
+        ].join('\n'),
+      ),
+    )
     .join('\n\n')
 }
 

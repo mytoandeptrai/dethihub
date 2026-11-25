@@ -327,7 +327,10 @@ async function isolate(context: BrowserContext) {
           await page.getByRole('button', { name: 'Tất cả công cụ', exact: true }).click()
           const sheet = page.getByRole('dialog', { name: 'Công cụ soạn đề', exact: true })
           await expect(sheet).toBeVisible()
-          const tab = sheet.getByRole('button', { name: index === 0 ? 'Định dạng' : label, exact: true })
+          const tab = sheet.getByRole('button', {
+            name: index === 0 ? 'Định dạng' : label,
+            exact: true,
+          })
           await tab.click()
           await expect(tab).toHaveAttribute('aria-pressed', 'true')
           await expect(sheet.locator('.ribbon-phone-sheet-body')).toBeVisible()
@@ -336,8 +339,15 @@ async function isolate(context: BrowserContext) {
           await expect(sheet).not.toBeVisible()
         }
       }
-      if (width < 1024) await page.getByRole('button', { name: 'Mục lục, Khối mẫu & Công cụ', exact: true }).click()
-      const navigation = width >= 1024 ? page.getByRole('navigation', { name: 'Bảng điều hướng', exact: true }) : page.getByRole('dialog', { name: 'Mục lục, Khối mẫu, Công cụ và Thuộc tính', exact: true })
+      if (width < 1024)
+        await page.getByRole('button', { name: 'Mục lục, Khối mẫu & Công cụ', exact: true }).click()
+      const navigation =
+        width >= 1024
+          ? page.getByRole('navigation', { name: 'Bảng điều hướng', exact: true })
+          : page.getByRole('dialog', {
+              name: 'Mục lục, Khối mẫu, Công cụ và Thuộc tính',
+              exact: true,
+            })
       await navigation.getByRole('button', { name: 'Mục lục', exact: true }).click()
       await expect(page.locator('.nav-body')).toBeVisible()
       await capture('editor-panel-3')

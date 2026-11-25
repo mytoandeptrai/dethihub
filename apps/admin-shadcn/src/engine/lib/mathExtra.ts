@@ -39,7 +39,8 @@ export function parseAngle(raw: string): number {
   const deg = /^([+-]?\d+(?:[.,]\d+)?)(?:°|độ|do)$/i.exec(s)
   if (deg) return (num(deg[1]) * Math.PI) / 180
   const m = /^([+-]?)(\d*)(π?)(?:\/(\d+))?$/.exec(s)
-  if (!m || (!m[2] && !m[3])) throw new Error(`Không đọc được góc "${raw}" — gõ vd. π/6, -2π/3, 150°`)
+  if (!m || (!m[2] && !m[3]))
+    throw new Error(`Không đọc được góc "${raw}" — gõ vd. π/6, -2π/3, 150°`)
   const k = (m[2] ? +m[2] : 1) * (m[3] ? Math.PI : 1)
   return (m[1] === '-' ? -1 : 1) * (k / (m[4] ? +m[4] : 1))
 }
@@ -48,7 +49,8 @@ export function parseAngle(raw: string): number {
 function anglesOf(line: string): Array<{ a: number; label: string; name?: string }> {
   // "M: π/3" → điểm tên M biểu diễn góc π/3
   const named = /^([A-Z][A-Za-z0-9']*)\s*:\s*(.+)$/.exec(line.trim())
-  if (named) return anglesOf(named[2]).map((p, k) => ({ ...p, name: k === 0 ? named[1] : undefined }))
+  if (named)
+    return anglesOf(named[2]).map((p, k) => ({ ...p, name: k === 0 ? named[1] : undefined }))
   const t = line.replace(/^x\s*=\s*/i, '').trim()
   // họ nghiệm: α + kβ (k ∈ Z)
   const fam = /^(.*?)\s*\+\s*k\s*(.*?)(?:\s*,?\s*\(?k\s*∈\s*[ZℤR]\)?)?$/i.exec(t)
@@ -57,8 +59,12 @@ function anglesOf(line: string): Array<{ a: number; label: string; name?: string
     const step = parseAngle(fam[2] || '1')
     if (Math.abs(step) < 1e-9) throw new Error('Bước của họ nghiệm phải khác 0')
     const n = Math.round((2 * Math.PI) / Math.abs(step))
-    if (n > 24 || Math.abs(n * Math.abs(step) - 2 * Math.PI) > 1e-6) throw new Error(`Bước ${fam[2]} không chia hết 2π (hoặc quá nhỏ) — cần dạng 2π/n`)
-    return Array.from({ length: n }, (_, k) => ({ a: a0 + k * step, label: k === 0 ? (fam[1] || '0') : '' }))
+    if (n > 24 || Math.abs(n * Math.abs(step) - 2 * Math.PI) > 1e-6)
+      throw new Error(`Bước ${fam[2]} không chia hết 2π (hoặc quá nhỏ) — cần dạng 2π/n`)
+    return Array.from({ length: n }, (_, k) => ({
+      a: a0 + k * step,
+      label: k === 0 ? fam[1] || '0' : '',
+    }))
   }
   return [{ a: parseAngle(t), label: t }]
 }
@@ -66,7 +72,12 @@ function anglesOf(line: string): Array<{ a: number; label: string; name?: string
 const prettyAngle = (s: string) => s.replace(/pi/gi, 'π').replace(/-/g, '−')
 
 /** bỏ dấu tiếng Việt để nhận diện từ khoá lệnh: "tô" → "to", "nối" → "noi", "họ" → "ho" */
-const deaccent = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+const deaccent = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
 
 /** số cho toạ độ / đường thẳng: "1/2", "√3/2", "sqrt(3)/2", "0,6", "-0.5" → số */
 function parseVal(t: string): number {
@@ -90,7 +101,12 @@ function parseVal(t: string): number {
 /** giá trị "đẹp" trên trục: 0, ±1/2, ±√2/2, ±√3/2, ±1; số khác ghi gần đúng 2 chữ số thập phân */
 function prettyVal(v: number): string {
   if (Math.abs(v) < 1e-6) return '0'
-  for (const [q, t] of [[1, '1'], [0.5, '1/2'], [Math.SQRT1_2, '√2/2'], [Math.sqrt(3) / 2, '√3/2']] as const)
+  for (const [q, t] of [
+    [1, '1'],
+    [0.5, '1/2'],
+    [Math.SQRT1_2, '√2/2'],
+    [Math.sqrt(3) / 2, '√3/2'],
+  ] as const)
     if (Math.abs(Math.abs(v) - q) < 1e-6) return (v < 0 ? '−' : '') + t
   const r = Math.round(Math.abs(v) * 100) / 100
   return (v < 0 && r > 0 ? '−' : '') + String(r).replace('.', ',')
@@ -106,7 +122,15 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
     .filter(Boolean)
   if (!lines.length) throw new Error('Gõ ít nhất một góc, vd. π/6')
   const { R, cx, cy } = TRIG_GEOM
-  type Pt = { a: number; vx: number; vy: number; px: number; py: number; label?: string; name?: string }
+  type Pt = {
+    a: number
+    vx: number
+    vy: number
+    px: number
+    py: number
+    label?: string
+    name?: string
+  }
   const pts: Pt[] = [] // mọi điểm sẽ chấm: góc, họ nghiệm, theo toạ độ
   const named = new Map<string, Pt>()
   const fam: Pt[] = [] // điểm của các họ nghiệm (cho "nối: họ")
@@ -129,7 +153,9 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
       const fill = /^noi\s+to\s*:/.test(d)
       // thân lệnh là phần sau dấu ":" đầu tiên (tránh so khớp chữ có dấu trong regex)
       const body = line.slice(line.indexOf(':') + 1).trim()
-      const names = /^(ho)$/i.test(deaccent(body).trim()) ? null : body.split(/[\s,]+/).filter(Boolean)
+      const names = /^(ho)$/i.test(deaccent(body).trim())
+        ? null
+        : body.split(/[\s,]+/).filter(Boolean)
       if (names && !names.length) err('cần dạng nối: M N P (hoặc "nối: họ" để nối điểm họ nghiệm)')
       polys.push({ names, fill, ln })
       return
@@ -145,9 +171,15 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
     // tô: [π/6 → 5π/6) — cung miền nghiệm ngược chiều kim đồng hồ
     if (d.match(/^to\s*:/)) {
       const m = d.match(/^to\s*:\s*([[(])?\s*(.+?)\s*(?:→|->|\bden\b)\s*(.+?)\s*([\])])?\s*$/)
-      if (!m) err('cần dạng tô: π/6 → 5π/6 (mũi tên →, -> hoặc "đến"; thêm [ ( ] ) ở hai đầu nếu cần)')
+      if (!m)
+        err('cần dạng tô: π/6 → 5π/6 (mũi tên →, -> hoặc "đến"; thêm [ ( ] ) ở hai đầu nếu cần)')
       try {
-        shades.push({ a0: parseAngle(m![2]), a1: parseAngle(m![3]), la: m![1] ? m![1] === '[' : true, lb: m![4] ? m![4] === ']' : true })
+        shades.push({
+          a0: parseAngle(m![2]),
+          a1: parseAngle(m![3]),
+          la: m![1] ? m![1] === '[' : true,
+          lb: m![4] ? m![4] === ']' : true,
+        })
       } catch (e) {
         err(e instanceof Error ? e.message : String(e))
       }
@@ -161,7 +193,8 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
         try {
           const v = parseVal(rhs)
           // ponytail: vẽ được trong khung mới vẽ — giá trị quá xa thì bỏ qua thay vì nới khung vô hạn
-          if ((axis === 'y' && Math.abs(v) <= 1.25) || (axis === 'x' && Math.abs(v) <= 1.35)) rays.push({ axis, v })
+          if ((axis === 'y' && Math.abs(v) <= 1.25) || (axis === 'x' && Math.abs(v) <= 1.35))
+            rays.push({ axis, v })
           return
         } catch {
           err(`cần dạng ${axis} = 1/2 (chấp nhận √3/2, sqrt(3)/2, 0,5)`)
@@ -175,8 +208,16 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
       try {
         const vx = parseVal(cm[2])
         const vy = parseVal(cm[3])
-        if (Math.abs(Math.hypot(vx, vy) - 1) > 0.02) warns.push({ line: ln, msg: `điểm ${cm[1]} không nằm trên đường tròn đơn vị` })
-        const p: Pt = { a: Math.atan2(vy, vx), vx, vy, px: cx + R * vx, py: cy - R * vy, name: cm[1] }
+        if (Math.abs(Math.hypot(vx, vy) - 1) > 0.02)
+          warns.push({ line: ln, msg: `điểm ${cm[1]} không nằm trên đường tròn đơn vị` })
+        const p: Pt = {
+          a: Math.atan2(vy, vx),
+          vx,
+          vy,
+          px: cx + R * vx,
+          py: cy - R * vy,
+          name: cm[1],
+        }
         pts.push(p)
         named.set(cm[1], p)
         return
@@ -188,7 +229,15 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
     try {
       const items = anglesOf(line)
       for (const it of items) {
-        const p: Pt = { a: it.a, vx: Math.cos(it.a), vy: Math.sin(it.a), px: cx + R * Math.cos(it.a), py: cy - R * Math.sin(it.a), label: it.label, name: it.name }
+        const p: Pt = {
+          a: it.a,
+          vx: Math.cos(it.a),
+          vy: Math.sin(it.a),
+          px: cx + R * Math.cos(it.a),
+          py: cy - R * Math.sin(it.a),
+          label: it.label,
+          name: it.name,
+        }
         pts.push(p)
         if (it.name) named.set(it.name, p)
         if (items.length > 1) fam.push(p)
@@ -202,7 +251,10 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
   const H = 320
   const pt = (n: string, ln: number): Pt => {
     const p = named.get(n) ?? named.get(n.toUpperCase())
-    if (!p) throw new Error(`Dòng ${ln} "${lines[ln - 1]}": điểm "${n}" chưa khai báo — khai báo bằng ${n}: góc (vd ${n}: pi/3) hoặc ${n}(1/2; √3/2)`)
+    if (!p)
+      throw new Error(
+        `Dòng ${ln} "${lines[ln - 1]}": điểm "${n}" chưa khai báo — khai báo bằng ${n}: góc (vd ${n}: pi/3) hoặc ${n}(1/2; √3/2)`,
+      )
     return p
   }
   // nhãn giá trị trên trục: gộp nhãn trùng theo giá trị; đường thẳng y = a/x = a cũng ghi nhãn ở đầu đường
@@ -224,8 +276,13 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
   b += `<text x="${cx + 8}" y="${cy - R - 20}" ${FAM} font-size="14" font-style="italic">sin</text>`
   b += `<text x="${cx - 9}" y="${cy + 16}" ${FAM} font-size="14" font-style="italic" text-anchor="end">O</text>`
   // điểm gốc A, A', B, B'
-  const corner = (t: string, x: number, y: number, anchor = 'middle') => `<text x="${x}" y="${y}" ${FAM} font-size="14" font-style="italic" text-anchor="${anchor}">${t}</text>`
-  b += corner('A', cx + R + 6, cy - 6, 'start') + corner("A'", cx - R - 6, cy - 6, 'end') + corner('B', cx + 8, cy - R - 4, 'start') + corner("B'", cx + 8, cy + R + 16, 'start')
+  const corner = (t: string, x: number, y: number, anchor = 'middle') =>
+    `<text x="${x}" y="${y}" ${FAM} font-size="14" font-style="italic" text-anchor="${anchor}">${t}</text>`
+  b +=
+    corner('A', cx + R + 6, cy - 6, 'start') +
+    corner("A'", cx - R - 6, cy - 6, 'end') +
+    corner('B', cx + 8, cy - R - 4, 'start') +
+    corner("B'", cx + 8, cy + R + 16, 'start')
   if (spec.tan) {
     b += `<path d="M${cx + R} ${cy + R + 10}V${cy - R - 20}" stroke="#111" stroke-width="1.1" marker-end="url(#mxarr)"/>`
     b += `<text x="${cx + R + 6}" y="${cy - R - 12}" ${FAM} font-size="14" font-style="italic">tan</text>`
@@ -274,9 +331,14 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
   }
   // nối điểm thành đa giác (khép kín), "nối tô:" thêm nền nhạt
   for (const pl of polys) {
-    const list = pl.names === null ? [...fam].sort((p, q) => p.a - q.a) : pl.names.map((n) => pt(n, pl.ln))
-    if (pl.names === null && !list.length) throw new Error(`Dòng ${pl.ln} "${lines[pl.ln - 1]}": không có họ nghiệm nào — thêm dòng vd π/4 + kπ/2`)
-    if (list.length < 2) throw new Error(`Dòng ${pl.ln} "${lines[pl.ln - 1]}": cần ít nhất 2 điểm để nối`)
+    const list =
+      pl.names === null ? [...fam].sort((p, q) => p.a - q.a) : pl.names.map((n) => pt(n, pl.ln))
+    if (pl.names === null && !list.length)
+      throw new Error(
+        `Dòng ${pl.ln} "${lines[pl.ln - 1]}": không có họ nghiệm nào — thêm dòng vd π/4 + kπ/2`,
+      )
+    if (list.length < 2)
+      throw new Error(`Dòng ${pl.ln} "${lines[pl.ln - 1]}": cần ít nhất 2 điểm để nối`)
     b += `<path d="M${list.map((p) => `${f1(p.px)} ${f1(p.py)}`).join('L')}Z" fill="${pl.fill ? '#1f5fbf' : 'none'}" fill-opacity="0.08" stroke="#111" stroke-width="1.2"/>`
   }
   const single = pts.length === 1
@@ -290,7 +352,8 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
     if (spec.projections) {
       b += `<path d="M${f1(X)} ${f1(Y)}V${cy}M${f1(X)} ${f1(Y)}H${cx}" stroke="#111" stroke-width="0.9" stroke-dasharray="4 3"/>`
     }
-    if (single || spec.tan || spec.cot) b += `<line x1="${cx}" y1="${cy}" x2="${f1(X)}" y2="${f1(Y)}" stroke="#111" stroke-width="1.2"/>`
+    if (single || spec.tan || spec.cot)
+      b += `<line x1="${cx}" y1="${cy}" x2="${f1(X)}" y2="${f1(Y)}" stroke="#111" stroke-width="1.2"/>`
     if (spec.tan && Math.abs(vx) > 0.15) {
       const ty = cy - (R * vy) / vx
       if (Math.abs(ty - cy) < R + 10)
@@ -321,7 +384,7 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
   for (const c of arcs) {
     const M = pt(c.m, c.ln)
     const N = pt(c.n, c.ln)
-    const sweep = ((N.a - M.a) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI)
+    const sweep = (((N.a - M.a) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
     if (sweep > 1e-9) {
       const a1 = M.a + sweep
       const large = sweep > Math.PI ? 1 : 0
@@ -353,7 +416,12 @@ export function renderTrigSvg(spec: TrigSpec, desc: string) {
   for (const v of [...sinVals.values()].sort((p, q) => q.y - p.y)) {
     const Y = cy - R * v.y + 5
     let col = sinCol.findIndex((c) => Y - 14 > c.y)
-    if (col < 0) col = sinCol.push({ y: -1e9, x: col === -1 && sinCol.length ? sinCol[sinCol.length - 1].x - 36 : cx - 6 }) - 1
+    if (col < 0)
+      col =
+        sinCol.push({
+          y: -1e9,
+          x: col === -1 && sinCol.length ? sinCol[sinCol.length - 1].x - 36 : cx - 6,
+        }) - 1
     sinCol[col].y = Y
     b += `<text x="${f1(sinCol[col].x)}" y="${f1(Y)}" ${FAM} font-size="13" text-anchor="end" paint-order="stroke" stroke="#fff" stroke-width="3">${esc(v.t)}</text>`
   }
@@ -378,7 +446,7 @@ function parseTree(text: string): TNode[] {
   const stack: Array<{ depth: number; node: TNode }> = [{ depth: -1, node: root }]
   for (const raw of text.split('\n')) {
     if (!raw.trim()) continue
-    const depth = Math.floor((raw.match(/^\s*/)![0].replace(/\t/g, '  ').length) / 2)
+    const depth = Math.floor(raw.match(/^\s*/)![0].replace(/\t/g, '  ').length / 2)
     const m = /^\s*([^:]+?)\s*:\s*(\S+)\s*$/.exec(raw)
     if (!m) throw new Error(`Dòng "${raw.trim()}" cần dạng Tên: xác suất, vd. A: 0,3`)
     while (stack[stack.length - 1].depth >= depth) stack.pop()
@@ -410,7 +478,9 @@ function eventLabel(name: string, x: number, y: number, anchor: string) {
   const x0 = anchor === 'start' ? x : anchor === 'end' ? x - w : x - w / 2
   return (
     `<text x="${x}" y="${y}" ${FAM} font-size="16" font-style="italic" text-anchor="${anchor}">${esc(core)}</text>` +
-    (bar ? `<line x1="${f1(x0)}" y1="${y - 14}" x2="${f1(x0 + w)}" y2="${y - 14}" stroke="#111" stroke-width="1"/>` : '')
+    (bar
+      ? `<line x1="${f1(x0)}" y1="${y - 14}" x2="${f1(x0 + w)}" y2="${y - 14}" stroke="#111" stroke-width="1"/>`
+      : '')
   )
 }
 
@@ -490,7 +560,8 @@ function parseSet(src: string): { name: string; ivs: Iv[]; pts: Array<{ v: numbe
       const [a, b] = u.split('/').map(Number)
       return a / b
     }
-    if (/^-?√\d+$/.test(u)) return (u.startsWith('-') ? -1 : 1) * Math.sqrt(Number(u.replace(/[-√]/g, '')))
+    if (/^-?√\d+$/.test(u))
+      return (u.startsWith('-') ? -1 : 1) * Math.sqrt(Number(u.replace(/[-√]/g, '')))
     throw new Error(`Không đọc được số "${t.trim()}"`)
   }
   const show = (t: string) => {
@@ -505,7 +576,14 @@ function parseSet(src: string): { name: string; ivs: Iv[]; pts: Array<{ v: numbe
       const a = val(iv[2])
       const b = val(iv[3])
       if (!(a < b)) throw new Error(`Khoảng "${p}": đầu trái phải nhỏ hơn đầu phải`)
-      ivs.push({ a, b, la: iv[1] as '(' | '[', rb: iv[4] as ')' | ']', ta: show(iv[2]), tb: show(iv[3]) })
+      ivs.push({
+        a,
+        b,
+        la: iv[1] as '(' | '[',
+        rb: iv[4] as ')' | ']',
+        ta: show(iv[2]),
+        tb: show(iv[3]),
+      })
       continue
     }
     const set = /^\{(.+)\}$/.exec(p)
@@ -526,12 +604,23 @@ export function renderNumberLineSvg(spec: NumberLineSpec, desc: string) {
     .map(parseSet)
   if (!rows.length) throw new Error('Gõ ít nhất một tập, vd. (-2; 3]')
   // các mốc hữu hạn của mọi dòng, xếp đều (trục số SGK không theo tỉ lệ)
-  const marks = [...new Set(rows.flatMap((r) => [...r.ivs.flatMap((iv) => [iv.a, iv.b]), ...r.pts.map((p) => p.v)]).filter(Number.isFinite))].sort((a, b) => a - b)
+  const marks = [
+    ...new Set(
+      rows
+        .flatMap((r) => [...r.ivs.flatMap((iv) => [iv.a, iv.b]), ...r.pts.map((p) => p.v)])
+        .filter(Number.isFinite),
+    ),
+  ].sort((a, b) => a - b)
   const GAP = 70
   const named = rows.some((r) => r.name)
   const left = named ? 70 : 30
   const x0 = left + 30
-  const X = (v: number) => (v === -Infinity ? left : v === Infinity ? x0 + Math.max(1, marks.length) * GAP + 30 : x0 + marks.indexOf(v) * GAP)
+  const X = (v: number) =>
+    v === -Infinity
+      ? left
+      : v === Infinity
+        ? x0 + Math.max(1, marks.length) * GAP + 30
+        : x0 + marks.indexOf(v) * GAP
   const right = x0 + Math.max(1, marks.length) * GAP + 30
   const W = right + 30
   const RH = 64
@@ -539,7 +628,8 @@ export function renderNumberLineSvg(spec: NumberLineSpec, desc: string) {
   b += `<defs><pattern id="nlh" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#111" stroke-width="1.1"/></pattern></defs>`
   rows.forEach((r, ri) => {
     const y = 34 + ri * RH
-    if (r.name) b += `<text x="${left - 14}" y="${y + 5}" ${FAM} font-size="16" font-style="italic" text-anchor="end">${esc(r.name)}</text>`
+    if (r.name)
+      b += `<text x="${left - 14}" y="${y + 5}" ${FAM} font-size="16" font-style="italic" text-anchor="end">${esc(r.name)}</text>`
     b += `<path d="M${left} ${y}H${right + 6}" stroke="#111" stroke-width="1.2" marker-end="url(#mxarr)"/>`
     // phần giữ lại theo thứ tự trên trục
     const keep = [...r.ivs].sort((p, q) => p.a - q.a)
@@ -553,12 +643,15 @@ export function renderNumberLineSvg(spec: NumberLineSpec, desc: string) {
       }
       if (cur < right - 0.5) gaps.push([cur, right])
       if (!keep.length) gaps.length = 0 // chỉ có điểm rời: không gạch
-      for (const [g0, g1] of gaps) b += `<rect x="${f1(g0)}" y="${y - 7}" width="${f1(g1 - g0)}" height="7" fill="url(#nlh)"/>`
+      for (const [g0, g1] of gaps)
+        b += `<rect x="${f1(g0)}" y="${y - 7}" width="${f1(g1 - g0)}" height="7" fill="url(#nlh)"/>`
     } else {
-      for (const iv of keep) b += `<line x1="${f1(X(iv.a))}" y1="${y}" x2="${f1(X(iv.b))}" y2="${y}" stroke="#111" stroke-width="4"/>`
+      for (const iv of keep)
+        b += `<line x1="${f1(X(iv.a))}" y1="${y}" x2="${f1(X(iv.b))}" y2="${y}" stroke="#111" stroke-width="4"/>`
     }
     // ngoặc ở đầu mút hữu hạn: "(" / ")" mở, "[" / "]" đóng
-    const bracket = (x: number, ch: string) => `<text x="${f1(x)}" y="${y + 7}" ${FAM} font-size="22" text-anchor="middle">${ch}</text>`
+    const bracket = (x: number, ch: string) =>
+      `<text x="${f1(x)}" y="${y + 7}" ${FAM} font-size="22" text-anchor="middle">${ch}</text>`
     for (const iv of keep) {
       if (Number.isFinite(iv.a)) b += bracket(X(iv.a) + 1, iv.la)
       if (Number.isFinite(iv.b)) b += bracket(X(iv.b) - 1, iv.rb)
@@ -571,7 +664,8 @@ export function renderNumberLineSvg(spec: NumberLineSpec, desc: string) {
       if (Number.isFinite(iv.b)) used.set(iv.b, iv.tb)
     }
     for (const p of r.pts) used.set(p.v, p.t)
-    for (const [v, t] of used) b += `<text x="${f1(X(v))}" y="${y + 26}" ${FAM} font-size="14" text-anchor="middle">${esc(t)}</text>`
+    for (const [v, t] of used)
+      b += `<text x="${f1(X(v))}" y="${y + 26}" ${FAM} font-size="14" text-anchor="middle">${esc(t)}</text>`
   })
   return wrap(W, 34 + rows.length * RH - 10, desc, b)
 }
@@ -684,12 +778,16 @@ export function renderVennSvg(spec: VennSpec, desc: string) {
       sum.set(k, [s[0] + x, s[1] + y, s[2] + 1])
     }
   let b = `<defs><pattern id="vnh" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#555" stroke-width="1.6"/></pattern>`
-  C.forEach(([a, c], k) => (b += `<clipPath id="vc${k}"><circle cx="${a}" cy="${c}" r="${r}"/></clipPath>`))
+  C.forEach(
+    ([a, c], k) => (b += `<clipPath id="vc${k}"><circle cx="${a}" cy="${c}" r="${r}"/></clipPath>`),
+  )
   b += `<mask id="vall" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/></mask></defs>`
   // tô: mỗi miền nguyên tử thoả biểu thức → giao các hình tròn "thuộc", trừ các hình tròn "không thuộc"
   if (spec.shade.trim()) {
     const f = setExpr(spec.shade, names)
-    const combos = Array.from({ length: 2 ** names.length }, (_, n) => names.map((_, k) => Boolean(n & (1 << k))))
+    const combos = Array.from({ length: 2 ** names.length }, (_, n) =>
+      names.map((_, k) => Boolean(n & (1 << k))),
+    )
     combos.forEach((m, n) => {
       if (!f(m)) return
       const maskId = `vm${n}`
@@ -726,7 +824,8 @@ export function renderVennSvg(spec: VennSpec, desc: string) {
     else k = names.filter((n) => k.includes(n)).join('')
     const s = sum.get(k)
     if (!s) throw new Error(`Không có miền "${m[1].trim()}"`)
-    const [x, y] = k === 'ngoài' ? [box.x + box.w - 22, box.y + box.h - 14] : [s[0] / s[2], s[1] / s[2]]
+    const [x, y] =
+      k === 'ngoài' ? [box.x + box.w - 22, box.y + box.h - 14] : [s[0] / s[2], s[1] / s[2]]
     b += `<text x="${f1(x)}" y="${f1(y + 5)}" ${FAM} font-size="15" text-anchor="middle" paint-order="stroke" stroke="#fff" stroke-width="3">${esc(m[2].trim())}</text>`
   }
   return wrap(W, H, desc, b)

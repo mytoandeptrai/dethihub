@@ -66,7 +66,8 @@ export function writeHeader(node: ProseMirrorNode, values: HeaderValues): ProseM
     while (lines.length < 3) lines.push(newTextNode(node, 'paragraph', ''))
     lines.splice(codeIndex >= 0 ? Math.min(codeIndex, lines.length) : 3, 0, line)
     children(originalLeft).forEach((extra, index) => {
-      if (index > codeIndex && CODE.test(extra.textContent)) lines.splice(Math.min(index, lines.length), 0, extra)
+      if (index > codeIndex && CODE.test(extra.textContent))
+        lines.splice(Math.min(index, lines.length), 0, extra)
     })
     left = withChildren(left, lines)
   }

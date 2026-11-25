@@ -1,7 +1,7 @@
 'use client'
 
-import { useRequireStaff } from '@/hooks/use-require-staff'
 import { PageSkeleton } from '@/components/page-skeleton'
+import { useRequireStaff } from '@/hooks/use-require-staff'
 
 export function RequireStaff({ children }: { children: React.ReactNode }) {
   const { isLoading } = useRequireStaff()

@@ -3,8 +3,8 @@ import { BookOpen, Home } from 'lucide-react'
 
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { Button, Card, Link } from '@/modules/public-pages/components/public-primitives-ui'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
+import { Button, Card, Link } from '@/modules/public-pages/components/public-primitives-ui'
 
 import type { CSSProperties } from 'react'
 const OPTIONS = [

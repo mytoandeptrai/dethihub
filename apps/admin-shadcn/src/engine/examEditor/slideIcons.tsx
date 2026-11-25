@@ -1,3 +1,5 @@
+import { BUCKET_D } from '@/engine/components/appIcons'
+
 /**
  * Icon riêng của trình soạn slide — port từ GenOffice (Apache-2.0):
  * `_ref/genoffice/apps/slides/src/renderer/components/icons.tsx`.
@@ -7,7 +9,6 @@
  * hai hệ toạ độ; các icon trùng tên đã có trong bộ docs thì dùng lại bộ docs.
  */
 import type { ReactNode } from 'react'
-import { BUCKET_D } from '@/engine/components/appIcons'
 
 interface IconProps {
   size?: number

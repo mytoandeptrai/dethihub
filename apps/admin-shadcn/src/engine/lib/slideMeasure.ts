@@ -97,7 +97,13 @@ export async function ensureMeasureFonts(): Promise<void> {
 }
 
 /** Bề rộng chuỗi tính bằng em (đo ở 100px rồi chia, để không phụ thuộc cỡ). */
-function emWidth(ctx: Ctx2d, text: string, weight: number, family = `"${MEASURE_FONT}", sans-serif`, italic = false): number {
+function emWidth(
+  ctx: Ctx2d,
+  text: string,
+  weight: number,
+  family = `"${MEASURE_FONT}", sans-serif`,
+  italic = false,
+): number {
   const key = `${family}|${weight}|${italic}|${text}`
   const hit = widthCache.get(key)
   if (hit !== undefined) return hit
@@ -108,10 +114,16 @@ function emWidth(ctx: Ctx2d, text: string, weight: number, family = `"${MEASURE_
 }
 
 /** Cỡ chữ tối đa để giữ giá trị nổi bật trên một dòng. */
-export function singleLineSize(text: string, widthPct: number, size: number, weight: number, family: string): number {
+export function singleLineSize(
+  text: string,
+  widthPct: number,
+  size: number,
+  weight: number,
+  family: string,
+): number {
   const ctx = getMeasureCtx()
   const width = ctx ? emWidth(ctx, text, weight, family) : text.length * 0.65
-  return Math.min(size, (widthPct - TEXT_PAD_X) * WRAP_SAFETY / Math.max(width, 0.1))
+  return Math.min(size, ((widthPct - TEXT_PAD_X) * WRAP_SAFETY) / Math.max(width, 0.1))
 }
 
 /** Số dòng sau khi ngắt theo từ (greedy, như trình duyệt); từ quá dài bị bẻ theo ký tự. */
@@ -176,7 +188,15 @@ export function textBoxHeight(
   let lines: number
   if (ctx) {
     const availEm = Math.max(1, ((widthPct - TEXT_PAD_X) / fontCqw) * WRAP_SAFETY)
-    lines = wrapLines(ctx, text, availEm, opts.weight ?? 400, opts.letterSpacing ?? 0, opts.family, opts.italic)
+    lines = wrapLines(
+      ctx,
+      text,
+      availEm,
+      opts.weight ?? 400,
+      opts.letterSpacing ?? 0,
+      opts.family,
+      opts.italic,
+    )
   } else {
     const charsPerLine = Math.max(8, (widthPct - TEXT_PAD_X) / (fontCqw * CHAR_WIDTH_EM))
     lines = text

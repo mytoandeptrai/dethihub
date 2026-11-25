@@ -1,3 +1,4 @@
+import katex from 'katex'
 /**
  * Markdown tối giản cho khung chat AI.
  *
@@ -8,7 +9,6 @@
  * code thay vì để markdown biến nó thành một mớ chữ.
  */
 import { Fragment, type ReactNode } from 'react'
-import katex from 'katex'
 import 'katex/contrib/mhchem'
 import { cn } from './cn'
 
@@ -36,10 +36,16 @@ const INLINE_RE =
   /(`[^`\n]+`|\*\*(?=\S)[^*\n]*?\*\*|__(?=\S)[^_\n]*?__|\*(?=\S)[^*\n]*?\*|(?<![A-Za-z0-9])_(?=\S)[^_\n]*?_(?![A-Za-z0-9])|\[[^\]\n]+\]\([^)\s]+\))/g
 const INLINE_MATH_RE = /\$[^$\n]+?\$/
 const MATH_RE = /\$\$[\s\S]*?\$\$|\$[^$\n]+?\$/
-const markContents = (delimiter: string) => String.raw`(?:${INLINE_MATH_RE.source}|[^${delimiter}$\n]|\$(?![^$\n]+\$))*?`
-const CHAT_INLINE_RE = new RegExp(MATH_RE.source + '|' + INLINE_RE.source
-  .replaceAll('[^*\\n]*?', markContents('*'))
-  .replaceAll('[^_\\n]*?', markContents('_')), 'g')
+const markContents = (delimiter: string) =>
+  String.raw`(?:${INLINE_MATH_RE.source}|[^${delimiter}$\n]|\$(?![^$\n]+\$))*?`
+const CHAT_INLINE_RE = new RegExp(
+  MATH_RE.source +
+    '|' +
+    INLINE_RE.source
+      .replaceAll('[^*\\n]*?', markContents('*'))
+      .replaceAll('[^_\\n]*?', markContents('_')),
+  'g',
+)
 
 const LINK_RE = /^\[([^\]]+)\]\(([^)\s]+)\)$/
 
@@ -117,7 +123,19 @@ export function parseMarkdown(src: string, chat = true): Block[] {
       const end = lines.findIndex((next, j) => j > i && next.trim() === '$$')
       if (end !== -1) {
         flush()
-        blocks.push({ type: 'p', inlines: [{ type: 'math', text: lines.slice(i + 1, end).join('\n').trim(), display: true }] })
+        blocks.push({
+          type: 'p',
+          inlines: [
+            {
+              type: 'math',
+              text: lines
+                .slice(i + 1, end)
+                .join('\n')
+                .trim(),
+              display: true,
+            },
+          ],
+        })
         i = end
         continue
       }
@@ -139,7 +157,11 @@ export function parseMarkdown(src: string, chat = true): Block[] {
 
     const header = chat && tableCells(line)
     const separator = header && tableCells(lines[i + 1] ?? '')
-    if (separator && header.length === separator.length && separator.every((cell) => /^:?-{3,}:?$/.test(cell))) {
+    if (
+      separator &&
+      header.length === separator.length &&
+      separator.every((cell) => /^:?-{3,}:?$/.test(cell))
+    ) {
       flush()
       const rows: Inline[][][] = []
       i++
@@ -215,10 +237,17 @@ function inlineNodes(nodes: Inline[], chat: boolean): ReactNode[] {
     }
     if (n.type === 'math') {
       // HTML do KaTeX sinh, với lệnh tin cậy bị tắt như renderMath.
-      const html = katex.renderToString(n.text, { displayMode: n.display, throwOnError: false, output: 'html', strict: false, trust: false })
+      const html = katex.renderToString(n.text, {
+        displayMode: n.display,
+        throwOnError: false,
+        output: 'html',
+        strict: false,
+        trust: false,
+      })
       return <span key={i} dangerouslySetInnerHTML={{ __html: html }} />
     }
-    const markedText = () => chat && n.text.includes('$') ? inlineNodes(parseInline(n.text), chat) : n.text
+    const markedText = () =>
+      chat && n.text.includes('$') ? inlineNodes(parseInline(n.text), chat) : n.text
     if (n.type === 'strong') return <strong key={i}>{markedText()}</strong>
     if (n.type === 'em') return <em key={i}>{markedText()}</em>
     if (n.type === 'link') {
@@ -243,12 +272,24 @@ function inlineNodes(nodes: Inline[], chat: boolean): ReactNode[] {
   })
 }
 
-export function Markdown({ text, className, chat = true }: { text: string; className?: string; chat?: boolean }) {
+export function Markdown({
+  text,
+  className,
+  chat = true,
+}: {
+  text: string
+  className?: string
+  chat?: boolean
+}) {
   const trimmed = text.trim()
 
   // AI trả JSON (đề/slide) — hiện nguyên khối code, đừng để markdown nuốt dấu.
-  if ((chat ? /^(?:\{\s*(?:"|\})|\[\s*(?:[{"\[\]]|-?\d|true\b|false\b|null\b))/ : /^[{\[]/).test(trimmed) &&
-    (!chat || !/^\[[^\]\n]+\]\(/.test(trimmed))) {
+  if (
+    (chat ? /^(?:\{\s*(?:"|\})|\[\s*(?:[{"\[\]]|-?\d|true\b|false\b|null\b))/ : /^[{\[]/).test(
+      trimmed,
+    ) &&
+    (!chat || !/^\[[^\]\n]+\]\(/.test(trimmed))
+  ) {
     return <pre className={cn('ai-md-pre', className)}>{trimmed}</pre>
   }
 
@@ -270,14 +311,31 @@ export function Markdown({ text, className, chat = true }: { text: string; class
         }
         if (b.type === 'quote') return <blockquote key={i}>{nodes(b.inlines)}</blockquote>
         if (b.type === 'hr') return <hr key={i} />
-        if (b.type === 'table') return (
-          <div key={i} className="ai-md-table">
-            <table>
-              <thead><tr>{b.head.map((cell, j) => <th key={j} scope="col">{nodes(cell)}</th>)}</tr></thead>
-              <tbody>{b.rows.map((row, j) => <tr key={j}>{row.map((cell, k) => <td key={k}>{nodes(cell)}</td>)}</tr>)}</tbody>
-            </table>
-          </div>
-        )
+        if (b.type === 'table')
+          return (
+            <div key={i} className="ai-md-table">
+              <table>
+                <thead>
+                  <tr>
+                    {b.head.map((cell, j) => (
+                      <th key={j} scope="col">
+                        {nodes(cell)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {b.rows.map((row, j) => (
+                    <tr key={j}>
+                      {row.map((cell, k) => (
+                        <td key={k}>{nodes(cell)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         const List = b.ordered ? 'ol' : 'ul'
         return (
           <List key={i}>

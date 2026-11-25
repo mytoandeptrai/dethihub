@@ -6,7 +6,9 @@
 /* Cân kích thước chữ fallback gần với Be Vietnam Pro để tránh giật bố cục (CLS) khi tải font */
 @font-face {
   font-family: 'Be Vietnam Pro Fallback';
-  src: local('Segoe UI'), local('Arial'), local('Roboto'), local('Liberation Sans'), local('Helvetica Neue');
+  src:
+    local('Segoe UI'), local('Arial'), local('Roboto'), local('Liberation Sans'),
+    local('Helvetica Neue');
   size-adjust: 112%;
   ascent-override: 97%;
   descent-override: 25%;
@@ -156,26 +158,62 @@
 
 /* Minh hoạ trang đăng nhập: lặp vô hạn, tắt khi người dùng bật "giảm chuyển động" */
 @keyframes auth-type {
-  0%, 100% { transform: scaleX(0.55); opacity: 0.55; }
-  50% { transform: scaleX(1); opacity: 1; }
+  0%,
+  100% {
+    transform: scaleX(0.55);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 @keyframes auth-pick {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 @keyframes auth-stamp {
-  0%, 12% { opacity: 0; transform: scale(0.85); }
-  22%, 78% { opacity: 1; transform: scale(1); }
-  90%, 100% { opacity: 0; transform: scale(0.85); }
+  0%,
+  12% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  22%,
+  78% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90%,
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
 }
-.auth-type { transform-origin: left center; animation: auth-type 3.2s ease-in-out infinite; }
-.auth-pick { animation: auth-pick 2.4s ease-in-out infinite; }
-.auth-stamp { animation: auth-stamp 5s ease-in-out infinite; }
+.auth-type {
+  transform-origin: left center;
+  animation: auth-type 3.2s ease-in-out infinite;
+}
+.auth-pick {
+  animation: auth-pick 2.4s ease-in-out infinite;
+}
+.auth-stamp {
+  animation: auth-stamp 5s ease-in-out infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .auth-type, .auth-pick, .auth-stamp { animation: none; }
+  .auth-type,
+  .auth-pick,
+  .auth-stamp {
+    animation: none;
+  }
 }
 
-@layer base {  * {
+@layer base {
+  * {
     border-color: var(--color-line);
   }
 
@@ -255,7 +293,9 @@
     font-size: 16px;
     line-height: 1.78;
     color: var(--color-ink);
-    font-variation-settings: 'SOFT' 40, 'WONK' 0;
+    font-variation-settings:
+      'SOFT' 40,
+      'WONK' 0;
   }
   .prose-exam p {
     margin: 0 0 0.6em;
@@ -306,7 +346,9 @@
     position: absolute;
     left: 0;
     background: #fff;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 8px 24px rgb(0 0 0 / 0.08);
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 0.12),
+      0 8px 24px rgb(0 0 0 / 0.08);
   }
 
   /* lớp nội dung — 1 ProseMirror duy nhất, các khối con đặt absolute */
@@ -700,8 +742,12 @@
     text-align: justify;
   }
   /* câu đã chọn căn lề (trái/giữa/phải) thì đề bài theo đúng căn đó, như bản Word */
-  .doc-content div[data-exam-node='examQuestion'][style*='text-align'] > div[data-exam-node='examQuestionPrompt'],
-  .doc-content div[data-exam-node='examEssay'][style*='text-align'] > div[data-exam-node='examEssayPrompt'] {
+  .doc-content
+    div[data-exam-node='examQuestion'][style*='text-align']
+    > div[data-exam-node='examQuestionPrompt'],
+  .doc-content
+    div[data-exam-node='examEssay'][style*='text-align']
+    > div[data-exam-node='examEssayPrompt'] {
     text-align: inherit;
   }
   /* Câu trắc nghiệm: lời dẫn chiếm cả hàng, phương án chia 2 cột bằng grid.
@@ -768,7 +814,9 @@
   .doc-content div[data-exam-node='examQuestion'][data-kind='tf'] {
     grid-template-columns: 1fr;
   }
-  .doc-content div[data-exam-node='examQuestion'][data-kind='tf'] > div[data-exam-node='examOption']::before {
+  .doc-content
+    div[data-exam-node='examQuestion'][data-kind='tf']
+    > div[data-exam-node='examOption']::before {
     content: attr(data-label) ') ';
   }
   .doc-content div[data-exam-node='examQuestion'][data-kind='short']::after {
@@ -1249,10 +1297,18 @@
 /* chuyển trang: mờ dần + trượt nhẹ; fill backwards để xong hiệu ứng không còn transform
    (transform đè lên position:fixed và zoom của trang A4) */
 @keyframes page-enter {
-  from { opacity: 0; transform: translate3d(0, 8px, 0); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.page-enter { animation: page-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.page-enter {
+  animation: page-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
 
 /* biến thời lượng & đường cong chuẩn cho panel/sheet/popover toàn app */
 :root {
@@ -1265,42 +1321,138 @@
 }
 
 /* ngăn kéo bên phải: trượt vào/ra, nền mờ dần */
-@keyframes drawer-in { from { transform: translate3d(100%, 0, 0); } }
-@keyframes drawer-out { to { transform: translate3d(100%, 0, 0); } }
-@keyframes drawer-in-left { from { transform: translate3d(-100%, 0, 0); } }
-@keyframes drawer-out-left { to { transform: translate3d(-100%, 0, 0); } }
-@keyframes sheet-in-up { from { transform: translate3d(0, 100%, 0); } }
-@keyframes sheet-out-down { to { transform: translate3d(0, 100%, 0); } }
-@keyframes pop-in { from { opacity: 0; transform: translate3d(0, -6px, 0); } }
-@keyframes pop-out { to { opacity: 0; transform: translate3d(0, -6px, 0); } }
-@keyframes slide-out-up { to { opacity: 0; transform: translate3d(0, -10px, 0); } }
-@keyframes backdrop-in { from { opacity: 0; } }
-@keyframes backdrop-out { to { opacity: 0; } }
+@keyframes drawer-in {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+@keyframes drawer-out {
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+@keyframes drawer-in-left {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+@keyframes drawer-out-left {
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+@keyframes sheet-in-up {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+@keyframes sheet-out-down {
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+}
+@keyframes pop-out {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+}
+@keyframes slide-out-up {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
 
-.drawer-in { animation: drawer-in 280ms cubic-bezier(0.32, 0.72, 0, 1) backwards; }
-.drawer-out { animation: drawer-out 200ms ease-in forwards; }
-.drawer-in-right { animation: drawer-in var(--sheet-dur) var(--sheet-ease) backwards; }
-.drawer-out-right { animation: drawer-out var(--sheet-dur-out) var(--sheet-ease-out) forwards; pointer-events: none; }
-.drawer-in-left { animation: drawer-in-left var(--sheet-dur) var(--sheet-ease) backwards; }
-.drawer-out-left { animation: drawer-out-left var(--sheet-dur-out) var(--sheet-ease-out) forwards; pointer-events: none; }
-.sheet-in-up { animation: sheet-in-up var(--sheet-dur) var(--sheet-ease) backwards; }
-.sheet-out-down { animation: sheet-out-down var(--sheet-dur-out) var(--sheet-ease-out) forwards; pointer-events: none; }
-.pop-in { animation: pop-in var(--pop-dur) var(--sheet-ease) backwards; }
-.pop-out { animation: pop-out var(--pop-dur-out) var(--sheet-ease-out) forwards; pointer-events: none; }
-.slide-out-up { animation: slide-out-up var(--pop-dur-out) var(--sheet-ease-out) forwards; pointer-events: none; }
-.backdrop-in { animation: backdrop-in var(--sheet-dur) ease-out backwards; }
-.backdrop-out { animation: backdrop-out var(--sheet-dur-out) ease-in forwards; pointer-events: none; }
+.drawer-in {
+  animation: drawer-in 280ms cubic-bezier(0.32, 0.72, 0, 1) backwards;
+}
+.drawer-out {
+  animation: drawer-out 200ms ease-in forwards;
+}
+.drawer-in-right {
+  animation: drawer-in var(--sheet-dur) var(--sheet-ease) backwards;
+}
+.drawer-out-right {
+  animation: drawer-out var(--sheet-dur-out) var(--sheet-ease-out) forwards;
+  pointer-events: none;
+}
+.drawer-in-left {
+  animation: drawer-in-left var(--sheet-dur) var(--sheet-ease) backwards;
+}
+.drawer-out-left {
+  animation: drawer-out-left var(--sheet-dur-out) var(--sheet-ease-out) forwards;
+  pointer-events: none;
+}
+.sheet-in-up {
+  animation: sheet-in-up var(--sheet-dur) var(--sheet-ease) backwards;
+}
+.sheet-out-down {
+  animation: sheet-out-down var(--sheet-dur-out) var(--sheet-ease-out) forwards;
+  pointer-events: none;
+}
+.pop-in {
+  animation: pop-in var(--pop-dur) var(--sheet-ease) backwards;
+}
+.pop-out {
+  animation: pop-out var(--pop-dur-out) var(--sheet-ease-out) forwards;
+  pointer-events: none;
+}
+.slide-out-up {
+  animation: slide-out-up var(--pop-dur-out) var(--sheet-ease-out) forwards;
+  pointer-events: none;
+}
+.backdrop-in {
+  animation: backdrop-in var(--sheet-dur) ease-out backwards;
+}
+.backdrop-out {
+  animation: backdrop-out var(--sheet-dur-out) ease-in forwards;
+  pointer-events: none;
+}
 
 @media (max-width: 1023px) {
-  .board-side-in { animation: drawer-in var(--sheet-dur) var(--sheet-ease) backwards; }
-  .board-side-out { animation: drawer-out var(--sheet-dur-out) var(--sheet-ease-out) forwards; pointer-events: none; }
+  .board-side-in {
+    animation: drawer-in var(--sheet-dur) var(--sheet-ease) backwards;
+  }
+  .board-side-out {
+    animation: drawer-out var(--sheet-dur-out) var(--sheet-ease-out) forwards;
+    pointer-events: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter, .drawer-in, .drawer-out, .drawer-in-right, .drawer-out-right,
-  .drawer-in-left, .drawer-out-left, .sheet-in-up, .sheet-out-down,
-  .pop-in, .pop-out, .slide-out-up, .backdrop-in, .backdrop-out,
-  .board-side-in, .board-side-out {
+  .page-enter,
+  .drawer-in,
+  .drawer-out,
+  .drawer-in-right,
+  .drawer-out-right,
+  .drawer-in-left,
+  .drawer-out-left,
+  .sheet-in-up,
+  .sheet-out-down,
+  .pop-in,
+  .pop-out,
+  .slide-out-up,
+  .backdrop-in,
+  .backdrop-out,
+  .board-side-in,
+  .board-side-out {
     animation: none;
   }
 }
@@ -1317,8 +1469,12 @@
   }
 }
 @keyframes tip-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 /* chỉ giữ trạng thái đầu (backwards), hết hiệu ứng thì nhường cho transition lúc ẩn / trượt */
 .anim-tip {
@@ -1335,11 +1491,21 @@
 }
 
 /* app chỉ có giao diện sáng: không cho trình duyệt điện thoại tự đảo màu (chế độ tối ép buộc) */
-:root { color-scheme: only light; }
+:root {
+  color-scheme: only light;
+}
 
 /* màn rất lớn để tỉ lệ 100% (vd. 30 inch 2560px): phóng cả trang web (trừ trình soạn) cho chữ, nút khỏi bé tí */
-@media (min-width: 2200px) { .site-scale { zoom: 1.15; } }
-@media (min-width: 2800px) { .site-scale { zoom: 1.3; } }
+@media (min-width: 2200px) {
+  .site-scale {
+    zoom: 1.15;
+  }
+}
+@media (min-width: 2800px) {
+  .site-scale {
+    zoom: 1.3;
+  }
+}
 
 /* ── Landing reveal & reduced motion (chỉ dùng transform/opacity/stroke-dashoffset) ── */
 .landing-below-fold {
@@ -1349,8 +1515,9 @@
 [data-reveal] {
   opacity: 0;
   transform: translate3d(0, 32px, 0);
-  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
-              transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
 }
 [data-reveal='true'] {
@@ -1368,45 +1535,134 @@
 }
 
 /* ── Trang chủ: hiệu ứng (chỉ transform / opacity / stroke-dashoffset) ── */
-:root { --land-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+:root {
+  --land-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
 /* con của khối hiện so le khi cuộn tới: đặt .stagger-kids lên chính khối có data-reveal hoặc bên trong nó */
-.stagger-kids[data-reveal] { opacity: 1; transform: none; transition: none; }
-.stagger-kids > * { transition: opacity 720ms var(--land-ease), transform 720ms var(--land-ease); }
+.stagger-kids[data-reveal] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+.stagger-kids > * {
+  transition:
+    opacity 720ms var(--land-ease),
+    transform 720ms var(--land-ease);
+}
 .stagger-kids[data-reveal='false'] > *,
-[data-reveal='false'] .stagger-kids > * { opacity: 0; transform: translate3d(0, 28px, 0); }
-.stagger-kids > :nth-child(2) { transition-delay: 110ms; }
-.stagger-kids > :nth-child(3) { transition-delay: 220ms; }
-.stagger-kids > :nth-child(4) { transition-delay: 330ms; }
-.stagger-kids > :nth-child(5) { transition-delay: 440ms; }
-.stagger-kids > :nth-child(6) { transition-delay: 550ms; }
-.stagger-kids > :nth-child(n+7) { transition-delay: 660ms; }
+[data-reveal='false'] .stagger-kids > * {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+}
+.stagger-kids > :nth-child(2) {
+  transition-delay: 110ms;
+}
+.stagger-kids > :nth-child(3) {
+  transition-delay: 220ms;
+}
+.stagger-kids > :nth-child(4) {
+  transition-delay: 330ms;
+}
+.stagger-kids > :nth-child(5) {
+  transition-delay: 440ms;
+}
+.stagger-kids > :nth-child(6) {
+  transition-delay: 550ms;
+}
+.stagger-kids > :nth-child(n + 7) {
+  transition-delay: 660ms;
+}
 
 /* đầu trang: chữ nổi lên lần lượt lúc vào trang */
-@keyframes land-rise { from { opacity: 0; transform: translate3d(0, 18px, 0); } }
-.land-rise { animation: land-rise 760ms var(--land-ease) both; animation-delay: var(--d, 0ms); }
+@keyframes land-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+}
+.land-rise {
+  animation: land-rise 760ms var(--land-ease) both;
+  animation-delay: var(--d, 0ms);
+}
 
 /* ảnh chụp đổi cảnh (đổi tab) */
-@keyframes land-swap { from { opacity: 0; transform: scale(1.025); } }
-.land-swap { animation: land-swap 560ms var(--land-ease) both; transform-origin: 50% 0; }
+@keyframes land-swap {
+  from {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+}
+.land-swap {
+  animation: land-swap 560ms var(--land-ease) both;
+  transform-origin: 50% 0;
+}
 
 /* vạch đếm giờ tới lần tự chuyển tab ở đầu trang */
-@keyframes land-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-.land-progress { transform-origin: 0 50%; animation: land-progress var(--dur, 6s) linear both; }
+@keyframes land-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.land-progress {
+  transform-origin: 0 50%;
+  animation: land-progress var(--dur, 6s) linear both;
+}
 
 /* hình công cụ tự vẽ nét */
-@keyframes land-draw { to { stroke-dashoffset: 0; } }
-@keyframes land-fade { to { opacity: 1; } }
-.land-draw .dr { stroke-dasharray: 1; stroke-dashoffset: 1; animation: land-draw 900ms cubic-bezier(0.45, 0, 0.2, 1) forwards; animation-delay: var(--d, 0ms); }
-.land-draw .dr-f { opacity: 0; animation: land-fade 420ms ease-out forwards; animation-delay: var(--d, 0ms); }
+@keyframes land-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes land-fade {
+  to {
+    opacity: 1;
+  }
+}
+.land-draw .dr {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: land-draw 900ms cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.land-draw .dr-f {
+  opacity: 0;
+  animation: land-fade 420ms ease-out forwards;
+  animation-delay: var(--d, 0ms);
+}
 
 /* điện thoại trôi nhẹ */
-@keyframes land-float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -8px, 0); } }
-.land-float { animation: land-float 7s ease-in-out infinite; }
+@keyframes land-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+.land-float {
+  animation: land-float 7s ease-in-out infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .stagger-kids > *, .land-rise, .land-swap, .land-float, .land-draw .dr, .land-draw .dr-f {
-    animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important;
+  .stagger-kids > *,
+  .land-rise,
+  .land-swap,
+  .land-float,
+  .land-draw .dr,
+  .land-draw .dr-f {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
   }
-  .land-progress { display: none; }
+  .land-progress {
+    display: none;
+  }
 }

@@ -1,3 +1,6 @@
+import katex from 'katex'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+
 /**
  * Các dropdown/dialog cho ribbon tab "Chèn":
  *   - TablePicker: lưới chọn kích thước bảng (giống Word)
@@ -7,17 +10,25 @@
  *   - ImagePicker: chọn ảnh từ máy → chèn base64
  */
 import { dialog } from '@/engine/components/Dialog'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { Editor } from '@tiptap/core'
-import katex from 'katex'
-import { cn } from '@/engine/lib/cn'
-import { uploadImage } from '@/engine/lib/mediaStore'
-import { IconClose, IconEquation, IconLink, IconPicture, IconShapes, IconSymbol, IconTable } from './icons'
-import { RibbonButton } from './Layout'
 import { Portal } from '@/engine/components/Portal'
 import { Segmented } from '@/engine/components/Segmented'
+import { cn } from '@/engine/lib/cn'
+import { uploadImage } from '@/engine/lib/mediaStore'
+
+import {
+  IconClose,
+  IconEquation,
+  IconLink,
+  IconPicture,
+  IconShapes,
+  IconSymbol,
+  IconTable,
+} from './icons'
+import { RibbonButton } from './Layout'
 import { SNIPPET_GROUPS, applySnippet } from './mathSnippets'
 import { useAnchoredPopover, popoverStyle } from './useAnchoredPopover'
+
+import type { Editor } from '@tiptap/core'
 
 /* ------------------------------------------------------------------ *
  * Table picker — lưới 10×8 như Word
@@ -63,10 +74,7 @@ export function TablePicker({ editor, disabled }: { editor: Editor | null; disab
       </span>
       {open && (
         <div className="rb-drop-menu rb-table-picker" style={popoverStyle(pos)}>
-          <div
-            className="rb-table-grid"
-            onMouseLeave={() => setHover(null)}
-          >
+          <div className="rb-table-grid" onMouseLeave={() => setHover(null)}>
             {Array.from({ length: MAX_R * MAX_C }).map((_, i) => {
               const r = Math.floor(i / MAX_C)
               const c = i % MAX_C
@@ -98,12 +106,66 @@ export function TablePicker({ editor, disabled }: { editor: Editor | null; disab
  * ------------------------------------------------------------------ */
 
 const SYMBOLS = [
-  '±', '×', '÷', '≠', '≤', '≥', '≈', '∞', '∑', '∏',
-  '√', '∛', '∫', '∂', '∇', '∆', 'π', 'α', 'β', 'γ',
-  'δ', 'θ', 'λ', 'μ', 'σ', 'φ', 'ω', '°', '′', '″',
-  '½', '⅓', '¼', '¾', '⅛', '→', '←', '↑', '↓', '↔',
-  '⇒', '⇔', '∈', '∉', '⊂', '⊆', '∪', '∩', '∅', 'ℕ',
-  'ℤ', 'ℚ', 'ℝ', 'ℂ', '✓', '✗', '★', '☆', '♪', '§',
+  '±',
+  '×',
+  '÷',
+  '≠',
+  '≤',
+  '≥',
+  '≈',
+  '∞',
+  '∑',
+  '∏',
+  '√',
+  '∛',
+  '∫',
+  '∂',
+  '∇',
+  '∆',
+  'π',
+  'α',
+  'β',
+  'γ',
+  'δ',
+  'θ',
+  'λ',
+  'μ',
+  'σ',
+  'φ',
+  'ω',
+  '°',
+  '′',
+  '″',
+  '½',
+  '⅓',
+  '¼',
+  '¾',
+  '⅛',
+  '→',
+  '←',
+  '↑',
+  '↓',
+  '↔',
+  '⇒',
+  '⇔',
+  '∈',
+  '∉',
+  '⊂',
+  '⊆',
+  '∪',
+  '∩',
+  '∅',
+  'ℕ',
+  'ℤ',
+  'ℚ',
+  'ℝ',
+  'ℂ',
+  '✓',
+  '✗',
+  '★',
+  '☆',
+  '♪',
+  '§',
 ]
 
 export function SymbolPicker({ editor, disabled }: { editor: Editor | null; disabled?: boolean }) {
@@ -194,7 +256,10 @@ export function EquationDialog({
 
   const preview = () => {
     try {
-      return { html: katex.renderToString(tex, { throwOnError: false, displayMode: true }), ok: true }
+      return {
+        html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
+        ok: true,
+      }
     } catch {
       return { html: '', ok: false }
     }
@@ -216,7 +281,15 @@ export function EquationDialog({
     if (!latex) return
     if (onSave) onSave(latex)
     // chèn thẳng thành node công thức (lưu lại vẫn là $...$ như quy ước cũ)
-    else editor.chain().focus().insertContent([{ type: 'inlineMath', attrs: { latex } }, { type: 'text', text: ' ' }]).run()
+    else
+      editor
+        .chain()
+        .focus()
+        .insertContent([
+          { type: 'inlineMath', attrs: { latex } },
+          { type: 'text', text: ' ' },
+        ])
+        .run()
     onClose()
   }
 
@@ -253,7 +326,9 @@ export function EquationDialog({
                   aria-label={it.tip}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => addSnippet(it.snip)}
-                  dangerouslySetInnerHTML={{ __html: snippetHtml(it.show ?? it.snip.replace(/#/g, '\\square')) }}
+                  dangerouslySetInnerHTML={{
+                    __html: snippetHtml(it.show ?? it.snip.replace(/#/g, '\\square')),
+                  }}
                 />
               ))}
             </div>
@@ -342,7 +417,15 @@ export function LinkDialog({
     if (from < to) {
       editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     } else {
-      editor.chain().focus().insertContent({ type: 'text', text: text || url, marks: [{ type: 'link', attrs: { href: url } }] }).run()
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'text',
+          text: text || url,
+          marks: [{ type: 'link', attrs: { href: url } }],
+        })
+        .run()
     }
     onClose()
   }
@@ -422,7 +505,9 @@ export function ImagePicker({ editor, disabled }: { editor: Editor | null; disab
         const src = await uploadImage(String(reader.result ?? ''))
         if (!editor.isDestroyed) editor.chain().focus().setImage({ src }).run()
       } catch (err) {
-        void dialog.alert(err instanceof Error ? err.message : 'Không chèn được ảnh này.', { title: 'Không chèn được ảnh' })
+        void dialog.alert(err instanceof Error ? err.message : 'Không chèn được ảnh này.', {
+          title: 'Không chèn được ảnh',
+        })
       }
     }
     reader.readAsDataURL(file)
@@ -457,12 +542,18 @@ export function ImagePicker({ editor, disabled }: { editor: Editor | null; disab
 
 /** Vẽ hình ra PNG nền trong suốt (2× để in nét), nét đen như hình vẽ trong đề. */
 async function shapePng(prst: string, px = 240): Promise<string> {
-  const [{ renderToStaticMarkup }, { ShapePreview }] = await Promise.all([import('react-dom/server'), import('./ShapeGallery')])
+  const [{ renderToStaticMarkup }, { ShapePreview }] = await Promise.all([
+    import('react-dom/server'),
+    import('./ShapeGallery'),
+  ])
   const raw = renderToStaticMarkup(<ShapePreview prst={prst} />)
   // hình khép kín vẽ nét không phóng (non-scaling-stroke) → cỡ nét tính bằng px ảnh; đường thẳng thì nét phóng theo khung 32
   const stroke = raw.includes('non-scaling-stroke') ? 2.4 : (2.4 * 32) / px
   const svg = raw
-    .replace(/width="26" height="26"/, `width="${px}" height="${px}" xmlns="http://www.w3.org/2000/svg"`)
+    .replace(
+      /width="26" height="26"/,
+      `width="${px}" height="${px}" xmlns="http://www.w3.org/2000/svg"`,
+    )
     .replace(/currentColor/g, '#000')
     // 2.4px ở ảnh 2× ≈ 1.2px khi hiện, gần nét bút vẽ hình trong đề
     .replace(/stroke-width="1.3"/g, `stroke-width="${stroke}"`)
@@ -499,14 +590,21 @@ export function ShapePicker({ editor, disabled }: { editor: Editor | null; disab
       const src = await uploadImage(await shapePng(prst))
       if (!editor.isDestroyed) editor.chain().focus().setImage({ src, width: 120 }).run()
     } catch (err) {
-      void dialog.alert(err instanceof Error ? err.message : 'Không chèn được hình này.', { title: 'Không chèn được hình' })
+      void dialog.alert(err instanceof Error ? err.message : 'Không chèn được hình này.', {
+        title: 'Không chèn được hình',
+      })
     }
   }
 
   return (
     <div className="rb-drop" ref={ref}>
       <span ref={triggerRef as React.RefObject<HTMLSpanElement>} className="rb-drop-trigger">
-        <RibbonButton icon={<IconShapes size={26} />} label="Hình dạng" disabled={disabled} onClick={() => setOpen((o) => !o)} />
+        <RibbonButton
+          icon={<IconShapes size={26} />}
+          label="Hình dạng"
+          disabled={disabled}
+          onClick={() => setOpen((o) => !o)}
+        />
       </span>
       {open && (
         <div className="rb-drop-menu" style={popoverStyle(pos)}>

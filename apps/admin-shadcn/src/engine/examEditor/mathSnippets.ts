@@ -81,9 +81,21 @@ export const SNIPPET_GROUPS: SnippetGroup[] = [
     key: 'calc',
     label: 'Giải tích',
     items: [
-      { snip: '\\begin{cases} # \\\\  \\end{cases}', show: '\\begin{cases}x\\\\y\\end{cases}', tip: 'Hệ phương trình' },
-      { snip: '\\left[\\begin{array}{l} # \\\\  \\end{array}\\right.', show: '\\left[\\begin{array}{l}x\\\\y\\end{array}\\right.', tip: 'Tuyển (hoặc)' },
-      { snip: 'x_{1,2} = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}', show: 'x_{1,2}', tip: 'Công thức nghiệm' },
+      {
+        snip: '\\begin{cases} # \\\\  \\end{cases}',
+        show: '\\begin{cases}x\\\\y\\end{cases}',
+        tip: 'Hệ phương trình',
+      },
+      {
+        snip: '\\left[\\begin{array}{l} # \\\\  \\end{array}\\right.',
+        show: '\\left[\\begin{array}{l}x\\\\y\\end{array}\\right.',
+        tip: 'Tuyển (hoặc)',
+      },
+      {
+        snip: 'x_{1,2} = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}',
+        show: 'x_{1,2}',
+        tip: 'Công thức nghiệm',
+      },
       { snip: '\\Delta ', show: '\\Delta', tip: 'Delta' },
       { snip: '\\lim_{x \\to #}', show: '\\lim_{x\\to a}', tip: 'Giới hạn' },
       { snip: '\\sum_{i=1}^{#}', show: '\\sum_{i=1}^{n}', tip: 'Tổng' },
@@ -100,7 +112,22 @@ export const SNIPPET_GROUPS: SnippetGroup[] = [
   {
     key: 'greek',
     label: 'Chữ Hy Lạp',
-    items: ['alpha', 'beta', 'gamma', 'delta', 'varepsilon', 'theta', 'lambda', 'mu', 'rho', 'sigma', 'varphi', 'omega', 'Delta', 'Omega'].map((n) => ({
+    items: [
+      'alpha',
+      'beta',
+      'gamma',
+      'delta',
+      'varepsilon',
+      'theta',
+      'lambda',
+      'mu',
+      'rho',
+      'sigma',
+      'varphi',
+      'omega',
+      'Delta',
+      'Omega',
+    ].map((n) => ({
       snip: `\\${n} `,
       show: `\\${n}`,
       tip: n,

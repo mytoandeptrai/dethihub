@@ -43,9 +43,7 @@
             "Sơ đồ thứ bậc tổ chức sống từ phân tử -> tế bào -> cơ thể -> quần thể -> quần xã -> hệ sinh thái -> sinh quyển.",
             "Cơ chế tự điều chỉnh của hệ thống sống (ví dụ: điều hòa cân bằng môi trường trong cơ thể ở mức sơ lược)."
           ],
-          "cong_thuc": [
-            "Không có công thức tính toán phức tạp ở chương này."
-          ],
+          "cong_thuc": ["Không có công thức tính toán phức tạp ở chương này."],
           "chua_duoc_dung": [
             "CHƯA DÙNG hệ thống phân loại 5 giới chi tiết của chương trình 2006 (Giới Khởi sinh, Nguyên sinh, Nấm, Thực vật, Động vật đã được giảm tải/rút gọn theo hướng tiếp cận các cấp độ tổ chức).",
             "CHƯA DÙNG kiến thức di truyền phân tử DNA, RNA (học ở chương Thành phần hóa học và lớp 12).",
@@ -153,9 +151,7 @@
             "Con đường tổng hợp và xuất khẩu protein ra ngoài tế bào.",
             "Sự biến đổi hình dạng tế bào nhờ khung xương tế bào."
           ],
-          "cong_thuc": [
-            "Không có công thức tính toán ở chương này."
-          ],
+          "cong_thuc": ["Không có công thức tính toán ở chương này."],
           "chua_duoc_dung": [
             "CHƯA DÙNG chuỗi truyền electron hô hấp phân tử chi tiết (học ở chương Chuyển hóa năng lượng).",
             "CHƯA DÙNG pha sáng, pha tối quang hợp chi tiết (học ở chương Chuyển hóa năng lượng).",
@@ -379,9 +375,7 @@
             "Cơ chế chuyển đổi giữa chu trình tiềm tan sang chu trình tan.",
             "Cơ chế phòng thủ của hệ miễn dịch chống virus (ở mức cơ bản)."
           ],
-          "cong_thuc": [
-            "Không có công thức tính toán ở chương này."
-          ],
+          "cong_thuc": ["Không có công thức tính toán ở chương này."],
           "chua_duoc_dung": [
             "CHƯA DÙNG chi tiết đáp ứng miễn dịch đặc hiệu tế bào T, B (học ở Sinh học 11 - Cân bằng nội môi và Miễn dịch).",
             "CHƯA DÙNG quy trình kỹ thuật di truyền chi tiết dùng virus làm thể truyền (lớp 12)."
@@ -570,9 +564,7 @@
             "Cơ chế tác động tương quan giữa các hormone thực vật (ví dụ: tỉ lệ Auxin/Cytokinin quyết định sự phân hóa mầm chồi/rễ).",
             "Cơ chế lột xác và biến thái ở sâu bọ dưới sự điều hòa của Ecdysone và Juvenile."
           ],
-          "cong_thuc": [
-            "Không có công thức tính toán ở chương này."
-          ],
+          "cong_thuc": ["Không có công thức tính toán ở chương này."],
           "chua_duoc_dung": [
             "CHƯA DÙNG di truyền sự sinh trưởng và đột biến gene quy định chiều cao (lớp 12).",
             "CHƯA DÙNG ứng dụng công nghệ tế bào tạo giống cây trồng (đã học chuyên đề 10 hoặc lớp 12)."
@@ -657,18 +649,11 @@
             "Tổng hợp kiến thức toàn bộ chương trình Sinh học 11 về cơ thể thực vật và động vật.",
             "Khái niệm hệ thống mở và tự điều chỉnh đã giới thiệu từ lớp 10."
           ],
-          "thuat_ngu": [
-            "hệ thống mở",
-            "tự điều chỉnh",
-            "cân bằng động",
-            "tích hợp sinh lý"
-          ],
+          "thuat_ngu": ["hệ thống mở", "tự điều chỉnh", "cân bằng động", "tích hợp sinh lý"],
           "qua_trinh_va_co_che": [
             "Sơ đồ tích hợp các hệ cơ quan (Tiêu hóa, Hô hấp, Tuần hoàn, Bài tiết, Thần kinh, Nội tiết) trong đáp ứng chung của cơ thể."
           ],
-          "cong_thuc": [
-            "Không có công thức."
-          ],
+          "cong_thuc": ["Không có công thức."],
           "chua_duoc_dung": [
             "CHƯA DÙNG kiến thức di truyền quần thể, sinh thái học quần xã (lớp 12)."
           ],
@@ -900,9 +885,7 @@
             "Quy trình tạo giống bằng công nghệ gene (ví dụ: tạo lúa Vàng chứa beta-carotene, tạo vi khuẩn E.coli sản xuất insulin người).",
             "Quy trình dung hợp tế bào trần tạo cây lai khác loài (Pomato = Potato + Tomato)."
           ],
-          "cong_thuc": [
-            "Không có công thức tính toán."
-          ],
+          "cong_thuc": ["Không có công thức tính toán."],
           "chua_duoc_dung": [
             "CHƯA DÙNG các chi tiết kỹ thuật PCR hay giải trình tự gene thế hệ mới vượt quá mức độ phổ thông."
           ],
@@ -1066,11 +1049,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh10-mo-dau",
-        "sinh10-thanh-phan-hoa-hoc-te-bao",
-        "sinh10-cau-truc-te-bao"
-      ],
+      "pham_vi": ["sinh10-mo-dau", "sinh10-thanh-phan-hoa-hoc-te-bao", "sinh10-cau-truc-te-bao"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1123,10 +1102,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh10-thong-tin-te-bao-chu-ki-te-bao",
-        "sinh10-vi-sinh-vat"
-      ],
+      "pham_vi": ["sinh10-thong-tin-te-bao-chu-ki-te-bao", "sinh10-vi-sinh-vat"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1150,11 +1126,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh10-thong-tin-te-bao-chu-ki-te-bao",
-        "sinh10-vi-sinh-vat",
-        "sinh10-virus"
-      ],
+      "pham_vi": ["sinh10-thong-tin-te-bao-chu-ki-te-bao", "sinh10-vi-sinh-vat", "sinh10-virus"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1178,9 +1150,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh11-trao-doi-chat-chuyen-hoa-nang-luong"
-      ],
+      "pham_vi": ["sinh11-trao-doi-chat-chuyen-hoa-nang-luong"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1204,9 +1174,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh11-trao-doi-chat-chuyen-hoa-nang-luong"
-      ],
+      "pham_vi": ["sinh11-trao-doi-chat-chuyen-hoa-nang-luong"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1230,10 +1198,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh11-cam-ung",
-        "sinh11-sinh-truong-phat-trien"
-      ],
+      "pham_vi": ["sinh11-cam-ung", "sinh11-sinh-truong-phat-trien"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1286,10 +1251,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh12-di-truyen-phan-tu-te-bao",
-        "sinh12-quy-luat-di-truyen"
-      ],
+      "pham_vi": ["sinh12-di-truyen-phan-tu-te-bao", "sinh12-quy-luat-di-truyen"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {
@@ -1341,10 +1303,7 @@
           "diem_moi_cau": 0.25
         }
       ],
-      "pham_vi": [
-        "sinh12-ung-dung-di-truyen-giong",
-        "sinh12-tien-hoa"
-      ],
+      "pham_vi": ["sinh12-ung-dung-di-truyen-giong", "sinh12-tien-hoa"],
       "ti_le_muc_do": "40% Nhận biết - 30% Thông hiểu - 20% Vận dụng - 10% Vận dụng cao"
     },
     {

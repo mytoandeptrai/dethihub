@@ -34,9 +34,7 @@
             "Trình bày vai trò của các chủ thể: người sản xuất – kinh doanh, người tiêu dùng, Nhà nước",
             "Phân tích quan hệ giữa các chủ thể trong nền kinh tế thị trường định hướng XHCN"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 10: thống kê số liệu kinh tế"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 10: thống kê số liệu kinh tế"],
           "chua_duoc_dung": [
             "Các mô hình kinh tế học vi mô/vĩ mô theo trường phái (đại học)",
             "GDP, chỉ số giá cả chi tiết (lớp 12)"
@@ -57,13 +55,7 @@
             "CTST": "Chủ đề thị trường và cơ chế thị trường",
             "CD": "Chủ đề thị trường và cơ chế thị trường"
           },
-          "khai_niem": [
-            "thị trường",
-            "cung – cầu",
-            "giá cả",
-            "cạnh tranh",
-            "cơ chế thị trường"
-          ],
+          "khai_niem": ["thị trường", "cung – cầu", "giá cả", "cạnh tranh", "cơ chế thị trường"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Giá",
@@ -78,9 +70,7 @@
             "Trình bày quy luật cung – cầu, cạnh tranh trong cơ chế thị trường",
             "Nêu ưu điểm và hạn chế của cơ chế thị trường; vai trò điều tiết của Nhà nước"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 10: đọc đồ thị hàm số (đường cung – cầu)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 10: đọc đồ thị hàm số (đường cung – cầu)"],
           "chua_duoc_dung": [
             "Điểm cân bằng thị trường với hàm cung – cầu đại số (đại học)",
             "Độc quyền, độc quyền nhóm chi tiết (chỉ nêu qua luật cạnh tranh)"
@@ -101,12 +91,7 @@
             "CTST": "Chủ đề ngân sách nhà nước và thuế",
             "CD": "Chủ đề ngân sách nhà nước và thuế"
           },
-          "khai_niem": [
-            "ngân sách nhà nước",
-            "thuế",
-            "thuế thu nhập cá nhân",
-            "nghĩa vụ nộp thuế"
-          ],
+          "khai_niem": ["ngân sách nhà nước", "thuế", "thuế thu nhập cá nhân", "nghĩa vụ nộp thuế"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Thuế thu nhập cá nhân",
@@ -128,9 +113,7 @@
             "Trình bày khái niệm thuế, đặc điểm và vai trò của thuế; nghĩa vụ nộp thuế của công dân",
             "Nêu ý thức chấp hành pháp luật về thuế của công dân"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 10: phần trăm (tính thuế TNCN theo bậc, mức nêu đơn giản)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 10: phần trăm (tính thuế TNCN theo bậc, mức nêu đơn giản)"],
           "chua_duoc_dung": [
             "Biểu thuế lũy tiến từng bậc chi tiết với giảm trừ cập nhật theo nghị quyết từng năm (chỉ ra đề với mức giảm trừ ghi rõ nguồn)",
             "Thuế giá trị gia tăng khấu trừ chi tiết (chỉ nêu)"
@@ -151,12 +134,7 @@
             "CTST": "Chủ đề kinh tế Việt Nam trong hội nhập quốc tế",
             "CD": "Chủ đề kinh tế Việt Nam trong bối cảnh hội nhập"
           },
-          "khai_niem": [
-            "hội nhập kinh tế quốc tế",
-            "cạnh tranh quốc tế",
-            "cơ hội",
-            "thách thức"
-          ],
+          "khai_niem": ["hội nhập kinh tế quốc tế", "cạnh tranh quốc tế", "cơ hội", "thách thức"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Nghị quyết 05-NQ/TW",
@@ -171,9 +149,7 @@
             "Phân tích cơ hội và thách thức đối với người lao động, doanh nghiệp",
             "Trình bày phương hướng nâng cao năng lực cạnh tranh quốc gia và yêu cầu với công dân"
           ],
-          "kien_thuc_duoc_dung": [
-            "Địa lí 10: thành tựu kinh tế Việt Nam"
-          ],
+          "kien_thuc_duoc_dung": ["Địa lí 10: thành tựu kinh tế Việt Nam"],
           "chua_duoc_dung": [
             "Cam kết trong các hiệp định thương mại tự do (CPTPP, EVFTA) chi tiết theo điều khoản (chỉ nêu)",
             "Chuỗi cung ứng toàn cầu chi tiết (đại học)"
@@ -229,9 +205,7 @@
             "Nêu điều kiện kết hôn, các hành vi bị cấm; hậu quả của kết hôn trái pháp luật (tảo hôn, cưỡng ép)",
             "Thái độ và cách ứng xử phù hợp pháp luật trong quan hệ hôn nhân"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 10: lập luận nếu – thì"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 10: lập luận nếu – thì"],
           "chua_duoc_dung": [
             "Thừa kế, di chúc chi tiết (KTPL 11)",
             "Hậu quả pháp lí chi tiết từng trường hợp phá sản hôn nhân (chỉ trình bày khái quát)"
@@ -287,9 +261,7 @@
             "Nêu các hành vi bị cấm khi quảng cáo (quảng cáo sai sự thật, đồ uống có cồn, sản phẩm với trẻ em...)",
             "Trình bày quyền của người tiêu dùng và cách bảo vệ quyền lợi khi mua hàng kém chất lượng"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 10: đọc bảng, phân tích tình huống"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 10: đọc bảng, phân tích tình huống"],
           "chua_duoc_dung": [
             "Điều khoản xử phạt vi phạm hành chính với mức tiền cụ thể theo nghị định (chỉ nêu nguyên tắc)",
             "Đấu thầu, trợ giá (ngoài chương trình)"
@@ -338,9 +310,7 @@
             "Nêu quyền được bảo hộ lao động và trách nhiệm của người sử dụng lao động",
             "Trình bày quy định về thời giờ làm việc, nghỉ ngơi, an toàn lao động và ý thức chấp hành"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 10: tính theo tỉ lệ (lương theo giờ)"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 10: tính theo tỉ lệ (lương theo giờ)"],
           "chua_duoc_dung": [
             "Tranh chấp lao động chi tiết, đình công theo thủ tục (KTPL 12 chỉ nêu)",
             "Luật Công đoàn, bảo hiểm chi tiết (lớp 12)"
@@ -415,9 +385,7 @@
           "luu_y_ra_de": "Năm 2025 có chủ trương sửa đổi Hiến pháp 2013 và sắp xếp bộ máy (bỏ cấp huyện, hợp nhất các cơ quan) — ra đề tránh chi tiết tổ chức từng cơ quan tại thời điểm chuyển đổi; nêu nguồn văn bản khi dẫn tên cơ quan mới."
         }
       ],
-      "chuyen_de": [
-        "Chuyên đề học tập Giáo dục Kinh tế và Pháp luật 10"
-      ],
+      "chuyen_de": ["Chuyên đề học tập Giáo dục Kinh tế và Pháp luật 10"],
       "ghi_chu_chua_chac": [
         "SGK KTPL 10 KNTT in lần đầu 18 bài; một số lần tái bản gộp Bài 14–16 thành Bài 14–15 — khi gộp cần đối chiếu bản SGK đang dùng ở trường",
         "Luật Giá 2023, Luật BVQLNTD 2023, dự thảo sửa đổi Hiến pháp 2025, dự thảo Luật HNGĐ thay thế: các thay đổi pháp luật sau khi SGK in — ra đề theo luật hiện hành hoặc tránh chi tiết trực thuộc luật cụ thể",
@@ -437,12 +405,7 @@
             "CTST": "Chủ đề cạnh tranh, cung – cầu",
             "CD": "Chủ đề cạnh tranh và cung – cầu"
           },
-          "khai_niem": [
-            "cạnh tranh lành mạnh",
-            "cung",
-            "cầu",
-            "giá cả thị trường"
-          ],
+          "khai_niem": ["cạnh tranh lành mạnh", "cung", "cầu", "giá cả thị trường"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Cạnh tranh",
@@ -481,21 +444,14 @@
             "CTST": "Chủ đề lạm phát và thất nghiệp",
             "CD": "Chủ đề lạm phát, thất nghiệp"
           },
-          "khai_niem": [
-            "lạm phát",
-            "thất nghiệp",
-            "tỉ lệ lạm phát",
-            "tỉ lệ thất nghiệp"
-          ],
+          "khai_niem": ["lạm phát", "thất nghiệp", "tỉ lệ lạm phát", "tỉ lệ thất nghiệp"],
           "can_cu_phap_ly": [],
           "yeu_cau_can_dat": [
             "Nêu khái niệm lạm phát, các loại lạm phát (vừa phải, phi mã, siêu lạm phát) và hậu quả",
             "Nêu khái niệm thất nghiệp, các loại thất nghiệp; tình hình thất nghiệp thanh niên",
             "Trình bày giải pháp chống lạm phát, giảm thất nghiệp; phương hướng của người học"
           ],
-          "kien_thuc_duoc_dung": [
-            "Toán 11: phần trăm, dãy số liệu thống kê"
-          ],
+          "kien_thuc_duoc_dung": ["Toán 11: phần trăm, dãy số liệu thống kê"],
           "chua_duoc_dung": [
             "Lí thuyết tiền tệ, công cụ chính sách tiền tệ của ngân hàng trung ương (đại học)",
             "Chỉ số CPI chi tiết theo rổ hàng hóa (chỉ nêu)"
@@ -537,10 +493,7 @@
             "Nêu vai trò của thị trường lao động với người lao động, người sử dụng lao động và Nhà nước",
             "Trình bày ý tưởng kinh doanh và các năng lực cần thiết của người kinh doanh; đánh giá ý tưởng kinh doanh đơn giản"
           ],
-          "kien_thuc_duoc_dung": [
-            "KTPL 10: pháp luật lao động",
-            "Toán 11: thống kê"
-          ],
+          "kien_thuc_duoc_dung": ["KTPL 10: pháp luật lao động", "Toán 11: thống kê"],
           "chua_duoc_dung": [
             "Kế hoạch kinh doanh đầy đủ theo mô hình doanh nghiệp (canvas) chi tiết",
             "Tài chính khởi nghiệp, gọi vốn (ngoài chương trình)"
@@ -561,10 +514,7 @@
             "CTST": "Chủ đề đạo đức kinh doanh",
             "CD": "Chủ đề đạo đức kinh doanh"
           },
-          "khai_niem": [
-            "đạo đức kinh doanh",
-            "trách nhiệm với người tiêu dùng"
-          ],
+          "khai_niem": ["đạo đức kinh doanh", "trách nhiệm với người tiêu dùng"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Bảo vệ quyền lợi người tiêu dùng",
@@ -579,9 +529,7 @@
             "Phân tích biểu hiện của người kinh doanh có/không đạo đức",
             "Có ý thức và hành vi tiêu dùng thông minh, ủng hộ kinh doanh có đạo đức"
           ],
-          "kien_thuc_duoc_dung": [
-            "KTPL 10: pháp luật về hàng hóa, dịch vụ, tiêu dùng"
-          ],
+          "kien_thuc_duoc_dung": ["KTPL 10: pháp luật về hàng hóa, dịch vụ, tiêu dùng"],
           "chua_duoc_dung": [
             "Trách nhiệm xã hội doanh nghiệp (CSR) chi tiết (lớp 12)",
             "Kinh tế học hành vi (đại học)"
@@ -891,9 +839,7 @@
           "luu_y_ra_de": "Luật Đất đai 2024 và Luật Căn cước 2023: SGK in trước — ra đề theo pháp luật hiện hành; địa giới hành chính sau sáp nhập 2025 ghi theo quy định hiện hành."
         }
       ],
-      "chuyen_de": [
-        "Chuyên đề học tập Giáo dục Kinh tế và Pháp luật 11"
-      ],
+      "chuyen_de": ["Chuyên đề học tập Giáo dục Kinh tế và Pháp luật 11"],
       "ghi_chu_chua_chac": [
         "SGK KTPL 11 KNTT in lần đầu 18 bài theo 9 chủ đề (đối chiếu vietjack); một số bản gộp Bài 15–18 khác chút — đối chiếu SGK dùng ở trường",
         "Luật Đất đai 2024, Luật Tài nguyên nước 2023, Luật Khoáng sản 2024, Luật GDĐT 2023: SGK in trước — ra đề theo luật hiện hành",
@@ -957,11 +903,7 @@
             "CTST": "Chủ đề hội nhập kinh tế quốc tế",
             "CD": "Chủ đề hội nhập kinh tế quốc tế"
           },
-          "khai_niem": [
-            "hội nhập kinh tế quốc tế",
-            "chủ quyền quốc gia",
-            "giải phóng thương mại"
-          ],
+          "khai_niem": ["hội nhập kinh tế quốc tế", "chủ quyền quốc gia", "giải phóng thương mại"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Nghị quyết 05-NQ/TW",
@@ -1059,12 +1001,7 @@
             "CTST": "Chủ đề lập kế hoạch kinh doanh",
             "CD": "Chủ đề kinh doanh"
           },
-          "khai_niem": [
-            "kế hoạch kinh doanh",
-            "vốn",
-            "mục tiêu kinh doanh",
-            "thị trường mục tiêu"
-          ],
+          "khai_niem": ["kế hoạch kinh doanh", "vốn", "mục tiêu kinh doanh", "thị trường mục tiêu"],
           "can_cu_phap_ly": [
             {
               "van_ban": "Luật Doanh nghiệp",
@@ -1122,10 +1059,7 @@
             "Phân tích lợi ích của việc thực hiện trách nhiệm xã hội đối với doanh nghiệp",
             "Trình bày trách nhiệm xã hội của doanh nghiệp Việt Nam trong thực tiễn"
           ],
-          "kien_thuc_duoc_dung": [
-            "KTPL 11: đạo đức kinh doanh",
-            "KTPL 12: phát triển bền vững"
-          ],
+          "kien_thuc_duoc_dung": ["KTPL 11: đạo đức kinh doanh", "KTPL 12: phát triển bền vững"],
           "chua_duoc_dung": [
             "Báo cáo phát triển bền vững theo chuẩn quốc tế GRI/ESG chi tiết (chỉ nêu)",
             "Kinh tế học trách nhiệm xã hội (đại học)"
@@ -1232,10 +1166,7 @@
             "Trình bày quyền sở hữu tài sản hợp pháp và nghĩa vụ tôn trọng tài sản của người khác",
             "Vận dụng xử lí tình huống liên quan đến sở hữu, thuế"
           ],
-          "kien_thuc_duoc_dung": [
-            "KTPL 10: thuế, Hiến pháp",
-            "KTPL 11: hợp đồng, sở hữu"
-          ],
+          "kien_thuc_duoc_dung": ["KTPL 10: thuế, Hiến pháp", "KTPL 11: hợp đồng, sở hữu"],
           "chua_duoc_dung": [
             "Xử phạt trốn thuế chi tiết theo nghị định và BLHS (chỉ nêu khái quát)",
             "Đất đai public ownership chi tiết theo luật và nghị định (chỉ nêu nguyên tắc)"
@@ -1307,10 +1238,7 @@
             "Trình bày nghĩa vụ bảo vệ di sản văn hóa, môi trường, tài nguyên",
             "Vận dụng xử lí tình huống thực hiện quyền – nghĩa vụ"
           ],
-          "kien_thuc_duoc_dung": [
-            "KTPL 10: Hiến pháp, năng lực dân sự",
-            "GDCD 7–9: kĩ năng sống"
-          ],
+          "kien_thuc_duoc_dung": ["KTPL 10: Hiến pháp, năng lực dân sự", "GDCD 7–9: kĩ năng sống"],
           "chua_duoc_dung": [
             "Cơ chế khiếu nại – tố tụng chi tiết theo từng luật (chỉ nêu quyền khiếu nại)",
             "Quyền tác giả, quyền liên quan (chuyên đề/lớp 10 nâng cao)"
@@ -1393,9 +1321,7 @@
           "luu_y_ra_de": "Các câu về Biển Đông theo lập trường chính thức của Việt Nam và công ước UNCLOS 1982; tránh tranh luận chính trị."
         }
       ],
-      "chuyen_de": [
-        "Chuyên đề học tập Giáo dục Kinh tế và Pháp luật 12"
-      ],
+      "chuyen_de": ["Chuyên đề học tập Giáo dục Kinh tế và Pháp luật 12"],
       "ghi_chu_chua_chac": [
         "SGK KTPL 12 KNTT gồm 16 bài theo 9 chủ đề (đối chiếu loigiaihay)",
         "Luật BHXH 2024 (hiệu lực 01/7/2025), Luật Khám bệnh chữa bệnh 2023, Luật Đất đai 2024, Luật Cư trú 2020, BLHS sửa đổi 2025: SGK in trước — ra đề theo luật hiện hành",

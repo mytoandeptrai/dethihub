@@ -16,10 +16,16 @@ const CELL_PAD_PT = 11 // lề trái/phải mặc định của ô bảng
 const MAX_COLS = 4
 const MATH = /\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g
 
-const plain = (rt: RichText) => (typeof rt === 'string' ? rt : (rt as Array<{ text: string } | string>).map((s) => (typeof s === 'string' ? s : s.text)).join(''))
+const plain = (rt: RichText) =>
+  typeof rt === 'string'
+    ? rt
+    : (rt as Array<{ text: string } | string>)
+        .map((s) => (typeof s === 'string' ? s : s.text))
+        .join('')
 
 /** Số ký tự hiển thị của công thức: mỗi lệnh `\xxx` tính một ký tự, bỏ ngoặc nhóm và dấu mũ/chỉ số. */
-const mathLen = (latex: string) => latex.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}^_\s]/g, '').length
+const mathLen = (latex: string) =>
+  latex.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}^_\s]/g, '').length
 
 function widthPt(text: string): number {
   let w = LABEL_PT + CELL_PAD_PT

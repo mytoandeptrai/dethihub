@@ -9,7 +9,14 @@ let conv: Promise<Conv> | null = null
 
 function loadConv(): Promise<Conv> {
   conv ??= (async () => {
-    const [{ mathjax }, { TeX }, { SVG }, { liteAdaptor }, { RegisterHTMLHandler }, { AllPackages }] = await Promise.all([
+    const [
+      { mathjax },
+      { TeX },
+      { SVG },
+      { liteAdaptor },
+      { RegisterHTMLHandler },
+      { AllPackages },
+    ] = await Promise.all([
       import('mathjax-full/js/mathjax.js'),
       import('mathjax-full/js/input/tex.js'),
       import('mathjax-full/js/output/svg.js'),
@@ -48,8 +55,10 @@ export async function texToSvg(tex: string, size: number, color: string): Promis
   let svg = toSvg(tex)
   const err = /data-mjx-error="([^"]*)"/.exec(svg)?.[1] ?? ''
   const ex = size * EX
-  const num = (attr: string) => parseFloat(new RegExp(`${attr}="([\\d.]+)ex"`).exec(svg)?.[1] ?? '0') * ex
-  const w = Math.max(1, num('width')), h = Math.max(1, num('height'))
+  const num = (attr: string) =>
+    parseFloat(new RegExp(`${attr}="([\\d.]+)ex"`).exec(svg)?.[1] ?? '0') * ex
+  const w = Math.max(1, num('width')),
+    h = Math.max(1, num('height'))
   svg = svg
     .replace(/width="[\d.]+ex"/, `width="${w.toFixed(2)}"`)
     .replace(/height="[\d.]+ex"/, `height="${h.toFixed(2)}"`)
@@ -59,7 +68,8 @@ export async function texToSvg(tex: string, size: number, color: string): Promis
   return { svg, w, h, error: err }
 }
 
-export const svgToDataUrl = (svg: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+export const svgToDataUrl = (svg: string) =>
+  `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 
 /** Mẫu chèn nhanh trong hộp công thức */
 export const FORMULA_SNIPPETS: { label: string; tex: string }[] = [

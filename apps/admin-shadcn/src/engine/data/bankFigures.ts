@@ -10,7 +10,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 12'],
     type: 'trac-nghiem',
-    prompt: 'Cho hàm số $y = x^3 - 3x + 1$ có bảng biến thiên như hình dưới. Hàm số đồng biến trên khoảng nào?',
+    prompt:
+      'Cho hàm số $y = x^3 - 3x + 1$ có bảng biến thiên như hình dưới. Hàm số đồng biến trên khoảng nào?',
     figure: { kind: 'vartable', expr: 'x^3-3x+1', fname: 'y' },
     options: [
       { key: 'A', text: '$(-1; 1)$' },
@@ -19,7 +20,8 @@ export const BANK_FIGURES: BankEntry[] = [
       { key: 'D', text: '$(-2; 2)$' },
     ],
     answer: 'B',
-    explanation: "$y' = 3x^2 - 3 > 0 \\Leftrightarrow x < -1$ hoặc $x > 1$, nên hàm số đồng biến trên $(1; +\\infty)$.",
+    explanation:
+      "$y' = 3x^2 - 3 > 0 \\Leftrightarrow x < -1$ hoặc $x > 1$, nên hàm số đồng biến trên $(1; +\\infty)$.",
     points: 0.25,
     tags: ['hàm số', 'bảng biến thiên', 'đơn điệu'],
     variable: false,
@@ -29,7 +31,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 12'],
     type: 'trac-nghiem',
-    prompt: 'Cho đồ thị hàm số $y = x^3 - 3x$ như hình dưới. Đồ thị cắt trục hoành tại bao nhiêu điểm?',
+    prompt:
+      'Cho đồ thị hàm số $y = x^3 - 3x$ như hình dưới. Đồ thị cắt trục hoành tại bao nhiêu điểm?',
     figure: { kind: 'graph', curves: ['x^3-3x'], xMin: -3, xMax: 3 },
     options: [
       { key: 'A', text: '$1$' },
@@ -38,7 +41,8 @@ export const BANK_FIGURES: BankEntry[] = [
       { key: 'D', text: '$0$' },
     ],
     answer: 'C',
-    explanation: '$x^3 - 3x = 0 \\Leftrightarrow x(x^2 - 3) = 0 \\Leftrightarrow x = 0$ hoặc $x = \\pm\\sqrt{3}$: ba giao điểm.',
+    explanation:
+      '$x^3 - 3x = 0 \\Leftrightarrow x(x^2 - 3) = 0 \\Leftrightarrow x = 0$ hoặc $x = \\pm\\sqrt{3}$: ba giao điểm.',
     points: 0.25,
     tags: ['hàm số', 'đồ thị', 'giao điểm'],
     variable: false,
@@ -48,7 +52,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt: 'Dựa vào bảng xét dấu dưới đây, tập nghiệm của bất phương trình $(x - 1)(x + 2) < 0$ là:',
+    prompt:
+      'Dựa vào bảng xét dấu dưới đây, tập nghiệm của bất phương trình $(x - 1)(x + 2) < 0$ là:',
     figure: { kind: 'signtable', expr: '(x-1)(x+2)' },
     options: [
       { key: 'A', text: '$(-2; 1)$' },
@@ -67,7 +72,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt: 'Trong mặt phẳng $Oxy$, cho hai điểm $A(1; 2)$ và $B(3; 6)$ như hình. Toạ độ trung điểm $I$ của đoạn $AB$ là:',
+    prompt:
+      'Trong mặt phẳng $Oxy$, cho hai điểm $A(1; 2)$ và $B(3; 6)$ như hình. Toạ độ trung điểm $I$ của đoạn $AB$ là:',
     figure: { kind: 'oxy', xMin: -1, xMax: 5, yMin: -1, yMax: 7, items: 'A(1; 2)\nB(3; 6)\nAB' },
     options: [
       { key: 'A', text: '$(4; 8)$' },
@@ -86,7 +92,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 9'],
     type: 'trac-nghiem',
-    prompt: 'Cho tam giác $ABC$ vuông tại $A$ như hình, có $AB = 3$ cm, $AC = 4$ cm. Độ dài cạnh $BC$ là:',
+    prompt:
+      'Cho tam giác $ABC$ vuông tại $A$ như hình, có $AB = 3$ cm, $AC = 4$ cm. Độ dài cạnh $BC$ là:',
     figure: { kind: 'geo2d', shape: 'right-triangle', names: ['A', 'B', 'C'] },
     options: [
       { key: 'A', text: '$7$ cm' },
@@ -105,7 +112,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 11'],
     type: 'trac-nghiem',
-    prompt: 'Cho hình chóp $S.ABCD$ có đáy là hình vuông, $SA$ vuông góc với mặt phẳng đáy (như hình). Đường thẳng nào vuông góc với mặt phẳng $(ABCD)$?',
+    prompt:
+      'Cho hình chóp $S.ABCD$ có đáy là hình vuông, $SA$ vuông góc với mặt phẳng đáy (như hình). Đường thẳng nào vuông góc với mặt phẳng $(ABCD)$?',
     figure: { kind: 'geo3d', shape: 'pyramid4-sa', names: ['S', 'A', 'B', 'C', 'D'] },
     options: [
       { key: 'A', text: '$SB$' },
@@ -124,8 +132,16 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt: 'Biểu đồ dưới đây cho biết điểm kiểm tra của học sinh một lớp. Có bao nhiêu học sinh đạt từ $7$ điểm trở lên?',
-    figure: { kind: 'stats', chart: 'bar', title: 'Điểm kiểm tra', xLabel: 'Điểm', yLabel: 'Số học sinh', data: '5; 6; 7; 8; 9\nSố học sinh: 2; 5; 8; 6; 4' },
+    prompt:
+      'Biểu đồ dưới đây cho biết điểm kiểm tra của học sinh một lớp. Có bao nhiêu học sinh đạt từ $7$ điểm trở lên?',
+    figure: {
+      kind: 'stats',
+      chart: 'bar',
+      title: 'Điểm kiểm tra',
+      xLabel: 'Điểm',
+      yLabel: 'Số học sinh',
+      data: '5; 6; 7; 8; 9\nSố học sinh: 2; 5; 8; 6; 4',
+    },
     options: [
       { key: 'A', text: '$18$' },
       { key: 'B', text: '$10$' },
@@ -143,7 +159,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 11'],
     type: 'trac-nghiem',
-    prompt: 'Điểm $M$ trên đường tròn lượng giác biểu diễn góc $\\dfrac{\\pi}{3}$ (như hình). Tung độ của điểm $M$ là:',
+    prompt:
+      'Điểm $M$ trên đường tròn lượng giác biểu diễn góc $\\dfrac{\\pi}{3}$ (như hình). Tung độ của điểm $M$ là:',
     figure: { kind: 'trig', angles: 'M: pi/3' },
     options: [
       { key: 'A', text: '$\\dfrac{1}{2}$' },
@@ -162,7 +179,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Toán',
     grades: ['Lớp 10'],
     type: 'trac-nghiem',
-    prompt: 'Gọi $A$ là tập học sinh thích bóng đá, $B$ là tập học sinh thích cầu lông; số học sinh mỗi miền ghi trên biểu đồ Ven. Có bao nhiêu học sinh thích ít nhất một trong hai môn?',
+    prompt:
+      'Gọi $A$ là tập học sinh thích bóng đá, $B$ là tập học sinh thích cầu lông; số học sinh mỗi miền ghi trên biểu đồ Ven. Có bao nhiêu học sinh thích ít nhất một trong hai môn?',
     figure: { kind: 'venn', sets: 'A, B', shade: 'A ∪ B', counts: 'A: 12\nAB: 8\nB: 10' },
     options: [
       { key: 'A', text: '$30$' },
@@ -181,7 +199,8 @@ export const BANK_FIGURES: BankEntry[] = [
     subject: 'Vật lí',
     grades: ['Lớp 11'],
     type: 'trac-nghiem',
-    prompt: 'Cho mạch điện như hình: nguồn $E = 12$ V, $r = 1\\ \\Omega$; $R_1 = 3\\ \\Omega$, $R_2 = 6\\ \\Omega$, $R_3 = 3\\ \\Omega$. Cường độ dòng điện qua nguồn là:',
+    prompt:
+      'Cho mạch điện như hình: nguồn $E = 12$ V, $r = 1\\ \\Omega$; $R_1 = 3\\ \\Omega$, $R_2 = 6\\ \\Omega$, $R_3 = 3\\ \\Omega$. Cường độ dòng điện qua nguồn là:',
     figure: { kind: 'circuit', text: 'nguồn E = 12 V, r = 1 Ω\nR1=3Ω - (R2=6Ω // R3=3Ω)' },
     options: [
       { key: 'A', text: '$2$ A' },
@@ -190,7 +209,8 @@ export const BANK_FIGURES: BankEntry[] = [
       { key: 'D', text: '$4$ A' },
     ],
     answer: 'A',
-    explanation: '$R_{23} = \\dfrac{6 \\cdot 3}{6 + 3} = 2\\ \\Omega$, $R_N = 3 + 2 = 5\\ \\Omega$, $I = \\dfrac{E}{R_N + r} = \\dfrac{12}{6} = 2$ A.',
+    explanation:
+      '$R_{23} = \\dfrac{6 \\cdot 3}{6 + 3} = 2\\ \\Omega$, $R_N = 3 + 2 = 5\\ \\Omega$, $I = \\dfrac{E}{R_N + r} = \\dfrac{12}{6} = 2$ A.',
     points: 0.25,
     tags: ['định luật Ohm', 'mạch điện'],
     variable: false,

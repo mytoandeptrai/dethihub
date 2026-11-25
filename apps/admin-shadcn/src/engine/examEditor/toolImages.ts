@@ -1,13 +1,14 @@
+import { toolFromRaw } from '@/engine/lib/docRewrite'
+import { prepareToolDoc } from '@/engine/lib/objects'
+import { svgDataUrl, svgToPng } from '@/engine/lib/plot'
+import { parseToolJson, renderTool, type ToolDoc, type ToolKind } from '@/engine/lib/toolSpec'
+
 /**
  * Ảnh công cụ vẽ chèn tự động (AI soạn đề, kho câu hỏi): vẽ từ cấu hình thành SVG để chèn ngay,
  * rồi `pngifyToolImages` đổi sang PNG (xuất Word không đọc SVG). Cấu hình nằm trong attr `plot`
  * nên nhấp đúp vẫn mở lại đúng công cụ.
  */
 import type { Editor, JSONContent } from '@tiptap/core'
-import { svgDataUrl, svgToPng } from '@/engine/lib/plot'
-import { parseToolJson, renderTool, type ToolDoc, type ToolKind } from '@/engine/lib/toolSpec'
-import { toolFromRaw } from '@/engine/lib/docRewrite'
-import { prepareToolDoc } from '@/engine/lib/objects'
 
 /** bề rộng mặc định (px) và chữ thay thế của ảnh công cụ trong trang đề */
 export const TOOL_DOC_IMAGE: Record<ToolKind, { width: number; alt: string }> = {
@@ -58,7 +59,12 @@ export function figureDoc(raw: unknown): ToolDoc | null {
 export function figureImageAttrs(doc: ToolDoc) {
   const look = TOOL_DOC_IMAGE[doc.kind]
   const img = renderTool(doc)
-  return { src: svgDataUrl(img.svg), alt: look.alt, width: toolImageWidth(doc.kind, img.width), plot: JSON.stringify(doc) }
+  return {
+    src: svgDataUrl(img.svg),
+    alt: look.alt,
+    width: toolImageWidth(doc.kind, img.width),
+    plot: JSON.stringify(doc),
+  }
 }
 
 /** hình có cỡ tuỳ nội dung (bảng, phương trình): giữ cỡ thật, không phóng quá mức chuẩn; hình khác dùng mức chuẩn */
@@ -70,7 +76,11 @@ export function toolImageWidth(kind: ToolKind, natural: number) {
 
 /** đoạn căn giữa chứa ảnh hình công cụ, để đặt ngay dưới câu hỏi */
 export function figureParagraph(doc: ToolDoc): JSONContent {
-  return { type: 'paragraph', attrs: { textAlign: 'center' }, content: [{ type: 'image', attrs: figureImageAttrs(doc) }] }
+  return {
+    type: 'paragraph',
+    attrs: { textAlign: 'center' },
+    content: [{ type: 'image', attrs: figureImageAttrs(doc) }],
+  }
 }
 
 /** ảnh công cụ còn ở dạng SVG → PNG, giữ nguyên attr khác */

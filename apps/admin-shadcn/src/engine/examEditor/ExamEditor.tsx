@@ -1,3 +1,17 @@
+import { Highlight } from '@tiptap/extension-highlight'
+import { Link } from '@tiptap/extension-link'
+import { Table } from '@tiptap/extension-table'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TextAlign } from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-text-style/color'
+import { FontFamily } from '@tiptap/extension-text-style/font-family'
+import { FontSize } from '@tiptap/extension-text-style/font-size'
+import { LineHeight } from '@tiptap/extension-text-style/line-height'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
 /**
  * Editor TipTap cho đề thi — dựng trang A4 thật, phân trang theo khối.
  *
@@ -11,39 +25,48 @@
  * Vì lớp giấy chỉ là hình ảnh nền, nội dung vẫn "chảy" liên tục như Word.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { EditorContent, useEditor } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import { Table } from '@tiptap/extension-table'
-import { TableRow } from '@tiptap/extension-table-row'
-import { TableCell } from '@tiptap/extension-table-cell'
-import { TableHeader } from '@tiptap/extension-table-header'
-import { TextStyle } from '@tiptap/extension-text-style'
-import { Color } from '@tiptap/extension-text-style/color'
-import { FontFamily } from '@tiptap/extension-text-style/font-family'
-import { FontSize } from '@tiptap/extension-text-style/font-size'
-import { Highlight } from '@tiptap/extension-highlight'
-import { Link } from '@tiptap/extension-link'
-import { TextAlign } from '@tiptap/extension-text-align'
-import { LineHeight } from '@tiptap/extension-text-style/line-height'
-import type { Editor, JSONContent } from '@tiptap/core'
+
+import {
+  activateInsertedBlock,
+  INSPECTOR_TEMPLATE_MIME,
+} from '@/modules/exam-inspector/lib/inspector-selection'
 import 'katex/dist/katex.min.css'
+import { ChoiceLayoutExtension, choiceColsKey, measureChoiceColumns } from './choiceLayout'
+import { createSearchPlugin } from './find'
+import { LeadImageExtension } from './leadImage'
+import { ObjectNavigation, focusBlankEditorArea, isTypingHelper } from './objectNavigation'
+import { PaginationExtension, pageGapsKey, computePagePlan } from './pagination'
 import { EXAM_MARKS, EXAM_NODES, TEXT_CONTENT_NODES, BaseParagraphNode } from './schema'
 import { BLOCK_TEMPLATE_MIME } from './templates'
-import { activateInsertedBlock, INSPECTOR_TEMPLATE_MIME } from '@/modules/exam-inspector/lib/inspector-selection'
-import { createSearchPlugin } from './find'
-import { ChoiceLayoutExtension, choiceColsKey, measureChoiceColumns } from './choiceLayout'
-import { LeadImageExtension } from './leadImage'
-import { PaginationExtension, pageGapsKey, computePagePlan } from './pagination'
-import { ObjectNavigation, focusBlankEditorArea, isTypingHelper } from './objectNavigation'
+
+import type { Editor, JSONContent } from '@tiptap/core'
 
 /** map rỗng dùng chung — tránh tạo Map mới mỗi lượt đo. */
 const EMPTY_GAPS = new Map<number, number>()
 import { DeleteObjects } from './deleteActions'
-
 import { EditorContextMenu } from './EditorContextMenu'
 import { MathEdit } from './MathEdit'
-import { A4_PORTRAIT_H, A4_PORTRAIT_W, CM, PAGE_GAP, marginsOf, pageGeometry, bandAt, type PageMargins, type PageSetup } from './pageSetup'
-export { A4_PORTRAIT_H, A4_PORTRAIT_W, CM, PAGE_GAP, marginsOf, pageGeometry, type PageMargins, type PageSetup }
+import {
+  A4_PORTRAIT_H,
+  A4_PORTRAIT_W,
+  CM,
+  PAGE_GAP,
+  marginsOf,
+  pageGeometry,
+  bandAt,
+  type PageMargins,
+  type PageSetup,
+} from './pageSetup'
+export {
+  A4_PORTRAIT_H,
+  A4_PORTRAIT_W,
+  CM,
+  PAGE_GAP,
+  marginsOf,
+  pageGeometry,
+  type PageMargins,
+  type PageSetup,
+}
 
 export interface ExamEditorProps {
   content: JSONContent
@@ -57,11 +80,19 @@ export interface ExamEditorProps {
   isReflow?: boolean
 }
 
-export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, isReflow }: ExamEditorProps) {
+export function ExamEditor({
+  content,
+  onChange,
+  onReady,
+  pageSetup,
+  readOnly,
+  isReflow,
+}: ExamEditorProps) {
   const flowRef = useRef<HTMLDivElement>(null)
   const [pageCount, setPageCount] = useState(1)
   const geo = pageGeometry(pageSetup ?? { marginCm: 2, orientation: 'portrait' })
-  const { PAGE_W, PAGE_H, MARGIN, MARGIN_TOP, MARGIN_RIGHT, MARGIN_BOTTOM, CONTENT_W, CONTENT_H } = geo
+  const { PAGE_W, PAGE_H, MARGIN, MARGIN_TOP, MARGIN_RIGHT, MARGIN_BOTTOM, CONTENT_W, CONTENT_H } =
+    geo
 
   // `useEditor` chỉ đọc options ở lần render đầu, nên callback đưa vào
   // options phải đi qua ref để không giữ closure cũ (onChange/onReady hay
@@ -208,9 +239,7 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
     const run = () => {
       raf = 0
       if (editor.isDestroyed) return
-      const questions = flow.querySelectorAll<HTMLElement>(
-        "div[data-exam-node='examQuestion']",
-      )
+      const questions = flow.querySelectorAll<HTMLElement>("div[data-exam-node='examQuestion']")
       const next = new Map<string, number>()
       questions.forEach((el) => {
         const id = el.dataset.id
@@ -332,7 +361,10 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
   const pageNumberKey = JSON.stringify(pageSetup?.pageNumber ?? null)
   useEffect(() => {
     if (!editor || editor.isDestroyed) return
-    const st = (editor.storage as unknown as Record<string, unknown>).examToc as { stride: number; pageNumber?: PageSetup['pageNumber'] }
+    const st = (editor.storage as unknown as Record<string, unknown>).examToc as {
+      stride: number
+      pageNumber?: PageSetup['pageNumber']
+    }
     st.stride = isReflow ? 0 : PAGE_H + PAGE_GAP
     st.pageNumber = pageSetup?.pageNumber
     editor.view.dispatch(editor.state.tr.setMeta('tocRefresh', true).setMeta('addToHistory', false))
@@ -386,62 +418,66 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
       {/* lớp giấy */}
       {!isReflow && (
         <div className="doc-papers" aria-hidden="true">
-        {papers.map((i) => (
-          <div
-            key={i}
-            className="doc-paper"
-            style={{
-              top: i * (PAGE_H + PAGE_GAP),
-              width: PAGE_W,
-              height: PAGE_H,
-              background: pageColor,
-              border: pageBorder ? `${pageBorder}px solid #000` : undefined,
-              boxSizing: 'border-box',
-            }}
-          >
-            {(['top', 'bottom'] as const).map((place) => {
-              const slots = bandAt(pageSetup, place, i + 1)
-              if (!slots) return null
-              return (
-                <div
-                  key={place}
-                  className="doc-page-band"
-                  style={{
-                    left: MARGIN,
-                    right: MARGIN_RIGHT,
-                    // giữa lề trên/dưới, giống đầu/chân trang Word
-                    ...(place === 'top'
-                      ? { top: Math.max(8, MARGIN_TOP / 2 - 10) }
-                      : { bottom: Math.max(8, MARGIN_BOTTOM / 2 - 10) }),
-                  }}
-                >
-                  <span>{slots.left}</span>
-                  <span>{slots.center}</span>
-                  <span>{slots.right}</span>
-                </div>
-              )
-            })}
-          </div>
-        ))}
-      </div>
+          {papers.map((i) => (
+            <div
+              key={i}
+              className="doc-paper"
+              style={{
+                top: i * (PAGE_H + PAGE_GAP),
+                width: PAGE_W,
+                height: PAGE_H,
+                background: pageColor,
+                border: pageBorder ? `${pageBorder}px solid #000` : undefined,
+                boxSizing: 'border-box',
+              }}
+            >
+              {(['top', 'bottom'] as const).map((place) => {
+                const slots = bandAt(pageSetup, place, i + 1)
+                if (!slots) return null
+                return (
+                  <div
+                    key={place}
+                    className="doc-page-band"
+                    style={{
+                      left: MARGIN,
+                      right: MARGIN_RIGHT,
+                      // giữa lề trên/dưới, giống đầu/chân trang Word
+                      ...(place === 'top'
+                        ? { top: Math.max(8, MARGIN_TOP / 2 - 10) }
+                        : { bottom: Math.max(8, MARGIN_BOTTOM / 2 - 10) }),
+                    }}
+                  >
+                    <span>{slots.left}</span>
+                    <span>{slots.center}</span>
+                    <span>{slots.right}</span>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
       )}
 
       {/* lớp nội dung — 1 editor duy nhất */}
       <div
         className="doc-flow"
         ref={flowRef}
-        style={{
-          top: isReflow ? undefined : 0,
-          left: isReflow ? undefined : 0,
-          width: isReflow ? '100%' : PAGE_W,
-          maxWidth: isReflow ? '100%' : undefined,
-          boxSizing: 'border-box',
-          padding: isReflow ? '12px 12px 60px' : `${MARGIN_TOP}px ${MARGIN_RIGHT}px ${MARGIN_BOTTOM}px ${MARGIN}px`,
-          // ngữ cảnh hình học cho CSS khối đề (khoảng cách phương án, thụt lề…)
-          '--doc-content-w': isReflow ? '100%' : `${CONTENT_W}px`,
-          '--doc-margin': isReflow ? '12px' : `${MARGIN}px`,
-          '--doc-orient': pageSetup?.orientation ?? 'portrait',
-        } as React.CSSProperties}
+        style={
+          {
+            'top': isReflow ? undefined : 0,
+            'left': isReflow ? undefined : 0,
+            'width': isReflow ? '100%' : PAGE_W,
+            'maxWidth': isReflow ? '100%' : undefined,
+            'boxSizing': 'border-box',
+            'padding': isReflow
+              ? '12px 12px 60px'
+              : `${MARGIN_TOP}px ${MARGIN_RIGHT}px ${MARGIN_BOTTOM}px ${MARGIN}px`,
+            // ngữ cảnh hình học cho CSS khối đề (khoảng cách phương án, thụt lề…)
+            '--doc-content-w': isReflow ? '100%' : `${CONTENT_W}px`,
+            '--doc-margin': isReflow ? '12px' : `${MARGIN}px`,
+            '--doc-orient': pageSetup?.orientation ?? 'portrait',
+          } as React.CSSProperties
+        }
       >
         {!readOnly && !content.content?.length && (
           <button

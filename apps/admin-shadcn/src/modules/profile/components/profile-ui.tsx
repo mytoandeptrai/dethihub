@@ -2,6 +2,7 @@
 import { Link, Navigate } from '@profile-engine'
 import { ChevronRight, FileText, LogOut, Shield } from 'lucide-react'
 
+import { FormSkeleton, LoadingRegion, PageSkeleton } from '@/components/page-skeleton'
 import {
   Avatar,
   SiteButton as Button,
@@ -13,7 +14,6 @@ import {
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { FormSkeleton, LoadingRegion, PageSkeleton } from '@/components/page-skeleton'
 import { ProfileModel } from '@/modules/profile/hooks'
 
 import type {
@@ -58,13 +58,13 @@ export function ProfileProfilePageUi(
             <IdentityCard user={user} />
             <Link
               to={appPaths.profile.uploads.href}
-              className="mt-3 flex items-center gap-3 rounded-[8px] bg-surface px-4 py-3 shadow-lift transition-colors hover:bg-paper-2"
+              className="bg-surface shadow-lift hover:bg-paper-2 mt-3 flex items-center gap-3 rounded-[8px] px-4 py-3 transition-colors"
             >
-              <FileText className="size-4 text-ink-3" />
-              <span className="flex-1 text-[14px] font-medium text-ink">
+              <FileText className="text-ink-3 size-4" />
+              <span className="text-ink flex-1 text-[14px] font-medium">
                 {t('profileCopy.m22')}
               </span>
-              <ChevronRight className="size-4 text-ink-3" />
+              <ChevronRight className="text-ink-3 size-4" />
             </Link>
           </aside>
 
@@ -90,14 +90,14 @@ export function ProfileAdminCardUi(
   if (props.viewState === 1) {
     const { me, navigate } = props
     return (
-      <section className="flex flex-wrap items-center justify-between gap-4 rounded-[8px] bg-surface p-6 shadow-lift">
+      <section className="bg-surface shadow-lift flex flex-wrap items-center justify-between gap-4 rounded-[8px] p-6">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-[6px] bg-clay text-white">
+          <div className="bg-clay flex size-10 items-center justify-center rounded-[6px] text-white">
             <Shield className="size-5" />
           </div>
           <div>
-            <h2 className="text-[16px] font-semibold text-ink">{t('profileCopy.m23')}</h2>
-            <p className="text-[13px] text-ink-3">
+            <h2 className="text-ink text-[16px] font-semibold">{t('profileCopy.m23')}</h2>
+            <p className="text-ink-3 text-[13px]">
               {t('profileCopy.m24')}
               {me.role === 'admin' ? t('profileCopy.m25') : t('profileCopy.m26')}
               {t('profileCopy.m27')}
@@ -124,14 +124,14 @@ export function ProfileIdentityCardUi(
         <Avatar
           src={user.avatar}
           name={user.name ?? user.email}
-          className="size-20 ring-4 ring-surface"
+          className="ring-surface size-20 ring-4"
           fallbackClassName="bg-clay-tint font-display text-[42px] font-semibold text-clay"
         />
 
-        <h2 className="mt-5 max-w-full truncate font-display text-subtitle font-semibold text-ink">
+        <h2 className="font-display text-subtitle text-ink mt-5 max-w-full truncate font-semibold">
           {user.name ?? t('profileCopy.m29')}
         </h2>
-        <p className="mt-1 max-w-full break-all text-[13.5px] text-ink-3">{user.email}</p>
+        <p className="text-ink-3 mt-1 max-w-full text-[13.5px] break-all">{user.email}</p>
 
         <Button
           variant="outline"
@@ -150,16 +150,16 @@ export function ProfileIdentityCardUi(
           onChange={changeAvatar}
         />
         {error ? (
-          <p role="alert" className="mt-3 text-[12.5px] font-medium text-clay-deep">
+          <p role="alert" className="text-clay-deep mt-3 text-[12.5px] font-medium">
             {error}
           </p>
         ) : null}
 
-        <div className="mt-7 w-full border-t border-line pt-5">
+        <div className="border-line mt-7 w-full border-t pt-5">
           <button
             type="button"
             onClick={onSignOut}
-            className="inline-flex items-center gap-2 text-[14px] font-semibold text-ink-3 transition-colors hover:text-clay-deep"
+            className="text-ink-3 hover:text-clay-deep inline-flex items-center gap-2 text-[14px] font-semibold transition-colors"
           >
             <LogOut className="size-4" />
             {t('profileCopy.m32')}
@@ -180,13 +180,13 @@ export function ProfileEditCardUi(
     return (
       <Card asChild className="min-w-0 rounded-xl p-5 sm:p-6">
         <form onSubmit={save} noValidate>
-          <h2 className="border-b border-line pb-4 font-display text-subtitle font-semibold text-ink">
+          <h2 className="border-line font-display text-subtitle text-ink border-b pb-4 font-semibold">
             {t('profileCopy.m33')}
           </h2>
 
           <div className="mt-7 grid gap-5 sm:grid-cols-2">
             <label className="block">
-              <span className="block text-[13px] font-semibold text-ink-2">
+              <span className="text-ink-2 block text-[13px] font-semibold">
                 {t('profileCopy.m34')}
               </span>
               <input
@@ -198,18 +198,18 @@ export function ProfileEditCardUi(
             </label>
 
             <div>
-              <span className="block text-[13px] font-semibold text-ink-2">
+              <span className="text-ink-2 block text-[13px] font-semibold">
                 {t('profileCopy.m35')}
               </span>
-              <p className="mt-1.5 truncate rounded-[6px] bg-sunken px-4 py-2.5 text-[14px] text-ink-3">
+              <p className="bg-sunken text-ink-3 mt-1.5 truncate rounded-[6px] px-4 py-2.5 text-[14px]">
                 {user.email}
               </p>
             </div>
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+          <div className="border-line mt-7 flex flex-wrap items-center justify-between gap-4 border-t pt-6">
             <p className="min-h-5 text-[13.5px]" role="status">
-              {error ? <span className="font-medium text-clay-deep">{error}</span> : null}
+              {error ? <span className="text-clay-deep font-medium">{error}</span> : null}
               {!error && notice ? <span className="text-sage">{notice}</span> : null}
             </p>
             <Button type="submit" variant="primary" disabled={busy}>
@@ -233,7 +233,7 @@ export function ProfileCreditCardUi(
     return (
       <Card asChild className="min-w-0 rounded-xl p-5 sm:p-6">
         <section>
-          <h2 className="border-b border-line pb-4 font-display text-subtitle font-semibold text-ink">
+          <h2 className="border-line font-display text-subtitle text-ink border-b pb-4 font-semibold">
             {t('profileCopy.m38')}
           </h2>
           <ProfileCreditBalanceUi {...props} />
@@ -252,31 +252,33 @@ function ProfileCreditBalanceUi({
 }: ReturnType<typeof ProfileModel.useCreditCardContainer>) {
   if (q === 'loading')
     return (
-      <LoadingRegion className="mt-6"><FormSkeleton /></LoadingRegion>
+      <LoadingRegion className="mt-6">
+        <FormSkeleton />
+      </LoadingRegion>
     )
-  if (q === 'error') return <p className="mt-6 text-[13px] text-ink-3">{t('profileCopy.m12')}</p>
+  if (q === 'error') return <p className="text-ink-3 mt-6 text-[13px]">{t('profileCopy.m12')}</p>
   if (q === 'unlimited')
     return (
       <>
-        <p className="mt-7 font-display text-[44px] font-semibold leading-none tracking-[-0.02em] text-ink">
+        <p className="font-display text-ink mt-7 text-[44px] leading-none font-semibold tracking-[-0.02em]">
           {t('profileCopy.m13')}
-          <span className="ml-2 text-[18px] font-medium text-ink-3">{t('profileCopy.m14')}</span>
+          <span className="text-ink-3 ml-2 text-[18px] font-medium">{t('profileCopy.m14')}</span>
         </p>
-        <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-clay/80" aria-hidden />
+        <div className="bg-clay/80 mt-5 h-2.5 overflow-hidden rounded-full" aria-hidden />
       </>
     )
-  if (q === null) return <p className="mt-6 text-[13px] text-ink-3">{t('profileCopy.m15')}</p>
+  if (q === null) return <p className="text-ink-3 mt-6 text-[13px]">{t('profileCopy.m15')}</p>
   return (
     <>
       <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-        <p className="font-display text-[44px] font-semibold leading-none tracking-[-0.02em] text-ink tnum">
+        <p className="font-display text-ink tnum text-[44px] leading-none font-semibold tracking-[-0.02em]">
           {fmt(left)}
-          <span className="text-[18px] font-medium text-ink-3">{t('profileCopy.m16')}</span>
+          <span className="text-ink-3 text-[18px] font-medium">{t('profileCopy.m16')}</span>
         </p>
         {canPay ? (
           <Link
             to={appPaths.pricing.href}
-            className="text-[13.5px] font-semibold text-clay hover:underline"
+            className="text-clay text-[13.5px] font-semibold hover:underline"
           >
             {t('profileCopy.m17')}
           </Link>
@@ -284,7 +286,7 @@ function ProfileCreditBalanceUi({
       </div>
       <ProgressBar pct={pct} label={t('profileCopy.m18')} />
       {q.base ? (
-        <p className="mt-3 text-[12.5px] text-ink-3">
+        <p className="text-ink-3 mt-3 text-[12.5px]">
           {t('profileCopy.m19')}
           {fmt(Math.floor(q.base / 1000))}
           {t('profileCopy.m20')}
@@ -301,30 +303,30 @@ export function ProfileCreditHistoryUi(
   if (props.viewState === 0) {
     const { rows } = props
     return (
-      <div className="mt-7 border-t border-line pt-5">
-        <h3 className="text-[14px] font-semibold text-ink">{t('profileCopy.m39')}</h3>
+      <div className="border-line mt-7 border-t pt-5">
+        <h3 className="text-ink text-[14px] font-semibold">{t('profileCopy.m39')}</h3>
         {rows === null ? (
-          <p className="mt-3 text-[13px] text-ink-3">{t('profileCopy.m11')}</p>
+          <p className="text-ink-3 mt-3 text-[13px]">{t('profileCopy.m11')}</p>
         ) : rows === 'error' ? (
-          <p className="mt-3 text-[13px] text-ink-3">{t('profileCopy.m40')}</p>
+          <p className="text-ink-3 mt-3 text-[13px]">{t('profileCopy.m40')}</p>
         ) : rows.length === 0 ? (
-          <p className="mt-3 text-[13px] text-ink-3">{t('profileCopy.m41')}</p>
+          <p className="text-ink-3 mt-3 text-[13px]">{t('profileCopy.m41')}</p>
         ) : (
-          <ul className="mt-2 divide-y divide-line">
+          <ul className="divide-line mt-2 divide-y">
             {rows.map((r) => (
               <li key={r.id} className="flex items-center justify-between gap-4 py-2.5">
                 <div className="min-w-0">
-                  <p className="text-[14px] text-ink">
+                  <p className="text-ink text-[14px]">
                     {EVENT_LABELS[r.kind] ?? t('profileCopy.m42')}
                   </p>
-                  <p className="text-[12px] text-ink-3">
+                  <p className="text-ink-3 text-[12px]">
                     {new Date(r.created_at).toLocaleString('vi-VN', {
                       dateStyle: 'short',
                       timeStyle: 'short',
                     })}
                   </p>
                 </div>
-                <span className="shrink-0 text-[14px] font-semibold text-emerald-700 tnum">
+                <span className="tnum shrink-0 text-[14px] font-semibold text-emerald-700">
                   {t('profileCopy.m43')}
                   {fmt(Math.floor(r.tokens / 1000))}
                   {t('profileCopy.m44')}

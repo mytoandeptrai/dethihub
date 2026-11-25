@@ -16,7 +16,13 @@ import {
 
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { Link, Tabs, TabsContent, TabsList, TabsTrigger } from '@/modules/public-pages/components/public-primitives-ui'
+import {
+  Link,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/modules/public-pages/components/public-primitives-ui'
 
 import { GraphIllustrationUi, SlidesIllustrationUi } from './illustrations-ui'
 import { SectionUi } from './section-ui'

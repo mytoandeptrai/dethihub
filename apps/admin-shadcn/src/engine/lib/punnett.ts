@@ -92,11 +92,16 @@ const PHENO_COLORS = [
  * ------------------------------------------------------------------ */
 
 const SUP_MAP: Record<string, string> = {
-  'ᴬ': 'A', 'ᵃ': 'a',
-  'ᴮ': 'B', 'ᵇ': 'b',
-  'ᴰ': 'D', 'ᵈ': 'd',
-  'ᴹ': 'M', 'ᵐ': 'm',
-  '⁺': '+', '⁻': '-',
+  'ᴬ': 'A',
+  'ᵃ': 'a',
+  'ᴮ': 'B',
+  'ᵇ': 'b',
+  'ᴰ': 'D',
+  'ᵈ': 'd',
+  'ᴹ': 'M',
+  'ᵐ': 'm',
+  '⁺': '+',
+  '⁻': '-',
 }
 
 /** Chuyển ký tự superscript unicode hoặc ^A thành dạng chuẩn X^A */
@@ -119,7 +124,16 @@ export function formatGenotypeToSvg(raw: string): string {
 /** Chuyển dạng X^A thành Unicode superscript để hiển thị text thuần nếu cần */
 export function formatGenotypeToUnicode(raw: string): string {
   const map: Record<string, string> = {
-    A: 'ᴬ', a: 'ᵃ', B: 'ᴮ', b: 'ᵇ', D: 'ᴰ', d: 'ᵈ', M: 'ᴹ', m: 'ᵐ', '+': '⁺', '-': '⁻',
+    'A': 'ᴬ',
+    'a': 'ᵃ',
+    'B': 'ᴮ',
+    'b': 'ᵇ',
+    'D': 'ᴰ',
+    'd': 'ᵈ',
+    'M': 'ᴹ',
+    'm': 'ᵐ',
+    '+': '⁺',
+    '-': '⁻',
   }
   return raw.replace(/X\^([A-Za-z0-9+-]+)/g, (_, allele) => {
     return 'X' + [...allele].map((c) => map[c] ?? c).join('')
@@ -245,12 +259,23 @@ function parseParentGenotype(rawInput: string, forceGender?: 'female' | 'male'):
       idx++
       if (idx < fullText.length && fullText[idx] === '^') {
         idx++
-        while (idx < fullText.length && /[A-Za-z0-9+-]/.test(fullText[idx]) && fullText[idx] !== 'X' && fullText[idx] !== 'Y') {
+        while (
+          idx < fullText.length &&
+          /[A-Za-z0-9+-]/.test(fullText[idx]) &&
+          fullText[idx] !== 'X' &&
+          fullText[idx] !== 'Y'
+        ) {
           allele1 += fullText[idx]
           idx++
         }
       }
-      if (!allele1 && idx < fullText.length && /[A-Za-z]/.test(fullText[idx]) && fullText[idx] !== 'X' && fullText[idx] !== 'Y') {
+      if (
+        !allele1 &&
+        idx < fullText.length &&
+        /[A-Za-z]/.test(fullText[idx]) &&
+        fullText[idx] !== 'X' &&
+        fullText[idx] !== 'Y'
+      ) {
         allele1 = fullText[idx]
         idx++
       }
@@ -262,17 +287,33 @@ function parseParentGenotype(rawInput: string, forceGender?: 'female' | 'male'):
         idx++
         if (idx < fullText.length && fullText[idx] === '^') {
           idx++
-          while (idx < fullText.length && /[A-Za-z0-9+-]/.test(fullText[idx]) && fullText[idx] !== 'X' && fullText[idx] !== 'Y') {
+          while (
+            idx < fullText.length &&
+            /[A-Za-z0-9+-]/.test(fullText[idx]) &&
+            fullText[idx] !== 'X' &&
+            fullText[idx] !== 'Y'
+          ) {
             allele2 += fullText[idx]
             idx++
           }
         }
-        if (!allele2 && idx < fullText.length && /[A-Za-z]/.test(fullText[idx]) && fullText[idx] !== 'X' && fullText[idx] !== 'Y') {
+        if (
+          !allele2 &&
+          idx < fullText.length &&
+          /[A-Za-z]/.test(fullText[idx]) &&
+          fullText[idx] !== 'X' &&
+          fullText[idx] !== 'Y'
+        ) {
           allele2 = fullText[idx]
           idx++
         }
         const geneName = (allele1 || allele2 || 'X').toUpperCase()[0] || 'X'
-        sexLinked = { kind: 'XX', gene: geneName, x1Allele: allele1 || 'A', x2Allele: allele2 || 'a' }
+        sexLinked = {
+          kind: 'XX',
+          gene: geneName,
+          x1Allele: allele1 || 'A',
+          x2Allele: allele2 || 'a',
+        }
         detectedGender = 'female'
       } else if (idx < fullText.length && fullText[idx] === 'Y') {
         // XY (đực)
@@ -281,31 +322,43 @@ function parseParentGenotype(rawInput: string, forceGender?: 'female' | 'male'):
         sexLinked = { kind: 'XY', gene: geneName, x1Allele: allele1 || 'A' }
         detectedGender = 'male'
       } else {
-        throw new Error(`NST giới tính '${fullText.slice(Math.max(0, idx - 4), idx + 2)}' thiếu chiếc tương đồng (phải là XX hoặc XY).`)
+        throw new Error(
+          `NST giới tính '${fullText.slice(Math.max(0, idx - 4), idx + 2)}' thiếu chiếc tương đồng (phải là XX hoặc XY).`,
+        )
       }
       continue
     }
 
     if (fullText[idx] === 'Y') {
-      throw new Error(`Ký hiệu '${fullText[idx]}' đứng đơn độc. Kiểu gen đực trên NST giới tính phải viết là X^...Y (ví dụ: XAY hoặc XaY).`)
+      throw new Error(
+        `Ký hiệu '${fullText[idx]}' đứng đơn độc. Kiểu gen đực trên NST giới tính phải viết là X^...Y (ví dụ: XAY hoặc XaY).`,
+      )
     }
 
     // 2. Cặp gen trên NST thường (2 alen cùng một chữ cái: Aa, AA, aa, Bb...)
     const ch1 = fullText[idx]
     if (!/[A-Za-z]/.test(ch1)) {
-      throw new Error(`Ký hiệu lạ '${ch1}' trong kiểu gen '${rawInput}'. Chỉ dùng chữ cái (Aa, Bb...) hoặc NST giới tính (X, Y).`)
+      throw new Error(
+        `Ký hiệu lạ '${ch1}' trong kiểu gen '${rawInput}'. Chỉ dùng chữ cái (Aa, Bb...) hoặc NST giới tính (X, Y).`,
+      )
     }
 
     if (idx + 1 >= fullText.length) {
-      throw new Error(`Gen '${ch1}' bị thiếu alen thứ hai. Sinh vật lưỡng bội cần 2 alen cho mỗi gen (ví dụ: ${ch1}${ch1.toLowerCase()} hoặc ${ch1}${ch1.toUpperCase()}).`)
+      throw new Error(
+        `Gen '${ch1}' bị thiếu alen thứ hai. Sinh vật lưỡng bội cần 2 alen cho mỗi gen (ví dụ: ${ch1}${ch1.toLowerCase()} hoặc ${ch1}${ch1.toUpperCase()}).`,
+      )
     }
 
     const ch2 = fullText[idx + 1]
     if (!/[A-Za-z]/.test(ch2)) {
-      throw new Error(`Ký hiệu lạ hoặc không hợp lệ: '${ch2}' trong cặp gen '${ch1}${ch2}'. Chỉ dùng chữ cái (Aa, Bb...) hoặc NST giới tính (X, Y).`)
+      throw new Error(
+        `Ký hiệu lạ hoặc không hợp lệ: '${ch2}' trong cặp gen '${ch1}${ch2}'. Chỉ dùng chữ cái (Aa, Bb...) hoặc NST giới tính (X, Y).`,
+      )
     }
     if (ch1.toLowerCase() !== ch2.toLowerCase()) {
-      throw new Error(`Cặp alen không khớp: '${ch1}${ch2}'. Mỗi gen phải gồm 2 alen cùng chữ cái (ví dụ: ${ch1.toUpperCase()}${ch1.toLowerCase()}).`)
+      throw new Error(
+        `Cặp alen không khớp: '${ch1}${ch2}'. Mỗi gen phải gồm 2 alen cùng chữ cái (ví dụ: ${ch1.toUpperCase()}${ch1.toLowerCase()}).`,
+      )
     }
 
     const gene = ch1.toUpperCase()
@@ -359,7 +412,9 @@ export function splitCrossString(crossStr: string): [string, string] {
   }
 
   if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
-    throw new Error('Cần nhập phép lai giữa hai bên, cách nhau bằng dấu × hoặc x (ví dụ: AaBb × Aabb hoặc XAXa × XaY).')
+    throw new Error(
+      'Cần nhập phép lai giữa hai bên, cách nhau bằng dấu × hoặc x (ví dụ: AaBb × Aabb hoặc XAXa × XaY).',
+    )
   }
 
   return [parts[0].trim(), parts[1].trim()]
@@ -416,7 +471,9 @@ export function parsePunnettCross(spec: PunnettSpec): ParsedCrossResult {
 
   const totalGenes = motherGenes.length
   if (totalGenes > 3) {
-    throw new Error(`Tối đa 3 cặp gen (khung tối đa 8 × 8). Phép lai đang có ${totalGenes} cặp gen.`)
+    throw new Error(
+      `Tối đa 3 cặp gen (khung tối đa 8 × 8). Phép lai đang có ${totalGenes} cặp gen.`,
+    )
   }
 
   // Kiểm tra cặp gen có khớp không
@@ -428,12 +485,16 @@ export function parsePunnettCross(spec: PunnettSpec): ParsedCrossResult {
     const msg: string[] = []
     if (diff1.length) msg.push(`bên mẹ có gen [${diff1.join(', ')}]`)
     if (diff2.length) msg.push(`bên bố có gen [${diff2.join(', ')}]`)
-    throw new Error(`Cặp gen không khớp giữa hai bên: ${msg.join(', ')}. Cả hai bên phải có cùng các cặp gen.`)
+    throw new Error(
+      `Cặp gen không khớp giữa hai bên: ${msg.join(', ')}. Cả hai bên phải có cùng các cặp gen.`,
+    )
   }
 
   if (mother.sexLinked && father.sexLinked) {
     if (mother.sexLinked.gene !== father.sexLinked.gene) {
-      throw new Error(`Gen trên NST giới tính X không khớp: mẹ là gen '${mother.sexLinked.gene}', bố là gen '${father.sexLinked.gene}'.`)
+      throw new Error(
+        `Gen trên NST giới tính X không khớp: mẹ là gen '${mother.sexLinked.gene}', bố là gen '${father.sexLinked.gene}'.`,
+      )
     }
   }
 
@@ -454,13 +515,14 @@ export function parsePunnettCross(spec: PunnettSpec): ParsedCrossResult {
   const genesList = motherGenes.filter((g) => g !== 'X')
   if (isSexLinked) genesList.push('X')
 
-  const { grid, genotypeRatios, phenotypeRatios, femalePhenotypeRatios, malePhenotypeRatios } = buildPunnettGrid(
-    motherGametes,
-    fatherGametes,
-    isSexLinked,
-    mother.sexLinked?.gene || 'A',
-    traitsMap,
-  )
+  const { grid, genotypeRatios, phenotypeRatios, femalePhenotypeRatios, malePhenotypeRatios } =
+    buildPunnettGrid(
+      motherGametes,
+      fatherGametes,
+      isSexLinked,
+      mother.sexLinked?.gene || 'A',
+      traitsMap,
+    )
 
   return {
     mother,
@@ -490,7 +552,14 @@ function formatFraction(n: number, d: number): string {
 
 export function generateGametes(parent: ParentParsed): Gamete[] {
   // Mỗi locus sinh ra mảng { allele, prob, sexChrom? }
-  const locusChoices: Array<Array<{ key: string; allele: string; prob: number; sexChrom?: { kind: 'X' | 'Y'; allele?: string } }>> = []
+  const locusChoices: Array<
+    Array<{
+      key: string
+      allele: string
+      prob: number
+      sexChrom?: { kind: 'X' | 'Y'; allele?: string }
+    }>
+  > = []
 
   // NST thường
   for (const g of parent.autosomal) {
@@ -514,7 +583,9 @@ export function generateGametes(parent: ParentParsed): Gamete[] {
       const a1 = sl.x1Allele
       const a2 = sl.x2Allele ?? sl.x1Allele
       if (a1 === a2) {
-        locusChoices.push([{ key: 'X', allele: `X^${a1}`, prob: 1, sexChrom: { kind: 'X', allele: a1 } }])
+        locusChoices.push([
+          { key: 'X', allele: `X^${a1}`, prob: 1, sexChrom: { kind: 'X', allele: a1 } },
+        ])
       } else {
         // X^A trước, X^a sau
         const upper = a1 < a2 ? a1 : a2
@@ -527,16 +598,23 @@ export function generateGametes(parent: ParentParsed): Gamete[] {
     } else {
       // XY: 1/2 X^A, 1/2 Y
       locusChoices.push([
-        { key: 'X', allele: `X^${sl.x1Allele}`, prob: 0.5, sexChrom: { kind: 'X', allele: sl.x1Allele } },
+        {
+          key: 'X',
+          allele: `X^${sl.x1Allele}`,
+          prob: 0.5,
+          sexChrom: { kind: 'X', allele: sl.x1Allele },
+        },
         { key: 'X', allele: 'Y', prob: 0.5, sexChrom: { kind: 'Y' } },
       ])
     }
   }
 
   // Tích đề-các (Cartesian product) các lựa chọn
-  let combinations: Array<{ alleles: Record<string, string>; prob: number; sexChrom?: { kind: 'X' | 'Y'; allele?: string } }> = [
-    { alleles: {}, prob: 1 },
-  ]
+  let combinations: Array<{
+    alleles: Record<string, string>
+    prob: number
+    sexChrom?: { kind: 'X' | 'Y'; allele?: string }
+  }> = [{ alleles: {}, prob: 1 }]
 
   for (const choices of locusChoices) {
     const next: typeof combinations = []
@@ -665,7 +743,12 @@ function determinePhenotype(
         nameParts.push(phenos?.[0] || `${g} (trội)`)
       } else if (isHetero) {
         keyParts.push(`${g}(trung gian)`)
-        nameParts.push((phenos?.length === 3 && phenos[1]) || (phenos ? `trung gian (${phenos[0]}-${phenos[phenos.length - 1]})` : `${g} (trung gian)`))
+        nameParts.push(
+          (phenos?.length === 3 && phenos[1]) ||
+            (phenos
+              ? `trung gian (${phenos[0]}-${phenos[phenos.length - 1]})`
+              : `${g} (trung gian)`),
+        )
       } else {
         keyParts.push(`${g}(lặn)`)
         nameParts.push(phenos ? phenos[phenos.length - 1] : `${g.toLowerCase()} (lặn)`)
@@ -717,7 +800,9 @@ function determinePhenotype(
       const a2 = fChrom?.allele || ''
       const hasUpper = a1 === a1.toUpperCase() || a2 === a2.toUpperCase()
       const isHomoUpper = a1 === a1.toUpperCase() && a2 === a2.toUpperCase()
-      const isHetero = (a1 === a1.toUpperCase() && a2 === a2.toLowerCase()) || (a1 === a1.toLowerCase() && a2 === a2.toUpperCase())
+      const isHetero =
+        (a1 === a1.toUpperCase() && a2 === a2.toLowerCase()) ||
+        (a1 === a1.toLowerCase() && a2 === a2.toUpperCase())
       const dom = trait?.dominance ?? 'complete'
 
       if (dom === 'incomplete') {
@@ -778,7 +863,14 @@ function buildPunnettGrid(
     for (let c = 0; c < motherGametes.length; c++) {
       const fGam = motherGametes[c]
       const { genotype, svgGenotype, isFemale } = normalizeGenotype(mGam, fGam, isSexLinked)
-      const { phenotypeKey, phenotypeName } = determinePhenotype(genotype, mGam, fGam, isSexLinked, sexGene, traitsMap)
+      const { phenotypeKey, phenotypeName } = determinePhenotype(
+        genotype,
+        mGam,
+        fGam,
+        isSexLinked,
+        sexGene,
+        traitsMap,
+      )
 
       if (!phenoColorMap.has(phenotypeKey)) {
         phenoColorMap.set(phenotypeKey, nextColorIdx % PHENO_COLORS.length)
@@ -815,12 +907,20 @@ function buildPunnettGrid(
       // Đếm theo giới tính (cho liên kết X)
       if (isSexLinked) {
         if (isFemale) {
-          const feEntry = femalePhenoCounts.get(phenotypeKey) ?? { label: phenotypeName.replace(/^cái\s*/i, ''), count: 0, prob: 0 }
+          const feEntry = femalePhenoCounts.get(phenotypeKey) ?? {
+            label: phenotypeName.replace(/^cái\s*/i, ''),
+            count: 0,
+            prob: 0,
+          }
           feEntry.count += 1
           feEntry.prob += cellProb
           femalePhenoCounts.set(phenotypeKey, feEntry)
         } else {
-          const maEntry = malePhenoCounts.get(phenotypeKey) ?? { label: phenotypeName.replace(/^đực\s*/i, ''), count: 0, prob: 0 }
+          const maEntry = malePhenoCounts.get(phenotypeKey) ?? {
+            label: phenotypeName.replace(/^đực\s*/i, ''),
+            count: 0,
+            prob: 0,
+          }
           maEntry.count += 1
           maEntry.prob += cellProb
           malePhenoCounts.set(phenotypeKey, maEntry)
@@ -916,8 +1016,12 @@ export function exportPunnettToText(spec: PunnettSpec): string {
   lines.push(`P: ${res.mother.label} ${res.mother.raw} × ${res.father.label} ${res.father.raw}`)
 
   // Giao tử
-  const mGamStr = res.motherGametes.map((g) => (g.ratioStr === '1' ? g.label : `${g.ratioStr} ${g.label}`)).join(', ')
-  const fGamStr = res.fatherGametes.map((g) => (g.ratioStr === '1' ? g.label : `${g.ratioStr} ${g.label}`)).join(', ')
+  const mGamStr = res.motherGametes
+    .map((g) => (g.ratioStr === '1' ? g.label : `${g.ratioStr} ${g.label}`))
+    .join(', ')
+  const fGamStr = res.fatherGametes
+    .map((g) => (g.ratioStr === '1' ? g.label : `${g.ratioStr} ${g.label}`))
+    .join(', ')
   lines.push(`GP: ${res.mother.label} (${mGamStr}) × ${res.father.label} (${fGamStr})`)
 
   // Khung Punnett dạng bảng chữ
@@ -926,7 +1030,10 @@ export function exportPunnettToText(spec: PunnettSpec): string {
   lines.push(colHeaders.join('\t| '))
   for (let r = 0; r < res.grid.length; r++) {
     const row = res.grid[r]
-    const rowCells = [res.fatherGametes[r].label, ...row.map((c) => (spec.blankGrid ? '___' : c.genotype))]
+    const rowCells = [
+      res.fatherGametes[r].label,
+      ...row.map((c) => (spec.blankGrid ? '___' : c.genotype)),
+    ]
     lines.push(rowCells.join('\t| '))
   }
 
@@ -950,7 +1057,10 @@ export function exportPunnettToText(spec: PunnettSpec): string {
  * Vẽ SVG Bảng lai Punnett
  * ------------------------------------------------------------------ */
 
-export function renderPunnettSvg(spec: PunnettSpec, desc: string): { svg: string; width: number; height: number } {
+export function renderPunnettSvg(
+  spec: PunnettSpec,
+  desc: string,
+): { svg: string; width: number; height: number } {
   const res = parsePunnettCross(spec)
 
   const showGametes = spec.showGametes ?? true
@@ -995,10 +1105,18 @@ export function renderPunnettSvg(spec: PunnettSpec, desc: string): { svg: string
   // 2. Dòng Giao tử GP
   if (showGametes) {
     const mGamSvg = res.motherGametes
-      .map((g) => (g.ratioStr === '1' ? g.svgLabel : `<tspan font-size="88%">${g.ratioStr}</tspan> ${g.svgLabel}`))
+      .map((g) =>
+        g.ratioStr === '1'
+          ? g.svgLabel
+          : `<tspan font-size="88%">${g.ratioStr}</tspan> ${g.svgLabel}`,
+      )
       .join(', ')
     const fGamSvg = res.fatherGametes
-      .map((g) => (g.ratioStr === '1' ? g.svgLabel : `<tspan font-size="88%">${g.ratioStr}</tspan> ${g.svgLabel}`))
+      .map((g) =>
+        g.ratioStr === '1'
+          ? g.svgLabel
+          : `<tspan font-size="88%">${g.ratioStr}</tspan> ${g.svgLabel}`,
+      )
       .join(', ')
 
     svgElements.push(
@@ -1048,7 +1166,10 @@ export function renderPunnettSvg(spec: PunnettSpec, desc: string): { svg: string
       for (let c = 0; c < numCols; c++) {
         const cx = tableX + headerColW + c * colW
         const cell = res.grid[r][c]
-        const colStyle = colorByPhenotype && !blankGrid ? PHENO_COLORS[cell.colorIndex] : { bg: '#ffffff', text: '#111827' }
+        const colStyle =
+          colorByPhenotype && !blankGrid
+            ? PHENO_COLORS[cell.colorIndex]
+            : { bg: '#ffffff', text: '#111827' }
 
         svgElements.push(
           `<rect x="${cx}" y="${ry}" width="${colW}" height="${rowH}" fill="${colStyle.bg}" stroke="#334155" stroke-width="1.2" />`,
@@ -1070,7 +1191,9 @@ export function renderPunnettSvg(spec: PunnettSpec, desc: string): { svg: string
     const maxGenoPerLine = 5
     for (let i = 0; i < res.genotypeRatios.length; i += maxGenoPerLine) {
       const chunk = res.genotypeRatios.slice(i, i + maxGenoPerLine)
-      const chunkStr = chunk.map((it) => `${it.ratioNum} ${formatGenotypeToSvg(it.label)}`).join(' : ')
+      const chunkStr = chunk
+        .map((it) => `${it.ratioNum} ${formatGenotypeToSvg(it.label)}`)
+        .join(' : ')
       const hasMore = i + maxGenoPerLine < res.genotypeRatios.length
       if (i === 0) {
         svgElements.push(

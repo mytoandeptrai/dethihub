@@ -1,14 +1,22 @@
-import { forwardRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import {
+  forwardRef,
+  useState,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from 'react'
+
 import { cn } from '@/engine/lib/utils'
-import { Button as BaseButton } from './button'
+
 import { Badge as BaseBadge } from './badge'
+import { Button as BaseButton } from './button'
 import { Card as BaseCard } from './card'
 import { Checkbox as BaseCheckbox } from './checkbox'
 import { Input, inputStyles } from './input'
 import { Label } from './label'
-import { Skeleton } from './skeleton'
 import { Separator } from './separator'
+import { Skeleton } from './skeleton'
 
 type Variant = 'primary' | 'soft' | 'ghost' | 'outline' | 'clay' | 'quiet'
 type Size = 'sm' | 'md' | 'lg' | 'icon'
@@ -51,11 +59,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       variant={VARIANTS[variant]}
       size={BASE_SIZES[size]}
-      className={cn(
-        'select-none active:scale-[0.97]',
-        SIZES[size],
-        className,
-      )}
+      className={cn('select-none active:scale-[0.97]', SIZES[size], className)}
       {...props}
     />
   )
@@ -77,11 +81,7 @@ export function Badge({
     honey: 'border-honey/15 bg-honey-soft text-honey',
     outline: 'border-line bg-white text-ink-3',
   }
-  return (
-    <BaseBadge className={cn(tones[tone], className)}>
-      {children}
-    </BaseBadge>
-  )
+  return <BaseBadge className={cn(tones[tone], className)}>{children}</BaseBadge>
 }
 
 export function Card({
@@ -112,10 +112,10 @@ export function Field({
   className?: string
 }) {
   return (
-    <Label className={cn('block font-normal leading-normal', className)}>
+    <Label className={cn('block leading-normal font-normal', className)}>
       <span className="eyebrow mb-2 block">{label}</span>
       {children}
-      {hint ? <span className="mt-1.5 block text-[12px] text-ink-3">{hint}</span> : null}
+      {hint ? <span className="text-ink-3 mt-1.5 block text-[12px]">{hint}</span> : null}
     </Label>
   )
 }
@@ -128,7 +128,7 @@ export function SkeletonCard({ variant = 'doc' }: { variant?: 'doc' | 'exam' }) 
   return (
     <BaseCard
       aria-hidden="true"
-      className="relative flex flex-col overflow-hidden rounded-xl border border-line/80 bg-white p-5 shadow-soft"
+      className="border-line/80 shadow-soft relative flex flex-col overflow-hidden rounded-xl border bg-white p-5"
     >
       {variant === 'exam' ? (
         <Skeleton className="-mx-5 -mt-5 mb-5 h-[120px] rounded-none" />
@@ -143,8 +143,10 @@ export function SkeletonCard({ variant = 'doc' }: { variant?: 'doc' | 'exam' }) 
       <Skeleton className="mt-3 h-3 w-2/5" />
       <Skeleton className="mt-auto h-9 w-full" />
       <span
-        className="anim-shimmer pointer-events-none absolute inset-y-0 left-0 w-1/3 motion-reduce:animation-none"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)' }}
+        className="anim-shimmer motion-reduce:animation-none pointer-events-none absolute inset-y-0 left-0 w-1/3"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)',
+        }}
       />
     </BaseCard>
   )
@@ -161,17 +163,17 @@ export function Checkbox({
   className,
   'aria-label': ariaLabel,
 }: {
-  checked: boolean
-  onChange: (checked: boolean) => void
-  children?: ReactNode
-  disabled?: boolean
-  className?: string
+  'checked': boolean
+  'onChange': (checked: boolean) => void
+  'children'?: ReactNode
+  'disabled'?: boolean
+  'className'?: string
   'aria-label'?: string
 }) {
   return (
     <label
       className={cn(
-        'inline-flex select-none items-center gap-2',
+        'inline-flex items-center gap-2 select-none',
         disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer',
         className,
       )}
@@ -190,7 +192,10 @@ export function Checkbox({
 export const inputClass = inputStyles
 
 /** ô mật khẩu có nút con mắt: mắt nhắm khi đang ẩn, mắt mở khi đang hiện */
-export function PasswordInput({ className, ...props }: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>) {
+export function PasswordInput({
+  className,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>) {
   const [show, setShow] = useState(false)
   return (
     <div className="relative">
@@ -201,7 +206,7 @@ export function PasswordInput({ className, ...props }: Omit<InputHTMLAttributes<
         aria-label={show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
         aria-pressed={show}
         data-tip={show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-        className="absolute inset-y-0 right-0 grid w-10 place-items-center text-ink-3 hover:text-ink"
+        className="text-ink-3 hover:text-ink absolute inset-y-0 right-0 grid w-10 place-items-center"
       >
         {show ? <Eye className="size-[18px]" /> : <EyeOff className="size-[18px]" />}
       </button>
@@ -211,14 +216,14 @@ export function PasswordInput({ className, ...props }: Omit<InputHTMLAttributes<
 
 export const selectClass =
   inputClass +
-  ' cursor-pointer appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2364748b\' stroke-width=\'2.2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")] bg-[right_1rem_center] bg-no-repeat pr-10'
+  " cursor-pointer appearance-none bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")] bg-[right_1rem_center] bg-no-repeat pr-10"
 
 /** same look, but sizes to its own content — for filter toolbars */
 export const selectAutoClass = selectClass.replace('w-full ', 'w-auto min-w-[9rem] ')
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded-md border border-line bg-sunken px-1.5 py-0.5 font-mono text-[11px] text-ink-3 shadow-soft">
+    <kbd className="border-line bg-sunken text-ink-3 shadow-soft rounded-md border px-1.5 py-0.5 font-mono text-[11px]">
       {children}
     </kbd>
   )
@@ -255,18 +260,18 @@ export function EmptyState({
   return (
     <BaseCard
       className={cn(
-        'flex flex-col items-center justify-center rounded-2xl border border-dashed border-line-2 bg-white px-8 py-16 text-center',
+        'border-line-2 flex flex-col items-center justify-center rounded-2xl border border-dashed bg-white px-8 py-16 text-center',
         className,
       )}
     >
       {icon ? (
-        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-surface text-ink-3 shadow-soft">
+        <div className="bg-surface text-ink-3 shadow-soft mb-4 flex size-14 items-center justify-center rounded-full">
           {icon}
         </div>
       ) : null}
-      <p className="font-display text-[21px] font-semibold tracking-[-0.01em] text-ink">{title}</p>
+      <p className="font-display text-ink text-[21px] font-semibold tracking-[-0.01em]">{title}</p>
       {description ? (
-        <p className="mt-2 max-w-[44ch] text-[13.5px] leading-relaxed text-ink-3">{description}</p>
+        <p className="text-ink-3 mt-2 max-w-[44ch] text-[13.5px] leading-relaxed">{description}</p>
       ) : null}
       {action ? <div className="mt-6">{action}</div> : null}
     </BaseCard>

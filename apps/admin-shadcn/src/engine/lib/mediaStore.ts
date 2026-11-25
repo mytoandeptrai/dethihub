@@ -3,13 +3,16 @@
  * thay vì base64 nặng trong localStorage. Ảnh cũ dạng data URL vẫn chạy bình thường.
  */
 import { uploadImageFile } from '@/apis/storage/requests'
-import { currentSession } from '@/engine/lib/auth-session'
 import { apiFetch } from '@/engine/lib/apiFetch'
+import { currentSession } from '@/engine/lib/auth-session'
 
 /** Đẩy data URL lên R2, trả về đường dẫn. Chuỗi không phải data URL thì giữ nguyên. */
-export async function uploadImage(src: string, auth?: { token: string; signal: AbortSignal }): Promise<string> {
+export async function uploadImage(
+  src: string,
+  auth?: { token: string; signal: AbortSignal },
+): Promise<string> {
   if (!src.startsWith('data:image/')) return src
-  if (!auth && !await currentSession()) return src
+  if (!auth && !(await currentSession())) return src
   const blob = await (await fetch(src, { signal: auth?.signal })).blob()
   const file = new File([blob], 'image.' + (blob.type.split('/')[1] || 'png'), { type: blob.type })
   const body = await uploadImageFile(file, auth?.signal)

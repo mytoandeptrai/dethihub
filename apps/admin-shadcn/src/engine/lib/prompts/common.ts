@@ -2,7 +2,8 @@
  * Chữ prompt dùng chung nhiều tác vụ AI (soạn đề, slide…). Module thuần: server ghép prompt từ đây.
  */
 
-export const CHAT_MARKDOWN = '\nKhi trả lời hỏi đáp bằng văn bản, có thể dùng Markdown (đậm, danh sách, bảng, code), công thức vẫn viết trong $…$.'
+export const CHAT_MARKDOWN =
+  '\nKhi trả lời hỏi đáp bằng văn bản, có thể dùng Markdown (đậm, danh sách, bảng, code), công thức vẫn viết trong $…$.'
 
 /** luật đưa vào system prompt: thiếu thông tin cốt lõi thì hỏi, không soạn bừa */
 export const ASK_RULE =
@@ -16,4 +17,5 @@ export const ASK_RULE =
   'Yêu cầu đã đủ rõ, hoặc là lệnh sửa/thêm trên tài liệu đang có, hoặc chỉ là câu hỏi thường thì làm/trả lời luôn, không hỏi.'
 
 /** phần suy nghĩ hiện thẳng cho giáo viên xem → bắt suy nghĩ bằng tiếng Việt (model mặc định nghĩ tiếng Anh) */
-export const THINK_VI = '\n\nNGÔN NGỮ SUY NGHĨ: toàn bộ phần suy nghĩ (reasoning) viết bằng tiếng Việt, câu ngắn, như giáo viên tự nhẩm. Không viết tiếng Anh.'
+export const THINK_VI =
+  '\n\nNGÔN NGỮ SUY NGHĨ: toàn bộ phần suy nghĩ (reasoning) viết bằng tiếng Việt, câu ngắn, như giáo viên tự nhẩm. Không viết tiếng Anh.'

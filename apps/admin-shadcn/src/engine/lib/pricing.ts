@@ -49,8 +49,12 @@ export function applyPricing(c: PricingConfig) {
 let loading: Promise<void> | null = null
 /** Đọc bảng giá admin đã lưu (một lần mỗi phiên); lỗi hoặc chưa có thì giữ mặc định. */
 export function loadPricing(): Promise<void> {
-  loading ??= import('@/apis/billing/requests').then(({ billingGetPricing }) => billingGetPricing({}))
-    .then((value) => { if (value.packs.length) applyPricing(value) }).catch(() => {})
+  loading ??= import('@/apis/billing/requests')
+    .then(({ billingGetPricing }) => billingGetPricing({}))
+    .then((value) => {
+      if (value.packs.length) applyPricing(value)
+    })
+    .catch(() => {})
   return loading
 }
 

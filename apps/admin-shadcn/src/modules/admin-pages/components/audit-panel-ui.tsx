@@ -1,8 +1,8 @@
 'use client'
-import { TableRowsSkeleton } from '@/components/page-skeleton'
 import { lib_adminApi_AUDIT_LABEL as AUDIT_LABEL } from '@admin-pages-engine'
 import { History, RefreshCw } from 'lucide-react'
 
+import { TableRowsSkeleton } from '@/components/page-skeleton'
 import {
   SiteBadge as Badge,
   SiteButton as Button,

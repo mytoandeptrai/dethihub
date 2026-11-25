@@ -1,9 +1,9 @@
 'use client'
-import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import { dialog } from '@engine-dialogs'
 import { cn } from '@workspace/ui/lib/utils'
 import { RefreshCw, Search, Wallet, X } from 'lucide-react'
 
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import {
   SiteBadge as Badge,
   SiteButton as Button,
@@ -14,7 +14,6 @@ import {
   PageHeader,
   Pager,
   Segmented,
-
   Toolbar,
 } from '@/components/product-ui'
 import { t } from '@/i18n/translate'
@@ -354,7 +353,9 @@ export function PaymentsPanelPaymentsPanelUi(
           </div>
         ) : tab === 'pricing' ? (
           pricingError === null ? (
-            <LoadingRegion><FormSkeleton /></LoadingRegion>
+            <LoadingRegion>
+              <FormSkeleton />
+            </LoadingRegion>
           ) : (
             <div className="flex flex-wrap items-center gap-3">
               <p role="alert" className="text-clay text-[13px]">

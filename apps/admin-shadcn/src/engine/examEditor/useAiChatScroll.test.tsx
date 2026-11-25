@@ -9,27 +9,42 @@ let resize = () => {}
 
 function Harness({ pending = false, actions = true, id = 'reply' }) {
   const { scrollRef, onScroll } = useAiChatScroll([{ id, pending }])
-  return <div role="log" onScroll={onScroll} ref={(chat) => {
-    scrollRef.current = chat
-    if (!chat) return
-    Object.defineProperties(chat, {
-      scrollHeight: { configurable: true, get: () => height },
-      clientHeight: { configurable: true, value: 300 },
-    })
-    chat.getBoundingClientRect = () => ({ top: 100, bottom: 400 }) as DOMRect
-    const row = chat.querySelector('[data-ai-approval]')
-    if (row) row.getBoundingClientRect = () => ({ bottom: 100 + actionBottom - chat.scrollTop }) as DOMRect
-  }}><div>{actions ? <div data-ai-approval>Áp dụng</div> : null}</div></div>
+  return (
+    <div
+      role="log"
+      onScroll={onScroll}
+      ref={(chat) => {
+        scrollRef.current = chat
+        if (!chat) return
+        Object.defineProperties(chat, {
+          scrollHeight: { configurable: true, get: () => height },
+          clientHeight: { configurable: true, value: 300 },
+        })
+        chat.getBoundingClientRect = () => ({ top: 100, bottom: 400 }) as DOMRect
+        const row = chat.querySelector('[data-ai-approval]')
+        if (row)
+          row.getBoundingClientRect = () =>
+            ({ bottom: 100 + actionBottom - chat.scrollTop }) as DOMRect
+      }}
+    >
+      <div>{actions ? <div data-ai-approval>Áp dụng</div> : null}</div>
+    </div>
+  )
 }
 
 beforeEach(() => {
   height = 900
   actionBottom = 720
-  vi.stubGlobal('ResizeObserver', class {
-    constructor(callback: () => void) { resize = callback }
-    observe() {}
-    disconnect() {}
-  })
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(callback: () => void) {
+        resize = callback
+      }
+      observe() {}
+      disconnect() {}
+    },
+  )
 })
 
 describe('ai chat scrolling', () => {
@@ -39,7 +54,10 @@ describe('ai chat scrolling', () => {
     expect(chat.scrollTop).toBe(600)
     rerender(<Harness />)
     expect(chat.scrollTop).toBe(420)
-    act(() => { actionBottom = 760; resize() })
+    act(() => {
+      actionBottom = 760
+      resize()
+    })
     expect(chat.scrollTop).toBe(460)
   })
 
@@ -60,11 +78,14 @@ describe('ai chat scrolling', () => {
     expect(chat.scrollTop).toBe(1200)
   })
 
-  it.each([0, 10000])('clamps scrolling to the real content bounds for action offset %s', (offset) => {
-    actionBottom = offset
-    render(<Harness />)
-    expect(screen.getByRole('log').scrollTop).toBe(offset === 0 ? 0 : 600)
-  })
+  it.each([0, 10000])(
+    'clamps scrolling to the real content bounds for action offset %s',
+    (offset) => {
+      actionBottom = offset
+      render(<Harness />)
+      expect(screen.getByRole('log').scrollTop).toBe(offset === 0 ? 0 : 600)
+    },
+  )
 
   it('handles empty content and follows normal chat without approval controls', () => {
     height = 0

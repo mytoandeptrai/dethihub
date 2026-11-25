@@ -1,3 +1,13 @@
+import { autoAnimate } from './slideAnim'
+import { pickSlideAsset, type SlideAssetId } from './slideAssets'
+import { PHOTO_CREDIT_FILL, photoScrimFill } from './slideContrast'
+import { DECOR_ANCHORS, decorKitById } from './slideDecor'
+import { slideFontStack } from './slideFonts'
+import { GRAPHIC_INK, graphicById, isGraphicId } from './slideGraphics'
+import { fitFontSize, singleLineSize } from './slideMeasure'
+import { textBoxHeight } from './slideText'
+import { contrastRatio, mixHex, normalizeTheme, readableTextOn } from './slideTheme'
+
 /**
  * Layout engine cho slide: catalog bố cục + dựng `SlideElement[]` từ nội dung.
  *
@@ -7,15 +17,6 @@
  * hardcode palette.
  */
 import type { DeckTheme, Slide, SlideElement, SlideTone } from '@/engine/store/docs'
-import { autoAnimate } from './slideAnim'
-import { textBoxHeight } from './slideText'
-import { slideFontStack } from './slideFonts'
-import { fitFontSize, singleLineSize } from './slideMeasure'
-import { PHOTO_CREDIT_FILL, photoScrimFill } from './slideContrast'
-import { GRAPHIC_INK, graphicById, isGraphicId } from './slideGraphics'
-import { DECOR_ANCHORS, decorKitById } from './slideDecor'
-import { pickSlideAsset, type SlideAssetId } from './slideAssets'
-import { contrastRatio, mixHex, normalizeTheme, readableTextOn } from './slideTheme'
 
 export type SlideLayoutId =
   | 'title'
@@ -54,11 +55,24 @@ export interface SlideStat {
 }
 
 export const isEditorialLayout = (id: string): boolean =>
-  id === 'bignum' || id === 'photo-full' || id === 'photo-compare' || id === 'bars' ||
-  id === 'rules' || id === 'editorial-text' || id === 'manifesto'
+  id === 'bignum' ||
+  id === 'photo-full' ||
+  id === 'photo-compare' ||
+  id === 'bars' ||
+  id === 'rules' ||
+  id === 'editorial-text' ||
+  id === 'manifesto'
 
 /** Bố cục dùng được trong chế độ Chuyên nghiệp: không thẻ hộp, không icon trong khung, không hoạ tiết. */
-export const PRO_LAYOUT_IDS = ['photo-full', 'manifesto', 'editorial-text', 'rules', 'bignum', 'bars', 'photo-compare'] as const
+export const PRO_LAYOUT_IDS = [
+  'photo-full',
+  'manifesto',
+  'editorial-text',
+  'rules',
+  'bignum',
+  'bars',
+  'photo-compare',
+] as const
 
 export interface SlideBar {
   label: string
@@ -249,19 +263,22 @@ export const SLIDE_LAYOUTS: SlideLayoutDef[] = [
   {
     id: 'rules',
     name: 'Danh sách kẻ dòng',
-    description: 'Tiêu đề và 3–5 hàng ngăn bằng đường kẻ mảnh: mốc/nhãn ngắn bên trái (stats.value), nội dung bên phải (stats.label).',
+    description:
+      'Tiêu đề và 3–5 hàng ngăn bằng đường kẻ mảnh: mốc/nhãn ngắn bên trái (stats.value), nội dung bên phải (stats.label).',
     fields: ['kicker', 'title', 'stats'],
   },
   {
     id: 'editorial-text',
     name: 'Chữ biên tập',
-    description: 'Tiêu đề lớn bên trái, vài đoạn chữ ngắn bên phải ngăn bằng đường kẻ đứng; không thẻ, không icon.',
+    description:
+      'Tiêu đề lớn bên trái, vài đoạn chữ ngắn bên phải ngăn bằng đường kẻ đứng; không thẻ, không icon.',
     fields: ['kicker', 'title', 'body', 'bullets'],
   },
   {
     id: 'manifesto',
     name: 'Câu chủ đề',
-    description: 'Một câu rất lớn trên nền mực đen: mở bài, luận điểm, trích dẫn (author = nguồn), lời kết.',
+    description:
+      'Một câu rất lớn trên nền mực đen: mở bài, luận điểm, trích dẫn (author = nguồn), lời kết.',
     fields: ['kicker', 'body', 'author'],
   },
   {
@@ -279,7 +296,8 @@ export const SLIDE_LAYOUTS: SlideLayoutDef[] = [
   {
     id: 'quiz',
     name: 'Câu hỏi',
-    description: 'Câu hỏi + 2–4 phương án, đáp án đúng được tô màu, kèm thanh "Đáp án" có giải thích. Nền dịu.',
+    description:
+      'Câu hỏi + 2–4 phương án, đáp án đúng được tô màu, kèm thanh "Đáp án" có giải thích. Nền dịu.',
     fields: ['kicker', 'question', 'options', 'answer', 'explanation'],
   },
   {
@@ -321,8 +339,10 @@ export function isTone(value: unknown): value is SlideTone {
 /** Tông mặc định theo layout (title/section nền nhấn, quote/quiz/closing nền dịu). */
 export function defaultTone(layoutId: string): SlideTone {
   const id: SlideLayoutId = isLayoutId(layoutId) ? layoutId : 'bullets'
-  if (id === 'title' || id === 'section' || id === 'statement' || id === 'manifesto') return 'accent'
-  if (id === 'quote' || id === 'quiz' || id === 'closing' || id === 'agenda' || id === 'hook') return 'soft'
+  if (id === 'title' || id === 'section' || id === 'statement' || id === 'manifesto')
+    return 'accent'
+  if (id === 'quote' || id === 'quiz' || id === 'closing' || id === 'agenda' || id === 'hook')
+    return 'soft'
   return 'theme'
 }
 
@@ -364,9 +384,23 @@ function legible(color: string, bgs: string[], fg: string): string {
 function paletteOf(theme: ReturnType<typeof normalizeTheme>, tone: SlideTone): LayoutPalette {
   const onAccent = readableTextOn(theme.accent)
   const base = {
-    displayFont: theme.fonts.heading === 'Be Vietnam Pro' ? 'Arial Narrow, Arial' : theme.fonts.heading,
-    text: (id: string, value: string | undefined, box: Box, style: Partial<SlideElement>, minScale?: number) =>
-      textEl(id, value, box, style, minScale, style.variant === 'body' ? theme.fonts.body : theme.fonts.heading),
+    displayFont:
+      theme.fonts.heading === 'Be Vietnam Pro' ? 'Arial Narrow, Arial' : theme.fonts.heading,
+    text: (
+      id: string,
+      value: string | undefined,
+      box: Box,
+      style: Partial<SlideElement>,
+      minScale?: number,
+    ) =>
+      textEl(
+        id,
+        value,
+        box,
+        style,
+        minScale,
+        style.variant === 'body' ? theme.fonts.body : theme.fonts.heading,
+      ),
     tone,
     fg: theme.fg,
     accent: theme.accent,
@@ -381,13 +415,23 @@ function paletteOf(theme: ReturnType<typeof normalizeTheme>, tone: SlideTone): L
   // accent chỉ chiếm diện tích nhỏ (vạch, badge), không tô cả khối chữ.
   const pick0 =
     tone === 'accent'
-      ? { background: mixHex(theme.bg, theme.accent, theme.dark ? 0.2 : 0.07), surface: theme.bg, panelMix: theme.dark ? 0.18 : 0.14 }
+      ? {
+          background: mixHex(theme.bg, theme.accent, theme.dark ? 0.2 : 0.07),
+          surface: theme.bg,
+          panelMix: theme.dark ? 0.18 : 0.14,
+        }
       : tone === 'soft'
         ? { background: theme.surface, surface: theme.bg, panelMix: theme.dark ? 0.18 : 0.14 }
         : { background: theme.bg, surface: theme.surface, panelMix: theme.dark ? 0.18 : 0.12 }
   // Theme Chuyên nghiệp: tông "accent" là nền mực đen, chữ màu giấy.
   const proDark = !!theme.pro && tone === 'accent'
-  const pick = proDark ? { background: theme.ink ?? '#161513', surface: mixHex(theme.ink ?? '#161513', theme.bg, 0.08), panelMix: 0.1 } : pick0
+  const pick = proDark
+    ? {
+        background: theme.ink ?? '#161513',
+        surface: mixHex(theme.ink ?? '#161513', theme.bg, 0.08),
+        panelMix: 0.1,
+      }
+    : pick0
   const fgc = proDark ? theme.bg : theme.fg
   const accentc = proDark ? mixHex(theme.accent, '#ffffff', 0.28) : theme.accent
   const panel = mixHex(pick.background, theme.accent, pick.panelMix)
@@ -512,7 +556,15 @@ function graphicEl(id: string, graphicId: string, box: Box, ink: string): SlideE
 }
 
 /** Asset trang trí (`orn-*`): đặt theo bề rộng, chiều cao suy từ tỉ lệ thật của hình trên khung 16:9. */
-function ornament(id: string, ornId: string, x: number, y: number, w: number, ink: string, centerY = false): SlideElement | null {
+function ornament(
+  id: string,
+  ornId: string,
+  x: number,
+  y: number,
+  w: number,
+  ink: string,
+  centerY = false,
+): SlideElement | null {
   const ratio = graphicById(ornId)?.ratio
   if (!ratio) return null
   const h = (w * 16) / (9 * ratio)
@@ -524,7 +576,14 @@ function ornament(id: string, ornId: string, x: number, y: number, w: number, in
  * Thẻ số 1–5 (pastel + nét tối `GRAPHIC_INK`): chỉ đặt khi nền `bg` đủ sáng để nét đọc được,
  * ngược lại trả null để caller dùng chấm/huy hiệu theo theme.
  */
-function numberTag(id: string, n: number, bg: string, x: number, cy: number, w: number): SlideElement | null {
+function numberTag(
+  id: string,
+  n: number,
+  bg: string,
+  x: number,
+  cy: number,
+  w: number,
+): SlideElement | null {
   if (n < 1 || n > 5 || contrastRatio(bg, GRAPHIC_INK) < 4.5) return null
   return ornament(id, `orn-the-so-${n}`, x, cy, w, GRAPHIC_INK, true)
 }
@@ -542,12 +601,17 @@ function graphicPlate(id: string, graphicId: string, box: Box, p: LayoutPalette)
   const insetY = inset * (16 / 9)
   return [
     { ...shapeEl(`${id}-plate`, box, GRAPHIC_PLATE, 'round'), radius: Math.min(p.radius, 18) },
-    graphicEl(id, graphicId, {
-      x: box.x + inset,
-      y: box.y + insetY,
-      w: box.w - inset * 2,
-      h: box.h - insetY * 2,
-    }, GRAPHIC_INK),
+    graphicEl(
+      id,
+      graphicId,
+      {
+        x: box.x + inset,
+        y: box.y + insetY,
+        w: box.w - inset * 2,
+        h: box.h - insetY * 2,
+      },
+      GRAPHIC_INK,
+    ),
   ]
 }
 
@@ -557,7 +621,10 @@ const overlaps = (a: Box, b: Box, pad = 0.6): boolean =>
 /** Slide nhiều chữ thì để trống, trang trí chỉ làm rối. */
 function textHeavy(content: SlideLayoutContent): boolean {
   const lists = [content.bullets, content.items, content.steps, content.left, content.right]
-  const chars = lists.reduce((sum, list) => sum + (list ?? []).join('').length, content.body?.length ?? 0)
+  const chars = lists.reduce(
+    (sum, list) => sum + (list ?? []).join('').length,
+    content.body?.length ?? 0,
+  )
   return chars > 320
 }
 
@@ -566,7 +633,12 @@ function textHeavy(content: SlideLayoutContent): boolean {
  * Có bộ thì thay hoạ tiết mặc định (`decor-N`) của bố cục; vị trí nào vướng phần tử khác
  * (vd tiêu đề dài, hình chính) thì bỏ vị trí đó chứ không dời đi chỗ khác.
  */
-function withKitDecor(id: SlideLayoutId, els: SlideElement[], content: SlideLayoutContent, p: LayoutPalette): SlideElement[] {
+function withKitDecor(
+  id: SlideLayoutId,
+  els: SlideElement[],
+  content: SlideLayoutContent,
+  p: LayoutPalette,
+): SlideElement[] {
   const kit = decorKitById(content.decorKit)
   if (!kit) return els
   const base = els.filter((el) => !/^decor-\d+$/.test(el.id))
@@ -585,7 +657,12 @@ function withKitDecor(id: SlideLayoutId, els: SlideElement[], content: SlideLayo
     const box =
       typeof anchor.at === 'object'
         ? { ...anchor.at, w, h }
-        : { x: anchor.at[1] === 'l' ? mx : 100 - mx - w, y: anchor.at[0] === 't' ? my : 100 - my - h, w, h }
+        : {
+            x: anchor.at[1] === 'l' ? mx : 100 - mx - w,
+            y: anchor.at[0] === 't' ? my : 100 - my - h,
+            w,
+            h,
+          }
     if (blockers.some((el) => overlaps(box, el))) return
     out.push({ ...graphicEl(`decor-kit-${i + 1}`, graphic.id, box, p.ink), decor: true })
   })
@@ -626,10 +703,20 @@ function titleEls(
   const size = sizes.find((s) => need(s) <= box.h) ?? sizes[sizes.length - 1]
   const h = Math.min(box.h, Math.max(4, need(size)))
   return compact([
-    p.text('title', text, { ...box, h }, {
-      variant: 'title', fontSize: size, fontWeight: 700, textColor: color,
-    }),
-    rule ? ornament('title-rule', 'orn-ke-song-ngan', box.x, box.y + h + 1.25, 10, p.accent, true) : null,
+    p.text(
+      'title',
+      text,
+      { ...box, h },
+      {
+        variant: 'title',
+        fontSize: size,
+        fontWeight: 700,
+        textColor: color,
+      },
+    ),
+    rule
+      ? ornament('title-rule', 'orn-ke-song-ngan', box.x, box.y + h + 1.25, 10, p.accent, true)
+      : null,
   ])
 }
 
@@ -645,7 +732,9 @@ const linesOf = (text?: string): string[] =>
 const NUMBERED_LINE = /^(bước|buoc|step)\s*\d+\s*[:.)\-–]|^\d+\s*[.)]/i
 /** Các ý đã tự đánh số ("Bước 1: …", "2. …") thì bỏ chấm đầu dòng cho khỏi thừa. */
 const bulletText = (items: string[]): string =>
-  items.every((item) => NUMBERED_LINE.test(item)) ? items.join('\n') : items.map((item) => `• ${item}`).join('\n')
+  items.every((item) => NUMBERED_LINE.test(item))
+    ? items.join('\n')
+    : items.map((item) => `• ${item}`).join('\n')
 
 const suffixOf = (id: string): number => Number(id.match(/(\d+)/)?.[1] ?? 0)
 
@@ -673,25 +762,69 @@ function composeTitle(p: LayoutPalette, content: SlideLayoutContent): SlideEleme
     shapeEl('hero-panel', { x: 67, y: 20, w: 26, h: 46.2 }, p.accent, 'ellipse'),
     // Ảnh AI (sinh nền sau khi slide đã hiện) thay hình có sẵn: ảnh cắt tròn trong vòng accent.
     ...(content.image
-      ? [{ id: 'hero-image', type: 'image' as const, shape: 'ellipse' as const, src: content.image, x: 69, y: 23.5, w: 22, h: 39.1 }]
-      : graphic
       ? [
-          shapeEl('hero-graphic-plate', { x: 70, y: 25.3, w: 20, h: 35.6 }, GRAPHIC_PLATE, 'ellipse'),
-          graphicEl('hero-graphic', graphic, { x: 73.5, y: 31.5, w: 13, h: 23.1 }, GRAPHIC_INK),
+          {
+            id: 'hero-image',
+            type: 'image' as const,
+            shape: 'ellipse' as const,
+            src: content.image,
+            x: 69,
+            y: 23.5,
+            w: 22,
+            h: 39.1,
+          },
         ]
-      : [iconEl('hero-icon', pickSlideAsset(`${content.title ?? ''} ${content.kicker ?? ''}`) ?? 'idea', { x: 73, y: 30.65, w: 14, h: 24.9 }, p.onAccent)]),
-    p.tone === 'accent'
-      ? shapeEl('accent-band', { x: 0, y: 0, w: 100, h: 1.4 }, p.accent)
-      : null,
-    p.text('kicker', content.kicker, { x: 9, y: 25, w: 56, h: 6.5 }, {
-      variant: 'body', fontSize: 1.8, fontWeight: 700, textColor: p.ink,
-    }),
-    p.text('title', content.title, { x: 9, y, w: 58, h: 30 }, {
-      variant: 'title', fontSize: 5.3, fontWeight: 700, textColor: p.fg,
-    }),
-    p.text('subtitle', content.subtitle, { x: 9, y: y + 34, w: 54, h: 17 }, {
-      variant: 'body', fontSize: 2.4, textColor: p.muted,
-    }),
+      : graphic
+        ? [
+            shapeEl(
+              'hero-graphic-plate',
+              { x: 70, y: 25.3, w: 20, h: 35.6 },
+              GRAPHIC_PLATE,
+              'ellipse',
+            ),
+            graphicEl('hero-graphic', graphic, { x: 73.5, y: 31.5, w: 13, h: 23.1 }, GRAPHIC_INK),
+          ]
+        : [
+            iconEl(
+              'hero-icon',
+              pickSlideAsset(`${content.title ?? ''} ${content.kicker ?? ''}`) ?? 'idea',
+              { x: 73, y: 30.65, w: 14, h: 24.9 },
+              p.onAccent,
+            ),
+          ]),
+    p.tone === 'accent' ? shapeEl('accent-band', { x: 0, y: 0, w: 100, h: 1.4 }, p.accent) : null,
+    p.text(
+      'kicker',
+      content.kicker,
+      { x: 9, y: 25, w: 56, h: 6.5 },
+      {
+        variant: 'body',
+        fontSize: 1.8,
+        fontWeight: 700,
+        textColor: p.ink,
+      },
+    ),
+    p.text(
+      'title',
+      content.title,
+      { x: 9, y, w: 58, h: 30 },
+      {
+        variant: 'title',
+        fontSize: 5.3,
+        fontWeight: 700,
+        textColor: p.fg,
+      },
+    ),
+    p.text(
+      'subtitle',
+      content.subtitle,
+      { x: 9, y: y + 34, w: 54, h: 17 },
+      {
+        variant: 'body',
+        fontSize: 2.4,
+        textColor: p.muted,
+      },
+    ),
   ])
 }
 
@@ -706,44 +839,93 @@ function composeSection(p: LayoutPalette, content: SlideLayoutContent): SlideEle
   const graphic = chosenGraphic(content)
   return compact([
     shapeEl('section-panel', { x: 0, y: 0, w: 34, h: 100 }, p.accent),
-    p.text('kicker', kicker, { x: 5, y: 27, w: 24, h: kickerH }, {
-      variant: 'body', fontSize: 1.7, fontWeight: 700, textColor: p.onAccent,
-    }),
-    ...titleEls(p, content.title, { x: 5, y: titleY, w: 25, h: 68 - titleY }, [4.1, 3.6, 3.2, 2.8, 2.5], false, p.onAccent),
+    p.text(
+      'kicker',
+      kicker,
+      { x: 5, y: 27, w: 24, h: kickerH },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        fontWeight: 700,
+        textColor: p.onAccent,
+      },
+    ),
+    ...titleEls(
+      p,
+      content.title,
+      { x: 5, y: titleY, w: 25, h: 68 - titleY },
+      [4.1, 3.6, 3.2, 2.8, 2.5],
+      false,
+      p.onAccent,
+    ),
     ornament('section-rule', 'orn-ke-song-ngan', 5, 70.45, 10, p.onAccent, true),
     // có đồ hoạ: phụ đề co lại, hình tròn nền nhạt bên phải (cùng kiểu huy hiệu ở bìa)
     ...(graphic
       ? [
-          shapeEl('section-graphic-plate', { x: 72, y: 32.2, w: 20, h: 35.6 }, GRAPHIC_PLATE, 'ellipse'),
+          shapeEl(
+            'section-graphic-plate',
+            { x: 72, y: 32.2, w: 20, h: 35.6 },
+            GRAPHIC_PLATE,
+            'ellipse',
+          ),
           graphicEl('section-graphic', graphic, { x: 75.5, y: 38.45, w: 13, h: 23.1 }, GRAPHIC_INK),
         ]
       : []),
-    p.text('subtitle', content.subtitle, { x: 42, y: 40, w: graphic ? 27 : 48, h: 20 }, {
-      variant: 'body', fontSize: 2.6, textColor: p.fg, valign: 'middle',
-    }),
+    p.text(
+      'subtitle',
+      content.subtitle,
+      { x: 42, y: 40, w: graphic ? 27 : 48, h: 20 },
+      {
+        variant: 'body',
+        fontSize: 2.6,
+        textColor: p.fg,
+        valign: 'middle',
+      },
+    ),
   ])
 }
 
 function composeStatement(p: LayoutPalette, content: SlideLayoutContent): SlideElement[] {
-  const text =
-    content.body?.trim() ||
-    content.quote?.trim() ||
-    cleanList(content.bullets).join(' ')
+  const text = content.body?.trim() || content.quote?.trim() || cleanList(content.bullets).join(' ')
   if (!text) return []
   return compact([
     ornament('decor-1', 'orn-nhanh-hoa-goc', 88, 3, 8, p.ink),
     ornament('decor-2', 'orn-canh-hoa-roi', 4, 76, 9, p.ink),
-    p.text('kicker', content.kicker, { x: 14, y: 18, w: 76, h: 6 }, {
-      variant: 'body', fontSize: 1.7, fontWeight: 600, textColor: p.ink,
-    }),
+    p.text(
+      'kicker',
+      content.kicker,
+      { x: 14, y: 18, w: 76, h: 6 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        fontWeight: 600,
+        textColor: p.ink,
+      },
+    ),
     // Câu dài (> 90 ký tự) hạ cỡ để vẫn là một khối gọn thay vì tràn hộp.
-    p.text('body', text, { x: 14, y: 27, w: 76, h: 42 }, {
-      variant: 'title', fontSize: text.length > 90 ? 3.7 : 4.6, fontWeight: 600, textColor: p.fg,
-    }),
+    p.text(
+      'body',
+      text,
+      { x: 14, y: 27, w: 76, h: 42 },
+      {
+        variant: 'title',
+        fontSize: text.length > 90 ? 3.7 : 4.6,
+        fontWeight: 600,
+        textColor: p.fg,
+      },
+    ),
     shapeEl('rule', { x: 14, y: 73, w: 12, h: 0.7 }, p.accent),
-    p.text('author', content.author, { x: 14, y: 77, w: 76, h: 8 }, {
-      variant: 'body', fontSize: 1.8, fontWeight: 600, textColor: p.muted,
-    }),
+    p.text(
+      'author',
+      content.author,
+      { x: 14, y: 77, w: 76, h: 8 },
+      {
+        variant: 'body',
+        fontSize: 1.8,
+        fontWeight: 600,
+        textColor: p.muted,
+      },
+    ),
   ])
 }
 
@@ -755,26 +937,54 @@ function composeBullets(p: LayoutPalette, content: SlideLayoutContent): SlideEle
   const size = listSize(lines.length, text)
   const graphic = chosenGraphic(content)
   // không có kicker thì tiêu đề được nhích lên và cao hơn → 2 dòng vẫn giữ cỡ lớn
-  const headerBox: Box = content.kicker?.trim() ? { x: 8, y: 15, w: 84, h: 15 } : { x: 8, y: 10, w: 84, h: 20 }
+  const headerBox: Box = content.kicker?.trim()
+    ? { x: 8, y: 15, w: 84, h: 15 }
+    : { x: 8, y: 10, w: 84, h: 20 }
   const header = titleEls(p, content.title, headerBox, [4.2, 3.8, 3.4, 3.1, 2.8], true)
   // Vùng nội dung bắt đầu dưới tiêu đề/vạch (đã đo), không còn y cố định.
   const regionTop = Math.max(33, bottomOf(header) + 3)
   const regionH = 96 - regionTop
   // Có hình khớp nghĩa → cột phải cao bằng panel chữ; không có → panel chữ rộng hết cỡ (không để icon lạc quẻ).
   const textW = graphic ? 56 : 78
-  const boxH = Math.min(regionH - 6, Math.max(24, textBoxHeight(text, textW, size, 1.4, { weight: 500 }) * 1.3))
+  const boxH = Math.min(
+    regionH - 6,
+    Math.max(24, textBoxHeight(text, textW, size, 1.4, { weight: 500 }) * 1.3),
+  )
   const top = regionTop + (regionH - boxH) / 2
   return compact([
-    shapeEl('content-panel', { x: 7, y: top - 3, w: graphic ? 66 : 86, h: boxH + 6 }, p.panel, 'round'),
+    shapeEl(
+      'content-panel',
+      { x: 7, y: top - 3, w: graphic ? 66 : 86, h: boxH + 6 },
+      p.panel,
+      'round',
+    ),
     shapeEl('accent-rail', { x: 5.6, y: top, w: 0.9, h: boxH }, p.accent),
-    ...(graphic ? graphicPlate('bullet-graphic', graphic, { x: 75, y: top - 3, w: 18, h: boxH + 6 }, p) : []),
-    p.text('kicker', content.kicker, { x: 8, y: 9, w: 84, h: 6 }, {
-      variant: 'body', fontSize: 1.7, fontWeight: 600, textColor: p.ink,
-    }),
+    ...(graphic
+      ? graphicPlate('bullet-graphic', graphic, { x: 75, y: top - 3, w: 18, h: boxH + 6 }, p)
+      : []),
+    p.text(
+      'kicker',
+      content.kicker,
+      { x: 8, y: 9, w: 84, h: 6 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        fontWeight: 600,
+        textColor: p.ink,
+      },
+    ),
     ...header,
-    p.text('bullets', text, { x: 8, y: top, w: textW, h: boxH }, {
-      variant: 'body', fontSize: size, textColor: p.fg, valign: 'middle',
-    }),
+    p.text(
+      'bullets',
+      text,
+      { x: 8, y: top, w: textW, h: boxH },
+      {
+        variant: 'body',
+        fontSize: size,
+        textColor: p.fg,
+        valign: 'middle',
+      },
+    ),
   ])
 }
 
@@ -783,7 +993,9 @@ function composeBullets(p: LayoutPalette, content: SlideLayoutContent): SlideEle
  * một "**" mỗi bên và lộ dấu sao ra chữ. Nhãn vốn đã in đậm nên bỏ cặp ** quanh nhãn.
  */
 function unboldLabel(item: string): string {
-  return item.replace(/^(\s*)\*\*([^*\n:]{1,44}):\*\*/, '$1$2:').replace(/^(\s*)\*\*([^*\n:]{1,44})\*\*\s*:/, '$1$2:')
+  return item
+    .replace(/^(\s*)\*\*([^*\n:]{1,44}):\*\*/, '$1$2:')
+    .replace(/^(\s*)\*\*([^*\n:]{1,44})\*\*\s*:/, '$1$2:')
 }
 
 /** "Nhãn: mô tả" trong một mục thẻ → tiêu đề ngắn + phần mô tả. */
@@ -840,25 +1052,73 @@ function composeCards(p: LayoutPalette, content: SlideLayoutContent): SlideEleme
         : { x: x + 2.5, y: y + 14, w: cardW - 5, h: cardH - 16 }
       const font =
         [2.5, 2.3, 2.1, 1.95, 1.85].find(
-          (size) => !body || textBoxHeight(body, bodyBox.w, size, 1.45, { weight: 400 }) <= bodyBox.h,
+          (size) =>
+            !body || textBoxHeight(body, bodyBox.w, size, 1.45, { weight: 400 }) <= bodyBox.h,
         ) ?? 1.8
       return [
-        { id: `card-${index + 1}-panel`, type: 'shape', shape: 'round', fill: p.surface, shadow: p.shadow !== 'none', radius: p.radius, border: p.border, borderColor: p.borderColor, x, y, w: cardW, h: cardH } as SlideElement,
-        shapeEl(`card-${index + 1}-badge`, { x: x + 2, y: y + 2, w: badgeW, h: badgeH }, p.accent, 'ellipse'),
-        p.text(`card-${index + 1}-index`, String(index + 1).padStart(2, '0'), {
-          x: x + 2, y: y + 2, w: badgeW, h: badgeH,
-        }, {
-          variant: 'body', fontSize: 1.9, fontWeight: 700, textColor: p.onAccent,
-          align: 'center', valign: 'middle',
-        }),
-        p.text(`card-${index + 1}-heading`, heading, { x: x + 10.5, y: y + 2.5, w: cardW - 12.5 - (asset ? iconW + 1 : 0), h: 11 }, {
-          variant: 'title', fontSize: heading.length > 24 ? 2.1 : 2.5, fontWeight: 700, textColor: p.fg,
-        }),
+        {
+          id: `card-${index + 1}-panel`,
+          type: 'shape',
+          shape: 'round',
+          fill: p.surface,
+          shadow: p.shadow !== 'none',
+          radius: p.radius,
+          border: p.border,
+          borderColor: p.borderColor,
+          x,
+          y,
+          w: cardW,
+          h: cardH,
+        } as SlideElement,
+        shapeEl(
+          `card-${index + 1}-badge`,
+          { x: x + 2, y: y + 2, w: badgeW, h: badgeH },
+          p.accent,
+          'ellipse',
+        ),
+        p.text(
+          `card-${index + 1}-index`,
+          String(index + 1).padStart(2, '0'),
+          {
+            x: x + 2,
+            y: y + 2,
+            w: badgeW,
+            h: badgeH,
+          },
+          {
+            variant: 'body',
+            fontSize: 1.9,
+            fontWeight: 700,
+            textColor: p.onAccent,
+            align: 'center',
+            valign: 'middle',
+          },
+        ),
+        p.text(
+          `card-${index + 1}-heading`,
+          heading,
+          { x: x + 10.5, y: y + 2.5, w: cardW - 12.5 - (asset ? iconW + 1 : 0), h: 11 },
+          {
+            variant: 'title',
+            fontSize: heading.length > 24 ? 2.1 : 2.5,
+            fontWeight: 700,
+            textColor: p.fg,
+          },
+        ),
         asset
-          ? iconEl(`card-${index + 1}-icon`, asset, { x: x + cardW - iconW - 2, y: y + 2.5, w: iconW, h: 12 }, p.accent)
+          ? iconEl(
+              `card-${index + 1}-icon`,
+              asset,
+              { x: x + cardW - iconW - 2, y: y + 2.5, w: iconW, h: 12 },
+              p.accent,
+            )
           : null,
         p.text(`card-${index + 1}`, body, bodyBox, {
-          variant: 'body', fontSize: font, fontWeight: 400, textColor: p.fg, ...(solo ? { valign: 'middle' as const } : {}),
+          variant: 'body',
+          fontSize: font,
+          fontWeight: 400,
+          textColor: p.fg,
+          ...(solo ? { valign: 'middle' as const } : {}),
         }),
       ]
     }
@@ -889,31 +1149,59 @@ function composeCards(p: LayoutPalette, content: SlideLayoutContent): SlideEleme
     return [
       panel,
       shapeEl(`card-${index + 1}-stripe`, { x, y, w: cardW, h: 0.9 }, p.accent),
-      asset ? shapeEl(`card-${index + 1}-icon-badge`, { x: x + cardW - badgeW - 2.5, y: y + 3, w: badgeW, h: badgeH }, p.accent, 'round') : null,
-      asset ? iconEl(`card-${index + 1}-icon`, asset, { x: x + cardW - badgeW - 1.8, y: y + 3.4, w: badgeW - 1.4, h: badgeH - 0.8 }, p.onAccent) : null,
-      p.text(`card-${index + 1}-index`, String(index + 1).padStart(2, '0'), {
-        x: x + 2.5,
-        y: y + 3,
-        w: cardW - badgeW - 7,
-        h: 7,
-      }, {
-        variant: 'body', fontSize: 1.35, fontWeight: 700, textColor: p.ink,
-      }),
-      p.text(`card-${index + 1}`, item, {
-        x: x + 2.5,
-        y: textTop,
-        w: cardW - 5,
-        h: cardH - (textTop - y) - 2,
-      }, {
-        variant: 'body', fontSize: font, fontWeight: 500, textColor: p.fg, valign: 'middle',
-      }),
+      asset
+        ? shapeEl(
+            `card-${index + 1}-icon-badge`,
+            { x: x + cardW - badgeW - 2.5, y: y + 3, w: badgeW, h: badgeH },
+            p.accent,
+            'round',
+          )
+        : null,
+      asset
+        ? iconEl(
+            `card-${index + 1}-icon`,
+            asset,
+            { x: x + cardW - badgeW - 1.8, y: y + 3.4, w: badgeW - 1.4, h: badgeH - 0.8 },
+            p.onAccent,
+          )
+        : null,
+      p.text(
+        `card-${index + 1}-index`,
+        String(index + 1).padStart(2, '0'),
+        {
+          x: x + 2.5,
+          y: y + 3,
+          w: cardW - badgeW - 7,
+          h: 7,
+        },
+        {
+          variant: 'body',
+          fontSize: 1.35,
+          fontWeight: 700,
+          textColor: p.ink,
+        },
+      ),
+      p.text(
+        `card-${index + 1}`,
+        item,
+        {
+          x: x + 2.5,
+          y: textTop,
+          w: cardW - 5,
+          h: cardH - (textTop - y) - 2,
+        },
+        {
+          variant: 'body',
+          fontSize: font,
+          fontWeight: 500,
+          textColor: p.fg,
+          valign: 'middle',
+        },
+      ),
     ]
   })
 
-  return compact([
-    ...titleEls(p, content.title, HEADER_BOX, HEADER_SIZES, true),
-    ...cards,
-  ])
+  return compact([...titleEls(p, content.title, HEADER_BOX, HEADER_SIZES, true), ...cards])
 }
 
 function splitTwoColumns(content: SlideLayoutContent): { left: string[]; right: string[] } {
@@ -944,9 +1232,7 @@ function composeTwoColumn(p: LayoutPalette, content: SlideLayoutContent): SlideE
   if (left.length === 0 && right.length === 0) return []
   const both = left.length > 0 && right.length > 0
   const boxFor = (side: 'left' | 'right'): Box =>
-    both
-      ? { x: side === 'left' ? 8 : 53, y: 27, w: 39, h: 60 }
-      : { x: 8, y: 27, w: 84, h: 60 }
+    both ? { x: side === 'left' ? 8 : 53, y: 27, w: 39, h: 60 } : { x: 8, y: 27, w: 84, h: 60 }
   const columns = { left: left.map(splitLabel), right: right.map(splitLabel) }
   const labelled = [...columns.left, ...columns.right].some((block) => block.label)
 
@@ -956,10 +1242,16 @@ function composeTwoColumn(p: LayoutPalette, content: SlideLayoutContent): SlideE
       ...titleEls(p, content.title, HEADER_BOX, HEADER_SIZES, true),
       both ? shapeEl('divider', { x: 49.4, y: 27, w: 0.6, h: 60 }, p.muted) : null,
       p.text('body', bulletText(left), boxFor('left'), {
-        variant: 'body', fontSize: size, textColor: p.fg, valign: 'middle',
+        variant: 'body',
+        fontSize: size,
+        textColor: p.fg,
+        valign: 'middle',
       }),
       p.text('body-2', bulletText(right), boxFor('right'), {
-        variant: 'body', fontSize: size, textColor: p.fg, valign: 'middle',
+        variant: 'body',
+        fontSize: size,
+        textColor: p.fg,
+        valign: 'middle',
       }),
     ])
   }
@@ -996,17 +1288,33 @@ function composeTwoColumn(p: LayoutPalette, content: SlideLayoutContent): SlideE
       if (block.label) {
         const h = labelH(block.label, size)
         out.push(
-          p.text(`${id}-heading`, block.label, { x: box.x, y, w: colW, h }, {
-            variant: 'body', fontSize: size, fontWeight: 700, lineHeight: 1.3, textColor: p.ink,
-          }),
+          p.text(
+            `${id}-heading`,
+            block.label,
+            { x: box.x, y, w: colW, h },
+            {
+              variant: 'body',
+              fontSize: size,
+              fontWeight: 700,
+              lineHeight: 1.3,
+              textColor: p.ink,
+            },
+          ),
         )
         y += h
       }
       const h = textBoxHeight(block.text, colW, size * 0.95, 1.4, { weight: 500 })
       out.push(
-        p.text(id, block.text, { x: box.x, y, w: colW, h }, {
-          variant: 'body', fontSize: size * 0.95, textColor: p.fg,
-        }),
+        p.text(
+          id,
+          block.text,
+          { x: box.x, y, w: colW, h },
+          {
+            variant: 'body',
+            fontSize: size * 0.95,
+            textColor: p.fg,
+          },
+        ),
       )
       y += h + blockGap
       return out
@@ -1041,12 +1349,29 @@ function composeComparison(p: LayoutPalette, content: SlideLayoutContent): Slide
       w: 40,
       h: 66,
     },
-    p.text(x < 50 ? 'left-title' : 'right-title', title, { x: x + 2, y: 28, w: 36, h: 8 }, {
-      variant: 'body', fontSize: 2.1, fontWeight: 700, textColor: color, align: 'center',
-    }),
-    p.text(x < 50 ? 'body' : 'body-2', bulletText(items), { x: x + 2.5, y: 38, w: 35, h: 51 }, {
-      variant: 'body', fontSize: 2.8, textColor: p.fg, valign: 'middle',
-    }),
+    p.text(
+      x < 50 ? 'left-title' : 'right-title',
+      title,
+      { x: x + 2, y: 28, w: 36, h: 8 },
+      {
+        variant: 'body',
+        fontSize: 2.1,
+        fontWeight: 700,
+        textColor: color,
+        align: 'center',
+      },
+    ),
+    p.text(
+      x < 50 ? 'body' : 'body-2',
+      bulletText(items),
+      { x: x + 2.5, y: 38, w: 35, h: 51 },
+      {
+        variant: 'body',
+        fontSize: 2.8,
+        textColor: p.fg,
+        valign: 'middle',
+      },
+    ),
   ]
 
   return compact([
@@ -1054,10 +1379,19 @@ function composeComparison(p: LayoutPalette, content: SlideLayoutContent): Slide
     ...side(left, content.leftTitle, 8, p.ink),
     ...side(right, content.rightTitle, 52, p.ink),
     shapeEl('vs-badge', { x: 47.5, y: 52, w: 5, h: 8.9 }, p.accent, 'ellipse'),
-    p.text('mark', 'VS', { x: 47.5, y: 52, w: 5, h: 8.9 }, {
-      variant: 'body', fontSize: 1.6, fontWeight: 700, textColor: p.onAccent, align: 'center',
-      valign: 'middle',
-    }),
+    p.text(
+      'mark',
+      'VS',
+      { x: 47.5, y: 52, w: 5, h: 8.9 },
+      {
+        variant: 'body',
+        fontSize: 1.6,
+        fontWeight: 700,
+        textColor: p.onAccent,
+        align: 'center',
+        valign: 'middle',
+      },
+    ),
   ])
 }
 
@@ -1066,16 +1400,40 @@ function composeQuote(p: LayoutPalette, content: SlideLayoutContent): SlideEleme
     content.quote?.trim() || linesOf(content.body).join(' ') || cleanList(content.bullets)[0]
   if (!quote) return []
   return compact([
-    p.text('mark', '“', { x: 8, y: 12, w: 12, h: 16 }, {
-      variant: 'title', fontSize: 9, fontWeight: 700, textColor: p.ink,
-    }),
+    p.text(
+      'mark',
+      '“',
+      { x: 8, y: 12, w: 12, h: 16 },
+      {
+        variant: 'title',
+        fontSize: 9,
+        fontWeight: 700,
+        textColor: p.ink,
+      },
+    ),
     shapeEl('quote-bar', { x: 8, y: 28, w: 0.5, h: 32 }, p.accent),
-    p.text('quote', quote, { x: 13, y: 28, w: 75, h: 30 }, {
-      variant: 'body', fontSize: 3.2, fontStyle: 'italic', textColor: p.fg,
-    }),
-    p.text('author', content.author, { x: 13, y: 60, w: 75, h: 8 }, {
-      variant: 'body', fontSize: 1.8, fontWeight: 600, textColor: p.ink,
-    }),
+    p.text(
+      'quote',
+      quote,
+      { x: 13, y: 28, w: 75, h: 30 },
+      {
+        variant: 'body',
+        fontSize: 3.2,
+        fontStyle: 'italic',
+        textColor: p.fg,
+      },
+    ),
+    p.text(
+      'author',
+      content.author,
+      { x: 13, y: 60, w: 75, h: 8 },
+      {
+        variant: 'body',
+        fontSize: 1.8,
+        fontWeight: 600,
+        textColor: p.ink,
+      },
+    ),
   ])
 }
 
@@ -1085,23 +1443,41 @@ function composeClosing(p: LayoutPalette, content: SlideLayoutContent): SlideEle
   const graphic = chosenGraphic(content)
   return compact([
     ornament('decor-1', 'orn-canh-la', 5, 6, 12, p.ink),
-    graphic ? graphicEl('closing-graphic', graphic, { x: 45, y: 10, w: 10, h: 17.8 }, GRAPHIC_INK) : null,
+    graphic
+      ? graphicEl('closing-graphic', graphic, { x: 45, y: 10, w: 10, h: 17.8 }, GRAPHIC_INK)
+      : null,
     ornament('decor-2', 'orn-bo-hoa', 85, 72, 10, p.ink),
     shapeEl('accent-line', { x: 47, y: 32, w: 6, h: 0.8 }, p.accent),
-    p.text('title', title, { x: 8, y: 36, w: 84, h: 18 }, {
-      variant: 'title', fontSize: 5.2, fontWeight: 700, textColor: p.fg, align: 'center',
-    }),
-    p.text('subtitle', content.subtitle, { x: 12, y: 57, w: 76, h: 16 }, {
-      variant: 'body', fontSize: 2.2, textColor: p.muted, align: 'center',
-    }),
+    p.text(
+      'title',
+      title,
+      { x: 8, y: 36, w: 84, h: 18 },
+      {
+        variant: 'title',
+        fontSize: 5.2,
+        fontWeight: 700,
+        textColor: p.fg,
+        align: 'center',
+      },
+    ),
+    p.text(
+      'subtitle',
+      content.subtitle,
+      { x: 12, y: 57, w: 76, h: 16 },
+      {
+        variant: 'body',
+        fontSize: 2.2,
+        textColor: p.muted,
+        align: 'center',
+      },
+    ),
   ])
 }
 
 /** Mục lục: panel màu bên trái, danh sách đánh số 01… bên phải. */
 function composeAgenda(p: LayoutPalette, content: SlideLayoutContent): SlideElement[] {
-  const items = (cleanList(content.items).length
-    ? cleanList(content.items)
-    : cleanList(content.bullets)
+  const items = (
+    cleanList(content.items).length ? cleanList(content.items) : cleanList(content.bullets)
   ).slice(0, 5)
   if (items.length === 0) return []
   const top = 22
@@ -1123,24 +1499,60 @@ function composeAgenda(p: LayoutPalette, content: SlideLayoutContent): SlideElem
       h: 100,
       fill: p.accent,
     },
-    p.text('kicker', agendaKicker, { x: 6, y: 24, w: 24, h: agendaKickerH }, {
-      variant: 'body', fontSize: 1.6, fontWeight: 600, textColor: p.onAccent,
-    }),
-    ...titleEls(p, content.title, { x: 6, y: agendaTitleY, w: 24, h: 63 - agendaTitleY }, [3.2, 2.9, 2.6, 2.4], false, p.onAccent),
+    p.text(
+      'kicker',
+      agendaKicker,
+      { x: 6, y: 24, w: 24, h: agendaKickerH },
+      {
+        variant: 'body',
+        fontSize: 1.6,
+        fontWeight: 600,
+        textColor: p.onAccent,
+      },
+    ),
+    ...titleEls(
+      p,
+      content.title,
+      { x: 6, y: agendaTitleY, w: 24, h: 63 - agendaTitleY },
+      [3.2, 2.9, 2.6, 2.4],
+      false,
+      p.onAccent,
+    ),
     shapeEl('rule', { x: 6, y: 66, w: 9, h: 0.7 }, p.onAccent),
     ...items.flatMap((item, index) => {
       const y = top + index * rowH
       return [
-        p.text(`card-${index + 1}-index`, String(index + 1).padStart(2, '0'), {
-          x: 41, y: y + 1, w: 8, h: 7,
-        }, {
-          variant: 'body', fontSize: 2.2, fontWeight: 700, textColor: p.ink,
-        }),
-        p.text(`card-${index + 1}`, item.replace(/^\s*\d{1,2}\s*[.)·:\-–]\s*/, ''), {
-          x: 51, y, w: 41, h: rowH - 2,
-        }, {
-          variant: 'body', fontSize: 2.3, textColor: p.fg,
-        }),
+        p.text(
+          `card-${index + 1}-index`,
+          String(index + 1).padStart(2, '0'),
+          {
+            x: 41,
+            y: y + 1,
+            w: 8,
+            h: 7,
+          },
+          {
+            variant: 'body',
+            fontSize: 2.2,
+            fontWeight: 700,
+            textColor: p.ink,
+          },
+        ),
+        p.text(
+          `card-${index + 1}`,
+          item.replace(/^\s*\d{1,2}\s*[.)·:\-–]\s*/, ''),
+          {
+            x: 51,
+            y,
+            w: 41,
+            h: rowH - 2,
+          },
+          {
+            variant: 'body',
+            fontSize: 2.3,
+            textColor: p.fg,
+          },
+        ),
         index < items.length - 1
           ? shapeEl(`divider-${index + 1}`, { x: 41, y: y + rowH - 1, w: 51, h: 0.2 }, p.muted)
           : null,
@@ -1154,7 +1566,9 @@ function sanitizeRows(rows?: string[][]): string[][] {
   if (!Array.isArray(rows)) return []
   const cleaned = rows
     .slice(0, 8)
-    .map((row) => (Array.isArray(row) ? row.slice(0, 6).map((cell) => String(cell ?? '').trim()) : []))
+    .map((row) =>
+      Array.isArray(row) ? row.slice(0, 6).map((cell) => String(cell ?? '').trim()) : [],
+    )
     .filter((row) => row.some(Boolean))
   const cols = Math.max(0, ...cleaned.map((row) => row.length))
   if (cols === 0) return []
@@ -1212,14 +1626,22 @@ function composeImageSide(
             ...imageBox,
           },
         ]),
-    p.text('bullets', bulletText(lines), {
-      x: imageOnLeft ? 50 : 8,
-      y: 26,
-      w: 44,
-      h: 60,
-    }, {
-      variant: 'body', fontSize: lines.length <= 2 ? 3 : 3.2, textColor: p.fg, valign: 'middle',
-    }),
+    p.text(
+      'bullets',
+      bulletText(lines),
+      {
+        x: imageOnLeft ? 50 : 8,
+        y: 26,
+        w: 44,
+        h: 60,
+      },
+      {
+        variant: 'body',
+        fontSize: lines.length <= 2 ? 3 : 3.2,
+        textColor: p.fg,
+        valign: 'middle',
+      },
+    ),
   ])
 }
 
@@ -1230,12 +1652,27 @@ function composeImageFull(p: LayoutPalette, content: SlideLayoutContent): SlideE
     { id: 'image-1', type: 'image', src: content.image, x: 0, y: 0, w: 100, h: 100 },
     shapeEl('scrim', { x: 6, y: 64, w: 56, h: 28 }, p.surface, 'round'),
     shapeEl('accent-bar', { x: 6, y: 64, w: 0.7, h: 28 }, p.accent),
-    p.text('title', content.title, { x: 10, y: 67, w: 48, h: 12 }, {
-      variant: 'title', fontSize: 3.2, fontWeight: 700, textColor: p.fg,
-    }),
-    p.text('body', content.body, { x: 10, y: 79, w: 48, h: 12 }, {
-      variant: 'body', fontSize: 1.8, textColor: p.muted,
-    }),
+    p.text(
+      'title',
+      content.title,
+      { x: 10, y: 67, w: 48, h: 12 },
+      {
+        variant: 'title',
+        fontSize: 3.2,
+        fontWeight: 700,
+        textColor: p.fg,
+      },
+    ),
+    p.text(
+      'body',
+      content.body,
+      { x: 10, y: 79, w: 48, h: 12 },
+      {
+        variant: 'body',
+        fontSize: 1.8,
+        textColor: p.muted,
+      },
+    ),
   ])
 }
 
@@ -1278,15 +1715,47 @@ function composeStats(p: LayoutPalette, content: SlideLayoutContent): SlideEleme
     const asset = picked[index]
     return [
       panel,
-      asset ? shapeEl(`stat-${index + 1}-icon-badge`, { x: x + cellW / 2 - 9, y: area.y + 2, w: 18, h: 14 }, p.accent, 'round') : null,
-      asset ? iconEl(`stat-${index + 1}-icon`, asset, { x: x + cellW / 2 - 8, y: area.y + 3, w: 16, h: 12 }, p.onAccent) : null,
-      p.text(`stat-${index + 1}-value`, stat.value || stat.label, { x, y: area.y + 17, w: cellW, h: 16 }, {
-        variant: 'title', fontSize: 6.2, fontWeight: 700, textColor: p.ink, align: 'center', valign: 'middle',
-      }),
+      asset
+        ? shapeEl(
+            `stat-${index + 1}-icon-badge`,
+            { x: x + cellW / 2 - 9, y: area.y + 2, w: 18, h: 14 },
+            p.accent,
+            'round',
+          )
+        : null,
+      asset
+        ? iconEl(
+            `stat-${index + 1}-icon`,
+            asset,
+            { x: x + cellW / 2 - 8, y: area.y + 3, w: 16, h: 12 },
+            p.onAccent,
+          )
+        : null,
+      p.text(
+        `stat-${index + 1}-value`,
+        stat.value || stat.label,
+        { x, y: area.y + 17, w: cellW, h: 16 },
+        {
+          variant: 'title',
+          fontSize: 6.2,
+          fontWeight: 700,
+          textColor: p.ink,
+          align: 'center',
+          valign: 'middle',
+        },
+      ),
       stat.value
-        ? p.text(`stat-${index + 1}-label`, stat.label, { x, y: area.y + 35, w: cellW, h: 13 }, {
-            variant: 'body', fontSize: 2.1, textColor: p.muted, align: 'center',
-          })
+        ? p.text(
+            `stat-${index + 1}-label`,
+            stat.label,
+            { x, y: area.y + 35, w: cellW, h: 13 },
+            {
+              variant: 'body',
+              fontSize: 2.1,
+              textColor: p.muted,
+              align: 'center',
+            },
+          )
         : null,
     ]
   })
@@ -1315,18 +1784,38 @@ function composeStatImage(p: LayoutPalette, content: SlideLayoutContent): SlideE
     ...stats.flatMap((stat, index) => {
       const y = 33 + index * rowH
       return [
-        p.text(`stat-${index + 1}-value`, stat.value, { x: 8, y, w: 42, h: 14 }, {
-          variant: 'title', fontSize: 6.4, fontWeight: 700, textColor: p.ink,
-        }),
-        p.text(`stat-${index + 1}-label`, stat.label, { x: 8, y: y + 15, w: 42, h: 8 }, {
-          variant: 'body', fontSize: 1.8, textColor: p.muted,
-        }),
+        p.text(
+          `stat-${index + 1}-value`,
+          stat.value,
+          { x: 8, y, w: 42, h: 14 },
+          {
+            variant: 'title',
+            fontSize: 6.4,
+            fontWeight: 700,
+            textColor: p.ink,
+          },
+        ),
+        p.text(
+          `stat-${index + 1}-label`,
+          stat.label,
+          { x: 8, y: y + 15, w: 42, h: 8 },
+          {
+            variant: 'body',
+            fontSize: 1.8,
+            textColor: p.muted,
+          },
+        ),
       ]
     }),
   ])
 }
 
-const EDITORIAL_TITLE = { variant: 'title', fontWeight: 800, lineHeight: 1.1, valign: 'top' } as const
+const EDITORIAL_TITLE = {
+  variant: 'title',
+  fontWeight: 800,
+  lineHeight: 1.1,
+  valign: 'top',
+} as const
 const PHOTO_FOREGROUND = '#ffffff'
 const PHOTO_MUTED = '#e2e0dc'
 
@@ -1344,21 +1833,70 @@ function layoutPhoto(
 function composeBigNum(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
   const w = c.image ? 52 : 88
   const value = c.value?.trim()
-  const size = value ? singleLineSize(value, w, c.image ? 20 : 23, 800, slideFontStack(p.displayFont)) : 20
+  const size = value
+    ? singleLineSize(value, w, c.image ? 20 : 23, 800, slideFontStack(p.displayFont))
+    : 20
   return compact([
-    c.image ? layoutPhoto('image-1', c.image, { x: 60, y: 9, w: 34, h: 76 }, c.imageCrop, c.focusX, c.focusY) : null,
-    p.text('kicker', upper(c.kicker), { x: 5, y: 8, w, h: 11 }, {
-      variant: 'body', fontSize: 1.55, fontWeight: 700, textColor: p.muted, valign: 'top', lineHeight: 1.2,
-    }),
-    p.text('bignum-value', value, { x: 5, y: 19, w, h: 44 }, {
-      ...EDITORIAL_TITLE, fontFamily: p.displayFont, fontSize: size, lineHeight: 1, textColor: p.ink, valign: 'middle',
-    }),
-    p.text('bignum-label', c.label, { x: 5, y: 67, w, h: 13 }, {
-      ...EDITORIAL_TITLE, fontSize: 3.6, textColor: p.fg,
-    }, 0.45),
-    p.text('subtitle', c.subtitle, { x: 5, y: 80, w, h: 9 }, {
-      variant: 'body', fontSize: 1.75, lineHeight: 1.18, textColor: p.muted, valign: 'top',
-    }, 0.45),
+    c.image
+      ? layoutPhoto(
+          'image-1',
+          c.image,
+          { x: 60, y: 9, w: 34, h: 76 },
+          c.imageCrop,
+          c.focusX,
+          c.focusY,
+        )
+      : null,
+    p.text(
+      'kicker',
+      upper(c.kicker),
+      { x: 5, y: 8, w, h: 11 },
+      {
+        variant: 'body',
+        fontSize: 1.55,
+        fontWeight: 700,
+        textColor: p.muted,
+        valign: 'top',
+        lineHeight: 1.2,
+      },
+    ),
+    p.text(
+      'bignum-value',
+      value,
+      { x: 5, y: 19, w, h: 44 },
+      {
+        ...EDITORIAL_TITLE,
+        fontFamily: p.displayFont,
+        fontSize: size,
+        lineHeight: 1,
+        textColor: p.ink,
+        valign: 'middle',
+      },
+    ),
+    p.text(
+      'bignum-label',
+      c.label,
+      { x: 5, y: 67, w, h: 13 },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: 3.6,
+        textColor: p.fg,
+      },
+      0.45,
+    ),
+    p.text(
+      'subtitle',
+      c.subtitle,
+      { x: 5, y: 80, w, h: 9 },
+      {
+        variant: 'body',
+        fontSize: 1.75,
+        lineHeight: 1.18,
+        textColor: p.muted,
+        valign: 'top',
+      },
+      0.45,
+    ),
   ])
 }
 
@@ -1369,18 +1907,51 @@ function composePhotoFull(p: LayoutPalette, c: SlideLayoutContent): SlideElement
   const titleY = left ? 23 : c.subtitle ? 66 : 69
   const titleH = left ? 39 : c.subtitle ? 15 : 19
   return compact([
-    layoutPhoto('image-1', c.image, { x: 0, y: 0, w: 100, h: 100 }, c.imageCrop, c.focusX, c.focusY ?? (left ? 45 : 30)),
-    { ...shapeEl('photo-scrim', { x: 0, y: 0, w: 100, h: 100 }, photoScrimFill(position)), border: 0, shadowLevel: 0 },
-    left && c.credit ? {
-      ...shapeEl('photo-credit-scrim', { x: 0, y: 76, w: 100, h: 24 }, PHOTO_CREDIT_FILL),
-      border: 0, shadowLevel: 0,
-    } : null,
-    p.text('title', c.title, { x: 5, y: titleY, w, h: titleH }, {
-      ...EDITORIAL_TITLE, fontSize: left ? 5 : 5.6, textColor: PHOTO_FOREGROUND, valign: 'middle',
-    }, 0.38),
-    p.text('subtitle', c.subtitle, { x: 5, y: left ? 62 : 81, w, h: left ? 21 : 8 }, {
-      variant: 'body', fontSize: 1.9, lineHeight: 1.16, textColor: PHOTO_MUTED, valign: 'top',
-    }, 0.48),
+    layoutPhoto(
+      'image-1',
+      c.image,
+      { x: 0, y: 0, w: 100, h: 100 },
+      c.imageCrop,
+      c.focusX,
+      c.focusY ?? (left ? 45 : 30),
+    ),
+    {
+      ...shapeEl('photo-scrim', { x: 0, y: 0, w: 100, h: 100 }, photoScrimFill(position)),
+      border: 0,
+      shadowLevel: 0,
+    },
+    left && c.credit
+      ? {
+          ...shapeEl('photo-credit-scrim', { x: 0, y: 76, w: 100, h: 24 }, PHOTO_CREDIT_FILL),
+          border: 0,
+          shadowLevel: 0,
+        }
+      : null,
+    p.text(
+      'title',
+      c.title,
+      { x: 5, y: titleY, w, h: titleH },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: left ? 5 : 5.6,
+        textColor: PHOTO_FOREGROUND,
+        valign: 'middle',
+      },
+      0.38,
+    ),
+    p.text(
+      'subtitle',
+      c.subtitle,
+      { x: 5, y: left ? 62 : 81, w, h: left ? 21 : 8 },
+      {
+        variant: 'body',
+        fontSize: 1.9,
+        lineHeight: 1.16,
+        textColor: PHOTO_MUTED,
+        valign: 'top',
+      },
+      0.48,
+    ),
   ])
 }
 
@@ -1388,24 +1959,55 @@ function composePhotoCompare(p: LayoutPalette, c: SlideLayoutContent): SlideElem
   const captions = Boolean(c.caption || c.caption2)
   const imageH = captions ? 52 : c.credit ? 62 : 67
   return compact([
-    p.text('title', c.title, { x: 5, y: 6, w: 90, h: 18 }, {
-      ...EDITORIAL_TITLE, fontSize: 5.3, textColor: p.fg,
-    }, 0.4),
+    p.text(
+      'title',
+      c.title,
+      { x: 5, y: 6, w: 90, h: 18 },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: 5.3,
+        textColor: p.fg,
+      },
+      0.4,
+    ),
     layoutPhoto('image-1', c.image, { x: 6, y: 24, w: 43, h: imageH }, c.imageCrop),
     layoutPhoto('image-2', c.image2, { x: 51, y: 24, w: 43, h: imageH }, c.image2Crop),
-    p.text('photo-caption', c.caption, { x: 5, y: 77, w: 45, h: 11 }, {
-      variant: 'body', fontSize: 1.7, lineHeight: 1.16, textColor: p.muted, valign: 'top',
-    }, 0.5),
-    p.text('photo-caption-2', c.caption2, { x: 50, y: 77, w: 45, h: 11 }, {
-      variant: 'body', fontSize: 1.7, lineHeight: 1.16, textColor: p.muted, valign: 'top',
-    }, 0.5),
+    p.text(
+      'photo-caption',
+      c.caption,
+      { x: 5, y: 77, w: 45, h: 11 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        lineHeight: 1.16,
+        textColor: p.muted,
+        valign: 'top',
+      },
+      0.5,
+    ),
+    p.text(
+      'photo-caption-2',
+      c.caption2,
+      { x: 50, y: 77, w: 45, h: 11 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        lineHeight: 1.16,
+        textColor: p.muted,
+        valign: 'top',
+      },
+      0.5,
+    ),
   ])
 }
 
 const upper = (text?: string): string | undefined => text?.toLocaleUpperCase('vi')
 
-const hairline = (id: string, box: Box, color: string): SlideElement =>
-  ({ ...shapeEl(id, box, color), border: 0, shadowLevel: 0 as const })
+const hairline = (id: string, box: Box, color: string): SlideElement => ({
+  ...shapeEl(id, box, color),
+  border: 0,
+  shadowLevel: 0 as const,
+})
 
 function composeRules(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
   const rows = (c.stats ?? [])
@@ -1418,25 +2020,66 @@ function composeRules(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
   const longest = Math.max(...rows.map((r) => r.value.length))
   const valueSize = longest <= 9 ? 3.6 : longest <= 14 ? 3.1 : 2.7
   return compact([
-    p.text('kicker', upper(c.kicker), { x: 5, y: 8, w: 80, h: 8 }, {
-      variant: 'body', fontSize: 1.85, fontWeight: 700, textColor: p.ink, valign: 'top', lineHeight: 1.2,
-    }),
-    p.text('title', c.title, { x: 5, y: 13, w: 90, h: 20 }, {
-      ...EDITORIAL_TITLE, fontSize: 5.3, textColor: p.fg,
-    }, 0.4),
+    p.text(
+      'kicker',
+      upper(c.kicker),
+      { x: 5, y: 8, w: 80, h: 8 },
+      {
+        variant: 'body',
+        fontSize: 1.85,
+        fontWeight: 700,
+        textColor: p.ink,
+        valign: 'top',
+        lineHeight: 1.2,
+      },
+    ),
+    p.text(
+      'title',
+      c.title,
+      { x: 5, y: 13, w: 90, h: 20 },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: 5.3,
+        textColor: p.fg,
+      },
+      0.4,
+    ),
     ...rows.flatMap((r, i) => {
       const y = top + i * row
       return [
         hairline(`divider-${i + 1}`, { x: 5, y, w: 90, h: 0.18 }, p.muted),
-        p.text(`item-${i + 1}-value`, r.value, { x: 5, y: y + 0.6, w: 21, h: row - 1.2 }, {
-          ...EDITORIAL_TITLE, fontSize: valueSize, textColor: p.ink, valign: 'middle',
-        }, 0.9),
-        p.text(`item-${i + 1}-label`, r.label, { x: 28, y: y + 0.6, w: 67, h: row - 1.2 }, {
-          variant: 'body', fontSize: rows.length > 4 ? 1.9 : 2.15, lineHeight: 1.22, textColor: p.fg, valign: 'middle',
-        }, 0.55),
+        p.text(
+          `item-${i + 1}-value`,
+          r.value,
+          { x: 5, y: y + 0.6, w: 21, h: row - 1.2 },
+          {
+            ...EDITORIAL_TITLE,
+            fontSize: valueSize,
+            textColor: p.ink,
+            valign: 'middle',
+          },
+          0.9,
+        ),
+        p.text(
+          `item-${i + 1}-label`,
+          r.label,
+          { x: 28, y: y + 0.6, w: 67, h: row - 1.2 },
+          {
+            variant: 'body',
+            fontSize: rows.length > 4 ? 1.9 : 2.15,
+            lineHeight: 1.22,
+            textColor: p.fg,
+            valign: 'middle',
+          },
+          0.55,
+        ),
       ]
     }),
-    hairline(`divider-${rows.length + 1}`, { x: 5, y: top + rows.length * row, w: 90, h: 0.18 }, p.muted),
+    hairline(
+      `divider-${rows.length + 1}`,
+      { x: 5, y: top + rows.length * row, w: 90, h: 0.18 },
+      p.muted,
+    ),
   ])
 }
 
@@ -1446,34 +2089,92 @@ function composeEditorialText(p: LayoutPalette, c: SlideLayoutContent): SlideEle
   if (lines.length === 0 && !c.title?.trim()) return []
   const text = lines.join('\n\n')
   return compact([
-    p.text('kicker', upper(c.kicker), { x: 5, y: 8, w: 80, h: 8 }, {
-      variant: 'body', fontSize: 1.85, fontWeight: 700, textColor: p.ink, valign: 'top', lineHeight: 1.2,
-    }),
-    p.text('title', c.title, { x: 5, y: 15, w: 40, h: 60 }, {
-      ...EDITORIAL_TITLE, fontSize: 6, textColor: p.fg,
-    }, 0.4),
+    p.text(
+      'kicker',
+      upper(c.kicker),
+      { x: 5, y: 8, w: 80, h: 8 },
+      {
+        variant: 'body',
+        fontSize: 1.85,
+        fontWeight: 700,
+        textColor: p.ink,
+        valign: 'top',
+        lineHeight: 1.2,
+      },
+    ),
+    p.text(
+      'title',
+      c.title,
+      { x: 5, y: 15, w: 40, h: 60 },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: 6,
+        textColor: p.fg,
+      },
+      0.4,
+    ),
     hairline('divider-1', { x: 48.5, y: 16, w: 0.12, h: 62 }, p.muted),
-    p.text('body', text, { x: 52, y: 15, w: 43, h: 66 }, {
-      variant: 'body', fontSize: lines.length > 3 ? 1.95 : 2.2, lineHeight: 1.3, textColor: p.fg, valign: 'top',
-    }, 0.55),
+    p.text(
+      'body',
+      text,
+      { x: 52, y: 15, w: 43, h: 66 },
+      {
+        variant: 'body',
+        fontSize: lines.length > 3 ? 1.95 : 2.2,
+        lineHeight: 1.3,
+        textColor: p.fg,
+        valign: 'top',
+      },
+      0.55,
+    ),
   ])
 }
 
 function composeManifesto(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
-  const text = c.body?.trim() || c.quote?.trim() || cleanList(c.bullets).join(' ') || c.title?.trim() || ''
+  const text =
+    c.body?.trim() || c.quote?.trim() || cleanList(c.bullets).join(' ') || c.title?.trim() || ''
   if (!text) return []
   const size = text.length > 180 ? 3.7 : text.length > 110 ? 4.5 : 5.6
   return compact([
-    p.text('kicker', upper(c.kicker), { x: 6, y: 12, w: 80, h: 8 }, {
-      variant: 'body', fontSize: 1.85, fontWeight: 700, textColor: p.ink, valign: 'top', lineHeight: 1.2,
-    }),
-    p.text('body', text, { x: 6, y: 21, w: 86, h: 52 }, {
-      ...EDITORIAL_TITLE, fontSize: size, textColor: p.fg, valign: 'top',
-    }, 0.45),
+    p.text(
+      'kicker',
+      upper(c.kicker),
+      { x: 6, y: 12, w: 80, h: 8 },
+      {
+        variant: 'body',
+        fontSize: 1.85,
+        fontWeight: 700,
+        textColor: p.ink,
+        valign: 'top',
+        lineHeight: 1.2,
+      },
+    ),
+    p.text(
+      'body',
+      text,
+      { x: 6, y: 21, w: 86, h: 52 },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: size,
+        textColor: p.fg,
+        valign: 'top',
+      },
+      0.45,
+    ),
     c.author?.trim() ? hairline('rule', { x: 6, y: 77, w: 8, h: 0.4 }, p.accent) : null,
-    p.text('author', c.author, { x: 6, y: 79, w: 86, h: 7 }, {
-      variant: 'body', fontSize: 1.8, fontWeight: 600, textColor: p.muted, valign: 'top',
-    }, 0.6),
+    p.text(
+      'author',
+      c.author,
+      { x: 6, y: 79, w: 86, h: 7 },
+      {
+        variant: 'body',
+        fontSize: 1.8,
+        fontWeight: 600,
+        textColor: p.muted,
+        valign: 'top',
+      },
+      0.6,
+    ),
   ])
 }
 
@@ -1486,16 +2187,36 @@ function formatBarValue(value: number): string {
 }
 
 function composeBars(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
-  const bars = (Array.isArray(c.bars) ? c.bars : []).filter((bar) => bar?.label && Number.isFinite(bar.value) && bar.value >= 0).slice(0, 6)
+  const bars = (Array.isArray(c.bars) ? c.bars : [])
+    .filter((bar) => bar?.label && Number.isFinite(bar.value) && bar.value >= 0)
+    .slice(0, 6)
   const max = Math.max(...bars.map((bar) => bar.value), 0)
   const row = Math.min(24, 60 / Math.max(bars.length, 1))
   const top = 26 + (60 - row * bars.length) / 2
   const axis = 31
   return compact([
-    p.text('title', c.title, { x: 5, y: 6, w: 90, h: 18 }, {
-      ...EDITORIAL_TITLE, fontSize: 5.3, textColor: p.fg,
-    }, 0.4),
-    bars.length ? { ...shapeEl('bars-axis', { x: axis - 0.16, y: top, w: 0.16, h: row * bars.length }, p.muted), border: 0, shadowLevel: 0 } : null,
+    p.text(
+      'title',
+      c.title,
+      { x: 5, y: 6, w: 90, h: 18 },
+      {
+        ...EDITORIAL_TITLE,
+        fontSize: 5.3,
+        textColor: p.fg,
+      },
+      0.4,
+    ),
+    bars.length
+      ? {
+          ...shapeEl(
+            'bars-axis',
+            { x: axis - 0.16, y: top, w: 0.16, h: row * bars.length },
+            p.muted,
+          ),
+          border: 0,
+          shadowLevel: 0,
+        }
+      : null,
     ...bars.flatMap((bar, i) => {
       const id = 'bar-' + (i + 1)
       const y = top + i * row
@@ -1503,16 +2224,41 @@ function composeBars(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
       const w = max > 0 ? 46 * (bar.value / max) : 0
       const value = formatBarValue(bar.value)
       return [
-        p.text(id + '-label', bar.label, { x: 5, y, w: 25, h: row }, {
-          variant: 'body', fontSize: bars.length > 4 ? 1.65 : 2.05, lineHeight: 1.15, textColor: p.fg, valign: 'middle',
-        }, 0.55),
-        w > 0 ? {
-          ...shapeEl(id + (bar.color ? '-custom' : ''), { x: axis, y: y + (row - h) / 2, w, h }, bar.color ?? p.ink),
-          border: 0, shadowLevel: 0 as const,
-        } : null,
-        p.text(id + '-value', value, { x: axis + w + 0.35, y, w: 17.65, h: row }, {
-          ...EDITORIAL_TITLE, fontSize: singleLineSize(value, 17.65, 2, 800, slideFontStack(p.displayFont)), textColor: p.fg, valign: 'middle',
-        }),
+        p.text(
+          id + '-label',
+          bar.label,
+          { x: 5, y, w: 25, h: row },
+          {
+            variant: 'body',
+            fontSize: bars.length > 4 ? 1.65 : 2.05,
+            lineHeight: 1.15,
+            textColor: p.fg,
+            valign: 'middle',
+          },
+          0.55,
+        ),
+        w > 0
+          ? {
+              ...shapeEl(
+                id + (bar.color ? '-custom' : ''),
+                { x: axis, y: y + (row - h) / 2, w, h },
+                bar.color ?? p.ink,
+              ),
+              border: 0,
+              shadowLevel: 0 as const,
+            }
+          : null,
+        p.text(
+          id + '-value',
+          value,
+          { x: axis + w + 0.35, y, w: 17.65, h: row },
+          {
+            ...EDITORIAL_TITLE,
+            fontSize: singleLineSize(value, 17.65, 2, 800, slideFontStack(p.displayFont)),
+            textColor: p.fg,
+            valign: 'middle',
+          },
+        ),
       ]
     }),
   ])
@@ -1520,27 +2266,47 @@ function composeBars(p: LayoutPalette, c: SlideLayoutContent): SlideElement[] {
 
 /** Nguồn là hộp chữ chỉnh sửa được, lưu cùng các phần tử của slide. */
 export function creditElement(credit: string | undefined, color: string): SlideElement | null {
-  return textEl('credit', credit?.trim().replace(/\s+/g, ' '), { x: 5, y: 89, w: 89, h: 6.1 }, {
-    fontSize: 1.2, fontFamily: 'Arial', lineHeight: 1.1, textColor: color, valign: 'top',
-  }, 0.72)
+  return textEl(
+    'credit',
+    credit?.trim().replace(/\s+/g, ' '),
+    { x: 5, y: 89, w: 89, h: 6.1 },
+    {
+      fontSize: 1.2,
+      fontFamily: 'Arial',
+      lineHeight: 1.1,
+      textColor: color,
+      valign: 'top',
+    },
+    0.72,
+  )
 }
 
-export function withSlideCredit(elements: SlideElement[], credit: SlideElement | null): SlideElement[] {
+export function withSlideCredit(
+  elements: SlideElement[],
+  credit: SlideElement | null,
+): SlideElement[] {
   if (!credit) return elements
   const content = elements.filter((el) => el.id !== 'credit')
   const isFullHeight = (el: SlideElement) => el.y === 0 && el.h === 100 && el.type !== 'text'
-  const bottom = bottomOf(content.filter((el) => !isFullHeight(el) && el.id !== 'photo-credit-scrim'))
+  const bottom = bottomOf(
+    content.filter((el) => !isFullHeight(el) && el.id !== 'photo-credit-scrim'),
+  )
   const scale = bottom > credit.y ? credit.y / bottom : 1
-  const fitted = scale === 1 ? content : content.map((el) => {
-    if (isFullHeight(el) || el.id === 'photo-credit-scrim') return el
-    const sized = {
-      ...el, y: el.y * scale, h: el.h * scale,
-      ...(el.fontSize ? { fontSize: el.fontSize * scale } : {}),
-    }
-    const base = BASE_SIZE.get(el)
-    if (base) BASE_SIZE.set(sized, base)
-    return sized
-  })
+  const fitted =
+    scale === 1
+      ? content
+      : content.map((el) => {
+          if (isFullHeight(el) || el.id === 'photo-credit-scrim') return el
+          const sized = {
+            ...el,
+            y: el.y * scale,
+            h: el.h * scale,
+            ...(el.fontSize ? { fontSize: el.fontSize * scale } : {}),
+          }
+          const base = BASE_SIZE.get(el)
+          if (base) BASE_SIZE.set(sized, base)
+          return sized
+        })
   return [...fitted, credit]
 }
 
@@ -1561,24 +2327,41 @@ function composeTimeline(p: LayoutPalette, content: SlideLayoutContent): SlideEl
     const center = 8 + slot * (index + 0.5)
     const left = center - slot / 2
     const tag = numberTag(`step-${index + 1}`, index + 1, p.panel, center - 2.1, 44, 4.2)
-    const label = p.text(`item-${index + 1}`, step, {
-      x: left + 1,
-      y: 51,
-      w: slot - 2,
-      h: 29,
-    }, {
-      variant: 'body', fontSize: stepSize, textColor: p.fg, align: 'center',
-    })
+    const label = p.text(
+      `item-${index + 1}`,
+      step,
+      {
+        x: left + 1,
+        y: 51,
+        w: slot - 2,
+        h: 29,
+      },
+      {
+        variant: 'body',
+        fontSize: stepSize,
+        textColor: p.fg,
+        align: 'center',
+      },
+    )
     if (tag) return [tag, label]
     return [
-      p.text(`step-${index + 1}-index`, String(index + 1).padStart(2, '0'), {
-        x: left,
-        y: 34,
-        w: slot,
-        h: 7,
-      }, {
-        variant: 'body', fontSize: 1.8, fontWeight: 700, textColor: p.ink, align: 'center',
-      }),
+      p.text(
+        `step-${index + 1}-index`,
+        String(index + 1).padStart(2, '0'),
+        {
+          x: left,
+          y: 34,
+          w: slot,
+          h: 7,
+        },
+        {
+          variant: 'body',
+          fontSize: 1.8,
+          fontWeight: 700,
+          textColor: p.ink,
+          align: 'center',
+        },
+      ),
       {
         id: `step-${index + 1}`,
         type: 'shape' as const,
@@ -1625,22 +2408,51 @@ function composeCycle(p: LayoutPalette, content: SlideLayoutContent): SlideEleme
         h: nodeH,
       },
       // Chữ nằm trong hình chữ nhật nội tiếp của hình tròn (≈ 78% × 60%), không ép vào hộp 10% cố định.
-      p.text(`item-${index + 1}`, step, {
-        x: cx - (nodeW * 0.78) / 2,
-        y: cy - (nodeH * 0.6) / 2,
-        w: nodeW * 0.78,
-        h: nodeH * 0.6,
-      }, {
-        variant: 'body', fontSize: count <= 4 ? 1.6 : 1.45, fontWeight: 600, textColor: p.onAccent,
-        align: 'center', valign: 'middle',
-      }),
+      p.text(
+        `item-${index + 1}`,
+        step,
+        {
+          x: cx - (nodeW * 0.78) / 2,
+          y: cy - (nodeH * 0.6) / 2,
+          w: nodeW * 0.78,
+          h: nodeH * 0.6,
+        },
+        {
+          variant: 'body',
+          fontSize: count <= 4 ? 1.6 : 1.45,
+          fontWeight: 600,
+          textColor: p.onAccent,
+          align: 'center',
+          valign: 'middle',
+        },
+      ),
       // Số thứ tự trên vành node: không có mũi tên nên người xem cần biết bắt đầu từ đâu.
-      { ...shapeEl(`node-${index + 1}-badge`, { x: cx - nodeW / 2 - 0.6, y: cy - nodeH / 2 - 1, w: 4, h: 7.1 }, p.background, 'ellipse') },
-      p.text(`node-${index + 1}-index`, String(index + 1), {
-        x: cx - nodeW / 2 - 0.6, y: cy - nodeH / 2 - 1, w: 4, h: 7.1,
-      }, {
-        variant: 'body', fontSize: 1.6, fontWeight: 700, textColor: p.ink, align: 'center', valign: 'middle',
-      }),
+      {
+        ...shapeEl(
+          `node-${index + 1}-badge`,
+          { x: cx - nodeW / 2 - 0.6, y: cy - nodeH / 2 - 1, w: 4, h: 7.1 },
+          p.background,
+          'ellipse',
+        ),
+      },
+      p.text(
+        `node-${index + 1}-index`,
+        String(index + 1),
+        {
+          x: cx - nodeW / 2 - 0.6,
+          y: cy - nodeH / 2 - 1,
+          w: 4,
+          h: 7.1,
+        },
+        {
+          variant: 'body',
+          fontSize: 1.6,
+          fontWeight: 700,
+          textColor: p.ink,
+          align: 'center',
+          valign: 'middle',
+        },
+      ),
     ]
   })
   return compact([
@@ -1691,7 +2503,14 @@ function composeQuiz(p: LayoutPalette, content: SlideLayoutContent): SlideElemen
       text: optionText,
       variant: 'body',
       // ô có nền đệm 3% hai bên (+4cqw so với hộp thường) nên đo trên hộp thu hẹp
-      fontSize: fitFontSize({ text: optionText, widthPct: optionW - 4, heightPct: 12, baseCqw: 2.3, lineHeight: 1.25, weight: 500 }),
+      fontSize: fitFontSize({
+        text: optionText,
+        widthPct: optionW - 4,
+        heightPct: 12,
+        baseCqw: 2.3,
+        lineHeight: 1.25,
+        weight: 500,
+      }),
       textColor: correct ? p.onAccent : p.fg,
       fill: correct ? p.accent : p.panel,
       fixedHeight: true,
@@ -1700,20 +2519,47 @@ function composeQuiz(p: LayoutPalette, content: SlideLayoutContent): SlideElemen
   // Thanh đáp án + giải thích: giáo viên chiếu là thấy lời giải như deck mẫu.
   const explanation = content.explanation?.trim()
   const answerText =
-    answer >= 0 ? `Đáp án: ${String.fromCharCode(65 + answer)}${explanation ? ` — ${explanation}` : ''}` : ''
+    answer >= 0
+      ? `Đáp án: ${String.fromCharCode(65 + answer)}${explanation ? ` — ${explanation}` : ''}`
+      : ''
   return compact([
-    p.text('kicker', content.kicker, { x: 8, y: 10, w: 84, h: 6 }, {
-      variant: 'body', fontSize: 1.7, fontWeight: 600, textColor: p.ink,
-    }),
-    p.text('question', question, { x: 8, y: 18, w: 84, h: 18 }, {
-      variant: 'title', fontSize: 3.2, fontWeight: 700, textColor: p.fg,
-    }),
+    p.text(
+      'kicker',
+      content.kicker,
+      { x: 8, y: 10, w: 84, h: 6 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        fontWeight: 600,
+        textColor: p.ink,
+      },
+    ),
+    p.text(
+      'question',
+      question,
+      { x: 8, y: 18, w: 84, h: 18 },
+      {
+        variant: 'title',
+        fontSize: 3.2,
+        fontWeight: 700,
+        textColor: p.fg,
+      },
+    ),
     ...optionEls,
     answerText ? shapeEl('answer-bar', { x: 8, y: 77, w: 84, h: 14 }, p.surface, 'round') : null,
     answerText ? shapeEl('answer-stripe', { x: 8, y: 77, w: 0.8, h: 14 }, p.accent) : null,
-    p.text('answer', answerText, { x: 10.5, y: 77, w: 80, h: 14 }, {
-      variant: 'body', fontSize: 2.1, fontWeight: 600, textColor: p.fg, valign: 'middle',
-    }),
+    p.text(
+      'answer',
+      answerText,
+      { x: 10.5, y: 77, w: 80, h: 14 },
+      {
+        variant: 'body',
+        fontSize: 2.1,
+        fontWeight: 600,
+        textColor: p.fg,
+        valign: 'middle',
+      },
+    ),
   ])
 }
 
@@ -1737,35 +2583,92 @@ function composeExample(p: LayoutPalette, content: SlideLayoutContent): SlideEle
   return compact([
     ...header,
     shapeEl('problem-panel', { x: 8, y: top, w: leftW, h: areaH }, p.panel, 'round'),
-    p.text('problem-label', 'ĐỀ BÀI', { x: 10, y: top + 2, w: leftW - 4, h: 6 }, {
-      variant: 'body', fontSize: 1.7, fontWeight: 700, textColor: p.ink, letterSpacing: 0.12,
-    }),
-    p.text('problem', problem, { x: 10, y: top + 9, w: leftW - 4, h: areaH - 11 }, {
-      variant: 'body', fontSize: 2.5, textColor: p.fg,
-    }),
+    p.text(
+      'problem-label',
+      'ĐỀ BÀI',
+      { x: 10, y: top + 2, w: leftW - 4, h: 6 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        fontWeight: 700,
+        textColor: p.ink,
+        letterSpacing: 0.12,
+      },
+    ),
+    p.text(
+      'problem',
+      problem,
+      { x: 10, y: top + 9, w: leftW - 4, h: areaH - 11 },
+      {
+        variant: 'body',
+        fontSize: 2.5,
+        textColor: p.fg,
+      },
+    ),
     ...steps.flatMap((step, index) => {
       const y = stepsTop + index * rowH
-      const tag = rowH >= 12 ? numberTag(`step-${index + 1}-badge`, index + 1, p.background, 43.5, y + rowH / 2, 3.2) : null
+      const tag =
+        rowH >= 12
+          ? numberTag(`step-${index + 1}-badge`, index + 1, p.background, 43.5, y + rowH / 2, 3.2)
+          : null
       return [
         ...(tag
           ? [tag]
           : [
-              shapeEl(`step-${index + 1}-badge`, { x: 43, y: y + (rowH - badgeH) / 2, w: badgeW, h: badgeH }, p.accent, 'ellipse'),
-              p.text(`step-${index + 1}-index`, String(index + 1), {
-                x: 43, y: y + (rowH - badgeH) / 2, w: badgeW, h: badgeH,
-              }, {
-                variant: 'body', fontSize: 1.9, fontWeight: 700, textColor: p.onAccent, align: 'center', valign: 'middle',
-              }),
+              shapeEl(
+                `step-${index + 1}-badge`,
+                { x: 43, y: y + (rowH - badgeH) / 2, w: badgeW, h: badgeH },
+                p.accent,
+                'ellipse',
+              ),
+              p.text(
+                `step-${index + 1}-index`,
+                String(index + 1),
+                {
+                  x: 43,
+                  y: y + (rowH - badgeH) / 2,
+                  w: badgeW,
+                  h: badgeH,
+                },
+                {
+                  variant: 'body',
+                  fontSize: 1.9,
+                  fontWeight: 700,
+                  textColor: p.onAccent,
+                  align: 'center',
+                  valign: 'middle',
+                },
+              ),
             ]),
-        p.text(`item-${index + 1}`, step, { x: 49, y, w: 43, h: rowH }, {
-          variant: 'body', fontSize: 2.2, textColor: p.fg, valign: 'middle',
-        }),
+        p.text(
+          `item-${index + 1}`,
+          step,
+          { x: 49, y, w: 43, h: rowH },
+          {
+            variant: 'body',
+            fontSize: 2.2,
+            textColor: p.fg,
+            valign: 'middle',
+          },
+        ),
       ]
     }),
-    conclusion ? shapeEl('conclusion-bar', { x: 8, y: barY, w: 84, h: barH }, p.accent, 'round') : null,
-    p.text('conclusion', conclusion, { x: 10, y: barY, w: 80, h: barH }, {
-      variant: 'body', fontSize: 2.4, fontWeight: 700, textColor: p.onAccent, align: 'center', valign: 'middle',
-    }),
+    conclusion
+      ? shapeEl('conclusion-bar', { x: 8, y: barY, w: 84, h: barH }, p.accent, 'round')
+      : null,
+    p.text(
+      'conclusion',
+      conclusion,
+      { x: 10, y: barY, w: 80, h: barH },
+      {
+        variant: 'body',
+        fontSize: 2.4,
+        fontWeight: 700,
+        textColor: p.onAccent,
+        align: 'center',
+        valign: 'middle',
+      },
+    ),
   ])
 }
 
@@ -1783,36 +2686,88 @@ function composeHook(p: LayoutPalette, content: SlideLayoutContent): SlideElemen
   const pillsTop = 46
   return compact([
     shapeEl('hook-bar', { x: 8, y: 13, w: 0.7, h: 74 }, p.accent),
-    p.text('kicker', content.kicker, { x: 11, y: 12, w: 50, h: 6 }, {
-      variant: 'body', fontSize: 1.7, fontWeight: 600, textColor: p.ink,
-    }),
+    p.text(
+      'kicker',
+      content.kicker,
+      { x: 11, y: 12, w: 50, h: 6 },
+      {
+        variant: 'body',
+        fontSize: 1.7,
+        fontWeight: 600,
+        textColor: p.ink,
+      },
+    ),
     ...titleEls(p, content.title, { x: 11, y: 18, w: 50, h: 14 }, [3.4, 3.0, 2.7], false),
-    p.text('body', body, { x: 11, y: 36, w: 50, h: 52 }, {
-      variant: 'title', fontSize: 3.3, fontWeight: 600, textColor: p.fg, valign: 'top',
-    }),
+    p.text(
+      'body',
+      body,
+      { x: 11, y: 36, w: 50, h: 52 },
+      {
+        variant: 'title',
+        fontSize: 3.3,
+        fontWeight: 600,
+        textColor: p.fg,
+        valign: 'top',
+      },
+    ),
     shapeEl('hook-panel', { x: 66, y: 11, w: 27, h: 80 }, p.panel, 'round'),
     ...(graphic
       ? graphicPlate('hook-graphic', graphic, art, p)
-      : [iconEl('hook-icon', pickSlideAsset(`${content.title ?? ''} ${body}`) ?? 'idea', art, p.accent)]),
+      : [
+          iconEl(
+            'hook-icon',
+            pickSlideAsset(`${content.title ?? ''} ${body}`) ?? 'idea',
+            art,
+            p.accent,
+          ),
+        ]),
     pills.length
-      ? p.text('hook-label', 'GỢI Ý', { x: 68.5, y: 40.5, w: 22, h: 4.5 }, {
-          variant: 'body', fontSize: 1.5, fontWeight: 700, textColor: p.ink, letterSpacing: 0.12, align: 'center',
-        })
+      ? p.text(
+          'hook-label',
+          'GỢI Ý',
+          { x: 68.5, y: 40.5, w: 22, h: 4.5 },
+          {
+            variant: 'body',
+            fontSize: 1.5,
+            fontWeight: 700,
+            textColor: p.ink,
+            letterSpacing: 0.12,
+            align: 'center',
+          },
+        )
       : null,
     ...pills.flatMap((pill, index) => {
       const y = pillsTop + index * (pillH + 2)
       return [
         shapeEl(`pill-${index + 1}`, { x: 68.5, y, w: 22, h: pillH }, p.background, 'round'),
-        p.text(`card-${index + 1}`, pill, { x: 69.5, y, w: 20, h: pillH }, {
-          variant: 'body', fontSize: 1.8, fontWeight: 600, textColor: p.fg, align: 'center', valign: 'middle',
-        }),
+        p.text(
+          `card-${index + 1}`,
+          pill,
+          { x: 69.5, y, w: 20, h: pillH },
+          {
+            variant: 'body',
+            fontSize: 1.8,
+            fontWeight: 600,
+            textColor: p.fg,
+            align: 'center',
+            valign: 'middle',
+          },
+        ),
       ]
     }),
   ])
 }
 
 /** Đường cong nối hai điểm (toạ độ % khung): S-curve tiếp tuyến ngang, vẽ bằng SVG ở renderer. */
-function connectorEl(id: string, x1: number, y1: number, x2: number, y2: number, color: string, width = 3): SlideElement {
+function connectorEl(
+  id: string,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  color: string,
+  width = 3,
+): SlideElement {
   const [xl, yl, xr, yr] = x1 <= x2 ? [x1, y1, x2, y2] : [x2, y2, x1, y1]
   return {
     id,
@@ -1863,20 +2818,32 @@ function composeMindmap(p: LayoutPalette, content: SlideLayoutContent): SlideEle
   const nodeW = long ? 26 : 18
   const nodeH = long ? 28 : 16
   const nodeSize =
-    [2.2, 1.9, 1.6, 1.4, 1.2].find((s) => textBoxHeight(center, nodeW - 2, s, 1.25, { weight: 700 }) <= nodeH - 2) ?? 1.2
+    [2.2, 1.9, 1.6, 1.4, 1.2].find(
+      (s) => textBoxHeight(center, nodeW - 2, s, 1.25, { weight: 700 }) <= nodeH - 2,
+    ) ?? 1.2
   const els: SlideElement[] = []
   const nodes: Array<SlideElement | null> = []
 
-  const place = (side: 'right' | 'left', list: Array<{ branch: ReturnType<typeof parseBranch>; index: number }>) => {
+  const place = (
+    side: 'right' | 'left',
+    list: Array<{ branch: ReturnType<typeof parseBranch>; index: number }>,
+  ) => {
     const slot = area / list.length
     const x = side === 'right' ? 100 - 6 - colW : 6
     list.forEach(({ branch, index }, k) => {
       const color = colors[index % colors.length]
-      const size = [1.6, 1.45, 1.3].find(
-        (s) => !branch.children.length || textBoxHeight(branch.children.join('\n'), colW - 1, s, 1.35, { weight: 500 }) <= slot - labelH - 3,
-      ) ?? 1.3
+      const size =
+        [1.6, 1.45, 1.3].find(
+          (s) =>
+            !branch.children.length ||
+            textBoxHeight(branch.children.join('\n'), colW - 1, s, 1.35, { weight: 500 }) <=
+              slot - labelH - 3,
+        ) ?? 1.3
       const kidsH = branch.children.length
-        ? Math.min(slot - labelH - 3, textBoxHeight(branch.children.join('\n'), colW - 1, size, 1.35, { weight: 500 }))
+        ? Math.min(
+            slot - labelH - 3,
+            textBoxHeight(branch.children.join('\n'), colW - 1, size, 1.35, { weight: 500 }),
+          )
         : 0
       const block = labelH + (kidsH ? 1 + kidsH : 0)
       const y = top + slot * k + (slot - block) / 2
@@ -1886,16 +2853,45 @@ function composeMindmap(p: LayoutPalette, content: SlideLayoutContent): SlideEle
           : connectorEl(`link-${index + 1}`, x + colW, y + labelH / 2, 50 - nodeW / 2, cy, color),
       )
       nodes.push(
-        { ...shapeEl(`card-${index + 1}-box`, { x, y, w: colW, h: labelH }, mixHex(color, p.background, 0.8), 'round'), radius: 14, border: 2, borderColor: color, shadow: false },
-        p.text(`card-${index + 1}-heading`, branch.label, { x: x + 1, y, w: colW - 2, h: labelH }, {
-          variant: 'body', fontSize: 1.9, fontWeight: 700, textColor: p.fg, align: 'center', valign: 'middle',
-        }),
+        {
+          ...shapeEl(
+            `card-${index + 1}-box`,
+            { x, y, w: colW, h: labelH },
+            mixHex(color, p.background, 0.8),
+            'round',
+          ),
+          radius: 14,
+          border: 2,
+          borderColor: color,
+          shadow: false,
+        },
+        p.text(
+          `card-${index + 1}-heading`,
+          branch.label,
+          { x: x + 1, y, w: colW - 2, h: labelH },
+          {
+            variant: 'body',
+            fontSize: 1.9,
+            fontWeight: 700,
+            textColor: p.fg,
+            align: 'center',
+            valign: 'middle',
+          },
+        ),
       )
       if (branch.children.length) {
         nodes.push(
-          p.text(`card-${index + 1}`, branch.children.map((c) => `• ${c}`).join('\n'), { x: x + 0.5, y: y + labelH + 1, w: colW - 1, h: kidsH }, {
-            variant: 'body', fontSize: size, textColor: p.fg, align: side === 'right' ? 'left' : 'right',
-          }),
+          p.text(
+            `card-${index + 1}`,
+            branch.children.map((c) => `• ${c}`).join('\n'),
+            { x: x + 0.5, y: y + labelH + 1, w: colW - 1, h: kidsH },
+            {
+              variant: 'body',
+              fontSize: size,
+              textColor: p.fg,
+              align: side === 'right' ? 'left' : 'right',
+            },
+          ),
         )
       }
     })
@@ -1907,10 +2903,29 @@ function composeMindmap(p: LayoutPalette, content: SlideLayoutContent): SlideEle
   return compact([
     ...header,
     ...els,
-    { ...shapeEl('center-node', { x: 50 - nodeW / 2, y: cy - nodeH / 2, w: nodeW, h: nodeH }, p.accent, 'round'), radius: 40, shadow: false },
-    p.text('body', center, { x: 51 - nodeW / 2, y: cy - nodeH / 2, w: nodeW - 2, h: nodeH }, {
-      variant: 'body', fontSize: nodeSize, fontWeight: 700, textColor: p.onAccent, align: 'center', valign: 'middle',
-    }),
+    {
+      ...shapeEl(
+        'center-node',
+        { x: 50 - nodeW / 2, y: cy - nodeH / 2, w: nodeW, h: nodeH },
+        p.accent,
+        'round',
+      ),
+      radius: 40,
+      shadow: false,
+    },
+    p.text(
+      'body',
+      center,
+      { x: 51 - nodeW / 2, y: cy - nodeH / 2, w: nodeW - 2, h: nodeH },
+      {
+        variant: 'body',
+        fontSize: nodeSize,
+        fontWeight: 700,
+        textColor: p.onAccent,
+        align: 'center',
+        valign: 'middle',
+      },
+    ),
     ...nodes,
   ])
 }
@@ -1947,10 +2962,17 @@ function composeStatic(
   const palette = paletteOf(resolved, tone && isTone(tone) ? tone : defaultTone(id))
   const elements = withKitDecor(id, composeById(id, palette, content), content, palette)
   if (!elements.length) return elements
-  return withSlideCredit(elements, creditElement(content.credit, id === 'photo-full' ? PHOTO_MUTED : palette.muted))
+  return withSlideCredit(
+    elements,
+    creditElement(content.credit, id === 'photo-full' ? PHOTO_MUTED : palette.muted),
+  )
 }
 
-function composeById(id: SlideLayoutId, palette: LayoutPalette, content: SlideLayoutContent): SlideElement[] {
+function composeById(
+  id: SlideLayoutId,
+  palette: LayoutPalette,
+  content: SlideLayoutContent,
+): SlideElement[] {
   switch (id) {
     case 'title':
       return composeTitle(palette, content)
@@ -2017,33 +3039,104 @@ function composeById(id: SlideLayoutId, palette: LayoutPalette, content: SlideLa
  * Nội dung: lấy từ slide hiện có + mẫu cho layout
  * ------------------------------------------------------------------ */
 const RESERVED = new Set([
-  'title', 'kicker', 'subtitle', 'quote', 'author', 'mark',
-  'bullets', 'body', 'body-2', 'question', 'left-title', 'right-title', 'bullet-anchor-mark',
-  'problem', 'problem-label', 'conclusion', 'answer', 'center-node',
-  'credit', 'bignum-value', 'bignum-label', 'photo-caption', 'photo-caption-2',
+  'title',
+  'kicker',
+  'subtitle',
+  'quote',
+  'author',
+  'mark',
+  'bullets',
+  'body',
+  'body-2',
+  'question',
+  'left-title',
+  'right-title',
+  'bullet-anchor-mark',
+  'problem',
+  'problem-label',
+  'conclusion',
+  'answer',
+  'center-node',
+  'credit',
+  'bignum-value',
+  'bignum-label',
+  'photo-caption',
+  'photo-caption-2',
 ])
-const NUMBERED = /^(card|option|stat|step|item|node|left|right|link)-\d+(-value|-label|-index|-heading|-box)?$/
+const NUMBERED =
+  /^(card|option|stat|step|item|node|left|right|link)-\d+(-value|-label|-index|-heading|-box)?$/
 const BAR_TEXT = /^bar-\d+-(label|value)$/
 const isRoleId = (id: string): boolean => RESERVED.has(id) || NUMBERED.test(id) || BAR_TEXT.test(id)
 
 const SKIN_DECOR_IDS = new Set([
-  'kicker-bg', 'title-left-accent', 'section-rule', 'closing-accent',
-  'split-left-block', 'left-tag', 'neon-line', 'terminal-prompt',
-  'flourish-top', 'flourish-bot', 'star-badge', 'title-box',
-  'sub-box', 'closing-box', 'chalk-line',
+  'kicker-bg',
+  'title-left-accent',
+  'section-rule',
+  'closing-accent',
+  'split-left-block',
+  'left-tag',
+  'neon-line',
+  'terminal-prompt',
+  'flourish-top',
+  'flourish-bot',
+  'star-badge',
+  'title-box',
+  'sub-box',
+  'closing-box',
+  'chalk-line',
 ])
 const STATIC_LAYOUT_IDS = new Set([
-  'accent-band', 'accent-bar', 'accent-line', 'accent-rail', 'accent-rule',
-  'answer-bar', 'answer-stripe', 'bullet-graphic', 'bullet-graphic-plate',
-  'closing-graphic', 'conclusion-bar', 'content-panel', 'divider',
-  'hero-graphic', 'hero-graphic-plate', 'hero-icon', 'hero-image', 'hero-panel',
-  'hook-bar', 'hook-graphic', 'hook-graphic-plate', 'hook-icon', 'hook-label', 'hook-panel',
-  'image-1', 'image-2', 'image-panel', 'photo-scrim', 'photo-credit-scrim', 'bars-axis', 'left-panel', 'problem-panel', 'quote-bar',
-  'right-panel', 'rule', 'scrim', 'section-graphic', 'section-graphic-plate',
-  'section-panel', 'section-rule', 'side-panel', 'table', 'timeline-line',
-  'timeline-panel', 'title-rule', 'vs-badge', 'decor-1', 'decor-2',
+  'accent-band',
+  'accent-bar',
+  'accent-line',
+  'accent-rail',
+  'accent-rule',
+  'answer-bar',
+  'answer-stripe',
+  'bullet-graphic',
+  'bullet-graphic-plate',
+  'closing-graphic',
+  'conclusion-bar',
+  'content-panel',
+  'divider',
+  'hero-graphic',
+  'hero-graphic-plate',
+  'hero-icon',
+  'hero-image',
+  'hero-panel',
+  'hook-bar',
+  'hook-graphic',
+  'hook-graphic-plate',
+  'hook-icon',
+  'hook-label',
+  'hook-panel',
+  'image-1',
+  'image-2',
+  'image-panel',
+  'photo-scrim',
+  'photo-credit-scrim',
+  'bars-axis',
+  'left-panel',
+  'problem-panel',
+  'quote-bar',
+  'right-panel',
+  'rule',
+  'scrim',
+  'section-graphic',
+  'section-graphic-plate',
+  'section-panel',
+  'section-rule',
+  'side-panel',
+  'table',
+  'timeline-line',
+  'timeline-panel',
+  'title-rule',
+  'vs-badge',
+  'decor-1',
+  'decor-2',
 ])
-const NUMBERED_LAYOUT_STRUCT = /^(card|stat|step|node|pill|divider|decor|decor-kit|left|right)-\d+(-[a-z-]+)?$/
+const NUMBERED_LAYOUT_STRUCT =
+  /^(card|stat|step|node|pill|divider|decor|decor-kit|left|right)-\d+(-[a-z-]+)?$/
 
 /** Phần tử trang trí/motif do skin hoặc decor kit thêm vào (không phải nội dung người dùng). */
 export const isSkinDecorId = (id: string): boolean =>
@@ -2054,14 +3147,16 @@ export const isDecorElement = (el: SlideElement): boolean =>
 
 /** Phần tử được sinh ra bởi layout engine (kể cả text vai trò lẫn hình khối nền/viền của layout). */
 export const isLayoutOwnedId = (id: string): boolean =>
-  isRoleId(id) || NUMBERED_LAYOUT_STRUCT.test(id) || /^bar-\d+(-custom)?$/.test(id) || STATIC_LAYOUT_IDS.has(id)
+  isRoleId(id) ||
+  NUMBERED_LAYOUT_STRUCT.test(id) ||
+  /^bar-\d+(-custom)?$/.test(id) ||
+  STATIC_LAYOUT_IDS.has(id)
 
 /** Đọc nội dung slide đang có để đổi layout mà không mất chữ/ảnh/bảng. */
 export function contentFromSlide(slide: Slide): SlideLayoutContent {
   const contentEls = slide.elements.filter((el) => !isDecorElement(el))
   const texts = contentEls.filter(
-    (el): el is SlideElement & { text: string } =>
-      el.type === 'text' && Boolean(el.text?.trim()),
+    (el): el is SlideElement & { text: string } => el.type === 'text' && Boolean(el.text?.trim()),
   )
   const byId = (id: string) => texts.find((el) => el.id === id)?.text
   // deck mặc định cũ: phần tử chữ đầu tiên không giữ vai trò nào → coi là tiêu đề
@@ -2069,22 +3164,26 @@ export function contentFromSlide(slide: Slide): SlideLayoutContent {
     texts.find((el) => el.id === 'title') ??
     texts.find((el) => el.variant === 'title' && !isRoleId(el.id)) ??
     texts.find((el) => !isRoleId(el.id))
-  const isComposedLayout = Boolean(slide.layout && isLayoutId(slide.layout)) && texts.some((el) => isRoleId(el.id))
+  const isComposedLayout =
+    Boolean(slide.layout && isLayoutId(slide.layout)) && texts.some((el) => isRoleId(el.id))
   const bullets = [
     ...linesOf(byId('bullets')),
     ...(isComposedLayout
       ? []
-      : texts
-          .filter((el) => el !== titleEl && !isRoleId(el.id))
-          .flatMap((el) => linesOf(el.text))),
+      : texts.filter((el) => el !== titleEl && !isRoleId(el.id)).flatMap((el) => linesOf(el.text))),
   ]
 
   const optionEls = contentEls
-    .filter((el): el is SlideElement & { text: string } => el.type === 'text' && /^option-\d+$/.test(el.id))
+    .filter(
+      (el): el is SlideElement & { text: string } =>
+        el.type === 'text' && /^option-\d+$/.test(el.id),
+    )
     .sort((a, b) => suffixOf(a.id) - suffixOf(b.id))
   const fills = optionEls.map((el) => el.fill)
   const uniqueFill =
-    optionEls.length > 1 ? fills.find((fill) => fill && fills.filter((f) => f === fill).length === 1) : undefined
+    optionEls.length > 1
+      ? fills.find((fill) => fill && fills.filter((f) => f === fill).length === 1)
+      : undefined
 
   const statEls = texts
     .filter((el) => /^stat-\d+-value$/.test(el.id))
@@ -2096,16 +3195,16 @@ export function contentFromSlide(slide: Slide): SlideLayoutContent {
   const images = contentEls.filter((el) => el.type === 'image')
   const imageEl = images.find((el) => el.id === 'image-1') ?? images[0]
   const image2 = images.find((el) => el.id === 'image-2') ?? images.find((el) => el !== imageEl)
-  const bars = texts.filter((el) => /^bar-\d+-value$/.test(el.id)).flatMap((el) => {
-    const id = el.id.replace(/-value$/, '')
-    const label = byId(id + '-label')
-    const value = Number(el.text.replace(/\./g, '').replace(',', '.'))
-    const color = contentEls.find((item) => item.id === id + '-custom')?.fill
-    return label && Number.isFinite(value) && value >= 0 ? [{ label, value, color }] : []
-  })
-  const graphicEl = contentEls.find(
-    (el) => el.type === 'graphic' && isGraphicId(el.graphicId),
-  )
+  const bars = texts
+    .filter((el) => /^bar-\d+-value$/.test(el.id))
+    .flatMap((el) => {
+      const id = el.id.replace(/-value$/, '')
+      const label = byId(id + '-label')
+      const value = Number(el.text.replace(/\./g, '').replace(',', '.'))
+      const color = contentEls.find((item) => item.id === id + '-custom')?.fill
+      return label && Number.isFinite(value) && value >= 0 ? [{ label, value, color }] : []
+    })
+  const graphicEl = contentEls.find((el) => el.type === 'graphic' && isGraphicId(el.graphicId))
 
   // two-column có nhãn: mỗi ý là `left-N` (+ `left-N-heading`) — ghép lại "nhãn: mô tả"
   const sideItems = (side: 'left' | 'right'): string[] | undefined => {
@@ -2172,45 +3271,53 @@ export function contentFromSlide(slide: Slide): SlideLayoutContent {
     options: optionEls.length
       ? optionEls.map((el) => el.text.replace(/^[A-D]\.\s*/i, ''))
       : undefined,
-    answer: answerMatch ? answerMatch[1].toUpperCase().charCodeAt(0) - 65 : uniqueFill ? fills.indexOf(uniqueFill) : undefined,
+    answer: answerMatch
+      ? answerMatch[1].toUpperCase().charCodeAt(0) - 65
+      : uniqueFill
+        ? fills.indexOf(uniqueFill)
+        : undefined,
   }
 }
 
 const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
-  title: { kicker: 'BÀI GIẢNG', title: 'Tiêu đề bài giảng', subtitle: 'Môn học · Lớp' },
-  section: { kicker: 'PHẦN 1', title: 'Mở đầu', subtitle: 'Nội dung chính của phần này' },
-  statement: {
+  'title': { kicker: 'BÀI GIẢNG', title: 'Tiêu đề bài giảng', subtitle: 'Môn học · Lớp' },
+  'section': { kicker: 'PHẦN 1', title: 'Mở đầu', subtitle: 'Nội dung chính của phần này' },
+  'statement': {
     kicker: 'Ý CHÍNH',
     body: 'Một ý lớn, một thông điệp duy nhất.',
     author: 'Giảng viên',
   },
-  bullets: {
+  'bullets': {
     title: 'Nội dung chính',
     bullets: ['Ý chính thứ nhất', 'Ý chính thứ hai', 'Ý chính thứ ba'],
   },
-  cards: { title: 'Ba điểm cần nhớ', items: ['Khái niệm', 'Ví dụ', 'Bài tập'] },
+  'cards': { title: 'Ba điểm cần nhớ', items: ['Khái niệm', 'Ví dụ', 'Bài tập'] },
   'two-column': {
     title: 'So sánh hai mặt',
     left: ['Đặc điểm thứ nhất', 'Đặc điểm thứ hai'],
     right: ['Đặc điểm thứ ba', 'Đặc điểm thứ tư'],
   },
-  comparison: {
+  'comparison': {
     title: 'Trước và sau',
     leftTitle: 'Trước',
     left: ['Cách làm cũ', 'Mất thời gian'],
     rightTitle: 'Sau',
     right: ['Cách làm mới', 'Nhanh và rõ'],
   },
-  quote: { quote: 'Học đi đôi với hành.', author: 'Tác giả' },
-  closing: { title: 'Cảm ơn đã theo dõi', subtitle: 'Câu hỏi và thảo luận' },
-  agenda: {
+  'quote': { quote: 'Học đi đôi với hành.', author: 'Tác giả' },
+  'closing': { title: 'Cảm ơn đã theo dõi', subtitle: 'Câu hỏi và thảo luận' },
+  'agenda': {
     kicker: 'NỘI DUNG',
     title: 'Bài học hôm nay',
     items: ['Khởi động', 'Khám phá', 'Luyện tập', 'Vận dụng'],
   },
-  table: {
+  'table': {
     title: 'Bảng tổng hợp',
-    rows: [['Nội dung', 'Ghi chú'], ['Ý thứ nhất', '…'], ['Ý thứ hai', '…']],
+    rows: [
+      ['Nội dung', 'Ghi chú'],
+      ['Ý thứ nhất', '…'],
+      ['Ý thứ hai', '…'],
+    ],
   },
   'image-left': {
     title: 'Hình minh hoạ',
@@ -2224,7 +3331,7 @@ const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
     title: 'Hình ảnh minh hoạ',
     body: 'Chú thích ngắn cho hình.',
   },
-  stats: {
+  'stats': {
     title: 'Con số nổi bật',
     stats: [
       { value: '85%', label: 'Tỉ lệ đạt' },
@@ -2232,7 +3339,7 @@ const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
       { value: '3', label: 'Mức độ' },
     ],
   },
-  bignum: {
+  'bignum': {
     kicker: 'MỐC THỜI GIAN',
     value: '2021',
     label: 'Một dấu mốc mới',
@@ -2247,11 +3354,14 @@ const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
     caption: 'Ảnh tư liệu · năm 1921',
     caption2: 'Cùng góc nhìn · năm 2019',
   },
-  bars: {
+  'bars': {
     title: 'Lượng khách theo năm',
-    bars: [{ label: '2022', value: 140000 }, { label: '2023', value: 70000 }],
+    bars: [
+      { label: '2022', value: 140000 },
+      { label: '2023', value: 70000 },
+    ],
   },
-  rules: {
+  'rules': {
     kicker: 'DÒNG THỜI GIAN',
     title: 'Ba mốc làm nên bước ngoặt',
     stats: [
@@ -2263,9 +3373,12 @@ const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
   'editorial-text': {
     kicker: 'BỐI CẢNH',
     title: 'Một quyết định thay đổi cả cục diện',
-    bullets: ['Đoạn đầu nêu dữ kiện chính của slide.', 'Đoạn hai giải thích vì sao dữ kiện đó quan trọng.'],
+    bullets: [
+      'Đoạn đầu nêu dữ kiện chính của slide.',
+      'Đoạn hai giải thích vì sao dữ kiện đó quan trọng.',
+    ],
   },
-  manifesto: {
+  'manifesto': {
     kicker: 'LUẬN ĐIỂM',
     body: 'Một câu đủ mạnh để cả lớp nhớ.',
     author: 'Nguồn hoặc người nói',
@@ -2277,27 +3390,32 @@ const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
       { value: '12', label: 'Bài học' },
     ],
   },
-  timeline: {
+  'timeline': {
     title: 'Tiến trình bài học',
     steps: ['Khởi động', 'Khám phá', 'Luyện tập', 'Vận dụng'],
   },
-  cycle: {
+  'cycle': {
     title: 'Chu trình học tập',
     steps: ['Trải nghiệm', 'Phân tích', 'Vận dụng', 'Đánh giá'],
   },
-  mindmap: {
+  'mindmap': {
     title: 'Sơ đồ tư duy',
     body: 'Chủ đề trung tâm',
-    items: ['Nhánh một: ý con A; ý con B', 'Nhánh hai: ý con C; ý con D', 'Nhánh ba: ý con E', 'Nhánh bốn: ý con F; ý con G'],
+    items: [
+      'Nhánh một: ý con A; ý con B',
+      'Nhánh hai: ý con C; ý con D',
+      'Nhánh ba: ý con E',
+      'Nhánh bốn: ý con F; ý con G',
+    ],
   },
-  quiz: {
+  'quiz': {
     kicker: 'KIỂM TRA NHANH',
     question: 'Phân số nào dưới đây bằng 1/2?',
     options: ['2/4', '2/3', '3/4', '1/3'],
     answer: 0,
     explanation: 'Rút gọn 2/4 chia cả tử và mẫu cho 2 được 1/2.',
   },
-  example: {
+  'example': {
     title: 'Ví dụ mẫu',
     problem: 'Tìm ƯCLN(24, 36) bằng cách phân tích ra thừa số nguyên tố.',
     steps: [
@@ -2307,7 +3425,7 @@ const DEMO: Record<SlideLayoutId, SlideLayoutContent> = {
     ],
     conclusion: 'Kết quả: ƯCLN(24, 36) = 12',
   },
-  hook: {
+  'hook': {
     kicker: 'KHỞI ĐỘNG',
     title: 'Thử thách mở đầu',
     body: 'Có 18 quyển vở và 24 bút, chia đều vào các túi quà. Chia được nhiều nhất mấy túi?',

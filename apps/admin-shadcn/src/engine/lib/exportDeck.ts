@@ -1,3 +1,8 @@
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+
+import { toDataUrl } from './mediaStore'
+import { firstColor, gradientSvg } from './slideBackground'
 /**
  * Xuất bài giảng ra .pptx (Tệp → Tải xuống file).
  *
@@ -6,22 +11,19 @@
  * — PptxGenJS hiểu % theo kích thước slide 16:9.
  */
 import { readableElements } from './slideContrast'
-import { boldRuns, hasBold, mathToPlain } from './slideMath'
-import { normalizeSlideHref, shouldShowSlideFooter } from './slideFormat'
-import { parseSlideVideo } from './slideVideo'
-import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
-import type { Deck, SlideElement } from '@/engine/store/docs'
-import { elementHeight } from './slideText'
-import { mixHex, normalizeTheme, readableTextOn } from './slideTheme'
 import { ensureFonts, primaryFont, slideFontStack } from './slideFonts'
-import { curvedTextPng } from './slideTextEffects'
-import { slideIconById } from './slideIconLibrary'
+import { normalizeSlideHref, shouldShowSlideFooter } from './slideFormat'
 import { graphicMarkup, loadGraphics } from './slideGraphics'
-import { firstColor, gradientSvg } from './slideBackground'
+import { slideIconById } from './slideIconLibrary'
+import { boldRuns, hasBold, mathToPlain } from './slideMath'
 import { isStrokeOnlyShape, prstOf } from './slidePresets'
 import { photoFrameClip, photoFrameRadius } from './slideShapes'
-import { toDataUrl } from './mediaStore'
+import { elementHeight } from './slideText'
+import { curvedTextPng } from './slideTextEffects'
+import { mixHex, normalizeTheme, readableTextOn } from './slideTheme'
+import { parseSlideVideo } from './slideVideo'
+
+import type { Deck, SlideElement } from '@/engine/store/docs'
 
 const hex = (value: string | undefined, fallback = 'FFFFFF') => {
   const v = (value ?? '').replace('#', '').trim()
@@ -37,23 +39,31 @@ function pptxTextEffects(el: SlideElement, fallback: string) {
   const stroke = el.textStroke
   const gradient = el.textGradient
   return {
-    color: hex(gradient ? mixHex(gradient.from, gradient.to, 0.5) : el.textColor ?? fallback),
+    color: hex(gradient ? mixHex(gradient.from, gradient.to, 0.5) : (el.textColor ?? fallback)),
     ...(stroke?.width ? { outline: { color: hex(stroke.color), size: stroke.width * 0.72 } } : {}),
   }
 }
 
 /** PptxGenJS đặt shadow của addText lên cả hộp. DrawingML hỗ trợ bóng riêng từng run. */
-function applyRunShadows(xml: string, shadows: Map<string, NonNullable<SlideElement['textShadow']>>): string {
+function applyRunShadows(
+  xml: string,
+  shadows: Map<string, NonNullable<SlideElement['textShadow']>>,
+): string {
   if (!shadows.size) return xml
-  return xml.replace(/<p:sp>[\s\S]*?<\/p:sp>/g, shape => {
+  return xml.replace(/<p:sp>[\s\S]*?<\/p:sp>/g, (shape) => {
     const key = shape.match(/<p:cNvPr\b[^>]*\bname="(slide-text-shadow-\d+)"/)?.[1]
     const shadow = key && shadows.get(key)
     if (!shadow) return shape
     const blur = Math.round(Math.max(0, shadow.blur) * 9144)
     const offset = Math.round(Math.hypot(shadow.x, shadow.y) * 9144)
-    const angle = Math.round((Math.atan2(shadow.y, shadow.x) * 180 / Math.PI + 360) % 360 * 60000)
+    const angle = Math.round(
+      (((Math.atan2(shadow.y, shadow.x) * 180) / Math.PI + 360) % 360) * 60000,
+    )
     const effect = `<a:effectLst><a:outerShdw blurRad="${blur}" dist="${offset}" dir="${angle}" algn="ctr" rotWithShape="0"><a:srgbClr val="${hex(shadow.color, '000000')}" /></a:outerShdw></a:effectLst>`
-    return shape.replace(/(<a:rPr\b[^>]*>(?:(?!<\/a:rPr>)[\s\S])*?)(<a:latin\b)/g, (_match, props, latin) => props + effect + latin)
+    return shape.replace(
+      /(<a:rPr\b[^>]*>(?:(?!<\/a:rPr>)[\s\S])*?)(<a:latin\b)/g,
+      (_match, props, latin) => props + effect + latin,
+    )
   })
 }
 
@@ -63,16 +73,22 @@ const pt = (cqw: number) => Math.round(cqw * 7.2 * 10) / 10
 /** toạ độ % của deck → kiểu `Coord` của PptxGenJS (template literal) */
 const pct = (value: number) => `${value}%` as `${number}%`
 
-
 /** Chuyển CSS border-radius (1..4 giá trị mỗi chiều hoặc "X / Y") thành 8 bán kính pixel chuẩn CSS. */
-function parseBorderRadii(spec: string, cw: number, ch: number): [number, number, number, number, number, number, number, number] {
+function parseBorderRadii(
+  spec: string,
+  cw: number,
+  ch: number,
+): [number, number, number, number, number, number, number, number] {
   const [hStr, vStr] = spec.split('/').map((s) => s.trim())
   const expand4 = (raw: string, ref: number) => {
-    const parts = raw.split(/\s+/).filter(Boolean).map((tok) => {
-      if (tok.endsWith('%')) return (parseFloat(tok) / 100) * ref
-      if (tok.endsWith('cqw')) return (parseFloat(tok) / 100) * cw
-      return parseFloat(tok) || 0
-    })
+    const parts = raw
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((tok) => {
+        if (tok.endsWith('%')) return (parseFloat(tok) / 100) * ref
+        if (tok.endsWith('cqw')) return (parseFloat(tok) / 100) * cw
+        return parseFloat(tok) || 0
+      })
     const [a = 0, b = a, c = a, d = b] = parts
     return [a, b, c, d] as const
   }
@@ -86,10 +102,23 @@ function parseBorderRadii(spec: string, cw: number, ch: number): [number, number
     ch / Math.max(1e-6, tlY + blY),
     ch / Math.max(1e-6, trY + brY),
   )
-  return [tlX * scale, tlY * scale, trX * scale, trY * scale, brX * scale, brY * scale, blX * scale, blY * scale]
+  return [
+    tlX * scale,
+    tlY * scale,
+    trX * scale,
+    trY * scale,
+    brX * scale,
+    brY * scale,
+    blX * scale,
+    blY * scale,
+  ]
 }
 
-function buildImagePath(el: Deck['slides'][number]['elements'][number], cw: number, ch: number): Path2D {
+function buildImagePath(
+  el: Deck['slides'][number]['elements'][number],
+  cw: number,
+  ch: number,
+): Path2D {
   const path = new Path2D()
   const clip = photoFrameClip(el.shape)
   const frameRad = photoFrameRadius(el.shape)
@@ -116,7 +145,8 @@ function buildImagePath(el: Deck['slides'][number]['elements'][number], cw: numb
     }
   }
   const cqwPx = cw / Math.max(1, el.w)
-  const radSpec = frameRad ?? (el.radius !== undefined ? `${(el.radius / 10) * cqwPx}px` : `${cqwPx}px`)
+  const radSpec =
+    frameRad ?? (el.radius !== undefined ? `${(el.radius / 10) * cqwPx}px` : `${cqwPx}px`)
   const [tlX, tlY, trX, trY, brX, brY, blX, blY] = parseBorderRadii(radSpec, cw, ch)
   path.moveTo(tlX, 0)
   path.lineTo(cw - trX, 0)
@@ -142,7 +172,13 @@ async function renderImageForPptx(
   defaultBorderColor: string,
 ): Promise<string> {
   if (typeof document === 'undefined') return dataUrl
-  const needsCanvas = Boolean(el.crop || el.imagePosition || el.shape || (el.radius !== undefined ? el.radius > 0 : true) || (el.border ?? 0) > 0)
+  const needsCanvas = Boolean(
+    el.crop ||
+    el.imagePosition ||
+    el.shape ||
+    (el.radius !== undefined ? el.radius > 0 : true) ||
+    (el.border ?? 0) > 0,
+  )
   if (!needsCanvas) return dataUrl
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -181,10 +217,10 @@ async function renderImageForPptx(
       const boxRatio = cw / ch
       if (imgRatio > boxRatio) {
         sw = nh * boxRatio
-        sx = (nw - sw) * (el.imagePosition?.x ?? 50) / 100
+        sx = ((nw - sw) * (el.imagePosition?.x ?? 50)) / 100
       } else if (boxRatio > imgRatio) {
         sh = nw / boxRatio
-        sy = (nh - sh) * (el.imagePosition?.y ?? 50) / 100
+        sy = ((nh - sh) * (el.imagePosition?.y ?? 50)) / 100
       }
     }
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch)
@@ -210,23 +246,34 @@ async function renderImageForPptx(
 export const dedupeParagraphProps = (xml: string): string =>
   xml.replace(/<a:p>[\s\S]*?<\/a:p>/g, (para) => {
     let seen = false
-    return para.replace(/<a:pPr\b[^>]*?(?:\/>|>[\s\S]*?<\/a:pPr>)/g, (m) => (seen ? '' : ((seen = true), m)))
+    return para.replace(/<a:pPr\b[^>]*?(?:\/>|>[\s\S]*?<\/a:pPr>)/g, (m) =>
+      seen ? '' : ((seen = true), m),
+    )
   })
 
 export async function exportDeckPptx(deck: Deck): Promise<void> {
   const data = await buildDeckPptx(deck)
   const name = deck.title.replace(/[\\/:*?"<>|]+/g, '-').trim() || 'bai-giang'
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' }))
+  a.href = URL.createObjectURL(
+    new Blob([data], {
+      type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    }),
+  )
   a.download = `${name}.pptx`
   a.click()
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
 }
 
 export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
-  if (deck.format === 'html') throw new Error('Bài giảng HTML chỉ trình chiếu trên web, không xuất PowerPoint được.')
+  if (deck.format === 'html')
+    throw new Error('Bài giảng HTML chỉ trình chiếu trên web, không xuất PowerPoint được.')
   const theme = normalizeTheme(deck.theme)
-  const [{ default: PptxGenJS }] = await Promise.all([import('pptxgenjs'), loadGraphics(), ensureFonts({ theme, slides: deck.slides })])
+  const [{ default: PptxGenJS }] = await Promise.all([
+    import('pptxgenjs'),
+    loadGraphics(),
+    ensureFonts({ theme, slides: deck.slides }),
+  ])
   const pptx = new PptxGenJS()
   pptx.layout = 'LAYOUT_16x9'
   pptx.title = deck.title
@@ -238,20 +285,40 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
     return name
   }
 
-  const slides = deck.slides.length > 0 ? deck.slides : [{ id: 'blank', background: '#ffffff', elements: [] }]
+  const slides =
+    deck.slides.length > 0 ? deck.slides : [{ id: 'blank', background: '#ffffff', elements: [] }]
   for (const [slideIndex, source] of slides.entries()) {
     const slide = pptx.addSlide()
     // nền gradient: PPTX chỉ có nền màu đặc nên đặt màu đầu làm nền dự phòng rồi phủ ảnh gradient toàn trang
     slide.background = { color: hex(firstColor(source.background)) }
     const gradient = gradientSvg(source.background)
-    if (gradient) slide.addImage({ data: `data:image/svg+xml;base64,${btoa(gradient)}`, x: 0, y: 0, w: '100%', h: '100%' })
+    if (gradient)
+      slide.addImage({
+        data: `data:image/svg+xml;base64,${btoa(gradient)}`,
+        x: 0,
+        y: 0,
+        w: '100%',
+        h: '100%',
+      })
     if (source.bgImage) {
       // ảnh đã cắt sẵn 16:9; lớp phủ cùng màu trung bình 30% như bản xem (`slideBgStyle`)
       slide.addImage({ data: await toDataUrl(source.bgImage), x: 0, y: 0, w: '100%', h: '100%' })
-      slide.addShape('rect' as never, { x: 0, y: 0, w: '100%', h: '100%', fill: { color: hex(source.background), transparency: 70 }, line: { type: 'none' } } as never)
+      slide.addShape(
+        'rect' as never,
+        {
+          x: 0,
+          y: 0,
+          w: '100%',
+          h: '100%',
+          fill: { color: hex(source.background), transparency: 70 },
+          line: { type: 'none' },
+        } as never,
+      )
     }
 
-    const elements = [...readableElements(source, deck.theme)].sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+    const elements = [...readableElements(source, deck.theme)].sort(
+      (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0),
+    )
     for (const el of elements) {
       const inheritedFace = el.variant === 'body' ? theme.fontBody : theme.fontHeading
       const box = {
@@ -261,15 +328,32 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
         h: pct(el.type === 'text' ? elementHeight(el, inheritedFace) : el.h),
       }
       const rotate = el.rotation ?? 0
-      const gradientFill = el.type === 'shape' && el.fill?.startsWith('linear-gradient(') ? gradientSvg(el.fill) : null
+      const gradientFill =
+        el.type === 'shape' && el.fill?.startsWith('linear-gradient(') ? gradientSvg(el.fill) : null
       if (el.type === 'text') {
         const face = el.fontFamily ?? inheritedFace
-        const png = el.textArc ? curvedTextPng(el, slideFontStack(face), el.textColor ?? theme.fg) : undefined
+        const png = el.textArc
+          ? curvedTextPng(el, slideFontStack(face), el.textColor ?? theme.fg)
+          : undefined
         if (png) {
           const fill = el.fill
-          if (fill) slide.addShape('rect', { ...box, rotate, fill: { color: hex(fill) }, line: { type: 'none' } })
+          if (fill)
+            slide.addShape('rect', {
+              ...box,
+              rotate,
+              fill: { color: hex(fill) },
+              line: { type: 'none' },
+            })
           const href = el.href && normalizeSlideHref(el.href)
-          slide.addImage({ ...box, data: png, rotate, flipH: el.flipX, flipV: el.flipY, hyperlink: href ? { url: href } : undefined, altText: el.text })
+          slide.addImage({
+            ...box,
+            data: png,
+            rotate,
+            flipH: el.flipX,
+            flipV: el.flipY,
+            hyperlink: href ? { url: href } : undefined,
+            altText: el.text,
+          })
           continue
         }
         const baseBold = (el.fontWeight ?? 400) >= 600
@@ -283,7 +367,8 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
         const hyperlink = safeHref ? { url: safeHref } : undefined
         const highlight = el.highlight ? hex(el.highlight) : undefined
         const strike = el.textDecoration === 'line-through' ? ('sngStrike' as const) : undefined
-        const underline = el.textDecoration === 'underline' ? ({ style: 'sng' } as const) : undefined
+        const underline =
+          el.textDecoration === 'underline' ? ({ style: 'sng' } as const) : undefined
         // Mỗi dòng là một đoạn, chữ **đậm** là run riêng. Mọi run mang cùng `align` và dòng cuối có
         // `breakLine`: PptxGenJS tách đoạn mỗi khi `align` của run đổi → trước đây chữ đậm nhảy xuống dòng.
         const runs: {
@@ -298,7 +383,9 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
             underline?: { style: 'sng' }
           }
         }[] = []
-        for (const run of hasBold(el.text) ? boldRuns(el.text ?? '') : [{ text: el.text ?? '', bold: false }]) {
+        for (const run of hasBold(el.text)
+          ? boldRuns(el.text ?? '')
+          : [{ text: el.text ?? '', bold: false }]) {
           mathToPlain(run.text)
             .split('\n')
             .forEach((part, i) => {
@@ -340,7 +427,14 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
         })
       } else if (el.type === 'icon' && slideIconById(el.assetId)) {
         const Icon = slideIconById(el.assetId)!
-        const svg = renderToStaticMarkup(createElement(Icon, { xmlns: 'http://www.w3.org/2000/svg', weight: 'duotone', color: `#${hex(el.textColor ?? deck.theme.accent)}`, size: 256 }))
+        const svg = renderToStaticMarkup(
+          createElement(Icon, {
+            xmlns: 'http://www.w3.org/2000/svg',
+            weight: 'duotone',
+            color: `#${hex(el.textColor ?? deck.theme.accent)}`,
+            size: 256,
+          }),
+        )
         // icon vuông: đặt hình vuông nằm giữa hộp như bản web, không kéo giãn theo hộp chữ nhật (slide 10 × 5,625in)
         const w = (el.w / 100) * 10
         const h = (el.h / 100) * 5.625
@@ -355,7 +449,11 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
           ...(el.href ? { hyperlink: { url: el.href } } : {}),
         })
       } else if (el.type === 'graphic' && el.graphicId) {
-        const svg = graphicMarkup(el.graphicId, `#${hex(el.textColor ?? deck.theme.fg)}`, el.fill ? `#${hex(el.fill)}` : undefined)
+        const svg = graphicMarkup(
+          el.graphicId,
+          `#${hex(el.textColor ?? deck.theme.fg)}`,
+          el.fill ? `#${hex(el.fill)}` : undefined,
+        )
         if (svg) {
           slide.addImage({
             ...box,
@@ -365,29 +463,38 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
           })
         }
       } else if (el.type === 'connector') {
-        slide.addShape('line' as never, {
-          ...box,
-          flipV: el.flipY,
-          line: { color: hex(el.borderColor ?? deck.theme.accent), width: (el.border ?? 3) * 0.75 },
-        } as never)
+        slide.addShape(
+          'line' as never,
+          {
+            ...box,
+            flipV: el.flipY,
+            line: {
+              color: hex(el.borderColor ?? deck.theme.accent),
+              width: (el.border ?? 3) * 0.75,
+            },
+          } as never,
+        )
       } else if (gradientFill) {
         slide.addImage({ ...box, rotate, data: `data:image/svg+xml;base64,${btoa(gradientFill)}` })
       } else if (el.type === 'shape' && el.shape === 'line') {
         // đường thẳng: chạy dọc giữa hộp; đầu mũi tên là thuộc tính của nét
         const arrow = el.lineArrow ?? 'none'
-        slide.addShape('line' as never, {
-          x: box.x,
-          y: pct(el.y + el.h / 2),
-          w: box.w,
-          h: pct(0),
-          rotate,
-          line: {
-            color: hex(el.fill ?? deck.theme.accent),
-            width: (el.border ?? 4) * 0.72,
-            ...(arrow === 'both' ? { beginArrowType: 'triangle' } : {}),
-            ...(arrow !== 'none' ? { endArrowType: 'triangle' } : {}),
-          },
-        } as never)
+        slide.addShape(
+          'line' as never,
+          {
+            x: box.x,
+            y: pct(el.y + el.h / 2),
+            w: box.w,
+            h: pct(0),
+            rotate,
+            line: {
+              color: hex(el.fill ?? deck.theme.accent),
+              width: (el.border ?? 4) * 0.72,
+              ...(arrow === 'both' ? { beginArrowType: 'triangle' } : {}),
+              ...(arrow !== 'none' ? { endArrowType: 'triangle' } : {}),
+            },
+          } as never,
+        )
       } else if (el.type === 'shape') {
         // viền/độ đục/bóng theo bản xem (canvas 1000px ↔ slide 720pt nên 1px ≈ 0,72pt)
         const fill = hex(el.fill ?? deck.theme.accent)
@@ -396,22 +503,61 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
           ...box,
           rotate,
           fill: { color: fill, transparency: Math.round((1 - (el.opacity ?? 1)) * 100) },
-          line: el.border ? { color: hex(el.borderColor ?? '#111827'), width: el.border * 0.72 } : { type: 'none' },
+          line: el.border
+            ? { color: hex(el.borderColor ?? '#111827'), width: el.border * 0.72 }
+            : { type: 'none' },
           ...(el.href ? { hyperlink: { url: el.href } } : {}),
-          ...(level > 0 ? { shadow: { type: 'outer', blur: [0, 4, 8, 14][level], offset: [0, 2, 4, 6][level], angle: 90, color: '0F172A', opacity: [0, 0.25, 0.3, 0.4][level] } } : {}),
+          ...(level > 0
+            ? {
+                shadow: {
+                  type: 'outer',
+                  blur: [0, 4, 8, 14][level],
+                  offset: [0, 2, 4, 6][level],
+                  angle: 90,
+                  color: '0F172A',
+                  opacity: [0, 0.25, 0.3, 0.4][level],
+                },
+              }
+            : {}),
         }
         const kind = prstOf(el.shape) as never
         if (isStrokeOnlyShape(el.shape)) {
           // đường nối gấp khúc/cong: chỉ có nét, màu nét lấy từ màu tô
-          slide.addShape(kind, { ...box, rotate, line: { color: fill, width: Math.max(el.border ?? 0, 3) * 0.72 }, ...(el.href ? { hyperlink: { url: el.href } } : {}) } as never)
+          slide.addShape(kind, {
+            ...box,
+            rotate,
+            line: { color: fill, width: Math.max(el.border ?? 0, 3) * 0.72 },
+            ...(el.href ? { hyperlink: { url: el.href } } : {}),
+          } as never)
           continue
         }
         if (el.text?.trim()) {
-          const curvedBox = { ...el, w: el.w * 0.76, h: el.h * 0.8, align: el.align ?? 'center' as const }
-          const png = el.textArc ? curvedTextPng(curvedBox, slideFontStack(el.fontFamily ?? theme.fontBody), el.textColor ?? readableTextOn(el.fill ?? theme.accent)) : undefined
+          const curvedBox = {
+            ...el,
+            w: el.w * 0.76,
+            h: el.h * 0.8,
+            align: el.align ?? ('center' as const),
+          }
+          const png = el.textArc
+            ? curvedTextPng(
+                curvedBox,
+                slideFontStack(el.fontFamily ?? theme.fontBody),
+                el.textColor ?? readableTextOn(el.fill ?? theme.accent),
+              )
+            : undefined
           if (png) {
             slide.addShape(kind, options as never)
-            slide.addImage({ data: png, x: pct(el.x + el.w * 0.12), y: pct(el.y + el.h * 0.1), w: pct(curvedBox.w), h: pct(curvedBox.h), rotate, flipH: el.flipX, flipV: el.flipY, altText: el.text })
+            slide.addImage({
+              data: png,
+              x: pct(el.x + el.w * 0.12),
+              y: pct(el.y + el.h * 0.1),
+              w: pct(curvedBox.w),
+              h: pct(curvedBox.h),
+              rotate,
+              flipH: el.flipX,
+              flipV: el.flipY,
+              altText: el.text,
+            })
             continue
           }
           // hình có chữ: PowerPoint giữ chữ bên trong hình (sửa được), không phải hộp chữ chồng lên
@@ -471,7 +617,9 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
           ...(rotate ? { rotate } : {}),
           ...(el.flipX ? { flipH: true } : {}),
           ...(el.flipY ? { flipV: true } : {}),
-          ...(el.opacity !== undefined && el.opacity < 1 ? { transparency: Math.round((1 - el.opacity) * 100) } : {}),
+          ...(el.opacity !== undefined && el.opacity < 1
+            ? { transparency: Math.round((1 - el.opacity) * 100) }
+            : {}),
           ...(level > 0
             ? {
                 shadow: {
@@ -572,7 +720,9 @@ export async function buildDeckPptx(deck: Deck): Promise<ArrayBuffer> {
   }
 
   const { default: JSZip } = await import('jszip')
-  const zip = await JSZip.loadAsync((await pptx.write({ outputType: 'arraybuffer' })) as ArrayBuffer)
+  const zip = await JSZip.loadAsync(
+    (await pptx.write({ outputType: 'arraybuffer' })) as ArrayBuffer,
+  )
   for (const path of Object.keys(zip.files).filter((p) => /^ppt\/slides\/slide\d+\.xml$/.test(p))) {
     const xml = dedupeParagraphProps(await zip.file(path)!.async('string'))
     zip.file(path, applyRunShadows(xml, shadows))

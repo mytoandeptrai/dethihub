@@ -1,7 +1,7 @@
 'use client'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { OpsPanelOpsPanelUi } from '@/modules/admin-pages/components/ops-panel-ui'
 import { OpsPanelModel } from '@/modules/admin-pages/hooks'
-import { PageSkeleton } from '@/components/page-skeleton'
 export function OpsPanelContainer(...args: Parameters<typeof OpsPanelModel.useOpsPanelContainer>) {
   const props = OpsPanelModel.useOpsPanelContainer(...args)
   if (props.loadingSettings) return <PageSkeleton variant="form" />

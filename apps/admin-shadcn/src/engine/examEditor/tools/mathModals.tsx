@@ -1,19 +1,41 @@
 /** Hộp công cụ Toán: bảng xét dấu, Oxy, thống kê, ghép nhóm, lượng giác, cây, trục số, Venn, bảng. */
 import { useMemo, useState } from 'react'
-import { cn } from '@/engine/lib/cn'
+
 import { inputClass } from '@/engine/components/ui'
-import { type ToolDoc } from '@/engine/lib/toolSpec'
-import { svgDataUrl } from '@/engine/lib/plot'
-import { LabelPreview } from './LabelDragPreview'
-import { TrigPickPreview } from './TrigPickPreview'
-import { autoSignTable, parseSignTableText, signTableToText, type SignTableSpec } from '@/engine/lib/signTable'
+import { cn } from '@/engine/lib/cn'
+import {
+  groupedStats,
+  parseGroups,
+  round2,
+  type GroupedSpec,
+  type GroupedView,
+} from '@/engine/lib/grouped'
 import { OXY_HELP, type OxySpec } from '@/engine/lib/oxy'
-import type { ChartKind, StatsSpec } from '@/engine/lib/stats'
-import type { NumberLineSpec, TreeSpec, TrigSpec, VennSpec } from '@/engine/lib/mathExtra'
-import { groupedStats, parseGroups, round2, type GroupedSpec, type GroupedView } from '@/engine/lib/grouped'
-import { TABLE_DEFAULT, parseCells, parseMerges, type TableAlign, type TableBorder, type TableHeader, type TableSpec } from '@/engine/lib/table'
-import { Check, ToolShell, sectionTitle } from './ToolShell'
+import { svgDataUrl } from '@/engine/lib/plot'
+import {
+  autoSignTable,
+  parseSignTableText,
+  signTableToText,
+  type SignTableSpec,
+} from '@/engine/lib/signTable'
+import {
+  TABLE_DEFAULT,
+  parseCells,
+  parseMerges,
+  type TableAlign,
+  type TableBorder,
+  type TableHeader,
+  type TableSpec,
+} from '@/engine/lib/table'
+import { type ToolDoc } from '@/engine/lib/toolSpec'
+
+import { LabelPreview } from './LabelDragPreview'
 import { type Props, type HelpGroups, useRender, TextBlock } from './toolModalKit'
+import { Check, ToolShell, sectionTitle } from './ToolShell'
+import { TrigPickPreview } from './TrigPickPreview'
+
+import type { NumberLineSpec, TreeSpec, TrigSpec, VennSpec } from '@/engine/lib/mathExtra'
+import type { ChartKind, StatsSpec } from '@/engine/lib/stats'
 
 const SIGN_HELP: HelpGroups = [
   {
@@ -38,7 +60,9 @@ const SIGN_HELP: HelpGroups = [
 export function SignTableModal({ initial, submitLabel, onClose, onInsert }: Props<SignTableSpec>) {
   const [expr, setExpr] = useState(initial ? '' : '(x-1)(x+2)/(x-3)')
   const [exprError, setExprError] = useState<string | null>(null)
-  const [text, setText] = useState(() => (initial ? signTableToText(initial) : signTableToText(autoSignTable('(x-1)(x+2)/(x-3)'))))
+  const [text, setText] = useState(() =>
+    initial ? signTableToText(initial) : signTableToText(autoSignTable('(x-1)(x+2)/(x-3)')),
+  )
   const parsed = useMemo((): { spec?: SignTableSpec; error?: string } => {
     try {
       return { spec: parseSignTableText(text) }
@@ -46,7 +70,10 @@ export function SignTableModal({ initial, submitLabel, onClose, onInsert }: Prop
       return { error: e instanceof Error ? e.message : String(e) }
     }
   }, [text])
-  const doc = useMemo((): ToolDoc | null => (parsed.spec ? { kind: 'signtable', spec: parsed.spec } : null), [parsed.spec])
+  const doc = useMemo(
+    (): ToolDoc | null => (parsed.spec ? { kind: 'signtable', spec: parsed.spec } : null),
+    [parsed.spec],
+  )
   const { preview } = useRender(doc)
 
   const build = () => {
@@ -69,21 +96,31 @@ export function SignTableModal({ initial, submitLabel, onClose, onInsert }: Prop
             build()
           }}
         >
-          <span className="shrink-0 font-serif text-[15px] italic text-ink-2">f(x) =</span>
+          <span className="text-ink-2 shrink-0 font-serif text-[15px] italic">f(x) =</span>
           <input
             value={expr}
             onChange={(e) => setExpr(e.target.value)}
             spellCheck={false}
             placeholder="vd. (x-1)(x+2)/(x-3)"
             aria-label="Biểu thức"
-            className={cn(inputClass, 'h-9 px-3 py-1 font-mono text-[13.5px]', exprError && 'border-clay')}
+            className={cn(
+              inputClass,
+              'h-9 px-3 py-1 font-mono text-[13.5px]',
+              exprError && 'border-clay',
+            )}
           />
-          <button type="submit" disabled={!expr.trim()} className="h-9 shrink-0 rounded-[6px] bg-clay px-3 text-[12.5px] font-semibold text-white disabled:opacity-40">
+          <button
+            type="submit"
+            disabled={!expr.trim()}
+            className="bg-clay h-9 shrink-0 rounded-[6px] px-3 text-[12.5px] font-semibold text-white disabled:opacity-40"
+          >
             Tạo bảng
           </button>
         </form>
-        {exprError && <p className="mt-1 text-[12px] text-clay">{exprError}</p>}
-        <p className="mt-1.5 text-[12px] leading-snug text-ink-4">Tích, thương ở ngoài cùng được tách thành từng hàng nhân tử.</p>
+        {exprError && <p className="text-clay mt-1 text-[12px]">{exprError}</p>}
+        <p className="text-ink-4 mt-1.5 text-[12px] leading-snug">
+          Tích, thương ở ngoài cùng được tách thành từng hàng nhân tử.
+        </p>
       </section>
       <TextBlock
         title="Nội dung bảng"
@@ -135,7 +172,7 @@ export function OxyModal({ initial, submitLabel, onClose, onInsert }: Props<OxyS
   const { preview } = useRender(doc)
   const errors = (preview?.errors ?? []).map((e) => `Dòng ${e.line}: ${e.msg}`)
   const range = (k: keyof OxySpec, label: string) => (
-    <label className="flex items-center gap-1.5 text-[13px] text-ink-2">
+    <label className="text-ink-2 flex items-center gap-1.5 text-[13px]">
       <span className="w-9 shrink-0 font-serif italic">{label}</span>
       <input
         type="number"
@@ -165,8 +202,12 @@ export function OxyModal({ initial, submitLabel, onClose, onInsert }: Props<OxyS
           {range('yMin', 'y từ')}
           {range('yMax', 'đến')}
         </div>
-        <Check checked={spec.numbers} onChange={(numbers) => set({ numbers })}>Ghi số trên trục</Check>
-        <Check checked={spec.grid} onChange={(grid) => set({ grid })}>Lưới ô vuông</Check>
+        <Check checked={spec.numbers} onChange={(numbers) => set({ numbers })}>
+          Ghi số trên trục
+        </Check>
+        <Check checked={spec.grid} onChange={(grid) => set({ grid })}>
+          Lưới ô vuông
+        </Check>
       </section>
     </>
   )
@@ -188,7 +229,13 @@ export function OxyModal({ initial, submitLabel, onClose, onInsert }: Props<OxyS
           onChange={(labelPos) => set({ labelPos })}
           move={move}
           onToggle={() => setMove((v) => !v)}
-          fallback={<img src={svgDataUrl(img.svg)} alt="Xem trước" className="max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain" />}
+          fallback={
+            <img
+              src={svgDataUrl(img.svg)}
+              alt="Xem trước"
+              className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+            />
+          }
         />
       )}
     />
@@ -200,11 +247,31 @@ export function OxyModal({ initial, submitLabel, onClose, onInsert }: Props<OxyS
  * ------------------------------------------------------------------ */
 
 const CHARTS: Array<{ id: ChartKind; label: string; example: string }> = [
-  { id: 'bar', label: 'Cột', example: 'Thứ 2; Thứ 3; Thứ 4; Thứ 5\nLớp 10A: 30; 25; 20; 28\nLớp 10B: 28; 22; 26; 24' },
-  { id: 'line', label: 'Đường gấp khúc', example: '2019; 2020; 2021; 2022\nSản lượng: 12; 15; 14; 18' },
-  { id: 'pie', label: 'Quạt tròn', example: 'Giỏi; Khá; Trung bình; Yếu\nSố học sinh: 8; 20; 10; 2' },
-  { id: 'hist', label: 'Ghép nhóm', example: '[40; 50) [50; 60) [60; 70) [70; 80)\nSố học sinh: 4; 10; 14; 6' },
-  { id: 'table', label: 'Bảng số liệu', example: '[40; 50) [50; 60) [60; 70) [70; 80)\nTần số: 4; 10; 14; 6' },
+  {
+    id: 'bar',
+    label: 'Cột',
+    example: 'Thứ 2; Thứ 3; Thứ 4; Thứ 5\nLớp 10A: 30; 25; 20; 28\nLớp 10B: 28; 22; 26; 24',
+  },
+  {
+    id: 'line',
+    label: 'Đường gấp khúc',
+    example: '2019; 2020; 2021; 2022\nSản lượng: 12; 15; 14; 18',
+  },
+  {
+    id: 'pie',
+    label: 'Quạt tròn',
+    example: 'Giỏi; Khá; Trung bình; Yếu\nSố học sinh: 8; 20; 10; 2',
+  },
+  {
+    id: 'hist',
+    label: 'Ghép nhóm',
+    example: '[40; 50) [50; 60) [60; 70) [70; 80)\nSố học sinh: 4; 10; 14; 6',
+  },
+  {
+    id: 'table',
+    label: 'Bảng số liệu',
+    example: '[40; 50) [50; 60) [60; 70) [70; 80)\nTần số: 4; 10; 14; 6',
+  },
 ]
 
 const STATS_HELP: HelpGroups = [
@@ -227,15 +294,29 @@ const STATS_HELP: HelpGroups = [
 ]
 
 export function StatsModal({ initial, submitLabel, onClose, onInsert }: Props<StatsSpec>) {
-  const [spec, setSpec] = useState<StatsSpec>(initial ?? { chart: 'bar', title: '', xLabel: '', yLabel: '', values: true, data: CHARTS[0].example })
+  const [spec, setSpec] = useState<StatsSpec>(
+    initial ?? {
+      chart: 'bar',
+      title: '',
+      xLabel: '',
+      yLabel: '',
+      values: true,
+      data: CHARTS[0].example,
+    },
+  )
   const set = (p: Partial<StatsSpec>) => setSpec((s) => ({ ...s, ...p }))
   const [move, setMove] = useState(false)
   const doc = useMemo((): ToolDoc => ({ kind: 'stats', spec }), [spec])
   const { preview, error } = useRender(doc)
   const field = (k: 'title' | 'xLabel' | 'yLabel', label: string, ph: string) => (
-    <label className="flex flex-col gap-1 text-[12.5px] text-ink-3">
+    <label className="text-ink-3 flex flex-col gap-1 text-[12.5px]">
       {label}
-      <input value={spec[k]} onChange={(e) => set({ [k]: e.target.value })} placeholder={ph} className={cn(inputClass, 'h-8 px-2 py-1 text-[13px]')} />
+      <input
+        value={spec[k]}
+        onChange={(e) => set({ [k]: e.target.value })}
+        placeholder={ph}
+        className={cn(inputClass, 'h-8 px-2 py-1 text-[13px]')}
+      />
     </label>
   )
   const inputs = (
@@ -255,7 +336,9 @@ export function StatsModal({ initial, submitLabel, onClose, onInsert }: Props<St
               }}
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                spec.chart === c.id ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                spec.chart === c.id
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {c.label}
@@ -278,11 +361,19 @@ export function StatsModal({ initial, submitLabel, onClose, onInsert }: Props<St
         {field('title', 'Tên biểu đồ', 'vd. Điểm thi môn Toán')}
         {spec.chart !== 'pie' && (
           <div className="grid grid-cols-2 gap-2">
-            {field('xLabel', spec.chart === 'table' ? 'Tên hàng đầu' : 'Trục ngang', spec.chart === 'table' ? 'Nhóm' : 'vd. Lớp')}
+            {field(
+              'xLabel',
+              spec.chart === 'table' ? 'Tên hàng đầu' : 'Trục ngang',
+              spec.chart === 'table' ? 'Nhóm' : 'vd. Lớp',
+            )}
             {spec.chart !== 'table' && field('yLabel', 'Trục đứng', 'vd. Số HS')}
           </div>
         )}
-        {spec.chart !== 'table' && <Check checked={spec.values} onChange={(values) => set({ values })}>Ghi số liệu trên hình</Check>}
+        {spec.chart !== 'table' && (
+          <Check checked={spec.values} onChange={(values) => set({ values })}>
+            Ghi số liệu trên hình
+          </Check>
+        )}
       </section>
     </>
   )
@@ -300,7 +391,11 @@ export function StatsModal({ initial, submitLabel, onClose, onInsert }: Props<St
       renderPreview={(img) =>
         spec.chart === 'table' ? (
           // bảng số liệu không có nhãn kéo được → xem thường
-          <img src={svgDataUrl(img.svg)} alt="Xem trước" className="max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain" />
+          <img
+            src={svgDataUrl(img.svg)}
+            alt="Xem trước"
+            className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+          />
         ) : (
           <LabelPreview
             img={img}
@@ -308,7 +403,13 @@ export function StatsModal({ initial, submitLabel, onClose, onInsert }: Props<St
             onChange={(labelPos) => set({ labelPos })}
             move={move}
             onToggle={() => setMove((v) => !v)}
-            fallback={<img src={svgDataUrl(img.svg)} alt="Xem trước" className="max-h-full max-w-full rounded-[4px] border border-line bg-white object-contain" />}
+            fallback={
+              <img
+                src={svgDataUrl(img.svg)}
+                alt="Xem trước"
+                className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+              />
+            }
           />
         )
       }
@@ -336,7 +437,10 @@ const GROUPED_HELP: HelpGroups = [
     items: [
       { code: 'Bảng ngang', what: 'Hàng 1 các nhóm, hàng 2 tần số (kiểu SGK, mặc định)' },
       { code: 'Bảng dọc', what: 'Mỗi nhóm một hàng' },
-      { code: 'Biểu đồ cột liền', what: 'Histogram: cột sát nhau, trục ghi mốc đầu mút; tuỳ chọn đa giác tần số' },
+      {
+        code: 'Biểu đồ cột liền',
+        what: 'Histogram: cột sát nhau, trục ghi mốc đầu mút; tuỳ chọn đa giác tần số',
+      },
     ],
   },
   {
@@ -365,9 +469,14 @@ export function GroupedModal({ initial, submitLabel, onClose, onInsert }: Props<
   const doc = useMemo((): ToolDoc => ({ kind: 'grouped', spec }), [spec])
   const { preview, error } = useRender(doc)
   const field = (k: 'label' | 'freqLabel', label: string, ph: string) => (
-    <label className="flex flex-col gap-1 text-[12.5px] text-ink-3">
+    <label className="text-ink-3 flex flex-col gap-1 text-[12.5px]">
       {label}
-      <input value={spec[k]} onChange={(e) => set({ [k]: e.target.value })} placeholder={ph} className={cn(inputClass, 'h-8 px-2 py-1 text-[13px]')} />
+      <input
+        value={spec[k]}
+        onChange={(e) => set({ [k]: e.target.value })}
+        placeholder={ph}
+        className={cn(inputClass, 'h-8 px-2 py-1 text-[13px]')}
+      />
     </label>
   )
   const toggleExtra = (extras: string, key: string, on: boolean) => {
@@ -410,7 +519,9 @@ export function GroupedModal({ initial, submitLabel, onClose, onInsert }: Props<
               onClick={() => set({ view: c.id })}
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                spec.view === c.id ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                spec.view === c.id
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {c.label}
@@ -436,22 +547,46 @@ export function GroupedModal({ initial, submitLabel, onClose, onInsert }: Props<
         <h3 className={cn(sectionTitle, 'mb-0')}>{isTable ? 'Hàng / cột phụ' : 'Tuỳ chọn'}</h3>
         {isTable && (
           <>
-            <Check checked={spec.extras.includes('mid')} onChange={(v) => set({ extras: toggleExtra(spec.extras, 'mid', v) })}>Giá trị đại diện (trung điểm)</Check>
-            <Check checked={spec.extras.includes('cum')} onChange={(v) => set({ extras: toggleExtra(spec.extras, 'cum', v) })}>Tần số tích luỹ</Check>
-            <Check checked={spec.extras.includes('rel')} onChange={(v) => set({ extras: toggleExtra(spec.extras, 'rel', v) })}>Tần số tương đối (%)</Check>
-            <Check checked={spec.extras.includes('total')} onChange={(v) => set({ extras: toggleExtra(spec.extras, 'total', v) })}>Cột / hàng Tổng (n)</Check>
+            <Check
+              checked={spec.extras.includes('mid')}
+              onChange={(v) => set({ extras: toggleExtra(spec.extras, 'mid', v) })}
+            >
+              Giá trị đại diện (trung điểm)
+            </Check>
+            <Check
+              checked={spec.extras.includes('cum')}
+              onChange={(v) => set({ extras: toggleExtra(spec.extras, 'cum', v) })}
+            >
+              Tần số tích luỹ
+            </Check>
+            <Check
+              checked={spec.extras.includes('rel')}
+              onChange={(v) => set({ extras: toggleExtra(spec.extras, 'rel', v) })}
+            >
+              Tần số tương đối (%)
+            </Check>
+            <Check
+              checked={spec.extras.includes('total')}
+              onChange={(v) => set({ extras: toggleExtra(spec.extras, 'total', v) })}
+            >
+              Cột / hàng Tổng (n)
+            </Check>
           </>
         )}
-        {!isTable && <Check checked={spec.polygon} onChange={(polygon) => set({ polygon })}>Vẽ đa giác tần số</Check>}
+        {!isTable && (
+          <Check checked={spec.polygon} onChange={(polygon) => set({ polygon })}>
+            Vẽ đa giác tần số
+          </Check>
+        )}
       </section>
       {tinh && (
         <section>
           <h3 className={cn(sectionTitle, 'mb-0')}>Tính giúp (chỉ hiện ở đây)</h3>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 rounded-[6px] border border-line bg-paper-2 px-3 py-2 text-[12.5px] text-ink-2">
+          <div className="border-line bg-paper-2 text-ink-2 grid grid-cols-2 gap-x-4 gap-y-1 rounded-[6px] border px-3 py-2 text-[12.5px]">
             {tinh.map(([k, v]) => (
               <div key={k} className="flex justify-between gap-2">
                 <span>{k}</span>
-                <span className="font-medium text-ink">{v}</span>
+                <span className="text-ink font-medium">{v}</span>
               </div>
             ))}
           </div>
@@ -478,7 +613,6 @@ export function GroupedModal({ initial, submitLabel, onClose, onInsert }: Props<
  * Vật lí: mạch điện
  * ------------------------------------------------------------------ */
 
-
 const TRIG_HELP: HelpGroups = [
   {
     group: 'Góc (mỗi dòng một góc)',
@@ -498,41 +632,73 @@ const TRIG_HELP: HelpGroups = [
     group: 'Đặt tên & toạ độ',
     items: [
       { code: 'M: pi/3', what: 'Điểm M ứng với góc π/3, tên hiện cạnh chấm' },
-      { code: 'M(1/2; √3/2)', what: 'Điểm theo toạ độ (cos; sin); lệch quá 0,02 khỏi đường tròn sẽ được nhắc nhưng vẫn vẽ' },
-      { code: 'Ô "Ghi giá trị cos, sin"', what: 'Giá trị đẹp ghi 0, ±1/2, ±√2/2, ±√3/2, ±1; góc khác ghi gần đúng 2 chữ số thập phân' },
+      {
+        code: 'M(1/2; √3/2)',
+        what: 'Điểm theo toạ độ (cos; sin); lệch quá 0,02 khỏi đường tròn sẽ được nhắc nhưng vẫn vẽ',
+      },
+      {
+        code: 'Ô "Ghi giá trị cos, sin"',
+        what: 'Giá trị đẹp ghi 0, ±1/2, ±√2/2, ±√3/2, ±1; góc khác ghi gần đúng 2 chữ số thập phân',
+      },
     ],
   },
   {
     group: 'Tô cung (miền nghiệm)',
     items: [
       { code: 'tô: π/6 → 5π/6', what: 'Cung đậm chạy ngược chiều kim đồng hồ; chấm đặc hai đầu' },
-      { code: 'tô: [π/6 → 5π/6)', what: '[ ] lấy đầu mút (chấm đặc), ( ) không lấy (chấm rỗng); mũi tên →, -> hoặc "đến"; nhiều dòng tô được' },
+      {
+        code: 'tô: [π/6 → 5π/6)',
+        what: '[ ] lấy đầu mút (chấm đặc), ( ) không lấy (chấm rỗng); mũi tên →, -> hoặc "đến"; nhiều dòng tô được',
+      },
     ],
   },
   {
     group: 'Đường thẳng',
     items: [
-      { code: 'y = 1/2', what: 'Nét liền ngang xuyên qua đường tròn, chấm 2 giao điểm; chấp nhận √3/2, sqrt(3)/2, 0,5' },
-      { code: 'x = -√2/2', what: 'Nét liền dọc; nhãn giá trị ở trục cos (x =) hoặc trục sin (y =)' },
-      { code: 'x = π/3 + kπ', what: 'Vế phải có π, k, ° thì vẫn là góc/họ nghiệm, không phải đường thẳng' },
+      {
+        code: 'y = 1/2',
+        what: 'Nét liền ngang xuyên qua đường tròn, chấm 2 giao điểm; chấp nhận √3/2, sqrt(3)/2, 0,5',
+      },
+      {
+        code: 'x = -√2/2',
+        what: 'Nét liền dọc; nhãn giá trị ở trục cos (x =) hoặc trục sin (y =)',
+      },
+      {
+        code: 'x = π/3 + kπ',
+        what: 'Vế phải có π, k, ° thì vẫn là góc/họ nghiệm, không phải đường thẳng',
+      },
     ],
   },
   {
     group: 'Nối & cung',
     items: [
-      { code: 'nối: M N P', what: 'Đa giác khép kín qua các điểm đã khai báo (M: góc hoặc M(x; y))' },
-      { code: 'nối tô: M N P', what: 'Nối kèm tô nhạt bên trong; "nối tô: họ" nối cả họ nghiệm theo thứ tự góc tăng' },
-      { code: 'cung: M N "π/2"', what: 'Cung mũi tên ngược chiều kim đồng hồ từ M tới N; nhãn trong "…" tuỳ chọn' },
+      {
+        code: 'nối: M N P',
+        what: 'Đa giác khép kín qua các điểm đã khai báo (M: góc hoặc M(x; y))',
+      },
+      {
+        code: 'nối tô: M N P',
+        what: 'Nối kèm tô nhạt bên trong; "nối tô: họ" nối cả họ nghiệm theo thứ tự góc tăng',
+      },
+      {
+        code: 'cung: M N "π/2"',
+        what: 'Cung mũi tên ngược chiều kim đồng hồ từ M tới N; nhãn trong "…" tuỳ chọn',
+      },
     ],
   },
 ]
 
 export function TrigModal({ initial, submitLabel, onClose, onInsert }: Props<TrigSpec>) {
-  const [spec, setSpec] = useState<TrigSpec>(initial ?? { angles: '2π/3', projections: true, tan: false, values: false, cot: false })
+  const [spec, setSpec] = useState<TrigSpec>(
+    initial ?? { angles: '2π/3', projections: true, tan: false, values: false, cot: false },
+  )
   const set = (p: Partial<TrigSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'trig', spec }), [spec])
   const { preview, error } = useRender(doc)
-  const errs = [...(error ? [error] : []), ...(preview?.errors ?? []).map((e) => `Dòng ${e.line}: ${e.msg}`)]
+  const errs = [
+    ...(error ? [error] : []),
+    ...(preview?.errors ?? []).map((e) => `Dòng ${e.line}: ${e.msg}`),
+  ]
   const inputs = (
     <>
       <TextBlock
@@ -546,10 +712,18 @@ export function TrigModal({ initial, submitLabel, onClose, onInsert }: Props<Tri
         label="Các góc"
       />
       <section className="space-y-2">
-        <Check checked={spec.projections} onChange={(projections) => set({ projections })}>Nét đứt chiếu xuống trục cos, sin</Check>
-        <Check checked={spec.values === true} onChange={(values) => set({ values })}>Ghi giá trị cos, sin trên trục</Check>
-        <Check checked={spec.tan} onChange={(tan) => set({ tan })}>Vẽ trục tan</Check>
-        <Check checked={spec.cot === true} onChange={(cot) => set({ cot })}>Vẽ trục cot</Check>
+        <Check checked={spec.projections} onChange={(projections) => set({ projections })}>
+          Nét đứt chiếu xuống trục cos, sin
+        </Check>
+        <Check checked={spec.values === true} onChange={(values) => set({ values })}>
+          Ghi giá trị cos, sin trên trục
+        </Check>
+        <Check checked={spec.tan} onChange={(tan) => set({ tan })}>
+          Vẽ trục tan
+        </Check>
+        <Check checked={spec.cot === true} onChange={(cot) => set({ cot })}>
+          Vẽ trục cot
+        </Check>
       </section>
     </>
   )
@@ -560,7 +734,9 @@ export function TrigModal({ initial, submitLabel, onClose, onInsert }: Props<Tri
       inputs={inputs}
       inputsWidth={340}
       preview={preview}
-      renderPreview={(img) => <TrigPickPreview img={img} angles={spec.angles} onAngles={(angles) => set({ angles })} />}
+      renderPreview={(img) => (
+        <TrigPickPreview img={img} angles={spec.angles} onAngles={(angles) => set({ angles })} />
+      )}
       submitLabel={submitLabel ?? (initial ? 'Cập nhật hình' : 'Chèn hình')}
       canSubmit={Boolean(preview) && !error}
       onSubmit={() => preview && onInsert(preview)}
@@ -574,14 +750,19 @@ const TREE_HELP: HelpGroups = [
     group: 'Nhánh',
     items: [
       { code: 'A: 0,3', what: 'Tên biến cố : xác suất (0,3 · 1/3 · 30%)' },
-      { code: "  B: 0,6", what: 'Thụt 2 dấu cách: nhánh con của dòng trên' },
+      { code: '  B: 0,6', what: 'Thụt 2 dấu cách: nhánh con của dòng trên' },
       { code: "A'  hoặc  ~A", what: 'Biến cố đối (vẽ gạch trên)' },
     ],
   },
 ]
 
 export function TreeModal({ initial, submitLabel, onClose, onInsert }: Props<TreeSpec>) {
-  const [spec, setSpec] = useState<TreeSpec>(initial ?? { text: "A: 0,3\n  B: 0,6\n  B': 0,4\nA': 0,7\n  B: 0,2\n  B': 0,8", products: true })
+  const [spec, setSpec] = useState<TreeSpec>(
+    initial ?? {
+      text: "A: 0,3\n  B: 0,6\n  B': 0,4\nA': 0,7\n  B: 0,2\n  B': 0,8",
+      products: true,
+    },
+  )
   const set = (p: Partial<TreeSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'probtree', spec }), [spec])
   const { preview, error } = useRender(doc)
@@ -598,7 +779,9 @@ export function TreeModal({ initial, submitLabel, onClose, onInsert }: Props<Tre
         label="Sơ đồ cây"
       />
       <section>
-        <Check checked={spec.products} onChange={(products) => set({ products })}>Ghi tích xác suất cuối mỗi nhánh</Check>
+        <Check checked={spec.products} onChange={(products) => set({ products })}>
+          Ghi tích xác suất cuối mỗi nhánh
+        </Check>
       </section>
     </>
   )
@@ -630,8 +813,15 @@ const NUMLINE_HELP: HelpGroups = [
   },
 ]
 
-export function NumberLineModal({ initial, submitLabel, onClose, onInsert }: Props<NumberLineSpec>) {
-  const [spec, setSpec] = useState<NumberLineSpec>(initial ?? { sets: 'A = (-2; 3]\nB = [1; +oo)', style: 'hatch' })
+export function NumberLineModal({
+  initial,
+  submitLabel,
+  onClose,
+  onInsert,
+}: Props<NumberLineSpec>) {
+  const [spec, setSpec] = useState<NumberLineSpec>(
+    initial ?? { sets: 'A = (-2; 3]\nB = [1; +oo)', style: 'hatch' },
+  )
   const set = (p: Partial<NumberLineSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'numberline', spec }), [spec])
   const { preview, error } = useRender(doc)
@@ -653,7 +843,9 @@ export function NumberLineModal({ initial, submitLabel, onClose, onInsert }: Pro
               onClick={() => set({ style: id })}
               className={cn(
                 'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
-                spec.style === id ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4',
+                spec.style === id
+                  ? 'border-clay bg-clay-tint text-clay font-medium'
+                  : 'border-line text-ink-2 hover:border-ink-4',
               )}
             >
               {label}
@@ -711,20 +903,32 @@ const VENN_HELP: HelpGroups = [
 ]
 
 export function VennModal({ initial, submitLabel, onClose, onInsert }: Props<VennSpec>) {
-  const [spec, setSpec] = useState<VennSpec>(initial ?? { sets: 'A, B', shade: 'A ∩ B', counts: '', universe: true })
+  const [spec, setSpec] = useState<VennSpec>(
+    initial ?? { sets: 'A, B', shade: 'A ∩ B', counts: '', universe: true },
+  )
   const set = (p: Partial<VennSpec>) => setSpec((s) => ({ ...s, ...p }))
   const doc = useMemo((): ToolDoc => ({ kind: 'venn', spec }), [spec])
   const { preview, error } = useRender(doc)
   const inputs = (
     <>
       <section className="grid grid-cols-2 gap-2">
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Các tập (2 hoặc 3)
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.sets} onChange={(e) => set({ sets: e.target.value })} placeholder="A, B, C" />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.sets}
+            onChange={(e) => set({ sets: e.target.value })}
+            placeholder="A, B, C"
+          />
         </label>
-        <label className="text-[12.5px] text-ink-2">
+        <label className="text-ink-2 text-[12.5px]">
           Miền tô
-          <input className={cn(inputClass, 'mt-1 h-9')} value={spec.shade} onChange={(e) => set({ shade: e.target.value })} placeholder="A ∩ B (trống: không tô)" />
+          <input
+            className={cn(inputClass, 'mt-1 h-9')}
+            value={spec.shade}
+            onChange={(e) => set({ shade: e.target.value })}
+            placeholder="A ∩ B (trống: không tô)"
+          />
         </label>
       </section>
       <TextBlock
@@ -738,7 +942,9 @@ export function VennModal({ initial, submitLabel, onClose, onInsert }: Props<Ven
         label="Số phần tử"
       />
       <section>
-        <Check checked={spec.universe} onChange={(universe) => set({ universe })}>Khung tập vũ trụ U</Check>
+        <Check checked={spec.universe} onChange={(universe) => set({ universe })}>
+          Khung tập vũ trụ U
+        </Check>
       </section>
     </>
   )
@@ -852,7 +1058,12 @@ export function TableModal({ initial, submitLabel, onClose, onInsert }: Props<Ta
   }
 
   const pill = (on: boolean) =>
-    cn('rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors', on ? 'border-clay bg-clay-tint font-medium text-clay' : 'border-line text-ink-2 hover:border-ink-4')
+    cn(
+      'rounded-[6px] border px-2.5 py-1 text-[12.5px] transition-colors',
+      on
+        ? 'border-clay bg-clay-tint text-clay font-medium'
+        : 'border-line text-ink-2 hover:border-ink-4',
+    )
 
   const inputs = (
     <>
@@ -871,14 +1082,14 @@ export function TableModal({ initial, submitLabel, onClose, onInsert }: Props<Ta
           <button
             type="button"
             onClick={addRow}
-            className="rounded-[6px] border border-line bg-white px-2.5 py-1 text-[12px] font-medium text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+            className="border-line text-ink-2 hover:border-ink-4 hover:text-ink rounded-[6px] border bg-white px-2.5 py-1 text-[12px] font-medium transition-colors"
           >
             + Thêm hàng
           </button>
           <button
             type="button"
             onClick={addCol}
-            className="rounded-[6px] border border-line bg-white px-2.5 py-1 text-[12px] font-medium text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+            className="border-line text-ink-2 hover:border-ink-4 hover:text-ink rounded-[6px] border bg-white px-2.5 py-1 text-[12px] font-medium transition-colors"
           >
             + Thêm cột
           </button>
@@ -888,7 +1099,13 @@ export function TableModal({ initial, submitLabel, onClose, onInsert }: Props<Ta
         <h3 className={sectionTitle}>Tiêu đề (đậm + nền nhạt)</h3>
         <div className="flex flex-wrap gap-1.5">
           {TABLE_HEADERS.map((h) => (
-            <button key={h.id} type="button" aria-pressed={spec.header === h.id} onClick={() => set({ header: h.id })} className={pill(spec.header === h.id)}>
+            <button
+              key={h.id}
+              type="button"
+              aria-pressed={spec.header === h.id}
+              onClick={() => set({ header: h.id })}
+              className={pill(spec.header === h.id)}
+            >
               {h.label}
             </button>
           ))}
@@ -898,7 +1115,13 @@ export function TableModal({ initial, submitLabel, onClose, onInsert }: Props<Ta
         <h3 className={sectionTitle}>Căn lề</h3>
         <div className="flex flex-wrap gap-1.5">
           {TABLE_ALIGNS.map((a) => (
-            <button key={a.id} type="button" aria-pressed={spec.align === a.id} onClick={() => set({ align: a.id })} className={pill(spec.align === a.id)}>
+            <button
+              key={a.id}
+              type="button"
+              aria-pressed={spec.align === a.id}
+              onClick={() => set({ align: a.id })}
+              className={pill(spec.align === a.id)}
+            >
               {a.label}
             </button>
           ))}
@@ -908,7 +1131,13 @@ export function TableModal({ initial, submitLabel, onClose, onInsert }: Props<Ta
         <h3 className={sectionTitle}>Đường kẻ</h3>
         <div className="flex flex-wrap gap-1.5">
           {TABLE_BORDERS.map((b) => (
-            <button key={b.id} type="button" aria-pressed={spec.border === b.id} onClick={() => set({ border: b.id })} className={pill(spec.border === b.id)}>
+            <button
+              key={b.id}
+              type="button"
+              aria-pressed={spec.border === b.id}
+              onClick={() => set({ border: b.id })}
+              className={pill(spec.border === b.id)}
+            >
               {b.label}
             </button>
           ))}
@@ -924,7 +1153,7 @@ export function TableModal({ initial, submitLabel, onClose, onInsert }: Props<Ta
           value={spec.fontSize}
           onChange={(e) => set({ fontSize: Number(e.target.value) })}
           aria-label="Cỡ chữ bảng"
-          className="w-full accent-clay"
+          className="accent-clay w-full"
         />
       </section>
       <TextBlock

@@ -2,13 +2,13 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 
 import { UserDeletionRequestedEvent } from '@/modules/access-control/domain/events/user-deletion-requested.event'
-import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { USER_DATA_REPOSITORY } from '@/modules/storage/application/ports/user-data.repository.port'
 import { ADMIN_AUDIT } from '@/shared-kernel/application/ports/admin-audit.port'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 
-import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 import type { UserDataRepositoryPort } from '@/modules/storage/application/ports/user-data.repository.port'
 import type { AdminAuditPort } from '@/shared-kernel/application/ports/admin-audit.port'
+import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 
 const MAX_AUDITED_KEYS = 50
 
