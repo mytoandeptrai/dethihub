@@ -80,10 +80,13 @@ describe('inspector panel', () => {
     const built = BLOCK_TEMPLATES.find(template => template.id === 'multilevel')!.build()
     const editor = setup(Array.isArray(built) ? built : [built])
     const levels = screen.getAllByTestId(/^inspector-field-levels\.\d+\.level$/)
-    for (const level of levels) fireEvent.change(level, { target: { value: '0' } })
+    for (const level of levels) {
+      await userEvent.clear(level)
+      await userEvent.type(level, '0')
+    }
     await waitFor(() => expect(screen.queryByTestId('inspector-field-levels.0.level')).not.toBeInTheDocument())
     const ordered = !editor.state.doc.firstChild!.attrs.ordered
-    fireEvent.change(screen.getByTestId('inspector-field-ordered'), { target: { value: String(ordered) } })
+    await userEvent.selectOptions(screen.getByTestId('inspector-field-ordered'), String(ordered))
     await waitFor(() => expect(editor.state.doc.firstChild!.attrs.ordered).toBe(ordered))
   })
   for (const template of BLOCK_TEMPLATES) {
