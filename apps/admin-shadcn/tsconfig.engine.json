@@ -11,7 +11,7 @@
     "emitDeclarationOnly": true,
     "rootDir": "src",
     "outDir": ".engine-types",
-    "tsBuildInfoFile": "node_modules/.cache/engine.tsbuildinfo"
+    "tsBuildInfoFile": ".engine-types/engine.tsbuildinfo"
   },
   "include": ["src/engine/**/*.ts", "src/engine/**/*.tsx", "next-env.d.ts"],
   "exclude": ["node_modules"]
