@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 
 import { PageSkeleton } from '@/components/page-skeleton'
 import { JsonLd } from '@/components/seo/json-ld'
-import { PublicLinks } from '@/components/seo/public-links'
 import { site } from '@/config/site'
 import { breadcrumbJsonLd } from '@/lib/seo'
 import { CommunityContainer } from '@/modules/community'
@@ -26,9 +25,6 @@ export default async function CommunityPage() {
       <Suspense fallback={<PageSkeleton variant="cards" />}>
         <CommunityContainer initialExams={exams} />
       </Suspense>
-      <footer>
-        <PublicLinks />
-      </footer>
     </>
   )
 }
