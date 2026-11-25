@@ -12,6 +12,24 @@ const request: AiQuestionRequest = { body: { task: 'soan-de', messages: [{ role:
 const friendly = 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.'
 
 describe('shared question generation', () => {
+  it('counts recovered protocol questions during streaming and finalizes identical done content', async () => {
+    vi.spyOn(browserAuth, 'getToken').mockResolvedValue(null)
+    const content = String.raw`{"action":"replace","say":"Đã soạn","blocks":[{"type":"question","no":1,"text":"$BH \cdot CH$ và $\sqrt{2}$"}]}`
+    const prefix = content.slice(0, -2)
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => new HttpResponse([
+      { type: 'delta', c: prefix },
+      { type: 'delta', c: content.slice(-2) },
+      { type: 'done', content, usage: null },
+    ].map((event) => `data: ${JSON.stringify(event)}\n\n`).join(''), { headers: { 'Content-Type': 'text/event-stream' } })))
+    const updates: number[] = []
+    const { result } = renderHook(() => useAiQuestionStream())
+    await act(async () => { await result.current.run(request, { onUpdate: (state) => { if (state.busy) updates.push(state.questions.length) } }) })
+    expect(updates).toContain(1)
+    expect(result.current.state.questions[0]?.prompt).toBe(String.raw`$BH \cdot CH$ và $\sqrt{2}$`)
+    expect(result.current.state.busy).toBe(false)
+    expect(result.current.state.error).toBeUndefined()
+  })
+
   it('retains complete questions when stopped before the response finishes', async () => {
     vi.spyOn(browserAuth, 'getToken').mockResolvedValue(null)
     let stream: ReadableStreamDefaultController<Uint8Array>

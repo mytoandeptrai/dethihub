@@ -18,10 +18,52 @@ export function questionText(value: unknown): string {
   return ''
 }
 
+function jsonStringRepair() {
+  let inString = false
+  let inMath = false
+  let pending = ''
+
+  return (chunk: string, final = false): string => {
+    const input = pending + chunk
+    pending = ''
+    let output = ''
+    for (let index = 0; index < input.length; index++) {
+      const char = input[index]!
+      if (inString && char === '\\') {
+        const next = input[index + 1]
+        if (!final && (!next || inMath && /[bfnrtu]/.test(next) && input.length < index + (next === 'u' ? 6 : 3))) {
+          pending = input.slice(index)
+          break
+        }
+        const mathCommand = inMath && /[a-z]/i.test(next ?? '') && /[a-z]/i.test(input[index + 2] ?? '') && !(next === 'u' && /^[\da-f]{4}$/i.test(input.slice(index + 2, index + 6)))
+        output += (next && (!/["\\/bfnrtu]/.test(next) || mathCommand) ? '\\\\' : '\\') + (next ?? '')
+        index++
+      } else {
+        if (char === '"') { inString = !inString; inMath = false }
+        else if (inString && char === '$') inMath = !inMath
+        output += inString && char === '\n' ? '\\n' : inString && char === '\r' ? '\\r' : inString && char === '\t' ? '\\t' : char
+      }
+    }
+    return output
+  }
+}
+
+export function parseAiDocumentReply(content: string): Record<string, unknown> | null {
+  const first = content.indexOf('{')
+  const last = content.lastIndexOf('}')
+  if (first < 0 || last < first) return null
+  try {
+    const value: unknown = JSON.parse(jsonStringRepair()(content.slice(first, last + 1), true))
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null
+  } catch { return null }
+}
+
 export class QuestionStreamParser {
   readonly questions: GeneratedQuestion[] = []
   readonly blocks: Record<string, unknown>[] = []
   readonly #parser = new JSONParser({ paths: ['$.blocks.*', '$.questions.*'] })
+  readonly #repair = jsonStringRepair()
+  #source = ''
   #started = false
   #failed = false
 
@@ -39,6 +81,7 @@ export class QuestionStreamParser {
   }
 
   push(chunk: string): void {
+    this.#source += chunk
     if (this.#failed || this.#parser.isEnded) return
     if (!this.#started) {
       const start = chunk.indexOf('{')
@@ -46,7 +89,16 @@ export class QuestionStreamParser {
       chunk = chunk.slice(start)
       this.#started = true
     }
-    try { this.#parser.write(chunk) } catch { this.#failed = true }
+    try { this.#parser.write(this.#repair(chunk)) } catch { this.#failed = true }
+  }
+
+  finish(): void {
+    const reply = parseAiDocumentReply(this.#source)
+    if (!reply) return
+    const parser = new QuestionStreamParser()
+    parser.push(JSON.stringify(reply))
+    this.questions.splice(0, this.questions.length, ...parser.questions)
+    this.blocks.splice(0, this.blocks.length, ...parser.blocks)
   }
 }
 

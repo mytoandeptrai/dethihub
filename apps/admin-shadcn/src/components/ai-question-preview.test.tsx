@@ -7,6 +7,14 @@ import { AiQuestionPreview } from './ai-question-preview'
 const questions = [1, 2].map((number) => ({ id: String(number), number, prompt: `Question ${number}`, raw: { no: number } }))
 
 describe('question preview', () => {
+  it('shows question counts without selective insertion controls during document approval', () => {
+    render(<AiQuestionPreview questions={questions} total={20} reviewOnly onInsert={vi.fn()} onRegenerate={vi.fn()} />)
+    expect(screen.getByText('Đã soạn 2/20 câu')).toBeInTheDocument()
+    expect(screen.getByText('Question 1')).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+  })
+
   it('selects every new question by default and inserts only checked questions', async () => {
     const onInsert = vi.fn()
     render(<AiQuestionPreview questions={questions} onInsert={onInsert} onRegenerate={vi.fn()} />)

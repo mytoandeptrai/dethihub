@@ -1,12 +1,39 @@
 import { describe, expect, it } from 'vitest'
 
-import { QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
+import { parseAiDocumentReply, QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
 
 describe('question stream parser', () => {
+  it('recovers bare LaTeX escapes split across chunks in a legacy replace reply', () => {
+    const source = String.raw`{"action":"replace","say":"Đề đã sẵn sàng","blocks":[{"type":"heading","text":"ĐỀ TOÁN"},{"type":"question","no":1,"text":"Tính $BH \\cdot CH$ và $\\sqrt{2}$, $\\frac{1}{2}$","options":[]}]}`.replaceAll('\\\\', '\\')
+    const parser = new QuestionStreamParser()
+    for (const char of source) parser.push(char)
+    expect(parser.questions).toHaveLength(1)
+    expect(parser.questions[0]?.prompt).toBe(String.raw`Tính $BH \cdot CH$ và $\sqrt{2}$, $\frac{1}{2}$`)
+    expect(parser.blocks).toHaveLength(2)
+    expect(parseAiDocumentReply(source)?.action).toBe('replace')
+  })
+
+  it('recovers a fenced append reply with non-question blocks without damaging escaped text', () => {
+    const source = '```json\n' + String.raw`{"action":"append","say":"Gửi thầy/cô **Lời giải chi tiết**","blocks":[{"type":"divider"},{"type":"heading","text":"LỜI GIẢI CHI TIẾT","level":1},{"type":"paragraph","text":"**Lời giải câu 1**\n$AH^2 = BH \cdot CH$, $\sqrt{2}$"}]}` + '\n```'
+    expect(parseAiDocumentReply(source)).toMatchObject({ action: 'append', blocks: [{ type: 'divider' }, { type: 'heading' }, { type: 'paragraph', text: String.raw`**Lời giải câu 1**` + '\n' + String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$` }] })
+    expect(parseAiDocumentReply('Hello')).toBeNull()
+    expect(parseAiDocumentReply('')).toBeNull()
+    expect(parseAiDocumentReply('{broken}')).toBeNull()
+  })
+
   it('retains math delimiters when converting rich-text questions for preview', () => {
     const parser = new QuestionStreamParser()
     parser.push(JSON.stringify({ blocks: [{ type: 'question', text: [{ text: 'Evaluate ' }, { math: 'x^2' }] }] }))
     expect(parser.questions[0]?.prompt).toBe('Evaluate $x^2$')
+  })
+
+  it('preserves correctly escaped backslashes, newlines, quotes and unicode', () => {
+    const value = { action: 'append', say: 'Line 1\n"Line 2"', blocks: [{ type: 'question', text: String.raw`$\frac{1}{2} + \sqrt{2}$` + '\n∀' }] }
+    const parser = new QuestionStreamParser()
+    for (const char of JSON.stringify(value)) parser.push(char)
+    parser.finish()
+    expect(parseAiDocumentReply(JSON.stringify(value))).toEqual(value)
+    expect(parser.questions[0]?.prompt).toBe(value.blocks[0]!.text)
   })
 
   it('emits only complete questions and ignores nested objects and quoted braces', () => {

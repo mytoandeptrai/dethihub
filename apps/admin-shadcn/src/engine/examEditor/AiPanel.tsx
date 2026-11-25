@@ -48,7 +48,7 @@ import { ASK_DEFAULT, AiAskPanel, askHistoryText, needsAskFirst, parseAsk, type 
 import { IconClose, IconEnter, IconPaperclip, IconStop } from './icons'
 import { AiQuestionPreview } from '@/components/ai-question-preview'
 import { useAiQuestionStream } from '@/hooks/use-ai-question-stream'
-import { selectedExamPayload } from '@/lib/ai-question-stream'
+import { parseAiDocumentReply, selectedExamPayload } from '@/lib/ai-question-stream'
 import type { AiQuestionRequest, AiQuestionState } from '@/hooks/use-ai-question-stream'
 import type { GeneratedQuestion } from '@/lib/ai-question-stream'
 import { ApiClientError } from '@/lib/api-error'
@@ -215,14 +215,13 @@ interface ActStep {
 }
 
 function examReview(content: string, questionCount: number): Pick<ChatTurn, 'text' | 'previewPayload'> {
-  if (questionCount > 0) return { text: '', previewPayload: undefined }
-  try {
-    const raw = extractJson<{ say?: unknown; blocks?: unknown; patch?: unknown }>(content)
+  const raw = parseAiDocumentReply(content)
+  if (raw) {
     const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
-    return { text: typeof raw.say === 'string' ? raw.say : changed ? 'Bản nháp đã sẵn sàng.' : content, previewPayload: changed ? content : undefined }
-  } catch {
-    return { text: content, previewPayload: undefined }
+    const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))
+    return { text: typeof raw.say === 'string' ? raw.say : reviewDocument ? 'Bản nháp đã sẵn sàng.' : '', previewPayload: reviewDocument ? JSON.stringify(raw) : undefined }
   }
+  return { text: questionCount > 0 ? '' : content, previewPayload: undefined }
 }
 
 /** đóng bước đang chạy (xong / lỗi) */
@@ -1693,11 +1692,14 @@ function AiConversation({
               />
               {turn.generation && (turn.generation.questions.length > 0 || turn.pending && !!turn.generation.total) ? (
                 <AiQuestionPreview key={`${turn.id}-${turn.generationVersion ?? 0}`} questions={turn.generation.questions} total={turn.generation.total}
-                  busy={!!turn.pending || busy} inserted={turn.inserted} refundedTokens={turn.generation.refundedTokens}
+                  busy={!!turn.pending || busy} inserted={turn.inserted} reviewOnly={!!turn.previewPayload} refundedTokens={turn.generation.refundedTokens}
                   onInsert={(questions) => insertQuestions(turn, questions)} onRegenerate={() => void retryGeneration(turn)}
                   renderText={(text) => <Markdown text={text} />} />
               ) : null}
-              {turn.previewPayload && !turn.inserted ? <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Chèn vào đề</button> : null}
+              {turn.previewPayload && !turn.inserted ? <div className="flex gap-2">
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Áp dụng</button>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, previewPayload: undefined, generation: undefined } : item))}>Huỷ</button>
+              </div> : null}
               {turn.sources?.length || turn.webSources?.length || turn.sourceNote ? <SourcesButton sources={turn.sources} web={turn.webSources} note={turn.sourceNote} /> : null}
               {turn.error ? (
                 <div className="ai-msg-error">

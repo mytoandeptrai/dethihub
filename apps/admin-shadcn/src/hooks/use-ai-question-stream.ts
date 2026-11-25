@@ -85,6 +85,7 @@ export function useAiQuestionStream() {
             parser = new QuestionStreamParser()
             parser.push(value.content)
           }
+          parser.finish()
           publish({ text: typeof value.content === 'string' ? value.content : current.text, receipt: typeof value.receipt === 'string' ? value.receipt : undefined })
         } else if (value.type === 'error') {
           options.onQuota?.(value.quota)

@@ -23,6 +23,32 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it.each(['replace', 'append'])('reviews a recovered %s document reply with apply and cancel instead of raw JSON', async (action) => {
+    const text = String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$`
+    const blocks = action === 'replace'
+      ? [{ type: 'heading', text: 'ĐỀ TOÁN', level: 1 }, { type: 'question', no: 1, text, options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }]
+      : [{ type: 'divider' }, { type: 'heading', text: 'LỜI GIẢI CHI TIẾT', level: 1 }, { type: 'paragraph', text }]
+    const say = action === 'replace' ? 'Đề Toán đã sẵn sàng.' : 'Gửi thầy/cô lời giải chi tiết.'
+    const content = JSON.stringify({ action, say, blocks }).replaceAll('\\\\', '\\')
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    const { container } = render(<AiPanel contextSummary="Đã có đầu đề hai cột" documentDigest='{"blocks":[{"type":"header"}]}' onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề trắc nghiệm 20 câu môn Toán lớp 9 về hệ thức lượng, kèm đáp án.{Enter}')
+    await screen.findByText(say)
+    expect(container.textContent).not.toContain('"action"')
+    expect(screen.queryByRole('status')?.textContent).toBe(action === 'replace' ? 'Đã soạn 1/20 câu' : undefined)
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual({ action, say, blocks })
+    expect(await screen.findByText('Đã áp dụng.')).toBeVisible()
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'tiếp tục{Enter}')
+    await screen.findByRole('button', { name: 'Huỷ' })
+    await userEvent.click(screen.getByRole('button', { name: 'Huỷ' }))
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(apply).toHaveBeenCalledOnce()
+  })
+
   it('renders generated mathematical questions with the existing math renderer', async () => {
     server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ blocks: [{ type: 'question', text: 'Evaluate $x^2$.' }] }), usage: null })))
     const { container } = render(<AiPanel onApplyBlocks={vi.fn()} />)
