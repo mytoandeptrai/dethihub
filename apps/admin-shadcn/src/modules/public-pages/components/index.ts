@@ -1,5 +1,4 @@
 export { default as CheckoutUi } from './checkout-ui'
-export * from './contact-links-ui'
 export { default as DesignsUi } from './designs-ui'
 export { default as HomeUi } from './home-ui'
 export { default as LegalUi } from './legal-ui'

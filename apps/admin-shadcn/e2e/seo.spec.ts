@@ -63,6 +63,15 @@ for (const path of publicPaths) {
       expect(await page.locator(`footer a[href="${href}"]`).count()).toBeGreaterThan(0)
     }
     const footers = page.locator('footer')
+    if (path === '/terms' || path === '/privacy') {
+      const article = page.locator('article')
+      await expect(article).not.toContainText(/facebook|zalo|fanpage|threads|messenger/i)
+      await expect(
+        article.locator('a[href^="mailto:"], a[href^="tel:"], img[src*="/social/"]'),
+      ).toHaveCount(0)
+      const sections = article.locator('section')
+      await expect(sections).toHaveCount(path === '/terms' ? 14 : 9)
+    }
     await expect(
       footers.locator('a[href^="mailto:"], a[href^="tel:"], img[src*="/social/"]'),
     ).toHaveCount(0)

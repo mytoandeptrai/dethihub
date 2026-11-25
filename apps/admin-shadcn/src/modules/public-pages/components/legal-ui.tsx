@@ -1,11 +1,10 @@
 'use client'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { ContactLinks } from '@/modules/public-pages/components/contact-links-ui'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
 import { Card, Link } from '@/modules/public-pages/components/public-primitives-ui'
 const UPDATED = '18/11/2026'
-type Block = string | string[] | 'contact'
+type Block = string | string[]
 type SectionUi = {
   h: string
   b: Block[]
@@ -73,14 +72,14 @@ const PRIVACY: SectionUi[] = [
   },
   {
     h: t('publicCopy.m192'),
-    b: [t('publicCopy.m193'), 'contact'],
+    b: [t('publicCopy.m193')],
   },
 ]
 const TERMS_INTRO = t('publicCopy.m194')
 const TERMS: SectionUi[] = [
   {
     h: t('publicCopy.m195'),
-    b: [t('publicCopy.m196'), 'contact'],
+    b: [t('publicCopy.m196')],
   },
   {
     h: t('publicCopy.m197'),
@@ -215,9 +214,7 @@ export default function LegalUi({ kind }: { kind: 'privacy' | 'terms' }) {
                   </h2>
                   <div className="text-ink-2 space-y-2 text-[14.5px] leading-[1.75]">
                     {s.b.map((block) =>
-                      block === 'contact' ? (
-                        <ContactLinks key="contact" className="pt-1 text-[14px]" />
-                      ) : Array.isArray(block) ? (
+                      Array.isArray(block) ? (
                         <ul
                           key={block.join('|')}
                           className="marker:text-ink-4 list-disc space-y-1 pl-5"
