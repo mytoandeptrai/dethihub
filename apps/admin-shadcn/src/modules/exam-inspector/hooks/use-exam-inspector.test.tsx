@@ -20,6 +20,18 @@ function fixture() {
 afterEach(() => { for (const editor of editors.splice(0)) editor.destroy() })
 
 describe('inspector synchronization', () => {
+  it.each([390, 768])('does not reveal on canvas taps in a %ipx sheet layout, but insertion and explicit edit reveal', (width) => {
+    const editor = fixture(), reveal = vi.fn()
+    const { result } = renderHook(() => useExamInspector(editor, reveal, width >= 1024))
+    act(() => editor.commands.setTextSelection(2))
+    act(() => fireEvent.click(editor.view.dom))
+    expect(result.current.activeInspectorBlock).not.toBeNull()
+    expect(reveal).not.toHaveBeenCalled()
+    act(() => activateInsertedBlock(editor, 0, 'title'))
+    expect(reveal).toHaveBeenCalledOnce()
+    act(() => result.current.reveal())
+    expect(reveal).toHaveBeenCalledTimes(2)
+  })
   it('reads canvas transactions; writes immediately without echoes; groups typing and undoes', () => {
     const editor = fixture(), reveal = vi.fn()
     const { result } = renderHook(() => useExamInspector(editor, reveal))

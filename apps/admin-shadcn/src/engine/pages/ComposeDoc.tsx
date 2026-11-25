@@ -527,7 +527,7 @@ export default function ComposeDoc() {
 
   const format = useFormatState(editor)
   const revealInspector = useCallback(() => openNavWithTab('inspector'), [openNavWithTab])
-  const inspector = useExamInspector(editor, revealInspector)
+  const inspector = useExamInspector(editor, revealInspector, viewport.w >= 1024)
   const [pageSetup, setPageSetup] = useState<PageSetup>({ marginCm: 2, orientation: 'portrait' })
   const geo = pageGeometry(pageSetup)
   const { PAGE_W, MARGIN, MARGIN_RIGHT } = geo

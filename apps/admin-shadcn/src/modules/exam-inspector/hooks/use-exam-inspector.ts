@@ -28,11 +28,13 @@ function selectedPosition(editor: Editor): number {
   return $from.depth ? $from.before(1) : from
 }
 
-export function useExamInspector(editor: Editor | null, onReveal: () => void) {
+export function useExamInspector(editor: Editor | null, onReveal: () => void, revealOnCanvasClick = true) {
   const store = useMemo(() => createStore<InspectorState>(() => EMPTY), [])
   const state = useStore(store)
   const reveal = useRef(onReveal)
   reveal.current = onReveal
+  const canvasReveal = useRef(revealOnCanvasClick)
+  canvasReveal.current = revealOnCanvasClick
   const lastWrite = useRef<{ id: string; field: string; at: number } | null>(null)
   const history = useRef(false)
   const serial = useRef(0)
@@ -59,7 +61,7 @@ export function useExamInspector(editor: Editor | null, onReveal: () => void) {
       if (inserted !== undefined) reveal.current()
     }
     const transaction = ({ transaction: tr }: { transaction: Transaction }) => refresh(tr)
-    const click = () => { refresh(); if (store.getState().activeInspectorBlock) reveal.current() }
+    const click = () => { refresh(); if (canvasReveal.current && store.getState().activeInspectorBlock) reveal.current() }
     refresh()
     editor.on('transaction', transaction)
     const dom = editor.view.dom
