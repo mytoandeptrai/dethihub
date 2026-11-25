@@ -10,7 +10,7 @@ inputs. No derived values or template identifiers are added to the document.
 - `useExamInspector` owns an editor-scoped, non-persisted Zustand store. Block positions and ephemeral identities are mapped through transactions; no document attributes are added.
 - Explicit canvas clicks and template insertion open the properties tab, even after the user closes the rail. Keyboard/caret navigation updates the active block without changing the tab; ordinary typing never reopens the rail.
 - Forms use the registry schema with React Hook Form and `zodResolver`. Invalid edits stay in the form and do not dispatch. Nested lists follow their existing structural restrictions.
-- Own writes are tagged and never echoed into document transactions. Forms with dynamic read-only fields refresh their restrictions/previews after writing, without replacing focused editable text. External changes update individual fields, excluding the focused field (and a containing list if its dimensions changed). Leaving the form reconciles deferred values. Ctrl/Cmd+Z inside a form invokes editor history, including its focused field; Shift+Ctrl/Cmd+Z redoes.
+- Own writes are tagged and never fed back into the form. External changes update individual fields, excluding the focused field (and a containing list if its dimensions changed). Leaving the form reconciles deferred values. Ctrl/Cmd+Z inside a form invokes editor history, including its focused field; Shift+Ctrl/Cmd+Z redoes.
 - Normal editor history groups consecutive typing. Switching fields or pausing for a second explicitly starts a new group. Block deletion is undoable.
 - Semantic text anchors (passage, rubric header, end) retain their adapter while active so editing their identifying text does not remove the focused form. Selecting another block restores normal structural matching.
 - The highlight and badge are a fixed, print-hidden body portal, never children/decorations/widgets of the measured document. Scroll, resize, document changes and completed layout transitions refresh their bounds.
@@ -39,16 +39,11 @@ inputs. No derived values or template identifiers are added to the document.
   rubric points remain part of each item's actual text, not a fabricated attr.
 - Choice options and true/false statements have fixed counts/order and display-only
   labels. Only their text is editable; structural edits belong to the canvas/ribbon.
-- Answer-key tables expose cell text, preserving table/row/cell attrs, spans and
-  header cell types. Table/row/cell counts are fixed (metadata `fixedLength`);
-  newlines edit the cell's paragraph slots. Non-table labels are left untouched.
-  Cells with non-text atoms (including math/images) show a read-only preview and
-  are never replaced. Derived read-only flags exist only in form values. Padding
-  requires an entirely empty number/answer pair, with neither cell containing atoms.
-  Classification and question numbers use only plain text; previews never affect
-  schemas. A pair is read-only if either cell has atoms or its number is not plain
-  digits. Other pairs remain editable, including in true/false tables with rich headers.
-  List levels likewise target existing items. Grid column edits change only the
+- Answer-key blocks have an empty writable schema and no form controls. Their
+  read-only preview shows tables, spans, labels, text, formula source and image alt
+  text. The note directs editing to the canvas. The inspector never classifies,
+  validates or rewrites answer cells; blank padding and rich content stay untouched.
+- List levels target existing items. Grid column edits change only the
   existing `cols` attr, not cell content or count.
 
 ## Header slots

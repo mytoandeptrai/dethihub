@@ -53,9 +53,6 @@ function setup(id: string) {
   return { editor, entry, node, pos }
 }
 
-function cell(text: string): JSONContent {
-  return { type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] }
-}
 
 afterEach(() => {
   for (const editor of editors.splice(0)) editor.destroy()
@@ -107,16 +104,7 @@ const expected: Record<string, Record<string, unknown>> = {
   'multilevel': { ordered: false, levels: [{ level: 0 }, { level: 1 }, { level: 2 }] },
   'grid2': { cols: 2 },
   'grid3': { cols: 3 },
-  'answerKey': {
-    tables: [
-      {
-        rows: [
-          { cells: [{ text: 'Câu', readOnly: false, questionNumber: false }, { text: '1', readOnly: false, questionNumber: true }, { text: '2', readOnly: false, questionNumber: true }] },
-          { cells: [{ text: 'Đáp án', readOnly: false, questionNumber: false }, { text: 'A', readOnly: false, questionNumber: false }, { text: 'B', readOnly: false, questionNumber: false }] },
-        ],
-      },
-    ],
-  },
+  'answerKey': {},
   'rubric': { title: 'A. HƯỚNG DẪN CHUNG', items: [{ label: '1.', text: 'Ý đúng — 1,0 điểm' }] },
   'end': { text: '--------- HẾT ---------' },
   'divider': {},
@@ -128,7 +116,7 @@ function changed(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
       if (typeof value === 'string') return [key, /^\d+$/.test(value.trim()) ? String(Number(value) + 1) : value ? `${value} sửa` : 'Đã sửa']
-      if (typeof value === 'boolean') return [key, key === 'readOnly' || key === 'questionNumber' ? value : !value]
+      if (typeof value === 'boolean') return [key, !value]
       if (typeof value === 'number')
         return [key, key === 'level' && value === 2 ? 1 : value === 3 ? 2 : value + 1]
       return [key, (value as Record<string, unknown>[]).map((item) => changed(item))]
@@ -140,7 +128,7 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
       if (typeof value === 'string') return [key, key === 'label' || /^\d+$/.test(value.trim()) ? value : '']
-      if (typeof value === 'boolean') return [key, key === 'questionNumber' ? value : false]
+      if (typeof value === 'boolean') return [key, false]
       if (typeof value === 'number')
         return [
           key,
@@ -158,65 +146,13 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
-  it('treats the first column as numbers when a grid has no header cells', () => {
+  it('exposes no writable answer-key values and refuses attempted cell edits', () => {
     const { editor, entry, node, pos } = setup('answerKey')
-    const json = node.toJSON() as JSONContent
-    json.content![0]!.content = [
-      { type: 'tableRow', content: [cell('1'), cell('2')] },
-      { type: 'tableRow', content: [cell('A'), cell('B')] },
-    ]
-    editor.commands.setContent({ type: 'doc', content: [json] })
-    const original = editor.state.doc.firstChild!
-    const values = entry.read(original) as { tables: { rows: { cells: { text: string; readOnly?: boolean }[] }[] }[] }
-    values.tables[0]!.rows[0]!.cells[0]!.text = '1.'
-    expect(entry.schema.safeParse(values).success).toBe(false)
-    expect(() => entry.write(editor.state.tr, pos, original, values)).toThrow()
-    json.content![0]!.content![0]!.content![0] = cell('1.')
-    editor.commands.setContent({ type: 'doc', content: [json] })
-    const unsafe = editor.state.doc.firstChild!
-    const locked = entry.read(unsafe) as typeof values
-    expect(locked.tables[0]!.rows[0]!.cells[0]!.readOnly).toBe(true)
-    expect(locked.tables[0]!.rows[1]!.cells[0]!.readOnly).toBe(true)
-    expect(entry.schema.safeParse(locked).success).toBe(true)
-    locked.tables[0]!.rows[1]!.cells[0]!.text = 'Changed'
-    expect(() => entry.write(editor.state.tr, pos, unsafe, locked)).toThrow()
-  })
-  it('classifies true/false tables using plain header text, ignoring an adjacent image', () => {
-    const { editor, entry, node, pos } = setup('answerKey')
-    const json = node.toJSON() as JSONContent
-    json.content![0]!.content = [
-      { type: 'tableRow', content: [cell('Câu'), cell('a)'), cell('b)')] },
-      { type: 'tableRow', content: [cell('1'), cell('Đ'), cell('S')] },
-    ]
-    json.content![0]!.content![0]!.content![1]!.content![0]!.content!.push({ type: 'image', attrs: { src: 'data:image/png;base64,AA==', alt: 'Diagram' } })
-    editor.commands.setContent({ type: 'doc', content: [json] })
-    const original = editor.state.doc.firstChild!
-    const values = entry.read(original) as { tables: { rows: { cells: { text: string; readOnly?: boolean; preview?: string }[] }[] }[] }
-    expect(entry.schema.safeParse(values).success).toBe(true)
-    expect(values.tables[0]!.rows[1]!.cells[1]!.readOnly).toBe(false)
-    values.tables[0]!.rows[1]!.cells[1]!.text = 'S'
-    expect(entry.write(editor.state.tr, pos, original, values).doc.firstChild!.child(0).child(1).child(1).textContent).toBe('S')
-  })
-  it.each(['inlineMath', 'image'])('does not treat %s answer cells as padding or allow their replacement', (type) => {
-    const { editor, entry, node, pos } = setup('answerKey')
-    const json = node.toJSON() as JSONContent
-    const rows = json.content![0]!.content!
-    rows[0]!.content![2]!.content![0]!.content = []
-    rows[1]!.content![2]!.content![0]!.content = [{ type, attrs: type === 'inlineMath' ? { latex: 'x^2' } : { src: 'data:image/png;base64,AA==', alt: 'Diagram' } }]
-    editor.commands.setContent({ type: 'doc', content: [json] })
-    const original = editor.state.doc.firstChild!
-    const values = entry.read(original) as { tables: { rows: { cells: { text: string; readOnly?: boolean; preview?: string }[] }[] }[] }
-    const cells = values.tables[0]!.rows[1]!.cells
-    expect(cells[2]!.readOnly).toBe(true)
-    expect(cells[2]!.preview).toContain(type === 'inlineMath' ? 'x^2' : 'Diagram')
-    expect(entry.schema.safeParse(values).success).toBe(true)
-    cells[1]!.text = 'C'
-    const updated = entry.write(editor.state.tr, pos, original, values).doc.firstChild!
-    expect(updated.child(0).child(1).child(2).toJSON()).toEqual(original.child(0).child(1).child(2).toJSON())
-    expect(updated.child(0).child(1).child(1).textContent).toBe('C')
-    cells[2]!.text = 'overwrite'
-    cells[2]!.readOnly = false
-    expect(() => entry.write(editor.state.tr, pos, original, values)).toThrow()
+    expect(entry.fields).toEqual([])
+    expect(entry.read(node)).toEqual({})
+    expect(entry.write(editor.state.tr, pos, node, {}).steps).toHaveLength(0)
+    expect(() => entry.write(editor.state.tr, pos, node, { tables: [] })).toThrow()
+    expect(editor.state.doc.nodeAt(pos)!.eq(node)).toBe(true)
   })
   it.each(['question', 'truefalse'])('rejects inspector structural changes to fixed %s items', (id) => {
     const { editor, entry, node, pos } = setup(id)
@@ -226,17 +162,6 @@ describe('template block registry', () => {
     for (const changedItems of [items.slice(1), [...items, { label: 'E', text: 'Extra' }], items.toReversed(), relabeled]) {
       expect(() => entry.write(editor.state.tr, pos, node, { [key]: changedItems })).toThrow()
     }
-  })
-  it('allows blank padding pairs in generated answer-key grids but rejects a missing number for an answer', () => {
-    const { entry, node } = setup('answerKey')
-    const values = entry.read(node) as { tables: { rows: { cells: { text: string }[] }[] }[] }
-    values.tables[0]!.rows[0]!.cells.push({ text: '' })
-    values.tables[0]!.rows[1]!.cells.push({ text: '' })
-    expect(entry.schema.safeParse(values).success).toBe(true)
-    values.tables[0]!.rows[1]!.cells.at(-1)!.text = 'C'
-    expect(entry.schema.safeParse(values).success).toBe(false)
-    values.tables[0]!.rows[1]!.cells.at(-1)!.text = ' '
-    expect(entry.schema.safeParse(values).success).toBe(false)
   })
   it('preserves every header code line and edits only the first code slot', () => {
     const { editor, entry, node, pos } = setup('header')
@@ -259,13 +184,6 @@ describe('template block registry', () => {
     const values = entry.read(node)
     const options = values[key] as { label: string; text: string }[]
     options[1]!.label = options[0]!.label
-    expect(() => entry.write(editor.state.tr, pos, node, values)).toThrow()
-  })
-  it.each(['2.', '', 'two', '-2', '2.5'])('rejects an unexportable answer-key question number %j', (text) => {
-    const { editor, entry, node, pos } = setup('answerKey')
-    const values = entry.read(node) as { tables: { rows: { cells: { text: string }[] }[] }[] }
-    values.tables[0]!.rows[0]!.cells[2]!.text = text
-    expect(entry.schema.safeParse(values).success).toBe(false)
     expect(() => entry.write(editor.state.tr, pos, node, values)).toThrow()
   })
   it.each([0, 1, 2])('preserves retained metadata row nodes when removing item %i', (removed) => {
@@ -455,7 +373,7 @@ describe('template block registry', () => {
     expect(matchBlockSchema(editor.schema.nodes.paragraph!.create())).toBeUndefined()
   })
 
-  it('preserves answer cell types, spans, paragraph attrs and marks and rejects structure changes', () => {
+  it('preserves answer cell types and spans without offering cell writes', () => {
     const { editor, entry } = setup('answerKey')
     let tr = editor.state.tr
     tr.doc.descendants((node, pos) => {
@@ -464,21 +382,11 @@ describe('template block registry', () => {
     })
     editor.view.dispatch(tr)
     const node = editor.state.doc.firstChild!
-    const values = entry.read(node) as { tables: { rows: { cells: { text: string }[] }[] }[] }
-    values.tables[0]!.rows[0]!.cells[0]!.text = 'Số câu\nTiếp'
-    const edited = entry.write(editor.state.tr, 0, node, values)
-    const header = edited.doc.firstChild!.child(0).child(0).child(0)
-    expect(header.type.name).toBe('tableHeader')
-    expect(header.attrs.colspan).toBe(2)
-    expect(header.childCount).toBe(2)
-    expect(entry.read(edited.doc.firstChild!)).toEqual(values)
-    expect(() => edited.doc.check()).not.toThrow()
-    const invalid = editor.state.tr
-    expect(() => entry.write(invalid, 0, node, { tables: [] })).toThrow()
-    expect(() =>
-      entry.write(invalid, 0, node, { tables: [{ rows: [{ cells: [{ text: 'wrong shape' }] }] }] }),
-    ).toThrow()
-    expect(invalid.steps).toHaveLength(0)
+    const unchanged = entry.write(editor.state.tr, 0, node, {})
+    expect(unchanged.steps).toHaveLength(0)
+    expect(unchanged.doc.firstChild!.eq(node)).toBe(true)
+    expect(() => entry.write(unchanged, 0, node, { tables: [] })).toThrow()
+    expect(unchanged.steps).toHaveLength(0)
   })
 
   it('re-matches structural variants and documents semantic multi-node anchors without claiming provenance', () => {

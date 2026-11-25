@@ -15,8 +15,6 @@ export interface InspectorField {
   fixedLength?: boolean
   minItems?: number
   readOnly?: boolean
-  readOnlyField?: string
-  previewField?: string
 }
 
 export interface BlockSchema {
@@ -244,106 +242,6 @@ function choiceQuestion(
   })
 }
 
-const cellSchema = z.strictObject({ text: z.string(), readOnly: z.boolean().optional(), preview: z.string().optional(), questionNumber: z.boolean().optional() })
-const tableSchema = z.strictObject({
-  rows: z.array(z.strictObject({ cells: z.array(cellSchema).min(1) })).min(1),
-}).superRefine(({ rows }, context) => {
-  const trueFalse = /^a\)?$/i.test(rows[0]?.cells[1]?.text.trim() ?? '')
-  rows.forEach((row, rowIndex) => {
-    row.cells.forEach((cell, cellIndex) => {
-      const questionNumber = cell.questionNumber ?? (trueFalse ? rowIndex > 0 && cellIndex === 0 : rowIndex % 2 === 0 && cellIndex > 0)
-      const answer = rows[rowIndex + 1]?.cells[cellIndex]
-      const padding = !trueFalse && cell.text === '' && !cell.readOnly && answer?.text === '' && !answer.readOnly
-      if (questionNumber && !cell.readOnly && !padding && !/^\d+$/.test(cell.text.trim())) context.addIssue({ code: 'custom', message: 'Invalid question number', path: ['rows', rowIndex, 'cells', cellIndex, 'text'] })
-    })
-  })
-})
-
-function readCell(cell: ProseMirrorNode) {
-  let readOnly = false
-  cell.descendants((child) => { if (child.isAtom && !child.isText) readOnly = true })
-  const text = cell.textBetween(0, cell.content.size, '\n')
-  const preview = cell.textBetween(0, cell.content.size, '\n', (leaf) => leaf.type.name === 'inlineMath' ? `$${String(leaf.attrs.latex ?? '')}$` : String(leaf.attrs.alt || `[${leaf.type.name}]`))
-  return { text, readOnly, questionNumber: false, ...(readOnly ? { preview } : {}) }
-}
-
-function readTable(table: ProseMirrorNode) {
-  const rows = children(table).map((row) => ({ cells: children(row).map((cell) => readCell(cell)) }))
-  const lockPair = (numberRow: number, numberColumn: number, answerRow: number, answerColumn: number) => {
-    const number = rows[numberRow]?.cells[numberColumn]
-    const answer = rows[answerRow]?.cells[answerColumn]
-    if (!number || !answer) return
-    number.questionNumber = true
-    const numberRich = readCell(table.child(numberRow).child(numberColumn)).readOnly
-    const answerRich = readCell(table.child(answerRow).child(answerColumn)).readOnly
-    if (numberRich || answerRich || !/^\d+$/.test(number.text.trim())) {
-      number.readOnly = true
-      answer.readOnly = true
-    }
-  }
-  const trueFalse = /^a\)?$/i.test(rows[0]?.cells[1]?.text.trim() ?? '')
-  rows.forEach((row, rowIndex) => {
-    row.cells.forEach((_, cellIndex) => {
-      if (trueFalse && rowIndex > 0 && cellIndex > 0) lockPair(rowIndex, 0, rowIndex, cellIndex)
-      else if (!trueFalse && rowIndex % 2 === 0) {
-        const start = table.child(rowIndex).firstChild?.type.name === 'tableHeader' ? 1 : 0
-        if (cellIndex >= start) lockPair(rowIndex, cellIndex, rowIndex + 1, cellIndex)
-      }
-    })
-  })
-  rows.forEach((row) => { row.cells.forEach((cell) => { if (cell.readOnly) cell.preview ??= cell.text }) })
-  return { rows }
-}
-
-function readTables(node: ProseMirrorNode) {
-  return children(node).filter((table) => named('table')(table)).map((table) => readTable(table))
-}
-
-function writeTables(
-  node: ProseMirrorNode,
-  tables: z.infer<typeof tableSchema>[],
-): ProseMirrorNode {
-  const original = children(node).filter((table) => named('table')(table))
-  if (tables.length !== original.length) throw new RangeError('Answer tables have fixed structure')
-  let index = 0
-  return withChildren(
-    node,
-    children(node).map((table) => {
-      if (table.type.name !== 'table') return table
-      const originalValues = readTable(table)
-      const values = tables[index++]!
-      if (values.rows.length !== table.childCount)
-        throw new RangeError('Answer rows have fixed structure')
-      return withChildren(
-        table,
-        children(table).map((row, rowIndex) => {
-          const cells = values.rows[rowIndex]!.cells
-          if (cells.length !== row.childCount)
-            throw new RangeError('Answer cells have fixed structure')
-          return withChildren(
-            row,
-            children(row).map((cell, cellIndex) => {
-              const text = cells[cellIndex]!.text
-              const originalCell = readCell(cell)
-              if (text === originalCell.text) return cell
-              if (originalValues.rows[rowIndex]!.cells[cellIndex]!.readOnly) throw new RangeError('Unsafe answer pairs are read-only')
-              const paragraphs = text
-                .split('\n')
-                .map((line, paragraphIndex) =>
-                  withText(
-                    cell.maybeChild(paragraphIndex) ?? newTextNode(cell, 'paragraph', ''),
-                    line,
-                  ),
-                )
-              return withChildren(cell, paragraphs)
-            }),
-          )
-        }),
-      )
-    }),
-  )
-}
-
 export const BLOCK_SCHEMAS: BlockSchema[] = [
   define({
     id: 'header',
@@ -505,17 +403,10 @@ export const BLOCK_SCHEMAS: BlockSchema[] = [
     id: 'answerKey',
     label: 'Bảng đáp án',
     match: named('examAnswerKey'),
-    shape: { tables: z.array(tableSchema).min(1) },
-    fields: [
-      list(
-        'tables',
-        'Các bảng đáp án',
-        [list('rows', 'Các dòng', [list('cells', 'Các ô', [{ ...textField, readOnlyField: 'readOnly', previewField: 'preview' }], true)], true)],
-        true,
-      ),
-    ],
-    read: (node) => ({ tables: readTables(node) }),
-    update: (node, values) => writeTables(node, values.tables),
+    shape: {},
+    fields: [],
+    read: () => ({}),
+    update: (node) => node,
   }),
   define({
     id: 'rubric',
