@@ -23,6 +23,20 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it('infers patch action for patch-only replies and previews them before approval', async () => {
+    const patch = [{ op: 'replace', id: 'b1', blocks: [{ type: 'paragraph', text: 'Đoạn đã sửa' }] }]
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ patch }), usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã sửa.' })
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    expect(screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })).toHaveTextContent('Đoạn đã sửa')
+    expect(container.textContent).not.toContain('"patch"')
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual({ action: 'patch', patch })
+  })
+
   it.each(['replace', 'append'])('blocks truncated %s drafts and retries with the receipt', async (action) => {
     let calls = 0
     const retries: string[] = []

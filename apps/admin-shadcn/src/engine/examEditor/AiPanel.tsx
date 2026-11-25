@@ -220,7 +220,8 @@ function examReview(content: string, questionCount: number, finishReason?: strin
   if ((raw || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (finishReason === 'length' || !isAiDocumentReplyComplete(content))) {
     return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
   }
-  if (raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || typeof raw.say === 'string')) {
+  if (raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || Array.isArray(raw.patch) || typeof raw.say === 'string')) {
+    if (!['replace', 'append', 'patch'].includes(String(raw.action)) && Array.isArray(raw.patch) && raw.patch.length > 0) raw.action = 'patch'
     const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
     const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))
     return { text: typeof raw.say === 'string' ? raw.say : reviewDocument ? 'Bản nháp đã sẵn sàng.' : '', previewPayload: reviewDocument ? JSON.stringify(raw) : undefined, incomplete: false }
