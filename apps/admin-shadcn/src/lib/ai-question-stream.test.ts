@@ -4,6 +4,26 @@ import { isAiDocumentReplyComplete, parseAiDocumentReply, QuestionStreamParser, 
 
 describe('question stream parser', () => {
   it.each([
+    ['$' + String.raw`\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot` + '$'],
+    [String.raw`\(\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot\)`],
+    [String.raw`\[\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot\]`],
+  ])('retains single-backslash LaTeX in complete math spans: %s', (math) => {
+    const source = `{"blocks":[{"type":"question","text":"${math}"}]}`
+    expect(parseAiDocumentReply(source)?.blocks).toEqual([{ type: 'question', text: math }])
+    const parser = new QuestionStreamParser()
+    for (const char of source) parser.push(char)
+    expect(parser.questions[0]?.prompt).toBe(math)
+    parser.finish()
+    expect(parser.questions[0]?.prompt).toBe(math)
+    expect(parseAiDocumentReply(JSON.stringify({ blocks: [{ type: 'question', text: math }] }))?.blocks).toEqual([{ type: 'question', text: math }])
+  })
+
+  it('does not reinterpret valid escapes after an unpaired currency dollar', () => {
+    const source = String.raw`{"say":"giá $5\nNam\tThanh\rmai\u0041","blocks":[]}`
+    expect(parseAiDocumentReply(source)).toEqual(JSON.parse(source))
+  })
+
+  it.each([
     ['{"blocks":[]}', true],
     ['{"blocks":[{"text":"literal } [ \\\" bracket"}],}', true],
     ['{"action":"replace","blocks":[{"text":"partial"}', false],

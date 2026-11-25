@@ -18,32 +18,46 @@ export function questionText(value: unknown): string {
   return ''
 }
 
-function jsonStringRepair() {
-  let inString = false
-  let inMath = false
-  let pending = ''
+function repairJsonString(source: string): string {
+  const mathRanges = [...source.matchAll(/(?<!\\)(\${1,2})[\s\S]*?\1|\\{1,2}\([\s\S]*?\\{1,2}\)|\\{1,2}\[[\s\S]*?\\{1,2}\]/g)]
+    .map((match) => [match.index, match.index + match[0].length] as const)
+  let output = ''
+  for (let index = 0; index < source.length; index++) {
+    const char = source[index]!
+    if (char === '\\') {
+      const next = source[index + 1]
+      const command = source.slice(index + 1).match(/^[a-zA-Z]+/)?.[0] ?? ''
+      const inMath = mathRanges.some(([start, end]) => index >= start && index < end)
+      const mathCommand = inMath && /^[bfnrt][a-z]+$/.test(command)
+      const invalidEscape = next === 'u' ? !/^[\da-f]{4}$/i.test(source.slice(index + 2, index + 6)) : !/["\\/bfnrt]/.test(next ?? '')
+      output += (next && (invalidEscape || mathCommand) ? '\\\\' : '\\') + (next ?? '')
+      index++
+    } else output += char === '\n' ? '\\n' : char === '\r' ? '\\r' : char === '\t' ? '\\t' : char
+  }
+  return output
+}
 
+function jsonStringRepair() {
+  let quoted: string | null = null
+  let escaped = false
   return (chunk: string, final = false): string => {
-    const input = pending + chunk
-    pending = ''
     let output = ''
-    for (let index = 0; index < input.length; index++) {
-      const char = input[index]!
-      if (inString && char === '\\') {
-        const next = input[index + 1]
-        if (!final && (!next || next === 'u' && input.length < index + 6 || inMath && /[bfr]/.test(next) && input.length < index + 3)) {
-          pending = input.slice(index)
-          break
-        }
-        const mathCommand = inMath && /[bfr]/.test(next ?? '') && /[a-z]/i.test(input[index + 2] ?? '')
-        const invalidEscape = next === 'u' ? !/^[\da-f]{4}$/i.test(input.slice(index + 2, index + 6)) : !/["\\/bfnrt]/.test(next ?? '')
-        output += (next && (invalidEscape || mathCommand) ? '\\\\' : '\\') + (next ?? '')
-        index++
+    for (const char of chunk) {
+      if (quoted === null) {
+        if (char === '"') quoted = char
+        else output += char
       } else {
-        if (char === '"') { inString = !inString; inMath = false }
-        else if (inString && char === '$') inMath = !inMath
-        output += inString && char === '\n' ? '\\n' : inString && char === '\r' ? '\\r' : inString && char === '\t' ? '\\t' : char
+        quoted += char
+        if (char === '"' && !escaped) {
+          output += repairJsonString(quoted)
+          quoted = null
+        }
+        escaped = char === '\\' && !escaped
       }
+    }
+    if (final && quoted !== null) {
+      output += repairJsonString(quoted)
+      quoted = null
     }
     return output
   }
