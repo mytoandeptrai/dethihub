@@ -35,6 +35,7 @@ const toRow = (row: components['schemas']['ExamCardDto']): CommunityRow => ({
   total_points: row.totalPoints,
   missing_keys: row.missingKeys as unknown as number | null,
 })
+export { toRow as toCommunityRow }
 export async function listCommunityDocs(): Promise<CommunityRow[]> {
   return (await requests.communityExamCommunity({ params: { query: { limit: 100 } } })).map(toRow)
 }

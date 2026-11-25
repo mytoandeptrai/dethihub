@@ -32,8 +32,10 @@ import type { ChangeEvent } from 'react'
 export type PaymentOrder = components['schemas']['CreatedOrderResponseDto']
 const fmt = (value: number) => value.toLocaleString('vi-VN')
 
-export function usePricingContainer() {
-  const pricing = useProductPricing()
+export function usePricingContainer(
+  initialPricing?: components['schemas']['PricingResponseDto'] | null,
+) {
+  const pricing = useProductPricing(initialPricing ?? undefined)
   const { session } = useSession()
   const router = useRouter()
   const search = useSearchParams()

@@ -24,7 +24,7 @@ export default async function CommunityPage() {
         ])}
       />
       <Suspense fallback={<PageSkeleton variant="cards" />}>
-        <CommunityContainer />
+        <CommunityContainer initialExams={exams} />
       </Suspense>
       <footer>
         <PublicLinks />

@@ -15,6 +15,7 @@ import {
   store_app_useApp as useApp,
   store_docs_useDocStore as useDocStore,
   useNavigate,
+  toCommunityRow,
   store_online_useOnline as useOnline,
   examEditor_useSlidingThumb_useSlidingThumb as useSlidingThumb,
 } from '@community-engine'
@@ -32,6 +33,7 @@ import type {
   lib_community_CommunityRow as CommunityRow,
   data_types_Exam as Exam,
 } from '@community-engine'
+import type { components } from '@workspace/api-types'
 export interface CardItem {
   id: string
   title: string
@@ -79,7 +81,9 @@ export function formatDate(iso: string) {
 export function strip(s: string) {
   return s.replaceAll(/\$[^$]*\$/g, '')
 }
-export function useCommunityContainer() {
+export function useCommunityContainer(options?: {
+  initialExams?: components['schemas']['ExamCardDto'][]
+}) {
   const navigate = useNavigate()
   const importExam = useApp((s) => s.importExam)
   const { session, isLoading } = useAuthSession()
@@ -92,6 +96,8 @@ export function useCommunityContainer() {
   const docsQuery = useQuery({
     queryKey: [...examsKeys.all, 'community'],
     queryFn: listCommunityDocs,
+    initialData: options?.initialExams?.map(toCommunityRow),
+    refetchOnMount: 'always',
     enabled: !isLoading,
   })
   const userDocs = docsQuery.data ?? EMPTY_DOCS
@@ -104,7 +110,7 @@ export function useCommunityContainer() {
     enabled: authorIds.length > 0,
   })
   const authors = authorsQuery.data ?? EMPTY_AUTHORS
-  const loading = docsQuery.isPending || (authorIds.length > 0 && authorsQuery.isPending)
+  const loading = docsQuery.isPending
   const [publishOpen, setPublishOpen] = useState(false)
   const [openingId, setOpeningId] = useState<string | null>(null)
   const [operationError, setOperationError] = useState<string | null>(null)

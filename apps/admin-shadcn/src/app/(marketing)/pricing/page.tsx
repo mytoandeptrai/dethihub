@@ -9,12 +9,13 @@ import { publicPageMetadata } from '@/modules/public-pages/public-page-seo'
 
 export const metadata = publicPageMetadata('pricing')
 export default async function PricingPage() {
-  const data = pricingJsonLd(await getPublicPricing())
+  const pricing = await getPublicPricing()
+  const data = pricingJsonLd(pricing)
   return (
     <>
       {data && <JsonLd data={data} />}
       <Suspense fallback={<PageSkeleton variant="cards" />}>
-        <PricingContainer />
+        <PricingContainer initialPricing={pricing} />
       </Suspense>
     </>
   )
