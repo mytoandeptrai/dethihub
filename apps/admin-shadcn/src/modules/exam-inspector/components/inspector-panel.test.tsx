@@ -31,19 +31,19 @@ function setup(content: JSONContent[] = [{ type: 'examTitle', content: [{ type: 
 describe('inspector panel', () => {
   it.each(['meta', 'rubric'])('keeps the last required %s list item and permits adding/removing extras', async (id) => {
     const built = BLOCK_TEMPLATES.find(template => template.id === id)!.build()
-    const editor = setup(Array.isArray(built) ? built : [built])
-    while (screen.getAllByRole('button', { name: 'Xoá mục', exact: true }).length > 1) {
-      await userEvent.click(screen.getAllByRole('button', { name: 'Xoá mục', exact: true }).at(-1)!)
+    const editor = setup([...(Array.isArray(built) ? built : [built]), { type: 'paragraph' }])
+    while (screen.getAllByRole('button', { name: 'Xoá mục' }).length > 1) {
+      await userEvent.click(screen.getAllByRole('button', { name: 'Xoá mục' }).at(-1)!)
     }
     const before = editor.getJSON()
-    expect(screen.getByRole('button', { name: 'Xoá mục', exact: true })).toBeDisabled()
-    await userEvent.click(screen.getByRole('button', { name: 'Xoá mục', exact: true }))
+    expect(screen.getByRole('button', { name: 'Xoá mục' })).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Xoá mục' }))
     expect(editor.getJSON()).toEqual(before)
-    await userEvent.click(screen.getByRole('button', { name: 'Thêm mục', exact: true }))
-    expect(screen.getAllByRole('button', { name: 'Xoá mục', exact: true })).toHaveLength(2)
-    expect(screen.getAllByRole('button', { name: 'Xoá mục', exact: true })[1]).toBeEnabled()
-    await userEvent.click(screen.getAllByRole('button', { name: 'Xoá mục', exact: true })[1]!)
-    expect(screen.getByRole('button', { name: 'Xoá mục', exact: true })).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Thêm mục' }))
+    expect(screen.getAllByRole('button', { name: 'Xoá mục' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Xoá mục' })[1]).toBeEnabled()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Xoá mục' })[1]!)
+    expect(screen.getByRole('button', { name: 'Xoá mục' })).toBeDisabled()
     expect(editor.getJSON()).toEqual(before)
   })
   it('resets stale fields when a multilevel list becomes a flat list', async () => {
@@ -52,7 +52,7 @@ describe('inspector panel', () => {
     const levels = screen.getAllByTestId(/^inspector-field-levels\.\d+\.level$/)
     for (const level of levels) fireEvent.change(level, { target: { value: '0' } })
     await waitFor(() => expect(screen.queryByTestId('inspector-field-levels.0.level')).not.toBeInTheDocument())
-    const ordered = !Boolean(editor.state.doc.firstChild!.attrs.ordered)
+    const ordered = !editor.state.doc.firstChild!.attrs.ordered
     fireEvent.change(screen.getByTestId('inspector-field-ordered'), { target: { value: String(ordered) } })
     await waitFor(() => expect(editor.state.doc.firstChild!.attrs.ordered).toBe(ordered))
   })
