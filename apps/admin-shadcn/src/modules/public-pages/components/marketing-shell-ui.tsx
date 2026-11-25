@@ -1,13 +1,11 @@
 'use client'
-import { CONTACT } from '@engine-pricing'
 import { cn } from '@workspace/ui/lib/utils'
-import { Coins, LogOut, Menu, MessageSquare, X } from 'lucide-react'
+import { Coins, LogOut, Menu, X } from 'lucide-react'
 import Image from 'next/image'
 
 import { PublicLinks } from '@/components/seo/public-links'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
-import { ContactLinks } from '@/modules/public-pages/components/contact-links-ui'
 import {
   AvatarUi,
   Button,
@@ -238,11 +236,11 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
     </header>
   )
 }
-export function FooterUi({ handleOpenFeedback }: { handleOpenFeedback: () => void }) {
+export function FooterUi() {
   return (
     <footer className="border-line mt-24 overflow-hidden border-t bg-white">
       <PublicLinks />
-      <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-x-6 gap-y-10 px-5 py-12 sm:px-6 md:gap-10 md:py-16 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-x-6 gap-y-10 px-5 py-12 sm:px-6 md:gap-10 md:py-16 lg:grid-cols-3">
         <div className="col-span-2 lg:col-span-1">
           <div className="flex items-center gap-2.5">
             <LogoUi className="h-7 w-auto" />
@@ -250,9 +248,6 @@ export function FooterUi({ handleOpenFeedback }: { handleOpenFeedback: () => voi
           <p className="text-ink-3 mt-3.5 max-w-[32ch] text-[13px] leading-relaxed">
             {t('publicCopy.m331')}
           </p>
-          <div className="mt-5">
-            <ContactLinks showEmail={false} />
-          </div>
         </div>
 
         <FooterColUi
@@ -273,42 +268,12 @@ export function FooterUi({ handleOpenFeedback }: { handleOpenFeedback: () => voi
             { label: t('publicCopy.m338'), to: appPaths.editor.href },
           ]}
         />
-        <div className="col-span-2 lg:col-span-1">
-          <p className="eyebrow mb-3.5">{t('publicCopy.m339')}</p>
-          <ul className="text-ink-3 space-y-2.5 text-[13px]">
-            <li>
-              <a
-                href={`mailto:${CONTACT.email}`}
-                className="hover:text-ink break-all hover:underline"
-              >
-                {CONTACT.email}
-              </a>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={handleOpenFeedback}
-                className="reveal text-clay inline-flex items-center gap-1.5 font-medium hover:underline max-[359px]:min-h-9"
-              >
-                <MessageSquare className="size-3.5" />
-                <span>{t('publicCopy.m340')}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
       </div>
 
       <div className="border-line border-t">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4 sm:px-6 sm:py-5">
           <p className="text-ink-3 text-[12px]">{t('publicCopy.m341')}</p>
           <div className="flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onClick={handleOpenFeedback}
-              className="text-ink-3 hover:text-ink hidden text-[12px] font-medium hover:underline sm:block"
-            >
-              {t('publicCopy.m342')}
-            </button>
             <Link
               to={appPaths.privacy.href}
               className="text-ink-3 hover:text-ink text-[12px] font-medium hover:underline"

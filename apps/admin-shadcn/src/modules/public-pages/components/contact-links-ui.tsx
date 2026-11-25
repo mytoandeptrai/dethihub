@@ -25,24 +25,16 @@ const SOCIAL = [
     src: '/brand/social/threads.svg',
   },
 ]
-export function ContactLinks({
-  className,
-  showEmail = true,
-}: {
-  className?: string
-  showEmail?: boolean
-}) {
+export function ContactLinks({ className }: { className?: string }) {
   return (
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      {showEmail && (
-        <a
-          href={`mailto:${CONTACT.email}`}
-          className="text-ink-2 hover:text-clay mr-1 inline-flex items-center gap-1.5 font-medium hover:underline"
-        >
-          <Mail className="size-4" />
-          {CONTACT.email}
-        </a>
-      )}
+      <a
+        href={`mailto:${CONTACT.email}`}
+        className="text-ink-2 hover:text-clay mr-1 inline-flex items-center gap-1.5 font-medium hover:underline"
+      >
+        <Mail className="size-4" />
+        {CONTACT.email}
+      </a>
       {SOCIAL.map((s) => (
         <a
           key={s.label}

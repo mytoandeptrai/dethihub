@@ -62,6 +62,19 @@ for (const path of publicPaths) {
     for (const href of ['/', '/pricing', '/community', '/terms', '/privacy']) {
       expect(await page.locator(`footer a[href="${href}"]`).count()).toBeGreaterThan(0)
     }
+    const footers = page.locator('footer')
+    await expect(
+      footers.locator('a[href^="mailto:"], a[href^="tel:"], img[src*="/social/"]'),
+    ).toHaveCount(0)
+    expect(await footers.allTextContents()).not.toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/facebook|zalo|fanpage|threads|messenger|hotline|liên hệ|@/i),
+      ]),
+    )
+    const footerHrefs = await footers
+      .locator('a')
+      .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+    expect(footerHrefs.every((href) => href?.startsWith('/'))).toBe(true)
     const images = await page
       .locator('img')
       .evaluateAll((elements) => elements.filter((element) => !element.hasAttribute('alt')).length)

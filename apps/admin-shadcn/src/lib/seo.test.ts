@@ -47,6 +47,8 @@ describe('seo metadata', () => {
     expect(getRobots()).toMatchObject({ index: false, follow: false })
   })
   it('links website data to the organization and orders breadcrumbs', () => {
+    expect(organizationJsonLd()).not.toHaveProperty('sameAs')
+    expect(organizationJsonLd()).not.toHaveProperty('contactPoint')
     expect(webSiteJsonLd().publisher['@id']).toBe(organizationJsonLd()['@id'])
     expect(breadcrumbJsonLd([{ name: 'Home', url: site.url }]).itemListElement[0]).toMatchObject({
       position: 1,

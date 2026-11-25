@@ -1,4 +1,3 @@
-/** Kênh liên hệ hiện ở trang Điều khoản / Quyền riêng tư và chân trang. Icon ở public/brand/social/. */
 export const CONTACT = {
   name: 'Quang Bình',
   email: 'abc@example.com',

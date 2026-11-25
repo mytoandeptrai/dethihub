@@ -12,7 +12,6 @@ export function useMarketingContainer() {
   const { session: auth } = useSession()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [feedbackOpen, setFeedbackOpen] = useState(false)
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 10)
     update()
@@ -51,9 +50,6 @@ export function useMarketingContainer() {
     menuOpen,
     menuAnim: { mounted: menuOpen, closing: false },
     canPay: true,
-    feedbackOpen,
-    onFeedbackChange: setFeedbackOpen,
-    onFeedback: () => setFeedbackOpen(true),
     onMenuToggle: () => setMenuOpen((value) => !value),
     onSignOut,
   }
