@@ -135,7 +135,7 @@ function changed(values: Record<string, unknown>): Record<string, unknown> {
 function cleared(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
-      if (typeof value === 'string') return [key, /^\d+$/.test(value.trim()) ? value : '']
+      if (typeof value === 'string') return [key, key === 'label' || /^\d+$/.test(value.trim()) ? value : '']
       if (typeof value === 'boolean') return [key, false]
       if (typeof value === 'number')
         return [
@@ -154,6 +154,15 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
+  it.each(['question', 'truefalse'])('rejects duplicate %s option labels', (id) => {
+    const { editor, entry, node, pos } = setup(id)
+    const key = id === 'question' ? 'options' : 'statements'
+    const values = entry.read(node)
+    const options = values[key] as { label: string; text: string }[]
+    options[1]!.label = options[0]!.label
+    expect(entry.schema.safeParse(values).success).toBe(false)
+    expect(() => entry.write(editor.state.tr, pos, node, values)).toThrow()
+  })
   it.each(['2.', '', 'two', '-2', '2.5'])('rejects an unexportable answer-key question number %j', (text) => {
     const { editor, entry, node, pos } = setup('answerKey')
     const values = entry.read(node) as { tables: { rows: { cells: { text: string }[] }[] }[] }

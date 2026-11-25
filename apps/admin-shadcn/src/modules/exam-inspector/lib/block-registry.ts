@@ -85,6 +85,14 @@ const orderedField: InspectorField = {
 const levelSchema = z.number().int().min(1).max(3)
 const noSchema = z.number().int().positive()
 const optionSchema = z.strictObject({ label: z.string(), text: z.string() })
+const uniqueOptions = (caseInsensitive = false) => z.array(optionSchema).superRefine((options, context) => {
+  const labels = new Set<string>()
+  options.forEach((option, index) => {
+    const label = caseInsensitive ? option.label.toLowerCase() : option.label
+    if (labels.has(label)) context.addIssue({ code: 'custom', message: 'Duplicate option label', path: [index, 'label'] })
+    labels.add(label)
+  })
+})
 const textItemSchema = z.strictObject({ text: z.string() })
 const named = (type: string) => (node: ProseMirrorNode) => node.type.name === type
 const rubricHeading = (node: ProseMirrorNode) =>
@@ -205,7 +213,7 @@ function choiceQuestion(
       id,
       label,
       match: question(kind),
-      shape: { no: noSchema, prompt: z.string(), statements: z.array(optionSchema) },
+      shape: { no: noSchema, prompt: z.string(), statements: uniqueOptions(true) },
       fields: [noField, promptField, list('statements', 'Các mệnh đề', [labelField, textField])],
       read: (node) => {
         const values = read(node)
@@ -222,7 +230,7 @@ function choiceQuestion(
     id,
     label,
     match: question(kind),
-    shape: { no: noSchema, prompt: z.string(), options: z.array(optionSchema) },
+    shape: { no: noSchema, prompt: z.string(), options: uniqueOptions() },
     fields: [noField, promptField, list('options', 'Các phương án', [labelField, textField])],
     read,
     update: (node, values) =>
