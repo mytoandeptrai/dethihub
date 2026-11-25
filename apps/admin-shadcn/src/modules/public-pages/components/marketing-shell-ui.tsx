@@ -28,7 +28,7 @@ function BetaTagUi() {
     </span>
   )
 }
-function LogoUi({ className }: { className?: string }) {
+function LogoUi({ className, eager = false }: { className?: string; eager?: boolean }) {
   return (
     <Image
       unoptimized
@@ -36,6 +36,8 @@ function LogoUi({ className }: { className?: string }) {
       alt={t('publicCopy.m151')}
       width={260}
       height={72}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchPriority={eager ? 'high' : undefined}
       className={className}
     />
   )
@@ -58,7 +60,10 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
           className="group flex shrink-0 items-center"
           aria-label={t('publicCopy.m324')}
         >
-          <LogoUi className="h-9 w-auto transition-transform duration-500 group-hover:scale-105" />
+          <LogoUi
+            eager
+            className="h-9 w-auto transition-transform duration-500 group-hover:scale-105"
+          />
         </Link>
 
         <nav className="ml-2 hidden items-center gap-0.5 lg:flex">

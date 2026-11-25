@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "analyze": "next experimental-analyze --output",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
     "dev": "next dev --turbopack --port 8080",
     "build": "pnpm typecheck && next build",
     "start": "next start",
