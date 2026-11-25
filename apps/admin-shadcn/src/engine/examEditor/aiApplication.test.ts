@@ -3,12 +3,42 @@ import { prepareAiApplication } from './aiApplication'
 import { blocksToTipTap, plainText } from './convert'
 
 describe('ai application preparation', () => {
-  it.each(['replace', 'append', 'patch'])('uses only reply-supplied answers for touched questions in %s without changing Apply blocks', (action) => {
+  it.each(['insertBefore', 'insertAfter', 'append'])('warns when %s supplies an extra key but leaves the original key intact', (op) => {
+    const question = { type: 'question' as const, no: 1, text: 'Cũ', options: [] }
+    const key = { type: 'answerKey' as const, items: [{ no: 1, answer: 'A' }] }
+    const current = blocksToTipTap([question, key])
+    const blocks = [{ type: 'question', text: 'Mới', options: ['Sai', 'Đúng'] }, { type: 'answerKey', items: [{ no: 1, answer: 'B' }] }]
+    const raw = op === 'append' ? { action: 'append', blocks } : { patch: [{ id: 'k0', op, blocks }] }
+    const prepared = prepareAiApplication(raw, current)
+    expect(prepared.answerKeyWarning).toBe(true)
+    expect(prepared.answers.find((item) => item.no === 1)?.answer).toBe('B')
+    const withoutOldKey = prepareAiApplication(raw, blocksToTipTap([question]))
+    expect(withoutOldKey.answerKeyWarning).toBe(false)
+  })
+
+  it('still warns when only one of multiple original answer keys is replaced', () => {
+    const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Cũ', options: [] }, ...[1, 2].map((no) => ({ type: 'answerKey' as const, items: [{ no, answer: 'A' }] }))])
+    const patch = [{ id: 'k0', block: { type: 'question', text: 'Mới' } }, { id: 'k1', block: { type: 'answerKey', items: [{ no: 1, answer: 'B' }] } }]
+    expect(prepareAiApplication({ patch }, current).answerKeyWarning).toBe(true)
+    expect(prepareAiApplication({ patch: [...patch, { id: 'k2', op: 'delete' }] }, current).answerKeyWarning).toBe(false)
+    expect(prepareAiApplication({ patch: patch.slice(1) }, current).answerKeyWarning).toBe(false)
+  })
+
+  it.each(['replace', 'append', 'patch'])('uses only reply answer keys for touched questions in %s', (action) => {
+    const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Cũ', options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const question = { type: 'question', text: 'Mới', options: ['Sai', 'Đúng'] }
+    const no = action === 'append' ? 2 : 1
+    const key = { type: 'answerKey', items: [{ no, answer: 'B' }] }
+    const prepared = prepareAiApplication({ action, blocks: [question, key], patch: [{ id: 'k0', block: question }, { id: 'k1', block: key }] }, current)
+    expect(prepared.answers.find((item) => item.no === no)?.answer).toEqual('B')
+    expect(prepared.answerKeyWarning).toBe(action === 'append')
+  })
+
+  it.each(['replace', 'append', 'patch'])('ignores unsupported per-question answer fields in %s', (action) => {
     const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Cũ', options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
     const question = { type: 'question', text: 'Mới', answer: 'B', options: ['Sai', 'Đúng'] }
     const prepared = prepareAiApplication({ action, blocks: [question], patch: [{ id: 'k0', block: question }] }, current)
-    const no = action === 'append' ? 2 : 1
-    expect(prepared.answers.find((item) => item.no === no)?.answer).toEqual('B')
+    expect(prepared.answers.find((item) => item.no === (action === 'append' ? 2 : 1))).toBeUndefined()
     expect(prepared.answerKeyWarning).toBe(true)
     const applied = action === 'patch' ? prepared.patches[0].blocks : prepared.blocks
     expect(applied[0]).not.toHaveProperty('answer')
@@ -16,43 +46,46 @@ describe('ai application preparation', () => {
     expect(JSON.stringify(blocksToTipTap(applied))).not.toContain('examAnswerKey')
   })
 
-  it.each([false, true])('never inherits answers when swapping one question per slot, explicit own answers: %s', (explicit) => {
+  it.each([false, true])('never inherits answers when swapping one question per slot, updated reply key: %s', (explicit) => {
     const questions = [1, 2].map((no) => ({ type: 'question' as const, no, text: `Câu ${no}`, options: [] }))
     const current = blocksToTipTap([...questions, { type: 'answerKey', items: [{ no: 1, answer: 'A' }, { no: 2, answer: 'B' }] }])
-    const prepared = prepareAiApplication({ patch: [{ id: 'k0', block: { ...questions[1], ...(explicit ? { answer: 'B' } : {}) } }, { id: 'k1', block: { ...questions[0], ...(explicit ? { answer: 'A' } : {}) } }] }, current)
+    const patch = [{ id: 'k0', block: questions[1] }, { id: 'k1', block: questions[0] }]
+    const keyPatch = { id: 'k2', block: { type: 'answerKey', items: [{ no: 1, answer: 'B' }, { no: 2, answer: 'A' }] } }
+    const prepared = prepareAiApplication({ patch: [...patch, ...(explicit ? [keyPatch] : [])] }, current)
     expect(prepared.answers.map((item) => [item.no, plainText(item.answer)]).sort()).toEqual(explicit ? [[1, 'B'], [2, 'A']] : [])
-    expect(prepared.answerKeyWarning).toBe(true)
+    expect(prepared.answerKeyWarning).toBe(!explicit)
   })
 
-  it.each([false, true])('handles the same plotted question as PNG then regenerated SVG without identity inference, own answer: %s', (explicit) => {
+  it.each([false, true])('handles the same plotted question as PNG then regenerated SVG without identity inference, updated reply key: %s', (explicit) => {
     const question = { type: 'question', text: 'Đồ thị nào?', options: ['Parabol'], figure: { kind: 'graph', curves: ['x^2'] } }
     const seed = prepareAiApplication({ blocks: [question] })
     const current = blocksToTipTap([...seed.blocks, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
     const image = current.content?.[0].content?.[0].content?.find((node) => node.type === 'image')
     expect(image?.attrs?.src).toContain('data:image/svg+xml')
     if (image?.attrs) image.attrs.src = 'data:image/png;base64,AAAA'
-    const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: [{ ...question, ...(explicit ? { answer: 'A' } : {}) }, { type: 'question', text: 'Câu bổ sung', options: [] }] }] }, current)
-    expect(() => blocksToTipTap(prepared.patches[0].blocks)).not.toThrow()
-    expect(JSON.stringify(prepared.patches[0].blocks)).toContain('data:image/svg+xml')
+    const keyPatch = { id: 'k1', block: { type: 'answerKey', items: [{ no: 1, answer: 'A' }] } }
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: [question, { type: 'question', text: 'Câu bổ sung', options: [] }] }, ...(explicit ? [keyPatch] : [])] }, current)
+    expect(() => blocksToTipTap(prepared.patches.flatMap((patch) => patch.blocks))).not.toThrow()
+    expect(JSON.stringify(prepared.patches)).toContain('data:image/svg+xml')
     expect(prepared.answers.map((item) => [item.no, plainText(item.answer)])).toEqual(explicit ? [[1, 'A']] : [])
-    expect(prepared.answerKeyWarning).toBe(true)
+    expect(prepared.answerKeyWarning).toBe(!explicit)
   })
 
   it('keeps untouched answers only before all question operations and prefers an explicit updated key', () => {
     const questions = [1, 2, 3].map((no) => ({ type: 'question' as const, no, text: `Câu ${no}`, options: [] }))
     const current = blocksToTipTap([...questions, { type: 'answerKey', items: [1, 2, 3].map((no) => ({ no, answer: 'A' })) }])
-    const patch = [{ id: 'k1', block: { ...questions[1], answer: 'B' } }]
+    const patch = [{ id: 'k1', block: questions[1] }]
     const prepared = prepareAiApplication({ patch }, current)
-    expect(prepared.answers.map((item) => [item.no, plainText(item.answer)])).toEqual([[1, 'A'], [2, 'B']])
+    expect(prepared.answers.map((item) => [item.no, plainText(item.answer)])).toEqual([[1, 'A']])
     expect(prepared.answerKeyWarning).toBe(true)
     const updated = prepareAiApplication({ patch: [...patch, { id: 'k3', block: { type: 'answerKey', items: [{ no: 2, answer: 'C' }] } }] }, current)
     expect(updated.answers.find((item) => item.no === 2)?.answer).toEqual('C')
     expect(updated.answerKeyWarning).toBe(false)
   })
 
-  it('does not use ignored answer keys, malformed own answers or no-op question proposals', () => {
+  it('does not use ignored answer keys or no-op question proposals', () => {
     const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Cũ', options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
-    const prepared = prepareAiApplication({ patch: [{ id: 'k0', block: { type: 'question', text: 'Mới', answer: { text: 42 } } }, { id: 'k99', block: { type: 'answerKey', items: [{ no: 1, answer: 'B' }] } }] }, current)
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', block: { type: 'question', text: 'Mới' } }, { id: 'k99', block: { type: 'answerKey', items: [{ no: 1, answer: 'B' }] } }] }, current)
     expect(prepared.answers).toEqual([])
     expect(prepared.answerKeyWarning).toBe(true)
     expect(prepareAiApplication({ patch: [{ id: 'k99', block: { type: 'question', text: 'Không áp dụng' } }] }, current).answerKeyWarning).toBe(false)
@@ -62,10 +95,14 @@ describe('ai application preparation', () => {
     expect(deleted.answerKeyWarning).toBe(true)
   })
 
-  it('supports numeric own answers and an explicitly empty updated answer key', () => {
-    const prepared = prepareAiApplication({ blocks: [{ type: 'question', kind: 'short', text: 'Đáp số?', answer: 12 }, { type: 'answerKey', items: [] }] })
+  it('supports short answers from reply keys and an explicitly empty updated answer key', () => {
+    const question = { type: 'question', kind: 'short', text: 'Đáp số?' }
+    const prepared = prepareAiApplication({ blocks: [question, { type: 'answerKey', items: [{ no: 1, answer: '12' }] }] })
     expect(prepared.answers).toEqual([{ no: 1, answer: '12' }])
     expect(prepared.answerKeyWarning).toBe(false)
+    const cleared = prepareAiApplication({ blocks: [question, { type: 'answerKey', items: [] }] })
+    expect(cleared.answers).toEqual([])
+    expect(cleared.answerKeyWarning).toBe(false)
     const empty = prepareAiApplication({ blocks: [] })
     expect(empty.answers).toEqual([])
     expect(empty.answerKeyWarning).toBe(false)

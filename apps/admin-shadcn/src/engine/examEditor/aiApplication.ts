@@ -59,7 +59,7 @@ function expandFigures(raw: unknown): unknown {
   })
 }
 
-function sanitizeBlocks(raw: unknown, ownAnswers: Map<ExamBlock, RichText>): ExamBlock[] {
+function sanitizeBlocks(raw: unknown): ExamBlock[] {
   if (!Array.isArray(raw)) return []
   // AI có lúc trả mảng trộn string + span; chuẩn hoá về Span[] để converter/export đọc được.
   const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
@@ -157,7 +157,7 @@ function sanitizeBlocks(raw: unknown, ownAnswers: Map<ExamBlock, RichText>): Exa
         let kind: 'tf' | 'short' | undefined = b.kind === 'tf' || b.kind === 'short' ? b.kind : undefined
         // câu điền chỗ trống bằng chữ (đề đã có dòng chấm) không vẽ 4 ô đáp số của dạng trả lời ngắn
         if (kind === 'short' && /…{3,}|\.{5,}/.test(plainText(rich(b.text)))) kind = undefined
-        const question: ExamBlock = {
+        out.push({
           type: 'question',
           no: typeof b.no === 'number' ? b.no : 1,
           ...(kind ? { kind } : {}),
@@ -177,10 +177,7 @@ function sanitizeBlocks(raw: unknown, ownAnswers: Map<ExamBlock, RichText>): Exa
                   }
                 }),
           format: fmt(b.format),
-        }
-        out.push(question)
-        const answer = rich(typeof b.answer === 'number' && Number.isFinite(b.answer) ? String(b.answer) : b.answer)
-        if (plainText(answer).trim()) ownAnswers.set(question, answer)
+        })
         break
       }
       case 'essay':
@@ -248,7 +245,7 @@ interface ExamPatch {
 }
 
 /** Các mục patch: {op, id, block|blocks}; thiếu op = thay khối (dạng cũ). Mục sai thì bỏ. */
-function sanitizePatches(raw: unknown, ownAnswers: Map<ExamBlock, RichText>): ExamPatch[] {
+function sanitizePatches(raw: unknown): ExamPatch[] {
   if (!Array.isArray(raw)) return []
   const out: ExamPatch[] = []
   for (const item of raw) {
@@ -263,7 +260,7 @@ function sanitizePatches(raw: unknown, ownAnswers: Map<ExamBlock, RichText>): Ex
       continue
     }
     const list = Array.isArray(p.blocks) ? p.blocks : p.block ? [p.block] : []
-    const blocks = sanitizeBlocks(expandFigures(list), ownAnswers)
+    const blocks = sanitizeBlocks(expandFigures(list))
     if (blocks.length) out.push({ op, index, blocks })
   }
   return out
@@ -274,9 +271,8 @@ function hasQuestions(nodes: readonly JSONContent[]): boolean {
 }
 
 export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSONContent) {
-  const ownAnswers = new Map<ExamBlock, RichText>()
-  const blocks = sanitizeBlocks(expandFigures(raw.blocks), ownAnswers)
-  const proposed = sanitizePatches(raw.patch, ownAnswers)
+  const blocks = sanitizeBlocks(expandFigures(raw.blocks))
+  const proposed = sanitizePatches(raw.patch)
   const action: 'append' | 'patch' | 'replace' | 'none' = raw.action === 'append' || raw.action === 'patch' || raw.action === 'replace'
     ? raw.action
     : Array.isArray(raw.patch) && (raw.patch.length > 0 || blocks.length === 0) ? 'patch' : blocks.length ? 'replace' : 'none'
@@ -321,14 +317,11 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
   let question = 0
   let essay = 0
   const untouchedNumbers = new Set<number>()
-  const questionAnswers = new Map<number, RichText>()
   const visit = (node: JSONContent, block?: ExamBlock, sourceIndex?: number) => {
     if (node.type === 'examQuestion') {
       question++
       if (block) {
         numbers.set(block, question)
-        const answer = ownAnswers.get(block)
-        if (answer !== undefined) questionAnswers.set(question, answer)
       } else if (sourceIndex !== undefined && !questionChanges.some((index) => index <= sourceIndex)) untouchedNumbers.add(question)
     }
     if (node.type === 'examEssay') { essay++; if (block) numbers.set(block, essay) }
@@ -336,13 +329,13 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
   }
   result.forEach(({ node, block, sourceIndex }) => visit(node, block, sourceIndex))
   const suppliedKeys = result.flatMap(({ block }) => block?.type === 'answerKey' ? [block] : [])
-  const existingAnswers = result.flatMap(({ node, block }) => !block && node.type === 'examAnswerKey'
-    ? tipTapToBlocks({ type: 'doc', content: [node] }).flatMap((item) => item.type === 'answerKey' ? item.items : []).filter((item) => untouchedNumbers.has(item.no)) : [])
+  const remainingKeys = result.filter(({ node, block }) => !block && node.type === 'examAnswerKey')
+  const existingAnswers = remainingKeys.flatMap(({ node }) => tipTapToBlocks({ type: 'doc', content: [node] })
+    .flatMap((item) => item.type === 'answerKey' ? item.items : []).filter((item) => untouchedNumbers.has(item.no)))
   const answers = new Map<number, { no: number; answer: RichText }>()
   existingAnswers.forEach((item) => answers.set(item.no, item))
-  questionAnswers.forEach((answer, no) => answers.set(no, { no, answer }))
   suppliedKeys.flatMap((block) => block.items).forEach((item) => answers.set(item.no, item))
-  const answerKeyWarning = questionChanges.length > 0 && suppliedKeys.length === 0
+  const answerKeyWarning = questionChanges.length > 0 && (suppliedKeys.length === 0 || remainingKeys.length > 0)
   return {
     action,
     blocks,

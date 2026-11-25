@@ -6,7 +6,7 @@ import { signedInState } from './session-helper'
 
 import type { components } from '@workspace/api-types'
 
-for (const scenario of ['swap', 'plot']) test(`${scenario} preview uses only reply answers and leaves Apply answer-key semantics unchanged`, async ({ browser }) => {
+for (const scenario of ['swap', 'plot', 'extra-key']) test(`${scenario} preview uses only reply answer keys and leaves Apply answer-key semantics unchanged`, async ({ browser }) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
   const context = await browser.newContext({ storageState: auth.state })
@@ -16,7 +16,9 @@ for (const scenario of ['swap', 'plot']) test(`${scenario} preview uses only rep
   const questions = [1, 2].map((no) => ({ type: 'question', no, text: no === 1 ? '1 + 1 = ?' : '1 + 2 = ?', options: [{ label: 'A', text: '2' }, { label: 'B', text: '3' }] }))
   const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jWZkAAAAASUVORK5CYII='
   const existing = plotted ? [{ type: 'question', no: 1, text: [{ text: 'Đồ thị hàm số' }, { text: '', image: { src: png, alt: 'Đồ thị hàm số', plot: JSON.stringify(plot) } }], options: [{ label: 'A', text: 'Parabol' }] }] : questions
-  const patch = plotted ? [{ id: 'k0', block: { type: 'question', text: 'Đồ thị hàm số', figure: { kind: 'graph', curves: ['x^2'] }, answer: 'A', options: ['Parabol'] } }] : [{ id: 'k0', block: questions[1] }, { id: 'k1', block: questions[0] }]
+  const patch = plotted ? [{ id: 'k0', block: { type: 'question', text: 'Đồ thị hàm số', figure: { kind: 'graph', curves: ['x^2'] }, options: ['Parabol'] } }, { id: 'k1', block: { type: 'answerKey', items: [{ no: 1, answer: 'A' }] } }] : scenario === 'extra-key'
+    ? [{ id: 'k0', op: 'insertBefore', blocks: [questions[1], { type: 'answerKey', items: [{ no: 1, answer: 'B' }] }] }]
+    : [{ id: 'k0', block: questions[1] }, { id: 'k1', block: questions[0] }]
   const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ patch }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: `explicit-${scenario}` }
   await page.route('**/api/**', (route) => {
     const pathname = new URL(route.request().url()).pathname
@@ -28,19 +30,20 @@ for (const scenario of ['swap', 'plot']) test(`${scenario} preview uses only rep
   await page.getByText(doc.title, { exact: true }).click()
   const editor = page.locator('.ProseMirror')
   await expect(editor).toBeVisible()
-  const key = editor.locator('[data-exam-node="examAnswerKey"]')
+  const key = editor.locator('[data-exam-node="examAnswerKey"]').last()
   const before = await key.locator('th, td').allTextContents()
   const open = page.getByRole('button', { name: 'Mở trợ lý AI', exact: true })
   if (await open.isVisible()) await open.click()
   await page.getByLabel('Nhập yêu cầu cho AI').fill('Sửa câu hỏi trong đề Toán lớp 9')
   await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
   const preview = page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
-  await expect(preview.getByRole('alert')).toHaveText('Phản hồi chưa cập nhật bảng đáp án. Vui lòng kiểm tra lại đáp án trước khi áp dụng.')
-  await expect(preview.getByText('Đáp án đúng', { exact: true })).toHaveCount(plotted ? 1 : 0)
+  await expect(preview.getByRole('alert')).toHaveText(plotted ? [] : ['Phản hồi chưa cập nhật bảng đáp án. Vui lòng kiểm tra lại đáp án trước khi áp dụng.'])
+  await expect(preview.getByText('Đáp án đúng', { exact: true })).toHaveCount(scenario === 'swap' ? 0 : 1)
   const imageSources = await preview.locator('img').evaluateAll((images) => images.map((image) => image.getAttribute('src')))
   expect(imageSources).toEqual(plotted ? [expect.stringContaining('data:image/svg+xml')] : [])
   await page.getByRole('button', { name: 'Áp dụng', exact: true }).click()
   await expect(editor.locator('[data-exam-node="examQuestion"]').first()).toContainText(plotted ? 'Đồ thị hàm số' : '1 + 2 = ?')
+  await expect(editor.locator('[data-exam-node="examAnswerKey"]')).toHaveCount(scenario === 'extra-key' ? 2 : 1)
   await expect(key.locator('th, td')).toHaveText(before)
   await context.close()
 })

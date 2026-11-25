@@ -24,11 +24,10 @@ describe('document approval preview', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Phản hồi chưa cập nhật bảng đáp án.')
     expect(screen.getByRole('alert')).not.toHaveTextContent('thứ tự')
   })
-  it('highlights the question own answer but uses only a generic missing-key warning', () => {
-    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', answer: 'B', options: ['Sai', 'Đúng'] }] }} />)
+  it('highlights an answer from a reply answer key', () => {
+    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', options: ['Sai', 'Đúng'] }, { type: 'answerKey', items: [{ no: 1, answer: 'B' }] }] }} />)
     expect(screen.getByText('B.').parentElement).toHaveTextContent('Đáp án đúng')
-    expect(screen.getByRole('alert')).toHaveTextContent('Phản hồi chưa cập nhật bảng đáp án.')
-    expect(screen.getByRole('alert')).not.toHaveTextContent('thứ tự')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
   it('previews replacement blocks rather than a no-op when the optional patch array is empty', () => {
     render(<AiDocumentPreview document={{ patch: [], blocks: [{ type: 'paragraph', text: 'Nội dung thay thế' }] }} />)
@@ -87,8 +86,8 @@ describe('document approval preview', () => {
     expect(essay).not.toHaveTextContent('Đáp án')
   })
 
-  it('does not infer answers from correctness flags other than the question answer field', () => {
-    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', correctAnswer: 'A', options: [{ label: 'A', text: 'Một', correct: true, isCorrect: true }] }] }} />)
+  it('does not infer answers from discarded per-question answer or correctness flags', () => {
+    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', answer: 'A', correctAnswer: 'A', options: [{ label: 'A', text: 'Một', correct: true, isCorrect: true }] }] }} />)
     expect(screen.queryByText('Đáp án đúng')).not.toBeInTheDocument()
     expect(screen.queryByText('Đáp án')).not.toBeInTheDocument()
   })
