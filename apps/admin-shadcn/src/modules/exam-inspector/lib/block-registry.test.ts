@@ -154,6 +154,15 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
+  it('allows blank padding pairs in generated answer-key grids but rejects a missing number for an answer', () => {
+    const { entry, node } = setup('answerKey')
+    const values = entry.read(node) as { tables: { rows: { cells: { text: string }[] }[] }[] }
+    values.tables[0]!.rows[0]!.cells.push({ text: '' })
+    values.tables[0]!.rows[1]!.cells.push({ text: '' })
+    expect(entry.schema.safeParse(values).success).toBe(true)
+    values.tables[0]!.rows[1]!.cells.at(-1)!.text = 'C'
+    expect(entry.schema.safeParse(values).success).toBe(false)
+  })
   it('preserves every header code line and edits only the first code slot', () => {
     const { editor, entry, node, pos } = setup('header')
     const header = node.toJSON() as JSONContent

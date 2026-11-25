@@ -251,7 +251,8 @@ const tableSchema = z.strictObject({
   rows.forEach((row, rowIndex) => {
     row.cells.forEach((cell, cellIndex) => {
       const questionNumber = trueFalse ? rowIndex > 0 && cellIndex === 0 : rowIndex % 2 === 0 && cellIndex > 0
-      if (questionNumber && !/^\d+$/.test(cell.text.trim())) context.addIssue({ code: 'custom', message: 'Invalid question number', path: ['rows', rowIndex, 'cells', cellIndex, 'text'] })
+      const padding = !trueFalse && !cell.text.trim() && !rows[rowIndex + 1]?.cells[cellIndex]?.text.trim()
+      if (questionNumber && !padding && !/^\d+$/.test(cell.text.trim())) context.addIssue({ code: 'custom', message: 'Invalid question number', path: ['rows', rowIndex, 'cells', cellIndex, 'text'] })
     })
   })
 })
