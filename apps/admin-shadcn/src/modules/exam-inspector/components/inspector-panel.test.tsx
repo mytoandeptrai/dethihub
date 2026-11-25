@@ -29,6 +29,23 @@ function setup(content: JSONContent[] = [{ type: 'examTitle', content: [{ type: 
 }
 
 describe('inspector panel', () => {
+  it.each(['meta', 'rubric'])('keeps the last required %s list item and permits adding/removing extras', async (id) => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === id)!.build()
+    const editor = setup(Array.isArray(built) ? built : [built])
+    while (screen.getAllByRole('button', { name: 'Xoá mục', exact: true }).length > 1) {
+      await userEvent.click(screen.getAllByRole('button', { name: 'Xoá mục', exact: true }).at(-1)!)
+    }
+    const before = editor.getJSON()
+    expect(screen.getByRole('button', { name: 'Xoá mục', exact: true })).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Xoá mục', exact: true }))
+    expect(editor.getJSON()).toEqual(before)
+    await userEvent.click(screen.getByRole('button', { name: 'Thêm mục', exact: true }))
+    expect(screen.getAllByRole('button', { name: 'Xoá mục', exact: true })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Xoá mục', exact: true })[1]).toBeEnabled()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Xoá mục', exact: true })[1]!)
+    expect(screen.getByRole('button', { name: 'Xoá mục', exact: true })).toBeDisabled()
+    expect(editor.getJSON()).toEqual(before)
+  })
   it('resets stale fields when a multilevel list becomes a flat list', async () => {
     const built = BLOCK_TEMPLATES.find(template => template.id === 'multilevel')!.build()
     const editor = setup(Array.isArray(built) ? built : [built])

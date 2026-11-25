@@ -22,7 +22,7 @@ function ListField({ metadata, path }: { metadata: InspectorField; path: string 
   return <fieldset className="min-w-0 space-y-2 rounded-md border border-slate-200 p-2">
     <legend className="px-1 text-xs font-medium text-slate-600">{metadata.label}</legend>
     {fields.map((item, index) => <div key={item.id} className="space-y-2 border-b border-slate-100 pb-2 last:border-0">
-      <div className="flex justify-between text-[11px] text-slate-500"><span>{t('examInspectorCopy.item', { number: index + 1 })}</span>{!metadata.fixedLength && <button type="button" onClick={() => remove(index)} className="text-indigo-600">{t('examInspectorCopy.remove')}</button>}</div>
+      <div className="flex justify-between text-[11px] text-slate-500"><span>{t('examInspectorCopy.item', { number: index + 1 })}</span>{!metadata.fixedLength && <button type="button" disabled={fields.length <= (metadata.minItems ?? 0)} onClick={() => remove(index)} className="text-indigo-600 disabled:text-slate-300">{t('examInspectorCopy.remove')}</button>}</div>
       {metadata.fields?.map((child) => <SchemaField key={child.key} metadata={child} path={`${path}.${index}.${child.key}`} />)}
     </div>)}
     {!metadata.fixedLength && <button type="button" className="text-xs font-medium text-indigo-600" onClick={() => append(defaultItem(metadata.fields ?? []))}>{t('examInspectorCopy.add')}</button>}

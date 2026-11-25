@@ -13,6 +13,7 @@ export interface InspectorField {
   options?: { label: string; value: string | number | boolean }[]
   fields?: InspectorField[]
   fixedLength?: boolean
+  minItems?: number
 }
 
 export interface BlockSchema {
@@ -70,7 +71,8 @@ const list = (
   label: string,
   fields: InspectorField[],
   fixedLength = false,
-): InspectorField => ({ key, label, kind: 'list', fields, fixedLength })
+  minItems = 0,
+): InspectorField => ({ key, label, kind: 'list', fields, fixedLength, minItems })
 const textField = field('text', 'Nội dung', 'textarea')
 const noField = field('no', 'Số câu', 'number')
 const promptField = field('prompt', 'Nội dung câu hỏi', 'textarea')
@@ -342,7 +344,7 @@ export const BLOCK_SCHEMAS: BlockSchema[] = [
     label: 'Thông tin đề',
     match: named('examMeta'),
     shape: { rows: z.array(z.strictObject({ label: z.string(), value: z.string() })).min(1) },
-    fields: [list('rows', 'Các dòng thông tin', [labelField, field('value', 'Giá trị')])],
+    fields: [list('rows', 'Các dòng thông tin', [labelField, field('value', 'Giá trị')], false, 1)],
     read: (node) => ({
       rows: children(node).map((row) => ({
         label: String(row.attrs.label),
@@ -486,7 +488,7 @@ export const BLOCK_SCHEMAS: BlockSchema[] = [
     label: 'Thang điểm',
     match: named('examRubric'),
     shape: { title: z.string(), items: z.array(optionSchema).min(1) },
-    fields: [field('title', 'Tiêu đề'), list('items', 'Các ý chấm', [labelField, textField])],
+    fields: [field('title', 'Tiêu đề'), list('items', 'Các ý chấm', [labelField, textField], false, 1)],
     read: (node) => ({
       title: children(node).find((item) => named('examRubricTitle')(item))?.textContent ?? '',
       items: children(node)
