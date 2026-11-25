@@ -23,6 +23,19 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it.each([
+    'Giải thích về JSON: {}. Không phải bản nháp.',
+    'Ví dụ {"example":"value"}. Không phải bản nháp.',
+    'Ví dụ {"blocks":"example","action":123}. Không phải bản nháp.',
+  ])('keeps explanatory prose containing non-protocol JSON: %s', async (content) => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
+    render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(content)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Nội dung sẽ áp dụng' })).not.toBeInTheDocument()
+  })
+
   it('recovers trailing commas and bare LaTeX before document approval', async () => {
     const content = String.raw`{"action":"append","say":"Bản nháp có dấu phẩy","blocks":[{"type":"paragraph","text":"$AH \\cdot CH$"},],}`.replaceAll('\\\\', '\\')
     server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content, usage: null })))
