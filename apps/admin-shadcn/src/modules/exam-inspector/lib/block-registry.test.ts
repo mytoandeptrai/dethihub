@@ -154,6 +154,14 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
+  it.each(['question', 'truefalse'])('rejects inspector structural changes to fixed %s items', (id) => {
+    const { editor, entry, node, pos } = setup(id)
+    const key = id === 'question' ? 'options' : 'statements'
+    const items = entry.read(node)[key] as { label: string; text: string }[]
+    for (const changedItems of [items.slice(1), [...items, { label: 'E', text: 'Extra' }], [...items].reverse(), items.map((item, index) => index ? item : { ...item, label: 'Z' })]) {
+      expect(() => entry.write(editor.state.tr, pos, node, { [key]: changedItems })).toThrow()
+    }
+  })
   it('allows blank padding pairs in generated answer-key grids but rejects a missing number for an answer', () => {
     const { entry, node } = setup('answerKey')
     const values = entry.read(node) as { tables: { rows: { cells: { text: string }[] }[] }[] }
@@ -184,7 +192,6 @@ describe('template block registry', () => {
     const values = entry.read(node)
     const options = values[key] as { label: string; text: string }[]
     options[1]!.label = options[0]!.label
-    expect(entry.schema.safeParse(values).success).toBe(false)
     expect(() => entry.write(editor.state.tr, pos, node, values)).toThrow()
   })
   it.each(['2.', '', 'two', '-2', '2.5'])('rejects an unexportable answer-key question number %j', (text) => {
@@ -194,19 +201,19 @@ describe('template block registry', () => {
     expect(entry.schema.safeParse(values).success).toBe(false)
     expect(() => entry.write(editor.state.tr, pos, node, values)).toThrow()
   })
-  it.each([0, 1, 3])('preserves retained option nodes when removing item %i', (removed) => {
-    const { editor, entry, node, pos } = setup('question')
+  it.each([0, 1, 2])('preserves retained metadata row nodes when removing item %i', (removed) => {
+    const { editor, entry, node, pos } = setup('meta')
     const marked = node.toJSON() as JSONContent
-    marked.content!.slice(1).forEach((option, index) => {
+    marked.content!.forEach((option, index) => {
       option.content![0]!.marks = [{ type: index % 2 ? 'italic' : 'bold' }]
     })
     editor.commands.setContent({ type: 'doc', content: [marked] })
     const original = editor.state.doc.firstChild!
-    const values = entry.read(original) as { options: { label: string; text: string }[] }
-    const expectedNodes = Array.from({ length: 4 }, (_, index) => original.child(index + 1)).filter((_, index) => index !== removed)
-    const options = values.options.filter((_, index) => index !== removed)
-    const updated = entry.write(editor.state.tr, pos, original, { options }).doc.firstChild!
-    expectedNodes.forEach((option, index) => expect(updated.child(index + 1).toJSON()).toEqual(option.toJSON()))
+    const values = entry.read(original) as { rows: { label: string; value: string }[] }
+    const expectedNodes = Array.from({ length: 3 }, (_, index) => original.child(index)).filter((_, index) => index !== removed)
+    const rows = values.rows.filter((_, index) => index !== removed)
+    const updated = entry.write(editor.state.tr, pos, original, { rows }).doc.firstChild!
+    expectedNodes.forEach((row, index) => expect(updated.child(index).toJSON()).toEqual(row.toJSON()))
   })
   it('covers the catalog in order with Vietnamese labels and matching schema metadata', () => {
     expect(BLOCK_SCHEMAS.map(({ id, label }) => ({ id, label }))).toEqual(
@@ -227,6 +234,11 @@ describe('template block registry', () => {
       expect(entry.schema.safeParse(entry.read(node)).success).toBe(true)
       expect(entry.write(editor.state.tr, pos, node, entry.read(node)).steps).toHaveLength(0)
       const values = changed(entry.read(node))
+      if (template.id === 'question' || template.id === 'truefalse') {
+        const key = template.id === 'question' ? 'options' : 'statements'
+        const original = entry.read(node)[key] as { label: string }[]
+        ;(values[key] as { label: string }[]).forEach((item, index) => { item.label = original[index]!.label })
+      }
       const tr = entry.write(editor.state.tr, pos, node, values)
       editor.view.dispatch(tr)
       const updated = editor.state.doc.nodeAt(pos)!

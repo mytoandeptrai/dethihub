@@ -14,7 +14,7 @@ export interface InspectorField {
   fields?: InspectorField[]
   fixedLength?: boolean
   minItems?: number
-  labelSequence?: 'upper' | 'lower'
+  readOnly?: boolean
 }
 
 export interface BlockSchema {
@@ -88,14 +88,6 @@ const orderedField: InspectorField = {
 const levelSchema = z.number().int().min(1).max(3)
 const noSchema = z.number().int().positive()
 const optionSchema = z.strictObject({ label: z.string(), text: z.string() })
-const uniqueOptions = (caseInsensitive = false) => z.array(optionSchema).superRefine((options, context) => {
-  const labels = new Set<string>()
-  options.forEach((option, index) => {
-    const label = caseInsensitive ? option.label.toLowerCase() : option.label
-    if (labels.has(label)) context.addIssue({ code: 'custom', message: 'Duplicate option label', path: [index, 'label'] })
-    labels.add(label)
-  })
-})
 const textItemSchema = z.strictObject({ text: z.string() })
 const named = (type: string) => (node: ProseMirrorNode) => node.type.name === type
 const rubricHeading = (node: ProseMirrorNode) =>
@@ -108,6 +100,12 @@ const nestedList = (node: ProseMirrorNode) =>
   children(node).some((child) => Number(child.attrs.level) > 0)
 const question = (kind: string | null) => (node: ProseMirrorNode) =>
   named('examQuestion')(node) && (node.attrs.kind ?? null) === kind
+
+function fixedOptions(node: ProseMirrorNode, items: { label: string; text: string }[]) {
+  const existing = children(node).filter(named('examOption'))
+  if (items.length !== existing.length || items.some((item, index) => item.label !== existing[index]!.attrs.label)) throw new RangeError('Graded items have fixed labels and order')
+  return existing.map((option, index) => withText(option, items[index]!.text))
+}
 
 function textItems(
   parent: ProseMirrorNode,
@@ -216,8 +214,8 @@ function choiceQuestion(
       id,
       label,
       match: question(kind),
-      shape: { no: noSchema, prompt: z.string(), statements: uniqueOptions(true) },
-      fields: [noField, promptField, { ...list('statements', 'Các mệnh đề', [labelField, textField]), labelSequence: 'lower' }],
+      shape: { no: noSchema, prompt: z.string(), statements: z.array(optionSchema) },
+      fields: [noField, promptField, list('statements', 'Các mệnh đề', [{ ...labelField, readOnly: true }, textField], true)],
       read: (node) => {
         const values = read(node)
         return { no: values.no, prompt: values.prompt, statements: values.options }
@@ -225,7 +223,7 @@ function choiceQuestion(
       update: (node, values) =>
         withChildren(withAttrs(node, { no: values.no }), [
           withText(node.child(0), values.prompt),
-          ...textItems(node, 'examOption', values.statements),
+          ...fixedOptions(node, values.statements),
         ]),
     })
   }
@@ -233,13 +231,13 @@ function choiceQuestion(
     id,
     label,
     match: question(kind),
-    shape: { no: noSchema, prompt: z.string(), options: uniqueOptions() },
-    fields: [noField, promptField, { ...list('options', 'Các phương án', [labelField, textField]), labelSequence: 'upper' }],
+    shape: { no: noSchema, prompt: z.string(), options: z.array(optionSchema) },
+    fields: [noField, promptField, list('options', 'Các phương án', [{ ...labelField, readOnly: true }, textField], true)],
     read,
     update: (node, values) =>
       withChildren(withAttrs(node, { no: values.no }), [
         withText(node.child(0), values.prompt),
-        ...textItems(node, 'examOption', values.options),
+        ...fixedOptions(node, values.options),
       ]),
   })
 }
