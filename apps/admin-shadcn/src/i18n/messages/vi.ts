@@ -10,7 +10,13 @@ import workspaceCopy from './workspace-copy'
 import examInspectorCopy from './exam-inspector-copy'
 
 const messages = {
-  aiReview: { title: 'Nội dung sẽ áp dụng', empty: 'Trống', count: 'Đã soạn {count}{total} câu' },
+  aiReview: {
+    title: 'Nội dung sẽ áp dụng', empty: 'Chưa có nội dung', count: 'Đã soạn {count}{total} câu',
+    replace: 'Thay toàn bộ đề', append: 'Thêm vào cuối đề', patch: 'Sửa một phần', draft: 'Bản nháp đề thi',
+    summary: '{questions} câu hỏi · {others} khối khác', question: 'Câu {number}.', questionColumn: 'Câu', answer: 'Đáp án', correct: 'Đáp án đúng',
+    divider: 'Đường phân cách', pageBreak: 'Ngắt trang', toc: 'Mục lục', image: 'Hình ảnh', unknown: 'Khối nội dung khác',
+    replaceBlock: 'Thay khối', deleteBlock: 'Xoá khối', insertAfter: 'Chèn sau', insertBefore: 'Chèn trước',
+  },
   loading: { label: 'Đang tải' },
   examInspectorCopy,
   publicCopy,

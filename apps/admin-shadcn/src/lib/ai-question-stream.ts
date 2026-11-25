@@ -104,6 +104,10 @@ export function parseAiDocumentReply(content: string, parse: (json: string) => u
   } catch { return null }
 }
 
+export function isAiQuestionBlock(block: Record<string, unknown>): boolean {
+  return ['question', 'essay', 'truefalse', 'short'].includes(String(block.type))
+}
+
 export class QuestionStreamParser {
   readonly questions: GeneratedQuestion[] = []
   readonly blocks: Record<string, unknown>[] = []
@@ -119,7 +123,7 @@ export class QuestionStreamParser {
       const source = stack.at(-1)?.key
       const raw = value as Record<string, unknown>
       if (source === 'blocks') this.blocks.push(raw)
-      if (source !== 'questions' && !(source === 'blocks' && (raw.type === 'question' || raw.type === 'essay'))) return
+      if (source !== 'questions' && !(source === 'blocks' && isAiQuestionBlock(raw))) return
       const prompt = questionText(raw.prompt ?? raw.text).trim()
       if (!prompt) return
       this.questions.push({ id: `${source}:${key}`, number: Number(raw.no ?? raw.number) || this.questions.length + 1, prompt, raw })

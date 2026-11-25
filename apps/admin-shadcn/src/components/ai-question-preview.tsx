@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { questionText } from '@/lib/ai-question-stream'
+import { t } from '@/i18n/translate'
 
 import type { GeneratedQuestion } from '@/lib/ai-question-stream'
 import type { ReactNode } from 'react'
@@ -22,7 +23,7 @@ export function AiQuestionPreview({ questions, total, busy = false, inserted = f
   const selected = questions.filter((question) => !excluded.has(question.id))
   return (
     <section aria-label="Câu hỏi AI đã soạn" className="my-3 min-w-0 rounded-xl border border-line bg-surface p-3 text-sm">
-      <p role="status" className="mb-3 font-semibold">Đã soạn {questions.length}{total ? `/${total}` : ''} câu</p>
+      <p role="status" className="mb-3 font-semibold">{t('aiReview.count', { count: questions.length, total: total && Number.isFinite(total) && total >= questions.length ? `/${total}` : '' })}</p>
       <ol className="max-h-96 space-y-3 overflow-y-auto">
         {questions.map((question) => (
           <li key={question.id} className="flex min-w-0 items-start gap-2 border-b border-line pb-3 last:border-0">
