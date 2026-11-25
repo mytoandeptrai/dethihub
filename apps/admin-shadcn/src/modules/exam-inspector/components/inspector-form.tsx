@@ -23,7 +23,7 @@ function nextLabel(items: Values[], sequence: 'upper' | 'lower') {
     let label = ''
     while (number > 0) {
       number--
-      label = String.fromCharCode(65 + number % 26) + label
+      label = String.fromCodePoint(65 + number % 26) + label
       number = Math.floor(number / 26)
     }
     if (sequence === 'lower') label = label.toLowerCase()
