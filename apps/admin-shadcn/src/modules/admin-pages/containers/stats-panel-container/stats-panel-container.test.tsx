@@ -1,12 +1,12 @@
 import { clearAdminCache } from '@admin-pages-engine'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createOperationsFixture } from '@/modules/admin-pages/testing/operations-fixture'
 import { server } from '@/testing/msw/server'
+import { renderWithProviders } from '@/testing/render'
 
 import { StatsPanelContainer } from './stats-panel-container'
 
@@ -22,7 +22,6 @@ beforeEach(() => {
 describe('stats panel loading boundaries', () => {
   it.each(['data', 'empty', 'error'])('keeps the date picker mounted and focused on refetch after initial %s', async (initial) => {
     const fixture = createOperationsFixture()
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
     let release!: () => void
     let held = false
     const gate = new Promise<void>((resolve) => { release = resolve })
@@ -32,7 +31,7 @@ describe('stats panel loading boundaries', () => {
       else if (initial === 'empty') return HttpResponse.json({ ...fixture.data.stats[7], chartDays: [] })
       return new HttpResponse(JSON.stringify(fixture.respond('GET', request.url).json), { headers: { 'content-type': 'application/json' } })
     }), http.get('http://localhost:3000/api/admin/stats/online', () => HttpResponse.json(fixture.data.online)))
-    render(<QueryClientProvider client={client}><StatsPanelContainer me={{ userId: 'fixture-staff', role: 'admin' }} /></QueryClientProvider>)
+    const { unmount } = renderWithProviders(<StatsPanelContainer me={{ userId: 'fixture-staff', role: 'admin' }} />)
     expect(screen.getByRole('status', { name: 'Đang tải' })).toBeInTheDocument()
     const picker = await screen.findByRole('radio', { name: '30 ngày' })
     await userEvent.click(picker)
@@ -45,6 +44,6 @@ describe('stats panel loading boundaries', () => {
       await waitFor(() => expect(screen.queryByRole('status', { name: 'Đang tải' })).not.toBeInTheDocument())
       expect(picker).toHaveFocus()
       expect(screen.getByRole('radio', { name: '30 ngày' })).toBe(picker)
-    } finally { release(); client.clear() }
+    } finally { release(); unmount() }
   })
 })
