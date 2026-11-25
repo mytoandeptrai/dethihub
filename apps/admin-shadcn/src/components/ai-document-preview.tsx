@@ -63,7 +63,7 @@ export function AiDocumentPreview({
         </p>
       ) : null}
       <div className="max-h-96 overflow-y-auto">
-        <PreviewValue value={document} renderText={renderText} />
+        <PreviewValue value={Object.fromEntries(Object.entries(document).filter(([key]) => key !== 'say'))} renderText={renderText} />
       </div>
     </section>
   )
