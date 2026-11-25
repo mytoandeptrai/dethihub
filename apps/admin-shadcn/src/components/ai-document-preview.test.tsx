@@ -11,6 +11,12 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('clearly reports that out-of-bounds patches have nothing to apply', () => {
+    const document = { say: 'Đã sửa xong.', patch: [{ id: 'k99', block: { type: 'paragraph', text: 'Không được chèn' } }] }
+    render(<PreparedPreview document={document} prepared={prepareAiApplication(document, { type: 'doc', content: [{ type: 'paragraph' }] })} />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Không có thay đổi hợp lệ để áp dụng.')
+    expect(screen.queryByText('Không được chèn')).not.toBeInTheDocument()
+  })
   it('renders adjacent rich spans as one Markdown flow instead of a minus-sign bullet', () => {
     render(<AiDocumentPreview document={{ blocks: [{ type: 'paragraph', text: [{ text: '$x^2$' }, { text: ' - 2' }] }] }} renderText={(text) => <p data-testid="inline-flow">{text}</p>} />)
     expect(screen.getAllByTestId('inline-flow')).toHaveLength(1)

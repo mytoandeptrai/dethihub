@@ -311,5 +311,6 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
     patches: patches.map((patch) => ({ ...patch, numbers: patch.blocks.map((block) => numbers.get(block) ?? 0) })),
     numbers: blocks.map((block) => numbers.get(block) ?? 0),
     answers,
+    noChanges: action === 'patch' ? patches.length === 0 : action !== 'none' && blocks.length === 0,
   }
 }

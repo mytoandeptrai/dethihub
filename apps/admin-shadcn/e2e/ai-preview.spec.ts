@@ -6,6 +6,36 @@ import { signedInState } from './session-helper'
 
 import type { components } from '@workspace/api-types'
 
+test('out-of-bounds patches keep rejection and regeneration available after Apply', async ({ browser }) => {
+  const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
+  const auth = await signedInState(browser, origin)
+  const context = await browser.newContext({ storageState: auth.state })
+  const page = await context.newPage()
+  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ say: 'Đã sửa xong.', patch: [{ id: 'k999', block: { type: 'paragraph', text: 'Không được chèn' } }] }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'no-op-fixture' }
+  await page.route('**/api/**', (route) => {
+    const pathname = new URL(route.request().url()).pathname
+    return route.fulfill({ json: pathname === '/api/ai/chat' ? response : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
+  })
+  const doc = { ...fixture, id: 'no-op-fixture', title: 'Không có thay đổi', blocks: [] }
+  await page.addInitScript((document) => localStorage.setItem('soandethi-docs', JSON.stringify({ state: { myDocs: [document], myDecks: [] }, version: 0 })), doc)
+  await page.goto(`${origin}/editor`)
+  await page.getByText(doc.title, { exact: true }).click()
+  const editor = page.locator('.ProseMirror')
+  await expect(editor).toBeVisible()
+  const before = await editor.innerText()
+  const open = page.getByRole('button', { name: 'Mở trợ lý AI', exact: true })
+  if (await open.isVisible()) await open.click()
+  await page.getByLabel('Nhập yêu cầu cho AI').fill('Sửa câu hỏi trong đề Toán lớp 9')
+  await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
+  await page.getByRole('button', { name: 'Áp dụng', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Huỷ', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Soạn lại', exact: true })).toBeEnabled()
+  await expect(page.locator('.ai-msg-error')).toContainText('Không có thay đổi hợp lệ để áp dụng.')
+  await expect(page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })).toContainText('Không có thay đổi hợp lệ để áp dụng.')
+  await expect(editor).toHaveText(before)
+  await context.close()
+})
+
 test('document approval is a readable mini exam, not a JSON tree', async ({ browser }, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)

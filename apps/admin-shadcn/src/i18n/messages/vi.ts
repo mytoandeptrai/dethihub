@@ -11,6 +11,7 @@ import examInspectorCopy from './exam-inspector-copy'
 
 const messages = {
   aiReview: {
+    noChanges: 'Không có thay đổi hợp lệ để áp dụng.',
     essay: 'Bài {number}.', score: '{score} điểm',
     title: 'Nội dung sẽ áp dụng', empty: 'Chưa có nội dung', count: 'Đã soạn {count}{total} câu',
     replace: 'Thay toàn bộ đề', append: 'Thêm vào cuối đề', patch: 'Sửa một phần', draft: 'Bản nháp đề thi',

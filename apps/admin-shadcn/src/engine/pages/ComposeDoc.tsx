@@ -590,7 +590,8 @@ export default function ComposeDoc() {
       if (!raw || typeof raw !== 'object') return looksJson ? { text: FAIL_JSON, failed: true } : undefined
 
       const say = typeof raw.say === 'string' ? raw.say.trim().slice(0, 1200) : ''
-      const { blocks, patches, action } = prepareAiApplication(raw, editor.getJSON())
+      const { blocks, patches, action, noChanges } = prepareAiApplication(raw, editor.getJSON())
+      if (noChanges) return { text: 'Không có thay đổi hợp lệ để áp dụng.', failed: true }
       const hasPlot = (list: ExamBlock[]) => list.some((b) => (b.type === 'paragraph' || b.type === 'question') && Array.isArray(b.text) && b.text.some((s) => s.image?.plot))
       if (hasPlot(blocks) || patches.some((p) => hasPlot(p.blocks)))
         setTimeout(() => void loadTools().then(({ ti }) => ti.pngifyToolImages(editor)), 0)

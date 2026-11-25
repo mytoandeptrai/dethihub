@@ -218,6 +218,7 @@ export function AiDocumentPreview({
     blocks: unknown[]
     numbers?: number[]
     answers?: { no: number; answer: unknown }[]
+    noChanges?: boolean
     patches: { op: 'replace' | 'insertAfter' | 'insertBefore' | 'delete'; index: number; blocks: unknown[]; numbers?: number[] }[]
   }
   questionCount?: number
@@ -257,6 +258,7 @@ export function AiDocumentPreview({
     >
       <h4 className="font-semibold text-indigo-700 dark:text-indigo-300">{t('aiReview.title')}</h4>
       <p className="mt-2 font-semibold">{t(`aiReview.${action}`)}</p>
+      {prepared.noChanges ? <p role="alert" className="my-2 text-amber-800 dark:text-amber-300">{t('aiReview.noChanges')}</p> : null}
       {typeof document.name === 'string' ? (
         <p className="mt-1 font-medium">{document.name}</p>
       ) : null}
