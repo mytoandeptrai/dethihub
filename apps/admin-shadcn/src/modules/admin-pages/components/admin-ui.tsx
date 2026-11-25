@@ -14,6 +14,7 @@ import {
   PaymentsPanelContainer,
   OpsPanelContainer,
   AuditPanelContainer,
+  FeaturesPanelContainer,
 } from '@/modules/admin-pages/containers'
 
 import type { useAdminContainer } from '@/modules/admin-pages/hooks/use-admin-container'
@@ -28,6 +29,7 @@ export function AdminUi({ me, section }: ReturnType<typeof useAdminContainer>) {
     payments: translate('adminOpsCopy.payments'),
     ai: translate('adminOpsCopy.ai'),
     audit: translate('adminOpsCopy.audit'),
+    features: translate('product.features'),
   }[section]
   return (
     <div className="w-full max-w-full overflow-x-clip">
@@ -76,6 +78,8 @@ export function AdminUi({ me, section }: ReturnType<typeof useAdminContainer>) {
               <PaymentsPanelContainer />
             ) : section === 'ai' ? (
               <OpsPanelContainer me={me} />
+            ) : section === 'features' ? (
+              <FeaturesPanelContainer me={me} />
             ) : (
               <AuditPanelContainer />
             )}

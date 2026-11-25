@@ -10,7 +10,7 @@ const pages = readdirSync(root, { recursive: true })
 
 describe('route navigation loading coverage', () => {
   it('inventories all public, user and admin pages', () => {
-    expect(pages).toHaveLength(35)
+    expect(pages).toHaveLength(36)
   })
 
   it.each(pages)('%s has a layout-preserving segment fallback', (page) => {

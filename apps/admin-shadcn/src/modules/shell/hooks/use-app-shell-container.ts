@@ -116,6 +116,7 @@ export function useAppShellContainer() {
         { path: appPaths.admin.payments, label: t('product.payments'), icon: Wallet },
         { path: appPaths.admin.ai, label: t('product.ai'), icon: Cpu },
         { path: appPaths.admin.audit, label: t('product.audit'), icon: History },
+        { path: appPaths.admin.features, label: t('product.features'), icon: Cpu },
       ]
     : []
   const create = { path: appPaths.editor.href, label: t('product.create'), icon: Plus }

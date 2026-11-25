@@ -9,6 +9,7 @@ export type AdminSection =
   | 'payments'
   | 'ai'
   | 'audit'
+  | 'features'
 export function useAdminContainer(section: AdminSection) {
   const query = useMe()
   const me = query.data

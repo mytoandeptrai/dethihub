@@ -15,7 +15,7 @@ export const appPaths = {
   pricing: { href: '/pricing' },
   previewDesigns: { href: '/preview-designs' },
   profile: { href: '/profile', uploads: { href: '/profile/uploads' } },
-  admin: { href: '/admin', users: '/admin/users', content: '/admin/content', bank: '/admin/bank', stats: '/admin/stats', payments: '/admin/payments', ai: '/admin/ai', audit: '/admin/audit' },
+  admin: { href: '/admin', users: '/admin/users', content: '/admin/content', bank: '/admin/bank', stats: '/admin/stats', payments: '/admin/payments', ai: '/admin/ai', audit: '/admin/audit', features: '/admin/features' },
   terms: { href: '/terms' },
   privacy: { href: '/privacy' },
   auth: {

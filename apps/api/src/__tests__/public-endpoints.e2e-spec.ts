@@ -37,6 +37,7 @@ describe('public HTTP endpoints', () => {
     expect(response.body).toEqual({
       maintenance: { on: false, message: '', until: null },
       announcements: [],
+      features: { word: true, slide: true, board: true, online: true },
     })
   })
 

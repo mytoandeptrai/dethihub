@@ -86,6 +86,7 @@ const messages = {
     payments: 'Giao dịch',
     ai: 'AI & hạ tầng',
     audit: 'Lịch sử quản trị',
+    features: 'Tính năng',
     points: '{points} điểm AI',
     unlimited: 'Không giới hạn',
     feedbackTitle: 'Gửi phản hồi về Đề Thi Hub',

@@ -40,3 +40,4 @@ export { WelcomePointsCardContainer as WelcomePointsCard } from './welcome-point
 export { default as SwitchContainer } from './switch-container'
 export type { HealthDrawerTarget } from '@/modules/admin-pages/hooks/use-health-drawer-container'
 export { SwitchContainer as Switch } from './switch-container'
+export { FeaturesPanelContainer } from './features-panel-container'

@@ -1395,7 +1395,14 @@ export interface components {
             items: components["schemas"]["AuditRowResponseDto"][];
             total: number;
         };
+        SiteFeaturesDto: {
+            word: boolean;
+            slide: boolean;
+            board: boolean;
+            online: boolean;
+        };
         SettingsResponseDto: {
+            features: components["schemas"]["SiteFeaturesDto"];
             maintenance: {
                 [key: string]: unknown;
             };
@@ -1433,6 +1440,7 @@ export interface components {
             until: Record<string, never> | null;
         };
         SiteStatusResponseDto: {
+            features: components["schemas"]["SiteFeaturesDto"];
             maintenance: components["schemas"]["SiteMaintenanceDto"];
             announcements: components["schemas"]["SiteAnnouncementDto"][];
         };
