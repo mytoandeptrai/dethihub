@@ -47,7 +47,9 @@ export function InspectorOverlay({ inspector, hidden = false }: { inspector: Exa
       })
       const selection = TextSelection.findFrom(editor.state.doc.resolve(start), 1, true)
       if (selection && selection.from < active.pos + active.node.nodeSize) {
-        editor.commands.focus(selection.from)
+        const current = editor.state.selection
+        const inside = current.from > active.pos && current.to < active.pos + active.node.nodeSize
+        editor.commands.focus(inside ? undefined : selection.from)
         return
       }
     }

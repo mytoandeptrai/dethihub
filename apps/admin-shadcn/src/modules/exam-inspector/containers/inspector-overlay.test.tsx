@@ -6,7 +6,7 @@ import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import { NodeSelection } from '@tiptap/pm/state'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterAll, afterEach, beforeAll, expect, it, vi } from 'vitest'
 
@@ -72,6 +72,24 @@ it.each(['pageBreak', 'divider', 'toc'])('reveals properties instead of focusing
   await userEvent.click(screen.getByTestId('inspector-badge-edit'))
   expect(reveal).toHaveBeenCalledOnce()
   expect(editor.view.dom).not.toHaveFocus()
+  expect(editor.getJSON()).toEqual(before)
+})
+
+it.each([
+  { desktop: true, range: false },
+  { desktop: false, range: true },
+])('preserves an existing answer-cell selection (desktop=$desktop, range=$range)', async ({ desktop, range }) => {
+  const { editor, reveal } = setup('answerKey', desktop)
+  let answerPos = 0
+  editor.state.doc.descendants((node, pos) => { if (node.isText && node.text === 'A') answerPos = pos })
+  act(() => { editor.commands.setTextSelection({ from: answerPos, to: answerPos + (range ? 1 : 0) }) })
+  const selection = editor.state.selection.toJSON()
+  const before = editor.getJSON()
+  await userEvent.click(screen.getByTestId('inspector-badge-edit'))
+  await waitFor(() => expect(editor.isFocused).toBe(true))
+  expect(editor.state.selection.toJSON()).toEqual(selection)
+  expect(editor.view.dom).toHaveFocus()
+  expect(reveal).not.toHaveBeenCalled()
   expect(editor.getJSON()).toEqual(before)
 })
 
