@@ -282,35 +282,55 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
       touched.add(patch.index)
       return true
     })
-  type Entry = { node: JSONContent; block?: ExamBlock }
+  type Entry = { node: JSONContent; block?: ExamBlock; owner?: JSONContent }
   const entries = (items: ExamBlock[]): Entry[] => items.flatMap((block) => (blocksToTipTap([block]).content ?? []).map((node) => ({ node, block })))
-  const result: Entry[] = (currentDocument?.content ?? []).map((node) => ({ node }))
+  const result: Entry[] = (currentDocument?.content ?? []).map((node) => ({ node, owner: node }))
   if (action === 'replace') result.splice(0, result.length, ...entries(blocks))
   if (action === 'append') result.push(...entries(blocks))
   if (action === 'patch') {
     for (const patch of patches) {
       if (!currentDocument) { result.push(...entries(patch.blocks)); continue }
       const at = patch.index + (patch.op === 'insertAfter' ? 1 : 0)
-      result.splice(at, patch.op === 'replace' || patch.op === 'delete' ? 1 : 0, ...entries(patch.blocks))
+      const replacements = entries(patch.blocks)
+      if (patch.op === 'replace' && replacements.length === 1 && replacements[0].node.type === 'examQuestion' && result[at]?.node.type === 'examQuestion')
+        replacements[0].owner = result[at].owner
+      result.splice(at, patch.op === 'replace' || patch.op === 'delete' ? 1 : 0, ...replacements)
     }
   }
   const numbers = new Map<ExamBlock, number>()
   let question = 0
   let essay = 0
-  const visit = (node: JSONContent, block?: ExamBlock) => {
-    if (node.type === 'examQuestion') { question++; if (block) numbers.set(block, question) }
+  const owners: JSONContent[] = []
+  const originals: JSONContent[] = []
+  const collect = (node: JSONContent) => {
+    if (node.type === 'examQuestion') originals.push(node)
+    node.content?.forEach(collect)
+  }
+  currentDocument?.content?.forEach(collect)
+  const visit = (node: JSONContent, block?: ExamBlock, owner = node) => {
+    if (node.type === 'examQuestion') { question++; owners.push(owner); if (block) numbers.set(block, question) }
     if (node.type === 'examEssay') { essay++; if (block) numbers.set(block, essay) }
     node.content?.forEach((child) => visit(child))
   }
-  result.forEach(({ node, block }) => visit(node, block))
-  const answers = tipTapToBlocks({ type: 'doc', content: result.map(({ node }) => node) })
-    .flatMap((block) => block.type === 'answerKey' ? block.items : [])
+  result.forEach(({ node, block, owner }) => visit(node, block, owner))
+  let answerKeyWarning = false
+  const answers = result.flatMap(({ node, block }) => {
+    if (node.type !== 'examAnswerKey') return []
+    const items = tipTapToBlocks({ type: 'doc', content: [node] }).flatMap((item) => item.type === 'answerKey' ? item.items : [])
+    if (block) return items
+    return items.filter((item) => {
+      const unchanged = !!originals[item.no - 1] && originals[item.no - 1] === owners[item.no - 1]
+      if (!unchanged) answerKeyWarning = true
+      return unchanged
+    })
+  })
   return {
     action,
     blocks,
     patches: patches.map((patch) => ({ ...patch, numbers: patch.blocks.map((block) => numbers.get(block) ?? 0) })),
     numbers: blocks.map((block) => numbers.get(block) ?? 0),
     answers,
+    answerKeyWarning,
     noChanges: action === 'patch' ? patches.length === 0 : action !== 'none' && blocks.length === 0,
   }
 }
