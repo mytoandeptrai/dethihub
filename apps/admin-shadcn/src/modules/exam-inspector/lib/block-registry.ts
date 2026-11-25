@@ -236,6 +236,14 @@ function choiceQuestion(
 const cellSchema = z.strictObject({ text: z.string() })
 const tableSchema = z.strictObject({
   rows: z.array(z.strictObject({ cells: z.array(cellSchema).min(1) })).min(1),
+}).superRefine(({ rows }, context) => {
+  const trueFalse = /^a\)?$/i.test(rows[0]?.cells[1]?.text.trim() ?? '')
+  rows.forEach((row, rowIndex) => {
+    row.cells.forEach((cell, cellIndex) => {
+      const questionNumber = trueFalse ? rowIndex > 0 && cellIndex === 0 : rowIndex % 2 === 0 && cellIndex > 0
+      if (questionNumber && !/^\d+$/.test(cell.text.trim())) context.addIssue({ code: 'custom', message: 'Invalid question number', path: ['rows', rowIndex, 'cells', cellIndex, 'text'] })
+    })
+  })
 })
 
 function readTables(node: ProseMirrorNode) {
