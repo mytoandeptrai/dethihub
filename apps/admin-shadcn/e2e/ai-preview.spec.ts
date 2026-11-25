@@ -6,7 +6,7 @@ import { signedInState } from './session-helper'
 
 import type { components } from '@workspace/api-types'
 
-test('document approval is a readable mini exam, not a JSON tree', async ({ browser }) => {
+test('document approval is a readable mini exam, not a JSON tree', async ({ browser }, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
   const context = await browser.newContext({ storageState: auth.state, viewport: { width: 1600, height: 1400 } })
@@ -36,6 +36,6 @@ test('document approval is a readable mini exam, not a JSON tree', async ({ brow
   await expect(page.getByRole('button', { name: 'Soạn lại', exact: true })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Huỷ', exact: true })).toBeEnabled()
   await page.evaluate(() => document.fonts.ready)
-  await preview.screenshot({ path: '/home/ubuntu/dethihub-step0/ai-preview-new.png' })
+  await preview.screenshot({ path: testInfo.outputPath('ai-preview-new.png') })
   await context.close()
 })

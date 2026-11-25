@@ -5,7 +5,7 @@ import { signedInState } from './session-helper'
 
 import type { Editor } from '@tiptap/core'
 
-test('continue typing after an image without deleting it or adding a blank page', async ({ browser }) => {
+test('continue typing after an image without deleting it or adding a blank page', async ({ browser }, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
   const context = await browser.newContext({ storageState: auth.state, viewport: { width: 1440, height: 1000 } })
@@ -98,7 +98,7 @@ test('continue typing after an image without deleting it or adding a blank page'
   await page.evaluate(() => new Promise<void>((resolve) => { requestAnimationFrame(() => requestAnimationFrame(() => resolve())) }))
   await expect(page.locator('.doc-paper')).toHaveCount(1)
   await expect(editor.locator('.doc-page-gap')).toHaveCount(0)
-  await page.screenshot({ path: '/home/ubuntu/dethihub-step0/editor-object-navigation.png', fullPage: true })
+  await page.screenshot({ path: testInfo.outputPath('editor-object-navigation.png'), fullPage: true })
   expect(errors).toEqual([])
   await context.close()
 })
