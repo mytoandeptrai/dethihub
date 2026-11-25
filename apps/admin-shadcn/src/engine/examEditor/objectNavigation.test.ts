@@ -32,6 +32,18 @@ function key(editor: Editor, value: string) {
 afterEach(() => editors.splice(0).forEach((editor) => editor.destroy()))
 
 describe('object navigation', () => {
+  it.each(['ArrowLeft', 'ArrowUp'])('never falls inside a question when moving before it with %s', (arrow) => {
+    const editor = setup([{ type: 'examQuestion', content: [{ type: 'examQuestionPrompt', content: [{ type: 'text', text: 'Đề bài không được sửa' }] }] }])
+    editor.commands.setNodeSelection(0)
+    const before = editor.getJSON()
+    key(editor, arrow)
+    expect(editor.getJSON()).toEqual(before)
+    expect(editor.state.selection.from).toBe(0)
+    key(editor, 'X')
+    editor.commands.insertContent('Trước câu hỏi')
+    expect(editor.state.doc.firstChild?.textContent).toBe('Trước câu hỏi')
+    expect(editor.state.doc.child(1).textContent).toBe('Đề bài không được sửa')
+  })
   it.each(['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'])('does not change document or page count when navigating between objects with %s', (arrow) => {
     const editor = setup([{ type: 'examDivider' }, { type: 'examDivider' }])
     const before = editor.getJSON()

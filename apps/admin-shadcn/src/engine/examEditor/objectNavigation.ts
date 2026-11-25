@@ -1,5 +1,5 @@
 import { Extension } from '@tiptap/core'
-import { NodeSelection, Plugin, Selection, TextSelection } from '@tiptap/pm/state'
+import { NodeSelection, Plugin, TextSelection } from '@tiptap/pm/state'
 import { GapCursor } from '@tiptap/pm/gapcursor'
 import { CellSelection } from '@tiptap/pm/tables'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
@@ -37,8 +37,7 @@ function focusBoundary(view: EditorView, pos: number, direction: -1 | 1, empty =
   if (adjacent?.isTextblock && (!empty || adjacent.content.size === 0)) {
     tr.setSelection(TextSelection.create(state.doc, pos + direction))
   } else if (!empty) {
-    const gap = new GapCursor($pos).map(state.doc, tr.mapping)
-    tr.setSelection(gap instanceof GapCursor ? gap : Selection.near($pos, direction))
+    tr.setSelection(new GapCursor($pos))
   } else {
     const paragraph = state.schema.nodes.paragraph
     if (!paragraph || !$pos.parent.canReplaceWith($pos.index(), $pos.index(), paragraph)) return false
