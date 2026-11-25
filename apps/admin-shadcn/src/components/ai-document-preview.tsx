@@ -12,18 +12,25 @@ function PreviewValue({
   renderText: (text: string) => ReactNode
 }) {
   if (typeof value === 'string') return <>{renderText(value)}</>
-  if (Array.isArray(value))
-    return value.length ? (
+  if (Array.isArray(value)) {
+    const occurrences = new Map<string, number>()
+    return value.length > 0 ? (
       <ol className="border-line space-y-3 border-l pl-3">
-        {value.map((item, index) => (
-          <li key={index}>
-            <PreviewValue value={item} renderText={renderText} />
-          </li>
-        ))}
+        {value.map((item) => {
+          const signature = JSON.stringify(item) ?? 'undefined'
+          const occurrence = occurrences.get(signature) ?? 0
+          occurrences.set(signature, occurrence + 1)
+          return (
+            <li key={`${signature}:${occurrence}`}>
+              <PreviewValue value={item} renderText={renderText} />
+            </li>
+          )
+        })}
       </ol>
     ) : (
       <span>{t('aiReview.empty')}</span>
     )
+  }
   if (value && typeof value === 'object')
     return (
       <dl className="space-y-2">
@@ -37,7 +44,7 @@ function PreviewValue({
         ))}
       </dl>
     )
-  return <>{value == null ? '—' : String(value)}</>
+  return value === null || value === undefined ? '—' : String(value)
 }
 
 export function AiDocumentPreview({
@@ -63,7 +70,10 @@ export function AiDocumentPreview({
         </p>
       ) : null}
       <div className="max-h-96 overflow-y-auto">
-        <PreviewValue value={Object.fromEntries(Object.entries(document).filter(([key]) => key !== 'say'))} renderText={renderText} />
+        <PreviewValue
+          value={Object.fromEntries(Object.entries(document).filter(([key]) => key !== 'say'))}
+          renderText={renderText}
+        />
       </div>
     </section>
   )
