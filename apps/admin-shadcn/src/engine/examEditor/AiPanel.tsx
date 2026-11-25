@@ -40,7 +40,6 @@ import { cn } from '@/engine/lib/cn'
 import { AI_ATTACH_EVENT, takeAiRefs, type AiRef } from '@/engine/lib/aiAttach'
 import { chatHistoryKey, encodeChatHistory, loadChatHistory, saveChatHistory } from '@/engine/lib/aiChatHistory'
 import { extractJson } from '@/engine/lib/llm'
-import aiThinkingAnim from '@/engine/assets/ai-assistant.svg'
 import { Markdown } from '@/engine/lib/aiChatMarkdown'
 import { compactHistory } from '@/engine/lib/aiHistory'
 import 'katex/dist/katex.min.css'
@@ -241,7 +240,7 @@ function ActLog({ steps }: { steps: ActStep[] }) {
       {steps.map((s, i) => (
         <li key={i} className={`ai-step ai-step--${s.state}`}>
           <span className="ai-step__icon" aria-hidden="true">
-            {s.state === 'done' ? '✓' : s.state === 'failed' ? '!' : <img className="ai-step__mascot" src={aiThinkingAnim} alt="" />}
+            {s.state === 'done' ? '✓' : s.state === 'failed' ? '!' : <img className="ai-step__mascot motion-safe:animate-pulse" src="/brand/ai-static.svg" alt="" />}
           </span>
           <span className="ai-step__label">{s.label}</span>
           {s.note ? <span className="ai-step__note">{s.note}</span> : null}
@@ -462,11 +461,9 @@ function ThinkingLine({ mode, intent }: { mode: AiMode; intent?: 'doc' | 'chat' 
   }, [steps])
   return (
     <div className="ai-thinking">
-      {/* animation "Trợ lý giấy" do người dùng cung cấp — SVG tự chạy,
-          không cần lottie-web (~450 KB JS) */}
       <img
-        className="ai-thinking__anim"
-        src={aiThinkingAnim}
+        className="ai-thinking__anim motion-safe:animate-pulse"
+        src="/brand/ai-static.svg"
         alt=""
         aria-hidden="true"
         width={22}

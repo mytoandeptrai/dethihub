@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -23,6 +23,19 @@ beforeEach(() => {
 const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it('uses the public mascot asset in the thinking row', async () => {
+    let stream!: ReadableStreamDefaultController<Uint8Array>
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => new HttpResponse(new ReadableStream({ start(controller) { stream = controller } }), { headers: { 'Content-Type': 'text/event-stream' } })))
+    const { container } = render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề trắc nghiệm 20 câu môn Toán lớp 9 về hệ thức lượng, kèm đáp án.{Enter}')
+    await waitFor(() => expect(stream).toBeDefined())
+    act(() => stream.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ type: 'think', d: 'Đang suy nghĩ' })}\n\n`)))
+    await screen.findByText('Suy nghĩ')
+    const src = container.querySelector('.ai-step__mascot')?.getAttribute('src')
+    await userEvent.click(screen.getByRole('button', { name: 'Dừng' }))
+    expect(src).toBe('/brand/ai-static.svg')
+  })
+
   it.each(['replace', 'append'])('reviews a recovered %s document reply with apply and cancel instead of raw JSON', async (action) => {
     const text = String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$`
     const blocks = action === 'replace'
