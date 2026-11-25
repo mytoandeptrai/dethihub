@@ -115,6 +115,7 @@ const messages = {
     invalidAmount: 'Nhập số tiền trong khoảng {min}đ – {max}đ.',
   },
   common: {
+    examContent: 'Nội dung đề thi',
     brand: 'Đề Thi Hub',
     description: 'Soạn đề, tạo bài giảng và quản lý tài liệu dạy học.',
     home: 'Về trang chủ',

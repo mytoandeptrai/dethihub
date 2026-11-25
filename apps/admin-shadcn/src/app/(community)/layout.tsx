@@ -1,3 +1,4 @@
+import ProductFontPreloads from '@/components/product-font-preloads'
 import { PublicLinks } from '@/components/seo/public-links'
 import { getServerSupabase } from '@/lib/supabase/server'
 import MarketingContainer from '@/modules/public-pages/containers/marketing-container/marketing-container'
@@ -10,7 +11,13 @@ export default async function CommunityLayout({ children }: { children: ReactNod
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return <MarketingContainer>{children}</MarketingContainer>
+  if (!user)
+    return (
+      <>
+        <ProductFontPreloads />
+        <MarketingContainer>{children}</MarketingContainer>
+      </>
+    )
   return (
     <AppShellContainer>
       {children}

@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 export default function MarketingContainer({ children }: { children: ReactNode }) {
   const state = useMarketingContainer()
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div data-marketing-shell="" className="flex min-h-dvh flex-col">
       <HeaderUi {...state} />
       <main id="main-content" className="min-w-0 flex-1">
         {children}

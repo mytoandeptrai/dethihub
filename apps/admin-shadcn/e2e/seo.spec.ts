@@ -11,6 +11,7 @@ for (const path of publicPaths) {
     expect(response?.status()).toBe(200)
     await expect(page.locator('h1')).toHaveCount(1)
     await expect(page.locator('h1')).not.toBeEmpty()
+    await expect(page.locator('link[rel="preload"][as="font"][href^="/fonts/"]')).toHaveCount(6)
     expect(new URL((await page.locator('link[rel="canonical"]').getAttribute('href'))!).href).toBe(
       new URL(path, canonicalOrigin).href,
     )
@@ -49,6 +50,11 @@ for (const path of publicPaths) {
       ).toBe(1)
     if (path.startsWith('/exams/')) {
       await expect(page.locator('.ProseMirror')).toBeVisible()
+      await expect(page.getByRole('textbox', { name: 'Nội dung đề thi' })).toHaveAttribute(
+        'aria-readonly',
+        'true',
+      )
+      await expect(page.getByRole('link', { name: 'Về đề cộng đồng', exact: true })).toBeVisible()
       await expect(page.locator('h1')).toHaveCount(1)
       expect(schemas.find((schema) => schema['@type'] === 'Quiz').additionalProperty.value).toBe(4)
       expect(schemas.some((schema) => schema['@type'] === 'BreadcrumbList')).toBe(true)

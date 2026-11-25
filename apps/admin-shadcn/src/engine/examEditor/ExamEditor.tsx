@@ -26,6 +26,7 @@ import StarterKit from '@tiptap/starter-kit'
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+import { t } from '@/i18n/translate'
 import {
   activateInsertedBlock,
   INSPECTOR_TEMPLATE_MIME,
@@ -153,6 +154,7 @@ export function ExamEditor({
       attributes: {
         class: 'doc-content',
         spellcheck: 'false',
+        ...(readOnly ? { 'aria-label': t('common.examContent'), 'aria-readonly': 'true' } : {}),
       },
       // Kéo khối mẫu từ nav panel vào trang — port `handleDrop`/`dropRange`
       // của soandethi: thả ở nửa trên khối cấp cao nhất → chèn trước khối đó,

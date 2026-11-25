@@ -17,7 +17,14 @@ import {
 import { t } from '@/i18n/translate-public'
 export function GraphIllustrationUi() {
   return (
-    <svg viewBox="0 0 300 140" fill="none" aria-hidden="true" className="home-graph">
+    <svg
+      width="300"
+      height="140"
+      viewBox="0 0 300 140"
+      fill="none"
+      aria-hidden="true"
+      className="home-graph"
+    >
       <path
         d="M20 112H280M150 130V8m-5 7 5-7 5 7m118 92 7 5-7 5"
         stroke="currentColor"

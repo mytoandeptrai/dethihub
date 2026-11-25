@@ -70,6 +70,7 @@ export function ExamViewUi(
           <div className="mx-auto flex min-h-16 max-w-[1180px] flex-wrap items-center gap-2.5 px-4 py-3 sm:px-6">
             <Link
               to={appPaths.community.href}
+              aria-label={t('studentCopy.m364')}
               className="bg-cream text-ink-2 shadow-soft hover:text-ink flex size-9 shrink-0 items-center justify-center rounded-full transition-colors"
             >
               <ArrowLeft className="size-4" />

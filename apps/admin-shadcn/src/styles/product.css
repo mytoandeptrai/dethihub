@@ -8,5 +8,6 @@
 @import '@fontsource/nunito/700.css';
 @import '@fontsource/nunito/800.css';
 @import '@fontsource/nunito/900.css';
+@import './product-fonts.css';
 @import './product-base.css';
 @import './product-home.css';
