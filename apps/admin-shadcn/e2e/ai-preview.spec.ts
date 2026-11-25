@@ -16,7 +16,7 @@ for (const scenario of ['swap', 'plot', 'extra-key']) test(`${scenario} preview 
   const questions = [1, 2].map((no) => ({ type: 'question', no, text: no === 1 ? '1 + 1 = ?' : '1 + 2 = ?', options: [{ label: 'A', text: '2' }, { label: 'B', text: '3' }] }))
   const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jWZkAAAAASUVORK5CYII='
   const existing = plotted ? [{ type: 'question', no: 1, text: [{ text: 'Đồ thị hàm số' }, { text: '', image: { src: png, alt: 'Đồ thị hàm số', plot: JSON.stringify(plot) } }], options: [{ label: 'A', text: 'Parabol' }] }] : questions
-  const patch = plotted ? [{ id: 'k0', block: { type: 'question', text: 'Đồ thị hàm số', figure: { kind: 'graph', curves: ['x^2'] }, options: ['Parabol'] } }, { id: 'k1', block: { type: 'answerKey', items: [{ no: 1, answer: 'A' }] } }] : scenario === 'extra-key'
+  const patch = plotted ? [{ id: 'k0', block: { type: 'question', text: 'Đồ thị hàm số', figure: { kind: 'graph', curves: ['x^2'] }, options: ['Đường thẳng', 'Parabol'] } }, { id: 'k1', block: { type: 'answerKey', items: [{ no: 1, answer: 'B' }] } }] : scenario === 'extra-key'
     ? [{ id: 'k0', op: 'insertBefore', blocks: [questions[1], { type: 'answerKey', items: [{ no: 1, answer: 'B' }] }] }]
     : [{ id: 'k0', block: questions[1] }, { id: 'k1', block: questions[0] }]
   const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ patch }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: `explicit-${scenario}` }
@@ -46,7 +46,7 @@ for (const scenario of ['swap', 'plot', 'extra-key']) test(`${scenario} preview 
   await page.getByRole('button', { name: 'Áp dụng', exact: true }).click()
   await expect(editor.locator('[data-exam-node="examQuestion"]').first()).toContainText(plotted ? 'Đồ thị hàm số' : '1 + 2 = ?')
   await expect(editor.locator('[data-exam-node="examAnswerKey"]')).toHaveCount(scenario === 'extra-key' ? 2 : 1)
-  await expect(key.locator('th, td')).toHaveText(before)
+  await expect(key.locator('th, td')).toHaveText(plotted ? ['Câu', '1', 'Đáp án', 'B'] : before)
   await context.close()
 })
 
