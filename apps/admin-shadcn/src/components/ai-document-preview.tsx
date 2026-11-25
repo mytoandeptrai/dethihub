@@ -206,7 +206,9 @@ export function AiDocumentPreview({
   prepared: {
     action: 'replace' | 'append' | 'patch' | 'none'
     blocks: unknown[]
-    patches: { op: 'replace' | 'insertAfter' | 'insertBefore' | 'delete'; index: number; blocks: unknown[] }[]
+    numbers?: number[]
+    answers?: { no: number; answer: unknown }[]
+    patches: { op: 'replace' | 'insertAfter' | 'insertBefore' | 'delete'; index: number; blocks: unknown[]; numbers?: number[] }[]
   }
   questionCount?: number
   total?: number
@@ -216,22 +218,23 @@ export function AiDocumentPreview({
   const blocks = prepared.action === 'append' || prepared.action === 'replace' ? prepared.blocks.map((block) => record(block)) : []
   const allBlocks = [...blocks, ...patches.flatMap((patch) => patch.blocks.map((block) => record(block)))]
   const questionCount = allBlocks.filter((block) => isAiQuestionBlock(block)).length
-  const answers = allBlocks
+  const answers = prepared.answers ?? allBlocks
     .filter((block) => block.type === 'answerKey')
     .flatMap((block) => list(block.items).map((item) => record(item)))
   const action = prepared.action === 'none' ? 'draft' : prepared.action
   let questionNumber = 0
   let essayNumber = 0
-  const renderBlocks = (items: Record<string, unknown>[]) =>
-    keyed(items).map(({ value: block, key }) => {
+  const renderBlocks = (items: Record<string, unknown>[], numbers?: number[]) =>
+    keyed(items).map(({ value: block, key }, index) => {
       if (block.type === 'question') questionNumber++
       if (block.type === 'essay') essayNumber++
+      const number = numbers?.[index] || (block.type === 'essay' ? essayNumber : questionNumber)
       return (
         <div key={key} className="min-w-0 break-words">
           <PaperBlock
             block={block}
-            number={block.type === 'essay' ? essayNumber : questionNumber}
-            answer={block.type === 'question' ? answers.find((answer) => Number(answer.no) === questionNumber)?.answer : undefined}
+            number={number}
+            answer={block.type === 'question' ? answers.find((answer) => Number(answer.no) === number)?.answer : undefined}
             renderText={renderText}
           />
         </div>
@@ -262,14 +265,14 @@ export function AiDocumentPreview({
         </p>
       ) : null}
       <div className="max-h-[32rem] space-y-4 overflow-y-auto rounded-lg border border-indigo-100 bg-white p-3 text-slate-800 dark:border-indigo-900 dark:bg-slate-950 dark:text-slate-100 [&_.katex-display]:overflow-x-auto [&_p]:my-0">
-        {renderBlocks(blocks)}
+        {renderBlocks(blocks, prepared.numbers)}
         {keyed(patches).map(({ value: patch, key }) => (
           <div key={key} className="space-y-3 border-t border-indigo-100 pt-3">
             <p className="text-ink-3 text-xs font-medium">
               {t(`aiReview.${patchLabels[patch.op as keyof typeof patchLabels] ?? 'patch'}`)}
               {` · k${patch.index}`}
             </p>
-            {renderBlocks(list(patch.blocks).map((block) => record(block)))}
+            {renderBlocks(list(patch.blocks).map((block) => record(block)), patch.numbers)}
           </div>
         ))}
         {allBlocks.length === 0 && patches.length === 0 ? (

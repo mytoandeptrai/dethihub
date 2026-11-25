@@ -11,6 +11,28 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('numbers a patched question by its resulting position and uses the existing answer key', () => {
+    const current = { type: 'doc', content: [
+      { type: 'examHeader' },
+      ...[1, 2, 3, 4].map((no) => ({ type: 'examQuestion', attrs: { no }, content: [{ type: 'examQuestionPrompt', content: [{ type: 'text', text: `Câu cũ ${no}` }] }] })),
+      { type: 'examAnswerKey', content: [{ type: 'table', content: ['4', 'D'].map((text) => ({ type: 'tableRow', content: [{ type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] }] })) }] },
+    ] }
+    const document = { action: 'patch', patch: [{ id: 'k4', block: { type: 'question', no: 4, text: 'Câu được sửa', options: ['Một', 'Hai', 'Ba', 'Bốn'] } }] }
+    render(<PreparedPreview document={document} prepared={prepareAiApplication(document, current)} />)
+    expect(screen.getByText('Câu 4.')).toBeVisible()
+    expect(screen.getByText('Đáp án đúng')).toBeInTheDocument()
+    expect(screen.getByText('D.').parentElement).toHaveTextContent('Đáp án đúng')
+    expect(screen.queryByText('Câu 1.')).not.toBeInTheDocument()
+  })
+
+  it('omits out-of-bounds and repeated destructive patches with the same application order', () => {
+    const document = { patch: [{ id: 'k0', block: { type: 'paragraph', text: 'Giữ lần đầu' } }, { id: 'k0', block: { type: 'paragraph', text: 'Bỏ lần hai' } }, { id: 'k0', op: 'delete' }, { id: 'k9', block: { type: 'paragraph', text: 'Ngoài đề' } }] }
+    render(<PreparedPreview document={document} prepared={prepareAiApplication(document, { type: 'doc', content: [{ type: 'paragraph' }] })} />)
+    expect(screen.getByText('Giữ lần đầu')).toBeVisible()
+    expect(screen.queryByText('Bỏ lần hai')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ngoài đề')).not.toBeInTheDocument()
+    expect(screen.queryByText('Xoá khối · k0')).not.toBeInTheDocument()
+  })
   it.each([undefined, 'replace'])('warns about replacement for effective action %s and hides ignored patches', (action) => {
     render(<AiDocumentPreview document={{ action, blocks: [{ type: 'paragraph', text: 'Đề mới' }], patch: action ? [{ id: 'k0', block: { type: 'paragraph', text: 'Không áp dụng' } }] : [] }} />)
     expect(screen.getByText('Thay toàn bộ đề')).toBeVisible()

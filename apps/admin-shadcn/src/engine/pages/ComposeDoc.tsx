@@ -49,7 +49,7 @@ import { examToDraft } from '@/engine/lib/onlineExam'
 import { DECK_THEMES } from '@/engine/lib/slideTheme'
 import { extractJson } from '@/engine/lib/llm'
 import { insertAiContent } from '@/lib/insert-ai-content'
-import { prepareAiApplication, type AiExamEnvelope, type PatchOp } from '@/engine/examEditor/aiApplication'
+import { prepareAiApplication, type AiExamEnvelope } from '@/engine/examEditor/aiApplication'
 import { importedSlides, readImportFile, textToBlocks } from '@/engine/lib/importFile'
 import { IconZoomIn, IconZoomOut } from '@/engine/examEditor/icons'
 import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
@@ -590,7 +590,7 @@ export default function ComposeDoc() {
       if (!raw || typeof raw !== 'object') return looksJson ? { text: FAIL_JSON, failed: true } : undefined
 
       const say = typeof raw.say === 'string' ? raw.say.trim().slice(0, 1200) : ''
-      const { blocks, patches, action } = prepareAiApplication(raw)
+      const { blocks, patches, action } = prepareAiApplication(raw, editor.getJSON())
       const hasPlot = (list: ExamBlock[]) => list.some((b) => (b.type === 'paragraph' || b.type === 'question') && Array.isArray(b.text) && b.text.some((s) => s.image?.plot))
       if (hasPlot(blocks) || patches.some((p) => hasPlot(p.blocks)))
         setTimeout(() => void loadTools().then(({ ti }) => ti.pngifyToolImages(editor)), 0)
@@ -622,17 +622,8 @@ export default function ComposeDoc() {
         if (action === 'patch' && patches.length) {
           const { state, view } = editor
           const tr = state.tr
-          const count = tr.doc.childCount
-          // vị trí lớn trước để vị trí nhỏ hơn không bị lệch; cùng khối: chèn sau → thay/xoá → chèn trước
-          const rank: Record<PatchOp, number> = { insertAfter: 0, replace: 1, delete: 1, insertBefore: 2 }
-          const ops = patches
-            .filter((p) => p.index < count)
-            .sort((a, b) => b.index - a.index || rank[a.op] - rank[b.op])
           const stat = { edit: 0, add: 0, del: 0 }
-          const touched = new Set<number>()
-          for (const p of ops) {
-            // mỗi khối chỉ thay/xoá một lần (AI trả trùng thì lấy mục đầu)
-            if ((p.op === 'replace' || p.op === 'delete') && touched.has(p.index)) continue
+          for (const p of patches) {
             let from = 0
             for (let i = 0; i < p.index; i++) from += tr.doc.child(i).nodeSize
             const to = from + tr.doc.child(p.index).nodeSize
@@ -649,7 +640,6 @@ export default function ComposeDoc() {
               tr.insert(p.op === 'insertAfter' ? to : from, nodes)
               stat.add += nodes.length
             }
-            if (p.op === 'replace' || p.op === 'delete') touched.add(p.index)
           }
           if (stat.edit + stat.add + stat.del) {
             view.dispatch(tr.scrollIntoView())
@@ -1182,6 +1172,7 @@ export default function ComposeDoc() {
             historyKey={activeDoc?.id}
             onApplyBlocks={handleAiResult}
             documentDigest={documentDigest}
+            currentDocument={activeContent}
             focusFor={(request) => focusNote(activeContent, request)}
             contextSummary={
               activeDoc

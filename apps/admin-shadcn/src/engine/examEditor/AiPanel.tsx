@@ -48,6 +48,7 @@ import { IconClose, IconEnter, IconPaperclip, IconStop } from './icons'
 import { AiQuestionPreview } from '@/components/ai-question-preview'
 import { AiDocumentPreview } from '@/components/ai-document-preview'
 import { prepareAiApplication } from './aiApplication'
+import type { JSONContent } from '@tiptap/core'
 import { useAiQuestionStream } from '@/hooks/use-ai-question-stream'
 import { isAiDocumentReplyComplete, parseAiDocumentReply, selectedExamPayload } from '@/lib/ai-question-stream'
 import type { AiQuestionRequest, AiQuestionState } from '@/hooks/use-ai-question-stream'
@@ -752,6 +753,7 @@ function AiConversation({
   onPendingSlides,
   contextSummary,
   documentDigest,
+  currentDocument,
   focusFor,
   mode = 'exam',
   attachKey,
@@ -782,6 +784,7 @@ function AiConversation({
   contextSummary?: string
   /** bản tóm tắt nội dung đề (id + loại khối + trích đoạn) cho model sửa đúng chỗ */
   documentDigest?: string
+  currentDocument?: JSONContent
   /** 'exam' = soạn đề, 'slide' = soạn bài trình bày, 'board' = bảng vẽ */
   mode?: AiMode
   /** nhận phần đính kèm "Hỏi AI" (attachToAi) có cùng khoá */
@@ -1713,7 +1716,7 @@ function AiConversation({
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
               </> : null}
               {turn.previewPayload && !turn.inserted ? <div>
-                <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} prepared={prepareAiApplication(parseAiDocumentReply(turn.previewPayload) ?? {})} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
+                <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} prepared={prepareAiApplication(parseAiDocumentReply(turn.previewPayload) ?? {}, currentDocument)} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
                 <div className="flex gap-2">
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Áp dụng</button>
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>

@@ -1,7 +1,8 @@
-import { plainText } from './convert'
+import { blocksToTipTap, plainText, tipTapToBlocks } from './convert'
 import { keyIndex } from '@/engine/lib/aiDocContext'
 import { figureDoc, figureImageAttrs } from './toolImages'
 import type { ExamBlock, FormatAttrs, RichText } from '@/engine/data/docTypes'
+import type { JSONContent } from '@tiptap/core'
 
 /** Hợp đồng AI trả về: thay cả đề / thêm cuối / sửa từng khối theo id (`k<vị trí>`). */
 export interface AiExamEnvelope {
@@ -223,6 +224,7 @@ interface ExamPatch {
   /** vị trí khối cấp cao nhất (id `k<vị trí>`) */
   index: number
   blocks: ExamBlock[]
+  numbers?: number[]
 }
 
 /** Các mục patch: {op, id, block|blocks}; thiếu op = thay khối (dạng cũ). Mục sai thì bỏ. */
@@ -247,15 +249,50 @@ function sanitizePatches(raw: unknown): ExamPatch[] {
   return out
 }
 
-export function prepareAiApplication(raw: AiExamEnvelope) {
+export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSONContent) {
   const blocks = sanitizeBlocks(expandFigures(raw.blocks))
-  const patches = sanitizePatches(raw.patch)
+  const proposed = sanitizePatches(raw.patch)
   const action: 'append' | 'patch' | 'replace' | 'none' = raw.action === 'append' || raw.action === 'patch' || raw.action === 'replace'
     ? raw.action
-    : patches.length ? 'patch' : blocks.length ? 'replace' : 'none'
+    : proposed.length ? 'patch' : blocks.length ? 'replace' : 'none'
+  const rank: Record<PatchOp, number> = { insertAfter: 0, replace: 1, delete: 1, insertBefore: 2 }
+  const touched = new Set<number>()
+  const patches = proposed.filter((patch) => patch.index < (currentDocument?.content?.length ?? Infinity))
+    .sort((a, b) => b.index - a.index || rank[a.op] - rank[b.op])
+    .filter((patch) => {
+      if (patch.op !== 'replace' && patch.op !== 'delete') return true
+      if (touched.has(patch.index)) return false
+      touched.add(patch.index)
+      return true
+    })
+  type Entry = { node: JSONContent; block?: ExamBlock }
+  const entries = (items: ExamBlock[]): Entry[] => items.flatMap((block) => (blocksToTipTap([block]).content ?? []).map((node) => ({ node, block })))
+  const result: Entry[] = (currentDocument?.content ?? []).map((node) => ({ node }))
+  if (action === 'replace') result.splice(0, result.length, ...entries(blocks))
+  if (action === 'append') result.push(...entries(blocks))
+  if (action === 'patch') {
+    for (const patch of patches) {
+      if (!currentDocument) { result.push(...entries(patch.blocks)); continue }
+      const at = patch.index + (patch.op === 'insertAfter' ? 1 : 0)
+      result.splice(at, patch.op === 'replace' || patch.op === 'delete' ? 1 : 0, ...entries(patch.blocks))
+    }
+  }
+  const numbers = new Map<ExamBlock, number>()
+  let question = 0
+  let essay = 0
+  const visit = (node: JSONContent, block?: ExamBlock) => {
+    if (node.type === 'examQuestion') { question++; if (block) numbers.set(block, question) }
+    if (node.type === 'examEssay') { essay++; if (block) numbers.set(block, essay) }
+    node.content?.forEach((child) => visit(child))
+  }
+  result.forEach(({ node, block }) => visit(node, block))
+  const answers = tipTapToBlocks({ type: 'doc', content: result.map(({ node }) => node) })
+    .flatMap((block) => block.type === 'answerKey' ? block.items : [])
   return {
     action,
     blocks,
-    patches,
+    patches: patches.map((patch) => ({ ...patch, numbers: patch.blocks.map((block) => numbers.get(block) ?? 0) })),
+    numbers: blocks.map((block) => numbers.get(block) ?? 0),
+    answers,
   }
 }
