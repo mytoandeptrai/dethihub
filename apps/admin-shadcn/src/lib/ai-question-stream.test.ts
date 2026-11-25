@@ -4,11 +4,28 @@ import { isAiDocumentReplyComplete, parseAiDocumentReply, QuestionStreamParser, 
 
 describe('question stream parser', () => {
   it.each([
-    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}', true],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}', false],
     ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}', false],
     ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp.', false],
-  ])('distinguishes quoted interval repair from missing delimiters: %s', (source, expected) => {
+    ['{"action":"replace","blocks":[{"type":"question","text":"Ví dụ "x"}]} phần còn lại của câu hỏi chưa xong', false],
+    [String.raw`{"action":"replace","blocks":[{"type":"question","text":"Giải thích "(0, 1] và $2 \times 3$" trong câu."}]}`, false],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Giải thích "đoạn mã" trong câu."}]}', false],
+  ])('rejects drafts requiring unescaped-quote recovery: %s', (source, expected) => {
     expect(isAiDocumentReplyComplete(String(source))).toBe(expected)
+  })
+
+  it('preserves correctly escaped quotes, half-open intervals and formulas', () => {
+    const text = String.raw`Giải thích "(0, 1] và $2 \times 3$" trong câu.`
+    const source = JSON.stringify({ action: 'replace', blocks: [{ type: 'question', text }] })
+    expect(isAiDocumentReplyComplete(source)).toBe(true)
+    expect(parseAiDocumentReply(source)?.blocks).toEqual([{ type: 'question', text }])
+  })
+
+  it.each([
+    '{"blocks":[]} trailing unfinished text',
+    '{"blocks":[]} {"blocks":[',
+  ])('does not accept a complete prefix while ignoring unfinished content: %s', (source) => {
+    expect(isAiDocumentReplyComplete(source)).toBe(false)
   })
 
   it.each([

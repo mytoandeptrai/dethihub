@@ -29,14 +29,40 @@ const chatResponse = (body: Pick<ChatResponseDto, 'content'> & Partial<ChatRespo
 const reply = () => chatResponse({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
-  it('approves a complete draft after repairing a quoted interval', async () => {
+  it('blocks a draft requiring quoted interval recovery', async () => {
     const content = '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}'
     server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
+    const apply = vi.fn()
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { name: 'unfinished code example', content: '{"action":"replace","blocks":[{"type":"question","text":"Ví dụ "x"}]} phần còn lại của câu hỏi chưa xong' },
+    { name: 'half-open interval and bare LaTeX', content: String.raw`{"action":"replace","blocks":[{"type":"question","text":"Giải thích "(0, 1] và $2 \times 3$" trong câu."}]}` },
+  ])('blocks $name until a safe regenerated draft is available', async ({ content }) => {
+    const retries: string[] = []
+    const text = String.raw`Giải thích "(0, 1] và $2 \times 3$" trong câu.`
+    const safe = { action: 'replace', blocks: [{ type: 'question', text }] }
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : JSON.stringify(safe), receipt: 'broken-receipt', finishReason: 'stop' })
+    }))
     const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
     render(<AiPanel onApplyBlocks={apply} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
     await userEvent.click(await screen.findByRole('button', { name: 'Áp dụng' }))
-    expect(JSON.parse(apply.mock.calls[0]![0]).blocks[0].text).toBe('Chọn khoảng "(0, 1]" phù hợp.')
+    expect(retries).toEqual(['', 'broken-receipt'])
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual(safe)
   })
 
   it('still blocks a truncated draft containing a quoted interval', async () => {

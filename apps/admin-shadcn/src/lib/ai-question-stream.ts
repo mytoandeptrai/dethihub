@@ -66,28 +66,32 @@ function jsonStringRepair() {
 export function isAiDocumentReplyComplete(content: string): boolean {
   const start = content.indexOf('{')
   if (start < 0) return false
-  const source = jsonStringRepair()(content.slice(start), true)
+  const source = content.slice(start).replace(/```\s*$/, '')
   const stack: string[] = []
   let quoted = false
+  let json = ''
   for (let index = 0; index < source.length; index++) {
-    const char = source[index]
-    if (quoted && char === '\\') { index++; continue }
-    if (char === '"') {
-      if (quoted) {
-        let next = index + 1
-        while (next < source.length && /\s/.test(source[next]!)) next++
-        if (next === source.length || /[,:}\]]/.test(source[next]!)) quoted = false
-      } else quoted = true
+    const char = source[index]!
+    if (quoted && char === '\\') {
+      json += source.slice(index, index + 2)
+      index++
       continue
     }
-    if (quoted) continue
-    if (char === '{' || char === '[') stack.push(char === '{' ? '}' : ']')
-    if (char === '}' || char === ']') {
-      if (stack.pop() !== char) return false
-      if (stack.length === 0) return true
+    if (char === '"') quoted = !quoted
+    if (!quoted) {
+      if (char === ',' && /^\s*[}\]]/.test(source.slice(index + 1))) continue
+      if (char === '{' || char === '[') stack.push(char === '{' ? '}' : ']')
+      if ((char === '}' || char === ']') && stack.pop() !== char) return false
     }
+    json += char
   }
-  return false
+  if (quoted || stack.length > 0) return false
+  try {
+    JSON.parse(jsonStringRepair()(json, true))
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function parseAiDocumentReply(content: string, parse: (json: string) => unknown = JSON.parse): Record<string, unknown> | null {

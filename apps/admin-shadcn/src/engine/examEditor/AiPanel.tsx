@@ -217,10 +217,11 @@ interface ActStep {
 
 function examReview(content: string, questionCount: number, finishReason?: string | null): Pick<ChatTurn, 'text' | 'previewPayload' | 'incomplete'> {
   const raw = parseAiDocumentReply(content, extractJson)
-  if ((raw || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (['length', 'max_tokens'].includes(finishReason ?? '') || !isAiDocumentReplyComplete(content))) {
+  const documentReply = raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || Array.isArray(raw.patch) || typeof raw.say === 'string')
+  if ((documentReply || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (['length', 'max_tokens'].includes(finishReason ?? '') || !isAiDocumentReplyComplete(content))) {
     return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
   }
-  if (raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || Array.isArray(raw.patch) || typeof raw.say === 'string')) {
+  if (raw && documentReply) {
     if (!['replace', 'append', 'patch'].includes(String(raw.action)) && Array.isArray(raw.patch) && raw.patch.length > 0) raw.action = 'patch'
     const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
     const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))
