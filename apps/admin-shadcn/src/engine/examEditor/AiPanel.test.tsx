@@ -133,6 +133,29 @@ describe('exam AI review workflow', () => {
     expect(screen.queryByRole('region', { name: 'Nội dung sẽ áp dụng' })).not.toBeInTheDocument()
   })
 
+  it.each([
+    { action: 123 },
+    { action: 123, say: 'Ví dụ minh hoạ', blocks: [{ type: 'paragraph', text: 'Không chèn nội dung này' }] },
+    { action: 123, blocks: [{ type: 'question', text: 'Câu hỏi chỉ là ví dụ' }] },
+    { action: 'example' },
+    { action: null },
+  ])('renders a fenced non-protocol example as chat rather than a broken draft: %j', async (example) => {
+    const explanation = 'Đây là ví dụ về trường action, không phải lệnh sửa đề.'
+    const content = `\`\`\`json\n${JSON.stringify(example)}\n\`\`\`\n\n${explanation}`
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content })))
+    const apply = vi.fn()
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Giải thích ví dụ JSON action trong đề Toán lớp 9{Enter}')
+    await screen.findByText(explanation)
+    expect(container).toHaveTextContent(JSON.stringify(example))
+    expect(screen.queryByText(/Phản hồi bị cắt/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Soạn lại' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Nội dung sẽ áp dụng' })).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
   it('recovers trailing commas and bare LaTeX before document approval', async () => {
     const content = String.raw`{"action":"append","say":"Bản nháp có dấu phẩy","blocks":[{"type":"paragraph","text":"$AH \\cdot CH$"},],}`.replaceAll('\\\\', '\\')
     server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))

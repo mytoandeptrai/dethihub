@@ -215,10 +215,14 @@ interface ActStep {
   live?: string
 }
 
-function examReview(content: string, questionCount: number, finishReason?: string | null): Pick<ChatTurn, 'text' | 'previewPayload' | 'incomplete'> {
+function examReview(content: string, questionCount: number, finishReason?: string | null): Pick<ChatTurn, 'text' | 'previewPayload' | 'incomplete' | 'generation'> {
   const raw = parseAiDocumentReply(content, extractJson)
-  const documentReply = raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || Array.isArray(raw.patch) || typeof raw.say === 'string')
-  if ((documentReply || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (['length', 'max_tokens'].includes(finishReason ?? '') || !isAiDocumentReplyComplete(content))) {
+  const documentReply = raw && (
+    typeof raw.action === 'string' && ['replace', 'append', 'patch'].includes(raw.action) ||
+    raw.action === undefined && (Array.isArray(raw.blocks) || Array.isArray(raw.patch))
+  )
+  const unparsedDocumentReply = !raw && /^\s*(?:```(?:json)?\s*)?\{\s*(?:"action"\s*:\s*"(?:replace|append|patch)"|"(?:blocks|patch)"\s*:\s*\[)/.test(content)
+  if ((documentReply || unparsedDocumentReply) && (['length', 'max_tokens'].includes(finishReason ?? '') || !isAiDocumentReplyComplete(content))) {
     return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
   }
   if (raw && documentReply) {
@@ -227,6 +231,7 @@ function examReview(content: string, questionCount: number, finishReason?: strin
     const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))
     return { text: typeof raw.say === 'string' ? raw.say : reviewDocument ? 'Bản nháp đã sẵn sàng.' : '', previewPayload: reviewDocument ? JSON.stringify(raw) : undefined, incomplete: false }
   }
+  if (raw && raw.action !== undefined) return { text: content, previewPayload: undefined, incomplete: false, generation: undefined }
   return { text: questionCount > 0 ? '' : content, previewPayload: undefined, incomplete: false }
 }
 
