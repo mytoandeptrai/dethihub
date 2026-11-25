@@ -29,6 +29,27 @@ function setup(content: JSONContent[] = [{ type: 'examTitle', content: [{ type: 
 }
 
 describe('inspector panel', () => {
+  it('refreshes pair restrictions after a form edit changes table classification', async () => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === 'answerKey')!.build() as JSONContent
+    const rows = built.content![0]!.content!
+    rows[0]!.content![1]!.content![0]!.content![0]!.text = 'a)'
+    rows[0]!.content![2]!.content![0]!.content![0]!.text = 'b)'
+    rows[1]!.content![0]!.content![0]!.content![0]!.text = '1'
+    setup([built])
+    const header = screen.getByTestId('inspector-field-tables.0.rows.0.cells.1.text')
+    await userEvent.clear(header)
+    expect(screen.getByTestId('inspector-field-tables.0.rows.1.cells.1.text')).not.toHaveRole('textbox')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+  it('locks the answer paired with a formula number while leaving another pair editable', async () => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === 'answerKey')!.build() as JSONContent
+    built.content![0]!.content![0]!.content![2]!.content![0]!.content = [{ type: 'inlineMath', attrs: { latex: '2' } }]
+    const editor = setup([built])
+    expect(screen.getByTestId('inspector-field-tables.0.rows.1.cells.2.text')).not.toHaveRole('textbox')
+    await userEvent.type(screen.getByTestId('inspector-field-tables.0.rows.1.cells.1.text'), 'C')
+    expect(editor.state.doc.firstChild!.child(0).child(1).child(1).textContent).toBe('AC')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
   it('refreshes the preview when a focused answer cell becomes read-only on the canvas', async () => {
     const built = BLOCK_TEMPLATES.find(template => template.id === 'answerKey')!.build() as JSONContent
     const editor = setup([built])

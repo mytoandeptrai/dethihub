@@ -16,6 +16,10 @@ function defaultItem(fields: InspectorField[]): Values {
   return Object.fromEntries(fields.map((field) => [field.key, field.kind === 'list' ? [] : field.kind === 'number' ? 1 : field.kind === 'select' ? field.options?.[0]?.value ?? '' : '']))
 }
 
+function hasDynamicFields(fields: InspectorField[]): boolean {
+  return fields.some((field) => field.readOnlyField || field.previewField || hasDynamicFields(field.fields ?? []))
+}
+
 function ListField({ metadata, path }: { metadata: InspectorField; path: string }) {
   const { control } = useFormContext<Values>()
   const { fields, append, remove } = useFieldArray<Record<string, Record<string, unknown>[]>>({ control: control as unknown as Control<Record<string, Record<string, unknown>[]>>, name: path })
@@ -32,10 +36,11 @@ function ListField({ metadata, path }: { metadata: InspectorField; path: string 
 function SchemaField({ metadata, path }: { metadata: InspectorField; path: string }) {
   const { control } = useFormContext<Values>()
   const readOnly = useWatch({ control, name: metadata.readOnlyField ? `${path.slice(0, path.lastIndexOf('.') + 1)}${metadata.readOnlyField}` : path, disabled: !metadata.readOnlyField })
+  const preview = useWatch({ control, name: metadata.previewField ? `${path.slice(0, path.lastIndexOf('.') + 1)}${metadata.previewField}` : path, disabled: !metadata.previewField })
   if (metadata.kind === 'list') return <ListField metadata={metadata} path={path} />
   return <Controller control={control} name={path} render={({ field, fieldState }) => <label className="block space-y-1 text-xs text-slate-600">
     <span>{metadata.label}</span>
-    {metadata.readOnly || metadata.readOnlyField && readOnly ? <output data-testid={`inspector-field-${path}`} className="block whitespace-pre-wrap break-words text-slate-700">{String(field.value ?? '')}</output> : metadata.kind === 'select' ? <select {...field} value={String(field.value ?? '')} data-testid={`inspector-field-${path}`} className={inputClass} onChange={(event) => field.onChange(metadata.options?.find((option) => String(option.value) === event.target.value)?.value)}>
+    {metadata.readOnly || metadata.readOnlyField && readOnly ? <output data-testid={`inspector-field-${path}`} className="block whitespace-pre-wrap break-words text-slate-700">{String(metadata.previewField ? preview ?? field.value ?? '' : field.value ?? '')}</output> : metadata.kind === 'select' ? <select {...field} value={String(field.value ?? '')} data-testid={`inspector-field-${path}`} className={inputClass} onChange={(event) => field.onChange(metadata.options?.find((option) => String(option.value) === event.target.value)?.value)}>
       {metadata.options?.map((option) => <option key={String(option.value)} value={String(option.value)}>{option.label}</option>)}
     </select> : metadata.kind === 'textarea' ? <textarea {...field} value={String(field.value ?? '')} rows={3} data-testid={`inspector-field-${path}`} className={inputClass} /> : <input {...field} value={typeof field.value === 'string' || typeof field.value === 'number' ? field.value : ''} type={metadata.kind === 'number' ? 'number' : 'text'} data-testid={`inspector-field-${path}`} className={inputClass} onChange={(event) => field.onChange(metadata.kind === 'number' ? event.target.value === '' ? null : Number(event.target.value) : event.target.value)} />}
     {fieldState.error && <span role="alert" className="text-red-600">{t('examInspectorCopy.invalid')}</span>}
@@ -81,7 +86,7 @@ export function InspectorForm({ block, inspector }: { block: InspectorBlock; ins
   useEffect(() => {
     const schemaChanged = previousSchema.current !== block.schema
     previousSchema.current = block.schema
-    if (!schemaChanged && inspector.origin === 'form') return
+    if (!schemaChanged && inspector.origin === 'form' && !hasDynamicFields(block.schema.fields)) return
     const active = document.activeElement
     const focused = inspector.origin !== 'history' && root.current?.contains(active) && active instanceof HTMLElement ? active.getAttribute('name') ?? undefined : undefined
     synchronizing.current = true
