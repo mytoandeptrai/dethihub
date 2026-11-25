@@ -6,6 +6,45 @@ import { signedInState } from './session-helper'
 
 import type { components } from '@workspace/api-types'
 
+for (const scenario of ['swap', 'plot']) test(`${scenario} preview uses only reply answers and leaves Apply answer-key semantics unchanged`, async ({ browser }) => {
+  const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
+  const auth = await signedInState(browser, origin)
+  const context = await browser.newContext({ storageState: auth.state })
+  const page = await context.newPage()
+  const plotted = scenario === 'plot'
+  const plot = { kind: 'graph', spec: { curves: [{ expr: 'x^2', color: '#4f46e5' }], xMin: -5, xMax: 5, yMin: -1, yMax: 25, grid: false, labels: false } }
+  const questions = [1, 2].map((no) => ({ type: 'question', no, text: no === 1 ? '1 + 1 = ?' : '1 + 2 = ?', options: [{ label: 'A', text: '2' }, { label: 'B', text: '3' }] }))
+  const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jWZkAAAAASUVORK5CYII='
+  const existing = plotted ? [{ type: 'question', no: 1, text: [{ text: 'Đồ thị hàm số' }, { text: '', image: { src: png, alt: 'Đồ thị hàm số', plot: JSON.stringify(plot) } }], options: [{ label: 'A', text: 'Parabol' }] }] : questions
+  const patch = plotted ? [{ id: 'k0', block: { type: 'question', text: 'Đồ thị hàm số', figure: { kind: 'graph', curves: ['x^2'] }, answer: 'A', options: ['Parabol'] } }] : [{ id: 'k0', block: questions[1] }, { id: 'k1', block: questions[0] }]
+  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ patch }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: `explicit-${scenario}` }
+  await page.route('**/api/**', (route) => {
+    const pathname = new URL(route.request().url()).pathname
+    return route.fulfill({ json: pathname === '/api/ai/chat' ? response : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
+  })
+  const doc = { ...fixture, id: `explicit-${scenario}`, title: `Kiểm tra đáp án ${scenario}`, blocks: [...existing, { type: 'answerKey', items: plotted ? [{ no: 1, answer: 'A' }] : [{ no: 1, answer: 'A' }, { no: 2, answer: 'B' }] }] }
+  await page.addInitScript((document) => localStorage.setItem('soandethi-docs', JSON.stringify({ state: { myDocs: [document], myDecks: [] }, version: 0 })), doc)
+  await page.goto(`${origin}/editor`)
+  await page.getByText(doc.title, { exact: true }).click()
+  const editor = page.locator('.ProseMirror')
+  await expect(editor).toBeVisible()
+  const key = editor.locator('[data-exam-node="examAnswerKey"]')
+  const before = await key.locator('th, td').allTextContents()
+  const open = page.getByRole('button', { name: 'Mở trợ lý AI', exact: true })
+  if (await open.isVisible()) await open.click()
+  await page.getByLabel('Nhập yêu cầu cho AI').fill('Sửa câu hỏi trong đề Toán lớp 9')
+  await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
+  const preview = page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
+  await expect(preview.getByRole('alert')).toHaveText('Phản hồi chưa cập nhật bảng đáp án. Vui lòng kiểm tra lại đáp án trước khi áp dụng.')
+  await expect(preview.getByText('Đáp án đúng', { exact: true })).toHaveCount(plotted ? 1 : 0)
+  const imageSources = await preview.locator('img').evaluateAll((images) => images.map((image) => image.getAttribute('src')))
+  expect(imageSources).toEqual(plotted ? [expect.stringContaining('data:image/svg+xml')] : [])
+  await page.getByRole('button', { name: 'Áp dụng', exact: true }).click()
+  await expect(editor.locator('[data-exam-node="examQuestion"]').first()).toContainText(plotted ? 'Đồ thị hàm số' : '1 + 2 = ?')
+  await expect(key.locator('th, td')).toHaveText(before)
+  await context.close()
+})
+
 for (const rewrite of [false, true]) test(`inserting a question ${rewrite ? 'with a rewritten original' : 'before the original'} leaves existing answer-key cells unchanged`, async ({ browser }) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
@@ -31,7 +70,7 @@ for (const rewrite of [false, true]) test(`inserting a question ${rewrite ? 'wit
   await page.getByLabel('Nhập yêu cầu cho AI').fill('Thêm câu hỏi vào đầu đề Toán lớp 9')
   await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
   const preview = page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
-  await expect(preview).toContainText('Bảng đáp án có thể không còn khớp với thứ tự câu hỏi.')
+  await expect(preview).toContainText('Phản hồi chưa cập nhật bảng đáp án.')
   await expect(preview.getByText('Đáp án đúng', { exact: true })).toHaveCount(0)
   await page.getByRole('button', { name: 'Áp dụng', exact: true }).click()
   const questions = editor.locator('[data-exam-node="examQuestion"]')

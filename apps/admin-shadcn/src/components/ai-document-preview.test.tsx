@@ -11,6 +11,25 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('renders a regenerated plotted question with only the generic missing-key warning', () => {
+    const current = { type: 'doc', content: [
+      { type: 'examQuestion', content: [{ type: 'examQuestionPrompt', content: [{ type: 'text', text: 'Đồ thị nào?' }, { type: 'image', attrs: { src: 'data:image/png;base64,AAAA', plot: '{"kind":"graph"}' } }] }] },
+      { type: 'examAnswerKey', content: [{ type: 'table', content: ['1', 'A'].map((text) => ({ type: 'tableRow', content: [{ type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] }] })) }] },
+    ] }
+    const document = { patch: [{ id: 'k0', block: { type: 'question', text: 'Đồ thị nào?', figure: { kind: 'graph', curves: ['x^2'] }, options: ['Parabol'] } }] }
+    render(<PreparedPreview document={document} prepared={prepareAiApplication(document, current)} />)
+    expect(screen.getByRole('img', { name: 'Đồ thị hàm số' }).getAttribute('src')).toContain('data:image/svg+xml')
+    expect(screen.queryByText('Đáp án đúng')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
+    expect(screen.getByRole('alert')).toHaveTextContent('Phản hồi chưa cập nhật bảng đáp án.')
+    expect(screen.getByRole('alert')).not.toHaveTextContent('thứ tự')
+  })
+  it('highlights the question own answer but uses only a generic missing-key warning', () => {
+    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', answer: 'B', options: ['Sai', 'Đúng'] }] }} />)
+    expect(screen.getByText('B.').parentElement).toHaveTextContent('Đáp án đúng')
+    expect(screen.getByRole('alert')).toHaveTextContent('Phản hồi chưa cập nhật bảng đáp án.')
+    expect(screen.getByRole('alert')).not.toHaveTextContent('thứ tự')
+  })
   it('previews replacement blocks rather than a no-op when the optional patch array is empty', () => {
     render(<AiDocumentPreview document={{ patch: [], blocks: [{ type: 'paragraph', text: 'Nội dung thay thế' }] }} />)
     expect(screen.getByText('Thay toàn bộ đề')).toBeVisible()
@@ -34,7 +53,7 @@ describe('document approval preview', () => {
     expect(screen.getAllByTestId('inline-flow')).toHaveLength(1)
     expect(screen.getByTestId('inline-flow')).toHaveTextContent('$x^2$ - 2')
   })
-  it('numbers a patched question by its resulting position and uses the existing answer key', () => {
+  it('numbers a patched question by its resulting position without inheriting its existing answer', () => {
     const current = { type: 'doc', content: [
       { type: 'examHeader' },
       ...[1, 2, 3, 4].map((no) => ({ type: 'examQuestion', attrs: { no }, content: [{ type: 'examQuestionPrompt', content: [{ type: 'text', text: `Câu cũ ${no}` }] }] })),
@@ -43,8 +62,8 @@ describe('document approval preview', () => {
     const document = { action: 'patch', patch: [{ id: 'k4', block: { type: 'question', no: 4, text: 'Câu được sửa', options: ['Một', 'Hai', 'Ba', 'Bốn'] } }] }
     render(<PreparedPreview document={document} prepared={prepareAiApplication(document, current)} />)
     expect(screen.getByText('Câu 4.')).toBeVisible()
-    expect(screen.getByText('Đáp án đúng')).toBeInTheDocument()
-    expect(screen.getByText('D.').parentElement).toHaveTextContent('Đáp án đúng')
+    expect(screen.queryByText('Đáp án đúng')).not.toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Phản hồi chưa cập nhật bảng đáp án.')
     expect(screen.queryByText('Câu 1.')).not.toBeInTheDocument()
   })
 
@@ -68,8 +87,8 @@ describe('document approval preview', () => {
     expect(essay).not.toHaveTextContent('Đáp án')
   })
 
-  it('does not display inline correctness that apply sanitization discards', () => {
-    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', answer: 'A', correctAnswer: 'A', options: [{ label: 'A', text: 'Một', correct: true, isCorrect: true }] }] }} />)
+  it('does not infer answers from correctness flags other than the question answer field', () => {
+    render(<AiDocumentPreview document={{ blocks: [{ type: 'question', text: 'Đề bài', correctAnswer: 'A', options: [{ label: 'A', text: 'Một', correct: true, isCorrect: true }] }] }} />)
     expect(screen.queryByText('Đáp án đúng')).not.toBeInTheDocument()
     expect(screen.queryByText('Đáp án')).not.toBeInTheDocument()
   })
