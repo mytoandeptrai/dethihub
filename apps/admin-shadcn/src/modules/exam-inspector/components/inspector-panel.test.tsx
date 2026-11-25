@@ -29,6 +29,16 @@ function setup(content: JSONContent[] = [{ type: 'examTitle', content: [{ type: 
 }
 
 describe('inspector panel', () => {
+  it('keeps the same focused textarea when heading text changes the matching schema', async () => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === 'heading')!.build()
+    const editor = setup(Array.isArray(built) ? built : [built])
+    const input = screen.getByTestId('inspector-field-text')
+    await userEvent.clear(input)
+    await userEvent.type(input, 'HƯỚNG DẪN CHẤM bổ sung')
+    expect(input).toHaveFocus()
+    expect(input).toHaveValue('HƯỚNG DẪN CHẤM bổ sung')
+    expect(editor.state.doc.firstChild!.textContent).toBe('HƯỚNG DẪN CHẤM bổ sung')
+  })
   it.each(['question', 'truefalse'])('assigns free labels to multiple new %s options and persists their text', async (id) => {
     const built = BLOCK_TEMPLATES.find(template => template.id === id)!.build()
     const editor = setup(Array.isArray(built) ? built : [built])

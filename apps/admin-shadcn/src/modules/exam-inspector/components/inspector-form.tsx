@@ -81,6 +81,7 @@ export function InspectorForm({ block, inspector }: { block: InspectorBlock; ins
   const form = useForm<Values>({ resolver: zodResolver(block.schema.schema), defaultValues: block.schema.read(block.node), mode: 'onChange' })
   const root = useRef<HTMLFormElement>(null)
   const synchronizing = useRef(false)
+  const previousSchema = useRef(block.schema)
   const latest = useRef({ inspector, block })
   latest.current = { inspector, block }
   useEffect(() => {
@@ -97,11 +98,19 @@ export function InspectorForm({ block, inspector }: { block: InspectorBlock; ins
     return () => subscription.unsubscribe()
   }, [form])
   useEffect(() => {
-    if (inspector.origin === 'form') return
+    const schemaChanged = previousSchema.current !== block.schema
+    previousSchema.current = block.schema
+    if (!schemaChanged && inspector.origin === 'form') return
     const active = document.activeElement
     const focused = inspector.origin !== 'history' && root.current?.contains(active) && active instanceof HTMLElement ? active.getAttribute('name') ?? undefined : undefined
     synchronizing.current = true
-    try { synchronize(form, block.schema.read(block.node), focused) } finally { synchronizing.current = false }
+    try {
+      if (schemaChanged) {
+        for (const key of Object.keys(form.getValues())) if (!(key in block.schema.schema.shape)) form.unregister(key)
+        form.clearErrors()
+      }
+      synchronize(form, block.schema.read(block.node), focused)
+    } finally { synchronizing.current = false }
   }, [block.node, block.schema, form, inspector.origin, inspector.revision])
   if (block.schema.fields.length === 0) return <p className="py-3 text-xs text-slate-500">{t('examInspectorCopy.empty')}</p>
   return <FormProvider {...form}><form ref={root} onSubmit={(event) => event.preventDefault()} className="space-y-3 py-3" onKeyDownCapture={(event) => {

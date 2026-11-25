@@ -22,7 +22,7 @@ export function InspectorPanel({ inspector }: { inspector: ExamInspector }) {
       <Accordion.Header><Accordion.Trigger className="flex w-full min-w-0 flex-col gap-1 py-2 text-left text-xs hover:text-indigo-600">
         <span className="font-semibold">{block.schema.label}</span><span className="block max-w-full truncate text-[11px] font-normal text-slate-400">{block.node.textContent.slice(0, 70)}</span>
       </Accordion.Trigger></Accordion.Header>
-      <Accordion.Panel><InspectorForm key={block.schema.id} block={block} inspector={inspector} /></Accordion.Panel>
+      <Accordion.Panel><InspectorForm block={block} inspector={inspector} /></Accordion.Panel>
     </Accordion.Item>)}
     </Accordion.Root>
   </div>
