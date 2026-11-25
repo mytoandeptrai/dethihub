@@ -29,6 +29,26 @@ function setup(content: JSONContent[] = [{ type: 'examTitle', content: [{ type: 
 }
 
 describe('inspector panel', () => {
+  it.each(['question', 'truefalse'])('assigns free labels to multiple new %s options and persists their text', async (id) => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === id)!.build()
+    const editor = setup(Array.isArray(built) ? built : [built])
+    const key = id === 'question' ? 'options' : 'statements'
+    await userEvent.click(screen.getByRole('button', { name: 'Thêm mục' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Thêm mục' }))
+    expect(screen.getByTestId(`inspector-field-${key}.4.label`)).toHaveValue(id === 'question' ? 'E' : 'e')
+    expect(screen.getByTestId(`inspector-field-${key}.5.label`)).toHaveValue(id === 'question' ? 'F' : 'f')
+    await userEvent.type(screen.getByTestId(`inspector-field-${key}.5.text`), 'New option text')
+    expect(editor.state.doc.firstChild!.textContent).toContain('New option text')
+    const label = screen.getByTestId(`inspector-field-${key}.5.label`)
+    await userEvent.clear(label)
+    await userEvent.type(label, id === 'question' ? 'A' : 'a')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Giá trị không hợp lệ')
+    await userEvent.clear(label)
+    await userEvent.type(label, id === 'question' ? 'G' : 'g')
+    await userEvent.type(screen.getByTestId(`inspector-field-${key}.5.text`), ' recovered')
+    expect(editor.state.doc.firstChild!.textContent).toContain('New option text recovered')
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+  })
   it.each(['meta', 'rubric'])('keeps the last required %s list item and permits adding/removing extras', async (id) => {
     const built = BLOCK_TEMPLATES.find(template => template.id === id)!.build()
     const editor = setup([...(Array.isArray(built) ? built : [built]), { type: 'paragraph' }])

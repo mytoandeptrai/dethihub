@@ -14,6 +14,7 @@ export interface InspectorField {
   fields?: InspectorField[]
   fixedLength?: boolean
   minItems?: number
+  labelSequence?: 'upper' | 'lower'
 }
 
 export interface BlockSchema {
@@ -216,7 +217,7 @@ function choiceQuestion(
       label,
       match: question(kind),
       shape: { no: noSchema, prompt: z.string(), statements: uniqueOptions(true) },
-      fields: [noField, promptField, list('statements', 'Các mệnh đề', [labelField, textField])],
+      fields: [noField, promptField, { ...list('statements', 'Các mệnh đề', [labelField, textField]), labelSequence: 'lower' }],
       read: (node) => {
         const values = read(node)
         return { no: values.no, prompt: values.prompt, statements: values.options }
@@ -233,7 +234,7 @@ function choiceQuestion(
     label,
     match: question(kind),
     shape: { no: noSchema, prompt: z.string(), options: uniqueOptions() },
-    fields: [noField, promptField, list('options', 'Các phương án', [labelField, textField])],
+    fields: [noField, promptField, { ...list('options', 'Các phương án', [labelField, textField]), labelSequence: 'upper' }],
     read,
     update: (node, values) =>
       withChildren(withAttrs(node, { no: values.no }), [
