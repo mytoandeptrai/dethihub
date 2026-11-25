@@ -266,6 +266,25 @@ function sanitizePatches(raw: unknown): ExamPatch[] {
   return out
 }
 
+function questionContentKey(node: JSONContent): string {
+  const question = tipTapToBlocks({ type: 'doc', content: [node] }).find((block) => block.type === 'question')
+  if (!question) return ''
+  const content = (value: RichText) => {
+    const parts: (string | { image: string })[] = []
+    let text = ''
+    for (const span of typeof value === 'string' ? [{ text: value }] : value) {
+      text += span.text
+      if (!span.image) continue
+      if (text) parts.push(text)
+      text = ''
+      parts.push({ image: span.image.plot ?? span.image.src })
+    }
+    if (text) parts.push(text)
+    return parts
+  }
+  return JSON.stringify([question.kind ?? 'mc', content(question.text), question.options.map((option) => [option.label, content(option.text)])])
+}
+
 export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSONContent) {
   const blocks = sanitizeBlocks(expandFigures(raw.blocks))
   const proposed = sanitizePatches(raw.patch)
@@ -292,8 +311,13 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
       if (!currentDocument) { result.push(...entries(patch.blocks)); continue }
       const at = patch.index + (patch.op === 'insertAfter' ? 1 : 0)
       const replacements = entries(patch.blocks)
-      if (patch.op === 'replace' && replacements.length === 1 && replacements[0].node.type === 'examQuestion' && result[at]?.node.type === 'examQuestion')
-        replacements[0].owner = result[at].owner
+      const previous = result[at]
+      if (patch.op === 'replace' && previous?.node.type === 'examQuestion') {
+        const questions = replacements.filter(({ node }) => node.type === 'examQuestion')
+        const originalContent = questionContentKey(previous.node)
+        const continued = questions.find(({ node }) => questionContentKey(node) === originalContent) ?? questions[0]
+        if (continued) continued.owner = previous.owner
+      }
       result.splice(at, patch.op === 'replace' || patch.op === 'delete' ? 1 : 0, ...replacements)
     }
   }

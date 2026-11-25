@@ -3,6 +3,37 @@ import { prepareAiApplication } from './aiApplication'
 import { blocksToTipTap, plainText } from './convert'
 
 describe('ai application preparation', () => {
+  it.each(['before', 'after'])('keeps a replaced question identity with an explanation %s it', (position) => {
+    const question = { type: 'question' as const, no: 1, text: '1 + 1 = ?', options: [{ label: 'A', text: '2' }] }
+    const explanation = { type: 'paragraph', text: 'Giải thích: cộng hai số một.' }
+    const current = blocksToTipTap([question, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: position === 'before' ? [explanation, question] : [question, explanation] }] }, current)
+    expect(prepared.answers.map((item) => [item.no, plainText(item.answer)])).toEqual([[1, 'A']])
+    expect(prepared.answerKeyWarning).toBe(false)
+  })
+
+  it('preserves a copied question before additional questions without relying on generated IDs', () => {
+    const question = { type: 'question' as const, no: 1, text: 'Câu gốc', options: [{ label: 'A', text: 'Đúng' }] }
+    const current = blocksToTipTap([{ type: 'paragraph', text: 'Tiêu đề' }, question, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k1', blocks: [question, { type: 'question', text: 'Câu mới', options: [] }, { type: 'paragraph', text: 'Giải thích' }] }] }, current)
+    expect(prepared.answers.map((item) => plainText(item.answer))).toEqual(['A'])
+    expect(prepared.answerKeyWarning).toBe(false)
+  })
+
+  it('keeps identity for a revised question at the same question position with explanation siblings', () => {
+    const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Đề bài cũ', options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: [{ type: 'question', text: 'Đề bài được sửa', options: [] }, { type: 'paragraph', text: 'Giải thích' }] }] }, current)
+    expect(prepared.answers.map((item) => plainText(item.answer))).toEqual(['A'])
+    expect(prepared.answerKeyWarning).toBe(false)
+  })
+
+  it('still warns when the copied question actually shifts behind another replacement question', () => {
+    const question = { type: 'question' as const, no: 1, text: 'Câu gốc', options: [] }
+    const current = blocksToTipTap([question, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
+    const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: [{ type: 'question', text: 'Câu mới ở trước', options: [] }, question] }] }, current)
+    expect(prepared.answers).toEqual([])
+    expect(prepared.answerKeyWarning).toBe(true)
+  })
   it('uses an explicitly updated answer key for inserted questions', () => {
     const current = blocksToTipTap([{ type: 'question', no: 1, text: '1 + 1 = ?', options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
     const prepared = prepareAiApplication({ patch: [{ id: 'k0', op: 'insertBefore', block: { type: 'question', text: '1 + 2 = ?', options: ['2', '3'] } }, { id: 'k1', block: { type: 'answerKey', items: [{ no: 1, answer: 'B' }, { no: 2, answer: 'A' }] } }] }, current)
