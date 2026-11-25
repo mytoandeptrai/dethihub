@@ -1,10 +1,11 @@
 'use client'
 
 import Image from 'next/image'
+import { Fragment } from 'react'
 import { t } from '@/i18n/translate'
 import { isAiQuestionBlock, questionText } from '@/lib/ai-question-stream'
 
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value)

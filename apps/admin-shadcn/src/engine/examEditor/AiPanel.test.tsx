@@ -29,6 +29,30 @@ const chatResponse = (body: Pick<ChatResponseDto, 'content'> & Partial<ChatRespo
 const reply = () => chatResponse({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it.each([
+    { content: '{"action":"replace","blocks":[', restoredText: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.' },
+    { content: '```json\n{"example":1}\n```\nĐây là phần giải thích đã tạo.', restoredText: 'Đây là phần giải thích đã tạo.' },
+  ])('restores a cut-off reply and refund-aware regeneration after reopening: $content', async ({ content, restoredText }) => {
+    const retries: string[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : 'Lời giải hoàn chỉnh.', finishReason: retries.length === 1 ? 'length' : 'stop', receipt: 'saved-cut-off-receipt' })
+    }))
+    const historyKey = `reopen-${content}`
+    const apply = vi.fn()
+    const first = render(<AiPanel historyKey={historyKey} onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Giải thích bài Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    first.unmount()
+    render(<AiPanel historyKey={historyKey} onApplyBlocks={apply} />)
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByText(restoredText)).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await screen.findByText('Lời giải hoàn chỉnh.')
+    expect(retries).toEqual(['', 'saved-cut-off-receipt'])
+    expect(apply).not.toHaveBeenCalled()
+  })
   it('blocks a draft requiring quoted interval recovery', async () => {
     const content = '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}'
     server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
