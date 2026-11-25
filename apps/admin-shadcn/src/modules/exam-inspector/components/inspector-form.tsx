@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef } from 'react'
-import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form'
+import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form'
 
 import { t } from '@/i18n/translate'
 import type { ExamInspector, InspectorBlock } from '@/modules/exam-inspector/hooks/use-exam-inspector'
@@ -31,10 +31,11 @@ function ListField({ metadata, path }: { metadata: InspectorField; path: string 
 
 function SchemaField({ metadata, path }: { metadata: InspectorField; path: string }) {
   const { control } = useFormContext<Values>()
+  const readOnly = useWatch({ control, name: metadata.readOnlyField ? `${path.slice(0, path.lastIndexOf('.') + 1)}${metadata.readOnlyField}` : path, disabled: !metadata.readOnlyField })
   if (metadata.kind === 'list') return <ListField metadata={metadata} path={path} />
   return <Controller control={control} name={path} render={({ field, fieldState }) => <label className="block space-y-1 text-xs text-slate-600">
     <span>{metadata.label}</span>
-    {metadata.readOnly ? <output data-testid={`inspector-field-${path}`} className="block whitespace-pre-wrap break-words text-slate-700">{String(field.value ?? '')}</output> : metadata.kind === 'select' ? <select {...field} value={String(field.value ?? '')} data-testid={`inspector-field-${path}`} className={inputClass} onChange={(event) => field.onChange(metadata.options?.find((option) => String(option.value) === event.target.value)?.value)}>
+    {metadata.readOnly || metadata.readOnlyField && readOnly ? <output data-testid={`inspector-field-${path}`} className="block whitespace-pre-wrap break-words text-slate-700">{String(field.value ?? '')}</output> : metadata.kind === 'select' ? <select {...field} value={String(field.value ?? '')} data-testid={`inspector-field-${path}`} className={inputClass} onChange={(event) => field.onChange(metadata.options?.find((option) => String(option.value) === event.target.value)?.value)}>
       {metadata.options?.map((option) => <option key={String(option.value)} value={String(option.value)}>{option.label}</option>)}
     </select> : metadata.kind === 'textarea' ? <textarea {...field} value={String(field.value ?? '')} rows={3} data-testid={`inspector-field-${path}`} className={inputClass} /> : <input {...field} value={typeof field.value === 'string' || typeof field.value === 'number' ? field.value : ''} type={metadata.kind === 'number' ? 'number' : 'text'} data-testid={`inspector-field-${path}`} className={inputClass} onChange={(event) => field.onChange(metadata.kind === 'number' ? event.target.value === '' ? null : Number(event.target.value) : event.target.value)} />}
     {fieldState.error && <span role="alert" className="text-red-600">{t('examInspectorCopy.invalid')}</span>}
@@ -42,14 +43,14 @@ function SchemaField({ metadata, path }: { metadata: InspectorField; path: strin
 }
 
 function synchronize(form: UseFormReturn<Values>, next: Values, focused?: string) {
-  const visit = (value: unknown, path: string) => {
-    if (path === focused) return
+  const visit = (value: unknown, path: string, readOnly = false) => {
+    if (path === focused && !readOnly) return
     if (Array.isArray(value)) {
       const current = form.getValues(path)
       if (Array.isArray(current) && current.length === value.length) { value.forEach((item, index) => visit(item, `${path}.${index}`)); return }
       if (focused?.startsWith(`${path}.`)) return
     } else if (value !== null && typeof value === 'object') {
-      for (const [key, child] of Object.entries(value)) visit(child, path ? `${path}.${key}` : key)
+      for (const [key, child] of Object.entries(value)) visit(child, path ? `${path}.${key}` : key, (value as Values).readOnly === true)
       return
     }
     form.setValue(path, value, { shouldDirty: false, shouldValidate: false })

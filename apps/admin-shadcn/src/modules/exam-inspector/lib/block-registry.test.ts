@@ -107,8 +107,8 @@ const expected: Record<string, Record<string, unknown>> = {
     tables: [
       {
         rows: [
-          { cells: [{ text: 'Câu' }, { text: '1' }, { text: '2' }] },
-          { cells: [{ text: 'Đáp án' }, { text: 'A' }, { text: 'B' }] },
+          { cells: [{ text: 'Câu', readOnly: false }, { text: '1', readOnly: false }, { text: '2', readOnly: false }] },
+          { cells: [{ text: 'Đáp án', readOnly: false }, { text: 'A', readOnly: false }, { text: 'B', readOnly: false }] },
         ],
       },
     ],
@@ -124,7 +124,7 @@ function changed(values: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(values).map(([key, value]) => {
       if (typeof value === 'string') return [key, /^\d+$/.test(value.trim()) ? String(Number(value) + 1) : value ? `${value} sửa` : 'Đã sửa']
-      if (typeof value === 'boolean') return [key, !value]
+      if (typeof value === 'boolean') return [key, key === 'readOnly' ? value : !value]
       if (typeof value === 'number')
         return [key, key === 'level' && value === 2 ? 1 : value === 3 ? 2 : value + 1]
       return [key, (value as Record<string, unknown>[]).map((item) => changed(item))]
@@ -154,11 +154,34 @@ function cleared(values: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe('template block registry', () => {
+  it.each(['inlineMath', 'image'])('does not treat %s answer cells as padding or allow their replacement', (type) => {
+    const { editor, entry, node, pos } = setup('answerKey')
+    const json = node.toJSON() as JSONContent
+    const rows = json.content![0]!.content!
+    rows[0]!.content![2]!.content![0]!.content = []
+    rows[1]!.content![2]!.content![0]!.content = [{ type, attrs: type === 'inlineMath' ? { latex: 'x^2' } : { src: 'data:image/png;base64,AA==', alt: 'Diagram' } }]
+    editor.commands.setContent({ type: 'doc', content: [json] })
+    const original = editor.state.doc.firstChild!
+    const values = entry.read(original) as { tables: { rows: { cells: { text: string; readOnly?: boolean }[] }[] }[] }
+    const cells = values.tables[0]!.rows[1]!.cells
+    expect(cells[2]!.readOnly).toBe(true)
+    expect(cells[2]!.text).toContain(type === 'inlineMath' ? 'x^2' : 'Diagram')
+    expect(entry.schema.safeParse(values).success).toBe(false)
+    values.tables[0]!.rows[0]!.cells[2]!.text = '2'
+    cells[1]!.text = 'C'
+    const updated = entry.write(editor.state.tr, pos, original, values).doc.firstChild!
+    expect(updated.child(0).child(1).child(2).toJSON()).toEqual(original.child(0).child(1).child(2).toJSON())
+    expect(updated.child(0).child(1).child(1).textContent).toBe('C')
+    cells[2]!.text = ''
+    cells[2]!.readOnly = false
+    expect(() => entry.write(editor.state.tr, pos, original, values)).toThrow()
+  })
   it.each(['question', 'truefalse'])('rejects inspector structural changes to fixed %s items', (id) => {
     const { editor, entry, node, pos } = setup(id)
     const key = id === 'question' ? 'options' : 'statements'
     const items = entry.read(node)[key] as { label: string; text: string }[]
-    for (const changedItems of [items.slice(1), [...items, { label: 'E', text: 'Extra' }], [...items].reverse(), items.map((item, index) => index ? item : { ...item, label: 'Z' })]) {
+    const relabeled = [{ label: 'Z', text: items[0]!.text }, ...items.slice(1)]
+    for (const changedItems of [items.slice(1), [...items, { label: 'E', text: 'Extra' }], items.toReversed(), relabeled]) {
       expect(() => entry.write(editor.state.tr, pos, node, { [key]: changedItems })).toThrow()
     }
   })
@@ -169,6 +192,8 @@ describe('template block registry', () => {
     values.tables[0]!.rows[1]!.cells.push({ text: '' })
     expect(entry.schema.safeParse(values).success).toBe(true)
     values.tables[0]!.rows[1]!.cells.at(-1)!.text = 'C'
+    expect(entry.schema.safeParse(values).success).toBe(false)
+    values.tables[0]!.rows[1]!.cells.at(-1)!.text = ' '
     expect(entry.schema.safeParse(values).success).toBe(false)
   })
   it('preserves every header code line and edits only the first code slot', () => {

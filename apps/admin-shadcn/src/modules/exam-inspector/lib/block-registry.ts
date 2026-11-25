@@ -15,6 +15,7 @@ export interface InspectorField {
   fixedLength?: boolean
   minItems?: number
   readOnly?: boolean
+  readOnlyField?: string
 }
 
 export interface BlockSchema {
@@ -102,7 +103,7 @@ const question = (kind: string | null) => (node: ProseMirrorNode) =>
   named('examQuestion')(node) && (node.attrs.kind ?? null) === kind
 
 function fixedOptions(node: ProseMirrorNode, items: { label: string; text: string }[]) {
-  const existing = children(node).filter(named('examOption'))
+  const existing = children(node).filter((option) => named('examOption')(option))
   if (items.length !== existing.length || items.some((item, index) => item.label !== existing[index]!.attrs.label)) throw new RangeError('Graded items have fixed labels and order')
   return existing.map((option, index) => withText(option, items[index]!.text))
 }
@@ -242,7 +243,7 @@ function choiceQuestion(
   })
 }
 
-const cellSchema = z.strictObject({ text: z.string() })
+const cellSchema = z.strictObject({ text: z.string(), readOnly: z.boolean().optional() })
 const tableSchema = z.strictObject({
   rows: z.array(z.strictObject({ cells: z.array(cellSchema).min(1) })).min(1),
 }).superRefine(({ rows }, context) => {
@@ -250,20 +251,26 @@ const tableSchema = z.strictObject({
   rows.forEach((row, rowIndex) => {
     row.cells.forEach((cell, cellIndex) => {
       const questionNumber = trueFalse ? rowIndex > 0 && cellIndex === 0 : rowIndex % 2 === 0 && cellIndex > 0
-      const padding = !trueFalse && !cell.text.trim() && !rows[rowIndex + 1]?.cells[cellIndex]?.text.trim()
-      if (questionNumber && !padding && !/^\d+$/.test(cell.text.trim())) context.addIssue({ code: 'custom', message: 'Invalid question number', path: ['rows', rowIndex, 'cells', cellIndex, 'text'] })
+      const answer = rows[rowIndex + 1]?.cells[cellIndex]
+      const padding = !trueFalse && cell.text === '' && !cell.readOnly && answer?.text === '' && !answer.readOnly
+      if (questionNumber && !cell.readOnly && !padding && !/^\d+$/.test(cell.text.trim())) context.addIssue({ code: 'custom', message: 'Invalid question number', path: ['rows', rowIndex, 'cells', cellIndex, 'text'] })
     })
   })
 })
+
+function readCell(cell: ProseMirrorNode) {
+  let readOnly = false
+  cell.descendants((child) => { if (child.isAtom && !child.isText) readOnly = true })
+  const text = cell.textBetween(0, cell.content.size, '\n', (leaf) => leaf.type.name === 'inlineMath' ? `$${String(leaf.attrs.latex ?? '')}$` : String(leaf.attrs.alt || `[${leaf.type.name}]`))
+  return { text, readOnly }
+}
 
 function readTables(node: ProseMirrorNode) {
   return children(node)
     .filter((table) => named('table')(table))
     .map((table) => ({
       rows: children(table).map((row) => ({
-        cells: children(row).map((cell) => ({
-          text: cell.textBetween(0, cell.content.size, '\n'),
-        })),
+        cells: children(row).map((cell) => readCell(cell)),
       })),
     }))
 }
@@ -292,7 +299,9 @@ function writeTables(
             row,
             children(row).map((cell, cellIndex) => {
               const text = cells[cellIndex]!.text
-              if (text === cell.textBetween(0, cell.content.size, '\n')) return cell
+              const originalCell = readCell(cell)
+              if (text === originalCell.text) return cell
+              if (originalCell.readOnly) throw new RangeError('Rich answer cells are read-only')
               const paragraphs = text
                 .split('\n')
                 .map((line, paragraphIndex) =>
@@ -476,7 +485,7 @@ export const BLOCK_SCHEMAS: BlockSchema[] = [
       list(
         'tables',
         'Các bảng đáp án',
-        [list('rows', 'Các dòng', [list('cells', 'Các ô', [textField], true)], true)],
+        [list('rows', 'Các dòng', [list('cells', 'Các ô', [{ ...textField, readOnlyField: 'readOnly' }], true)], true)],
         true,
       ),
     ],

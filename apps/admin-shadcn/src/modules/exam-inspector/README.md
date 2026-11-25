@@ -37,9 +37,14 @@ inputs. No derived values or template identifiers are added to the document.
 - No correct-answer field is offered on questions: this schema has no such attr;
   answers reside in the separate answer-key table. Essay points map to `score`;
   rubric points remain part of each item's actual text, not a fabricated attr.
+- Choice options and true/false statements have fixed counts/order and display-only
+  labels. Only their text is editable; structural edits belong to the canvas/ribbon.
 - Answer-key tables expose cell text, preserving table/row/cell attrs, spans and
   header cell types. Table/row/cell counts are fixed (metadata `fixedLength`);
   newlines edit the cell's paragraph slots. Non-table labels are left untouched.
+  Cells with non-text atoms (including math/images) show a read-only preview and
+  are never replaced. Derived read-only flags exist only in form values. Padding
+  requires an entirely empty number/answer pair, with neither cell containing atoms.
   List levels likewise target existing items. Grid column edits change only the
   existing `cols` attr, not cell content or count.
 

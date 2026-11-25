@@ -29,6 +29,29 @@ function setup(content: JSONContent[] = [{ type: 'examTitle', content: [{ type: 
 }
 
 describe('inspector panel', () => {
+  it('refreshes the preview when a focused answer cell becomes read-only on the canvas', async () => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === 'answerKey')!.build() as JSONContent
+    const editor = setup([built])
+    await userEvent.click(screen.getByTestId('inspector-field-tables.0.rows.1.cells.1.text'))
+    let position = 0
+    editor.state.doc.descendants((node, pos) => { if (node.type.name === 'tableCell' && node.textContent === 'A') position = pos })
+    act(() => { editor.commands.insertContentAt(position + 2, { type: 'inlineMath', attrs: { latex: 'x^2' } }) })
+    const preview = screen.getByTestId('inspector-field-tables.0.rows.1.cells.1.text')
+    expect(preview).not.toHaveRole('textbox')
+    expect(preview).toHaveTextContent('x^2')
+  })
+  it('displays rich answer-key cells read-only while editing adjacent plain cells', async () => {
+    const built = BLOCK_TEMPLATES.find(template => template.id === 'answerKey')!.build() as JSONContent
+    built.content![0]!.content![1]!.content![2]!.content![0]!.content = [{ type: 'inlineMath', attrs: { latex: 'x^2' } }]
+    const editor = setup([built])
+    const rich = screen.getByTestId('inspector-field-tables.0.rows.1.cells.2.text')
+    expect(rich).not.toHaveRole('textbox')
+    expect(rich).toHaveTextContent('x^2')
+    const original = editor.state.doc.firstChild!.child(0).child(1).child(2).toJSON()
+    await userEvent.type(screen.getByTestId('inspector-field-tables.0.rows.1.cells.1.text'), 'C')
+    expect(editor.state.doc.firstChild!.child(0).child(1).child(1).textContent).toBe('AC')
+    expect(editor.state.doc.firstChild!.child(0).child(1).child(2).toJSON()).toEqual(original)
+  })
   it('keeps the same focused textarea when heading text changes the matching schema', async () => {
     const built = BLOCK_TEMPLATES.find(template => template.id === 'heading')!.build()
     const editor = setup(Array.isArray(built) ? built : [built])
