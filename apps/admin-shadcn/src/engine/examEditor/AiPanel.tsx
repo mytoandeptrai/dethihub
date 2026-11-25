@@ -10,6 +10,7 @@
  */
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { Link } from '@/engine/compat/router'
+import { useAiChatScroll } from './useAiChatScroll'
 import { useSession } from '@/engine/lib/useSession'
 import { Button } from '@/engine/components/ui'
 import { IconDocExam } from '@/engine/components/docIcons'
@@ -40,15 +41,17 @@ import { cn } from '@/engine/lib/cn'
 import { AI_ATTACH_EVENT, takeAiRefs, type AiRef } from '@/engine/lib/aiAttach'
 import { chatHistoryKey, encodeChatHistory, loadChatHistory, saveChatHistory } from '@/engine/lib/aiChatHistory'
 import { extractJson } from '@/engine/lib/llm'
-import aiThinkingAnim from '@/engine/assets/ai-assistant.svg'
 import { Markdown } from '@/engine/lib/aiChatMarkdown'
 import { compactHistory } from '@/engine/lib/aiHistory'
 import 'katex/dist/katex.min.css'
 import { ASK_DEFAULT, AiAskPanel, askHistoryText, needsAskFirst, parseAsk, type AiAsk } from './AiAskPanel'
 import { IconClose, IconEnter, IconPaperclip, IconStop } from './icons'
 import { AiQuestionPreview } from '@/components/ai-question-preview'
+import { AiDocumentPreview } from '@/components/ai-document-preview'
+import { prepareAiApplication } from './aiApplication'
+import type { JSONContent } from '@tiptap/core'
 import { useAiQuestionStream } from '@/hooks/use-ai-question-stream'
-import { selectedExamPayload } from '@/lib/ai-question-stream'
+import { isAiDocumentReplyComplete, parseAiDocumentReply, selectedExamPayload } from '@/lib/ai-question-stream'
 import type { AiQuestionRequest, AiQuestionState } from '@/hooks/use-ai-question-stream'
 import type { GeneratedQuestion } from '@/lib/ai-question-stream'
 import { ApiClientError } from '@/lib/api-error'
@@ -196,6 +199,7 @@ export interface ChatTurn {
   generation?: AiQuestionState
   inserted?: boolean
   previewPayload?: string
+  incomplete?: boolean
   generationVersion?: number
   /** người dùng đã bấm 👎 */
   vote?: 'up' | 'down'
@@ -214,15 +218,26 @@ interface ActStep {
   live?: string
 }
 
-function examReview(content: string, questionCount: number): Pick<ChatTurn, 'text' | 'previewPayload'> {
-  if (questionCount > 0) return { text: '', previewPayload: undefined }
-  try {
-    const raw = extractJson<{ say?: unknown; blocks?: unknown; patch?: unknown }>(content)
-    const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
-    return { text: typeof raw.say === 'string' ? raw.say : changed ? 'Bản nháp đã sẵn sàng.' : content, previewPayload: changed ? content : undefined }
-  } catch {
-    return { text: content, previewPayload: undefined }
+function examReview(content: string, questionCount: number, finishReason?: string | null): Pick<ChatTurn, 'text' | 'previewPayload' | 'incomplete' | 'generation'> {
+  const raw = parseAiDocumentReply(content, extractJson)
+  const documentReply = raw && (
+    typeof raw.action === 'string' && ['replace', 'append', 'patch'].includes(raw.action) ||
+    raw.action === undefined && (Array.isArray(raw.blocks) || Array.isArray(raw.patch))
+  )
+  const unparsedDocumentReply = !raw && /^\s*(?:```(?:json)?\s*)?\{\s*(?:"action"\s*:\s*"(?:replace|append|patch)"|"(?:blocks|patch)"\s*:\s*\[)/.test(content)
+  const tokenLimited = ['length', 'max_tokens'].includes(finishReason ?? '')
+  const jsonStart = /^\s*(?:\{|```(?:json)?(?:\s|$))/i.test(content)
+  if (tokenLimited && jsonStart || (documentReply || unparsedDocumentReply) && (tokenLimited || !isAiDocumentReplyComplete(content))) {
+    return { text: documentReply || unparsedDocumentReply ? '' : content, previewPayload: undefined, incomplete: true }
   }
+  if (raw && documentReply) {
+    if (!['replace', 'append', 'patch'].includes(String(raw.action)) && Array.isArray(raw.patch) && raw.patch.length > 0) raw.action = 'patch'
+    const changed = [raw.blocks, raw.patch].some((items) => Array.isArray(items) && items.length > 0)
+    const reviewDocument = changed && (questionCount === 0 || ['replace', 'append', 'patch'].includes(String(raw.action)))
+    return { text: typeof raw.say === 'string' ? raw.say : reviewDocument ? 'Bản nháp đã sẵn sàng.' : '', previewPayload: reviewDocument ? JSON.stringify(raw) : undefined, incomplete: false }
+  }
+  if (raw && raw.action !== undefined) return { text: content, previewPayload: undefined, incomplete: false, generation: undefined }
+  return { text: questionCount > 0 ? '' : content, previewPayload: undefined, incomplete: false }
 }
 
 /** đóng bước đang chạy (xong / lỗi) */
@@ -242,7 +257,7 @@ function ActLog({ steps }: { steps: ActStep[] }) {
       {steps.map((s, i) => (
         <li key={i} className={`ai-step ai-step--${s.state}`}>
           <span className="ai-step__icon" aria-hidden="true">
-            {s.state === 'done' ? '✓' : s.state === 'failed' ? '!' : <img className="ai-step__mascot" src={aiThinkingAnim} alt="" />}
+            {s.state === 'done' ? '✓' : s.state === 'failed' ? '!' : <img className="ai-step__mascot motion-safe:animate-pulse" src="/brand/ai-static.svg" alt="" />}
           </span>
           <span className="ai-step__label">{s.label}</span>
           {s.note ? <span className="ai-step__note">{s.note}</span> : null}
@@ -463,11 +478,9 @@ function ThinkingLine({ mode, intent }: { mode: AiMode; intent?: 'doc' | 'chat' 
   }, [steps])
   return (
     <div className="ai-thinking">
-      {/* animation "Trợ lý giấy" do người dùng cung cấp — SVG tự chạy,
-          không cần lottie-web (~450 KB JS) */}
       <img
-        className="ai-thinking__anim"
-        src={aiThinkingAnim}
+        className="ai-thinking__anim motion-safe:animate-pulse"
+        src="/brand/ai-static.svg"
         alt=""
         aria-hidden="true"
         width={22}
@@ -741,6 +754,7 @@ function AiConversation({
   onPendingSlides,
   contextSummary,
   documentDigest,
+  currentDocument,
   focusFor,
   mode = 'exam',
   attachKey,
@@ -771,6 +785,7 @@ function AiConversation({
   contextSummary?: string
   /** bản tóm tắt nội dung đề (id + loại khối + trích đoạn) cho model sửa đúng chỗ */
   documentDigest?: string
+  currentDocument?: JSONContent
   /** 'exam' = soạn đề, 'slide' = soạn bài trình bày, 'board' = bảng vẽ */
   mode?: AiMode
   /** nhận phần đính kèm "Hỏi AI" (attachToAi) có cùng khoá */
@@ -873,7 +888,7 @@ function AiConversation({
   /** dàn ý vừa duyệt khi deck đã có slide: chờ người dùng chọn ghi đè / nối tiếp */
   const [overwriteAsk, setOverwriteAsk] = useState<{ turnId: string; plan: DeckPlan } | null>(null)
   const abortRef = useRef<AbortController | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const { scrollRef, onScroll: handleChatScroll } = useAiChatScroll(turns)
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const filesRef = useRef<Attachment[]>([])
@@ -936,12 +951,6 @@ function AiConversation({
       setRemovingFiles((cur) => cur.filter((f) => f !== id))
     }, 170)
   }
-
-  // cuộn xuống cuối khi có lượt mới
-  useEffect(() => {
-    const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [turns])
 
   // tự động lớn dần textarea theo nội dung; đo lại khi bề rộng đổi — panel đóng sẵn có bề rộng 0,
   // đo lúc đó thì mỗi chữ một dòng, ô nhập cao vọt và giữ nguyên khi panel mở ra
@@ -1185,7 +1194,7 @@ function AiConversation({
       onProgress?.({ phase: 'think', thought: 0, thinking: '', text: '' })
       // model chưa gửi gì (đang xếp hàng / suy luận không stream): số giây vẫn chạy
       const ticker = examSteps ? setInterval(() => phase === 'think' && logPatch({ note: secs() }), 1000) : undefined
-      let res: Awaited<ReturnType<typeof callLlm>>
+      let res: Awaited<ReturnType<typeof callLlm>> & { finishReason?: string | null }
       try {
         const options = {
           signal: controller.signal,
@@ -1305,7 +1314,7 @@ function AiConversation({
       } else {
         patchTurn((turn) => {
           const hasQuestions = !!turn.generation?.questions.length
-          const review = examReview(res.content, turn.generation?.questions.length ?? 0)
+          const review = examReview(res.content, turn.generation?.questions.length ?? 0, res.finishReason)
           return { ...review, pending: false, log: hasQuestions || review.previewPayload ? closeLog(turn.log ?? [], 'done') : undefined }
         })
       }
@@ -1350,13 +1359,13 @@ function AiConversation({
     abortRef.current = controller
     setBusy(true)
     const patch = (value: Partial<ChatTurn>) => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, ...value } : item))
-    patch({ pending: true, error: undefined, topup: undefined, text: '', inserted: false, previewPayload: undefined, aiRequest: request, generationVersion: (turn.generationVersion ?? 0) + 1, log: undefined })
+    patch({ pending: true, error: undefined, topup: undefined, text: '', inserted: false, previewPayload: undefined, incomplete: false, aiRequest: request, generationVersion: (turn.generationVersion ?? 0) + 1, log: undefined })
     try {
       const result = await generation.run(request, { signal: controller.signal, onQuota: reportQuota,
         onUpdate: (snapshot) => patch({ generation: snapshot }),
       })
       setTurns((current) => current.map((item) => item.id === turn.id ? { ...item,
-        ...examReview(result.content, item.generation?.questions.length ?? 0),
+        ...examReview(result.content, item.generation?.questions.length ?? 0, result.finishReason),
         ...(result.stopped ? { text: 'Đã dừng.' } : {}),
         retry: undefined,
       } : item))
@@ -1625,7 +1634,7 @@ function AiConversation({
         </span>
       </div>
 
-      <div className="ai-chat" ref={scrollRef}>
+      <div className="ai-chat" ref={scrollRef} onScroll={handleChatScroll}>
         {empty ? (
           <div className="ai-chat-empty">
             <div className="ai-chat-empty-title">
@@ -1691,13 +1700,24 @@ function AiConversation({
                 }
                 onCancel={() => cancelPlan(turn.id)}
               />
-              {turn.generation && (turn.generation.questions.length > 0 || turn.pending && !!turn.generation.total) ? (
+              {turn.generation && !turn.previewPayload && !turn.incomplete && (turn.generation.questions.length > 0 || turn.pending && !!turn.generation.total) ? (
                 <AiQuestionPreview key={`${turn.id}-${turn.generationVersion ?? 0}`} questions={turn.generation.questions} total={turn.generation.total}
-                  busy={!!turn.pending || busy} inserted={turn.inserted} refundedTokens={turn.generation.refundedTokens}
+                  busy={!!turn.pending || busy} inserted={turn.inserted} reviewOnly={!!turn.previewPayload} refundedTokens={turn.generation.refundedTokens}
                   onInsert={(questions) => insertQuestions(turn, questions)} onRegenerate={() => void retryGeneration(turn)}
                   renderText={(text) => <Markdown text={text} />} />
               ) : null}
-              {turn.previewPayload && !turn.inserted ? <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Chèn vào đề</button> : null}
+              {turn.incomplete ? <>
+                <p className="my-2 text-sm text-ink-3">Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.</p>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
+              </> : null}
+              {turn.previewPayload && !turn.inserted ? <div>
+                <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} prepared={prepareAiApplication(parseAiDocumentReply(turn.previewPayload) ?? {}, currentDocument)} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
+                <div className="flex gap-2" data-ai-approval>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Áp dụng</button>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
+                <button type="button" className="ai-retry" disabled={busy} onClick={() => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, previewPayload: undefined, generation: undefined } : item))}>Huỷ</button>
+                </div>
+              </div> : null}
               {turn.sources?.length || turn.webSources?.length || turn.sourceNote ? <SourcesButton sources={turn.sources} web={turn.webSources} note={turn.sourceNote} /> : null}
               {turn.error ? (
                 <div className="ai-msg-error">

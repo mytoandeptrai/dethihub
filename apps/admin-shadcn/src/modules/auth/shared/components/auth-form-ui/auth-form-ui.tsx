@@ -4,7 +4,7 @@ import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
 import { appPaths } from '@/config/app-paths'
-import { t as translate } from '@/i18n/translate'
+import { FormSkeleton, LoadingRegion } from '@/components/page-skeleton'
 
 import type { useAuthFormContainer } from '@/modules/auth/shared/hooks'
 
@@ -95,7 +95,7 @@ const AuthFormUi = ({
             {title}
           </h2>
           {isSessionLoading ? (
-            <p role="status">{translate('common.loading')}</p>
+            <LoadingRegion><FormSkeleton /></LoadingRegion>
           ) : resetInvalid ? (
             <div className="space-y-5">
               <p>{t('invalidReset')}</p>

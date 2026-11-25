@@ -1,12 +1,107 @@
 import { describe, expect, it } from 'vitest'
 
-import { QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
+import { isAiDocumentReplyComplete, parseAiDocumentReply, QuestionStreamParser, selectedExamPayload } from './ai-question-stream'
 
 describe('question stream parser', () => {
+  it.each([
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}', false],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}', false],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp.', false],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Ví dụ "x"}]} phần còn lại của câu hỏi chưa xong', false],
+    [String.raw`{"action":"replace","blocks":[{"type":"question","text":"Giải thích "(0, 1] và $2 \times 3$" trong câu."}]}`, false],
+    ['{"action":"replace","blocks":[{"type":"question","text":"Giải thích "đoạn mã" trong câu."}]}', false],
+  ])('rejects drafts requiring unescaped-quote recovery: %s', (source, expected) => {
+    expect(isAiDocumentReplyComplete(String(source))).toBe(expected)
+  })
+
+  it('preserves correctly escaped quotes, half-open intervals and formulas', () => {
+    const text = String.raw`Giải thích "(0, 1] và $2 \times 3$" trong câu.`
+    const source = JSON.stringify({ action: 'replace', blocks: [{ type: 'question', text }] })
+    expect(isAiDocumentReplyComplete(source)).toBe(true)
+    expect(parseAiDocumentReply(source)?.blocks).toEqual([{ type: 'question', text }])
+  })
+
+  it.each([
+    '{"blocks":[]} trailing unfinished text',
+    '{"blocks":[]} {"blocks":[',
+  ])('does not accept a complete prefix while ignoring unfinished content: %s', (source) => {
+    expect(isAiDocumentReplyComplete(source)).toBe(false)
+  })
+
+  it.each([
+    ['$' + String.raw`\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot` + '$'],
+    [String.raw`\(\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot\)`],
+    [String.raw`\[\times \neq \frac{1}{2} \beta \rho \nu \text{abc} \theta \cdot\]`],
+  ])('retains single-backslash LaTeX in complete math spans: %s', (math) => {
+    const source = `{"blocks":[{"type":"question","text":"${math}"}]}`
+    expect(parseAiDocumentReply(source)?.blocks).toEqual([{ type: 'question', text: math }])
+    const parser = new QuestionStreamParser()
+    for (const char of source) parser.push(char)
+    expect(parser.questions[0]?.prompt).toBe(math)
+    parser.finish()
+    expect(parser.questions[0]?.prompt).toBe(math)
+    expect(parseAiDocumentReply(JSON.stringify({ blocks: [{ type: 'question', text: math }] }))?.blocks).toEqual([{ type: 'question', text: math }])
+  })
+
+  it('does not reinterpret valid escapes after an unpaired currency dollar', () => {
+    const source = String.raw`{"say":"giá $5\nNam\tThanh\rmai\u0041","blocks":[]}`
+    expect(parseAiDocumentReply(source)).toEqual(JSON.parse(source))
+  })
+
+  it.each([
+    ['{"blocks":[]}', true],
+    ['{"blocks":[{"text":"literal } [ \\\" bracket"}],}', true],
+    ['{"action":"replace","blocks":[{"text":"partial"}', false],
+    ['{"action":"append","blocks":[{"text":"partial', false],
+    ['{"blocks":[]]', false],
+    ['', false],
+  ])('checks original JSON closure without accepting delimiter repair: %s', (source, expected) => {
+    expect(isAiDocumentReplyComplete(String(source))).toBe(expected)
+  })
+
+  it.each([
+    String.raw`{"action":"append","say":"giá $5\nNam\tThanh \"quote\" \\ \/ \u0041","blocks":[]}`,
+    String.raw`{"action":"append","blocks":[{"type":"question","text":"$x\nNam\tText\u0041\/$"}]}`,
+  ])('never rewrites valid JSON escapes after dollar signs: %s', (source) => {
+    const expected = JSON.parse(source)
+    expect(parseAiDocumentReply(source)).toEqual(expected)
+    const parser = new QuestionStreamParser()
+    for (const char of source) parser.push(char)
+    parser.finish()
+    expect(parser.blocks).toEqual(expected.blocks)
+  })
+
+  it('recovers bare LaTeX escapes split across chunks in a legacy replace reply', () => {
+    const source = String.raw`{"action":"replace","say":"Đề đã sẵn sàng","blocks":[{"type":"heading","text":"ĐỀ TOÁN"},{"type":"question","no":1,"text":"Tính $BH \\cdot CH$ và $\\sqrt{2}$, $\\frac{1}{2}$","options":[]}]}`.replaceAll('\\\\', '\\')
+    const parser = new QuestionStreamParser()
+    for (const char of source) parser.push(char)
+    expect(parser.questions).toHaveLength(1)
+    expect(parser.questions[0]?.prompt).toBe(String.raw`Tính $BH \cdot CH$ và $\sqrt{2}$, $\frac{1}{2}$`)
+    expect(parser.blocks).toHaveLength(2)
+    expect(parseAiDocumentReply(source)?.action).toBe('replace')
+  })
+
+  it('recovers a fenced append reply with non-question blocks without damaging escaped text', () => {
+    const source = '```json\n' + String.raw`{"action":"append","say":"Gửi thầy/cô **Lời giải chi tiết**","blocks":[{"type":"divider"},{"type":"heading","text":"LỜI GIẢI CHI TIẾT","level":1},{"type":"paragraph","text":"**Lời giải câu 1**\n$AH^2 = BH \cdot CH$, $\sqrt{2}$"}]}` + '\n```'
+    expect(parseAiDocumentReply(source)).toMatchObject({ action: 'append', blocks: [{ type: 'divider' }, { type: 'heading' }, { type: 'paragraph', text: String.raw`**Lời giải câu 1**` + '\n' + String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$` }] })
+    expect(parseAiDocumentReply('Hello')).toBeNull()
+    expect(parseAiDocumentReply('')).toBeNull()
+    expect(parseAiDocumentReply('{broken}')).toBeNull()
+  })
+
   it('retains math delimiters when converting rich-text questions for preview', () => {
     const parser = new QuestionStreamParser()
     parser.push(JSON.stringify({ blocks: [{ type: 'question', text: [{ text: 'Evaluate ' }, { math: 'x^2' }] }] }))
     expect(parser.questions[0]?.prompt).toBe('Evaluate $x^2$')
+  })
+
+  it('preserves correctly escaped backslashes, newlines, quotes and unicode', () => {
+    const value = { action: 'append', say: 'Line 1\n"Line 2"', blocks: [{ type: 'question', text: String.raw`$\frac{1}{2} + \sqrt{2}$` + '\n∀' }] }
+    const parser = new QuestionStreamParser()
+    for (const char of JSON.stringify(value)) parser.push(char)
+    parser.finish()
+    expect(parseAiDocumentReply(JSON.stringify(value))).toEqual(value)
+    expect(parser.questions[0]?.prompt).toBe(value.blocks[0]!.text)
   })
 
   it('emits only complete questions and ignores nested objects and quoted braces', () => {

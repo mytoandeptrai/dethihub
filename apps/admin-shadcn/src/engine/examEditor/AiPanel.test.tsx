@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,6 +8,11 @@ import { browserAuth } from '@/lib/api-client'
 import { server } from '@/testing/msw/server'
 
 import { AiPanel } from './AiPanel'
+
+import type { components } from '@workspace/api-types'
+
+type ChatResponseDto = components['schemas']['ChatResponseDto']
+type ProblemDetailsDto = components['schemas']['ProblemDetailsDto']
 
 vi.mock('@/engine/lib/useSession', () => ({ useSession: () => null }))
 vi.mock('@/engine/lib/khungPrompt', () => ({ khungPromptFor: async () => '' }))
@@ -20,11 +25,298 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn()
 })
 
-const reply = () => HttpResponse.json({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
+const chatResponse = (body: Pick<ChatResponseDto, 'content'> & Partial<ChatResponseDto>) => HttpResponse.json<ChatResponseDto>({ reasoning: '', usage: null, finishReason: 'stop', quota: null, ...body })
+const reply = () => chatResponse({ content: JSON.stringify({ blocks: [1, 2].map((no) => ({ type: 'question', no, text: `Question ${no}`, options: [] })) }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'receipt-1' })
 
 describe('exam AI review workflow', () => {
+  it.each([
+    { content: '{"action":"replace","blocks":[', restoredText: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.' },
+    { content: '```json\n{"example":1}\n```\nĐây là phần giải thích đã tạo.', restoredText: 'Đây là phần giải thích đã tạo.' },
+  ])('restores a cut-off reply and refund-aware regeneration after reopening: $content', async ({ content, restoredText }) => {
+    const retries: string[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : 'Lời giải hoàn chỉnh.', finishReason: retries.length === 1 ? 'length' : 'stop', receipt: 'saved-cut-off-receipt' })
+    }))
+    const historyKey = `reopen-${content}`
+    const apply = vi.fn()
+    const first = render(<AiPanel historyKey={historyKey} onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Giải thích bài Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    first.unmount()
+    render(<AiPanel historyKey={historyKey} onApplyBlocks={apply} />)
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByText(restoredText)).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await screen.findByText('Lời giải hoàn chỉnh.')
+    expect(retries).toEqual(['', 'saved-cut-off-receipt'])
+    expect(apply).not.toHaveBeenCalled()
+  })
+  it('blocks a draft requiring quoted interval recovery', async () => {
+    const content = '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}]}'
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
+    const apply = vi.fn()
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { name: 'unfinished code example', content: '{"action":"replace","blocks":[{"type":"question","text":"Ví dụ "x"}]} phần còn lại của câu hỏi chưa xong' },
+    { name: 'half-open interval and bare LaTeX', content: String.raw`{"action":"replace","blocks":[{"type":"question","text":"Giải thích "(0, 1] và $2 \times 3$" trong câu."}]}` },
+  ])('blocks $name until a safe regenerated draft is available', async ({ content }) => {
+    const retries: string[] = []
+    const text = String.raw`Giải thích "(0, 1] và $2 \times 3$" trong câu.`
+    const safe = { action: 'replace', blocks: [{ type: 'question', text }] }
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : JSON.stringify(safe), receipt: 'broken-receipt', finishReason: 'stop' })
+    }))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Áp dụng' }))
+    expect(retries).toEqual(['', 'broken-receipt'])
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual(safe)
+  })
+
+  it('still blocks a truncated draft containing a quoted interval', async () => {
+    const content = '{"action":"replace","blocks":[{"type":"question","text":"Chọn khoảng "(0, 1]" phù hợp."}'
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
+    const apply = vi.fn()
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it('infers patch action for patch-only replies and previews them before approval', async () => {
+    const patch = [{ op: 'replace', id: 'k1', blocks: [{ type: 'paragraph', text: 'Đoạn đã sửa' }] }]
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ patch }), usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã sửa.' })
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    expect(screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })).toHaveTextContent('Đoạn đã sửa')
+    expect(container.textContent).not.toContain('"patch"')
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual({ action: 'patch', patch })
+  })
+
+  it.each(['replace', 'append'])('blocks truncated %s drafts and retries with the receipt', async (action) => {
+    let calls = 0
+    const retries: string[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      calls++
+      return chatResponse({ content: calls === 1 ? `{"action":"${action}","blocks":[{"type":"question","text":"Partial question"}` : JSON.stringify({ action, blocks: [{ type: 'question', text: 'Complete question' }] }), receipt: `receipt-${calls}`, usage: null })
+    }))
+    const apply = vi.fn()
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    expect(retries).toEqual(['', 'receipt-1'])
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it.each(['length', 'max_tokens'].flatMap((finishReason) => [
+    '{"action":"app',
+    '  {',
+    '```json\n{"action":"app',
+    '```json\n',
+    '```\n{"action":"app',
+    '```json\n{"action":123}\n```\n\nGiải thích bị cắt',
+  ].map((content) => ({ finishReason, content }))))('retries token-limited JSON starts with the original receipt: $finishReason $content', async ({ finishReason, content }) => {
+    const retries: string[] = []
+    const safe = { action: 'append', blocks: [{ type: 'paragraph', text: 'Lời giải hoàn chỉnh' }] }
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : JSON.stringify(safe), finishReason: retries.length === 1 ? finishReason : 'stop', receipt: 'limited-receipt' })
+    }))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Áp dụng' }))
+    expect(retries).toEqual(['', 'limited-receipt'])
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual(safe)
+  })
+
+  it.each(['length', 'max_tokens'].flatMap((finishReason) => [
+    '```\nprint("Ví dụ minh hoạ")\n```\n\nĐây là phần giải thích đã tạo.',
+    '```json\n{"action":123}\n```\n\nĐây là phần giải thích đã tạo.',
+    '{"example":"Đây là phần giải thích đã tạo."}',
+  ].map((content) => ({ finishReason, content }))))('preserves non-protocol token-limited answers alongside retry: $finishReason $content', async ({ finishReason, content }) => {
+    const retries: string[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of') ?? '')
+      return chatResponse({ content: retries.length === 1 ? content : 'Lời giải hoàn chỉnh.', finishReason: retries.length === 1 ? finishReason : 'stop', receipt: 'chat-receipt' })
+    }))
+    const apply = vi.fn()
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Giải thích ví dụ trong bài Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(container).toHaveTextContent('Đây là phần giải thích đã tạo.')
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Soạn lại' }))
+    await screen.findByText('Lời giải hoàn chỉnh.')
+    expect(retries).toEqual(['', 'chat-receipt'])
+    expect(screen.queryByText(/Phản hồi bị cắt/)).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it.each(['length', 'max_tokens'])('blocks token-limited replies even when their JSON delimiters are complete: %s', async (finishReason) => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason, usage: null })))
+    render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(/Phản hồi bị cắt/)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Soạn lại' })).toBeEnabled()
+  })
+
+  it.each([
+    'Giải thích về JSON: {}. Không phải bản nháp.',
+    'Ví dụ {"example":"value"}. Không phải bản nháp.',
+    'Ví dụ {"blocks":"example","action":123}. Không phải bản nháp.',
+  ])('keeps explanatory prose containing non-protocol JSON: %s', async (content) => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
+    render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByText(content)
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Nội dung sẽ áp dụng' })).not.toBeInTheDocument()
+  })
+
+  it.each([
+    { action: 123 },
+    { action: 123, say: 'Ví dụ minh hoạ', blocks: [{ type: 'paragraph', text: 'Không chèn nội dung này' }] },
+    { action: 123, blocks: [{ type: 'question', text: 'Câu hỏi chỉ là ví dụ' }] },
+    { action: 'example' },
+    { action: null },
+  ])('renders a fenced non-protocol example as chat rather than a broken draft: %j', async (example) => {
+    const explanation = 'Đây là ví dụ về trường action, không phải lệnh sửa đề.'
+    const content = `\`\`\`json\n${JSON.stringify(example)}\n\`\`\`\n\n${explanation}`
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content })))
+    const apply = vi.fn()
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Giải thích ví dụ JSON action trong đề Toán lớp 9{Enter}')
+    await screen.findByText(explanation)
+    expect(container).toHaveTextContent(JSON.stringify(example))
+    expect(screen.queryByText(/Phản hồi bị cắt/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Soạn lại' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Nội dung sẽ áp dụng' })).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it('recovers trailing commas and bare LaTeX before document approval', async () => {
+    const content = String.raw`{"action":"append","say":"Bản nháp có dấu phẩy","blocks":[{"type":"paragraph","text":"$AH \\cdot CH$"},],}`.replaceAll('\\\\', '\\')
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    const { container } = render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    expect(container.textContent).not.toContain('"action"')
+    expect(screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })).toHaveTextContent('Thêm vào cuối đề')
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual({ action: 'append', say: 'Bản nháp có dấu phẩy', blocks: [{ type: 'paragraph', text: String.raw`$AH \cdot CH$` }] })
+  })
+
+  it.each(['replace', 'append'])('previews every block applied by %s approval', async (action) => {
+    const blocks = [{ type: 'heading', text: 'Tiêu đề sẽ chèn', level: 1 }, { type: 'paragraph', text: 'Lời giải sẽ chèn' }, { type: 'divider' }, { type: 'question', no: 1, text: 'Câu hỏi sẽ chèn' }, { type: 'answerKey', items: [{ no: 1, answer: 'Đáp án sẽ chèn' }] }, { type: 'table', rows: [['Ô sẽ chèn']] }]
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ action, say: 'Kiểm tra toàn bộ bản nháp', blocks }), usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    render(<AiPanel onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    const preview = screen.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
+    for (const text of ['Tiêu đề sẽ chèn', 'Lời giải sẽ chèn', 'Câu hỏi sẽ chèn', 'Đáp án sẽ chèn', 'Đường phân cách']) expect(preview).toHaveTextContent(text)
+    expect(preview).not.toHaveTextContent('Ô sẽ chèn')
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0]).blocks).toEqual(blocks)
+  })
+
+  it.each([true, false])('regenerates document approval with its retry receipt (questions: %s)', async (withQuestions) => {
+    const retries: (string | null)[] = []
+    server.use(http.post('http://localhost:3000/api/ai/chat', ({ request }) => {
+      retries.push(request.headers.get('x-ai-retry-of'))
+      return chatResponse({ content: JSON.stringify({ action: 'append', say: 'Bản nháp kiểm tra', blocks: withQuestions ? [{ type: 'question', no: 1, text: 'Kiểm tra' }] : [{ type: 'paragraph', text: 'Lời giải' }] }), usage: null, receipt: `receipt-${retries.length}` })
+    }))
+    render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
+    await screen.findByRole('button', { name: 'Áp dụng' })
+    const retry = screen.getByRole('button', { name: 'Soạn lại' })
+    await waitFor(() => expect(retry).toBeEnabled())
+    await userEvent.click(retry)
+    await waitFor(() => expect(retries).toEqual(['', 'receipt-1']))
+    await screen.findByRole('button', { name: 'Áp dụng' })
+  })
+
+  it('uses the public mascot asset in the thinking row', async () => {
+    let stream!: ReadableStreamDefaultController<Uint8Array>
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => new HttpResponse(new ReadableStream({ start(controller) { stream = controller } }), { headers: { 'Content-Type': 'text/event-stream' } })))
+    const { container } = render(<AiPanel onApplyBlocks={vi.fn()} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề trắc nghiệm 20 câu môn Toán lớp 9 về hệ thức lượng, kèm đáp án.{Enter}')
+    await waitFor(() => expect(stream).toBeDefined())
+    act(() => stream.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ type: 'think', d: 'Đang suy nghĩ' })}\n\n`)))
+    await screen.findByText('Suy nghĩ')
+    const src = container.querySelector('.ai-step__mascot')?.getAttribute('src')
+    await userEvent.click(screen.getByRole('button', { name: 'Dừng' }))
+    expect(src).toBe('/brand/ai-static.svg')
+  })
+
+  it.each(['replace', 'append'])('reviews a recovered %s document reply with apply and cancel instead of raw JSON', async (action) => {
+    const text = String.raw`$AH^2 = BH \cdot CH$, $\sqrt{2}$`
+    const blocks = action === 'replace'
+      ? [{ type: 'heading', text: 'ĐỀ TOÁN', level: 1 }, { type: 'question', no: 1, text, options: [] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }]
+      : [{ type: 'divider' }, { type: 'heading', text: 'LỜI GIẢI CHI TIẾT', level: 1 }, { type: 'paragraph', text }]
+    const say = action === 'replace' ? 'Đề Toán đã sẵn sàng.' : 'Gửi thầy/cô lời giải chi tiết.'
+    const content = JSON.stringify({ action, say, blocks }).replaceAll('\\\\', '\\')
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content, usage: null })))
+    const apply = vi.fn().mockReturnValue({ text: 'Đã áp dụng.' })
+    const { container } = render(<AiPanel contextSummary="Đã có đầu đề hai cột" documentDigest='{"blocks":[{"type":"header"}]}' onApplyBlocks={apply} />)
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề trắc nghiệm 20 câu môn Toán lớp 9 về hệ thức lượng, kèm đáp án.{Enter}')
+    await screen.findByText(say)
+    expect(container.textContent).not.toContain('"action"')
+    expect(screen.queryByRole('status')?.textContent).toBe(action === 'replace' ? 'Đã soạn 1/20 câu' : undefined)
+    expect(screen.queryByRole('button', { name: 'Chèn vào đề' })).not.toBeInTheDocument()
+    expect(apply).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: 'Áp dụng' }))
+    expect(JSON.parse(apply.mock.calls[0]![0])).toEqual({ action, say, blocks })
+    expect(await screen.findByText('Đã áp dụng.')).toBeVisible()
+    await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'tiếp tục{Enter}')
+    await screen.findByRole('button', { name: 'Huỷ' })
+    await userEvent.click(screen.getByRole('button', { name: 'Huỷ' }))
+    expect(screen.queryByRole('button', { name: 'Áp dụng' })).not.toBeInTheDocument()
+    expect(apply).toHaveBeenCalledOnce()
+  })
+
   it('renders generated mathematical questions with the existing math renderer', async () => {
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ blocks: [{ type: 'question', text: 'Evaluate $x^2$.' }] }), usage: null })))
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => chatResponse({ content: JSON.stringify({ blocks: [{ type: 'question', text: 'Evaluate $x^2$.' }] }), usage: null })))
     const { container } = render(<AiPanel onApplyBlocks={vi.fn()} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByLabelText('Chọn câu 1')
@@ -49,12 +341,12 @@ describe('exam AI review workflow', () => {
     let fail!: () => void
     const gate = new Promise<void>((resolve) => { fail = resolve })
     const bodies: { messages: { content: string }[] }[] = []
-    server.use(http.post('http://localhost:3000/api/ai/chat', async ({ request }) => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', async ({ request }): Promise<HttpResponse<ChatResponseDto | ProblemDetailsDto>> => {
       const body = await request.json() as typeof bodies[number]
       bodies.push(body)
       if (bodies.length === 1) {
         await gate
-        return HttpResponse.json({ title: 'Bad Gateway', status: 502, detail: 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.' }, { status: 502 })
+        return HttpResponse.json<ProblemDetailsDto>({ type: 'about:blank', title: 'Bad Gateway', status: 502, detail: 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.' }, { status: 502 })
       }
       return reply()
     }))

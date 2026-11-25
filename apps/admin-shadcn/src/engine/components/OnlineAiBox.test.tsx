@@ -58,9 +58,10 @@ describe('online AI review', () => {
     vi.spyOn(browserAuth, 'getToken').mockResolvedValue(null)
     let stream!: ReadableStreamDefaultController<Uint8Array>
     server.use(http.post('http://localhost:3000/api/ai/chat', () => new HttpResponse(new ReadableStream({ start(controller) { stream = controller } }), { headers: { 'Content-Type': 'text/event-stream' } })))
-    render(<><input aria-label="Existing question" defaultValue="Original" /><OnlineAiBox meta={defaultMeta()} questions={[]} onAdd={vi.fn()} /></>)
+    const { container } = render(<><input aria-label="Existing question" defaultValue="Original" /><OnlineAiBox meta={defaultMeta()} questions={[]} onAdd={vi.fn()} /></>)
     await userEvent.type(screen.getByLabelText('Nội dung cần AI soạn'), 'Soạn 20 câu{Enter}')
     await waitFor(() => expect(stream).toBeDefined())
+    const thinkingSrc = container.querySelector('img.motion-reduce\\:hidden')?.getAttribute('src')
     expect(screen.getByLabelText('Nội dung cần AI soạn')).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Thêm tệp nguồn' })).toBeDisabled()
     await userEvent.type(screen.getByLabelText('Existing question'), ' edited')
@@ -70,6 +71,7 @@ describe('online AI review', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Dừng' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Chèn vào đề' })).toBeEnabled())
     expect(screen.getByLabelText('Chọn câu 1')).toBeChecked()
+    expect(thinkingSrc).toBe('/brand/ai-static.svg')
   })
 
   it('keeps the no-questions message inline', async () => {

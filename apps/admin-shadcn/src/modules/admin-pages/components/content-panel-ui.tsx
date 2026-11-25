@@ -1,6 +1,6 @@
 'use client'
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import { components_appIcons_TrashIcon as TrashIcon } from '@admin-pages-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { AlertTriangle, Check, Eye, FileText, HardDrive, RefreshCw, Search, X } from 'lucide-react'
 
@@ -14,7 +14,7 @@ import {
   Pager,
   Segmented,
   SiteSelect,
-  Spinner,
+
   Toolbar,
   inputClass,
 } from '@/components/product-ui'
@@ -169,12 +169,7 @@ export function ContentPanelExamsTabUi(
               </thead>
               <tbody className="divide-line-2 divide-y">
                 {loading && exams.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-ink-3 py-16 text-center">
-                      <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                      <span>{translate('adminPagesCopy.m210')}</span>
-                    </td>
-                  </tr>
+                  <TableRowsSkeleton columns={8} />
                 ) : exams.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center">
@@ -498,10 +493,7 @@ export function ContentPanelExamDrawerUi(
             </h3>
 
             {loadingDoc ? (
-              <div className="text-ink-3 flex items-center justify-center py-8">
-                <Spinner className="mr-2" />
-                <span>{translate('adminPagesCopy.m235')}</span>
-              </div>
+              <LoadingRegion><FormSkeleton /></LoadingRegion>
             ) : questions.length > 0 ? (
               <div className="space-y-3">
                 {questions.map((q: any, idx: number) => (
@@ -650,12 +642,7 @@ export function ContentPanelReportsTabUi(
               </thead>
               <tbody className="divide-line-2 divide-y">
                 {loading && reports.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-ink-3 py-16 text-center">
-                      <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                      <span>{translate('adminPagesCopy.m252')}</span>
-                    </td>
-                  </tr>
+                  <TableRowsSkeleton columns={7} />
                 ) : reports.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center">
@@ -872,12 +859,7 @@ export function ContentPanelDocsTabUi(
                 </thead>
                 <tbody className="divide-line-2 divide-y">
                   {loading && docs.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-ink-3 py-16 text-center">
-                        <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                        <span>{translate('adminPagesCopy.m270')}</span>
-                      </td>
-                    </tr>
+                    <TableRowsSkeleton columns={6} />
                   ) : docs.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-12 text-center">
@@ -1014,10 +996,7 @@ export function ContentPanelFeedbackTabUi(
         <Card className="border-line shadow-soft overflow-hidden border">
           <div className="divide-line-2 divide-y">
             {loading && feedback.length === 0 ? (
-              <div className="text-ink-3 py-16 text-center">
-                <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                <span>{translate('adminPagesCopy.m275')}</span>
-              </div>
+              <LoadingRegion><FormSkeleton /></LoadingRegion>
             ) : feedback.length === 0 ? (
               <div className="py-12 text-center">
                 <EmptyState title={translate('adminPagesCopy.m276')} description="" />

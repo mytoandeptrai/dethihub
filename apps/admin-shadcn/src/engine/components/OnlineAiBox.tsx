@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowUp, FileText, Plus, Square, X } from 'lucide-react'
-import thinkingAnim from '@/engine/assets/ai-assistant.svg'
 import { dialog } from '@/engine/components/Dialog'
 import { Button } from '@/engine/components/ui'
 import type { Question } from '@/engine/data/types'
@@ -121,7 +120,7 @@ export function OnlineAiBox({
         {/* "Trợ lý giấy" của app: bản tĩnh lúc nghỉ, bản động lúc AI đang soạn (giảm chuyển động thì giữ bản tĩnh) */}
         <span className="relative mb-0.5 size-10 shrink-0" aria-hidden="true">
           <img src="/brand/ai-static.svg" alt="" width={40} height={40} className={`size-10 ${busy ? 'motion-safe:hidden' : ''}`} />
-          {busy ? <img src={typeof thinkingAnim === 'string' ? thinkingAnim : (thinkingAnim as { src: string }).src} alt="" width={40} height={40} className="absolute inset-0 size-10 motion-reduce:hidden" /> : null}
+          {busy ? <img src="/brand/ai-static.svg" alt="" width={40} height={40} className="absolute inset-0 size-10 motion-reduce:hidden motion-safe:animate-pulse" /> : null}
         </span>
 
         <div

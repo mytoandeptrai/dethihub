@@ -1,4 +1,5 @@
 'use client'
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { Activity, Check, RefreshCw } from 'lucide-react'
@@ -101,7 +102,7 @@ export function OpsPanelOpsPanelUi(
               ) : null}
             </div>
             <div className="flex items-center gap-3">
-              {loadingSettings ? <Spinner className="text-ink-3 size-3.5" /> : null}
+              {loadingSettings ? <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion> : null}
               <Segmented<'maint' | 'notice'>
                 value={opsTab}
                 onChange={setOpsTab}
@@ -342,7 +343,7 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m152')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <Spinner className="text-ink-3 size-4" />
+                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
                 ) : (
                   <span className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]">
                     {formatNumber(totalCalls)}
@@ -355,7 +356,7 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m153')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <Spinner className="text-ink-3 size-4" />
+                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
                 ) : (
                   <span className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]">
                     {errorRateStr}
@@ -368,7 +369,7 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m154')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <Spinner className="text-ink-3 size-4" />
+                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
                 ) : (
                   <span
                     className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]"
@@ -384,7 +385,7 @@ export function OpsPanelOpsPanelUi(
               <span className="text-ink-3 text-[12px] font-medium">{t('adminOpsCopy.m155')}</span>
               <div className="mt-1">
                 {loadingStats ? (
-                  <Spinner className="text-ink-3 size-4" />
+                  <LoadingRegion><Skeleton className="h-8 w-24" /></LoadingRegion>
                 ) : (
                   <span className="tnum text-ink block truncate text-[18px] font-bold tracking-tight sm:text-[24px] lg:text-[26px]">
                     {totalCostStr}
@@ -487,12 +488,7 @@ export function OpsPanelOpsPanelUi(
                   </thead>
                   <tbody className="divide-line-2 divide-y">
                     {loadingStats ? (
-                      <tr>
-                        <td colSpan={7} className="text-ink-3 py-8 text-center">
-                          <Skeleton className="mr-2 inline-block h-5 w-24 align-middle" />
-                          <span>{t('adminOpsCopy.m168')}</span>
-                        </td>
-                      </tr>
+                      <TableRowsSkeleton columns={7} />
                     ) : modelStats.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="text-ink-4 py-8 text-center">
@@ -550,10 +546,7 @@ export function OpsPanelOpsPanelUi(
           </div>
 
           {loadingErrors ? (
-            <div className="text-ink-3 py-12 text-center">
-              <Spinner className="text-ink-3 mr-2 size-4" />
-              <span className="text-[13px]">{t('adminOpsCopy.m172')}</span>
-            </div>
+            <LoadingRegion><FormSkeleton /></LoadingRegion>
           ) : aiErrors.length === 0 ? (
             <div className="py-8">
               <EmptyState

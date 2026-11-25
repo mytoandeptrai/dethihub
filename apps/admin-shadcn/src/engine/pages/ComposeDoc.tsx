@@ -30,6 +30,9 @@ import type { SlideEditorActions } from '@/engine/examEditor/SlideEditor'
 import { DOC_STATUS_LABELS, docStatus, type DocStatus } from '@/engine/lib/docStatus'
 import { StartTab } from '@/engine/examEditor/StartTab'
 import { NavPanel, type PaneTab } from '@/engine/examEditor/NavPanel'
+import { useExamInspector } from '@/modules/exam-inspector/hooks/use-exam-inspector'
+import { InspectorPanel } from '@/modules/exam-inspector/components/inspector-panel'
+import { InspectorOverlay } from '@/modules/exam-inspector/containers/inspector-overlay'
 import type { ToolDoc, ToolImage } from '@/engine/lib/toolSpec'
 
 /** chỗ đặt đồ thị: thay ảnh cũ, hoặc chèn thành đoạn mới tại vị trí giữa hai khối */
@@ -46,13 +49,14 @@ import { examToDraft } from '@/engine/lib/onlineExam'
 import { DECK_THEMES } from '@/engine/lib/slideTheme'
 import { extractJson } from '@/engine/lib/llm'
 import { insertAiContent } from '@/lib/insert-ai-content'
+import { prepareAiApplication, type AiExamEnvelope } from '@/engine/examEditor/aiApplication'
 import { importedSlides, readImportFile, textToBlocks } from '@/engine/lib/importFile'
 import { IconZoomIn, IconZoomOut } from '@/engine/examEditor/icons'
-import type { ExamBlock, ExamDoc, FormatAttrs, RichText } from '@/engine/data/docTypes'
+import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
 import { emptyDoc } from '@/engine/data/docTypes'
 import { cn } from '@/engine/lib/cn'
 import { attachToAi } from '@/engine/lib/aiAttach'
-import { blockKey, blocksText, focusNote, keyIndex, type AiApplyResult } from '@/engine/lib/aiDocContext'
+import { blockKey, blocksText, focusNote, type AiApplyResult } from '@/engine/lib/aiDocContext'
 import { reportAi, takeRecentAiTurn } from '@/engine/lib/aiFeedback'
 
 const SESSION_KEY = 'dethinhbien-compose-session'
@@ -103,7 +107,6 @@ const ToolModal = lazyPage(() => import('@/engine/examEditor/tools/ToolModal').t
  * Tải sẵn ngay khi trình soạn sẵn sàng (xem effect gọi `loadTools`), nên lúc AI trả đề có hình thì đã có.
  */
 type ToolMods = { ti: typeof import('@/engine/examEditor/toolImages'); ts: typeof import('@/engine/lib/toolSpec'); plot: typeof import('@/engine/lib/plot') }
-let tools: ToolMods | null = null
 let toolsLoading: Promise<ToolMods> | null = null
 const loadTools = (): Promise<ToolMods> =>
   (toolsLoading ??= Promise.all([
@@ -113,7 +116,7 @@ const loadTools = (): Promise<ToolMods> =>
     // kho hình đồ vật (tranh đếm tiểu học): phải có trước khi vẽ, kẻo hình ra ô trống
     import('@/engine/lib/figureSprites').then((m) => m.loadSprites()),
   ]).then(
-    ([ti, ts, plot]) => (tools = { ti, ts, plot }),
+    ([ti, ts, plot]) => ({ ti, ts, plot }),
   ))
 const AiPanel = lazyPage(() => import('@/engine/examEditor/AiPanel').then((m) => ({ default: m.AiPanel })))
 const SlideEditor = lazyPage(() => loadSlideEditor().then((m) => ({ default: m.SlideEditor })))
@@ -174,250 +177,6 @@ function SlideEditorSkeleton() {
   )
 }
 
-/** Hợp đồng AI trả về: thay cả đề / thêm cuối / sửa từng khối theo id (`k<vị trí>`). */
-interface AiExamEnvelope {
-  action?: string
-  blocks?: unknown
-  patch?: unknown
-  /** câu trả lời ngắn cho giáo viên (đã hiểu yêu cầu thế nào, đã làm gì) — hiện trong chat */
-  say?: unknown
-  /** tên đề theo bài (chỉ khi replace) — đặt cho tab còn tên mặc định */
-  name?: unknown
-  /** một câu nhắc người dùng (vd. nội dung họ yêu cầu nằm ngoài chương trình 2018) — hiện kèm câu tóm tắt */
-  warning?: unknown
-}
-
-const AI_BLOCK_TYPES = new Set([
-  'header',
-  'title',
-  'meta',
-  'student',
-  'heading',
-  'paragraph',
-  'bullets',
-  'grid',
-  'question',
-  'essay',
-  'answerKey',
-  'rubric',
-  'pageBreak',
-  'divider',
-  'table',
-])
-
-/** Chuẩn hoá block AI trả về: đúng loại + field tối thiểu, sai thì bỏ. */
-/**
- * AI soạn đề gắn `figure` (cấu hình công cụ vẽ) vào khối cần hình → vẽ bằng công cụ,
- * đặt thành đoạn ảnh căn giữa ngay dưới khối. Ảnh tạm là SVG; `pngifyToolImages` đổi sang PNG sau
- * (xuất Word không đọc SVG). Hình nào cấu hình sai thì bỏ qua, đề vẫn chèn bình thường.
- */
-function expandFigures(raw: unknown): unknown {
-  if (!Array.isArray(raw)) return raw
-  return raw.flatMap((item) => {
-    if (!item || typeof item !== 'object' || !('figure' in item)) return [item]
-    const { figure, ...block } = item as Record<string, unknown>
-    // công cụ chưa tải (hiếm: tải sẵn khi mở trình soạn) thì chèn đề không kèm hình
-    const doc = tools?.ti.figureDoc(figure)
-    if (!doc) return [block]
-    const { src, alt, width, plot } = tools!.ti.figureImageAttrs(doc)
-    // câu trắc nghiệm: ảnh vào cuối đề bài (dòng riêng) để nằm TRƯỚC phương án A–D
-    if (block.type === 'question') {
-      const t = block.text
-      const spans = typeof t === 'string' ? [{ text: t }] : Array.isArray(t) ? t : []
-      return [{ ...block, text: [...spans, { text: '', image: { src, alt, width, plot } }] }]
-    }
-    return [block,{ type: 'paragraph', text: [{ text: '', image: { src, alt, width, plot } }], format: { align: 'center' } }]
-  })
-}
-
-function sanitizeBlocks(raw: unknown): ExamBlock[] {
-  if (!Array.isArray(raw)) return []
-  // AI có lúc trả mảng trộn string + span; chuẩn hoá về Span[] để converter/export đọc được.
-  const rich = (v: unknown): RichText =>
-    typeof v === 'string'
-      ? v
-      : Array.isArray(v)
-        ? (v.map((s) => (typeof s === 'string' ? { text: s } : s)) as RichText)
-        : ''
-  const fmt = (v: unknown): FormatAttrs | undefined =>
-    v && typeof v === 'object' ? (v as FormatAttrs) : undefined
-  const list = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
-  const out: ExamBlock[] = []
-  for (const item of raw) {
-    if (!item || typeof item !== 'object') continue
-    const b = item as Record<string, unknown>
-    const type = typeof b.type === 'string' ? b.type : ''
-    if (!AI_BLOCK_TYPES.has(type)) continue
-    switch (type) {
-      case 'header': {
-        // dạng cũ {"type":"header","text":"…"} → đưa vào cột trái thay vì header rỗng
-        const left = rich(b.left) || (typeof b.text === 'string' ? b.text : '')
-        out.push({ type: 'header', left, right: rich(b.right) })
-        break
-      }
-      case 'title':
-        out.push({ type: 'title', text: rich(b.text), format: fmt(b.format) })
-        break
-      case 'meta':
-        out.push({
-          type: 'meta',
-          rows: list(b.rows)
-            .map((row, i) =>
-              Array.isArray(row)
-                ? ([String(row[0] ?? ''), rich(row[1])] as [string, RichText])
-                : row && typeof row === 'object'
-                  ? ([
-                      String((row as Record<string, unknown>).label ?? `Dòng ${i + 1}`),
-                      rich((row as Record<string, unknown>).value),
-                    ] as [string, RichText])
-                  : null,
-            )
-            .filter((r): r is [string, RichText] => r !== null),
-        })
-        break
-      case 'student':
-        out.push({ type: 'student', text: rich(b.text), format: fmt(b.format) })
-        break
-      case 'heading':
-        out.push({
-          type: 'heading',
-          text: rich(b.text),
-          level: (b.level === 2 || b.level === 3 ? b.level : 1) as 1 | 2 | 3,
-          format: fmt(b.format),
-        })
-        break
-      case 'paragraph':
-        out.push({ type: 'paragraph', text: rich(b.text), format: fmt(b.format) })
-        break
-      case 'bullets':
-        out.push({
-          type: 'bullets',
-          items: list(b.items) as RichText[],
-          ...(b.ordered === true ? { ordered: true } : {}),
-          ...(Array.isArray(b.levels) ? { levels: b.levels.map(Number) } : {}),
-          format: fmt(b.format),
-        })
-        break
-      case 'grid':
-        out.push({
-          type: 'grid',
-          cols: b.cols === 3 ? 3 : 2,
-          cells: list(b.cells) as RichText[],
-          format: fmt(b.format),
-        })
-        break
-      case 'question': {
-        // kind: 'tf' = đúng/sai (4 ý a–d), 'short' = trả lời ngắn (không có phương án); còn lại là trắc nghiệm A–D
-        let kind: 'tf' | 'short' | undefined = b.kind === 'tf' || b.kind === 'short' ? b.kind : undefined
-        // câu điền chỗ trống bằng chữ (đề đã có dòng chấm) không vẽ 4 ô đáp số của dạng trả lời ngắn
-        if (kind === 'short' && /…{3,}|\.{5,}/.test(plainText(rich(b.text)))) kind = undefined
-        out.push({
-          type: 'question',
-          no: typeof b.no === 'number' ? b.no : 1,
-          ...(kind ? { kind } : {}),
-          text: rich(b.text),
-          // chấp nhận cả dạng viết tắt: options: ["A. …", "B. …"]
-          options:
-            kind === 'short'
-              ? []
-              : list(b.options).map((o, i) => {
-                  const letter = String.fromCharCode((kind === 'tf' ? 97 : 65) + i)
-                  if (typeof o === 'string') return { label: letter, text: o }
-                  const opt = (o ?? {}) as Record<string, unknown>
-                  return {
-                    label: typeof opt.label === 'string' ? (kind === 'tf' ? opt.label.toLowerCase() : opt.label) : letter,
-                    text: rich(opt.text),
-                    format: fmt(opt.format),
-                  }
-                }),
-          format: fmt(b.format),
-        })
-        break
-      }
-      case 'essay':
-        out.push({
-          type: 'essay',
-          no: typeof b.no === 'number' ? b.no : 1,
-          score: typeof b.score === 'number' ? b.score : 0,
-          text: rich(b.text),
-          sub: Array.isArray(b.sub) ? (b.sub as RichText[]) : undefined,
-          format: fmt(b.format),
-        })
-        break
-      case 'answerKey':
-        // chấp nhận items: [{no, answer}] hoặc chuỗi rút gọn "Câu 1. A"
-        out.push({
-          type: 'answerKey',
-          items: list(b.items).map((it, i) =>
-            typeof it === 'string'
-              ? { no: i + 1, answer: it }
-              : {
-                  no: typeof (it as Record<string, unknown>)?.no === 'number'
-                    ? ((it as Record<string, unknown>).no as number)
-                    : i + 1,
-                  answer: rich((it as Record<string, unknown>)?.answer),
-                },
-          ),
-        })
-        break
-      case 'rubric':
-        out.push({
-          type: 'rubric',
-          title: b.title == null ? undefined : rich(b.title),
-          // chấp nhận items: [{label, text}] hoặc chuỗi rút gọn
-          items: list(b.items).map((it, i) =>
-            typeof it === 'string'
-              ? { label: `${i + 1}.`, text: it }
-              : {
-                  label:
-                    typeof (it as Record<string, unknown>)?.label === 'string'
-                      ? ((it as Record<string, unknown>).label as string)
-                      : `${i + 1}.`,
-                  text: rich((it as Record<string, unknown>)?.text),
-                },
-          ),
-        })
-        break
-      case 'pageBreak':
-        out.push({ type: 'pageBreak' })
-        break
-      case 'divider':
-        out.push({ type: 'divider' })
-        break
-    }
-  }
-  return out
-}
-
-type PatchOp = 'replace' | 'insertAfter' | 'insertBefore' | 'delete'
-interface ExamPatch {
-  op: PatchOp
-  /** vị trí khối cấp cao nhất (id `k<vị trí>`) */
-  index: number
-  blocks: ExamBlock[]
-}
-
-/** Các mục patch: {op, id, block|blocks}; thiếu op = thay khối (dạng cũ). Mục sai thì bỏ. */
-function sanitizePatches(raw: unknown): ExamPatch[] {
-  if (!Array.isArray(raw)) return []
-  const out: ExamPatch[] = []
-  for (const item of raw) {
-    if (!item || typeof item !== 'object') continue
-    const p = item as Record<string, unknown>
-    const index = typeof p.id === 'string' ? keyIndex(p.id) : -1
-    if (index < 0) continue
-    const op: PatchOp =
-      p.op === 'insertAfter' || p.op === 'insertBefore' || p.op === 'delete' ? p.op : 'replace'
-    if (op === 'delete') {
-      out.push({ op, index, blocks: [] })
-      continue
-    }
-    const list = Array.isArray(p.blocks) ? p.blocks : p.block ? [p.block] : []
-    const blocks = sanitizeBlocks(expandFigures(list))
-    if (blocks.length) out.push({ op, index, blocks })
-  }
-  return out
-}
 
 /** Bản chữ của các khối (khi không áp được vào đề thì hiện trong chat để giáo viên vẫn dùng được). */
 function blocksPlain(blocks: ExamBlock[]): string {
@@ -523,6 +282,8 @@ export default function ComposeDoc() {
   )
 
   const format = useFormatState(editor)
+  const revealInspector = useCallback(() => openNavWithTab('inspector'), [openNavWithTab])
+  const inspector = useExamInspector(editor, revealInspector, viewport.w >= 1024)
   const [pageSetup, setPageSetup] = useState<PageSetup>({ marginCm: 2, orientation: 'portrait' })
   const geo = pageGeometry(pageSetup)
   const { PAGE_W, MARGIN, MARGIN_RIGHT } = geo
@@ -829,20 +590,12 @@ export default function ComposeDoc() {
       if (!raw || typeof raw !== 'object') return looksJson ? { text: FAIL_JSON, failed: true } : undefined
 
       const say = typeof raw.say === 'string' ? raw.say.trim().slice(0, 1200) : ''
-      const blocks = sanitizeBlocks(expandFigures(raw.blocks))
-      const patches = sanitizePatches(raw.patch)
+      const { blocks, patches, action, noChanges } = prepareAiApplication(raw, editor.getJSON())
+      if (noChanges) return { text: 'Không có thay đổi hợp lệ để áp dụng.', failed: true }
       const hasPlot = (list: ExamBlock[]) => list.some((b) => (b.type === 'paragraph' || b.type === 'question') && Array.isArray(b.text) && b.text.some((s) => s.image?.plot))
       if (hasPlot(blocks) || patches.some((p) => hasPlot(p.blocks)))
         setTimeout(() => void loadTools().then(({ ti }) => ti.pngifyToolImages(editor)), 0)
       const warn = typeof raw.warning === 'string' && raw.warning.trim() ? `\n\nLưu ý: ${raw.warning.trim().slice(0, 300)}` : ''
-      const action =
-        raw.action === 'append' || raw.action === 'patch' || raw.action === 'replace'
-          ? raw.action
-          : patches.length
-            ? 'patch'
-            : blocks.length
-              ? 'replace'
-              : 'none'
       const done = (line: string) => ({ text: `${say ? `${say}\n\n` : ''}${line}${warn}` })
       // phần AI viết mà không áp được: hiện thành chữ trong chat
       const fallback = (why: string): AiApplyResult => {
@@ -870,17 +623,8 @@ export default function ComposeDoc() {
         if (action === 'patch' && patches.length) {
           const { state, view } = editor
           const tr = state.tr
-          const count = tr.doc.childCount
-          // vị trí lớn trước để vị trí nhỏ hơn không bị lệch; cùng khối: chèn sau → thay/xoá → chèn trước
-          const rank: Record<PatchOp, number> = { insertAfter: 0, replace: 1, delete: 1, insertBefore: 2 }
-          const ops = patches
-            .filter((p) => p.index < count)
-            .sort((a, b) => b.index - a.index || rank[a.op] - rank[b.op])
           const stat = { edit: 0, add: 0, del: 0 }
-          const touched = new Set<number>()
-          for (const p of ops) {
-            // mỗi khối chỉ thay/xoá một lần (AI trả trùng thì lấy mục đầu)
-            if ((p.op === 'replace' || p.op === 'delete') && touched.has(p.index)) continue
+          for (const p of patches) {
             let from = 0
             for (let i = 0; i < p.index; i++) from += tr.doc.child(i).nodeSize
             const to = from + tr.doc.child(p.index).nodeSize
@@ -897,7 +641,6 @@ export default function ComposeDoc() {
               tr.insert(p.op === 'insertAfter' ? to : from, nodes)
               stat.add += nodes.length
             }
-            if (p.op === 'replace' || p.op === 'delete') touched.add(p.index)
           }
           if (stat.edit + stat.add + stat.del) {
             view.dispatch(tr.scrollIntoView())
@@ -1276,9 +1019,11 @@ export default function ComposeDoc() {
             isOverlay={isTablet}
             currentTab={navTab}
             onTabChange={setNavTab}
+            inspectorContent={<InspectorPanel inspector={inspector} />}
           />
         {/* sân soạn (giữa) */}
         <div className="compose-center">
+          <InspectorOverlay inspector={inspector} hidden={navOpen && (isMobile || isTablet)} />
           {findTab && editor && (
             <Suspense fallback={null}><FindPanel editor={editor} initialTab={findTab} onClose={() => setFindTab(null)} /></Suspense>
           )}
@@ -1428,6 +1173,7 @@ export default function ComposeDoc() {
             historyKey={activeDoc?.id}
             onApplyBlocks={handleAiResult}
             documentDigest={documentDigest}
+            currentDocument={activeContent}
             focusFor={(request) => focusNote(activeContent, request)}
             contextSummary={
               activeDoc

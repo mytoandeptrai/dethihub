@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 
-import { SkeletonCard } from '@/components/product-ui'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { OnlineListItemCardUi, OnlineListOnlineListUi } from '@/modules/online-exams/components'
 import { PublishedPanelContainer } from '@/modules/online-exams/containers/online-published-container'
 import { OnlineListModel } from '@/modules/online-exams/hooks'
@@ -13,7 +13,7 @@ function OnlineListContent() {
 }
 export function OnlineListContainer() {
   return (
-    <Suspense fallback={<SkeletonCard variant="exam" />}>
+    <Suspense fallback={<PageSkeleton />}>
       <OnlineListContent />
     </Suspense>
   )

@@ -5,9 +5,10 @@
  */
 import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
 import { MathText } from '@/engine/components/MathText'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
-import { Blocks, ChevronLeft, ChevronRight, ListTree, Wrench, X } from 'lucide-react'
+import { Blocks, ChevronLeft, ChevronRight, ListTree, SlidersHorizontal, Wrench, X } from 'lucide-react'
+import { INSPECTOR_TEMPLATE_MIME } from '@/modules/exam-inspector/lib/inspector-selection'
 import { NavRailIndicator } from './NavRailIndicator'
 import { PanelContentTransition } from './PanelContentTransition'
 import { SheetTabs } from './SheetTabs'
@@ -21,7 +22,7 @@ import { IconGrip } from './icons'
 import { Button } from '@/engine/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/engine/components/ui/tooltip'
 
-export type PaneTab = 'toc' | 'blocks' | 'tools'
+export type PaneTab = 'toc' | 'blocks' | 'tools' | 'inspector'
 
 /** Gom danh sách mẫu theo nhóm liền kề, giữ thứ tự khai báo. */
 function groupTemplates(list: BlockTemplate[]): Array<{ name: string; items: BlockTemplate[] }> {
@@ -38,6 +39,7 @@ const TABS: Array<{ id: PaneTab; label: string; Icon: typeof ListTree }> = [
   { id: 'toc', label: 'Mục lục', Icon: ListTree },
   { id: 'blocks', label: 'Khối mẫu', Icon: Blocks },
   { id: 'tools', label: 'Công cụ', Icon: Wrench },
+  { id: 'inspector', label: 'Thuộc tính', Icon: SlidersHorizontal },
 ]
 
 /** rộng panel trượt (cùng cỡ thư viện bên soạn slide) */
@@ -57,6 +59,7 @@ export function NavPanel({
   isOverlay,
   currentTab,
   onTabChange,
+  inspectorContent,
 }: {
   doc: JSONContent
   /** panel đang mở hay chỉ còn thanh icon */
@@ -75,6 +78,7 @@ export function NavPanel({
   isOverlay?: boolean
   currentTab?: PaneTab
   onTabChange?: (tab: PaneTab) => void
+  inspectorContent?: ReactNode
 }) {
   const left = side === 'left'
   const [internalTab, setInternalTab] = useState<PaneTab>('toc')
@@ -102,7 +106,7 @@ export function NavPanel({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Mục lục, Khối mẫu và Công cụ"
+          aria-label="Mục lục, Khối mẫu, Công cụ và Thuộc tính"
           className={cn(
             'relative z-10 flex max-h-[85dvh] w-full flex-col rounded-t-2xl border-t border-line bg-surface shadow-2xl pb-[max(0.75rem,env(safe-area-inset-bottom))]',
             mobileSheet.closing ? 'sheet-out-down' : 'sheet-in-up',
@@ -115,7 +119,7 @@ export function NavPanel({
 
           {/* Header with tabs & close */}
           <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
-            <SheetTabs className="min-w-0 flex-1 overflow-x-auto no-scrollbar" items={TABS.map(({ id, label, Icon }) => ({ id, label, icon: <Icon className="size-4" /> }))} value={tab} onChange={setTab} />
+            <SheetTabs className="min-w-0 flex-1 overflow-x-auto no-scrollbar" items={TABS.map(({ id, label, Icon }) => ({ id, label, testId: id === 'inspector' ? 'inspector-tab' : undefined, icon: <Icon className="size-4" /> }))} value={tab} onChange={setTab} />
             <button
               type="button"
               onClick={() => onOpenChange(false)}
@@ -128,6 +132,7 @@ export function NavPanel({
 
           {/* Body */}
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            {tab === 'inspector' && inspectorContent}
             {tab === 'toc' && (
               <div className="nav-body">
                 {toc.length === 0 ? (
@@ -170,7 +175,6 @@ export function NavPanel({
                             className="flex w-full items-start gap-2.5 rounded-lg border border-line bg-surface p-2.5 text-left transition-colors hover:border-clay hover:bg-paper-2 active:bg-paper"
                             onClick={() => {
                               onInsertTemplate(tpl)
-                              onOpenChange(false)
                             }}
                           >
                             <span className="nav-tpl__grip mt-0.5 text-ink-3">
@@ -257,6 +261,7 @@ export function NavPanel({
           <PanelContentTransition activeTab={active} tabOrder={TABS.map((t) => t.id)}>
             {(tabId) => (
               <>
+                {tabId === 'inspector' && inspectorContent}
                 {tabId === 'toc' && (
                   <div className="nav-body">
                     {toc.length === 0 ? (
@@ -290,6 +295,7 @@ export function NavPanel({
                                 draggable
                                 onDragStart={(e) => {
                                   e.dataTransfer.setData(BLOCK_TEMPLATE_MIME, JSON.stringify(tpl.build()))
+                                  e.dataTransfer.setData(INSPECTOR_TEMPLATE_MIME, tpl.id)
                                   e.dataTransfer.effectAllowed = 'copy'
                                 }}
                                 onClick={() => onInsertTemplate(tpl)}
@@ -337,6 +343,7 @@ export function NavPanel({
             variant="ghost"
             size="icon"
             data-tab-id={id}
+            data-testid={id === 'inspector' ? 'inspector-tab' : undefined}
             type="button"
             onClick={() => {
               onOpenChange(!(active === id))

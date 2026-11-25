@@ -8,6 +8,7 @@
 import type { Editor, JSONContent } from '@tiptap/core'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import { getTopBlock, syncDomSelection } from './formatState'
+import { activateInsertedBlock } from '@/modules/exam-inspector/lib/inspector-selection'
 
 export type TplGroup = 'Đầu đề' | 'Câu hỏi' | 'Nội dung' | 'Bố cục'
 
@@ -472,17 +473,22 @@ export function insertBlockTemplate(editor: Editor, tpl: BlockTemplate): void {
     // thay toàn bộ doc (giống insertExamFooter của bản gốc) — insertContentAt
     // với range 0..size vẫn để sót paragraph rỗng phía sau
     editor.chain().setContent({ type: 'doc', content: Array.isArray(json) ? json : [json] }, { emitUpdate: true }).run()
-    // setContent có thể để lại AllSelection (chọn cả doc) → đặt con trỏ về cuối
-    editor.chain().focus('end').run()
+    // Select the template anchor after replacing the empty document.
+    activateInsertedBlock(editor, 0, tpl.id)
+    editor.commands.focus()
     return
   }
   if (tpl.place) {
-    editor.chain().focus().insertContentAt(examFooterPos(doc, tpl.place), json).run()
+    const pos = examFooterPos(doc, tpl.place)
+    editor.chain().focus().insertContentAt(pos, json).run()
+    activateInsertedBlock(editor, pos, tpl.id)
     return
   }
   const target = getTopBlock(editor)
   if (!target) {
+    const pos = editor.state.selection.from
     editor.chain().focus().insertContent(json).run()
+    activateInsertedBlock(editor, pos, tpl.id)
     return
   }
   if (target.node.type.name === 'paragraph' && target.node.content.size === 0) {
@@ -491,7 +497,9 @@ export function insertBlockTemplate(editor: Editor, tpl: BlockTemplate): void {
       .focus()
       .insertContentAt({ from: target.pos, to: target.pos + target.node.nodeSize }, json)
       .run()
+    activateInsertedBlock(editor, target.pos, tpl.id)
     return
   }
   editor.chain().focus().insertContentAt(target.pos + target.node.nodeSize, json).run()
+  activateInsertedBlock(editor, target.pos + target.node.nodeSize, tpl.id)
 }

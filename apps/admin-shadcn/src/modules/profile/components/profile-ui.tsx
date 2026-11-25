@@ -1,6 +1,5 @@
 'use client'
 import { Link, Navigate } from '@profile-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { ChevronRight, FileText, LogOut, Shield } from 'lucide-react'
 
 import {
@@ -14,6 +13,7 @@ import {
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
+import { FormSkeleton, LoadingRegion, PageSkeleton } from '@/components/page-skeleton'
 import { ProfileModel } from '@/modules/profile/hooks'
 
 import type {
@@ -31,6 +31,7 @@ export function ProfileProfileUi(
     parts: typeof Imported0
   },
 ) {
+  if (props.viewState === 2) return <PageSkeleton variant="detail" />
   const { ProfilePage } = props.parts
   if (props.viewState === 0) {
     return <Navigate to={appPaths.auth.login.href} replace />
@@ -251,11 +252,7 @@ function ProfileCreditBalanceUi({
 }: ReturnType<typeof ProfileModel.useCreditCardContainer>) {
   if (q === 'loading')
     return (
-      <div role="status" className="mt-6 space-y-3">
-        <p className="text-caption text-ink-3">{t('profileCopy.m11')}</p>
-        <Skeleton className="h-12 w-32" />
-        <Skeleton className="h-2 w-full" />
-      </div>
+      <LoadingRegion className="mt-6"><FormSkeleton /></LoadingRegion>
     )
   if (q === 'error') return <p className="mt-6 text-[13px] text-ink-3">{t('profileCopy.m12')}</p>
   if (q === 'unlimited')

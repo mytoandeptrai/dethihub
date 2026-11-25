@@ -1,6 +1,7 @@
 import type { ChatTurn } from '../examEditor/AiPanel'
+import type { AiQuestionRequest } from '@/hooks/use-ai-question-stream'
 
-type HistoryTurn = Pick<ChatTurn, 'id' | 'role' | 'text' | 'intent' | 'sources' | 'webSources' | 'sourceNote' | 'error' | 'refs' | 'fileNames' | 'pickedSources' | 'cost'>
+type HistoryTurn = Pick<ChatTurn, 'id' | 'role' | 'text' | 'intent' | 'sources' | 'webSources' | 'sourceNote' | 'error' | 'refs' | 'fileNames' | 'pickedSources' | 'cost' | 'incomplete' | 'aiRequest'>
 const MAX_TURNS = 60
 
 export const chatHistoryKey = (mode: 'exam' | 'slide', id: string) => `derou.ai-chat.${mode}.${id}`
@@ -9,10 +10,11 @@ export function encodeChatHistory(turns: ChatTurn[]): string {
   return JSON.stringify(turns
     .filter((turn) => !turn.pending && turn.planState !== 'pending' && turn.askState !== 'open')
     .slice(-MAX_TURNS)
-    .map(({ id, role, text, intent, sources, webSources, sourceNote, error, refs, files, fileNames, pickedSources, cost }): HistoryTurn => ({
+    .map(({ id, role, text, intent, sources, webSources, sourceNote, error, refs, files, fileNames, pickedSources, cost, incomplete, aiRequest, generation }): HistoryTurn => ({
       id, role, text, intent, sources, webSources, sourceNote, error, refs, ...(cost ? { cost } : {}),
       pickedSources: pickedSources?.map(({ name, kind }) => ({ name, kind })),
       fileNames: files?.map((file) => file.name) ?? fileNames,
+      ...(incomplete ? { incomplete: true, ...(aiRequest ? { aiRequest: { ...aiRequest, retryOf: generation?.receipt ?? aiRequest.retryOf } } : {}) } : {}),
     })))
 }
 
@@ -20,6 +22,19 @@ const isObject = (value: unknown): value is Record<string, unknown> => !!value &
 const asStrings = (value: unknown): string[] | undefined =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : undefined
 const asString = (value: unknown) => typeof value === 'string' ? value : undefined
+
+function isRetryRequest(value: unknown): value is AiQuestionRequest {
+  if (!isObject(value) || !isObject(value.body)) return false
+  const body = value.body
+  return typeof body.task === 'string' && Array.isArray(body.messages) && body.messages.every((message: unknown) =>
+    isObject(message) && typeof message.role === 'string' && ['system', 'user', 'assistant'].includes(message.role) && typeof message.content === 'string') &&
+    (value.retryOf === undefined || typeof value.retryOf === 'string') &&
+    (value.total === undefined || typeof value.total === 'number') &&
+    (body.taskInput === undefined || isObject(body.taskInput) && !Array.isArray(body.taskInput)) &&
+    (body.reasoningEffort === undefined || typeof body.reasoningEffort === 'string' && ['low', 'medium', 'high', 'max'].includes(body.reasoningEffort)) &&
+    ['maxTokens', 'temperature'].every((key) => body[key] === undefined || typeof body[key] === 'number') &&
+    ['webSearch', 'stream', 'strong'].every((key) => body[key] === undefined || typeof body[key] === 'boolean')
+}
 
 export function decodeChatHistory(raw: string): HistoryTurn[] {
   try {
@@ -31,6 +46,7 @@ export function decodeChatHistory(raw: string): HistoryTurn[] {
       if (typeof id !== 'string' || typeof text !== 'string' || (role !== 'user' && role !== 'assistant')) return []
       return [{
         id, role, text,
+        ...(turn.incomplete === true ? { incomplete: true, ...(isRetryRequest(turn.aiRequest) ? { aiRequest: turn.aiRequest } : {}) } : {}),
         intent: intent === 'chat' || intent === 'doc' ? intent : undefined,
         sources: asStrings(turn.sources),
         webSources: Array.isArray(webSources)

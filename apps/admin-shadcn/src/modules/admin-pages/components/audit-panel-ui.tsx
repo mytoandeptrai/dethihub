@@ -1,6 +1,6 @@
 'use client'
+import { TableRowsSkeleton } from '@/components/page-skeleton'
 import { lib_adminApi_AUDIT_LABEL as AUDIT_LABEL } from '@admin-pages-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { History, RefreshCw } from 'lucide-react'
 
 import {
@@ -60,12 +60,7 @@ export function AuditPanelAuditPanelUi(
               </thead>
               <tbody className="divide-line-2 divide-y">
                 {loading && items.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-ink-3 py-16 text-center">
-                      <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                      <span>{t('adminOpsCopy.m183')}</span>
-                    </td>
-                  </tr>
+                  <TableRowsSkeleton columns={4} />
                 ) : items.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-12">

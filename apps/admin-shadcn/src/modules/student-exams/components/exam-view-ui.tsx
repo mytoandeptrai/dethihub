@@ -30,6 +30,7 @@ import {
 import { A4_PORTRAIT_W, ExamEditor } from '@/components/student-kernel'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
+import { PageSkeleton } from '@/components/page-skeleton'
 
 import type {
   ExamViewParts as Imported0,
@@ -47,9 +48,7 @@ export function ExamViewUi(
   const { SaveMenu, DocView, ReportExamButton } = props.parts
   if (props.viewState === 2)
     return (
-      <div role="status" className="text-ink-3 p-8">
-        {t('studentCopy.m289')}
-      </div>
+      <PageSkeleton variant="detail" />
     )
   if (props.viewState === 0) {
     return (

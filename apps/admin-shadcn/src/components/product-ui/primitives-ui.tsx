@@ -11,6 +11,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { Slot, Tabs as TabsPrimitive } from 'radix-ui'
 import { isValidElement } from 'react'
 
+import { LoadingRegion } from '@/components/page-skeleton'
 import { PageShell as PublicPageShell } from '@/modules/public-pages/components/page-header-ui'
 import { AvatarUi, Button } from '@/modules/public-pages/components/public-primitives-ui'
 
@@ -226,8 +227,7 @@ export function EmptyState({
 
 export function SkeletonCard({ variant = 'doc' }: { variant?: 'doc' | 'exam' }) {
   return (
-    <Card
-      aria-hidden="true"
+    <LoadingRegion><Card
       className="border-line/80 shadow-soft relative flex flex-col overflow-hidden rounded-xl border bg-white p-5"
     >
       {variant === 'exam' ? (
@@ -242,7 +242,7 @@ export function SkeletonCard({ variant = 'doc' }: { variant?: 'doc' | 'exam' }) 
       <Skeleton className="mt-2 h-4 w-3/5" />
       <Skeleton className="mt-3 h-3 w-2/5" />
       <Skeleton className="mt-auto h-9 w-full" />
-    </Card>
+    </Card></LoadingRegion>
   )
 }
 

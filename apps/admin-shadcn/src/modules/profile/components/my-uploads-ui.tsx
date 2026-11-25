@@ -1,12 +1,13 @@
 'use client'
+import { LoadingRegion, CardGridSkeleton, PageSkeleton } from '@/components/page-skeleton'
 import {
   lib_documents_DOC_TYPES as DOC_TYPES,
   Link,
   Navigate,
   components_appIcons_TrashIcon as TrashIcon,
 } from '@profile-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { ChevronLeft, Search, Upload, X } from 'lucide-react'
+import { Skeleton } from '@workspace/ui/components/skeleton'
 
 import {
   SiteButton as Button,
@@ -37,6 +38,7 @@ export function MyUploadsMyUploadsUi(
     parts: typeof Imported0
   },
 ) {
+  if (props.viewState === 2) return <PageSkeleton />
   const { MyFilesCard } = props.parts
   if (props.viewState === 0) {
     return <Navigate to={appPaths.auth.login.href} replace />
@@ -79,9 +81,7 @@ export function MyUploadsStorageBarUi(
               </span>
             </p>
           ) : (
-            <p className="text-[13px] text-ink-3">
-              {st === 'loading' ? t('profileCopy.m11') : t('profileCopy.m62')}
-            </p>
+            st === 'loading' ? <LoadingRegion><Skeleton className="h-7 w-36" /></LoadingRegion> : <p className="text-[13px] text-ink-3">{t('profileCopy.m62')}</p>
           )}
         </div>
         <ProgressBar pct={pct} label={t('profileCopy.m63')} className="mt-3" />
@@ -191,12 +191,7 @@ export function MyUploadsMyFilesCardUi(
           <p className="mt-4 text-[13px] text-ink-3">{t('profileCopy.m72')}</p>
         ) : null}
         {empty && files === 'loading' ? (
-          <div role="status" className="mt-6 space-y-3">
-            <p className="text-sm text-ink-3">{t('profileCopy.m11')}</p>
-            {Array.from({ length: 3 }, (_, i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-xl" />
-            ))}
-          </div>
+          <LoadingRegion className="mt-6"><CardGridSkeleton /></LoadingRegion>
         ) : empty ? (
           <EmptyState title={t('profileCopy.m73')} description={t('profileCopy.m74')} />
         ) : (

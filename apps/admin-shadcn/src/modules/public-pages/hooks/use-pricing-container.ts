@@ -132,6 +132,7 @@ export function usePricingContainer() {
   }, [returning.data, client, router])
   return {
     session,
+    loading: pricing.isPending || bonus.isLoading || returning.isLoading,
     pricingError: pricing.error?.message ?? bonus.error?.message ?? returning.error?.message,
     inputId,
     inputRef,

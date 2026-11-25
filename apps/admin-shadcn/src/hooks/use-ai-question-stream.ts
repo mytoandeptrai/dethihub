@@ -85,6 +85,7 @@ export function useAiQuestionStream() {
             parser = new QuestionStreamParser()
             parser.push(value.content)
           }
+          parser.finish()
           publish({ text: typeof value.content === 'string' ? value.content : current.text, receipt: typeof value.receipt === 'string' ? value.receipt : undefined })
         } else if (value.type === 'error') {
           options.onQuota?.(value.quota)
@@ -105,7 +106,7 @@ export function useAiQuestionStream() {
       active.current = null
       options.signal?.removeEventListener('abort', abort)
     }
-    return { content: current.text, reasoning: thinking, usage: final?.usage ?? null, receipt: current.receipt, citations: final?.citations, stopped: current.stopped }
+    return { content: current.text, reasoning: thinking, usage: final?.usage ?? null, receipt: current.receipt, citations: final?.citations, stopped: current.stopped, finishReason: final?.finishReason }
   }, [])
 
   const retry = useCallback(() => {

@@ -1,10 +1,11 @@
+import { PageSkeleton } from '@/components/page-skeleton'
 import { Suspense } from 'react'
 
 import { CommunityContainer } from '@/modules/community'
 
 export default function CommunityPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<PageSkeleton variant="cards" />}>
       <CommunityContainer />
     </Suspense>
   )

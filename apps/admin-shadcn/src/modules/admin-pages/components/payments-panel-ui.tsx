@@ -1,6 +1,6 @@
 'use client'
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import { dialog } from '@engine-dialogs'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { RefreshCw, Search, Wallet, X } from 'lucide-react'
 
@@ -14,7 +14,7 @@ import {
   PageHeader,
   Pager,
   Segmented,
-  Spinner,
+
   Toolbar,
 } from '@/components/product-ui'
 import { t } from '@/i18n/translate'
@@ -242,12 +242,7 @@ export function PaymentsPanelPaymentsPanelUi(
               </thead>
               <tbody className="divide-line-2 divide-y">
                 {loading && items.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-ink-3 py-16 text-center">
-                      <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                      <span>{t('adminOpsCopy.m85')}</span>
-                    </td>
-                  </tr>
+                  <TableRowsSkeleton columns={7} />
                 ) : items.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12">
@@ -359,10 +354,7 @@ export function PaymentsPanelPaymentsPanelUi(
           </div>
         ) : tab === 'pricing' ? (
           pricingError === null ? (
-            <p role="status" className="text-ink-3 flex items-center gap-2 text-[13px]">
-              <Spinner className="size-3.5" />
-              {t('adminOpsCopy.m97')}
-            </p>
+            <LoadingRegion><FormSkeleton /></LoadingRegion>
           ) : (
             <div className="flex flex-wrap items-center gap-3">
               <p role="alert" className="text-clay text-[13px]">

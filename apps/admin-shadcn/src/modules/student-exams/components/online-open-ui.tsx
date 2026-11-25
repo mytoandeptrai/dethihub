@@ -1,6 +1,6 @@
 'use client'
 import { Link } from '@student-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { AlertCircle, ArrowRight, CheckCircle2, LogIn } from 'lucide-react'
 
 import {
@@ -33,20 +33,10 @@ export function OnlineOpenUi(
     return (
       <PageShell className="max-w-[760px] py-8 lg:py-12">
         <EmptyState
-          icon={
-            done ? (
-              <CheckCircle2 className="size-6" strokeWidth={1.6} />
-            ) : (
-              <AlertCircle className="size-6" strokeWidth={1.6} />
-            )
-          }
+          icon={done ? <CheckCircle2 className="size-6" strokeWidth={1.6} /> : <AlertCircle className="size-6" strokeWidth={1.6} />}
           title={done ? t('studentCopy.m283') : t('studentCopy.m284')}
           description={done ? t('studentCopy.m285') : error!}
-          action={
-            <Link to={appPaths.home.href}>
-              <Button variant="primary">{t('studentCopy.m286')}</Button>
-            </Link>
-          }
+          action={<Link to={appPaths.home.href}><Button variant="primary">{t('studentCopy.m286')}</Button></Link>}
         />
       </PageShell>
     )
@@ -55,16 +45,7 @@ export function OnlineOpenUi(
     const { loginHref } = props
     return (
       <PageShell className="max-w-[760px] py-8 lg:py-12">
-        <EmptyState
-          icon={<LogIn className="size-6" strokeWidth={1.6} />}
-          title={t('studentCopy.m287')}
-          description={t('studentCopy.m288')}
-          action={
-            <Link to={loginHref}>
-              <Button variant="primary">{t('studentCopy.m107')}</Button>
-            </Link>
-          }
-        />
+        <EmptyState icon={<LogIn className="size-6" strokeWidth={1.6} />} title={t('studentCopy.m287')} description={t('studentCopy.m288')} action={<Link to={loginHref}><Button variant="primary">{t('studentCopy.m107')}</Button></Link>} />
       </PageShell>
     )
   }
@@ -72,18 +53,7 @@ export function OnlineOpenUi(
     const { exam, onStudentStart } = props
     return <StudentForm exam={exam} onStart={onStudentStart} />
   }
-  if (props.viewState === 3) {
-    return (
-      <PageShell className="max-w-[760px] py-8 lg:py-12">
-        <Card role="status" className="space-y-5 p-6">
-          <span className="text-ink-3 text-sm">{t('studentCopy.m289')}</span>
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-        </Card>
-      </PageShell>
-    )
-  }
+  if (props.viewState === 3) return <PageSkeleton variant="form" />
   return null
 }
 export function OnlineOpenStudentFormUi(

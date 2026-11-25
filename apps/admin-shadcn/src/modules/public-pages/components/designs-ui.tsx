@@ -1,5 +1,5 @@
 'use client'
-import { Skeleton } from '@workspace/ui/components/skeleton'
+import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import dynamic from 'next/dynamic'
 
 import { t } from '@/i18n/translate'
@@ -30,11 +30,7 @@ export default function PreviewDesignsUi({
           description=""
         />
         {!ready && (
-          <div className="space-y-5">
-            {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-64 w-full" />
-            ))}
-          </div>
+          <LoadingRegion><CardGridSkeleton /></LoadingRegion>
         )}
         {error && <p role="alert">{t('common.networkError')}</p>}
 

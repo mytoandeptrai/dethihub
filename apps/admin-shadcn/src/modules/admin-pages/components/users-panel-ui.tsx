@@ -1,9 +1,9 @@
 'use client'
+import { TableRowsSkeleton, LoadingRegion, FormSkeleton } from '@/components/page-skeleton'
 import {
   lib_llm_TOKENS_PER_POINT as TOKENS_PER_POINT,
   components_appIcons_TrashIcon as TrashIcon,
 } from '@admin-pages-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { Ban, Check, Coins, Lock, Search, ShieldAlert, Unlock, Users, X } from 'lucide-react'
 
@@ -17,7 +17,7 @@ import {
   PageHeader,
   Pager,
   Segmented,
-  Spinner,
+
   Toolbar,
   inputClass,
 } from '@/components/product-ui'
@@ -117,12 +117,7 @@ export function UsersPanelUsersPanelUi(
               </thead>
               <tbody className="divide-line-2 divide-y">
                 {loading && users.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-ink-3 py-16 text-center">
-                      <Skeleton className="mx-auto inline-block h-5 w-24 align-middle" />
-                      <span>{translate('adminPagesCopy.m67')}</span>
-                    </td>
-                  </tr>
+                  <TableRowsSkeleton columns={8} />
                 ) : users.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-12">
@@ -429,10 +424,7 @@ export function UsersPanelUserDetailDrawerUi(
               </div>
 
               {quotaLoading ? (
-                <div className="text-ink-3 flex items-center justify-center py-6">
-                  <Spinner className="mr-2" />
-                  <span>{translate('adminPagesCopy.m93')}</span>
-                </div>
+                <LoadingRegion><FormSkeleton /></LoadingRegion>
               ) : (
                 <div className="border-line-2 bg-sunken/40 space-y-4 rounded-[8px] border p-4">
                   <div>
@@ -982,10 +974,7 @@ export function UsersPanelStorageSectionUi(
             </div>
           </div>
         ) : (
-          <div className="text-ink-3 flex items-center justify-center py-6">
-            <Spinner className="mr-2" />
-            <span>{translate('adminPagesCopy.m141')}</span>
-          </div>
+          <LoadingRegion><FormSkeleton /></LoadingRegion>
         )}
       </section>
     )
