@@ -8,7 +8,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { useRef, useState } from 'react'
 
 import { inputClass } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 
 import type { lib_adminApi_Announcement as Announcement } from '@admin-pages-engine'

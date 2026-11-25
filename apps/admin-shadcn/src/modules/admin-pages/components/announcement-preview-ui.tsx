@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useRef } from 'react'
 
 import { SiteButton } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAnnouncementPreview } from '@/modules/admin-pages/hooks/use-announcement-preview'
 
 import type { lib_adminApi_Announcement as Announcement } from '@admin-pages-engine'

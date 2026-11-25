@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 import { bankSchema } from '@/modules/admin-pages/hooks/admin-schemas'
 import { usePaged } from '@/modules/admin-pages/hooks/use-admin-paged'
 import { useAdminRequests } from '@/modules/admin-pages/hooks/use-admin-requests'

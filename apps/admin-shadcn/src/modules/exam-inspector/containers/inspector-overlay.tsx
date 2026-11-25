@@ -4,7 +4,7 @@ import { TextSelection } from '@tiptap/pm/state'
 import { useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-exam-inspector'
 
 import type { ExamInspector } from '@/modules/exam-inspector/hooks/use-exam-inspector'
 import type { InspectorField } from '@/modules/exam-inspector/lib/block-registry'

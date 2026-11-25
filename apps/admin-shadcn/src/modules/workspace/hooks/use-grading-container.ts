@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 export interface AnswerKey {
   id: string
   label: string

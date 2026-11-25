@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse, passthrough } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-library-profile'
 import {
   useCommunityContainer,
   usePublishModalContainer,

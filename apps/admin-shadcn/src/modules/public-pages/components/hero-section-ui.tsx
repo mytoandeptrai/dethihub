@@ -2,7 +2,7 @@
 import { ArrowRight, Globe, Printer } from 'lucide-react'
 
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import { Button, Link } from '@/modules/public-pages/components/public-primitives-ui'
 
 import { EditorIllustrationUi } from './illustrations-ui'

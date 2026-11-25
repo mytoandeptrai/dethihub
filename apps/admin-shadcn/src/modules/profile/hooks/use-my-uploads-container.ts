@@ -19,7 +19,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { storageKeys, storageListDocumentsQuery, storageUsageQuery } from '@/apis/storage'
 import { appPaths } from '@/config/app-paths'
 import { useSession as useAuthSession } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-profile'
 
 import type { ChangeEvent } from 'react'
 export const mb = (n: number) => {

@@ -3,7 +3,7 @@ import { DEFAULT_PACK_VND, basePoints } from '@engine-pricing'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { PageSkeleton } from '@/components/page-skeleton'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
 import {
   Button,

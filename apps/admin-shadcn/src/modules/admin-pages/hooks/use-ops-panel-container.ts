@@ -4,7 +4,7 @@ import { dialog } from '@engine-dialogs'
 import { Cpu, Database, HardDrive } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { toDatetimeLocalString, toIsoString } from '@/modules/admin-pages/hooks/admin-utils'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 

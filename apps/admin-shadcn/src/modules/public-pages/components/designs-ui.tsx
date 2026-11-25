@@ -2,7 +2,7 @@
 import dynamic from 'next/dynamic'
 
 import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
 import { Card } from '@/modules/public-pages/components/public-primitives-ui'
 

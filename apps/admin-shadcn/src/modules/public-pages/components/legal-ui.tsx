@@ -1,6 +1,6 @@
 'use client'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
 import { Card, Link } from '@/modules/public-pages/components/public-primitives-ui'
 const UPDATED = '18/11/2026'

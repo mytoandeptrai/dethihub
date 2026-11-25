@@ -1,7 +1,7 @@
 import { data_types_SUBJECTS as SUBJECTS } from '@online-exams-engine'
 import { z } from 'zod'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 
 import type { data_types_Subject as Subject } from '@online-exams-engine'
 

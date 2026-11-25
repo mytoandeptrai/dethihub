@@ -2,7 +2,7 @@
 import { dialog } from '@engine-dialogs'
 import { useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 export function useWelcomePointsCardContainer({
   initial,

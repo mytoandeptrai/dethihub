@@ -10,7 +10,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { examsKeys, myExamSaveMutation, myExamSetListedMutation } from '@/apis/exams'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 import { FEATURE_DISABLED_MESSAGE } from '@/modules/feature-access/components/feature-notice'
 import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 

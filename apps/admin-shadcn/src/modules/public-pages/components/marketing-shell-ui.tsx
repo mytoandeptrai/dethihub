@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 import { PublicLinks } from '@/components/seo/public-links'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import {
   AvatarUi,
   Button,

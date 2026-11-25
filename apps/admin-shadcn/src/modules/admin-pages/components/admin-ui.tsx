@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 import { SiteBadge as Badge } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-ops-admin-pages'
 import {
   BankPanelContainer,
   ContentPanelContainer,

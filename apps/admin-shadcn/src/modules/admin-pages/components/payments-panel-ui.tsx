@@ -16,7 +16,7 @@ import {
   Segmented,
   Toolbar,
 } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import {
   AdminDrawer,
   AdminRowActions,

@@ -3,7 +3,7 @@
 import { Accordion } from '@base-ui/react/accordion'
 import { useEffect, useRef } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-exam-inspector'
 
 import { AnswerKeyPreview } from './answer-key-preview'
 import { InspectorForm } from './inspector-form'

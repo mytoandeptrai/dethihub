@@ -1,4 +1,4 @@
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 
 import type {
   lib_attempts_Attempt as Attempt,

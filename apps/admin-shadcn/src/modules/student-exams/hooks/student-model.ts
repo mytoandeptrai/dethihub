@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-student'
 
 import type { data_docTypes_ExamDoc as ExamDoc } from '@student-engine'
 

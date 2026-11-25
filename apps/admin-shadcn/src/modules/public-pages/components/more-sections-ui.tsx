@@ -13,7 +13,7 @@ import { Accordion } from 'radix-ui'
 
 import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import { Button, Link } from '@/modules/public-pages/components/public-primitives-ui'
 import { homeFaq } from '@/modules/public-pages/home-faq'
 

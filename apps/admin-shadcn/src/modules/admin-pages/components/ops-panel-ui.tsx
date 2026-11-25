@@ -14,7 +14,7 @@ import {
   Spinner,
   inputClass,
 } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { AdminTable } from '@/modules/admin-pages/components/admin-primitives-ui'
 import AnnouncementsEditor from '@/modules/admin-pages/containers/announcements-editor-container'
 import DbStatusCard from '@/modules/admin-pages/containers/db-status-card-container'

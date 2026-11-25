@@ -13,7 +13,7 @@ import { useMemo, useSyncExternalStore } from 'react'
 
 import { appPaths } from '@/config/app-paths'
 import { useUrlState } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 import { filterAndSort, metadataOptions } from '@/modules/workspace/hooks/my-docs-model'
 
 import type { LibraryItem, SortKey } from '@/modules/workspace/hooks/my-docs-model'

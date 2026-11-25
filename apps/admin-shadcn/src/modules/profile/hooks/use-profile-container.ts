@@ -18,7 +18,7 @@ import { z } from 'zod'
 import { aiCreditEventsQuery, aiQuotaQuery } from '@/apis/ai'
 import { meKeys, useMe } from '@/apis/me'
 import { useSession } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-profile'
 
 import type { lib_auth_Session as Session } from '@profile-engine'
 import type { components } from '@workspace/api-types'

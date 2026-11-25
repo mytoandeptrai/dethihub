@@ -30,7 +30,7 @@ import {
 } from '@/components/product-ui'
 import { A4_PORTRAIT_W, ExamEditor } from '@/components/student-kernel'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-student'
 
 import type {
   ExamViewParts as Imported0,

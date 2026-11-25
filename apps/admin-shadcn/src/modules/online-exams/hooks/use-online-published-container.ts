@@ -3,7 +3,7 @@
 import { lib_onlinePublish_shareUrl as shareUrl } from '@online-exams-engine'
 import { useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 
 import type {
   lib_community_CommunityRow as CommunityRow,

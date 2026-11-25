@@ -23,7 +23,7 @@ import {
   PageShell,
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 
 import type { MyExamsParts } from '@/modules/workspace/containers/my-exams-container'
 import type { MyExamsModel } from '@/modules/workspace/hooks'

@@ -28,7 +28,7 @@ import { A4_PORTRAIT_W } from '@/components/student-kernel'
 import { appPaths } from '@/config/app-paths'
 import { useClientReady } from '@/hooks/use-client-ready'
 import { useSession } from '@/hooks/use-session'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-student'
 
 import { decodeStudentDoc } from './student-model'
 

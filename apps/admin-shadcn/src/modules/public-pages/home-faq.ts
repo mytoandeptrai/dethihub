@@ -1,4 +1,4 @@
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 
 export const homeFaq = [
   { question: t('publicCopy.m137'), answer: t('publicCopy.m138') },

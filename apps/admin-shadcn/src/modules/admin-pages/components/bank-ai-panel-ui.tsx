@@ -20,7 +20,7 @@ import {
   Spinner,
   inputClass,
 } from '@/components/product-ui'
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 import { BankAiPanelModel } from '@/modules/admin-pages/hooks'
 
 import type { BankAiPanelParts as Imported0 } from '@/modules/admin-pages/containers/bank-ai-panel-container/bank-ai-panel-container'

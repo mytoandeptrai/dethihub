@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/product-ui/popover-ui'
 import { inputClass } from '@/components/product-ui/primitives-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 

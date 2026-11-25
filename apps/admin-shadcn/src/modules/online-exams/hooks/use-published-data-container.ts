@@ -21,7 +21,7 @@ import {
 } from '@/apis/exams'
 import { appPaths } from '@/config/app-paths'
 import { useClientReady, useSession, useUrlState } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 import { DEMO_ROW, demoAttempts, PAGE } from '@/modules/online-exams/hooks/published-demo'
 import {
   publishedAttempt,

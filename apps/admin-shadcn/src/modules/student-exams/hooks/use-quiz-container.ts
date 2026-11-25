@@ -21,7 +21,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { examsKeys, studentAttemptMutation } from '@/apis/exams'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-student'
 
 import { studentKey } from './use-online-open-container'
 

@@ -21,7 +21,7 @@ import {
   PageHeader,
   Segmented,
 } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { AdminModal } from '@/modules/admin-pages/components/admin-primitives-ui'
 import { StatsPanelModel } from '@/modules/admin-pages/hooks'
 import { formatNumber, shortenId } from '@/modules/admin-pages/hooks/admin-utils'

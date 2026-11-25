@@ -1,9 +1,9 @@
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
 
 import { appPaths } from '@/config/app-paths'
 import { env } from '@/config/env'
 import { site } from '@/config/site'
+import messages from '@/i18n/messages/core'
 import { t } from '@/i18n/translate'
 import { buildMetadata } from '@/lib/seo'
 
@@ -37,7 +37,6 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const messages = await getMessages()
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
@@ -60,7 +59,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         >
           {t('common.skip')}
         </a>
-        <NextIntlClientProvider locale="vi" messages={messages}>
+        <NextIntlClientProvider locale="vi" messages={{ auth: messages.auth }}>
           <AppProvider>{children}</AppProvider>
         </NextIntlClientProvider>
       </body>

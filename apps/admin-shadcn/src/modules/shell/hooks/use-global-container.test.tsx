@@ -11,6 +11,11 @@ import type { Session } from '@supabase/supabase-js'
 import type { ReactNode } from 'react'
 
 const state = vi.hoisted(() => ({ path: '/', session: null as Session | null }))
+const sync = vi.hoisted(() => ({ start: vi.fn(), stop: vi.fn(), session: vi.fn() }))
+vi.mock('@workspace-engine', () => ({
+  startSync: sync.start,
+  lib_auth_currentSession: sync.session,
+}))
 vi.mock('@/hooks', () => ({ useSession: () => ({ session: state.session, isLoading: false }) }))
 vi.mock('next/navigation', () => ({
   usePathname: () => state.path,
@@ -29,6 +34,9 @@ const site = (on: boolean, announcements: unknown[] = []) => ({
 beforeEach(() => {
   state.path = '/'
   state.session = null
+  sync.start.mockClear().mockReturnValue(sync.stop)
+  sync.stop.mockClear()
+  sync.session.mockReset().mockImplementation(async () => state.session)
   sessionStorage.clear()
   Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' })
   server.use(http.post('http://localhost:3000/api/presence', () => HttpResponse.json({ ok: true })))
@@ -39,6 +47,32 @@ afterEach(() => {
 })
 
 describe('maintenance and announcements', () => {
+  it('starts workspace work only on app routes and cleans up on marketing navigation', async () => {
+    state.path = '/pricing'
+    state.session = { user: { id: 'workspace-user' } } as Session
+    const { result, rerender } = renderHook(useGlobalContainer, { wrapper })
+    await waitFor(() => expect(result.current.siteLoading).toBe(false))
+    expect(sync.start).not.toHaveBeenCalled()
+    state.path = '/editor'
+    rerender()
+    await waitFor(() => expect(sync.start).toHaveBeenCalledOnce())
+    state.path = '/'
+    rerender()
+    expect(sync.stop).toHaveBeenCalledOnce()
+  })
+
+  it('does not start workspace sync without a session or when session lookup fails', async () => {
+    state.path = '/editor'
+    const { result, rerender } = renderHook(useGlobalContainer, { wrapper })
+    await waitFor(() => expect(result.current.siteLoading).toBe(false))
+    expect(sync.session).not.toHaveBeenCalled()
+    sync.session.mockRejectedValue(new Error('Session unavailable'))
+    state.session = { user: { id: 'workspace-user' } } as Session
+    rerender()
+    await waitFor(() => expect(sync.session).toHaveBeenCalledOnce())
+    expect(sync.start).not.toHaveBeenCalled()
+  })
+
   it('blocks visitors during maintenance', async () => {
     server.use(
       http.get('http://localhost:3000/api/site/status', () => HttpResponse.json(site(true))),

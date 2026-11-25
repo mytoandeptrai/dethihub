@@ -2,7 +2,7 @@
 import { lib_adminApi_clearAdminCache as clearAdminCache } from '@admin-pages-engine'
 import { useCallback, useEffect, useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 
 import type { lib_adminApi_DbStatus as DbStatus } from '@admin-pages-engine'

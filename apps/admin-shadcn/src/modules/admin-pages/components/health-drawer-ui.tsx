@@ -4,7 +4,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { Eye, EyeOff, X } from 'lucide-react'
 
 import { SiteButton as Button, Spinner } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { AdminDrawer } from '@/modules/admin-pages/components/admin-primitives-ui'
 import { HealthDrawerModel } from '@/modules/admin-pages/hooks'
 

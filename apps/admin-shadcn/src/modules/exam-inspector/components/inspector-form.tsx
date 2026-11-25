@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef } from 'react'
 import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-exam-inspector'
 
 import type {
   ExamInspector,

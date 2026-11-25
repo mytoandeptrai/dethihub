@@ -20,7 +20,7 @@ import {
   Toolbar,
   inputClass,
 } from '@/components/product-ui'
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 import {
   AdminDrawer,
   AdminModal,

@@ -12,7 +12,7 @@ import { useState } from 'react'
 
 import { appPaths } from '@/config/app-paths'
 import { usePaged, useClientReady, useUrlState } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
 

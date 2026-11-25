@@ -8,7 +8,7 @@ import {
 import { dialog } from '@engine-dialogs'
 import { useRef, useState } from 'react'
 
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 
 import type {
   lib_bankImport_BankDraft as BankDraft,

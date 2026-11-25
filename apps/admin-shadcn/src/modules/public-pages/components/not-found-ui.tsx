@@ -2,7 +2,7 @@
 import { BookOpen, Home } from 'lucide-react'
 
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import { PageHeader, PageShell } from '@/modules/public-pages/components/page-header-ui'
 import { Button, Card, Link } from '@/modules/public-pages/components/public-primitives-ui'
 

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 
 import type { lib_adminApi_AuditEntry as AuditEntry } from '@admin-pages-engine'

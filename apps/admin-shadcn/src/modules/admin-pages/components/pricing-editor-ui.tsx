@@ -4,7 +4,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { Plus } from 'lucide-react'
 
 import { SiteButton as Button, Card, Spinner, inputClass } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { AdminTable } from '@/modules/admin-pages/components/admin-primitives-ui'
 import { PricingEditorModel } from '@/modules/admin-pages/hooks'
 

@@ -3,7 +3,7 @@ import { dialog } from '@engine-dialogs'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { useEffect, useEffectEvent, useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 import { useDrawerExit } from '@/modules/admin-pages/hooks/use-drawer-exit'
 

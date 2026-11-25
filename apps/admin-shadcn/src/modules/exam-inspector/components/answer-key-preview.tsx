@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-exam-inspector'
 
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 

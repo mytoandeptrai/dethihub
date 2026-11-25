@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 export function useNotFoundContainer() {
   const pathname = usePathname()
   const [requestedPath, setRequestedPath] = useState('')

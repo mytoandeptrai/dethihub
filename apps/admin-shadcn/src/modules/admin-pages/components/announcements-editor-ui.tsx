@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, Eye, ImagePlus, Plus } from 'lucide-react'
 import Image from 'next/image'
 
 import { SiteButton as Button, EmptyState, Spinner } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { AnnouncementPopup } from '@/modules/admin-pages/components/announcement-preview-ui'
 import Switch from '@/modules/admin-pages/containers/switch-container'
 import { AnnouncementsEditorModel } from '@/modules/admin-pages/hooks'

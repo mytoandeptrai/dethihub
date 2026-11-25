@@ -11,7 +11,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import { SiteButton } from '@/components/product-ui'
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 
 import type { ComponentProps, ReactNode } from 'react'
 import './admin-overlays.css'

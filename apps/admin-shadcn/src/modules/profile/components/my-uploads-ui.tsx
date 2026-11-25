@@ -24,7 +24,7 @@ import {
   Toolbar,
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-profile'
 import { MyUploadsModel } from '@/modules/profile/hooks'
 
 import type {

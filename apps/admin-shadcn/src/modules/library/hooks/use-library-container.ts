@@ -13,7 +13,7 @@ import { useRef, useState } from 'react'
 
 import { storageKeys, storageListDocumentsQuery, storageUsageQuery } from '@/apis/storage'
 import { useSession as useAuthSession } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-library'
 
 import type { lib_documents_UserDocument as UserDocument } from '@library-engine'
 import type { ChangeEvent, DragEvent } from 'react'

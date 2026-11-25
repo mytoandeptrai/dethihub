@@ -10,7 +10,7 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-student'
 import { ReportExamButtonContainer } from '@/modules/student-exams/containers/exam-view-container'
 import { studentDoc, studentExam, studentRemoteId } from '@/modules/student-exams/testing/fixture'
 import { server } from '@/testing/msw/server'

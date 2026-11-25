@@ -14,7 +14,7 @@ import {
   PageShell,
   SiteSelect,
 } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 import { GradingModel } from '@/modules/workspace/hooks'
 
 import type { GradingParts } from '@/modules/workspace/containers/grading-container'

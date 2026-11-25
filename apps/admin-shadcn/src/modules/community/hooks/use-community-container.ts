@@ -25,7 +25,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { examsKeys } from '@/apis/exams'
 import { appPaths } from '@/config/app-paths'
 import { useSession as useAuthSession, usePaged } from '@/hooks'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-community'
 
 import type {
   lib_community_CommunityAuthor as CommunityAuthor,

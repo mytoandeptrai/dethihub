@@ -4,7 +4,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { Database, RotateCw } from 'lucide-react'
 
 import { LoadingRegion } from '@/components/page-skeleton'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { DbStatusCardModel } from '@/modules/admin-pages/hooks'
 
 import type {

@@ -2,7 +2,7 @@
 import { cn } from '@workspace/ui/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 function numbers(page: number, pages: number): { id: string; value: number | '…' }[] {
   const set = new Set([1, pages, page - 1, page, page + 1].filter((n) => n >= 1 && n <= pages))
   const out: { id: string; value: number | '…' }[] = []

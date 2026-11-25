@@ -2,7 +2,7 @@
 import { dialog } from '@engine-dialogs'
 import { useCallback, useEffect, useState } from 'react'
 
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 import { useAdminRequests } from '@/modules/admin-pages/hooks/use-admin-requests'
 import { useDrawerExit } from '@/modules/admin-pages/hooks/use-drawer-exit'
 

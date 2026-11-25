@@ -14,7 +14,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 export function GraphIllustrationUi() {
   return (
     <svg viewBox="0 0 300 140" fill="none" aria-hidden="true" className="home-graph">

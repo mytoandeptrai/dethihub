@@ -18,7 +18,7 @@ import {
   inputClass,
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 import {
   AdminDrawer,
   AdminRowActions,

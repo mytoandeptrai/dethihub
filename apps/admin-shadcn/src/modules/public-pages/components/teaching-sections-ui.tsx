@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-public'
 import {
   Link,
   Tabs,

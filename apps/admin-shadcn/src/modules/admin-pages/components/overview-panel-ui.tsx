@@ -4,7 +4,7 @@ import { Skeleton } from '@workspace/ui/components/skeleton'
 import { ArrowRight, BookOpen, Cpu, FileText, Users } from 'lucide-react'
 
 import { Card, PageHeader } from '@/components/product-ui'
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 import { formatNumber } from '@/modules/admin-pages/hooks/admin-utils'
 
 import type { OverviewPanelParts as Imported0 } from '@/modules/admin-pages/containers/overview-panel-container/overview-panel-container'

@@ -32,7 +32,7 @@ import {
   SkeletonCard,
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 import { OnlinePublishedModel } from '@/modules/online-exams/hooks'
 
 import type { OnlinePublishedParts } from '@/modules/online-exams/containers/online-published-container'

@@ -20,7 +20,7 @@ import {
 } from '@/components/product-ui'
 import { MathText } from '@/components/student-kernel'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-community'
 import { CommunityModel } from '@/modules/community/hooks'
 
 import type {

@@ -1,7 +1,6 @@
 'use client'
 
 import { dialog, useDialogs } from '@engine-dialogs'
-import { startSync, lib_auth_currentSession as currentSession } from '@workspace-engine'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -33,8 +32,11 @@ export function useWorkspaceSync(userId?: string) {
     if (!userId) return
     let disposed = false
     let stop: (() => void) | undefined
-    void currentSession()
-      .then((session) => (!disposed && session?.user.id === userId ? startSync() : undefined))
+    void import('@workspace-engine')
+      .then(async ({ startSync, lib_auth_currentSession: currentSession }) => {
+        const session = await currentSession()
+        return !disposed && session?.user.id === userId ? startSync() : undefined
+      })
       .then((dispose) => {
         if (disposed) dispose?.()
         else stop = dispose
@@ -65,8 +67,12 @@ export function useGlobalContainer() {
   const blocked = maintenance && !staff && !openPath
   const [dismissed, setDismissed] = useState(true)
   const [page, setPage] = useState(0)
-  usePresenceHeartbeat(session?.user.id)
-  useWorkspaceSync(session?.user.id)
+  const workspace =
+    /^\/(editor|my-docs|grading|online-exams|library|profile|admin|quiz|play|community)(\/|$)/.test(
+      pathname,
+    )
+  usePresenceHeartbeat(workspace ? session?.user.id : undefined)
+  useWorkspaceSync(workspace ? session?.user.id : undefined)
   useEffect(() => {
     if (pathname !== appPaths.editor.href || blocked)
       document.documentElement.dataset.productShell = ''

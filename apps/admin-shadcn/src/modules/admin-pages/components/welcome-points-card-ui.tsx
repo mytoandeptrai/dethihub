@@ -2,7 +2,7 @@
 import { cn } from '@workspace/ui/lib/utils'
 
 import { SiteButton as Button, Card, Spinner, inputClass } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 
 import type { WelcomePointsCardParts as Imported0 } from '@/modules/admin-pages/containers/welcome-points-card-container/welcome-points-card-container'
 import type { WelcomePointsCardModel } from '@/modules/admin-pages/hooks'

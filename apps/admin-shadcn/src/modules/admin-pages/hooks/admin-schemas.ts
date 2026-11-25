@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { t as translate } from '@/i18n/translate'
+import { t as translate } from '@/i18n/translate-admin-pages'
 export const bankSchema = z.object({
   prompt: z
     .string()

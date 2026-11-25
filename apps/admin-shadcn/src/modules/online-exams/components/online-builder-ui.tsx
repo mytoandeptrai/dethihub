@@ -53,7 +53,7 @@ import {
   Toolbar,
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 import { FeatureNotice } from '@/modules/feature-access/components/feature-notice'
 import { OnlineBuilderModel } from '@/modules/online-exams/hooks'
 

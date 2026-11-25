@@ -3,7 +3,7 @@ import { lib_pricing_DEFAULT_PRICING as DEFAULT_PRICING } from '@admin-pages-eng
 import { dialog } from '@engine-dialogs'
 import { useState } from 'react'
 
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-admin-ops'
 import { useAdminOperationsRequests } from '@/modules/admin-pages/hooks/use-admin-operations-requests'
 
 import type { lib_pricing_PricingConfig as PricingConfig } from '@admin-pages-engine'

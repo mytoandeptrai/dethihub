@@ -48,7 +48,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/product-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-workspace'
 import { MyDocsModel } from '@/modules/workspace/hooks'
 import { relativeUpdatedAt } from '@/modules/workspace/hooks/my-docs-model'
 

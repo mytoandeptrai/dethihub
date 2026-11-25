@@ -4,7 +4,7 @@ import { Check, Copy, Link2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { SiteButton as Button } from '@/components/product-ui/primitives-ui'
-import { t } from '@/i18n/translate'
+import { t } from '@/i18n/translate-online-exams'
 export function CopyLink({ url, className }: { url: string; className?: string }) {
   const [copied, setCopied] = useState(false)
   const copy = () => {
