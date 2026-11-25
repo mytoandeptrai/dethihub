@@ -74,6 +74,37 @@ for (const [label, id] of [['out-of-bounds', 'k999'], ['malformed-id', 'invalid'
   await context.close()
 })
 
+test('empty patch arrays do not discard replacement blocks on Apply', async ({ browser }) => {
+  const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
+  const auth = await signedInState(browser, origin)
+  const context = await browser.newContext({ storageState: auth.state })
+  const page = await context.newPage()
+  const text = 'Nội dung thay thế đã duyệt.'
+  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ patch: [], blocks: [{ type: 'paragraph', text }] }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'empty-patch-fixture' }
+  await page.route('**/api/**', (route) => {
+    const pathname = new URL(route.request().url()).pathname
+    return route.fulfill({ json: pathname === '/api/ai/chat' ? response : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
+  })
+  const doc = { ...fixture, id: 'empty-patch-fixture', title: 'Duyệt thay thế nội dung', blocks: [{ type: 'paragraph', text: 'Nội dung cũ cần thay' }] }
+  await page.addInitScript((document) => localStorage.setItem('soandethi-docs', JSON.stringify({ state: { myDocs: [document], myDecks: [] }, version: 0 })), doc)
+  await page.goto(`${origin}/editor`)
+  await page.getByText(doc.title, { exact: true }).click()
+  const editor = page.locator('.ProseMirror')
+  await expect(editor).toContainText('Nội dung cũ cần thay')
+  const open = page.getByRole('button', { name: 'Mở trợ lý AI', exact: true })
+  if (await open.isVisible()) await open.click()
+  await page.getByLabel('Nhập yêu cầu cho AI').fill('Thay nội dung đề Toán lớp 9 bằng đoạn văn mới')
+  await page.getByLabel('Nhập yêu cầu cho AI').press('Enter')
+  const preview = page.getByRole('region', { name: 'Nội dung sẽ áp dụng' })
+  await expect(preview).toContainText('Thay toàn bộ đề')
+  await expect(preview).toContainText(text)
+  await page.getByRole('button', { name: 'Áp dụng', exact: true }).click()
+  await expect(editor).toContainText(text)
+  await expect(editor).not.toContainText('Nội dung cũ cần thay')
+  await expect(page.getByRole('button', { name: 'Huỷ', exact: true })).toHaveCount(0)
+  await context.close()
+})
+
 test('document approval is a readable mini exam, not a JSON tree', async ({ browser }, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)

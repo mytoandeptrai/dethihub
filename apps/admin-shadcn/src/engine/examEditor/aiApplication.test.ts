@@ -3,6 +3,15 @@ import { prepareAiApplication } from './aiApplication'
 import { blocksToTipTap, plainText } from './convert'
 
 describe('ai application preparation', () => {
+  it('infers replacement for non-empty blocks with an empty patch while keeping truly empty patches as no-ops', () => {
+    const blocks = [{ type: 'paragraph', text: 'Nội dung thay thế' }]
+    const prepared = prepareAiApplication({ patch: [], blocks })
+    expect(prepared.action).toBe('replace')
+    expect(prepared.noChanges).toBe(false)
+    expect(prepared.blocks).toEqual(blocks)
+    expect(prepareAiApplication({ action: 'append', patch: [], blocks }).action).toBe('append')
+    expect(prepareAiApplication({ patch: [], blocks: [] })).toMatchObject({ action: 'patch', noChanges: true })
+  })
   it('does not give an inserted question the answer of a rewritten original in the same replacement', () => {
     const current = blocksToTipTap([{ type: 'question', no: 1, text: 'Câu gốc', options: [{ label: 'A', text: 'Đúng' }, { label: 'B', text: 'Sai' }] }, { type: 'answerKey', items: [{ no: 1, answer: 'A' }] }])
     const prepared = prepareAiApplication({ patch: [{ id: 'k0', blocks: [{ type: 'question', text: 'Câu mới', options: ['Sai', 'Đúng'] }, { type: 'question', text: 'Câu gốc được viết lại', options: ['Đúng', 'Sai'] }] }] }, current)

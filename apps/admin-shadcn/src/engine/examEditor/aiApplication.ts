@@ -280,7 +280,7 @@ export function prepareAiApplication(raw: AiExamEnvelope, currentDocument?: JSON
   const proposed = sanitizePatches(raw.patch)
   const action: 'append' | 'patch' | 'replace' | 'none' = raw.action === 'append' || raw.action === 'patch' || raw.action === 'replace'
     ? raw.action
-    : Array.isArray(raw.patch) ? 'patch' : blocks.length ? 'replace' : 'none'
+    : Array.isArray(raw.patch) && (raw.patch.length > 0 || blocks.length === 0) ? 'patch' : blocks.length ? 'replace' : 'none'
   const rank: Record<PatchOp, number> = { insertAfter: 0, replace: 1, delete: 1, insertBefore: 2 }
   const touched = new Set<number>()
   const patches = proposed.filter((patch) => patch.index < (currentDocument?.content?.length ?? Infinity))

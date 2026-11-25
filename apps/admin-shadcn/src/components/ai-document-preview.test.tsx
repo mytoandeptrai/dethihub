@@ -11,6 +11,12 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('previews replacement blocks rather than a no-op when the optional patch array is empty', () => {
+    render(<AiDocumentPreview document={{ patch: [], blocks: [{ type: 'paragraph', text: 'Nội dung thay thế' }] }} />)
+    expect(screen.getByText('Thay toàn bộ đề')).toBeVisible()
+    expect(screen.getByText('Nội dung thay thế')).toBeVisible()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
   it('shows a patch no-op notice instead of a successful draft when all IDs are malformed', () => {
     render(<AiDocumentPreview document={{ say: 'Đã sửa xong.', patch: [{ id: 'invalid', block: { type: 'paragraph', text: 'Không được chèn' } }] }} />)
     expect(screen.getByText('Sửa một phần')).toBeVisible()
