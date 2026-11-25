@@ -34,6 +34,7 @@ import { createSearchPlugin } from './find'
 import { ChoiceLayoutExtension, choiceColsKey, measureChoiceColumns } from './choiceLayout'
 import { LeadImageExtension } from './leadImage'
 import { PaginationExtension, pageGapsKey, computePagePlan } from './pagination'
+import { ObjectNavigation, focusBlankEditorArea } from './objectNavigation'
 
 /** map rỗng dùng chung — tránh tạo Map mới mỗi lượt đo. */
 const EMPTY_GAPS = new Map<number, number>()
@@ -89,6 +90,7 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
         // `paragraph` dùng bản riêng (có formatAttrs) — bản của StarterKit
         // thiếu indentLeft/shading/borders nên các nút đó im lặng.
         paragraph: false,
+        trailingNode: false,
       }),
       TextStyle,
       Color,
@@ -112,6 +114,7 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
       LeadImageExtension,
       PaginationExtension,
       DeleteObjects,
+      ObjectNavigation,
     ],
     content,
     editable: !readOnly,
@@ -277,7 +280,7 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
     }
     // bỏ qua chính các widget spacer (PM render chúng thành con của .doc-content)
     const els = (Array.from(contentEl.children) as HTMLElement[]).filter(
-      (el) => !el.classList.contains('doc-page-gap'),
+      (el) => !el.classList.contains('doc-page-gap') && !el.hasAttribute('data-typing-tail'),
     )
     if (els.length === 0) {
       setPageCount(1)
@@ -372,6 +375,9 @@ export function ExamEditor({ content, onChange, onReady, pageSetup, readOnly, is
   return (
     <div
       className="doc-stage"
+      onMouseDown={(event) => {
+        if (editor && focusBlankEditorArea(editor.view, event.nativeEvent)) event.preventDefault()
+      }}
       style={{
         width: isReflow ? '100%' : PAGE_W,
         minHeight: isReflow ? undefined : pageCount * (PAGE_H + PAGE_GAP),
