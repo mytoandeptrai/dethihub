@@ -1,9 +1,9 @@
 'use client'
 
 import { useRequireStaff } from '@/hooks/use-require-staff'
-import { t } from '@/i18n/translate'
+import { PageSkeleton } from '@/components/page-skeleton'
 
 export function RequireStaff({ children }: { children: React.ReactNode }) {
   const { isLoading } = useRequireStaff()
-  return isLoading ? <p role="status">{t('common.loading')}</p> : children
+  return isLoading ? <PageSkeleton variant="dashboard" /> : children
 }

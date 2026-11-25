@@ -10,6 +10,7 @@ import workspaceCopy from './workspace-copy'
 import examInspectorCopy from './exam-inspector-copy'
 
 const messages = {
+  loading: { label: 'Đang tải' },
   examInspectorCopy,
   publicCopy,
   workspaceCopy,
