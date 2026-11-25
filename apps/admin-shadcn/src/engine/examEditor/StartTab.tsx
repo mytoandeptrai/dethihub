@@ -18,6 +18,7 @@ import { dialog } from '@/engine/components/Dialog'
 import { DocIcon, IconDocExam, IconDocBoard, IconDocSlide } from '@/engine/components/docIcons'
 import { IconPencil, IconSearch, IconTrash } from './icons'
 import { useSlidingThumb } from './useSlidingThumb'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 /** sub-lines của lời chào — chọn ngẫu nhiên mỗi lần mở, như bản gốc */
 const GREET_ASKS = [
@@ -87,6 +88,7 @@ export function StartTab({
   /** mở lại một bài trình bày đã lưu */
   onOpenDeck?: (deck: Deck) => void
 }) {
+  const { canUse } = useFeatureAccess()
   const myDocs = useDocStore((s) => s.myDocs)
   const myDecks = useDocStore((s) => s.myDecks)
   const deleteDoc = useDocStore((s) => s.deleteDoc)
@@ -239,7 +241,7 @@ export function StartTab({
           </div>
 
           <div className="quick-cards">
-            <button type="button" className="quick-card" onClick={onNewDoc}>
+            {canUse('word') && <button type="button" className="quick-card" onClick={onNewDoc}>
               <IconDocExam size={30} />
               <span className="quick-text">
                 <span className="quick-title-row">
@@ -248,9 +250,9 @@ export function StartTab({
                 </span>
                 <span className="quick-sub">.docx</span>
               </span>
-            </button>
+            </button>}
 
-            <button
+            {canUse('slide') && <button
               type="button"
               className="quick-card"
               onClick={onNewSlide}
@@ -264,9 +266,9 @@ export function StartTab({
                 </span>
                 <span className="quick-sub">.pptx</span>
               </span>
-            </button>
+            </button>}
 
-            <button type="button" className="quick-card" onClick={onNewBoard}>
+            {canUse('board') && <button type="button" className="quick-card" onClick={onNewBoard}>
               <IconDocBoard size={30} />
               <span className="quick-text">
                 <span className="quick-title-row">
@@ -274,7 +276,7 @@ export function StartTab({
                 </span>
                 <span className="quick-sub">Vẽ tay, sơ đồ</span>
               </span>
-            </button>
+            </button>}
           </div>
         </section>
 

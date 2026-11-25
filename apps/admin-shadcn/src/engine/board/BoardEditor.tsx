@@ -33,7 +33,7 @@ import { bindToScene, guideAt, Instruments, placeInstrument, projectGuide, type 
 import { type Tool, type Slot, type Opts, DEFAULT_TIP, CHALK_WHITE, LIGHT_COLORS, CHALK_COLORS, DEFAULT_OPTS, DEFAULT_STYLES, ERASE_R, CLIP_MARK, SHAPES, type Saved, load, type Drag, computeSnap, TOOL_KEYS, MOD_KEY, SHAPE_KEYS, FILLS, CURSOR } from './boardModel'
 import { type Main, ERASER_SVG, LASER_COLORS, LASER_SIZES, LASER_SVG, KIND_LABEL, TOOL_LABEL, curvePoints, densify, type SideTab, SIDE_W, WRENCH_D, PEN_D, ERASER_D, LASER_D, SELECT_D, LASSO_D, SHAPE_D, TEXT_D, DOT_SIZES, BUCKET_D, TRASH_D, HAND_D, UNDO_D, REDO_D, PLUS_D, IMG_D, PDF_NOTE_D, EXPORT_D, PAPER_D, RULER_D, ProtractorIcon, COMPASS_D, FOUNTAIN_D, PENS, PenPanel, SHAPE_BY_ID, SHAPE_SECTIONS, THEME_COLORS, PAPERS, AiIcon, SideBtn, Group, Chip, Toggle, Pop, MoreColors, HexInput, PanelRow, NONE_BG, draggingFill, SPREAD_MS, BUCKET_SVG, Swatch, Ico, IconBtn, SelBtn } from './boardUi'
 
-export default function BoardEditor({ id }: { id: string }) {
+export default function BoardEditor({ id, readOnly = false }: { id: string; readOnly?: boolean }) {
   const wrapRef = useRef<HTMLDivElement>(null)
   /** tăng mỗi khi cảnh đổi — khoá cache lớp "tường" của thùng sơn */
   const sceneVer = useRef(0)
@@ -201,6 +201,7 @@ export default function BoardEditor({ id }: { id: string }) {
 
   const saveTimer = useRef(0)
   const persist = useCallback(() => {
+    if (readOnly) return
     window.clearTimeout(saveTimer.current)
     let running: Promise<boolean> | undefined
     const write = async () => {
@@ -226,7 +227,7 @@ export default function BoardEditor({ id }: { id: string }) {
     }
     pendingBoardSaves.set(id, save)
     saveTimer.current = window.setTimeout(() => void save(), 400)
-  }, [id])
+  }, [id, readOnly])
 
   const changed = useCallback(() => {
     sceneVer.current++
@@ -690,7 +691,7 @@ export default function BoardEditor({ id }: { id: string }) {
     const p = toScene(ev.clientX, ev.clientY)
     // lật đầu gôm của bút hoặc giữ nút trên thân bút → gôm tạm thời
     const flip = ev.pointerType === 'pen' && (ev.button === 5 || ev.button === 2 || (ev.buttons & 32) !== 0)
-    const t: Tool = flip ? 'eraser' : toolRef.current
+    const t: Tool = readOnly ? 'hand' : flip ? 'eraser' : toolRef.current
     const v = view.current
 
     if (ev.pointerType === 'pen') penSeen.current = true
@@ -1332,6 +1333,7 @@ export default function BoardEditor({ id }: { id: string }) {
   /** dán: hình đã sao chép trong bảng, ảnh / PDF từ ngoài, hoặc chữ */
   const pasteHandler = useRef<(ev: ClipboardEvent) => void>(() => {})
   pasteHandler.current = (ev: ClipboardEvent) => {
+    if (readOnly) return
     const target = ev.target as HTMLElement | null
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
     if (editingRef.current || dialogRef.current) return
@@ -1375,6 +1377,7 @@ export default function BoardEditor({ id }: { id: string }) {
 
   const keyHandler = useRef<(ev: KeyboardEvent) => void>(() => {})
   keyHandler.current = (ev: KeyboardEvent) => {
+    if (readOnly) return
     const target = ev.target as HTMLElement | null
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
     if (editingRef.current || dialogRef.current) return
@@ -2631,6 +2634,20 @@ export default function BoardEditor({ id }: { id: string }) {
     { id: 'text', label: 'Chữ', tip: 'Chữ', kbd: 'T', icon: TEXT_D, onClick: () => pickTool('text') },
     { id: 'hand', label: 'Kéo', tip: 'Kéo bảng', kbd: 'H', icon: HAND_D, onClick: () => pickTool('hand') },
   ]
+
+  if (readOnly) return (
+    <div className="board-editor flex min-h-0 flex-1 flex-col overflow-hidden" style={{ backgroundColor: paperBg(o.paper) }} aria-label="Bảng vẽ chỉ xem">
+      <div className="border-line flex gap-3 border-b p-3 print:hidden">
+        <button type="button" onClick={() => setDialog({ t: 'export' })}>Xuất PNG / PDF</button>
+        {pdfPages.map((_page, index) => <button type="button" key={index} onClick={() => goPage(index)}>Trang {index + 1}</button>)}
+      </div>
+      <div className="relative min-w-0 flex-1 overflow-hidden" ref={wrapRef}>
+        <canvas ref={canvasRef} className="absolute inset-0 touch-none select-none" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} />
+        <canvas ref={liveRef} className="pointer-events-none absolute inset-0 h-full w-full" />
+      </div>
+      {dialog?.t === 'export' && <ExportDialog hasSelection={false} hasPages={els.current.some(isPage)} defaultPaperBg={isDarkPaper(o.paper)} onClose={() => setDialog(null)} onDone={onExport} preview={exportPreview} />}
+    </div>
+  )
 
   return (
     <div className="board-editor flex min-h-0 flex-1 flex-col overflow-hidden" style={{ backgroundColor: paperBg(o.paper) }}>

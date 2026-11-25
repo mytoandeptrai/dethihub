@@ -28,6 +28,7 @@ import type { ReactNode } from 'react'
 type AppShellUiProps = ReturnType<typeof useAppShellContainer> & { children: ReactNode }
 type SidebarUiProps = Omit<AppShellUiProps, 'children'> & { compact: boolean }
 function SidebarUi({
+  canCreate,
   compact,
   pathname,
   session,
@@ -118,7 +119,7 @@ function SidebarUi({
             {!compact && t('auth.loginTitle')}
           </Link>
         )}
-        <Link
+        {canCreate && <Link
           href={appPaths.editor.href}
           aria-current={activePath === appPaths.editor.href ? 'page' : undefined}
           className={cn(
@@ -129,7 +130,7 @@ function SidebarUi({
         >
           <span className="text-lg">+</span>
           {!compact && t('product.create')}
-        </Link>
+        </Link>}
       </div>
       <nav
         aria-label={t('product.navigation')}

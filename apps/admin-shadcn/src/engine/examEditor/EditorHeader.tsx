@@ -12,7 +12,8 @@ function Hint({ label, children }: { label: string; children: ReactNode }) {
   return <Tooltip><TooltipTrigger asChild>{children}</TooltipTrigger><TooltipContent side="bottom">{label}</TooltipContent></Tooltip>
 }
 
-export function EditorHeader({ title, dirty, status, onRename, onStatusChange, onSave, onPreview, previewLabel = 'Xem trước', previewIcon = <Eye className="size-4" />, exports, fileSlot, onCommands, previewEmphasis = false }: {
+export function EditorHeader({ title, dirty, status, onRename, onStatusChange, onSave, onPreview, previewLabel = 'Xem trước', previewIcon = <Eye className="size-4" />, exports, fileSlot, onCommands, previewEmphasis = false, readOnly = false }: {
+  readOnly?: boolean
   previewEmphasis?: boolean
   fileSlot?: (element: HTMLSpanElement | null) => void
   onCommands?: () => void
@@ -49,7 +50,7 @@ export function EditorHeader({ title, dirty, status, onRename, onStatusChange, o
   return <TooltipProvider delayDuration={250}>
     <header data-editor-header className="flex h-12 min-h-12 min-w-0 shrink-0 items-center justify-between gap-2 border-b border-line bg-surface px-3 text-ink sm:px-4 print:hidden">
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        {onCommands && <><span ref={fileSlot} className="shrink-0" /><Button type="button" variant="ghost" size="sm" className="size-8 shrink-0 px-0 sm:w-auto sm:px-2" aria-label="Lệnh (Ctrl K)" onClick={onCommands}><Command className="size-4" /><span className="hidden sm:inline">Lệnh</span></Button></>}
+        {!readOnly && onCommands && <><span ref={fileSlot} className="shrink-0" /><Button type="button" variant="ghost" size="sm" className="size-8 shrink-0 px-0 sm:w-auto sm:px-2" aria-label="Lệnh (Ctrl K)" onClick={onCommands}><Command className="size-4" /><span className="hidden sm:inline">Lệnh</span></Button></>}
         <Link to="/de-cua-toi" className="hidden shrink-0 text-xs font-medium text-ink-3 hover:text-clay sm:inline">Đề của tôi</Link>
         <ChevronRight className="hidden size-3.5 shrink-0 text-ink-4 sm:block" aria-hidden />
         {editing ? <Input
@@ -66,11 +67,12 @@ export function EditorHeader({ title, dirty, status, onRename, onStatusChange, o
           className="h-8 min-w-0 max-w-80 flex-1 px-2 py-1 text-sm font-semibold"
         /> : <button
           type="button"
+          disabled={readOnly}
           aria-label={`Đổi tên: ${title}`}
           className="min-w-0 truncate rounded-md px-1 py-1 text-left text-sm font-semibold hover:bg-sunken"
           onClick={() => { setDraft(title); pending.current = true; setEditing(true) }}
         >{title}</button>}
-        {onStatusChange && <DropdownMenu>
+        {!readOnly && onStatusChange && <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Badge asChild variant="outline" className="shrink-0 gap-1 border-line bg-sunken px-2 py-1 text-[11px] font-medium text-ink-2 hover:bg-clay-tint hover:text-clay">
               <button type="button" aria-label="Trạng thái tài liệu">{DOC_STATUS_LABELS[docStatus(status)]}<ChevronDown className="size-3" aria-hidden /></button>
@@ -90,7 +92,7 @@ export function EditorHeader({ title, dirty, status, onRename, onStatusChange, o
           <Hint label="Xuất"><DropdownMenuTrigger asChild><Button type="button" variant="outline" size="sm" aria-label="Xuất" className="size-8 px-0 sm:w-auto sm:px-3"><Download className="size-4" /><span className="hidden sm:inline">Xuất</span><ChevronDown className="hidden size-3 sm:block" /></Button></DropdownMenuTrigger></Hint>
           <DropdownMenuContent align="end">{exports.map((item) => <DropdownMenuItem key={item.label} onSelect={item.onSelect}>{item.label}</DropdownMenuItem>)}</DropdownMenuContent>
         </DropdownMenu>}
-        <Hint label={`Lưu · ${savedLabel}`}><Button type="button" size="sm" aria-label="Lưu" onClick={onSave} className="size-8 px-0 sm:w-auto sm:px-3"><Save className="size-4" /><span className="hidden sm:inline">Lưu</span><span className="sr-only">{savedLabel}</span></Button></Hint>
+        {!readOnly && <Hint label={`Lưu · ${savedLabel}`}><Button type="button" size="sm" aria-label="Lưu" onClick={onSave} className="size-8 px-0 sm:w-auto sm:px-3"><Save className="size-4" /><span className="hidden sm:inline">Lưu</span><span className="sr-only">{savedLabel}</span></Button></Hint>}
       </div>
     </header>
   </TooltipProvider>

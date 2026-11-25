@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 
 import { aiQuotaQuery } from '@/apis/ai/queries'
 import { useMe } from '@/apis/me/queries'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 import { appPaths } from '@/config/app-paths'
 import { useSession } from '@/hooks'
 import { t } from '@/i18n/translate'
@@ -33,6 +34,8 @@ import { t } from '@/i18n/translate'
 const storageKey = 'dethihub.sidebar-collapsed'
 
 export function useAppShellContainer() {
+  const access = useFeatureAccess()
+  const canCreate = access.canUse('word') || access.canUse('slide') || access.canUse('board')
   const pathname = usePathname()
   const router = useRouter()
   const { session } = useSession()
@@ -122,7 +125,7 @@ export function useAppShellContainer() {
   const create = { path: appPaths.editor.href, label: t('product.create'), icon: Plus }
   const profile = { path: appPaths.profile.href, label: t('product.account'), icon: UserRound }
   const paletteItems = [
-    create,
+    ...(canCreate ? [create] : []),
     ...workspace,
     ...explore,
     profile,
@@ -163,6 +166,7 @@ export function useAppShellContainer() {
     ? Math.max(0, quota.data.quota.limit - quota.data.quota.used)
     : 0
   return {
+    canCreate,
     pathname,
     session,
     collapsed,
@@ -173,7 +177,7 @@ export function useAppShellContainer() {
     mobileNavigation: [
       { path: appPaths.myDocs.href, label: t('product.myDocs'), icon: FolderOpen },
       { path: appPaths.onlineExams.href, label: t('product.online'), icon: ListChecks },
-      { path: appPaths.editor.href, label: t('product.mobileCreate'), icon: Plus },
+      ...(canCreate ? [{ path: appPaths.editor.href, label: t('product.mobileCreate'), icon: Plus }] : []),
       { path: appPaths.grading.href, label: t('product.mobileGrading'), icon: GraduationCap },
     ],
     explore,

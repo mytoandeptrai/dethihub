@@ -11,15 +11,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { examsKeys, myExamSaveMutation, myExamSetListedMutation } from '@/apis/exams'
 import { t } from '@/i18n/translate'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+import { FEATURE_DISABLED_MESSAGE } from '@/modules/feature-access/components/feature-notice'
 
 import type { lib_onlineExam_OnlineItem as OnlineItem } from '@online-exams-engine'
 
 export function useOnlinePublication() {
+  const access = useFeatureAccess()
   const client = useQueryClient()
   const invalidate = () => client.invalidateQueries({ queryKey: examsKeys.all })
   const save = useMutation({ ...myExamSaveMutation(), onSuccess: invalidate })
   const listed = useMutation({ ...myExamSetListedMutation(), onSuccess: invalidate })
   const publish = async (item: OnlineItem, visible: boolean) => {
+    if (!access.canUse('online')) throw new Error(FEATURE_DISABLED_MESSAGE)
     if (!(await currentSession())) throw new Error(t('onlineExamsCopy.needLogin'))
     if (!(await confirmPublishWithoutKey(itemToExam(item))))
       throw new Error(t('onlineExamsCopy.cancelPublish'))
@@ -31,6 +35,7 @@ export function useOnlinePublication() {
     return row.id
   }
   const changeListed = async (item: OnlineItem, visible: boolean) => {
+    if (!access.canUse('online')) throw new Error(FEATURE_DISABLED_MESSAGE)
     if (!item.publishedId) return
     if (!(await currentSession())) throw new Error(t('onlineExamsCopy.needLogin'))
     await listed.mutateAsync({

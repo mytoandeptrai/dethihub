@@ -5,13 +5,15 @@ import {
   store_online_useOnline as useOnline,
 } from '@online-exams-engine'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { examsKeys } from '@/apis/exams'
 import { useOnlineBuilderContainer } from '@/modules/online-exams/hooks/use-online-builder-container'
 import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
+import { useOnlineListContainer } from '@/modules/online-exams/hooks/use-online-list-container'
+import { OnlineBuilderContainer } from '@/modules/online-exams/containers/online-builder-container'
 import {
   usePublishedPanelContainer,
   useOnlineResultsContainer,
@@ -37,6 +39,12 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(window.location.search),
 }))
 vi.mock('@engine-dialogs', () => ({ dialog: { confirm: vi.fn(async () => true) } }))
+vi.mock('@/components/online-exams-kernel', () => ({
+  QuestionBody: ({ q }: { q: { prompt: string } }) => <p>{q.prompt}</p>,
+  MathText: ({ children }: { children: string }) => <span>{children}</span>,
+  OnlineAiBox: () => null,
+  QuestionImageField: () => null,
+}))
 
 const remoteId = '11111111-1111-4111-8111-111111111111'
 const card = {
@@ -87,6 +95,10 @@ function localExam() {
   return useOnline.getState().items.find((item) => item.id === id)!
 }
 beforeEach(() => {
+  server.use(
+    http.get('http://localhost:3000/api/site/status', () => HttpResponse.json({ features: { word: true, slide: true, board: true, online: true } })),
+    http.get('http://localhost:3000/api/me', () => HttpResponse.json({ userId: 'online-user', role: 'user' })),
+  )
   vi.clearAllMocks()
   window.history.replaceState({}, '', '/online-exams')
   route.id = remoteId
@@ -344,6 +356,44 @@ describe('published exams and results', () => {
 })
 
 describe('local online builder validation', () => {
+  function disableOnline() {
+    auth.session = null
+    const status = { features: { word: true, slide: true, board: true, online: false } }
+    client.setQueryData(['site'], status)
+    server.use(http.get('http://localhost:3000/api/site/status', () => HttpResponse.json(status)))
+  }
+  it('blocks direct online creation without creating a draft', async () => {
+    disableOnline()
+    route.id = 'new'
+    render(<OnlineBuilderContainer />, { wrapper })
+    expect(await screen.findByRole('heading', { name: 'Tính năng đang tạm tắt' })).toBeVisible()
+    expect(useOnline.getState().items).toHaveLength(0)
+  })
+  it('keeps the list reachable but guards its create action', async () => {
+    disableOnline()
+    const hook = renderHook(useOnlineListContainer, { wrapper })
+    expect(hook.result.current.canCreate).toBe(false)
+    act(() => hook.result.current.onCreate())
+    expect(useOnline.getState().items).toHaveLength(0)
+    expect(route.push).toHaveBeenCalledWith('/online-exams/new')
+  })
+  it('opens an existing exam read-only with printing and no publish or editing actions', async () => {
+    disableOnline()
+    const item = localExam()
+    route.id = item.id
+    render(<OnlineBuilderContainer />, { wrapper })
+    expect(await screen.findByText('Quản trị viên đã tạm tắt tính năng này. Nội dung bạn đã tạo vẫn xem được.')).toBeVisible()
+    expect(screen.getByText('Một cộng một bằng bao nhiêu?')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'In / PDF' })).toBeEnabled()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Đăng|Xuất bản/ })).not.toBeInTheDocument()
+  })
+  it('rejects publish when online editing is disabled', async () => {
+    disableOnline()
+    const item = localExam()
+    const hook = renderHook(useOnlinePublication, { wrapper })
+    await expect(hook.result.current.publish(item, true)).rejects.toThrow('Quản trị viên đã tạm tắt')
+  })
   it('loads a missing local draft from an uncached workspace read before declaring it missing', async () => {
     const item = localExam()
     useOnline.setState({ items: [] })

@@ -13,6 +13,7 @@ import { DocIcon, IconDocExam, IconDocBoard, IconDocSlide } from '@/engine/compo
 import { IconChevronDown, IconChevronLeft, IconClose, IconHome, IconPlus } from './icons'
 import { useAnchoredPopover, popoverStyle } from './useAnchoredPopover'
 import { useSlidingThumb } from './useSlidingThumb'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 export function TabStrip({
   tabs,
@@ -245,6 +246,7 @@ function NewDocMenu({
   onNewSlide?: () => void
   slideEnabled: boolean
 }) {
+  const { canUse } = useFeatureAccess()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const popRef = useRef<HTMLDivElement>(null)
@@ -286,6 +288,8 @@ function NewDocMenu({
     return <IconDocExam size={26} />
   }
 
+  if (!canUse('word') && !canUse('slide') && !canUse('board')) return null
+
   return (
     <div className="new-doc-menu" ref={menuRef}>
       <button
@@ -304,7 +308,7 @@ function NewDocMenu({
       {popAnim.mounted && createPortal(
         <div ref={popRef} className={cn('new-doc-pop', popAnim.closing ? 'pop-out' : 'pop-in')} style={popoverStyle(pos)} role="menu">
           <div className="new-doc-pop__head">Tạo tài liệu mới</div>
-          {NEW_DOC_OPTIONS.map((opt) => {
+          {NEW_DOC_OPTIONS.filter((opt) => canUse(opt.kind === 'exam' ? 'word' : opt.kind)).map((opt) => {
             const disabled = !opt.available || (opt.kind === 'slide' && !slideEnabled)
             return (
               <button

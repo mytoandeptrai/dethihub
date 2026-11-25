@@ -137,7 +137,7 @@ const uid = () => Math.random().toString(36).slice(2, 10)
  * trình duyệt (chọn "Lưu thành PDF"). Dùng đúng bộ vẽ của bản xem nên phông, công thức, màu giống hệt —
  * không phụ thuộc phông trong PowerPoint. CSS in nằm ở slide.css (`.slide-print-*`).
  */
-function PrintDeck({ slides, theme, footer, onDone }: { slides: Slide[]; theme: ResolvedTheme; footer?: DeckFooter; onDone: () => void }) {
+export function PrintDeck({ slides, theme, footer, onDone }: { slides: Slide[]; theme: ResolvedTheme; footer?: DeckFooter; onDone: () => void }) {
   const done = useRef(onDone)
   done.current = onDone
   useEffect(() => {

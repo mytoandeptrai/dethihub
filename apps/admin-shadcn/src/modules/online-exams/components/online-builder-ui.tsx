@@ -53,6 +53,7 @@ import {
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
+import { FeatureNotice } from '@/modules/feature-access/components/feature-notice'
 import { PageSkeleton } from '@/components/page-skeleton'
 import { OnlineBuilderModel } from '@/modules/online-exams/hooks'
 
@@ -65,6 +66,12 @@ export function OnlineBuilderOnlineBuilderUi(
   },
 ) {
   const { ExamPreview, Toggle, QuestionEditor } = props.parts
+  if (props.viewState === 4) return <FeatureNotice />
+  if (props.viewState === 1 && props.readOnly) return <PageShell>
+    <FeatureNotice banner />
+    <div className="my-4 flex gap-4 print:hidden"><Link to={appPaths.onlineExams.href}>Quay lại</Link><Button onClick={() => window.print()}>In / PDF</Button></div>
+    <ExamPreview title={props.item.meta.title} questions={props.questions} />
+  </PageShell>
   if (props.viewState === 0) {
     return <Navigate to={appPaths.onlineExams.href} replace />
   }
@@ -113,6 +120,7 @@ export function OnlineBuilderOnlineBuilderUi(
     } = props
     return (
       <PageShell>
+        {props.staffDisabled && <FeatureNotice staff />}
         <PageHeader
           eyebrow={
             <Link

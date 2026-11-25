@@ -36,6 +36,7 @@ import {
 } from '@/components/product-ui'
 import { appPaths } from '@/config/app-paths'
 import { t } from '@/i18n/translate'
+import { FeatureNotice } from '@/modules/feature-access/components/feature-notice'
 
 import type { OnlineListParts } from '@/modules/online-exams/containers/online-list-container'
 import type { OnlineListModel } from '@/modules/online-exams/hooks'
@@ -50,6 +51,7 @@ export function OnlineListOnlineListUi(
     const { items, onCreate, tab, setTab, paged, remove } = props
     return (
       <PageShell>
+        {props.staffDisabled && <FeatureNotice staff />}
         <PageHeader
           eyebrow={t('onlineExamsCopy.m76')}
           title={
@@ -68,7 +70,7 @@ export function OnlineListOnlineListUi(
           }
           description=""
           actions={
-            <Button variant="primary" onClick={onCreate}>
+            props.canCreate && <Button variant="primary" onClick={onCreate}>
               <Plus className="size-4" />
               {t('onlineExamsCopy.m80')}
             </Button>
@@ -109,7 +111,7 @@ export function OnlineListOnlineListUi(
                 title={t('onlineExamsCopy.m85')}
                 description={t('onlineExamsCopy.m86')}
                 action={
-                  <Button variant="clay" onClick={onCreate}>
+                  props.canCreate && <Button variant="clay" onClick={onCreate}>
                     <Plus className="size-4" />
                     {t('onlineExamsCopy.m80')}
                   </Button>
@@ -244,7 +246,7 @@ export function OnlineListItemCardUi(
                   variant="outline"
                   size="sm"
                   className="min-w-0 flex-1"
-                  disabled={busy || item.status !== 'done' || !playable}
+                  disabled={props.readOnly || busy || item.status !== 'done' || !playable}
                   data-tip={
                     item.status === 'done' ? t('onlineExamsCopy.m101') : t('onlineExamsCopy.m100')
                   }

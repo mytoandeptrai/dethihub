@@ -14,10 +14,12 @@ import { appPaths } from '@/config/app-paths'
 import { usePaged, useClientReady, useUrlState } from '@/hooks'
 import { t } from '@/i18n/translate'
 import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 import type { lib_onlineExam_OnlineItem as OnlineItem } from '@online-exams-engine'
 export type Tab = 'history' | 'published'
 export function useOnlineListContainer() {
+  const access = useFeatureAccess()
   const ready = useClientReady()
   const navigate = useNavigate()
   const [tab, setTab] = useUrlState<Tab>('tab', 'history', ['history', 'published'])
@@ -29,7 +31,9 @@ export function useOnlineListContainer() {
   return {
     viewState: 0 as const,
     items,
-    onCreate: () => navigate(appPaths.onlineExams.getHref(create())),
+    canCreate: access.canUse('online'),
+    staffDisabled: access.isStaff && access.isDisabled('online'),
+    onCreate: () => navigate(access.canUse('online') ? appPaths.onlineExams.getHref(create()) : appPaths.onlineExams.getHref('new')),
     tab,
     setTab,
     paged,
@@ -47,6 +51,7 @@ export function useItemCardContainer({
 }) {
   const navigate = useNavigate()
   const publication = useOnlinePublication()
+  const access = useFeatureAccess()
   const [busy, setBusy] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const exam = itemToExam(item)
@@ -54,6 +59,7 @@ export function useItemCardContainer({
   const playable = item.questions.length > 0 && issues === 0
   const published = Boolean(item.publishedId)
   const publish = async (listed: boolean) => {
+    if (!access.canUse('online')) return
     setBusy(true)
     setFormError(null)
     try {
@@ -81,6 +87,7 @@ export function useItemCardContainer({
     index,
     item,
     published,
+    readOnly: !access.canUse('online'),
     exam,
     onEdit: () => navigate(appPaths.onlineExams.getHref(item.id)),
     onQuiz: () => navigate(appPaths.quiz.getHref(loadForQuiz(item))),

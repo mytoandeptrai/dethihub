@@ -29,6 +29,7 @@ import { useClientReady, useSession as useFrontendSession } from '@/hooks'
 import { t } from '@/i18n/translate'
 import { onlineMetaSchema } from '@/modules/online-exams/hooks/schema'
 import { useOnlinePublication } from '@/modules/online-exams/hooks/use-online-publication'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 import type {
   lib_onlineExam_OnlineItem as OnlineItem,
@@ -49,6 +50,7 @@ export const GRADE_OPTIONS = GRADES.map((g) => ({ value: g, label: g }))
 export const textareaClass = inputClass + ' resize-y leading-relaxed'
 export const oneLine = (s: string) => s.replaceAll(/\s+/g, ' ').trim()
 export function useOnlineBuilderContainer() {
+  const access = useFeatureAccess()
   const ready = useClientReady()
   const auth = useFrontendSession()
   const publication = useOnlinePublication()
@@ -76,7 +78,10 @@ export function useOnlineBuilderContainer() {
     mode: 'onChange',
     values: item?.meta ?? defaultMeta(),
   })
-  const update = useOnline((s) => s.update)
+  const persist = useOnline((s) => s.update)
+  const update: typeof persist = (itemId, patch) => {
+    if (access.canUse('online')) persist(itemId, patch)
+  }
   const loggedIn = Boolean(auth.session)
   const [step, setStep] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -88,6 +93,8 @@ export function useOnlineBuilderContainer() {
   if (remote.error && !item) return { viewState: 3 as const, error: remote.error.message }
   if (!ready || auth.isLoading || (!item && !!auth.session && remote.isPending))
     return { viewState: 2 as const }
+  if (!item && !access.isResolved) return { viewState: 2 as const }
+  if (!item && !access.canUse('online')) return { viewState: 4 as const }
   if (!item) return { viewState: 0 as const }
   const questions = item.questions
   const issues = questions.map((question) => questionIssue(question))
@@ -223,6 +230,8 @@ export function useOnlineBuilderContainer() {
   }
   return {
     viewState: 1 as const,
+    readOnly: !access.canUse('online'),
+    staffDisabled: access.isStaff && access.isDisabled('online'),
     item,
     questions,
     setPreview,

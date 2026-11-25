@@ -58,6 +58,10 @@ import { cn } from '@/engine/lib/cn'
 import { attachToAi } from '@/engine/lib/aiAttach'
 import { blockKey, blocksText, focusNote, type AiApplyResult } from '@/engine/lib/aiDocContext'
 import { reportAi, takeRecentAiTurn } from '@/engine/lib/aiFeedback'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
+import type { Feature } from '@/modules/feature-access/hooks/use-feature-access'
+import { FeatureNotice } from '@/modules/feature-access/components/feature-notice'
+import { appPaths } from '@/config/app-paths'
 
 const SESSION_KEY = 'dethinhbien-compose-session'
 const MOBILE_VIEW_KEY = 'dethinhbien-mobile-view'
@@ -120,6 +124,7 @@ const loadTools = (): Promise<ToolMods> =>
   ))
 const AiPanel = lazyPage(() => import('@/engine/examEditor/AiPanel').then((m) => ({ default: m.AiPanel })))
 const SlideEditor = lazyPage(() => loadSlideEditor().then((m) => ({ default: m.SlideEditor })))
+const SlideReadOnly = lazyPage(() => import('@/engine/examEditor/slide-read-only').then((module) => ({ default: module.SlideReadOnly })))
 
 /** khung giữ chỗ lúc trình soạn slide chưa tải xong: có sẵn thanh ribbon + vùng slide mờ, không để trắng phía trên */
 /** khung chờ của bảng vẽ: thanh công cụ, hàng tuỳ chọn, mặt bảng */
@@ -206,7 +211,23 @@ function nodeText(node: JSONContent): string {
   return (node.content ?? []).map(nodeText).join(' ')
 }
 
+const featureForKind = (kind?: string): Feature => kind === 'slide' ? 'slide' : kind === 'board' ? 'board' : 'word'
+
 export default function ComposeDoc() {
+  const access = useFeatureAccess()
+  const location = useLocation()
+  const query = new URLSearchParams(location.search).get('new')
+  const kind = query || (location.state as { create?: string } | null)?.create
+  const requested = kind ? featureForKind(kind) : undefined
+  if (requested && !access.isResolved) return <BoardSkeleton />
+  if (requested && !access.canUse(requested)) return <FeatureNotice />
+  return <ComposeWorkspace requestedCreation={requested} />
+}
+
+function ComposeWorkspace({ requestedCreation }: { requestedCreation?: Feature }) {
+  const access = useFeatureAccess()
+  const accessRef = useRef(access)
+  accessRef.current = access
   const navigate = useNavigate()
   const viewport = useViewportSize()
   // tải sẵn trình soạn slide khi rảnh → bấm "Slide" là hiện ngay, không thấy khung chờ
@@ -228,13 +249,20 @@ export default function ComposeDoc() {
     renameTab,
     setTabStatus,
     setContent,
-    saveDoc,
-    saveTab,
-    saveAll,
+    saveTab: persistTab,
     openDoc,
     openDeck,
     updateDeck,
   } = useComposeStore()
+
+  const saveTab = useCallback((id: string) => {
+    const tab = useComposeStore.getState().tabs.find((value) => value.id === id)
+    if (tab && accessRef.current.canUse(featureForKind(tab.kind))) persistTab(id)
+  }, [persistTab])
+  const saveDoc = saveTab
+  const saveAll = useCallback(() => {
+    for (const tab of useComposeStore.getState().tabs) if (tab.dirty) saveTab(tab.id)
+  }, [saveTab])
 
   const [ribbonTab, setRibbonTab] = useState('home')
   const [findTab, setFindTab] = useState<'find' | 'replace' | null>(null)
@@ -243,7 +271,7 @@ export default function ComposeDoc() {
   // create: trang chủ bấm "Mở bảng vẽ" / "Mở ngay" (Slide) → mở thẳng một slide / bảng vẽ trống
   const { state: navState } = useLocation() as { state: { openTab?: boolean; open?: { kind: 'exam' | 'slide' | 'board'; id: string }; create?: 'slide' | 'board' } | null }
   // F5 không về màn Bắt đầu: phiên (tab đang mở, tab đang xem) giữ trong sessionStorage — xem effect khôi phục bên dưới
-  const [startChosen, setStartOpen] = useState(() => (navState?.openTab || navState?.create ? false : (readSession()?.start ?? true)))
+  const [startChosen, setStartOpen] = useState(() => (navState?.openTab || requestedCreation ? false : (readSession()?.start ?? true)))
   // không còn tab nào (mới vào trang, hoặc vừa đóng tab cuối) thì luôn ở màn Bắt đầu
   const startOpen = startChosen || tabs.length === 0
   // màn hẹp (tablet/điện thoại): trợ lý AI nổi đè lên trang nên mặc định đóng
@@ -307,12 +335,13 @@ export default function ComposeDoc() {
         if (doc) openDoc(doc)
       }
       navigate('.', { replace: true, state: null })
-    } else if (navState?.create && !createdRef.current) {
+    } else if (requestedCreation && !createdRef.current) {
       // StrictMode chạy effect hai lần ở dev: không tạo hai bảng/slide
       createdRef.current = true
-      if (navState.create === 'board') newBoard()
-      else newSlide()
-      navigate('.', { replace: true, state: null })
+      if (requestedCreation === 'board') newBoard()
+      else if (requestedCreation === 'slide') newSlide()
+      else newDoc()
+      navigate(appPaths.editor.href, { replace: true, state: null })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -331,13 +360,13 @@ export default function ComposeDoc() {
 
   // Tự lưu toàn bộ tab khi rời trang (đóng tab trình duyệt, tải lại, điều hướng).
   useEffect(() => {
-    const flush = () => useComposeStore.getState().saveAll()
+    const flush = () => saveAll()
     window.addEventListener('pagehide', flush)
     window.addEventListener('beforeunload', flush)
     // và cứ 5 giây lưu các tab có thay đổi, để treo máy hay trình duyệt đóng đột ngột cũng không mất bài (rồi đồng bộ lên tài khoản)
     const timer = window.setInterval(() => {
       const s = useComposeStore.getState()
-      for (const t of s.tabs) if (t.dirty) s.saveTab(t.id)
+      for (const t of s.tabs) if (t.dirty) saveTab(t.id)
     }, 5000)
     return () => {
       window.clearInterval(timer)
@@ -346,7 +375,7 @@ export default function ComposeDoc() {
       // rời /soan-de bằng điều hướng SPA: chỉ lưu tab có thay đổi, tránh tạo
       // bản ghi rỗng khi StrictMode mount/unmount hai lần
       const s = useComposeStore.getState()
-      if (s.tabs.some((t) => t.dirty)) s.saveAll()
+      if (s.tabs.some((t) => t.dirty)) saveAll()
     }
   }, [])
 
@@ -368,6 +397,7 @@ export default function ComposeDoc() {
    */
   const newDocAndOpen = useCallback(
     (reuseEmpty: boolean) => {
+      if (!accessRef.current.canUse('word')) return
       if (reuseEmpty) {
         // chỉ dùng lại tab ĐỀ trống — tab slide/bảng vẽ không có `contents` nên trước đây bị coi nhầm là đề trống
         const only = tabs.length === 1 && tabs[0].kind !== 'slide' && tabs[0].kind !== 'board' ? tabs[0] : null
@@ -434,6 +464,11 @@ export default function ComposeDoc() {
   )
 
   const activeTab = tabs.find((t) => t.id === activeId)
+  const activeFeature = featureForKind(activeTab?.kind)
+  const readOnly = !access.canUse(activeFeature)
+  useEffect(() => {
+    editor?.setEditable(!readOnly)
+  }, [editor, readOnly])
   const slideActions = useRef<SlideEditorActions>(null)
   const savedStatus = useDocStore((s) => activeTab?.kind === 'slide'
     ? s.myDecks.find((d) => d.id === activeId)?.status
@@ -468,7 +503,7 @@ export default function ComposeDoc() {
 
   const onChange = useCallback(
     (doc: JSONContent) => {
-      if (!activeId) return
+      if (!activeId || !accessRef.current.canUse('word')) return
       setContent(activeId, doc)
     },
     [activeId, setContent],
@@ -490,6 +525,7 @@ export default function ComposeDoc() {
    * để chỉnh đáp án, giải thích, cài đặt rồi làm thử hoặc đăng. Chuyển rồi mà bấm lại thì hỏi mở bản đã chỉnh hay chuyển lại từ đầu.
    */
   const handleStartQuiz = useCallback(async () => {
+    if (!accessRef.current.canUse('online')) return
     if (!activeDoc) return
     const exam = docToExam(activeDoc, `doc-${activeDoc.id}`)
     if (!exam.sections.some((s) => s.questions.length)) {
@@ -854,17 +890,19 @@ export default function ComposeDoc() {
 
   return (
     <div className={cn('compose-app', isReflow && 'is-reflow')}>
-      {!startOpen && activeTab && activeTab.kind !== 'exam' && <EditorHeader
+      {!startOpen && activeTab && access.isDisabled(activeFeature) && <FeatureNotice banner staff={access.isStaff} />}
+      {!startOpen && activeTab && (activeTab.kind !== 'exam' || readOnly) && <EditorHeader
         key={activeTab.id}
         fileSlot={activeTab.kind !== 'board' ? setExamFileTarget : undefined}
         onCommands={activeTab.kind !== 'board' ? () => setExamCommandsOpen(true) : undefined}
         title={activeTab.title}
         dirty={activeTab.dirty}
+        readOnly={readOnly}
         status={docStatus(savedStatus ?? activeDeck?.status)}
         onRename={(title) => renameTab(activeTab.id, title)}
         onStatusChange={activeTab.kind === 'board' ? undefined : (status) => setTabStatus(activeTab.id, status)}
         onSave={activeTab.kind === 'slide' ? handleSaveSlide : handleSave}
-        onPreview={activeTab.kind === 'board' ? undefined : activeTab.kind === 'slide' ? () => slideActions.current?.present() : handleStartQuiz}
+        onPreview={activeTab.kind === 'board' || readOnly && activeTab.kind !== 'slide' || !access.canUse('online') && activeTab.kind === 'exam' ? undefined : activeTab.kind === 'slide' ? () => slideActions.current?.present() : handleStartQuiz}
         previewLabel={activeTab.kind === 'slide' ? 'Trình chiếu' : 'Làm đề tương tác'}
         previewEmphasis={activeTab.kind === 'slide'}
         previewIcon={activeTab.kind === 'slide' ? undefined : <MonitorPlay className="size-4" strokeWidth={1.5} />}
@@ -895,15 +933,20 @@ export default function ComposeDoc() {
           }}
           onNew={() => newDocAndOpen(false)}
           onNewSlide={() => {
+            if (!access.canUse('slide')) return
             newSlide()
             setStartOpen(false)
           }}
           onNewBoard={() => {
+            if (!access.canUse('board')) return
             newBoard()
             setStartOpen(false)
           }}
           slideEnabled
-          onRename={renameTab}
+          onRename={(id, title) => {
+            const tab = tabs.find((value) => value.id === id)
+            if (tab && access.canUse(featureForKind(tab.kind))) renameTab(id, title)
+          }}
           onBack={saveAll}
         />
       </div>
@@ -917,10 +960,12 @@ export default function ComposeDoc() {
             setStartOpen(false)
           }}
           onNewSlide={() => {
+            if (!access.canUse('slide')) return
             newSlide()
             setStartOpen(false)
           }}
           onNewBoard={() => {
+            if (!access.canUse('board')) return
             newBoard()
             setStartOpen(false)
           }}
@@ -937,7 +982,7 @@ export default function ComposeDoc() {
         <div className="compose-body">
           <PageErrorBoundary resetKey={activeTab.id}>
           <Suspense fallback={<BoardSkeleton />}>
-            <BoardEditor key={activeTab.id} id={activeTab.id} />
+            <BoardEditor key={`${activeTab.id}:${readOnly}`} id={activeTab.id} readOnly={readOnly} />
           </Suspense>
           </PageErrorBoundary>
         </div>
@@ -946,7 +991,7 @@ export default function ComposeDoc() {
         <div className="compose-body">
           <PageErrorBoundary resetKey={activeDeck.id}>
           <Suspense fallback={<SlideEditorSkeleton />}>
-          <SlideEditor
+          {readOnly ? <SlideReadOnly deck={activeDeck} actionsRef={slideActions} /> : <SlideEditor
             fileTarget={examFileTarget}
             commandOpen={examCommandsOpen}
             onCommandOpen={setExamCommandsOpen}
@@ -956,13 +1001,13 @@ export default function ComposeDoc() {
             onSave={handleSaveSlide}
             onNewDeck={newSlide}
             onImportFile={handleImportSlides}
-          />
+          />}
           </Suspense>
           </PageErrorBoundary>
         </div>
       ) : (
         <>
-      <Ribbon
+      {!readOnly && <Ribbon
         editor={editor}
         activeTab={ribbonTab}
         onTabChange={setRibbonTab}
@@ -1003,9 +1048,9 @@ export default function ComposeDoc() {
           hint: docStatus(savedStatus) === status ? 'Hiện tại' : 'Đổi trạng thái tài liệu',
           onClick: () => setTabStatus(activeTab!.id, status),
         }))}
-      />
+      />}
       <div className="compose-body">
-          <NavPanel
+          {!readOnly && <NavPanel
             doc={activeContent}
             open={navOpen}
             onOpenChange={setNavOpen}
@@ -1020,11 +1065,11 @@ export default function ComposeDoc() {
             currentTab={navTab}
             onTabChange={setNavTab}
             inspectorContent={<InspectorPanel inspector={inspector} />}
-          />
+          />}
         {/* sân soạn (giữa) */}
         <div className="compose-center">
-          <InspectorOverlay inspector={inspector} hidden={navOpen && (isMobile || isTablet)} />
-          {findTab && editor && (
+          {!readOnly && <InspectorOverlay inspector={inspector} hidden={navOpen && (isMobile || isTablet)} />}
+          {!readOnly && findTab && editor && (
             <Suspense fallback={null}><FindPanel editor={editor} initialTab={findTab} onClose={() => setFindTab(null)} /></Suspense>
           )}
           <div className="compose-scroll" ref={stageRef}>
@@ -1035,7 +1080,7 @@ export default function ComposeDoc() {
               key={activeId ?? 'none'}
               style={{ zoom: isReflow ? 1 : effectiveScale, ['--page-zoom' as string]: isReflow ? 1 : effectiveScale }}
             >
-              {!isReflow && (
+              {!readOnly && !isReflow && (
                 <Ruler
                   width={PAGE_W}
                   margin={MARGIN}
@@ -1057,6 +1102,7 @@ export default function ComposeDoc() {
                   onChange={onChange}
                   onReady={handleEditorReady}
                   pageSetup={pageSetup}
+                  readOnly={readOnly}
                   isReflow={isReflow}
                 />
               </Suspense>
@@ -1121,7 +1167,7 @@ export default function ComposeDoc() {
 
         {/* nav pane (phải) */}
         <Suspense fallback={null}>
-        <DocSelectionAi
+        {!readOnly && <DocSelectionAi
           editor={editor}
           context={activeDoc ? `đề "${activeDoc.title}"` : undefined}
           onInsertPlot={(img, after) => void handleInsertPlot(img, { after })}
@@ -1149,9 +1195,9 @@ export default function ComposeDoc() {
             }])
             setAiOpen(true)
           }}
-        />
+        />}
         </Suspense>
-        {plotEdit && (
+        {!readOnly && plotEdit && (
           <Suspense fallback={null}>
           <ToolModal
             kind={plotEdit.doc.kind}
@@ -1166,7 +1212,7 @@ export default function ComposeDoc() {
           </Suspense>
         )}
         {/* AI dock (phải, như soạn slide) */}
-        <AiDock open={aiOpen} onToggle={() => setAiOpen((v) => !v)} width={360} side="right">
+        {!readOnly && <AiDock open={aiOpen} onToggle={() => setAiOpen((v) => !v)} width={360} side="right">
           <Suspense fallback={null}>
           <AiPanel
             attachKey="exam"
@@ -1182,7 +1228,7 @@ export default function ComposeDoc() {
             }
           />
           </Suspense>
-        </AiDock>
+        </AiDock>}
 
       </div>
         </>

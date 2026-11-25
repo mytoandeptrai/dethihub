@@ -9,11 +9,14 @@ import { Slot, Tabs as TabsPrimitive } from 'radix-ui'
 import { isValidElement } from 'react'
 
 import { appPaths } from '@/config/app-paths'
+import { useFeatureAccess } from '@/modules/feature-access/hooks/use-feature-access'
 
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
 
 type LinkProps = Omit<ComponentProps<typeof NextLink>, 'href'> & { to?: string; href?: string }
 export function Link({ to, href, ...props }: LinkProps) {
+  const access = useFeatureAccess()
+  if ((href ?? to) === appPaths.editor.href && !access.canUse('word')) return null
   return <NextLink href={href ?? to ?? appPaths.home.href} {...props} />
 }
 
