@@ -10,9 +10,11 @@ export type AdminSection =
   | 'ai'
   | 'audit'
 export function useAdminContainer(section: AdminSection) {
-  const me = useMe().data
+  const query = useMe()
+  const me = query.data
   return {
     section,
+    isPending: query.isPending,
     me:
       me && (me.role === 'admin' || me.role === 'moderator')
         ? { userId: me.userId, role: me.role }

@@ -1,4 +1,5 @@
 'use client'
+import { LoadingRegion, TableSkeleton } from '@/components/page-skeleton'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import {
@@ -238,10 +239,7 @@ export function StatsPanelStatsPanelUi(
           </div>
 
           {loading ? (
-            <div className="text-ink-3 flex h-44 items-center justify-center">
-              <Skeleton className="mr-2 h-8 w-24" />
-              <span className="text-[13px]">{t('adminOpsCopy.m21')}</span>
-            </div>
+            <LoadingRegion><Skeleton className="h-44 w-full" /></LoadingRegion>
           ) : chartDays.length === 0 ? (
             <EmptyState title={t('adminOpsCopy.m22')} className="min-h-44" />
           ) : (
@@ -311,10 +309,7 @@ export function StatsPanelStatsPanelUi(
           </div>
 
           {loading ? (
-            <div className="text-ink-3 flex h-44 items-center justify-center">
-              <Skeleton className="mr-2 h-8 w-24" />
-              <span className="text-[13px]">{t('adminOpsCopy.m21')}</span>
-            </div>
+            <LoadingRegion><Skeleton className="h-44 w-full" /></LoadingRegion>
           ) : chartDays.length === 0 ? (
             <EmptyState title={t('adminOpsCopy.m27')} className="min-h-44" />
           ) : (
@@ -418,10 +413,7 @@ export function StatsPanelStatsPanelUi(
 
             <div className="divide-line-2 mt-4 max-h-[55vh] divide-y overflow-y-auto">
               {loadingOnline ? (
-                <div className="text-ink-3 flex h-32 items-center justify-center">
-                  <Skeleton className="mr-2 h-8 w-24" />
-                  <span className="text-[13px]">{t('adminOpsCopy.m36')}</span>
-                </div>
+                <LoadingRegion><TableSkeleton /></LoadingRegion>
               ) : onlineUsers.length === 0 ? (
                 <EmptyState title={t('adminOpsCopy.m37')} />
               ) : (

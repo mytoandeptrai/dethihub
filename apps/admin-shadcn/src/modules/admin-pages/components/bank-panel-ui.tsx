@@ -1,4 +1,5 @@
 'use client'
+import { LoadingRegion, CardGridSkeleton } from '@/components/page-skeleton'
 import {
   data_bankLevel_LEVEL_LABEL as LEVEL_LABEL,
   data_types_GRADES as METADATA_GRADES,
@@ -9,7 +10,6 @@ import {
   components_appIcons_TrashIcon as TrashIcon,
   data_bankLevel_levelOf as levelOf,
 } from '@admin-pages-engine'
-import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import {
   AlertCircle,
@@ -345,9 +345,7 @@ export function BankPanelBankPanelUi(
         </Toolbar>
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <Skeleton className="h-40 w-full rounded-xl" />
-          </div>
+          <LoadingRegion><CardGridSkeleton /></LoadingRegion>
         ) : filteredItems.length === 0 ? (
           <EmptyState
             icon={<BookOpen className="text-ink-4 size-8" />}

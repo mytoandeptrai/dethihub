@@ -1,4 +1,6 @@
 'use client'
+import { LoadingRegion } from '@/components/page-skeleton'
+import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { Database, RotateCw } from 'lucide-react'
 
@@ -82,7 +84,7 @@ export function DbStatusCardDbStatusCardUi(
           </div>
         </div>
         <div className="border-line text-ink-3 tnum flex flex-wrap items-center gap-x-2 gap-y-1 border-t px-4 py-2.5 text-[12.5px]">
-          {err ? (
+          {loading && !st ? <LoadingRegion><div className="flex gap-3">{[0, 1, 2, 3].map((key) => <Skeleton key={key} className="h-5 w-14" />)}</div></LoadingRegion> : err ? (
             <span className="text-clay">{err}</span>
           ) : (
             <>
