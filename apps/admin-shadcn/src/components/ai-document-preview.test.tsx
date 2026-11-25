@@ -11,6 +11,11 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('renders adjacent rich spans as one Markdown flow instead of a minus-sign bullet', () => {
+    render(<AiDocumentPreview document={{ blocks: [{ type: 'paragraph', text: [{ text: '$x^2$' }, { text: ' - 2' }] }] }} renderText={(text) => <p data-testid="inline-flow">{text}</p>} />)
+    expect(screen.getAllByTestId('inline-flow')).toHaveLength(1)
+    expect(screen.getByTestId('inline-flow')).toHaveTextContent('$x^2$ - 2')
+  })
   it('numbers a patched question by its resulting position and uses the existing answer key', () => {
     const current = { type: 'doc', content: [
       { type: 'examHeader' },

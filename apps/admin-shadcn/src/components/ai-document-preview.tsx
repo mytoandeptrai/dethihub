@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { t } from '@/i18n/translate'
 import { isAiQuestionBlock, questionText } from '@/lib/ai-question-stream'
 
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value)
@@ -80,12 +80,21 @@ function PaperBlock({
   answer?: unknown
   renderText: (text: string) => ReactNode
 }) {
-  const text = (value: unknown) => Array.isArray(value)
-    ? keyed(value).map(({ value: span, key }) => {
-        const image = record(record(span).image)
-        return <span key={key}>{renderText(contentText(span))}{typeof image.src === 'string' ? <Image unoptimized src={image.src} alt={String(image.alt ?? '')} width={Number(image.width) || 260} height={200} style={{ width: 'auto', height: 'auto' }} className="my-2 block max-h-56 max-w-full object-contain" /> : null}</span>
-      })
-    : renderText(contentText(value))
+  const text = (value: unknown) => {
+    if (!Array.isArray(value)) return renderText(contentText(value))
+    const parts: ReactNode[] = []
+    let buffer = ''
+    keyed(value).forEach(({ value: span, key }) => {
+      buffer += contentText(span)
+      const image = record(record(span).image)
+      if (typeof image.src !== 'string') return
+      if (buffer) parts.push(<Fragment key={`text-${key}`}>{renderText(buffer)}</Fragment>)
+      buffer = ''
+      parts.push(<Image key={key} unoptimized src={image.src} alt={String(image.alt ?? '')} width={Number(image.width) || 260} height={200} style={{ width: 'auto', height: 'auto' }} className="my-2 block max-h-56 max-w-full object-contain" />)
+    })
+    if (buffer) parts.push(<Fragment key="tail">{renderText(buffer)}</Fragment>)
+    return parts
+  }
   if (block.type === 'header')
     return (
       <div className="grid grid-cols-2 gap-3 border-b border-indigo-100 pb-3 text-center text-xs font-semibold whitespace-pre-line">
