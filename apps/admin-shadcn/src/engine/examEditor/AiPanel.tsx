@@ -217,7 +217,7 @@ interface ActStep {
 
 function examReview(content: string, questionCount: number, finishReason?: string | null): Pick<ChatTurn, 'text' | 'previewPayload' | 'incomplete'> {
   const raw = parseAiDocumentReply(content, extractJson)
-  if ((raw || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (finishReason === 'length' || !isAiDocumentReplyComplete(content))) {
+  if ((raw || /^\s*(?:```(?:json)?\s*)?\{\s*"(?:action|blocks|say|patch)"/.test(content)) && (['length', 'max_tokens'].includes(finishReason ?? '') || !isAiDocumentReplyComplete(content))) {
     return { text: 'Phản hồi bị cắt, chưa thể áp dụng an toàn. Thầy/cô hãy chọn Soạn lại.', previewPayload: undefined, incomplete: true }
   }
   if (raw && (typeof raw.action === 'string' || Array.isArray(raw.blocks) || Array.isArray(raw.patch) || typeof raw.say === 'string')) {

@@ -79,8 +79,8 @@ describe('exam AI review workflow', () => {
     expect(apply).not.toHaveBeenCalled()
   })
 
-  it('blocks length-limited replies even when their JSON delimiters are complete', async () => {
-    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason: 'length', usage: null })))
+  it.each(['length', 'max_tokens'])('blocks token-limited replies even when their JSON delimiters are complete: %s', async (finishReason) => {
+    server.use(http.post('http://localhost:3000/api/ai/chat', () => HttpResponse.json({ content: JSON.stringify({ action: 'replace', blocks: [{ type: 'paragraph', text: 'Partial draft' }] }), finishReason, usage: null })))
     render(<AiPanel onApplyBlocks={vi.fn()} />)
     await userEvent.type(screen.getByLabelText('Nhập yêu cầu cho AI'), 'Soạn đề 1 câu Toán lớp 9{Enter}')
     await screen.findByText(/Phản hồi bị cắt/)
