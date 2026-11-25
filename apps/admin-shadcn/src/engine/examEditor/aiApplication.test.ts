@@ -3,6 +3,25 @@ import { prepareAiApplication } from './aiApplication'
 import { blocksToTipTap, plainText } from './convert'
 
 describe('ai application preparation', () => {
+  it.each([
+    { patch: [] },
+    { patch: [{ id: 'not-an-id', block: { type: 'paragraph', text: 'Không áp dụng' } }] },
+    { patch: [{ id: null, block: { type: 'paragraph', text: 'Không áp dụng' } }, { op: 'delete' }] },
+  ])('classifies an unusable patch array as a patch no-op: $patch', ({ patch }) => {
+    const prepared = prepareAiApplication({ say: 'Đã sửa xong.', patch })
+    expect(prepared.action).toBe('patch')
+    expect(prepared.noChanges).toBe(true)
+    expect(prepared.patches).toEqual([])
+  })
+
+  it('does not infer replacement blocks when an unusable patch array was supplied', () => {
+    const prepared = prepareAiApplication({ patch: [{ id: 'bad' }], blocks: [{ type: 'paragraph', text: 'Không được thay đề' }] })
+    expect(prepared.action).toBe('patch')
+    expect(prepared.noChanges).toBe(true)
+    expect(prepareAiApplication({ blocks: [{ type: 'paragraph', text: 'Đề mới' }] }).action).toBe('replace')
+    expect(prepareAiApplication({ say: 'Lời giải' }).action).toBe('none')
+    expect(prepareAiApplication({ action: 'replace', patch: [], blocks: [{ type: 'paragraph', text: 'Đề mới' }] }).action).toBe('replace')
+  })
   it.each(['before', 'after'])('keeps a replaced question identity with an explanation %s it', (position) => {
     const question = { type: 'question' as const, no: 1, text: '1 + 1 = ?', options: [{ label: 'A', text: '2' }] }
     const explanation = { type: 'paragraph', text: 'Giải thích: cộng hai số một.' }

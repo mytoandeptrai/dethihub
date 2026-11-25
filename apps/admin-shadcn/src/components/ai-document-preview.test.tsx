@@ -11,6 +11,12 @@ function AiDocumentPreview(props: Omit<ComponentProps<typeof PreparedPreview>, '
 }
 
 describe('document approval preview', () => {
+  it('shows a patch no-op notice instead of a successful draft when all IDs are malformed', () => {
+    render(<AiDocumentPreview document={{ say: 'Đã sửa xong.', patch: [{ id: 'invalid', block: { type: 'paragraph', text: 'Không được chèn' } }] }} />)
+    expect(screen.getByText('Sửa một phần')).toBeVisible()
+    expect(screen.getByRole('alert')).toHaveTextContent('Không có thay đổi hợp lệ để áp dụng.')
+    expect(screen.queryByText('Không được chèn')).not.toBeInTheDocument()
+  })
   it('clearly reports that out-of-bounds patches have nothing to apply', () => {
     const document = { say: 'Đã sửa xong.', patch: [{ id: 'k99', block: { type: 'paragraph', text: 'Không được chèn' } }] }
     render(<PreparedPreview document={document} prepared={prepareAiApplication(document, { type: 'doc', content: [{ type: 'paragraph' }] })} />)
@@ -45,7 +51,7 @@ describe('document approval preview', () => {
     expect(screen.queryByText('Xoá khối · k0')).not.toBeInTheDocument()
   })
   it.each([undefined, 'replace'])('warns about replacement for effective action %s and hides ignored patches', (action) => {
-    render(<AiDocumentPreview document={{ action, blocks: [{ type: 'paragraph', text: 'Đề mới' }], patch: action ? [{ id: 'k0', block: { type: 'paragraph', text: 'Không áp dụng' } }] : [] }} />)
+    render(<AiDocumentPreview document={{ action, blocks: [{ type: 'paragraph', text: 'Đề mới' }], ...(action ? { patch: [{ id: 'k0', block: { type: 'paragraph', text: 'Không áp dụng' } }] } : {}) }} />)
     expect(screen.getByText('Thay toàn bộ đề')).toBeVisible()
     expect(screen.queryByText('Không áp dụng')).not.toBeInTheDocument()
   })

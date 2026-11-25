@@ -42,12 +42,12 @@ test('inserting a question leaves existing answer-key cells unchanged', async ({
   await context.close()
 })
 
-test('out-of-bounds patches keep rejection and regeneration available after Apply', async ({ browser }) => {
+for (const [label, id] of [['out-of-bounds', 'k999'], ['malformed-id', 'invalid']]) test(`${label} patches keep rejection and regeneration available after Apply`, async ({ browser }) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
   const context = await browser.newContext({ storageState: auth.state })
   const page = await context.newPage()
-  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ say: 'Đã sửa xong.', patch: [{ id: 'k999', block: { type: 'paragraph', text: 'Không được chèn' } }] }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'no-op-fixture' }
+  const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify({ say: 'Đã sửa xong.', patch: [{ id, block: { type: 'paragraph', text: 'Không được chèn' } }] }), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'no-op-fixture' }
   await page.route('**/api/**', (route) => {
     const pathname = new URL(route.request().url()).pathname
     return route.fulfill({ json: pathname === '/api/ai/chat' ? response : pathname === '/api/me' ? { userId: auth.user.id, role: 'user' } : pathname === '/api/site/status' ? { maintenance: false } : pathname === '/api/ai/quota' ? { used: 0, limit: 100, credits: 100 } : [] })
