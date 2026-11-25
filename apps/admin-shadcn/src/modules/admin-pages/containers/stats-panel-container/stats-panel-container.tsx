@@ -6,7 +6,7 @@ export function StatsPanelContainer(
   ...args: Parameters<typeof StatsPanelModel.useStatsPanelContainer>
 ) {
   const props = StatsPanelModel.useStatsPanelContainer(...args)
-  if (props.loading) return <PageSkeleton variant="dashboard" />
+  if (props.initialLoading) return <PageSkeleton variant="dashboard" />
   return <StatsPanelStatsPanelUi {...props} parts={StatsPanelParts} />
 }
 export const StatsPanelParts = { StatsPanel: StatsPanelContainer }

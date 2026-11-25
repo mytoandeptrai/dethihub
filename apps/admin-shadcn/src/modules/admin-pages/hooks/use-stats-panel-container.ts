@@ -28,6 +28,7 @@ export function useStatsPanelContainer({ me: _me }: StatsPanelProps) {
   const [days, setDays] = useState<'7' | '30' | '90'>('7')
   const [stats, setStats] = useState<StatsOverview | null>(null)
   const [loading, setLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [onlineData, setOnlineData] = useState<StatsOnline | null>(null)
   const [loadingOnline, setLoadingOnline] = useState(false)
@@ -43,6 +44,7 @@ export function useStatsPanelContainer({ me: _me }: StatsPanelProps) {
       } catch {
       } finally {
         setLoading(false)
+        setInitialLoading(false)
         setRefreshing(false)
       }
     },
@@ -97,6 +99,7 @@ export function useStatsPanelContainer({ me: _me }: StatsPanelProps) {
     loadOverview,
     loadOnline,
     loading,
+    initialLoading,
     refreshing,
     stats,
     newUsersInPeriod,

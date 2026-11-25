@@ -238,7 +238,7 @@ export function StatsPanelStatsPanelUi(
             </div>
           </div>
 
-          {loading ? (
+          {loading || refreshing ? (
             <LoadingRegion><Skeleton className="h-44 w-full" /></LoadingRegion>
           ) : chartDays.length === 0 ? (
             <EmptyState title={t('adminOpsCopy.m22')} className="min-h-44" />
@@ -308,7 +308,7 @@ export function StatsPanelStatsPanelUi(
             </div>
           </div>
 
-          {loading ? (
+          {loading || refreshing ? (
             <LoadingRegion><Skeleton className="h-44 w-full" /></LoadingRegion>
           ) : chartDays.length === 0 ? (
             <EmptyState title={t('adminOpsCopy.m27')} className="min-h-44" />
