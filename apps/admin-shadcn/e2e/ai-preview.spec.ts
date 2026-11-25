@@ -75,7 +75,7 @@ for (const [label, id] of [['out-of-bounds', 'k999'], ['malformed-id', 'invalid'
 test('document approval is a readable mini exam, not a JSON tree', async ({ browser }, testInfo) => {
   const origin = process.env.PUBLIC_PAGES_ORIGIN ?? 'http://localhost:8080'
   const auth = await signedInState(browser, origin)
-  const context = await browser.newContext({ storageState: auth.state, viewport: { width: 1600, height: 1400 } })
+  const context = await browser.newContext({ storageState: auth.state, viewport: { width: 1600, height: 900 } })
   const page = await context.newPage()
   const response: components['schemas']['ChatResponseDto'] = { content: JSON.stringify(draftPreviewFixture), reasoning: '', usage: null, finishReason: 'stop', quota: null, receipt: 'preview-fixture' }
   await page.route('**/api/**', (route) => {
@@ -102,6 +102,13 @@ test('document approval is a readable mini exam, not a JSON tree', async ({ brow
   await expect(page.getByRole('button', { name: 'Soạn lại', exact: true })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Huỷ', exact: true })).toBeEnabled()
   await page.evaluate(() => document.fonts.ready)
+  const approval = page.getByRole('button', { name: 'Áp dụng', exact: true }).locator('..')
+  await expect(page.getByRole('button', { name: 'Áp dụng', exact: true })).toBeInViewport({ ratio: 1 })
+  await expect.poll(() => approval.evaluate((row) => {
+    const chat = row.closest('.ai-chat') as HTMLElement
+    return Math.round(chat.getBoundingClientRect().top + chat.clientTop + chat.clientHeight - row.getBoundingClientRect().bottom)
+  })).toBeLessThanOrEqual(8)
+  await page.locator('.ai-panel').screenshot({ path: testInfo.outputPath('ai-scroll-fixed.png') })
   await preview.screenshot({ path: testInfo.outputPath('ai-preview-new.png') })
   await context.close()
 })

@@ -43,7 +43,7 @@ export function AiQuestionPreview({ questions, total, busy = false, inserted = f
         ))}
       </ol>
       {refundedTokens && refundedTokens > 0 ? <p className="mt-2 text-emerald-700">Đã hoàn {(refundedTokens / 1000).toLocaleString('vi-VN')} điểm</p> : null}
-      {reviewOnly ? null : <div className="mt-3 flex flex-wrap gap-2">
+      {reviewOnly ? null : <div className="mt-3 flex flex-wrap gap-2" data-ai-approval>
         <button type="button" disabled={busy || inserted || selected.length === 0} onClick={() => onInsert(selected)} className="rounded-lg bg-indigo-600 px-3 py-2 font-medium text-white disabled:opacity-40">{inserted ? 'Đã chèn vào đề' : 'Chèn vào đề'}</button>
         <button type="button" disabled={busy} onClick={onRegenerate} className="rounded-lg border border-line px-3 py-2 disabled:opacity-40">Soạn lại</button>
       </div>}

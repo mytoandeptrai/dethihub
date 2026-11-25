@@ -10,6 +10,7 @@
  */
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { Link } from '@/engine/compat/router'
+import { useAiChatScroll } from './useAiChatScroll'
 import { useSession } from '@/engine/lib/useSession'
 import { Button } from '@/engine/components/ui'
 import { IconDocExam } from '@/engine/components/docIcons'
@@ -887,7 +888,7 @@ function AiConversation({
   /** dàn ý vừa duyệt khi deck đã có slide: chờ người dùng chọn ghi đè / nối tiếp */
   const [overwriteAsk, setOverwriteAsk] = useState<{ turnId: string; plan: DeckPlan } | null>(null)
   const abortRef = useRef<AbortController | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const { scrollRef, onScroll: handleChatScroll } = useAiChatScroll(turns)
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const filesRef = useRef<Attachment[]>([])
@@ -950,12 +951,6 @@ function AiConversation({
       setRemovingFiles((cur) => cur.filter((f) => f !== id))
     }, 170)
   }
-
-  // cuộn xuống cuối khi có lượt mới
-  useEffect(() => {
-    const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [turns])
 
   // tự động lớn dần textarea theo nội dung; đo lại khi bề rộng đổi — panel đóng sẵn có bề rộng 0,
   // đo lúc đó thì mỗi chữ một dòng, ô nhập cao vọt và giữ nguyên khi panel mở ra
@@ -1639,7 +1634,7 @@ function AiConversation({
         </span>
       </div>
 
-      <div className="ai-chat" ref={scrollRef}>
+      <div className="ai-chat" ref={scrollRef} onScroll={handleChatScroll}>
         {empty ? (
           <div className="ai-chat-empty">
             <div className="ai-chat-empty-title">
@@ -1717,7 +1712,7 @@ function AiConversation({
               </> : null}
               {turn.previewPayload && !turn.inserted ? <div>
                 <AiDocumentPreview document={parseAiDocumentReply(turn.previewPayload) ?? {}} prepared={prepareAiApplication(parseAiDocumentReply(turn.previewPayload) ?? {}, currentDocument)} questionCount={turn.generation?.questions.length} total={turn.generation?.total} renderText={(text) => <Markdown text={text} />} />
-                <div className="flex gap-2">
+                <div className="flex gap-2" data-ai-approval>
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => insertQuestions(turn)}>Áp dụng</button>
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => void retryGeneration(turn)}>Soạn lại</button>
                 <button type="button" className="ai-retry" disabled={busy} onClick={() => setTurns((current) => current.map((item) => item.id === turn.id ? { ...item, previewPayload: undefined, generation: undefined } : item))}>Huỷ</button>
