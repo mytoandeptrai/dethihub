@@ -16,7 +16,7 @@ import { authSchema, initialAuthFormData } from './schema'
 
 import type { AuthMode, AuthFormData } from './schema'
 
-const TERMS_KEY = 'dero.terms-accepted'
+const TERMS_KEY = 'dethihub.terms-accepted'
 
 export function useAuthFormContainer(mode: AuthMode) {
   const t = useTranslations('auth')

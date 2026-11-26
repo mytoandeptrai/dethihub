@@ -364,7 +364,7 @@ export function mockGetHealthTargets(): Promise<{
     providers: mockProviders(),
     services: {
       supabase: { endpoint: 'https://mock.supabase.co', keyMask: '••••9f3c' },
-      r2: { endpoint: 'https://mock.r2.cloudflarestorage.com/de-ro', keyMask: '••••77de' },
+      r2: { endpoint: 'https://mock.r2.cloudflarestorage.com/dethihub', keyMask: '••••77de' },
     },
   })
 }

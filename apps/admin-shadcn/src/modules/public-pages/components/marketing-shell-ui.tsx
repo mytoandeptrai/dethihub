@@ -25,7 +25,7 @@ function LogoUi({ className, eager = false }: { className?: string; eager?: bool
   return (
     <Image
       unoptimized
-      src="/brand/logo-de-ro.svg"
+      src="/brand/logo.svg"
       alt={t('publicCopy.m151')}
       width={260}
       height={72}

@@ -1232,7 +1232,7 @@
         "keyMask": "••••9f3c"
       },
       "r2": {
-        "endpoint": "https://mock.r2.cloudflarestorage.com/de-ro",
+        "endpoint": "https://mock.r2.cloudflarestorage.com/dethihub",
         "keyMask": "••••77de"
       }
     }

@@ -2,7 +2,7 @@
  * Bảng vẽ — ảnh lớn (ảnh chèn, trang PDF) lưu trong IndexedDB thay vì localStorage (~5MB).
  * Trong bản lưu, `src` của ảnh lớn được thay bằng khoá `idb:…`; mở bảng thì đọc ảnh về lại.
  */
-const DB = 'derou-board-images'
+const DB = 'dethihub-board-images'
 const STORE = 'img'
 export const IDB_PREFIX = 'idb:'
 /** ảnh nhỏ hơn ngưỡng này (công thức, hình công cụ) vẫn lưu thẳng trong localStorage */

@@ -99,7 +99,7 @@ export const DEFAULT_STYLES: Record<Slot, Style> = {
 }
 export const ERASE_R = [6, 14, 28]
 /** dấu ghi vào clipboard hệ thống khi sao chép hình trong bảng */
-export const CLIP_MARK = 'derou-board-copy:'
+export const CLIP_MARK = 'dethihub-board-copy:'
 export const SHAPES: Kind[] = ['rectangle', 'diamond', 'ellipse', 'arrow', 'line']
 
 export interface Saved {

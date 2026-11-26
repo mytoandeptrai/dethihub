@@ -20,7 +20,7 @@ type HistoryTurn = Pick<
 >
 const MAX_TURNS = 60
 
-export const chatHistoryKey = (mode: 'exam' | 'slide', id: string) => `derou.ai-chat.${mode}.${id}`
+export const chatHistoryKey = (mode: 'exam' | 'slide', id: string) => `dethihub.ai-chat.${mode}.${id}`
 
 export function encodeChatHistory(turns: ChatTurn[]): string {
   return JSON.stringify(

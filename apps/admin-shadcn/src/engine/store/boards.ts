@@ -57,16 +57,16 @@ export const useBoards = create<BoardsState>()(
     }),
     {
       name: 'dethinhbien-boards',
-      // bảng vẽ trước đây lưu riêng từng khoá `derou.board.<id>`: gom về danh sách (một lần), rồi xoá khoá cũ
+      // bảng vẽ trước đây lưu riêng từng khoá `dethihub.board.<id>`: gom về danh sách (một lần), rồi xoá khoá cũ
       onRehydrateStorage: () => (state) => {
         if (!state) return
         try {
-          const legacy = Object.keys(localStorage).filter((k) => k.startsWith('derou.board.'))
+          const legacy = Object.keys(localStorage).filter((k) => k.startsWith('dethihub.board.'))
           if (!legacy.length) return
           const have = new Set(state.items.map((b) => b.id))
           const add: BoardItem[] = []
           for (const k of legacy) {
-            const id = k.slice('derou.board.'.length)
+            const id = k.slice('dethihub.board.'.length)
             const data = JSON.parse(localStorage.getItem(k) ?? 'null') as BoardData | null
             if (!have.has(id) && data?.v === 2)
               add.push({

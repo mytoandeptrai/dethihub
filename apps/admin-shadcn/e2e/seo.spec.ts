@@ -11,7 +11,7 @@ for (const path of publicPaths) {
     expect(response?.status()).toBe(200)
     await expect(page.locator('h1')).toHaveCount(1)
     await expect(page.locator('h1')).not.toBeEmpty()
-    const logo = page.locator('header img[src="/brand/logo-de-ro.svg"]')
+    const logo = page.locator('header img[src="/brand/logo.svg"]')
     await expect(logo).toHaveAttribute('loading', 'eager')
     await expect(logo).toHaveAttribute('fetchpriority', 'high')
     await expect(page.locator('link[rel="preload"][as="font"][href^="/fonts/"]')).toHaveCount(6)

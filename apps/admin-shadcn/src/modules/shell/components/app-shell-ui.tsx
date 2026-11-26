@@ -64,7 +64,7 @@ function SidebarUi({
             unoptimized
             width={260}
             height={72}
-            src={compact ? '/brand/favicon.svg' : '/brand/logo-de-ro.svg'}
+            src={compact ? '/brand/favicon.svg' : '/brand/logo.svg'}
             alt={t('common.brand')}
             className={compact ? 'size-8' : 'h-10 w-auto'}
           />

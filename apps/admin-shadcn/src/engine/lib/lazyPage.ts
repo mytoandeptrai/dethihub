@@ -7,7 +7,7 @@
  */
 import { lazy, type ComponentType } from 'react'
 
-const KEY = 'derou.chunk-reload-at'
+const KEY = 'dethihub.chunk-reload-at'
 
 /** lỗi do không tải được file JS (khác với lỗi trong code) */
 export function isChunkError(err: unknown): boolean {
