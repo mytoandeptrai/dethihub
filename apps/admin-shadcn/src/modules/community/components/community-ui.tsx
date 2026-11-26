@@ -324,13 +324,13 @@ export function CommunityExamCardUi(
 ) {
   const { KeyBadge } = props.parts
   if (props.viewState === 0) {
-    const { index, item, busy, authorName } = props
+    const { item, busy, authorName } = props
     return (
       <Card
         asChild
-        className="anim-delay group hover:shadow-lift flex min-w-0 flex-col overflow-hidden rounded-xl transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
+        className="group hover:shadow-lift flex min-w-0 flex-col overflow-hidden rounded-xl transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
       >
-        <article style={{ '--delay': `${Math.min(index, 8) * 0.05}s` } as React.CSSProperties}>
+        <article>
           <button
             type="button"
             onClick={item.onView}

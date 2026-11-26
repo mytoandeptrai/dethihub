@@ -1,6 +1,5 @@
-import { Suspense } from 'react'
+import { connection } from 'next/server'
 
-import { PageSkeleton } from '@/components/page-skeleton'
 import { JsonLd } from '@/components/seo/json-ld'
 import { site } from '@/config/site'
 import { breadcrumbJsonLd } from '@/lib/seo'
@@ -12,6 +11,7 @@ import { publicPageMetadata } from '@/modules/public-pages/public-page-seo'
 export const metadata = publicPageMetadata('community')
 
 export default async function CommunityPage() {
+  await connection()
   const exams = await getPublicCollection()
   return (
     <>
@@ -22,9 +22,7 @@ export default async function CommunityPage() {
           { name: 'Đề cộng đồng', url: `${site.url}/community` },
         ])}
       />
-      <Suspense fallback={<PageSkeleton variant="cards" />}>
-        <CommunityContainer initialExams={exams} />
-      </Suspense>
+      <CommunityContainer initialExams={exams} />
     </>
   )
 }

@@ -47,10 +47,12 @@ for (const path of publicPaths) {
       )
     if (path === '/pricing')
       expect(schemas.some((schema) => schema['@type'] === 'OfferCatalog')).toBe(true)
-    if (path === '/community')
+    if (path === '/community') {
       expect(
         schemas.find((schema) => schema['@type'] === 'CollectionPage').mainEntity.numberOfItems,
       ).toBe(1)
+      await expect(page.locator('article').first()).toHaveCSS('animation-name', 'none')
+    }
     if (path.startsWith('/exams/')) {
       await expect(page.locator('.ProseMirror')).toBeVisible()
       await expect(page.getByRole('textbox', { name: 'Nội dung đề thi' })).toHaveAttribute(
@@ -104,6 +106,22 @@ for (const path of publicPaths) {
       expect(headingLevels[index]! - headingLevels[index - 1]!).toBeLessThanOrEqual(1)
   })
 }
+
+test('guest community cards are visible without JavaScript', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false })
+  const page = await context.newPage()
+  try {
+    expect((await page.goto('/community'))?.status()).toBe(200)
+    const card = page.locator('article').filter({ hasText: exam.title }).first()
+    await expect(card).toBeVisible()
+    await expect(card.getByRole('button', { name: 'Đọc đề', exact: true })).toBeVisible()
+    await expect(card.getByRole('button', { name: 'Làm bài', exact: true })).toBeVisible()
+    await expect(page.getByRole('status')).toHaveCount(0)
+    await expect(page.locator('h1')).toHaveCount(1)
+  } finally {
+    await context.close()
+  }
+})
 
 test('private and utility pages remain noindex', async ({ page, request }) => {
   await page.goto('/editor')
