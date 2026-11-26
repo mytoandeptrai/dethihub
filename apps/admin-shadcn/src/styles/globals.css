@@ -1,1 +1,15 @@
 @import '@workspace/ui/globals.css';
+
+:root {
+  --background: oklch(0.982 0.006 85);
+  --foreground: oklch(0.26 0.015 60);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.26 0.015 60);
+  --primary: oklch(0.54 0.13 40);
+  --primary-foreground: oklch(1 0 0);
+  --muted: oklch(0.95 0.008 80);
+  --muted-foreground: oklch(0.5 0.018 65);
+  --border: oklch(0.9 0.01 75);
+  --input: oklch(0.9 0.01 75);
+  --ring: oklch(0.54 0.13 40);
+}

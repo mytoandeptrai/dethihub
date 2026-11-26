@@ -1,0 +1,2430 @@
+{
+  "me": {
+    "userId": "00000000-0000-4000-8000-000000000000",
+    "role": "admin"
+  },
+  "users": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "email": "chu-app@example.com",
+      "name": "Chủ app",
+      "avatar": null,
+      "createdAt": "2026-10-01T00:00:00.000Z",
+      "lastSignInAt": "2026-11-01T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": "admin",
+      "docs": 0,
+      "decks": 0,
+      "tokensThisMonth": 0,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "email": "giaovien1@example.com",
+      "name": "Giáo viên 1",
+      "avatar": "https://i.pravatar.cc/96?img=1",
+      "createdAt": "2026-10-02T00:00:00.000Z",
+      "lastSignInAt": "2026-11-02T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": "moderator",
+      "docs": 7,
+      "decks": 3,
+      "tokensThisMonth": 13337,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "email": "giaovien2@example.com",
+      "name": "Giáo viên 2",
+      "avatar": null,
+      "createdAt": "2026-10-03T00:00:00.000Z",
+      "lastSignInAt": "2026-11-03T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 14,
+      "decks": 0,
+      "tokensThisMonth": 26674,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "email": "giaovien3@example.com",
+      "name": "Giáo viên 3",
+      "avatar": null,
+      "createdAt": "2026-10-04T00:00:00.000Z",
+      "lastSignInAt": "2026-11-04T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 21,
+      "decks": 3,
+      "tokensThisMonth": 40011,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000004",
+      "email": "giaovien4@example.com",
+      "name": "Giáo viên 4",
+      "avatar": "https://i.pravatar.cc/96?img=4",
+      "createdAt": "2026-10-05T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 5,
+      "decks": 0,
+      "tokensThisMonth": 53348,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000005",
+      "email": "giaovien5@example.com",
+      "name": "Giáo viên 5",
+      "avatar": null,
+      "createdAt": "2026-10-06T00:00:00.000Z",
+      "lastSignInAt": "2026-11-06T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 12,
+      "decks": 3,
+      "tokensThisMonth": 66685,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000006",
+      "email": "giaovien6@example.com",
+      "name": "Giáo viên 6",
+      "avatar": null,
+      "createdAt": "2026-10-07T00:00:00.000Z",
+      "lastSignInAt": "2026-11-07T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 19,
+      "decks": 0,
+      "tokensThisMonth": 80022,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000007",
+      "email": "giaovien7@example.com",
+      "name": "Giáo viên 7",
+      "avatar": "https://i.pravatar.cc/96?img=7",
+      "createdAt": "2026-10-08T00:00:00.000Z",
+      "lastSignInAt": "2026-11-08T00:00:00.000Z",
+      "bannedUntil": "2126-01-01T00:00:00Z",
+      "role": null,
+      "docs": 3,
+      "decks": 3,
+      "tokensThisMonth": 93359,
+      "flag": {
+        "strikes": 2,
+        "lastAt": "2026-11-09T08:12:00Z",
+        "lastAction": "users.list",
+        "lastIp": "203.0.113.7"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000008",
+      "email": "giaovien8@example.com",
+      "name": "Giáo viên 8",
+      "avatar": null,
+      "createdAt": "2026-10-09T00:00:00.000Z",
+      "lastSignInAt": "2026-11-09T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 10,
+      "decks": 0,
+      "tokensThisMonth": 106696,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "email": "giaovien9@example.com",
+      "name": "Giáo viên 9",
+      "avatar": null,
+      "createdAt": "2026-10-10T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 17,
+      "decks": 3,
+      "tokensThisMonth": 120033,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "email": "giaovien10@example.com",
+      "name": "Giáo viên 10",
+      "avatar": "https://i.pravatar.cc/96?img=10",
+      "createdAt": "2026-10-11T00:00:00.000Z",
+      "lastSignInAt": "2026-11-02T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 1,
+      "decks": 0,
+      "tokensThisMonth": 133370,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000011",
+      "email": "giaovien11@example.com",
+      "name": "Giáo viên 11",
+      "avatar": null,
+      "createdAt": "2026-10-12T00:00:00.000Z",
+      "lastSignInAt": "2026-11-03T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 8,
+      "decks": 3,
+      "tokensThisMonth": 146707,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "email": "giaovien12@example.com",
+      "name": "Giáo viên 12",
+      "avatar": null,
+      "createdAt": "2026-10-13T00:00:00.000Z",
+      "lastSignInAt": "2026-11-04T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 15,
+      "decks": 0,
+      "tokensThisMonth": 44,
+      "flag": {
+        "strikes": 1,
+        "lastAt": "2026-11-08T03:40:00Z",
+        "lastAction": "quota.set",
+        "lastIp": "198.51.100.4"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "email": "giaovien13@example.com",
+      "name": "Giáo viên 13",
+      "avatar": "https://i.pravatar.cc/96?img=13",
+      "createdAt": "2026-10-14T00:00:00.000Z",
+      "lastSignInAt": "2026-11-05T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 22,
+      "decks": 3,
+      "tokensThisMonth": 13381,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000014",
+      "email": "giaovien14@example.com",
+      "name": "Giáo viên 14",
+      "avatar": null,
+      "createdAt": "2026-10-15T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 6,
+      "decks": 0,
+      "tokensThisMonth": 26718,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000015",
+      "email": "giaovien15@example.com",
+      "name": "Giáo viên 15",
+      "avatar": null,
+      "createdAt": "2026-10-16T00:00:00.000Z",
+      "lastSignInAt": "2026-11-07T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 13,
+      "decks": 3,
+      "tokensThisMonth": 40055,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000016",
+      "email": "giaovien16@example.com",
+      "name": "Giáo viên 16",
+      "avatar": "https://i.pravatar.cc/96?img=16",
+      "createdAt": "2026-10-17T00:00:00.000Z",
+      "lastSignInAt": "2026-11-08T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 20,
+      "decks": 0,
+      "tokensThisMonth": 53392,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000017",
+      "email": "giaovien17@example.com",
+      "name": "Giáo viên 17",
+      "avatar": null,
+      "createdAt": "2026-10-18T00:00:00.000Z",
+      "lastSignInAt": "2026-11-09T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 4,
+      "decks": 3,
+      "tokensThisMonth": 66729,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000018",
+      "email": "giaovien18@example.com",
+      "name": "Giáo viên 18",
+      "avatar": null,
+      "createdAt": "2026-10-19T00:00:00.000Z",
+      "lastSignInAt": "2026-11-01T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 11,
+      "decks": 0,
+      "tokensThisMonth": 80066,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "email": "giaovien19@example.com",
+      "name": "Giáo viên 19",
+      "avatar": "https://i.pravatar.cc/96?img=19",
+      "createdAt": "2026-10-20T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 18,
+      "decks": 3,
+      "tokensThisMonth": 93403,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000020",
+      "email": "giaovien20@example.com",
+      "name": "Giáo viên 20",
+      "avatar": null,
+      "createdAt": "2026-10-21T00:00:00.000Z",
+      "lastSignInAt": "2026-11-03T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 2,
+      "decks": 0,
+      "tokensThisMonth": 106740,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000021",
+      "email": "giaovien21@example.com",
+      "name": "Giáo viên 21",
+      "avatar": null,
+      "createdAt": "2026-10-22T00:00:00.000Z",
+      "lastSignInAt": "2026-11-04T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 9,
+      "decks": 3,
+      "tokensThisMonth": 120077,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000022",
+      "email": "giaovien22@example.com",
+      "name": "Giáo viên 22",
+      "avatar": "https://i.pravatar.cc/96?img=22",
+      "createdAt": "2026-10-23T00:00:00.000Z",
+      "lastSignInAt": "2026-11-05T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 16,
+      "decks": 0,
+      "tokensThisMonth": 133414,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000023",
+      "email": "giaovien23@example.com",
+      "name": "Giáo viên 23",
+      "avatar": null,
+      "createdAt": "2026-10-24T00:00:00.000Z",
+      "lastSignInAt": "2026-11-06T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 0,
+      "decks": 3,
+      "tokensThisMonth": 146751,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000024",
+      "email": "giaovien24@example.com",
+      "name": "Giáo viên 24",
+      "avatar": null,
+      "createdAt": "2026-10-25T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 7,
+      "decks": 0,
+      "tokensThisMonth": 88,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000025",
+      "email": "giaovien25@example.com",
+      "name": "Giáo viên 25",
+      "avatar": "https://i.pravatar.cc/96?img=25",
+      "createdAt": "2026-10-26T00:00:00.000Z",
+      "lastSignInAt": "2026-11-08T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 14,
+      "decks": 3,
+      "tokensThisMonth": 13425,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000026",
+      "email": "giaovien26@example.com",
+      "name": "Giáo viên 26",
+      "avatar": null,
+      "createdAt": "2026-10-27T00:00:00.000Z",
+      "lastSignInAt": "2026-11-09T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 21,
+      "decks": 0,
+      "tokensThisMonth": 26762,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000027",
+      "email": "giaovien27@example.com",
+      "name": "Giáo viên 27",
+      "avatar": null,
+      "createdAt": "2026-10-28T00:00:00.000Z",
+      "lastSignInAt": "2026-11-01T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 5,
+      "decks": 3,
+      "tokensThisMonth": 40099,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000028",
+      "email": "giaovien28@example.com",
+      "name": "Giáo viên 28",
+      "avatar": "https://i.pravatar.cc/96?img=28",
+      "createdAt": "2026-10-29T00:00:00.000Z",
+      "lastSignInAt": "2026-11-02T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 12,
+      "decks": 0,
+      "tokensThisMonth": 53436,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000029",
+      "email": "giaovien29@example.com",
+      "name": "Giáo viên 29",
+      "avatar": null,
+      "createdAt": "2026-10-30T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 19,
+      "decks": 3,
+      "tokensThisMonth": 66773,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000030",
+      "email": "giaovien30@example.com",
+      "name": "Giáo viên 30",
+      "avatar": null,
+      "createdAt": "2026-10-31T00:00:00.000Z",
+      "lastSignInAt": "2026-11-04T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 3,
+      "decks": 0,
+      "tokensThisMonth": 80110,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000031",
+      "email": "giaovien31@example.com",
+      "name": "Giáo viên 31",
+      "avatar": "https://i.pravatar.cc/96?img=31",
+      "createdAt": "2026-11-01T00:00:00.000Z",
+      "lastSignInAt": "2026-11-05T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 10,
+      "decks": 3,
+      "tokensThisMonth": 93447,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000032",
+      "email": "giaovien32@example.com",
+      "name": "Giáo viên 32",
+      "avatar": null,
+      "createdAt": "2026-11-02T00:00:00.000Z",
+      "lastSignInAt": "2026-11-06T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 17,
+      "decks": 0,
+      "tokensThisMonth": 106784,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000033",
+      "email": "giaovien33@example.com",
+      "name": "Giáo viên 33",
+      "avatar": null,
+      "createdAt": "2026-11-03T00:00:00.000Z",
+      "lastSignInAt": "2026-11-07T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 1,
+      "decks": 3,
+      "tokensThisMonth": 120121,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000034",
+      "email": "giaovien34@example.com",
+      "name": "Giáo viên 34",
+      "avatar": "https://i.pravatar.cc/96?img=34",
+      "createdAt": "2026-11-04T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 8,
+      "decks": 0,
+      "tokensThisMonth": 133458,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000035",
+      "email": "giaovien35@example.com",
+      "name": "Giáo viên 35",
+      "avatar": null,
+      "createdAt": "2026-11-05T00:00:00.000Z",
+      "lastSignInAt": "2026-11-09T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 15,
+      "decks": 3,
+      "tokensThisMonth": 146795,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000036",
+      "email": "giaovien36@example.com",
+      "name": "Giáo viên 36",
+      "avatar": null,
+      "createdAt": "2026-11-06T00:00:00.000Z",
+      "lastSignInAt": "2026-11-01T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 22,
+      "decks": 0,
+      "tokensThisMonth": 132,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000037",
+      "email": "giaovien37@example.com",
+      "name": "Giáo viên 37",
+      "avatar": "https://i.pravatar.cc/96?img=37",
+      "createdAt": "2026-11-07T00:00:00.000Z",
+      "lastSignInAt": "2026-11-02T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 6,
+      "decks": 3,
+      "tokensThisMonth": 13469,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000038",
+      "email": "giaovien38@example.com",
+      "name": "Giáo viên 38",
+      "avatar": null,
+      "createdAt": "2026-11-08T00:00:00.000Z",
+      "lastSignInAt": "2026-11-03T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 13,
+      "decks": 0,
+      "tokensThisMonth": 26806,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000039",
+      "email": "giaovien39@example.com",
+      "name": "Giáo viên 39",
+      "avatar": null,
+      "createdAt": "2026-11-09T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 20,
+      "decks": 3,
+      "tokensThisMonth": 40143,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000040",
+      "email": "giaovien40@example.com",
+      "name": "Giáo viên 40",
+      "avatar": "https://i.pravatar.cc/96?img=40",
+      "createdAt": "2026-10-01T00:00:00.000Z",
+      "lastSignInAt": "2026-11-05T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 4,
+      "decks": 0,
+      "tokensThisMonth": 53480,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000041",
+      "email": "giaovien41@example.com",
+      "name": "Giáo viên 41",
+      "avatar": null,
+      "createdAt": "2026-10-02T00:00:00.000Z",
+      "lastSignInAt": "2026-11-06T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 11,
+      "decks": 3,
+      "tokensThisMonth": 66817,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000042",
+      "email": "giaovien42@example.com",
+      "name": "Giáo viên 42",
+      "avatar": null,
+      "createdAt": "2026-10-03T00:00:00.000Z",
+      "lastSignInAt": "2026-11-07T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 18,
+      "decks": 0,
+      "tokensThisMonth": 80154,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000043",
+      "email": "giaovien43@example.com",
+      "name": "Giáo viên 43",
+      "avatar": "https://i.pravatar.cc/96?img=43",
+      "createdAt": "2026-10-04T00:00:00.000Z",
+      "lastSignInAt": "2026-11-08T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 2,
+      "decks": 3,
+      "tokensThisMonth": 93491,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000044",
+      "email": "giaovien44@example.com",
+      "name": "Giáo viên 44",
+      "avatar": null,
+      "createdAt": "2026-10-05T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 9,
+      "decks": 0,
+      "tokensThisMonth": 106828,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000045",
+      "email": "giaovien45@example.com",
+      "name": "Giáo viên 45",
+      "avatar": null,
+      "createdAt": "2026-10-06T00:00:00.000Z",
+      "lastSignInAt": "2026-11-01T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 16,
+      "decks": 3,
+      "tokensThisMonth": 120165,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000046",
+      "email": "giaovien46@example.com",
+      "name": "Giáo viên 46",
+      "avatar": "https://i.pravatar.cc/96?img=46",
+      "createdAt": "2026-10-07T00:00:00.000Z",
+      "lastSignInAt": "2026-11-02T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 0,
+      "decks": 0,
+      "tokensThisMonth": 133502,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000047",
+      "email": "giaovien47@example.com",
+      "name": "Giáo viên 47",
+      "avatar": null,
+      "createdAt": "2026-10-08T00:00:00.000Z",
+      "lastSignInAt": "2026-11-03T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 7,
+      "decks": 3,
+      "tokensThisMonth": 146839,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000048",
+      "email": "giaovien48@example.com",
+      "name": "Giáo viên 48",
+      "avatar": null,
+      "createdAt": "2026-10-09T00:00:00.000Z",
+      "lastSignInAt": "2026-11-04T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 14,
+      "decks": 0,
+      "tokensThisMonth": 176,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000049",
+      "email": "giaovien49@example.com",
+      "name": "Giáo viên 49",
+      "avatar": "https://i.pravatar.cc/96?img=49",
+      "createdAt": "2026-10-10T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 21,
+      "decks": 3,
+      "tokensThisMonth": 13513,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000050",
+      "email": "giaovien50@example.com",
+      "name": "Giáo viên 50",
+      "avatar": null,
+      "createdAt": "2026-10-11T00:00:00.000Z",
+      "lastSignInAt": "2026-11-06T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 5,
+      "decks": 0,
+      "tokensThisMonth": 26850,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000051",
+      "email": "giaovien51@example.com",
+      "name": "Giáo viên 51",
+      "avatar": null,
+      "createdAt": "2026-10-12T00:00:00.000Z",
+      "lastSignInAt": "2026-11-07T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 12,
+      "decks": 3,
+      "tokensThisMonth": 40187,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000052",
+      "email": "giaovien52@example.com",
+      "name": "Giáo viên 52",
+      "avatar": "https://i.pravatar.cc/96?img=52",
+      "createdAt": "2026-10-13T00:00:00.000Z",
+      "lastSignInAt": "2026-11-08T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 19,
+      "decks": 0,
+      "tokensThisMonth": 53524,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000053",
+      "email": "giaovien53@example.com",
+      "name": "Giáo viên 53",
+      "avatar": null,
+      "createdAt": "2026-10-14T00:00:00.000Z",
+      "lastSignInAt": "2026-11-09T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 3,
+      "decks": 3,
+      "tokensThisMonth": 66861,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000054",
+      "email": "giaovien54@example.com",
+      "name": "Giáo viên 54",
+      "avatar": null,
+      "createdAt": "2026-10-15T00:00:00.000Z",
+      "lastSignInAt": null,
+      "bannedUntil": null,
+      "role": null,
+      "docs": 10,
+      "decks": 0,
+      "tokensThisMonth": 80198,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000055",
+      "email": "giaovien55@example.com",
+      "name": "Giáo viên 55",
+      "avatar": "https://i.pravatar.cc/96?img=55",
+      "createdAt": "2026-10-16T00:00:00.000Z",
+      "lastSignInAt": "2026-11-02T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 17,
+      "decks": 3,
+      "tokensThisMonth": 93535,
+      "flag": null
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000056",
+      "email": "giaovien56@example.com",
+      "name": "Giáo viên 56",
+      "avatar": null,
+      "createdAt": "2026-10-17T00:00:00.000Z",
+      "lastSignInAt": "2026-11-03T00:00:00.000Z",
+      "bannedUntil": null,
+      "role": null,
+      "docs": 1,
+      "decks": 0,
+      "tokensThisMonth": 106872,
+      "flag": null
+    }
+  ],
+  "quotas": {
+    "00000000-0000-4000-8000-000000000000": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 0,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000001": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 13337,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000002": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 26674,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000003": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 40011,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000004": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 53348,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000005": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 66685,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000006": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 80022,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000007": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 93359,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000008": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 106696,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000009": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 120033,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000010": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 133370,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000011": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 146707,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000012": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 44,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000013": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 13381,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000014": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 26718,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000015": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 40055,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000016": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 53392,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000017": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 66729,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000018": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 80066,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000019": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 93403,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000020": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 106740,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000021": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 120077,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000022": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 133414,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000023": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 146751,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000024": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 88,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000025": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 13425,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000026": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 26762,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000027": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 40099,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000028": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 53436,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000029": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 66773,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000030": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 80110,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000031": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 93447,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000032": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 106784,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000033": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 120121,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000034": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 133458,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000035": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 146795,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000036": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 132,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000037": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 13469,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000038": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 26806,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000039": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 40143,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000040": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 53480,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000041": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 66817,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000042": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 80154,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000043": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 93491,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000044": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 106828,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000045": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 120165,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000046": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 133502,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000047": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 146839,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000048": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 176,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000049": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 13513,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000050": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 26850,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000051": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 40187,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000052": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 53524,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000053": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 66861,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000054": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 80198,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000055": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 93535,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    },
+    "00000000-0000-4000-8000-000000000056": {
+      "override": null,
+      "defaultLimit": 150000,
+      "usedThisMonth": 106872,
+      "requestsThisMonth": 12,
+      "credits": 0,
+      "emptyDay": 2,
+      "freeEmpty": 3
+    }
+  },
+  "storage": {
+    "override": null,
+    "defaultBytes": 10485760,
+    "used": 3400000
+  },
+  "stats": {
+    "days": 7,
+    "rows": [
+      {
+        "day": "2026-11-23",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 30,
+        "errors": 0,
+        "tokens": 186000,
+        "cost": 0.36,
+        "avgMs": 4000
+      },
+      {
+        "day": "2026-11-23",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 15,
+        "errors": 1,
+        "tokens": 93000,
+        "cost": null,
+        "avgMs": 7500
+      },
+      {
+        "day": "2026-11-23",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 28,
+        "errors": 2,
+        "tokens": 173600,
+        "cost": null,
+        "avgMs": 11000
+      },
+      {
+        "day": "2026-11-22",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 37,
+        "errors": 1,
+        "tokens": 229400,
+        "cost": 0.444,
+        "avgMs": 4120
+      },
+      {
+        "day": "2026-11-22",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 22,
+        "errors": 2,
+        "tokens": 136400,
+        "cost": null,
+        "avgMs": 7620
+      },
+      {
+        "day": "2026-11-22",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 35,
+        "errors": 3,
+        "tokens": 217000,
+        "cost": null,
+        "avgMs": 11120
+      },
+      {
+        "day": "2026-11-21",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 44,
+        "errors": 2,
+        "tokens": 272800,
+        "cost": 0.528,
+        "avgMs": 4240
+      },
+      {
+        "day": "2026-11-21",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 29,
+        "errors": 3,
+        "tokens": 179800,
+        "cost": null,
+        "avgMs": 7740
+      },
+      {
+        "day": "2026-11-21",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 2,
+        "errors": 0,
+        "tokens": 12400,
+        "cost": null,
+        "avgMs": 11240
+      },
+      {
+        "day": "2026-11-20",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 51,
+        "errors": 3,
+        "tokens": 316200,
+        "cost": 0.612,
+        "avgMs": 4360
+      },
+      {
+        "day": "2026-11-20",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 36,
+        "errors": 0,
+        "tokens": 223200,
+        "cost": null,
+        "avgMs": 7860
+      },
+      {
+        "day": "2026-11-20",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 9,
+        "errors": 1,
+        "tokens": 55800,
+        "cost": null,
+        "avgMs": 11360
+      },
+      {
+        "day": "2026-11-19",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 58,
+        "errors": 0,
+        "tokens": 359600,
+        "cost": 0.696,
+        "avgMs": 4480
+      },
+      {
+        "day": "2026-11-19",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 3,
+        "errors": 1,
+        "tokens": 18600,
+        "cost": null,
+        "avgMs": 7980
+      },
+      {
+        "day": "2026-11-19",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 16,
+        "errors": 2,
+        "tokens": 99200,
+        "cost": null,
+        "avgMs": 11480
+      },
+      {
+        "day": "2026-11-18",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 65,
+        "errors": 1,
+        "tokens": 403000,
+        "cost": 0.78,
+        "avgMs": 4600
+      },
+      {
+        "day": "2026-11-18",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 10,
+        "errors": 2,
+        "tokens": 62000,
+        "cost": null,
+        "avgMs": 8100
+      },
+      {
+        "day": "2026-11-18",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 23,
+        "errors": 3,
+        "tokens": 142600,
+        "cost": null,
+        "avgMs": 11600
+      },
+      {
+        "day": "2026-11-17",
+        "model": "gpt-5.5",
+        "provider": "opencode",
+        "calls": 32,
+        "errors": 2,
+        "tokens": 198400,
+        "cost": 0.384,
+        "avgMs": 4720
+      },
+      {
+        "day": "2026-11-17",
+        "model": "mercury-3",
+        "provider": "mercury",
+        "calls": 17,
+        "errors": 3,
+        "tokens": 105400,
+        "cost": null,
+        "avgMs": 8220
+      },
+      {
+        "day": "2026-11-17",
+        "model": "claude-opus-5-5",
+        "provider": "anthropic",
+        "calls": 30,
+        "errors": 0,
+        "tokens": 186000,
+        "cost": null,
+        "avgMs": 11720
+      }
+    ]
+  },
+  "exams": [
+    {
+      "id": "e1000000-0000-4000-8000-000000000001",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "ownerEmail": "giaovien1@example.com",
+      "title": "Kiểm tra 1 tiết Toán 10 — Đại số & Hệ số góc",
+      "subject": "Toán",
+      "grade": "Lớp 10",
+      "school": "THPT Chu Văn An",
+      "createdAt": "2026-11-09T08:30:00Z",
+      "questionCount": 25,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Tìm tập xác định của hàm số y = sqrt(2x - 4)...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000002",
+      "ownerId": "00000000-0000-4000-8000-000000000002",
+      "ownerEmail": "giaovien2@example.com",
+      "title": "Đề thi giữa kỳ 1 Vật lí 11 — Dao động cơ",
+      "subject": "Vật lí",
+      "grade": "Lớp 11",
+      "school": "THPT Chuyên Hà Nội - Amsterdam",
+      "createdAt": "2026-11-08T14:15:00Z",
+      "questionCount": 28,
+      "durationMinutes": 50,
+      "totalPoints": 10,
+      "preview": "Một con lắc lò xo dao động điều hòa với chu kỳ T = 2s...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 2
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000003",
+      "ownerId": "00000000-0000-4000-8000-000000000003",
+      "ownerEmail": "giaovien3@example.com",
+      "title": "Đề ôn tập Ngữ văn 12 — Nghị luận văn học (Tây Tiến)",
+      "subject": "Ngữ văn",
+      "grade": "Lớp 12",
+      "school": "THPT Lương Thế Vinh",
+      "createdAt": "2026-11-07T09:40:00Z",
+      "questionCount": 6,
+      "durationMinutes": 90,
+      "totalPoints": 10,
+      "preview": "Phân tích vẻ đẹp người lính Tây Tiến qua ngòi bút Quang Dũng...",
+      "listed": true,
+      "status": "hidden",
+      "removedReason": null,
+      "moderatedBy": "00000000-0000-4000-8000-000000000000",
+      "moderatedAt": "2026-11-08T10:00:00Z",
+      "openReports": 1
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000004",
+      "ownerId": "00000000-0000-4000-8000-000000000004",
+      "ownerEmail": "giaovien4@example.com",
+      "title": "Đề thi trắc nghiệm Hoá học 10 — Bảng tuần hoàn các nguyên tố",
+      "subject": "Hóa học",
+      "grade": "Lớp 10",
+      "school": "THPT Kim Liên",
+      "createdAt": "2026-11-06T11:20:00Z",
+      "questionCount": 30,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Cấu hình electron nguyên tử của nguyên tố X là 1s2 2s2 2p6 3s1...",
+      "listed": false,
+      "status": "removed",
+      "removedReason": "Nội dung trùng lặp tài liệu có bản quyền Nhà xuất bản Giáo dục",
+      "moderatedBy": "00000000-0000-4000-8000-000000000000",
+      "moderatedAt": "2026-11-07T08:00:00Z",
+      "openReports": 0
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000005",
+      "ownerId": "00000000-0000-4000-8000-000000000005",
+      "ownerEmail": "giaovien5@example.com",
+      "title": "Kiểm tra 15 phút Tiếng Anh 9 — Unit 3: Teen stress and pressure",
+      "subject": "Tiếng Anh",
+      "grade": "Lớp 9",
+      "school": "THCS Giảng Võ",
+      "createdAt": "2026-11-05T16:00:00Z",
+      "questionCount": 15,
+      "durationMinutes": 15,
+      "totalPoints": 10,
+      "preview": "Choose the word whose underlined part is pronounced differently...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000006",
+      "ownerId": "00000000-0000-4000-8000-000000000006",
+      "ownerEmail": "giaovien6@example.com",
+      "title": "Đề khảo sát Lịch sử 8 — Cách mạng tư sản Pháp 1789",
+      "subject": "Lịch sử",
+      "grade": "Lớp 8",
+      "school": "THCS Cầu Giấy",
+      "createdAt": "2026-11-04T07:10:00Z",
+      "questionCount": 20,
+      "durationMinutes": 30,
+      "totalPoints": 10,
+      "preview": "Tình hình kinh tế nước Pháp trước năm 1789 có đặc điểm gì nổi bật?...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000007",
+      "ownerId": "00000000-0000-4000-8000-000000000007",
+      "ownerEmail": "giaovien7@example.com",
+      "title": "Đề ôn Sinh học 11 — Tuần hoàn máu ở động vật",
+      "subject": "Sinh học",
+      "grade": "Lớp 11",
+      "school": "THPT Yên Hòa",
+      "createdAt": "2026-11-03T13:45:00Z",
+      "questionCount": 25,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Hệ tuần hoàn hở có ở những nhóm động vật nào sau đây?...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 1
+    },
+    {
+      "id": "e1000000-0000-4000-8000-000000000008",
+      "ownerId": "00000000-0000-4000-8000-000000000008",
+      "ownerEmail": "giaovien8@example.com",
+      "title": "Đề kiểm tra Tin học 10 — Lập trình Python cơ bản",
+      "subject": "Tin học",
+      "grade": "Lớp 10",
+      "school": "THPT Phan Đình Phùng",
+      "createdAt": "2026-11-02T10:00:00Z",
+      "questionCount": 20,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Cho biết kết quả in ra màn hình của đoạn lệnh print(5 // 2)...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0
+    }
+  ],
+  "details": {
+    "e1000000-0000-4000-8000-000000000001": {
+      "id": "e1000000-0000-4000-8000-000000000001",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "ownerEmail": "giaovien1@example.com",
+      "title": "Kiểm tra 1 tiết Toán 10 — Đại số & Hệ số góc",
+      "subject": "Toán",
+      "grade": "Lớp 10",
+      "school": "THPT Chu Văn An",
+      "createdAt": "2026-11-09T08:30:00Z",
+      "questionCount": 25,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Tìm tập xác định của hàm số y = sqrt(2x - 4)...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000001",
+        "title": "Kiểm tra 1 tiết Toán 10 — Đại số & Hệ số góc",
+        "subject": "Toán",
+        "grade": "Lớp 10",
+        "unit": "THPT Chu Văn An",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Tìm tập xác định của hàm số y = sqrt(2x - 4)...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000002": {
+      "id": "e1000000-0000-4000-8000-000000000002",
+      "ownerId": "00000000-0000-4000-8000-000000000002",
+      "ownerEmail": "giaovien2@example.com",
+      "title": "Đề thi giữa kỳ 1 Vật lí 11 — Dao động cơ",
+      "subject": "Vật lí",
+      "grade": "Lớp 11",
+      "school": "THPT Chuyên Hà Nội - Amsterdam",
+      "createdAt": "2026-11-08T14:15:00Z",
+      "questionCount": 28,
+      "durationMinutes": 50,
+      "totalPoints": 10,
+      "preview": "Một con lắc lò xo dao động điều hòa với chu kỳ T = 2s...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 2,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000002",
+        "title": "Đề thi giữa kỳ 1 Vật lí 11 — Dao động cơ",
+        "subject": "Vật lí",
+        "grade": "Lớp 11",
+        "unit": "THPT Chuyên Hà Nội - Amsterdam",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Một con lắc lò xo dao động điều hòa với chu kỳ T = 2s...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000003": {
+      "id": "e1000000-0000-4000-8000-000000000003",
+      "ownerId": "00000000-0000-4000-8000-000000000003",
+      "ownerEmail": "giaovien3@example.com",
+      "title": "Đề ôn tập Ngữ văn 12 — Nghị luận văn học (Tây Tiến)",
+      "subject": "Ngữ văn",
+      "grade": "Lớp 12",
+      "school": "THPT Lương Thế Vinh",
+      "createdAt": "2026-11-07T09:40:00Z",
+      "questionCount": 6,
+      "durationMinutes": 90,
+      "totalPoints": 10,
+      "preview": "Phân tích vẻ đẹp người lính Tây Tiến qua ngòi bút Quang Dũng...",
+      "listed": true,
+      "status": "hidden",
+      "removedReason": null,
+      "moderatedBy": "00000000-0000-4000-8000-000000000000",
+      "moderatedAt": "2026-11-08T10:00:00Z",
+      "openReports": 1,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000003",
+        "title": "Đề ôn tập Ngữ văn 12 — Nghị luận văn học (Tây Tiến)",
+        "subject": "Ngữ văn",
+        "grade": "Lớp 12",
+        "unit": "THPT Lương Thế Vinh",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Phân tích vẻ đẹp người lính Tây Tiến qua ngòi bút Quang Dũng...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000004": {
+      "id": "e1000000-0000-4000-8000-000000000004",
+      "ownerId": "00000000-0000-4000-8000-000000000004",
+      "ownerEmail": "giaovien4@example.com",
+      "title": "Đề thi trắc nghiệm Hoá học 10 — Bảng tuần hoàn các nguyên tố",
+      "subject": "Hóa học",
+      "grade": "Lớp 10",
+      "school": "THPT Kim Liên",
+      "createdAt": "2026-11-06T11:20:00Z",
+      "questionCount": 30,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Cấu hình electron nguyên tử của nguyên tố X là 1s2 2s2 2p6 3s1...",
+      "listed": false,
+      "status": "removed",
+      "removedReason": "Nội dung trùng lặp tài liệu có bản quyền Nhà xuất bản Giáo dục",
+      "moderatedBy": "00000000-0000-4000-8000-000000000000",
+      "moderatedAt": "2026-11-07T08:00:00Z",
+      "openReports": 0,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000004",
+        "title": "Đề thi trắc nghiệm Hoá học 10 — Bảng tuần hoàn các nguyên tố",
+        "subject": "Hóa học",
+        "grade": "Lớp 10",
+        "unit": "THPT Kim Liên",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Cấu hình electron nguyên tử của nguyên tố X là 1s2 2s2 2p6 3s1...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000005": {
+      "id": "e1000000-0000-4000-8000-000000000005",
+      "ownerId": "00000000-0000-4000-8000-000000000005",
+      "ownerEmail": "giaovien5@example.com",
+      "title": "Kiểm tra 15 phút Tiếng Anh 9 — Unit 3: Teen stress and pressure",
+      "subject": "Tiếng Anh",
+      "grade": "Lớp 9",
+      "school": "THCS Giảng Võ",
+      "createdAt": "2026-11-05T16:00:00Z",
+      "questionCount": 15,
+      "durationMinutes": 15,
+      "totalPoints": 10,
+      "preview": "Choose the word whose underlined part is pronounced differently...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000005",
+        "title": "Kiểm tra 15 phút Tiếng Anh 9 — Unit 3: Teen stress and pressure",
+        "subject": "Tiếng Anh",
+        "grade": "Lớp 9",
+        "unit": "THCS Giảng Võ",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Choose the word whose underlined part is pronounced differently...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000006": {
+      "id": "e1000000-0000-4000-8000-000000000006",
+      "ownerId": "00000000-0000-4000-8000-000000000006",
+      "ownerEmail": "giaovien6@example.com",
+      "title": "Đề khảo sát Lịch sử 8 — Cách mạng tư sản Pháp 1789",
+      "subject": "Lịch sử",
+      "grade": "Lớp 8",
+      "school": "THCS Cầu Giấy",
+      "createdAt": "2026-11-04T07:10:00Z",
+      "questionCount": 20,
+      "durationMinutes": 30,
+      "totalPoints": 10,
+      "preview": "Tình hình kinh tế nước Pháp trước năm 1789 có đặc điểm gì nổi bật?...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000006",
+        "title": "Đề khảo sát Lịch sử 8 — Cách mạng tư sản Pháp 1789",
+        "subject": "Lịch sử",
+        "grade": "Lớp 8",
+        "unit": "THCS Cầu Giấy",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Tình hình kinh tế nước Pháp trước năm 1789 có đặc điểm gì nổi bật?...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000007": {
+      "id": "e1000000-0000-4000-8000-000000000007",
+      "ownerId": "00000000-0000-4000-8000-000000000007",
+      "ownerEmail": "giaovien7@example.com",
+      "title": "Đề ôn Sinh học 11 — Tuần hoàn máu ở động vật",
+      "subject": "Sinh học",
+      "grade": "Lớp 11",
+      "school": "THPT Yên Hòa",
+      "createdAt": "2026-11-03T13:45:00Z",
+      "questionCount": 25,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Hệ tuần hoàn hở có ở những nhóm động vật nào sau đây?...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 1,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000007",
+        "title": "Đề ôn Sinh học 11 — Tuần hoàn máu ở động vật",
+        "subject": "Sinh học",
+        "grade": "Lớp 11",
+        "unit": "THPT Yên Hòa",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Hệ tuần hoàn hở có ở những nhóm động vật nào sau đây?...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    },
+    "e1000000-0000-4000-8000-000000000008": {
+      "id": "e1000000-0000-4000-8000-000000000008",
+      "ownerId": "00000000-0000-4000-8000-000000000008",
+      "ownerEmail": "giaovien8@example.com",
+      "title": "Đề kiểm tra Tin học 10 — Lập trình Python cơ bản",
+      "subject": "Tin học",
+      "grade": "Lớp 10",
+      "school": "THPT Phan Đình Phùng",
+      "createdAt": "2026-11-02T10:00:00Z",
+      "questionCount": 20,
+      "durationMinutes": 45,
+      "totalPoints": 10,
+      "preview": "Cho biết kết quả in ra màn hình của đoạn lệnh print(5 // 2)...",
+      "listed": true,
+      "status": "published",
+      "removedReason": null,
+      "moderatedBy": null,
+      "moderatedAt": null,
+      "openReports": 0,
+      "doc": {
+        "id": "e1000000-0000-4000-8000-000000000008",
+        "title": "Đề kiểm tra Tin học 10 — Lập trình Python cơ bản",
+        "subject": "Tin học",
+        "grade": "Lớp 10",
+        "unit": "THPT Phan Đình Phùng",
+        "kind": "exam",
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "question",
+            "prompt": "Cho biết kết quả in ra màn hình của đoạn lệnh print(5 // 2)...",
+            "choices": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+            "answer": "A",
+            "points": 0.4
+          },
+          {
+            "id": "b2",
+            "type": "question",
+            "prompt": "Câu hỏi mẫu tiếp theo trong đề thi...",
+            "choices": ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4"],
+            "answer": "B",
+            "points": 0.4
+          }
+        ]
+      }
+    }
+  },
+  "reports": [
+    {
+      "id": 1,
+      "examId": "e1000000-0000-4000-8000-000000000002",
+      "examTitle": "Đề thi giữa kỳ 1 Vật lí 11 — Dao động cơ",
+      "reporterId": "00000000-0000-4000-8000-000000000010",
+      "reporterEmail": "hocsinh10@example.com",
+      "reason": "Sai đáp án",
+      "detail": "Câu số 14 câu hỏi tính vận tốc cực đại đáp án C sai, phải là 20pi cm/s (đáp án B).",
+      "status": "open",
+      "createdAt": "2026-11-09T09:12:00Z",
+      "resolvedBy": null,
+      "resolvedAt": null
+    },
+    {
+      "id": 2,
+      "examId": "e1000000-0000-4000-8000-000000000002",
+      "examTitle": "Đề thi giữa kỳ 1 Vật lí 11 — Dao động cơ",
+      "reporterId": "00000000-0000-4000-8000-000000000011",
+      "reporterEmail": "giaovien11@example.com",
+      "reason": "Sai đáp án",
+      "detail": "Đồng ý với báo cáo trước, câu 14 nhầm lẫn giữa chu kỳ và tần số góc.",
+      "status": "open",
+      "createdAt": "2026-11-09T10:45:00Z",
+      "resolvedBy": null,
+      "resolvedAt": null
+    },
+    {
+      "id": 3,
+      "examId": "e1000000-0000-4000-8000-000000000003",
+      "examTitle": "Đề ôn tập Ngữ văn 12 — Nghị luận văn học (Tây Tiến)",
+      "reporterId": "00000000-0000-4000-8000-000000000012",
+      "reporterEmail": "giaovien12@example.com",
+      "reason": "Vi phạm bản quyền",
+      "detail": "Sao chép nguyên văn đáp án hướng dẫn chấm của Sở GD&ĐT Hà Nội chưa xin phép.",
+      "status": "open",
+      "createdAt": "2026-11-08T07:20:00Z",
+      "resolvedBy": null,
+      "resolvedAt": null
+    },
+    {
+      "id": 4,
+      "examId": "e1000000-0000-4000-8000-000000000007",
+      "examTitle": "Đề ôn Sinh học 11 — Tuần hoàn máu ở động vật",
+      "reporterId": "00000000-0000-4000-8000-000000000013",
+      "reporterEmail": "hocsinh13@example.com",
+      "reason": "Khác",
+      "detail": "Hình ảnh sơ đồ tim ở câu 8 bị vỡ hạt, không nhìn rõ chú thích van tim.",
+      "status": "open",
+      "createdAt": "2026-11-07T14:30:00Z",
+      "resolvedBy": null,
+      "resolvedAt": null
+    },
+    {
+      "id": 5,
+      "examId": "e1000000-0000-4000-8000-000000000004",
+      "examTitle": "Đề thi trắc nghiệm Hoá học 10 — Bảng tuần hoàn các nguyên tố",
+      "reporterId": "00000000-0000-4000-8000-000000000014",
+      "reporterEmail": "giaovien14@example.com",
+      "reason": "Spam",
+      "detail": "Đề chứa link dẫn tới nhóm Zalo bán khoá học ôn thi.",
+      "status": "resolved",
+      "createdAt": "2026-11-06T12:00:00Z",
+      "resolvedBy": "00000000-0000-4000-8000-000000000000",
+      "resolvedAt": "2026-11-07T08:00:00Z"
+    },
+    {
+      "id": 6,
+      "examId": "e1000000-0000-4000-8000-000000000001",
+      "examTitle": "Kiểm tra 1 tiết Toán 10 — Đại số & Hệ số góc",
+      "reporterId": "00000000-0000-4000-8000-000000000015",
+      "reporterEmail": "hocsinh15@example.com",
+      "reason": "Nội dung không phù hợp",
+      "detail": "Câu 2 có từ ngữ đùa cợt không chuẩn mực.",
+      "status": "dismissed",
+      "createdAt": "2026-11-05T09:00:00Z",
+      "resolvedBy": "00000000-0000-4000-8000-000000000000",
+      "resolvedAt": "2026-11-05T11:00:00Z"
+    }
+  ],
+  "documents": {
+    "docs": [
+      {
+        "id": "d1000000-0000-4000-8000-000000000001",
+        "ownerId": "00000000-0000-4000-8000-000000000001",
+        "ownerEmail": "giaovien1@example.com",
+        "name": "Bo-de-thi-thu-tot-nghiep-THPT-2026-Toan.pdf",
+        "mime": "application/pdf",
+        "size": 4250000,
+        "url": "/api/files/doc/1111111111111111111111111111111111111111.pdf",
+        "createdAt": "2026-11-09T06:20:00Z",
+        "subject": "Toán"
+      },
+      {
+        "id": "d1000000-0000-4000-8000-000000000002",
+        "ownerId": "00000000-0000-4000-8000-000000000002",
+        "ownerEmail": "giaovien2@example.com",
+        "name": "Giao-trinh-thi-nghiem-Vat-li-11.docx",
+        "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "size": 2150000,
+        "url": "/api/files/doc/2222222222222222222222222222222222222222.docx",
+        "createdAt": "2026-11-08T11:15:00Z",
+        "subject": "Vật lí"
+      },
+      {
+        "id": "d1000000-0000-4000-8000-000000000003",
+        "ownerId": "00000000-0000-4000-8000-000000000001",
+        "ownerEmail": "giaovien1@example.com",
+        "name": "So-do-tu-duy-Hinh-hoc-khong-gian-12.pdf",
+        "mime": "application/pdf",
+        "size": 8900000,
+        "url": "/api/files/doc/3333333333333333333333333333333333333333.pdf",
+        "createdAt": "2026-11-07T15:40:00Z",
+        "subject": "Toán"
+      },
+      {
+        "id": "d1000000-0000-4000-8000-000000000004",
+        "ownerId": "00000000-0000-4000-8000-000000000003",
+        "ownerEmail": "giaovien3@example.com",
+        "name": "De-cuong-on-tap-Ngu-van-hoc-ki-1.docx",
+        "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "size": 980000,
+        "url": "/api/files/doc/4444444444444444444444444444444444444444.docx",
+        "createdAt": "2026-11-06T08:50:00Z",
+        "subject": "Ngữ văn"
+      },
+      {
+        "id": "d1000000-0000-4000-8000-000000000005",
+        "ownerId": "00000000-0000-4000-8000-000000000004",
+        "ownerEmail": "giaovien4@example.com",
+        "name": "Bang-tuan-hoan-chat-luong-cao.png",
+        "mime": "image/png",
+        "size": 1450000,
+        "url": "/api/files/img/5555555555555555555555555555555555555555.png",
+        "createdAt": "2026-11-05T13:20:00Z",
+        "subject": "Hóa học"
+      },
+      {
+        "id": "d1000000-0000-4000-8000-000000000006",
+        "ownerId": "00000000-0000-4000-8000-000000000005",
+        "ownerEmail": "giaovien5@example.com",
+        "name": "Audio-Listening-Practice-Grade-9.pdf",
+        "mime": "application/pdf",
+        "size": 3120000,
+        "url": "/api/files/doc/6666666666666666666666666666666666666666.pdf",
+        "createdAt": "2026-11-04T17:05:00Z",
+        "subject": "Tiếng Anh"
+      }
+    ],
+    "total": 6,
+    "page": 1,
+    "perPage": 1000,
+    "topUsers": [
+      {
+        "ownerId": "00000000-0000-4000-8000-000000000001",
+        "email": "giaovien1@example.com",
+        "name": "Cô Nguyễn Thu Hà",
+        "totalSize": 13150000,
+        "docCount": 2
+      },
+      {
+        "ownerId": "00000000-0000-4000-8000-000000000005",
+        "email": "giaovien5@example.com",
+        "name": "Thầy Trần Đức Nam",
+        "totalSize": 3120000,
+        "docCount": 1
+      },
+      {
+        "ownerId": "00000000-0000-4000-8000-000000000002",
+        "email": "giaovien2@example.com",
+        "name": "Thầy Lê Hoàng",
+        "totalSize": 2150000,
+        "docCount": 1
+      },
+      {
+        "ownerId": "00000000-0000-4000-8000-000000000004",
+        "email": "giaovien4@example.com",
+        "name": "Cô Phạm Hồng Nhung",
+        "totalSize": 1450000,
+        "docCount": 1
+      },
+      {
+        "ownerId": "00000000-0000-4000-8000-000000000003",
+        "email": "giaovien3@example.com",
+        "name": "Cô Đỗ Mai Lan",
+        "totalSize": 980000,
+        "docCount": 1
+      }
+    ]
+  },
+  "feedback": [
+    {
+      "id": 1,
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "email": "giaovien1@example.com",
+      "message": "Ứng dụng soạn đề rất tiện, mong đội ngũ phát triển thêm tính năng tách nhóm câu hỏi có cùng đoạn văn đọc hiểu trong môn Tiếng Anh và Ngữ văn.",
+      "page": "/soan-de",
+      "createdAt": "2026-11-09T11:00:00Z",
+      "read": false
+    },
+    {
+      "id": 2,
+      "userId": null,
+      "email": "khachhang@gmail.com",
+      "message": "Tôi là phụ huynh muốn làm thử đề của con trên điện thoại nhưng cỡ chữ công thức toán hơi nhỏ, mong thêm tuỳ chọn phóng to.",
+      "page": "/lam-de/demo",
+      "createdAt": "2026-11-08T18:40:00Z",
+      "read": false
+    },
+    {
+      "id": 3,
+      "userId": "00000000-0000-4000-8000-000000000002",
+      "email": "giaovien2@example.com",
+      "message": "Xuất Word rất đẹp và giữ chuẩn lề A4, thầy cô trong tổ chuyên môn trường tôi đều khen. Cảm ơn tác giả nhiều!",
+      "page": "/de-cong-dong",
+      "createdAt": "2026-11-07T16:15:00Z",
+      "read": true
+    },
+    {
+      "id": 4,
+      "userId": null,
+      "email": null,
+      "message": "Nên thêm tính năng in phiếu trả lời trắc nghiệm 20 câu / 40 câu để học sinh tô chì như thi thật.",
+      "page": "/cham-trac-nghiem",
+      "createdAt": "2026-11-06T09:30:00Z",
+      "read": true
+    },
+    {
+      "id": 5,
+      "userId": "00000000-0000-4000-8000-000000000005",
+      "email": "giaovien5@example.com",
+      "message": "Cho tôi hỏi tài khoản miễn phí có giới hạn số lượng đề đăng lên cộng đồng không ạ?",
+      "page": "/ho-so",
+      "createdAt": "2026-11-05T14:20:00Z",
+      "read": true
+    }
+  ],
+  "overrides": [
+    {
+      "id": "toan-l6-01",
+      "data": {
+        "id": "toan-l6-01",
+        "subject": "Toán",
+        "grades": ["Lớp 6"],
+        "type": "trac-nghiem",
+        "prompt": "Số $12$ nằm giữa hai số nguyên liên tiếp. Hai số đó là: (Đã sửa nội dung chuẩn hoá)",
+        "options": [
+          {
+            "key": "A",
+            "text": "$10$ và $11$"
+          },
+          {
+            "key": "B",
+            "text": "$11$ và $13$"
+          },
+          {
+            "key": "C",
+            "text": "$13$ và $14$"
+          },
+          {
+            "key": "D",
+            "text": "$14$ và $15$"
+          }
+        ],
+        "answer": "B",
+        "explanation": "Số liền trước của $12$ là $11$, số liền sau của $12$ là $13$.",
+        "points": 0.25,
+        "tags": ["số tự nhiên", "thứ tự", "NB"],
+        "variable": false
+      },
+      "status": "published",
+      "updated_at": "2026-11-09T10:30:00Z",
+      "updated_by": "00000000-0000-4000-8000-000000000000"
+    },
+    {
+      "id": "toan-l6-03",
+      "data": {
+        "id": "toan-l6-03",
+        "subject": "Toán",
+        "grades": ["Lớp 6"],
+        "type": "trac-nghiem",
+        "prompt": "Rút gọn phân số $\\dfrac{18}{24}$ được kết quả là:",
+        "options": [
+          {
+            "key": "A",
+            "text": "$\\dfrac{3}{4}$"
+          },
+          {
+            "key": "B",
+            "text": "$\\dfrac{9}{12}$"
+          },
+          {
+            "key": "C",
+            "text": "$\\dfrac{6}{8}$"
+          },
+          {
+            "key": "D",
+            "text": "$\\dfrac{2}{3}$"
+          }
+        ],
+        "answer": "A",
+        "explanation": "Chia cả tử và mẫu cho $6$: $\\dfrac{18 : 6}{24 : 6} = \\dfrac{3}{4}$.",
+        "points": 0.25,
+        "tags": ["phân số"],
+        "variable": true
+      },
+      "status": "hidden",
+      "updated_at": "2026-11-08T14:15:00Z",
+      "updated_by": "00000000-0000-4000-8000-000000000000"
+    },
+    {
+      "id": "db-mock-001",
+      "data": {
+        "id": "db-mock-001",
+        "subject": "Vật lí",
+        "grades": ["Lớp 10"],
+        "type": "trac-nghiem",
+        "prompt": "Một chất điểm chuyển động thẳng đều với vận tốc $v = 10\\text{ m/s}$. Quãng đường chất điểm đi được sau $5\\text{ s}$ là:",
+        "options": [
+          {
+            "key": "A",
+            "text": "$20\\text{ m}$"
+          },
+          {
+            "key": "B",
+            "text": "$50\\text{ m}$"
+          },
+          {
+            "key": "C",
+            "text": "$100\\text{ m}$"
+          },
+          {
+            "key": "D",
+            "text": "$2\\text{ m}$"
+          }
+        ],
+        "answer": "B",
+        "explanation": "Quãng đường đi được trong chuyển động thẳng đều: $s = v \\cdot t = 10 \\cdot 5 = 50\\text{ m}$.",
+        "points": 0.25,
+        "tags": ["chuyển động thẳng đều", "NB"],
+        "variable": true
+      },
+      "status": "published",
+      "updated_at": "2026-11-10T09:00:00Z",
+      "updated_by": "00000000-0000-4000-8000-000000000000"
+    }
+  ]
+}

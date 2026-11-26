@@ -32,14 +32,12 @@ import { QuotaRepositoryImpl } from '@/modules/ai/infrastructure/repositories/qu
 import { UserDataRepositoryImpl } from '@/modules/ai/infrastructure/repositories/user-data.repository'
 import { AiAdminController } from '@/modules/ai/presentation/controllers/ai-admin.controller'
 import { AiController } from '@/modules/ai/presentation/controllers/ai.controller'
-import { AppSettingsModule } from '@/modules/app-settings/app-settings.module'
 import { AI_METER } from '@/shared-kernel/application/ports/ai-meter.port'
 import { CREDIT_GRANT } from '@/shared-kernel/application/ports/credit-grant.port'
 import { VISION_READER } from '@/shared-kernel/application/ports/vision-reader.port'
 
 @Global() // @global-approved: other contexts meter AI points, read images and grant credits through shared-kernel ports
 @Module({
-  imports: [AppSettingsModule],
   controllers: [AiController, AiAdminController],
   providers: [
     UserDeletionListener,

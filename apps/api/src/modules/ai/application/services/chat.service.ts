@@ -41,6 +41,8 @@ import type { AiCallLogRepositoryPort } from '@/modules/ai/application/ports/ai-
 import type {
   Citation,
   LlmProviderPort,
+  LlmRequest,
+  LlmResult,
   LlmStream,
 } from '@/modules/ai/application/ports/llm-provider.port'
 import type { TaskPromptsPort } from '@/modules/ai/application/ports/task-prompts.port'
@@ -96,6 +98,17 @@ interface Billing {
 const RETRY_WAIT_MS = 4000
 const THINK_BATCH_MS = 250
 const NEXT_MODEL_WAIT_MS = 500
+const AI_OVERLOADED = 'AI đang quá tải. Bạn vui lòng thử lại sau ít phút hoặc tự soạn câu hỏi.'
+
+const unavailable = (billing: Billing) =>
+  new BadGatewayException({
+    code: ErrorCode.AI_UNAVAILABLE,
+    message:
+      AI_OVERLOADED +
+      (billing.receipt
+        ? ' Yêu cầu này không bị trừ điểm; chưa áp dụng hoàn điểm cho lần trước.'
+        : ''),
+  })
 
 const fail = (status: HttpStatus, code: string, message: string) =>
   new HttpException({ code, message }, status)
@@ -208,7 +221,7 @@ export class ChatService {
     release: () => Promise<void>,
     sink?: ChatSink,
   ): Promise<ChatReply> {
-    const { userId, quota, promptTokens, maxTokens } = billing
+    const { userId, promptTokens, maxTokens } = billing
     const webSearch = command.webSearch === true
 
     let providers
@@ -229,13 +242,11 @@ export class ChatService {
     }
     const targets = buildTargets(providers, { webSearch, strong: command.strong === true })
     if (targets.length === 0) {
-      throw new InternalServerErrorException({
-        code: ErrorCode.AI_UNAVAILABLE,
-        message: 'Máy chủ chưa cấu hình nhà cung cấp AI nào.',
-      })
+      throw unavailable(billing)
     }
 
     const timeoutMs = this.config.get('LLM_TIMEOUT_MS', { infer: true })
+    const firstAnswerTimeoutMs = this.config.get('LLM_FIRST_ANSWER_TIMEOUT_MS', { infer: true })
     const strongFactor = this.config.get('STRONG_POINT_FACTOR', { infer: true })
     const logs: Promise<void>[] = []
     // tokens a provider billed for an attempt that gave the user nothing: charged only beyond the free allowance
@@ -276,31 +287,51 @@ export class ChatService {
       const anthropic = target.provider === 'anthropic'
       const provider = anthropic ? this.anthropic : this.openAiCompatible
       const startedAt = Date.now()
-      let reasoningEffort = command.reasoningEffort
+      let reasoningEffort = target.reasoningEffort ?? command.reasoningEffort
       let lastError: string | null = null
 
       for (let attempt = 0; attempt < (anthropic ? 1 : 2); attempt++) {
         if (attempt > 0 || index > 0) sink?.retry()
+        let contentSent = false
         let result
         try {
-          result = await provider.complete({
-            target,
-            messages: command.messages,
-            maxTokens,
-            temperature: command.temperature,
-            reasoningEffort,
-            timeoutMs,
-            stream: sink && !webSearch ? this.#streamTo(sink) : undefined,
-          })
+          result = await this.#complete(
+            provider,
+            {
+              target,
+              messages: command.messages,
+              maxTokens,
+              temperature: command.temperature,
+              reasoningEffort,
+              timeoutMs,
+              stream:
+                sink && !webSearch
+                  ? this.#streamTo(sink, () => {
+                      contentSent = true
+                    })
+                  : undefined,
+            },
+            firstAnswerTimeoutMs,
+          )
         } catch (error) {
           const failure = this.#classify(error, target.model, timeoutMs, attempt < 1)
           lastError = failure.message
+          if (contentSent) {
+            log(target, startedAt, lastError)
+            await Promise.all(logs)
+            throw unavailable(billing)
+          }
           if (!failure.retry) break
           await sleep(RETRY_WAIT_MS)
           continue
         }
 
         if (result.broken) {
+          if (contentSent) {
+            log(target, startedAt, `${target.model}: luồng trả lời bị ngắt giữa chừng`)
+            await Promise.all(logs)
+            throw unavailable(billing)
+          }
           // the provider still bills what it generated; estimate it from what arrived
           if (await this.#beyondFreeFails(userId)) {
             wasted +=
@@ -342,20 +373,93 @@ export class ChatService {
       if (index < targets.length - 1) await sleep(NEXT_MODEL_WAIT_MS)
     }
 
-    await Promise.all([wasted ? this.quotas.addUsage(userId, wasted, quota) : null, ...logs])
-    throw new BadGatewayException({
-      code: ErrorCode.AI_UNAVAILABLE,
-      message: 'Các model AI đều không phản hồi. Vui lòng thử lại sau.',
-    })
+    await Promise.all(logs)
+    throw unavailable(billing)
   }
 
-  /** Reasoning arrives a few characters at a time; it is sent in batches, and always before the answer text that follows it */
-  #streamTo(sink: ChatSink): LlmStream {
+  /** Both deadlines restart per attempt; answering clears only the first-answer deadline. */
+  async #complete(
+    provider: LlmProviderPort,
+    request: LlmRequest,
+    firstAnswerTimeoutMs: number,
+  ): Promise<LlmResult> {
+    const controller = new AbortController()
+    let rejectDeadline: (error: Error) => void
+    const deadline = new Promise<never>((_resolve, reject) => {
+      rejectDeadline = reject
+    })
+    const expire = (error: Error) => {
+      controller.abort(error)
+      rejectDeadline(error)
+    }
+    const firstAnswerTimer = setTimeout(
+      () =>
+        expire(
+          new DOMException(
+            `first answer timeout (${firstAnswerTimeoutMs}ms)`,
+            'FirstAnswerTimeoutError',
+          ),
+        ),
+      firstAnswerTimeoutMs,
+    )
+    const absoluteTimer = setTimeout(
+      () => expire(new DOMException('Absolute attempt timeout', 'TimeoutError')),
+      request.timeoutMs,
+    )
+    const onFirstAnswer = () => {
+      clearTimeout(firstAnswerTimer)
+    }
+    const stream = request.stream
+    try {
+      const result = await Promise.race([
+        provider.complete({
+          ...request,
+          signal: controller.signal,
+          onFirstAnswer,
+          stream: stream
+            ? {
+                onOpen: () => {
+                  if (!controller.signal.aborted) stream.onOpen()
+                },
+                onDelta: (delta) => {
+                  if (controller.signal.aborted) return
+                  if (delta.content.trim()) onFirstAnswer()
+                  stream.onDelta(delta)
+                },
+              }
+            : undefined,
+        }),
+        deadline,
+      ])
+      if (controller.signal.aborted) throw controller.signal.reason
+      return result
+    } finally {
+      clearTimeout(firstAnswerTimer)
+      clearTimeout(absoluteTimer)
+    }
+  }
+
+  /** Buffer reasoning until an answer arrives, so an empty model can be replaced without leaking its output */
+  #streamTo(sink: ChatSink, onContent: () => void): LlmStream {
     let thinking = ''
+    let leading = ''
+    let answering = false
     let sentAt = 0
     return {
       onOpen: () => sink.start(),
       onDelta: ({ content, reasoning }) => {
+        if (!answering) {
+          thinking += reasoning
+          leading += content
+          if (!leading.trim()) return
+          answering = true
+          onContent()
+          if (thinking) sink.think(thinking)
+          thinking = ''
+          sink.delta(leading)
+          leading = ''
+          return
+        }
         if (reasoning) {
           thinking += reasoning
           if (Date.now() - sentAt > THINK_BATCH_MS) {
@@ -399,6 +503,9 @@ export class ChatService {
     timeoutMs: number,
     canRetry: boolean,
   ): { message: string; retry: boolean } {
+    if (error instanceof Error && error.name === 'FirstAnswerTimeoutError') {
+      return { message: `${model}: ${error.message}`, retry: false }
+    }
     if (error instanceof LlmUpstreamError) {
       if (error.status === 401 || error.status === 403) {
         return { message: `${model}: API key bị từ chối (${error.status})`, retry: false }

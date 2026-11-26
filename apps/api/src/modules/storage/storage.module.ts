@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common'
 
-import { ObjectStorageModule } from '@/modules/object-storage/object-storage.module'
 import { UserDeletionListener } from '@/modules/storage/application/listeners/user-deletion.listener'
 import { STORAGE_ADMIN_REPOSITORY } from '@/modules/storage/application/ports/storage-admin.repository.port'
 import { USER_DATA_REPOSITORY } from '@/modules/storage/application/ports/user-data.repository.port'
@@ -19,7 +18,6 @@ import { StorageAdminController } from '@/modules/storage/presentation/controlle
 import { StorageController } from '@/modules/storage/presentation/controllers/storage.controller'
 
 @Module({
-  imports: [ObjectStorageModule],
   controllers: [StorageController, FileController, StorageAdminController],
   providers: [
     UserDeletionListener,

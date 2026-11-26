@@ -1,9 +1,8 @@
-// const config = {
-//   plugins: {
-//     "@tailwindcss/postcss": {},
-//   },
-// };
+import path from 'node:path'
 
-// export default config;
-
-export { default } from '@workspace/ui/postcss.config'
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+    [path.resolve(process.cwd(), 'postcss.engine.cjs')]: {},
+  },
+}

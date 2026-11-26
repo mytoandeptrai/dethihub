@@ -17,6 +17,9 @@ export interface LlmRequest {
   temperature?: number
   reasoningEffort?: string
   timeoutMs: number
+  signal?: AbortSignal
+  /** actual answer text, excluding reasoning and whitespace */
+  onFirstAnswer?: () => void
   stream?: LlmStream
 }
 

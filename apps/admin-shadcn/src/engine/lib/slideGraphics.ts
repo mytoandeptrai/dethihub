@@ -1,0 +1,286 @@
+import { GRAPHIC_META, type GraphicMeta } from './graphicsMeta'
+
+/**
+ * Registry đồ hoạ vector (chặng 2). Dữ liệu thô nằm ở `graphics.ts` (sinh tự
+ * động từ contact sheet bằng `scripts/import-graphics.mjs`).
+ *
+ * Vai trò: AI chọn một `id` có sẵn thay vì gọi vẽ ảnh — nhanh, rẻ, không lỗi
+ * chữ, và luôn đúng bộ màu. Renderer chỉ thay màu nét (#22333B) theo theme,
+ * giữ nguyên khối fill pastel như bản thiết kế.
+ */
+import type { GraphicCategory } from './graphics'
+
+export type { GraphicCategory, GraphicMeta }
+
+/**
+ * Danh mục (tên, từ khoá, tỉ lệ, màu chủ đạo) nạp ngay; SVG (~1,4 MB) nằm ở `graphics.ts`, tải sau bằng
+ * `loadGraphics()` để trang soạn đề/slide mở nhanh. Chưa tải xong thì `graphicMarkup` trả '' và tự kích tải;
+ * component vẽ hình dùng `subscribeGraphics` (hook `useGraphicsReady`) để vẽ lại khi SVG về.
+ */
+export const ALL_GRAPHICS = GRAPHIC_META
+const GRAPHICS = ALL_GRAPHICS
+let SVG: Map<string, string> | null = null
+let loading: Promise<void> | null = null
+const listeners = new Set<() => void>()
+
+export function loadGraphics(): Promise<void> {
+  return (loading ??= import('./graphics').then((m) => {
+    SVG = new Map(m.GRAPHICS.map((graphic) => [graphic.id, graphic.svg]))
+    listeners.forEach((fn) => fn())
+  }))
+}
+export const graphicsReady = (): boolean => SVG !== null
+export function subscribeGraphics(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+/** SVG gốc của hình (chưa đổi màu); '' nếu chưa tải `loadGraphics()` */
+export const graphicSvg = (id: string): string => SVG?.get(id) ?? ''
+
+/** Icon AI được chọn; `ornament` (trang trí do layout đặt) chỉ tra được qua graphicById. */
+export const SLIDE_GRAPHICS = GRAPHICS.filter((graphic) => graphic.category !== 'ornament')
+
+const BY_ID = new Map(GRAPHICS.map((graphic) => [graphic.id, graphic]))
+
+export const GRAPHIC_IDS = new Set(SLIDE_GRAPHICS.map((graphic) => graphic.id))
+
+/** Màu nét gốc trong file thiết kế — thay bằng màu theme khi render. */
+export const GRAPHIC_INK = '#22333B'
+
+export const GRAPHIC_CATEGORY_LABEL: Record<GraphicCategory, string> = {
+  math: 'Toán & hình học',
+  sci: 'Khoa học',
+  nat: 'Thiên nhiên',
+  lang: 'Ngữ văn',
+  soc: 'Lịch sử & địa lý',
+  class: 'Lớp học',
+  people: 'Người & giao tiếp',
+  reward: 'Khen thưởng',
+  sym: 'Ký hiệu',
+  frame: 'Khung & nhãn',
+  arrow: 'Mũi tên',
+  decor: 'Trang trí',
+  misc: 'Khác',
+  cs: 'Tin học',
+  prog: 'Ngôn ngữ lập trình',
+  eng: 'Ngoại ngữ',
+  geo: 'Địa lí',
+  his: 'Lịch sử',
+  lit: 'Văn học',
+  bio: 'Sinh học',
+  chem: 'Hoá học',
+  phys: 'Vật lí',
+  art: 'Nghệ thuật',
+  pe: 'Thể chất',
+  life: 'Kỹ năng sống',
+  civic: 'Giáo dục công dân',
+  event: 'Lễ & sự kiện',
+  feel: 'Cảm xúc & phản hồi',
+  anim: 'Hình động',
+  ornament: 'Hoạ tiết',
+}
+
+const CATEGORY_ORDER: GraphicCategory[] = [
+  'math',
+  'sci',
+  'nat',
+  'lang',
+  'class',
+  'people',
+  'reward',
+  'sym',
+  'frame',
+  'arrow',
+  'decor',
+  'misc',
+  'cs',
+  'prog',
+  'eng',
+  'geo',
+  'his',
+  'lit',
+  'bio',
+  'chem',
+  'phys',
+  'art',
+  'pe',
+  'life',
+  'civic',
+  'event',
+  'feel',
+  'anim',
+]
+
+/** Bỏ dấu tiếng Việt để search bằng chuỗi không dấu (giống pickSlideAsset). */
+const norm = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toLowerCase()
+
+export function isGraphicId(value: unknown): value is string {
+  return typeof value === 'string' && GRAPHIC_IDS.has(value)
+}
+
+export function graphicById(id: string | undefined): GraphicMeta | undefined {
+  return id ? BY_ID.get(id) : undefined
+}
+
+/**
+ * Tìm đồ hoạ theo từ khoá tiếng Việt (có dấu hay không dấu đều được).
+ * Trả về xếp theo điểm khớp, tối đa `limit`.
+ */
+export function searchGraphics(text: string, limit = 8): GraphicMeta[] {
+  const q = norm(text).trim()
+  if (!q) return []
+  const tokens = q.split(/[^a-z0-9]+/).filter((token) => token.length >= 2)
+  if (!tokens.length) return []
+  return SLIDE_GRAPHICS.map((graphic) => {
+    const hay = `${norm(graphic.name)} ${graphic.keywords} ${graphic.id.replace(/-/g, ' ')}`
+    let score = 0
+    for (const token of tokens) {
+      if (hay.includes(token)) score += token.length > 3 ? 2 : 1
+    }
+    if (norm(graphic.name) === q) score += 4
+    return { graphic, score }
+  })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((entry) => entry.graphic)
+}
+
+const wordsOf = (text: string) =>
+  norm(text)
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+
+/**
+ * Tìm cho panel Đồ hoạ (gồm cả hoạ tiết): MỌI từ gõ vào phải khớp đầu một từ trong tên/từ khoá
+ * (gõ "trai tim" không ra "bên trái", "tim" không ra "tìm kiếm"); khớp tên xếp trước khớp từ khoá.
+ */
+export function findGraphics(text: string): GraphicMeta[] {
+  const tokens = wordsOf(text)
+  if (!tokens.length) return []
+  const phrase = tokens.join(' ')
+  return GRAPHICS.flatMap((graphic) => {
+    const name = wordsOf(graphic.name)
+    const rest = wordsOf(`${graphic.keywords} ${graphic.id}`)
+    let score = 0
+    for (const token of tokens) {
+      if (name.includes(token)) score += 3
+      else if (name.some((word) => word.startsWith(token))) score += 2
+      else if (rest.some((word) => word.startsWith(token))) score += 1
+      else return []
+    }
+    if (name.join(' ').startsWith(phrase)) score += 2
+    return [{ graphic, score }]
+  })
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.graphic)
+}
+
+/** Cùng luật khớp đầu từ, cho các danh sách nhỏ (khung ảnh…). */
+export const matchesWords = (text: string, query: string): boolean => {
+  const hay = wordsOf(text)
+  return wordsOf(query).every((token) => hay.some((word) => word.startsWith(token)))
+}
+
+const words = (text: string): Set<string> =>
+  new Set(
+    norm(text)
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length >= 3),
+  )
+
+/**
+ * Đồ hoạ AI chọn có khớp nghĩa slide không: tên/từ khoá/id của hình phải chung ít nhất một từ
+ * với chữ trên slide. Không khớp thì bỏ hình (hình lệch nghĩa — cái cân cho ƯCLN — tệ hơn không hình).
+ */
+export function graphicFits(id: string, text: string): boolean {
+  const graphic = graphicById(id)
+  if (!graphic) return false
+  const hay = words(`${graphic.name} ${graphic.keywords} ${graphic.id.replace(/-/g, ' ')}`)
+  for (const word of words(text)) if (hay.has(word)) return true
+  return false
+}
+
+/** màu pastel được tô nhiều nhất trong SVG (bỏ nét và trắng): đó là "màu chủ đạo" của hình.
+ *  Giữ đồng bộ với bản trong scripts/split-graphics.mjs (tính sẵn `main` cho danh mục). */
+function dominantFill(svg: string): string | null {
+  const count = new Map<string, number>()
+  for (const [, color] of svg.matchAll(/fill="(#[0-9a-fA-F]{6})"/g)) {
+    if (color.toUpperCase() === GRAPHIC_INK || color.toUpperCase() === '#FFFFFF') continue
+    count.set(color, (count.get(color) ?? 0) + 1)
+  }
+  return [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+}
+
+/** màu chủ đạo hiện tại của đồ hoạ (để bảng màu hiện đúng màu đang dùng) */
+export function graphicMainColor(id: string | undefined): string {
+  const graphic = graphicById(id)
+  return graphic?.main ?? '#b9d4ea'
+}
+
+/** SVG sẵn sàng nhúng: đổi màu nét và (tuỳ chọn) màu chủ đạo, ép phủ kín hộp chứa. */
+/** màu từ JSON slide (có thể do người khác soạn): chỉ nhận dạng #rgb/#rrggbb/tên màu, sai thì dùng mặc định */
+const safeColor = (c: string | undefined, fallback?: string) =>
+  c && /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{3,20}|rgba?\([\d\s.,%]+\))$/.test(c.trim())
+    ? c.trim()
+    : fallback
+
+export function graphicMarkup(id: string, inkIn = GRAPHIC_INK, mainIn?: string): string {
+  const ink = safeColor(inkIn, GRAPHIC_INK) as string
+  const main = safeColor(mainIn)
+  const graphic = graphicById(id)
+  if (!graphic) return ''
+  const raw = SVG?.get(id)
+  if (!raw) {
+    void loadGraphics()
+    return ''
+  }
+  let svg = raw.replace(
+    /^<svg /,
+    '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" ',
+  )
+  const dominant = main ? dominantFill(svg) : null
+  if (main && dominant) svg = svg.replaceAll(`fill="${dominant}"`, `fill="${main}"`)
+  return svg.replaceAll(GRAPHIC_INK, ink)
+}
+
+/**
+ * Catalog gửi cho model: chỉ id + tên ngắn, gom theo nhóm. 232 mục ≈ 5,5K ký tự,
+ * nên prompt từng slide chỉ gửi các nhóm hợp với môn (`categories`); không truyền
+ * thì gửi hết (dùng khi chưa biết môn).
+ */
+/**
+ * Danh mục đồ hoạ RÚT GỌN cho một lượt gọi: đủ nhóm chính của môn + nhóm lớp học (dùng chung),
+ * cộng các hình khớp từ khoá của từng slide trong lượt. Danh mục đầy đủ ~8.000 ký tự, gửi lại ở mọi lượt.
+ */
+export function graphicShortlistText(
+  categories: readonly string[] | undefined,
+  queries: string[],
+): string {
+  const keep = new Set(categories?.length ? [categories[0], 'class'] : ['class'])
+  const picked = new Map<string, GraphicMeta>()
+  for (const g of SLIDE_GRAPHICS) if (keep.has(g.category)) picked.set(g.id, g)
+  for (const q of queries) for (const g of searchGraphics(q, 8)) picked.set(g.id, g)
+  return CATEGORY_ORDER.map((category) => {
+    const items = [...picked.values()].filter((g) => g.category === category)
+    return items.length ? `${category}: ${items.map((g) => `${g.id}=${g.name}`).join(', ')}` : ''
+  })
+    .filter(Boolean)
+    .join('\n')
+}
+
+export function graphicCatalogText(categories?: readonly string[]): string {
+  return CATEGORY_ORDER.filter((category) => !categories || categories.includes(category))
+    .map((category) => {
+      const items = GRAPHICS.filter((graphic) => graphic.category === category)
+      if (!items.length) return ''
+      return `${category}: ${items.map((graphic) => `${graphic.id}=${graphic.name}`).join(', ')}`
+    })
+    .filter(Boolean)
+    .join('\n')
+}

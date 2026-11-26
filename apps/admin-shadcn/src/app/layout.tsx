@@ -1,45 +1,67 @@
+import { NextIntlClientProvider } from 'next-intl'
+
+import { appPaths } from '@/config/app-paths'
 import { env } from '@/config/env'
+import { site } from '@/config/site'
+import messages from '@/i18n/messages/core'
+import { t } from '@/i18n/translate'
+import { buildMetadata } from '@/lib/seo'
 
 import { AppProvider } from './provide'
 
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import '@/styles/globals.css'
+import '@/styles/product.css'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
-  title: {
-    default: env.NEXT_PUBLIC_APP_NAME,
-    template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`,
-  },
-  description: 'A minimal foundation.',
-  openGraph: {
-    type: 'website',
-    siteName: env.NEXT_PUBLIC_APP_NAME,
-  },
-  twitter: {
-    card: 'summary_large_image',
-  },
+  ...buildMetadata(),
+  alternates: undefined,
+  metadataBase: new URL(site.url),
+  title: { default: site.name, template: `%s | ${site.name}` },
+  applicationName: site.name,
+  keywords: site.keywords,
+  authors: [{ name: site.name, url: site.url }],
+  creator: site.name,
+  publisher: site.name,
+  formatDetection: { telephone: false, email: false, address: false },
+  verification: { google: env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#4f46e5' },
+    { media: '(prefers-color-scheme: dark)', color: '#312e81' },
+  ],
+}
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#09090b" />
+        {/*
+          Product CSS (product-*.css) is scoped to html[data-product-shell]. useGlobalContainer sets that
+          attribute in a useEffect, which only runs after JS loads and hydrates, so the server HTML painted
+          unstyled first (visible on Vercel). This inline script sets it before first paint with the same
+          rule (every page except the editor); the effect still handles client navigation and maintenance.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(location.pathname!==${JSON.stringify(appPaths.editor.href)})document.documentElement.dataset.productShell=''`,
+          }}
+        />
       </head>
-      <body className="grid min-h-dvh antialiased">
+      <body className="min-h-dvh antialiased">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:ring-2 focus:ring-ring"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-background focus:p-3"
         >
-          Skip to main content
+          {t('common.skip')}
         </a>
-        <AppProvider>{children}</AppProvider>
+        <NextIntlClientProvider locale="vi" messages={{ auth: messages.auth }}>
+          <AppProvider>{children}</AppProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

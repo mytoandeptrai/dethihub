@@ -1,9 +1,12 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   ci:
@@ -86,18 +89,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build database package
-        run: pnpm --filter @workspace/database build
+      - name: Build API workspace dependencies
+        run: pnpm --filter @workspace/database --filter @workspace/core build
 
       - name: Apply Prisma migrations
         run: pnpm --filter @workspace/database db:migrate:deploy
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          DIRECT_URL: postgres://postgres:postgres@localhost:5432/postgres
 
       - name: Run E2E tests
         working-directory: apps/api
         run: pnpm test:e2e
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          DIRECT_URL: postgres://postgres:postgres@localhost:5432/postgres
           JWT_SECRET: test-secret-key-min-32-chars-for-ci
           REDIS_URL: redis://localhost:6379

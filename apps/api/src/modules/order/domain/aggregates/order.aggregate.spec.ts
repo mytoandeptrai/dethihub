@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest'
+
 /**
  * Order aggregate root pure domain tests — no NestJS Testing Module
  */
@@ -8,8 +10,6 @@ import { OrderCreatedEvent } from '@/modules/order/domain/events/order-created.e
 import { OrderPaidEvent } from '@/modules/order/domain/events/order-paid.event'
 import { Money } from '@/modules/order/domain/value-objects/money.vo'
 import { OrderItem } from '@/modules/order/domain/value-objects/order-item.vo'
-
-import { describe, expect, it } from 'vitest'
 function buildItems(): OrderItem[] {
   return [OrderItem.create('prod-001', 1, '99.99')]
 }

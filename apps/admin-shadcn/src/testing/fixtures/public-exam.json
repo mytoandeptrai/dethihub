@@ -1,0 +1,50 @@
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "title": "Đề kiểm tra Toán lớp 9 – Học kỳ II",
+  "kind": "exam",
+  "status": "published",
+  "listed": true,
+  "subject": "Toán",
+  "grade": "Lớp 9",
+  "term": "Học kỳ II",
+  "schoolYear": "2025 – 2026",
+  "duration": "45 phút",
+  "unit": "Trường THCS Đề Thi Hub",
+  "authority": "Phòng Giáo dục",
+  "createdAt": "2026-09-18T07:15:00.000Z",
+  "updatedAt": "2026-09-18T07:15:00.000Z",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Ôn tập kiến thức đại số và hình học với các câu hỏi dành cho học sinh lớp 9."
+    },
+    {
+      "type": "question",
+      "no": 1,
+      "text": "Căn bậc hai số học của 16 bằng bao nhiêu?",
+      "options": [
+        { "label": "A", "text": "4" },
+        { "label": "B", "text": "8" }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 2,
+      "text": "Tổng ba góc trong một tam giác bằng bao nhiêu độ?",
+      "options": [
+        { "label": "A", "text": "180" },
+        { "label": "B", "text": "360" }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 3,
+      "text": "Phương trình x + 2 = 5 có nghiệm là bao nhiêu?",
+      "options": [
+        { "label": "A", "text": "3" },
+        { "label": "B", "text": "7" }
+      ]
+    },
+    { "type": "essay", "no": 4, "text": "Chứng minh định lý về tam giác cân.", "score": 2 }
+  ]
+}

@@ -3,12 +3,24 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@workspace/ui/*": [
-        "../../packages/ui/src/*"
-      ]
+      "@editor-engine": ["./.engine-types/engine/compat/editor-root.d.ts"],
+      "@engine-pricing": ["./.engine-types/engine/compat/pricing.d.ts"],
+      "@engine-dialogs": ["./.engine-types/engine/compat/dialogs.d.ts"],
+      "@engine-designs": ["./.engine-types/engine/compat/designs.d.ts"],
+      "@engine-navigation": ["./.engine-types/engine/compat/navigation.d.ts"],
+      "@workspace-engine": ["./.engine-types/engine/compat/workspace.d.ts"],
+      "@online-exams-engine": ["./.engine-types/engine/compat/online-exams.d.ts"],
+      "@student-engine": ["./.engine-types/engine/compat/student-exams.d.ts"],
+      "@profile-engine": ["./.engine-types/engine/compat/profile.d.ts"],
+      "@admin-pages-engine": ["./.engine-types/engine/compat/admin-pages.d.ts"],
+      "@admin-overlays-engine": ["./.engine-types/engine/compat/admin-overlays.d.ts"],
+      "@library-engine": ["./.engine-types/engine/compat/library.d.ts"],
+      "@community-engine": ["./.engine-types/engine/compat/community.d.ts"],
+      "@product-ui-engine": ["./.engine-types/engine/compat/product-ui.d.ts"],
+      "@student-kernel": ["./.engine-types/engine/compat/student-kernel.d.ts"],
+      "@online-exams-kernel": ["./.engine-types/engine/compat/online-exams-kernel.d.ts"],
+      "@/*": ["./src/*"],
+      "@workspace/ui/*": ["../../packages/ui/src/*"]
     },
     "target": "esnext",
     "esModuleInterop": true,
@@ -27,11 +39,7 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo",
-    "lib": [
-      "esnext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["esnext", "DOM", "DOM.Iterable"],
     "module": "preserve",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -51,7 +59,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules", "src/engine", ".engine-types"]
 }

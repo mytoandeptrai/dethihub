@@ -1,0 +1,453 @@
+import {
+  Blocks,
+  ChevronLeft,
+  ChevronRight,
+  ListTree,
+  SlidersHorizontal,
+  Wrench,
+  X,
+} from 'lucide-react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
+
+import { MathText } from '@/engine/components/MathText'
+import { Button } from '@/engine/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/engine/components/ui/tooltip'
+import { cn } from '@/engine/lib/cn'
+import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
+import { INSPECTOR_TEMPLATE_MIME } from '@/modules/exam-inspector/lib/inspector-selection'
+
+import { buildTocFromDoc, type TocEntry } from './convert'
+import { IconGrip } from './icons'
+import { NavRailIndicator } from './NavRailIndicator'
+import { PanelContentTransition } from './PanelContentTransition'
+import { SheetTabs } from './SheetTabs'
+import { BLOCK_TEMPLATES, BLOCK_TEMPLATE_MIME, type BlockTemplate } from './templates'
+import { ToolsPanel } from './tools/LazyToolsPanel'
+
+import type { PlotImage } from './tools/GraphToolModal'
+/**
+ * Nav pane bên phải — port từ GenOffice (`apps/docs/.../components/NavPane.tsx`):
+ * thanh icon dọc (Mục lục / Khối mẫu) như thư viện bên soạn slide, panel trượt
+ * ra bên trái thanh đó.
+ */
+import type { ExamBlock, ExamDoc } from '@/engine/data/docTypes'
+import type { JSONContent } from '@tiptap/core'
+
+export type PaneTab = 'toc' | 'blocks' | 'tools' | 'inspector'
+
+/** Gom danh sách mẫu theo nhóm liền kề, giữ thứ tự khai báo. */
+function groupTemplates(list: BlockTemplate[]): Array<{ name: string; items: BlockTemplate[] }> {
+  const out: Array<{ name: string; items: BlockTemplate[] }> = []
+  for (const tpl of list) {
+    const last = out[out.length - 1]
+    if (last && last.name === tpl.group) last.items.push(tpl)
+    else out.push({ name: tpl.group, items: [tpl] })
+  }
+  return out
+}
+
+const TABS: Array<{ id: PaneTab; label: string; Icon: typeof ListTree }> = [
+  { id: 'toc', label: 'Mục lục', Icon: ListTree },
+  { id: 'blocks', label: 'Khối mẫu', Icon: Blocks },
+  { id: 'tools', label: 'Công cụ', Icon: Wrench },
+  { id: 'inspector', label: 'Thuộc tính', Icon: SlidersHorizontal },
+]
+
+/** rộng panel trượt (cùng cỡ thư viện bên soạn slide) */
+const PANEL_W = 280
+
+export function NavPanel({
+  doc,
+  open,
+  onOpenChange,
+  onInsertTemplate,
+  onGoToBlock,
+  onInsertPlot,
+  onInsertBlocks,
+  examDoc = null,
+  side = 'right',
+  isMobile,
+  isOverlay,
+  currentTab,
+  onTabChange,
+  inspectorContent,
+}: {
+  doc: JSONContent
+  /** panel đang mở hay chỉ còn thanh icon */
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onInsertTemplate: (tpl: BlockTemplate) => void
+  onGoToBlock: (index: number) => void
+  onInsertPlot: (img: PlotImage) => void
+  onInsertBlocks?: (blocks: ExamBlock[]) => void
+  /** đề đang soạn (cho công cụ Xáo đề) */
+  examDoc?: ExamDoc | null
+  /** cột đặt panel: soạn đề để bên trái (AI bên phải, như soạn slide) */
+  side?: 'left' | 'right'
+  isMobile?: boolean
+  /** trên tablet (640–1023px): giữ thanh icon, mở panel phủ lên trang thay vì đẩy trang hẹp lại */
+  isOverlay?: boolean
+  currentTab?: PaneTab
+  onTabChange?: (tab: PaneTab) => void
+  inspectorContent?: ReactNode
+}) {
+  const left = side === 'left'
+  const [internalTab, setInternalTab] = useState<PaneTab>('toc')
+  const tab = currentTab ?? internalTab
+  const setTab = onTabChange ?? setInternalTab
+  const active = open ? tab : null
+  const shown = tab
+
+  const navRef = useRef<HTMLElement>(null)
+  const toc = useMemo(() => buildTocFromDoc(doc), [doc])
+  const mobileSheet = useAnimatedPresence(Boolean(isMobile && open), 180)
+  const tabletBackdrop = useAnimatedPresence(Boolean(isOverlay && active), 180)
+
+  if (isMobile) {
+    if (!mobileSheet.mounted) return null
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        {/* Backdrop */}
+        <div
+          className={cn(
+            'fixed inset-0 bg-black/40 backdrop-blur-xs',
+            mobileSheet.closing ? 'backdrop-out' : 'backdrop-in',
+          )}
+          onClick={() => onOpenChange(false)}
+          aria-hidden="true"
+        />
+        {/* Bottom sheet */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mục lục, Khối mẫu, Công cụ và Thuộc tính"
+          className={cn(
+            'border-line bg-surface relative z-10 flex max-h-[85dvh] w-full flex-col rounded-t-2xl border-t pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl',
+            mobileSheet.closing ? 'sheet-out-down' : 'sheet-in-up',
+          )}
+        >
+          {/* Handle bar */}
+          <div className="flex items-center justify-center pt-2.5 pb-1">
+            <div className="bg-line h-1 w-10 rounded-full" />
+          </div>
+
+          {/* Header with tabs & close */}
+          <div className="border-line flex items-center justify-between gap-2 border-b px-3 py-2">
+            <SheetTabs
+              className="no-scrollbar min-w-0 flex-1 overflow-x-auto"
+              items={TABS.map(({ id, label, Icon }) => ({
+                id,
+                label,
+                testId: id === 'inspector' ? 'inspector-tab' : undefined,
+                icon: <Icon className="size-4" />,
+              }))}
+              value={tab}
+              onChange={setTab}
+            />
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              aria-label="Đóng"
+              className="text-ink-3 hover:bg-paper-2 hover:text-ink flex size-9 shrink-0 items-center justify-center rounded-lg"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            {tab === 'inspector' && inspectorContent}
+            {tab === 'toc' && (
+              <div className="nav-body">
+                {toc.length === 0 ? (
+                  <p className="nav-body__empty text-ink-3 text-sm">
+                    Chưa có tiêu đề hay câu hỏi. Thêm tiêu đề bằng tab <b>Chèn</b> để lập mục lục.
+                  </p>
+                ) : (
+                  <ul className="nav-toc space-y-1">
+                    {toc.map((entry: TocEntry) => (
+                      <li key={entry.index} style={{ paddingLeft: `${(entry.level - 1) * 12}px` }}>
+                        <button
+                          type="button"
+                          className="hover:bg-paper-2 text-ink block w-full truncate rounded px-2 py-1.5 text-left text-sm"
+                          onClick={() => {
+                            onGoToBlock(entry.index)
+                            onOpenChange(false)
+                          }}
+                        >
+                          <MathText>
+                            {entry.kind === 'question'
+                              ? `Câu ${entry.no}. ${entry.text}`
+                              : entry.text}
+                          </MathText>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {tab === 'blocks' && (
+              <div className="nav-body space-y-4">
+                {groupTemplates(BLOCK_TEMPLATES).map((group) => (
+                  <section key={group.name} className="nav-tpl-group">
+                    <h3 className="nav-tpl-group__name text-ink-3 mb-1.5 text-xs font-semibold tracking-wider uppercase">
+                      {group.name}
+                    </h3>
+                    <ul className="nav-tpl space-y-1.5">
+                      {group.items.map((tpl) => (
+                        <li key={tpl.id}>
+                          <button
+                            type="button"
+                            className="border-line bg-surface hover:border-clay hover:bg-paper-2 active:bg-paper flex w-full items-start gap-2.5 rounded-lg border p-2.5 text-left transition-colors"
+                            onClick={() => {
+                              onInsertTemplate(tpl)
+                            }}
+                          >
+                            <span className="nav-tpl__grip text-ink-3 mt-0.5">
+                              <IconGrip size={14} />
+                            </span>
+                            <span className="nav-tpl__texts min-w-0 flex-1">
+                              <span className="nav-tpl__label text-ink block text-sm font-medium">
+                                {tpl.label}
+                              </span>
+                              <span className="nav-tpl__desc text-ink-3 block truncate text-xs">
+                                {tpl.desc}
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            )}
+
+            {tab === 'tools' && (
+              <div className="nav-body">
+                <ToolsPanel
+                  examDoc={examDoc}
+                  onInsertPlot={(img) => {
+                    onInsertPlot(img)
+                    onOpenChange(false)
+                  }}
+                  onInsertBlocks={(blocks) => {
+                    onInsertBlocks?.(blocks)
+                    onOpenChange(false)
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn('relative flex min-h-0 shrink-0', left && 'flex-row-reverse')}>
+      {tabletBackdrop.mounted && (
+        <div
+          className={cn(
+            'fixed inset-0 z-30 bg-black/15',
+            tabletBackdrop.closing ? 'backdrop-out' : 'backdrop-in',
+          )}
+          onClick={() => onOpenChange(false)}
+          aria-hidden="true"
+        />
+      )}
+      {/* nút thu panel kiểu Canva: viên thuốc bám mép trái panel */}
+      <button
+        type="button"
+        aria-label="Đóng panel"
+        data-tip="Đóng panel"
+        tabIndex={active ? 0 : -1}
+        onClick={() => onOpenChange(false)}
+        className={cn(
+          'border-line text-ink-2 hover:text-clay absolute top-1/2 z-50 flex h-12 w-5 -translate-y-1/2 items-center justify-center rounded-full border bg-white shadow-sm transition-[left,right,opacity] duration-200 ease-out motion-reduce:transition-none',
+          left ? '-translate-x-1/2' : 'translate-x-1/2',
+        )}
+        style={{
+          [left ? 'left' : 'right']: 64 + (active ? PANEL_W : 0),
+          opacity: active ? 1 : 0,
+          pointerEvents: active ? 'auto' : 'none',
+        }}
+      >
+        {left ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
+      </button>
+      {/* khung ngoài đổi bề rộng để panel trượt; khung trong giữ nguyên bề rộng nên nội dung không bị bóp */}
+      <div
+        className={cn(
+          'min-h-0 overflow-hidden transition-[width,opacity] duration-200 ease-out motion-reduce:transition-none',
+          isOverlay && 'absolute top-0 bottom-0 z-40',
+          isOverlay && active && 'shadow-[8px_0_24px_-8px_rgba(0,0,0,0.18)]',
+        )}
+        style={{
+          width: active ? PANEL_W : 0,
+          opacity: active ? 1 : 0,
+          ...(isOverlay ? { [left ? 'left' : 'right']: 64 } : {}),
+        }}
+        inert={!active}
+      >
+        <aside
+          className={cn(
+            'nav-panel border-line bg-surface h-full min-h-0',
+            left ? 'border-r' : 'border-l',
+          )}
+          style={{ width: PANEL_W }}
+          aria-label={TABS.find((t) => t.id === shown)?.label}
+        >
+          <div className="border-line flex h-11 shrink-0 items-center justify-between border-b px-3">
+            <span className="text-ink text-[13px] font-semibold">
+              {TABS.find((t) => t.id === shown)?.label}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-ink-3 size-7 rounded-md"
+              aria-label="Đóng panel"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+          <PanelContentTransition activeTab={active} tabOrder={TABS.map((t) => t.id)}>
+            {(tabId) => (
+              <>
+                {tabId === 'inspector' && inspectorContent}
+                {tabId === 'toc' && (
+                  <div className="nav-body">
+                    {toc.length === 0 ? (
+                      <p className="nav-body__empty">
+                        Chưa có tiêu đề hay câu hỏi. Thêm tiêu đề bằng tab <b>Chèn</b> để lập mục
+                        lục.
+                      </p>
+                    ) : (
+                      <ul className="nav-toc">
+                        {toc.map((entry: TocEntry) => (
+                          <li
+                            key={entry.index}
+                            style={{ paddingLeft: `${(entry.level - 1) * 12}px` }}
+                          >
+                            <button type="button" onClick={() => onGoToBlock(entry.index)}>
+                              <MathText>
+                                {entry.kind === 'question'
+                                  ? `Câu ${entry.no}. ${entry.text}`
+                                  : entry.text}
+                              </MathText>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {tabId === 'blocks' && (
+                  <div className="nav-body">
+                    {groupTemplates(BLOCK_TEMPLATES).map((group) => (
+                      <section key={group.name} className="nav-tpl-group">
+                        <h3 className="nav-tpl-group__name">{group.name}</h3>
+                        <ul className="nav-tpl">
+                          {group.items.map((tpl) => (
+                            <li key={tpl.id}>
+                              <button
+                                type="button"
+                                draggable
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData(
+                                    BLOCK_TEMPLATE_MIME,
+                                    JSON.stringify(tpl.build()),
+                                  )
+                                  e.dataTransfer.setData(INSPECTOR_TEMPLATE_MIME, tpl.id)
+                                  e.dataTransfer.effectAllowed = 'copy'
+                                }}
+                                onClick={() => onInsertTemplate(tpl)}
+                                data-tip="Bấm để chèn tại con trỏ, hoặc kéo vào trang"
+                              >
+                                <span className="nav-tpl__grip">
+                                  <IconGrip size={12} />
+                                </span>
+                                <span className="nav-tpl__texts">
+                                  <span className="nav-tpl__label">{tpl.label}</span>
+                                  <span className="nav-tpl__desc">{tpl.desc}</span>
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ))}
+                  </div>
+                )}
+
+                {tabId === 'tools' && (
+                  <div className="nav-body">
+                    <div className="px-3">
+                      <ToolsPanel
+                        examDoc={examDoc}
+                        onInsertPlot={onInsertPlot}
+                        onInsertBlocks={onInsertBlocks}
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </PanelContentTransition>
+        </aside>
+      </div>
+      <TooltipProvider delayDuration={250}>
+        <nav
+          ref={navRef}
+          aria-label="Bảng điều hướng"
+          className={cn(
+            'border-line bg-surface relative flex w-[64px] flex-col items-center gap-2 py-3',
+            left ? 'border-r' : 'border-l',
+          )}
+        >
+          <NavRailIndicator containerRef={navRef} activeId={active} />
+          {TABS.map(({ id, label, Icon }) => (
+            <Tooltip key={id}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-tab-id={id}
+                  data-testid={id === 'inspector' ? 'inspector-tab' : undefined}
+                  type="button"
+                  onClick={() => {
+                    onOpenChange(!(active === id))
+                    setTab(id)
+                  }}
+                  aria-pressed={active === id}
+                  className={cn(
+                    'relative z-10 flex h-auto w-[54px] flex-col items-center justify-center gap-1.5 rounded-xl px-0.5 py-2.5 text-[11px] leading-none tracking-[-0.01em] whitespace-nowrap transition-colors duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none',
+                    active === id
+                      ? 'bg-clay-tint text-clay-deep font-semibold'
+                      : 'text-ink-3 hover:bg-paper-2 hover:text-ink font-medium',
+                  )}
+                >
+                  <Icon
+                    className="size-5 transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none"
+                    strokeWidth={active === id ? 2.1 : 1.7}
+                  />
+                  {label}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side={left ? 'right' : 'left'}>{label}</TooltipContent>
+            </Tooltip>
+          ))}
+        </nav>
+      </TooltipProvider>
+    </div>
+  )
+}

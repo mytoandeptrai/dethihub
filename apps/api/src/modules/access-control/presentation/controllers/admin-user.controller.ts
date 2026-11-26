@@ -1,8 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 
-import { UserDeletionService } from '@/modules/access-control/application/services/user-deletion.service'
 import { AdminUserService } from '@/modules/access-control/application/services/admin-user.service'
+import { UserDeletionService } from '@/modules/access-control/application/services/user-deletion.service'
 import {
   AdminAuditQueryDto,
   AdminUserListQueryDto,

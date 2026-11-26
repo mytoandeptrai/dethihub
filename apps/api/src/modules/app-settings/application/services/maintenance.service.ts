@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 
-import { PlatformRoleService } from '@/modules/access-control/application/services/platform-role.service'
 import { AppSettingsService } from '@/modules/app-settings/application/services/app-settings.service'
+import { PLATFORM_ROLE_LOOKUP } from '@/shared-kernel/application/ports/platform-role-lookup.port'
+
+import type { PlatformRoleLookupPort } from '@/shared-kernel/application/ports/platform-role-lookup.port'
 
 interface MaintenanceSetting {
   on?: boolean
@@ -14,7 +16,7 @@ const DEFAULT_MESSAGE = 'Ứng dụng đang bảo trì, vui lòng quay lại sau
 export class MaintenanceService {
   constructor(
     private readonly settings: AppSettingsService,
-    private readonly roles: PlatformRoleService,
+    @Inject(PLATFORM_ROLE_LOOKUP) private readonly roles: PlatformRoleLookupPort,
   ) {}
 
   /** The message to show when the caller is blocked by maintenance mode, otherwise null */

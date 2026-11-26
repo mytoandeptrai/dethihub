@@ -26,7 +26,12 @@ export class TimeoutInterceptor implements NestInterceptor {
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    if (this.reflector.getAllAndOverride<boolean>(SKIP_TIMEOUT_KEY, [context.getHandler(), context.getClass()])) {
+    if (
+      this.reflector.getAllAndOverride<boolean>(SKIP_TIMEOUT_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ])
+    ) {
       return next.handle()
     }
     return next.handle().pipe(

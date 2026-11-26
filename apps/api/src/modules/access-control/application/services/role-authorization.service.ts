@@ -2,12 +2,13 @@ import { ForbiddenException, Inject, Injectable, ServiceUnavailableException } f
 
 import { AUTH_USER_DIRECTORY } from '@/modules/access-control/application/ports/auth-user-directory.port'
 import { BANNED_MESSAGE } from '@/modules/access-control/application/services/authentication.service'
-import { PlatformRoleService } from '@/modules/access-control/application/services/platform-role.service'
 import { SecurityStrikeService } from '@/modules/access-control/application/services/security-strike.service'
+import { PLATFORM_ROLE_LOOKUP } from '@/shared-kernel/application/ports/platform-role-lookup.port'
 import { satisfiesRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type { AuthUserDirectoryPort } from '@/modules/access-control/application/ports/auth-user-directory.port'
+import type { PlatformRoleLookupPort } from '@/shared-kernel/application/ports/platform-role-lookup.port'
 import type { PlatformRole } from '@/shared-kernel/domain/value-objects/platform-role.vo'
 import type { AuthenticatedUser } from '@/shared-kernel/infrastructure/types/authenticated-user'
 
@@ -17,7 +18,7 @@ const FORBIDDEN_MESSAGE = 'Không có quyền.'
 @Injectable()
 export class RoleAuthorizationService {
   constructor(
-    private readonly roles: PlatformRoleService,
+    @Inject(PLATFORM_ROLE_LOOKUP) private readonly roles: PlatformRoleLookupPort,
     @Inject(AUTH_USER_DIRECTORY) private readonly directory: AuthUserDirectoryPort,
     private readonly strike: SecurityStrikeService,
   ) {}

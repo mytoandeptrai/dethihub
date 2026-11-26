@@ -197,6 +197,10 @@ export const envSchema = z.object({
       const parsed = nonNegativeNumber(value, 250_000)
       return parsed >= 10_000 ? parsed : 250_000
     }),
+  LLM_FIRST_ANSWER_TIMEOUT_MS: z
+    .string()
+    .optional()
+    .transform((value) => positiveNumber(value, 60_000)),
   STRONG_POINT_FACTOR: z
     .string()
     .optional()
@@ -211,6 +215,18 @@ export const envSchema = z.object({
   GEMINI_API_KEY: optionalText,
   GEMINI_BASE_URL: optionalText,
   GEMINI_MODEL: optionalText,
+  NUMES_API_KEY: optionalText,
+  NUMES_BASE_URL: optionalText,
+  NUMES_MODEL: optionalText,
+  CROWLLM_API_KEY: optionalText,
+  CROWLLM_BASE_URL: optionalText,
+  CROWLLM_MODEL: optionalText,
+  COARENA_API_KEY: optionalText,
+  COARENA_BASE_URL: optionalText,
+  COARENA_MODEL: optionalText,
+  VYCEAI_API_KEY: optionalText,
+  VYCEAI_BASE_URL: optionalText,
+  VYCEAI_MODEL: optionalText,
   FOSTA_API_KEY: optionalText,
   FOSTA_BASE_URL: optionalText,
   FOSTA_MODEL: optionalText,

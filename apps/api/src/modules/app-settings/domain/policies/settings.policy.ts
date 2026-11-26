@@ -1,4 +1,22 @@
-export const SETTING_KEYS = ['maintenance', 'announcements', 'pricing', 'ai_welcome'] as const
+export const SETTING_KEYS = [
+  'maintenance',
+  'announcements',
+  'pricing',
+  'ai_welcome',
+  'features',
+] as const
+
+export const FEATURE_KEYS = ['word', 'slide', 'board', 'online'] as const
+export type SiteFeatures = Record<(typeof FEATURE_KEYS)[number], boolean>
+
+export function resolveFeatures(value?: Partial<SiteFeatures> | null): SiteFeatures {
+  return {
+    word: value?.word !== false,
+    slide: value?.slide !== false,
+    board: value?.board !== false,
+    online: value?.online !== false,
+  }
+}
 
 export type SettingKey = (typeof SETTING_KEYS)[number]
 
@@ -115,6 +133,20 @@ export function isSettingKey(key: string): key is SettingKey {
 /** Returns the cleaned value to store; throws SettingsValidationError with a user-facing message */
 export function sanitizeSetting(key: string, value: Raw): Raw {
   if (!isSettingKey(key)) return fail('Cài đặt không tồn tại.')
+  if (key === 'features') {
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      Array.isArray(value) ||
+      Object.keys(value).some(
+        (property) => !FEATURE_KEYS.includes(property as keyof SiteFeatures),
+      ) ||
+      FEATURE_KEYS.some((property) => typeof value[property] !== 'boolean')
+    ) {
+      return fail('Tính năng phải có đủ bốn giá trị boolean và không có thuộc tính khác.')
+    }
+    return Object.fromEntries(FEATURE_KEYS.map((property) => [property, value[property]]))
+  }
   if (key === 'maintenance') return maintenance(value)
   if (key === 'announcements') return announcements(value)
   if (key === 'ai_welcome') return aiWelcome(value)

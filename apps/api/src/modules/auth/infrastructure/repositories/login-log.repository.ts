@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
 import { Injectable } from '@nestjs/common'
-import { Prisma, type LoginStatus } from '@workspace/database'
 
 import { PrismaService } from '@/app/database/prisma.service'
 
@@ -11,6 +10,7 @@ import type {
   LoginLogQueryParams,
   LoginLogRepositoryPort,
 } from '@/modules/auth/application/ports/login-log.repository.port'
+import type { Prisma, LoginStatus } from '@workspace/database'
 
 @Injectable()
 export class LoginLogRepositoryImpl implements LoginLogRepositoryPort {

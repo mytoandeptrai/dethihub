@@ -1,21 +1,21 @@
 import { BadGatewayException, BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { OBJECT_STORAGE } from '@/modules/object-storage/application/ports/object-storage.port'
 import { DB_METRICS_SOURCE } from '@/modules/ops/application/ports/db-metrics.port'
 import { OPS_QUERY_REPOSITORY } from '@/modules/ops/application/ports/ops-query.repository.port'
 import { computeDbMetrics, parsePrometheus } from '@/modules/ops/domain/policies/prometheus.policy'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { USER_PROFILE_LOOKUP } from '@/shared-kernel/application/ports/user-profile-lookup.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type { Env } from '@/app/config/env.schema'
-import type { ObjectStoragePort } from '@/modules/object-storage/application/ports/object-storage.port'
 import type { DbMetricsSourcePort } from '@/modules/ops/application/ports/db-metrics.port'
 import type {
   OpsQueryRepositoryPort,
   StatsOverview,
 } from '@/modules/ops/application/ports/ops-query.repository.port'
 import type { DbMetrics } from '@/modules/ops/domain/policies/prometheus.policy'
+import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 import type { UserProfileLookupPort } from '@/shared-kernel/application/ports/user-profile-lookup.port'
 
 const ONLINE_LIMIT = 20

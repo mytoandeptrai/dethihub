@@ -21,6 +21,8 @@ const APPROVED_GLOBAL_MODULES = new Set([
   'src/modules/identity/identity.module.ts',
   'src/modules/access-control/access-control.module.ts',
   'src/modules/ai/ai.module.ts',
+  'src/modules/app-settings/app-settings.module.ts',
+  'src/modules/object-storage/object-storage.module.ts',
 ])
 
 const SRC_ROOT = path.resolve(import.meta.dirname, '../../../')

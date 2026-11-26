@@ -5,6 +5,7 @@ import {
   SETTING_KEYS,
   SettingsValidationError,
   sanitizeSetting,
+  resolveFeatures,
 } from '@/modules/app-settings/domain/policies/settings.policy'
 import { ADMIN_AUDIT } from '@/shared-kernel/application/ports/admin-audit.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
@@ -30,7 +31,13 @@ export class AdminSettingsService {
   async getAll(): Promise<Record<string, unknown>> {
     const entries = await Promise.all(
       SETTING_KEYS.map(
-        async (key) => [camelCase(key), (await this.settings.get(key)) ?? DEFAULTS[key]] as const,
+        async (key) =>
+          [
+            camelCase(key),
+            key === 'features'
+              ? resolveFeatures(await this.settings.get('features'))
+              : ((await this.settings.get(key)) ?? DEFAULTS[key]),
+          ] as const,
       ),
     )
     return Object.fromEntries(entries)

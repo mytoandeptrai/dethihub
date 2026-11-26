@@ -6,6 +6,10 @@ export type ProviderName =
   | 'anyrouter'
   | 'nightrouter'
   | 'anthropic'
+  | 'numes'
+  | 'crowllm'
+  | 'coarena'
+  | 'vyceai'
 
 export interface ProviderSettings {
   apiKey: string
@@ -24,6 +28,8 @@ export interface Target extends ProviderSettings {
   provider: ProviderName
   /** forward reasoning_effort */
   effort?: boolean
+  /** fixed provider policy, overriding the client effort */
+  reasoningEffort?: 'low'
   /** call with stream:true and collect the SSE (the gateway cuts plain calls after 60 s) */
   stream?: boolean
   /** DeepSeek web-search tool, thinking disabled */
@@ -39,7 +45,7 @@ export class LlmUpstreamError extends Error {
   }
 }
 
-/** The cost-ordered chain: DeepSeek, Gemini, opencode (+fallback model), FOSTA, AnyRouter, NightRouter, Claude last. Providers without a key are skipped */
+/** Existing providers first, then Coarena, Numes, CrowLLM and VyceAI. Providers without a key are skipped */
 export function buildTargets(
   config: ProviderConfig,
   options: { webSearch: boolean; strong: boolean },
@@ -64,6 +70,11 @@ export function buildTargets(
   if (p.anyrouter) targets.push({ provider: 'anyrouter', ...p.anyrouter, stream: true })
   if (p.nightrouter) targets.push({ provider: 'nightrouter', ...p.nightrouter })
   if (p.anthropic) targets.push({ provider: 'anthropic', ...p.anthropic })
+  for (const provider of ['coarena', 'numes', 'crowllm', 'vyceai'] as const) {
+    const settings = p[provider]
+    if (settings)
+      targets.push({ provider, ...settings, effort: true, reasoningEffort: 'low', stream: true })
+  }
 
   if (options.strong && p.deepseek && config.deepseekStrongModel) {
     targets.unshift({

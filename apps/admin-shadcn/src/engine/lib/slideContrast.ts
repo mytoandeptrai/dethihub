@@ -1,0 +1,92 @@
+import { contrastRatio, readableTextOn } from './slideTheme'
+
+/**
+ * Chữ phải đọc được trên màu nền NGAY DƯỚI nó, không phải nền chung của bộ màu.
+ * Nền dưới chữ = ô tô màu của chính chữ, nếu không thì hình khối đặc nằm dưới
+ * (vẽ trước) che tâm khung chữ, nếu không nữa thì nền slide. Tương phản dưới 3:1
+ * (mức WCAG cho chữ lớn) thì thay bằng mực đậm hoặc trắng.
+ * Chỉ đổi lúc vẽ, không ghi vào dữ liệu bài.
+ */
+import type { Slide, SlideElement } from '@/engine/store/docs'
+
+const MIN_RATIO = 3
+
+// Hai vùng chữ nằm về phía đậm của gradient. Giữa và phía còn lại giữ ảnh sáng.
+export const photoScrimFill = (position: 'bottom' | 'left') =>
+  'linear-gradient(' +
+  (position === 'left' ? 270 : 180) +
+  'deg, #10121400 23%, #101214e6 66%, #101214fa 100%)'
+
+export const PHOTO_CREDIT_FILL =
+  'linear-gradient(180deg, #10121400 0%, #101214e6 54%, #101214fa 100%)'
+
+// Nền sáng nhất ngay dưới vùng chữ khi ảnh gốc trắng hoàn toàn.
+const PHOTO_TEXT_BG = '#282a2c'
+
+export function photoScrimBackground(
+  shape: SlideElement,
+  x: number,
+  y: number,
+): string | undefined {
+  const down = (y - shape.y) / shape.h
+  if (shape.fill === PHOTO_CREDIT_FILL && down >= 0.54) return PHOTO_TEXT_BG
+  if (shape.fill === photoScrimFill('bottom') && down >= 0.66) return PHOTO_TEXT_BG
+  const left = (shape.x + shape.w - x) / shape.w
+  return shape.fill === photoScrimFill('left') && left >= 0.66 ? PHOTO_TEXT_BG : undefined
+}
+
+/** màu đặc dạng #rgb / #rrggbb; gradient thì lấy mã hex đầu tiên; còn lại (trong suốt, rgba…) bỏ qua */
+function solidHex(css: string | undefined): string | null {
+  if (!css) return null
+  const m = /#(?:[0-9a-f]{6}|[0-9a-f]{3})\b/i.exec(css)
+  if (!m) return null
+  // #rrggbbaa / rgba thì không tính là đặc
+  if (/^#[0-9a-f]{8}$/i.test(css.trim())) return null
+  return m[0]
+}
+
+const order = (els: SlideElement[]) =>
+  els
+    .map((el, i) => ({ el, i }))
+    .sort((a, b) => (a.el.zIndex ?? 0) - (b.el.zIndex ?? 0) || a.i - b.i)
+
+function bgUnder(el: SlideElement, below: SlideElement[], slideBg: string): string {
+  const own = solidHex(el.fill)
+  if (own) return own
+  const cx = el.x + el.w / 2
+  const cy = el.y + el.h / 2
+  for (let k = below.length - 1; k >= 0; k--) {
+    const s = below[k]
+    if (s.type !== 'shape' || s.shape === 'line' || (s.opacity ?? 1) < 0.6) continue
+    if (cx < s.x || cx > s.x + s.w || cy < s.y || cy > s.y + s.h) continue
+    const scrimBg = photoScrimBackground(s, cx, cy)
+    if (scrimBg) return scrimBg
+    const fill = solidHex(s.fill)
+    if (fill) return fill
+  }
+  return slideBg
+}
+
+/** Bản sao danh sách phần tử, chữ khó đọc được đổi `textColor`; thứ tự giữ nguyên. */
+export function readableElements(slide: Slide, theme: { fg: string; bg: string }): SlideElement[] {
+  const slideBg = solidHex(slide.background) ?? solidHex(theme.bg) ?? '#ffffff'
+  const sorted = order(slide.elements)
+  const fixed = new Map<string, string>()
+  sorted.forEach(({ el }, idx) => {
+    if (el.type !== 'text') return
+    const color = solidHex(el.textColor ?? theme.fg)
+    if (!color) return
+    const bg = bgUnder(
+      el,
+      sorted.slice(0, idx).map((x) => x.el),
+      slideBg,
+    )
+    if (contrastRatio(color, bg) >= MIN_RATIO) return
+    const alt = contrastRatio(theme.fg, bg) >= MIN_RATIO ? theme.fg : readableTextOn(bg)
+    fixed.set(el.id, alt)
+  })
+  if (!fixed.size) return slide.elements
+  return slide.elements.map((el) =>
+    fixed.has(el.id) ? { ...el, textColor: fixed.get(el.id) } : el,
+  )
+}

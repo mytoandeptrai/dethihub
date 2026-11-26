@@ -1,19 +1,19 @@
 import { BadGatewayException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 
-import { OBJECT_STORAGE } from '@/modules/object-storage/application/ports/object-storage.port'
 import { USER_DOCUMENT_REPOSITORY } from '@/modules/storage/application/ports/user-document.repository.port'
 import {
   isDocumentKey,
   isServableKey,
   urlOfKey,
 } from '@/modules/storage/domain/policies/file-key.policy'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
+import type { UserDocumentRepositoryPort } from '@/modules/storage/application/ports/user-document.repository.port'
 import type {
   ObjectStoragePort,
   StoredObject,
-} from '@/modules/object-storage/application/ports/object-storage.port'
-import type { UserDocumentRepositoryPort } from '@/modules/storage/application/ports/user-document.repository.port'
+} from '@/shared-kernel/application/ports/object-storage.port'
 
 export interface ReadableFile extends StoredObject {
   isPrivate: boolean

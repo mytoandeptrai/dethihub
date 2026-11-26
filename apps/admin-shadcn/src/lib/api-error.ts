@@ -1,38 +1,41 @@
-/**
- * RFC 9457 Problem Details — https://www.rfc-editor.org/rfc/rfc9457
- *
- * Backend error shape:
- * - Business errors:   { type, title, status, code, detail }
- * - Validation errors: { type, title, status, code, detail, errors[] }
- */
+import { t } from '@/i18n/translate'
 
-export interface FieldError {
-  field?: string
-  code: string
-  message: string
-}
+import type { components } from '@workspace/api-types'
+
+type ProblemDetails = components['schemas']['ProblemDetailsDto']
+export type FieldError = NonNullable<ProblemDetails['errors']>[number]
 
 export class ApiClientError extends Error {
   readonly status: number
   readonly code?: string
-  /** Human-readable message for this specific occurrence (detail ?? title) */
+  readonly detail: string
   readonly userMessage: string
-  /** Field-level errors, present only for validation failures */
   readonly errors: FieldError[]
+  readonly refundedTokens?: number
 
-  constructor(raw: {
-    title: string
-    status: number
-    code?: string
-    detail?: string
-    errors?: FieldError[]
-  }) {
-    const userMessage = raw.detail ?? raw.title
-    super(userMessage)
+  constructor(raw: Pick<ProblemDetails, 'title' | 'status'> & Partial<ProblemDetails>) {
+    super(raw.detail ?? raw.title)
     this.name = 'ApiClientError'
     this.status = raw.status
     this.code = raw.code
-    this.userMessage = userMessage
+    this.detail = raw.detail ?? raw.title
+    this.userMessage = this.detail
     this.errors = raw.errors ?? []
+    if ('refundedTokens' in raw && typeof raw.refundedTokens === 'number' && raw.refundedTokens > 0)
+      this.refundedTokens = raw.refundedTokens
   }
+}
+
+export async function responseError(response: Response): Promise<ApiClientError> {
+  const raw: unknown = await response
+    .clone()
+    .json()
+    .catch(() => null)
+  const problem = raw && typeof raw === 'object' ? (raw as Partial<ProblemDetails>) : {}
+  return new ApiClientError({
+    ...problem,
+    status: response.status,
+    title: typeof problem.title === 'string' ? problem.title : t('common.requestError'),
+    detail: typeof problem.detail === 'string' ? problem.detail : undefined,
+  })
 }

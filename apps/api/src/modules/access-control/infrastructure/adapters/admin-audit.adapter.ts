@@ -9,7 +9,9 @@ import type { AdminAuditPort } from '@/shared-kernel/application/ports/admin-aud
 export class AdminAuditAdapter implements AdminAuditPort {
   readonly #logger = new Logger(AdminAuditAdapter.name)
 
-  constructor(@Inject(ADMIN_AUDIT_REPOSITORY) private readonly repository: AdminAuditRepositoryPort) {}
+  constructor(
+    @Inject(ADMIN_AUDIT_REPOSITORY) private readonly repository: AdminAuditRepositoryPort,
+  ) {}
 
   async record(
     actorId: string | null,

@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { Injectable } from '@nestjs/common'
 
 import { LlmUpstreamError } from '@/modules/ai/domain/provider-chain'
-import { readStream, StreamFold } from '@/modules/ai/infrastructure/adapters/chat-completion-stream'
+import { readStream } from '@/modules/ai/infrastructure/adapters/chat-completion-stream'
 
 import type {
   Citation,
@@ -76,7 +76,10 @@ export class OpenAiCompatibleAdapter implements LlmProviderPort {
           : {}),
       }),
       redirect: 'error',
-      signal: AbortSignal.timeout(request.timeoutMs),
+      signal: AbortSignal.any([
+        AbortSignal.timeout(request.timeoutMs),
+        ...(request.signal ? [request.signal] : []),
+      ]),
     })
 
     if (!response.ok) {
@@ -84,18 +87,15 @@ export class OpenAiCompatibleAdapter implements LlmProviderPort {
       throw new LlmUpstreamError(response.status)
     }
 
-    if (request.stream) {
-      request.stream.onOpen()
-      return readStream(response, (delta) => request.stream?.onDelta(delta))
+    if (request.stream || target.stream) {
+      request.stream?.onOpen()
+      return readStream(response, (delta) => {
+        if (delta.content.trim()) request.onFirstAnswer?.()
+        request.stream?.onDelta(delta)
+      })
     }
 
     const text = await response.text()
-    if (target.stream) {
-      const fold = new StreamFold()
-      for (const line of text.split('\n')) fold.push(line)
-      return fold.result()
-    }
-
     let data: Completion
     try {
       data = JSON.parse(text) as Completion
@@ -103,6 +103,7 @@ export class OpenAiCompatibleAdapter implements LlmProviderPort {
       throw new Error('upstream returned non-JSON body')
     }
     const choice = data.choices?.[0]
+    if (choice?.message?.content?.trim()) request.onFirstAnswer?.()
     return {
       content: choice?.message?.content ?? '',
       reasoning: choice?.message?.reasoning_content ?? '',

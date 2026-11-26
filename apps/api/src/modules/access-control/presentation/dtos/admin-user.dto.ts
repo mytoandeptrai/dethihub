@@ -8,7 +8,9 @@ import type { AuditRow } from '@/modules/access-control/application/ports/admin-
 import type { AdminUserView } from '@/modules/access-control/application/services/admin-user.service'
 
 export class AdminUserListQueryDto extends AdminPageQueryDto {
-  @ApiPropertyOptional({ description: 'Matches email or display name within the page, max 100 chars' })
+  @ApiPropertyOptional({
+    description: 'Matches email or display name within the page, max 100 chars',
+  })
   @IsOptional()
   @Trim(100)
   @IsString()

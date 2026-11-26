@@ -1,35 +1,25 @@
-import { createClient } from '@infra-x/fwrap'
+import 'server-only'
+import { redirect } from 'next/navigation'
+import createClient from 'openapi-fetch'
 
-import type { RequestOptions } from '@infra-x/fwrap'
+import { appPaths } from '@/config/app-paths'
+import { env } from '@/config/env'
+import { createAuthenticatedFetch } from '@/lib/authenticated-fetch'
+import { getServerSupabase } from '@/lib/supabase/server'
 
-export const fetchClient = createClient({
-  //   prefixUrl:,
-  timeout: 30_000,
-  retry: {
-    limit: 2,
-    methods: ['GET', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'TRACE'],
-    statusCodes: [408, 413, 429, 500, 502, 503, 504],
-  },
-  onRequest: [
-    async (request) => {
-      if (globalThis.window === undefined) {
-        const { cookies } = await import('next/headers')
-        const cookieStore = await cookies()
-        const cookieHeader = cookieStore.toString()
-        if (cookieHeader) {
-          request.headers.set('Cookie', cookieHeader)
-        }
-      }
-      return request
-    },
-  ],
-})
+import type { paths } from '@workspace/api-types'
 
-export interface FetchClientOptions extends Omit<RequestOptions, 'prefixUrl'> {
-  next?: {
-    revalidate?: number
-    tags?: string[]
-  }
+export async function getFetchClient() {
+  const supabase = await getServerSupabase()
+  return createClient<paths>({
+    baseUrl: env.NEXT_PUBLIC_API_URL,
+    fetch: createAuthenticatedFetch({
+      getToken: async () => (await supabase.auth.getSession()).data.session?.access_token ?? null,
+      refreshToken: async () => {
+        const { data, error } = await supabase.auth.refreshSession()
+        return error ? null : (data.session?.access_token ?? null)
+      },
+      onUnauthorized: () => redirect(appPaths.auth.login.href),
+    }),
+  })
 }
-
-// Server Component client: Cookie auth, supports Next.js next.tags cache. For Client Components, use api-client.ts (Bearer Token).

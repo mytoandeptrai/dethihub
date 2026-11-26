@@ -61,7 +61,7 @@ export class AlertService {
     for (const alert of active) {
       const previous = lastSent.get(alert.kind)
       if (previous && now.getTime() - previous.getTime() < this.#cooldownMs) continue
-      if (!(await this.notifier.send(`⚠️ đề rõ\n${alert.text}`))) continue
+      if (!(await this.notifier.send(`⚠️ Đề Thi Hub\n${alert.text}`))) continue
       await this.alerts.markSent(alert.kind, now)
       sent.push(alert.kind)
     }

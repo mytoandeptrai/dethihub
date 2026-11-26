@@ -1,0 +1,122 @@
+'use client'
+
+import { useState } from 'react'
+
+import { t } from '@/i18n/translate'
+import { questionText } from '@/lib/ai-question-stream'
+
+import type { GeneratedQuestion } from '@/lib/ai-question-stream'
+import type { ReactNode } from 'react'
+
+export function AiQuestionPreview({
+  questions,
+  total,
+  busy = false,
+  inserted = false,
+  reviewOnly = false,
+  refundedTokens,
+  onInsert,
+  onRegenerate,
+  renderText = (text) => text,
+}: {
+  questions: readonly GeneratedQuestion[]
+  total?: number
+  busy?: boolean
+  inserted?: boolean
+  reviewOnly?: boolean
+  refundedTokens?: number
+  onInsert: (questions: GeneratedQuestion[]) => void
+  onRegenerate: () => void
+  renderText?: (text: string) => ReactNode
+}) {
+  const [excluded, setExcluded] = useState<Set<string>>(() => new Set())
+  const selected = questions.filter((question) => !excluded.has(question.id))
+  return (
+    <section
+      aria-label="Câu hỏi AI đã soạn"
+      className="border-line bg-surface my-3 min-w-0 rounded-xl border p-3 text-sm"
+    >
+      <p role="status" className="mb-3 font-semibold">
+        {t('aiReview.count', {
+          count: questions.length,
+          total: total && Number.isFinite(total) && total >= questions.length ? `/${total}` : '',
+        })}
+      </p>
+      <ol className="max-h-96 space-y-3 overflow-y-auto">
+        {questions.map((question) => (
+          <li
+            key={question.id}
+            className="border-line flex min-w-0 items-start gap-2 border-b pb-3 last:border-0"
+          >
+            {reviewOnly ? null : (
+              <input
+                type="checkbox"
+                aria-label={`Chọn câu ${question.number}`}
+                checked={!excluded.has(question.id)}
+                disabled={inserted}
+                onChange={() =>
+                  setExcluded((current) => {
+                    const next = new Set(current)
+                    if (next.has(question.id)) next.delete(question.id)
+                    else next.add(question.id)
+                    return next
+                  })
+                }
+                className="mt-1 size-4 shrink-0 accent-indigo-600"
+              />
+            )}
+            <div className="min-w-0 flex-1 break-words">
+              <span className="font-semibold">Câu {question.number}. </span>
+              {renderText(question.prompt)}
+              {Array.isArray(question.raw.options)
+                ? question.raw.options.map((option: unknown, index) => {
+                    const item =
+                      typeof option === 'object' && option
+                        ? (option as Record<string, unknown>)
+                        : { text: option }
+                    const label = String(item.label ?? item.key ?? 'ABCD'[index])
+                    return (
+                      <div key={label} className="text-ink-3 mt-1 flex items-start gap-1">
+                        <span className="shrink-0">{label}.</span>
+                        {renderText(questionText(item.text))}
+                      </div>
+                    )
+                  })
+                : null}
+              {question.raw.answer ? (
+                <div className="mt-1 font-medium">
+                  Đáp án: {renderText(questionText(question.raw.answer))}
+                </div>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ol>
+      {refundedTokens && refundedTokens > 0 ? (
+        <p className="mt-2 text-emerald-700">
+          Đã hoàn {(refundedTokens / 1000).toLocaleString('vi-VN')} điểm
+        </p>
+      ) : null}
+      {reviewOnly ? null : (
+        <div className="mt-3 flex flex-wrap gap-2" data-ai-approval>
+          <button
+            type="button"
+            disabled={busy || inserted || selected.length === 0}
+            onClick={() => onInsert(selected)}
+            className="rounded-lg bg-indigo-600 px-3 py-2 font-medium text-white disabled:opacity-40"
+          >
+            {inserted ? 'Đã chèn vào đề' : 'Chèn vào đề'}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onRegenerate}
+            className="border-line rounded-lg border px-3 py-2 disabled:opacity-40"
+          >
+            Soạn lại
+          </button>
+        </div>
+      )}
+    </section>
+  )
+}

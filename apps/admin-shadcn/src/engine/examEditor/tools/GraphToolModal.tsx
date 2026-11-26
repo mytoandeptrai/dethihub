@@ -1,0 +1,349 @@
+import { ChevronRight, Plus, X } from 'lucide-react'
+/**
+ * Công cụ Toán: vẽ đồ thị hàm số y = f(x). Cột trái nhập hàm + miền vẽ, cột
+ * phải xem trước ngay khi gõ; "Chèn" trả về SVG để trình soạn tự đưa vào.
+ */
+import { useEffect, useMemo, useState } from 'react'
+
+import { TrashIcon } from '@/engine/components/appIcons'
+import { Button, inputClass } from '@/engine/components/ui'
+import { cn } from '@/engine/lib/cn'
+import {
+  PLOT_COLORS,
+  autoYRange,
+  parseExpr,
+  renderPlotSvg,
+  svgDataUrl,
+  type Fn,
+  type PlotSpec,
+} from '@/engine/lib/plot'
+
+export type { ToolImage as PlotImage } from '@/engine/lib/toolSpec'
+import { applyLabelPos, withTextHalo } from '@/engine/lib/toolSpec'
+
+import { LabelPreview } from './LabelDragPreview'
+
+import type { ToolImage as PlotImage, LabelPos } from '@/engine/lib/toolSpec'
+
+const MAX_CURVES = 4
+const fmtNum = (v: number) => String(v).replace('.', ',').replace('-', '−')
+const numClass = inputClass + ' h-9 px-2.5 py-1 text-center tabular-nums'
+
+export function GraphToolModal({
+  initial,
+  submitLabel,
+  onClose,
+  onInsert,
+}: {
+  /** đồ thị đã chèn, mở lại để sửa */
+  initial?: PlotSpec | null
+  /** nhãn nút chèn (mặc định: "Cập nhật đồ thị" khi có `initial`, không thì "Chèn đồ thị") */
+  submitLabel?: string
+  onClose: () => void
+  onInsert: (img: PlotImage) => void
+}) {
+  const [exprs, setExprs] = useState<string[]>(
+    initial?.curves.map((c) => c.expr) ?? ['x^2 - 2x - 3'],
+  )
+  const [xMin, setXMin] = useState(String(initial?.xMin ?? -5))
+  const [xMax, setXMax] = useState(String(initial?.xMax ?? 5))
+  // đồ thị cũ giữ nguyên khung đã chèn
+  const [autoY, setAutoY] = useState(!initial)
+  const [yMin, setYMin] = useState(String(initial?.yMin ?? -5))
+  const [yMax, setYMax] = useState(String(initial?.yMax ?? 5))
+  const [grid, setGrid] = useState(initial?.grid ?? false)
+  const [labels, setLabels] = useState(initial?.labels ?? false)
+  // độ lệch nhãn đã kéo (giữ nguyên khi sửa hàm số / miền vẽ — nhãn đi theo điểm của nó)
+  const [labelPos, setLabelPos] = useState<LabelPos | undefined>(initial?.labelPos)
+  const [move, setMove] = useState(false)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !e.defaultPrevented && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // lỗi từng ô nhập (ô trống thì bỏ qua, không báo lỗi)
+  const parsed = useMemo(
+    () =>
+      exprs.map((e): { fn?: Fn; error?: string } => {
+        if (!e.trim()) return {}
+        try {
+          return { fn: parseExpr(e) }
+        } catch (err) {
+          return { error: (err as Error).message }
+        }
+      }),
+    [exprs],
+  )
+
+  const x0 = Number(xMin.replace(',', '.'))
+  const x1 = Number(xMax.replace(',', '.'))
+  const rangeError = !(Number.isFinite(x0) && Number.isFinite(x1) && x0 < x1)
+    ? 'Miền x chưa hợp lệ'
+    : null
+
+  const spec = useMemo<PlotSpec | null>(() => {
+    if (rangeError) return null
+    const fns = parsed.map((p) => p.fn).filter((f): f is Fn => Boolean(f))
+    let lo: number, hi: number
+    if (autoY) [lo, hi] = autoYRange(fns, x0, x1)
+    else {
+      lo = Number(yMin.replace(',', '.'))
+      hi = Number(yMax.replace(',', '.'))
+      if (!(Number.isFinite(lo) && Number.isFinite(hi) && lo < hi)) return null
+    }
+    return {
+      curves: exprs
+        .map((e, i) => ({ expr: e, color: PLOT_COLORS[i % PLOT_COLORS.length] }))
+        .filter((_, i) => parsed[i].fn),
+      xMin: x0,
+      xMax: x1,
+      yMin: lo,
+      yMax: hi,
+      grid,
+      labels,
+    }
+  }, [parsed, exprs, x0, x1, autoY, yMin, yMax, grid, labels, rangeError])
+
+  // spec có labelPos → nằm trong <desc> của SVG, chèn/nhấp đúp sửa vẫn giữ độ lệch
+  const plot = useMemo(
+    () =>
+      spec ? withTextHalo(applyLabelPos(renderPlotSvg({ ...spec, labelPos }), labelPos)) : null,
+    [spec, labelPos],
+  )
+  const canInsert = Boolean(plot && spec && spec.curves.length > 0)
+
+  // khi bật tự động, hiện miền y đang dùng trong ô (chỉ đọc)
+  const shownY = autoY && spec ? [String(spec.yMin), String(spec.yMax)] : [yMin, yMax]
+
+  return (
+    <div
+      className="bg-ink/30 fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-4"
+      // modal có thể render qua portal từ trong phần tử slide: chặn sự kiện lan về phần tử đó
+      onMouseDown={(e) => {
+        e.stopPropagation()
+        onClose()
+      }}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Đồ thị hàm số"
+        className="anim-pop bg-surface shadow-float flex h-full max-h-[100dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-none md:h-[min(640px,92vh)] md:max-h-[92vh] md:rounded-[8px]"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="border-line flex items-center justify-between gap-4 border-b px-4 py-3 md:px-6 md:py-4">
+          <div>
+            <h2 className="text-ink text-[17px] font-semibold">Đồ thị hàm số</h2>
+            <p className="text-ink-3 mt-0.5 text-[12.5px]">
+              Gõ như viết tay: x^2 - 2x + 1, sqrt(x), sin 2x, |x - 1|, 1/x
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Đóng"
+            className="text-ink-3 hover:bg-sunken hover:text-ink flex size-8 shrink-0 items-center justify-center rounded-[6px] transition-colors"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto md:flex-row md:overflow-hidden">
+          {/* ---------- nhập ---------- */}
+          <div className="border-line flex shrink-0 flex-col gap-5 p-5 md:w-[320px] md:overflow-y-auto md:border-r">
+            <section>
+              <h3 className="text-ink-3 mb-2 text-[12px] font-semibold tracking-[0.04em] uppercase">
+                Hàm số
+              </h3>
+              <div className="flex flex-col gap-2">
+                {exprs.map((e, i) => (
+                  <div key={i}>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="size-2.5 shrink-0 rounded-full"
+                        style={{ background: PLOT_COLORS[i % PLOT_COLORS.length] }}
+                      />
+                      <span className="text-ink-2 shrink-0 font-serif text-[15px] italic">y =</span>
+                      <input
+                        value={e}
+                        autoFocus={i === exprs.length - 1}
+                        onChange={(ev) =>
+                          setExprs(exprs.map((v, k) => (k === i ? ev.target.value : v)))
+                        }
+                        spellCheck={false}
+                        aria-label={`Hàm số ${i + 1}`}
+                        aria-invalid={Boolean(parsed[i].error)}
+                        className={cn(
+                          inputClass,
+                          'h-9 px-3 py-1 font-mono text-[13.5px]',
+                          parsed[i].error && 'border-clay',
+                        )}
+                      />
+                      {exprs.length > 1 && (
+                        <button
+                          type="button"
+                          aria-label="Xoá hàm này"
+                          onClick={() => setExprs(exprs.filter((_, k) => k !== i))}
+                          className="text-ink-4 hover:bg-sunken hover:text-ink flex size-8 shrink-0 items-center justify-center rounded-[6px]"
+                        >
+                          <TrashIcon className="size-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    {parsed[i].error && (
+                      <p className="text-clay mt-1 pl-[54px] text-[12px]">{parsed[i].error}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {exprs.length < MAX_CURVES && (
+                <button
+                  type="button"
+                  onClick={() => setExprs([...exprs, ''])}
+                  className="text-ink-2 hover:bg-sunken hover:text-ink mt-2 inline-flex items-center gap-1.5 rounded-[6px] px-2 py-1.5 text-[13px] font-medium"
+                >
+                  <Plus className="size-3.5" /> Thêm hàm
+                </button>
+              )}
+            </section>
+
+            {/* khung hình: đa số không cần chỉnh nên gập sẵn (mở sẵn khi đang sửa đồ thị cũ hoặc nhập sai) */}
+            <details className="group" open={Boolean(initial) || Boolean(rangeError)}>
+              <summary className="text-ink-3 hover:text-ink flex cursor-pointer list-none items-center gap-1.5 text-[12px] font-semibold tracking-[0.04em] uppercase [&::-webkit-details-marker]:hidden">
+                <ChevronRight className="size-3.5 transition-transform group-open:rotate-90" />
+                Khung hình
+                {!rangeError && spec && (
+                  <span className="text-ink-4 ml-auto font-normal tracking-normal normal-case tabular-nums">
+                    x {fmtNum(spec.xMin)} → {fmtNum(spec.xMax)}
+                  </span>
+                )}
+              </summary>
+              <div className="mt-2.5">
+                <div className="text-ink-2 grid grid-cols-[28px_1fr_16px_1fr] items-center gap-x-2 gap-y-2 text-[13.5px]">
+                  <span className="font-serif italic">x</span>
+                  <input
+                    value={xMin}
+                    onChange={(e) => setXMin(e.target.value)}
+                    aria-label="x nhỏ nhất"
+                    className={numClass}
+                  />
+                  <span className="text-ink-4 text-center">→</span>
+                  <input
+                    value={xMax}
+                    onChange={(e) => setXMax(e.target.value)}
+                    aria-label="x lớn nhất"
+                    className={numClass}
+                  />
+                  <span className="font-serif italic">y</span>
+                  <input
+                    value={shownY[0]}
+                    disabled={autoY}
+                    onChange={(e) => setYMin(e.target.value)}
+                    aria-label="y nhỏ nhất"
+                    className={cn(numClass, autoY && 'bg-sunken text-ink-3')}
+                  />
+                  <span className="text-ink-4 text-center">→</span>
+                  <input
+                    value={shownY[1]}
+                    disabled={autoY}
+                    onChange={(e) => setYMax(e.target.value)}
+                    aria-label="y lớn nhất"
+                    className={cn(numClass, autoY && 'bg-sunken text-ink-3')}
+                  />
+                </div>
+                {rangeError && <p className="text-clay mt-1 text-[12px]">{rangeError}</p>}
+                <Check
+                  checked={autoY}
+                  onChange={(v) => {
+                    if (!v && spec) {
+                      setYMin(String(spec.yMin))
+                      setYMax(String(spec.yMax))
+                    }
+                    setAutoY(v)
+                  }}
+                >
+                  Tự chọn miền y
+                </Check>
+              </div>
+            </details>
+
+            <section>
+              <h3 className="text-ink-3 mb-1 text-[12px] font-semibold tracking-[0.04em] uppercase">
+                Hiển thị
+              </h3>
+              <Check checked={grid} onChange={setGrid}>
+                Lưới ô vuông
+              </Check>
+              <Check checked={labels} onChange={setLabels}>
+                Ghi tên hàm cạnh đồ thị
+              </Check>
+            </section>
+          </div>
+
+          {/* ---------- xem trước ---------- */}
+          <div className="bg-paper-2 flex h-[min(56vh,520px)] min-h-0 min-w-0 flex-1 items-center justify-center p-5 md:h-auto">
+            {plot ? (
+              // co vừa cả hai chiều: khung 1:1 có thể cao hơn rộng
+              <LabelPreview
+                img={plot}
+                labelPos={labelPos}
+                onChange={setLabelPos}
+                move={move}
+                onToggle={() => setMove((v) => !v)}
+                fallback={
+                  <img
+                    src={svgDataUrl(plot.svg)}
+                    alt="Xem trước đồ thị"
+                    className="border-line max-h-full max-w-full rounded-[4px] border bg-white object-contain"
+                  />
+                }
+              />
+            ) : (
+              <p className="text-ink-3 text-[13px]">Kiểm tra lại miền vẽ.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="border-line bg-surface sticky bottom-0 z-10 flex shrink-0 items-center justify-end gap-2 border-t px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6 md:py-3.5">
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Huỷ
+          </Button>
+          <Button
+            variant="clay"
+            size="sm"
+            disabled={!canInsert}
+            onClick={() => plot && onInsert(plot)}
+          >
+            {submitLabel ?? (initial ? 'Cập nhật đồ thị' : 'Chèn đồ thị')}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Check({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+  children: React.ReactNode
+}) {
+  return (
+    <label className="text-ink-2 mt-2 flex cursor-pointer items-center gap-2 text-[13.5px]">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="size-4 accent-[var(--color-clay)]"
+      />
+      {children}
+    </label>
+  )
+}

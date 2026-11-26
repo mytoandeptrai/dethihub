@@ -125,7 +125,17 @@ Decision rule:
 - Shared by ≥ 3 contexts → extract as a shared subdomain (its own context, e.g. `identity`)
 - Bidirectional dependency → boundaries are wrong; merge and re-split
 
-Only four modules may be `@Global()`: `PrismaModule`, `cache`, `audit-log`, `DomainEventsModule`. Everything else is scoped.
+Global modules are explicitly approved in `apps/api/src/__tests__/unit/global-modules.spec.ts` and annotated with `@global-approved`. Cross-context providers export Symbol tokens, not implementation dependencies.
+
+| Module | Shared responsibility |
+| --- | --- |
+| `PrismaModule`, `DomainEventsModule` | Database and domain event infrastructure |
+| `cache`, `audit-log` | Cache and audit ports |
+| `auth`, `identity` | Legacy authentication and identity ports |
+| `access-control` | Authentication, platform role lookup, profile lookup and admin audit |
+| `ai` | AI metering, image reading and credit grants |
+| `app-settings` | Read-only settings port consumed by billing and AI |
+| `object-storage` | Object storage port consumed by storage, media and ops |
 
 ## Frontend: `apps/admin-shadcn`
 

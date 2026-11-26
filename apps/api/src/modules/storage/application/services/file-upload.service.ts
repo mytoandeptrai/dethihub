@@ -10,7 +10,6 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { fileTypeFromBuffer } from 'file-type'
 
-import { OBJECT_STORAGE } from '@/modules/object-storage/application/ports/object-storage.port'
 import { USER_DOCUMENT_REPOSITORY } from '@/modules/storage/application/ports/user-document.repository.port'
 import { USER_IMAGE_REPOSITORY } from '@/modules/storage/application/ports/user-image.repository.port'
 import { FileKind } from '@/modules/storage/domain/enums/file-kind.enum'
@@ -24,15 +23,16 @@ import {
   checkDocumentQuota,
   checkImageQuota,
 } from '@/modules/storage/domain/policies/storage-quota.policy'
+import { OBJECT_STORAGE } from '@/shared-kernel/application/ports/object-storage.port'
 import { ErrorCode } from '@/shared-kernel/infrastructure/enums/error-code'
 
 import type { Env } from '@/app/config/env.schema'
-import type { ObjectStoragePort } from '@/modules/object-storage/application/ports/object-storage.port'
 import type {
   UserDocumentRecord,
   UserDocumentRepositoryPort,
 } from '@/modules/storage/application/ports/user-document.repository.port'
 import type { UserImageRepositoryPort } from '@/modules/storage/application/ports/user-image.repository.port'
+import type { ObjectStoragePort } from '@/shared-kernel/application/ports/object-storage.port'
 
 interface DetectedFile {
   mime: string

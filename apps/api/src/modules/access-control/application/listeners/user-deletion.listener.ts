@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 
 import { USER_DATA_REPOSITORY } from '@/modules/access-control/application/ports/user-data.repository.port'
-
 import { UserDeletionRequestedEvent } from '@/modules/access-control/domain/events/user-deletion-requested.event'
 
 import type { UserDataRepositoryPort } from '@/modules/access-control/application/ports/user-data.repository.port'

@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 
 import { Injectable } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
-import { Prisma, type UserDatabase } from '@workspace/database'
 
 import { PrismaService } from '@/app/database/prisma.service'
 
@@ -15,6 +14,7 @@ import type {
   IdentityRepositoryPort,
   UserSummary,
 } from '@/modules/identity/application/ports/user.repository.port'
+import type { Prisma, UserDatabase } from '@workspace/database'
 
 const BCRYPT_ROUNDS = 12
 

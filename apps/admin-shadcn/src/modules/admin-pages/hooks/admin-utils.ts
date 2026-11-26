@@ -1,0 +1,90 @@
+export function formatViDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return '—'
+  const vn = new Date(d.getTime() + 7 * 3600 * 1000)
+  const dd = String(vn.getUTCDate()).padStart(2, '0')
+  const mm = String(vn.getUTCMonth() + 1).padStart(2, '0')
+  const yyyy = vn.getUTCFullYear()
+  const hh = String(vn.getUTCHours()).padStart(2, '0')
+  const min = String(vn.getUTCMinutes()).padStart(2, '0')
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}`
+}
+export function formatViDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return '—'
+  const vn = new Date(d.getTime() + 7 * 3600 * 1000)
+  const dd = String(vn.getUTCDate()).padStart(2, '0')
+  const mm = String(vn.getUTCMonth() + 1).padStart(2, '0')
+  const yyyy = vn.getUTCFullYear()
+  return `${dd}/${mm}/${yyyy}`
+}
+export function formatNumber(n: number | null | undefined): string {
+  if (n === null || n === undefined || isNaN(n)) return '0'
+  return n.toLocaleString('vi-VN')
+}
+export function shortenId(id: string | null | undefined): string {
+  if (!id) return '—'
+  return id.length > 8 ? id.slice(0, 8) : id
+}
+export function formatAuditDetail(_action: string, detail: unknown): string {
+  if (!detail || typeof detail !== 'object') return '—'
+  const d = detail as Record<string, unknown>
+  const parts: string[] = []
+  if (d.lock) {
+    parts.push(`Vi phạm lần ${d.strikes}: khoá ${d.lock}`)
+    if (d.action) parts.push(`Thao tác: ${d.action}`)
+    if (d.ip) parts.push(`IP: ${d.ip}`)
+    return parts.join(' · ')
+  }
+  if (d.reason && typeof d.reason === 'string') {
+    parts.push(`Lý do: ${d.reason}`)
+  }
+  if ('monthlyTokens' in d) {
+    if (d.monthlyTokens === null) {
+      parts.push('Hạn mức: Không giới hạn')
+    } else {
+      parts.push(`Hạn mức tháng: ${formatNumber(Number(d.monthlyTokens) / 1000)} điểm`)
+    }
+  }
+  if (d.tokens !== undefined) {
+    const num = Number(d.tokens)
+    const sign = num > 0 ? '+' : ''
+    const noteStr = d.note ? ` (${d.note})` : ''
+    parts.push(`Số điểm: ${sign}${formatNumber(num / 1000)} điểm${noteStr}`)
+  }
+  if (d.hours !== undefined) {
+    parts.push(`Thời hạn: ${d.hours} giờ`)
+  }
+  if (d.filesRemoved !== undefined) {
+    parts.push(`Đã dọn: ${d.filesRemoved} tệp`)
+  }
+  if (parts.length > 0) return parts.join(' · ')
+  const keys = Object.keys(d)
+  if (keys.length === 0) return '—'
+  try {
+    return JSON.stringify(d)
+  } catch {
+    return '—'
+  }
+}
+const pad = (n: number) => String(n).padStart(2, '0')
+export function toDatetimeLocalString(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const yyyy = d.getFullYear()
+  const mm = pad(d.getMonth() + 1)
+  const dd = pad(d.getDate())
+  const hh = pad(d.getHours())
+  const min = pad(d.getMinutes())
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`
+}
+export function toIsoString(localDt: string): string | null {
+  const trimmed = localDt.trim()
+  if (!trimmed) return null
+  const d = new Date(trimmed)
+  if (isNaN(d.getTime())) return null
+  return d.toISOString()
+}

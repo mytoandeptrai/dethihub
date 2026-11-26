@@ -1,0 +1,613 @@
+{
+  "id": "geometry-exam",
+  "title": "Đề kiểm tra Toán — đối chiếu A4",
+  "kind": "exam",
+  "subject": "Toán",
+  "grade": "9",
+  "school": "THCS Đề Thi Hub",
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "blocks": [
+    {
+      "type": "header",
+      "left": "TRƯỜNG THCS ĐỀ THI HUB",
+      "right": "ĐỀ KIỂM TRA HỌC KỲ I"
+    },
+    {
+      "type": "title",
+      "text": "MÔN TOÁN — LỚP 9"
+    },
+    {
+      "type": "meta",
+      "rows": [
+        ["Thời gian", "90 phút"],
+        ["Họ và tên", "................................................"]
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "I. TRẮC NGHIỆM",
+      "level": 1
+    },
+    {
+      "type": "question",
+      "no": 1,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 2,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 3,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 4,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 5,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 6,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 7,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 8,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 9,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 10,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 11,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 12,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 13,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 14,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 15,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 16,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 17,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 18,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 19,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 20,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 21,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 22,
+      "kind": "mcq",
+      "text": "Cho tam giác ABC vuông tại A, biết AB = 6 cm, AC = 8 cm. Độ dài cạnh huyền BC bằng bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "10 cm"
+        },
+        {
+          "label": "B",
+          "text": "12 cm"
+        },
+        {
+          "label": "C",
+          "text": "14 cm"
+        },
+        {
+          "label": "D",
+          "text": "16 cm"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 23,
+      "kind": "mcq",
+      "text": "Tìm giá trị của biểu thức $x^2+2x+1$ tại $x=2$. Chọn phương án đúng trong các đáp án dưới đây.",
+      "options": [
+        {
+          "label": "A",
+          "text": "$9$"
+        },
+        {
+          "label": "B",
+          "text": "$6$"
+        },
+        {
+          "label": "C",
+          "text": "$4$"
+        },
+        {
+          "label": "D",
+          "text": "$3$"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "no": 24,
+      "kind": "mcq",
+      "text": "Một lớp học có 40 học sinh, trong đó có 24 học sinh nữ. Tỉ số phần trăm của số học sinh nữ so với cả lớp là bao nhiêu?",
+      "options": [
+        {
+          "label": "A",
+          "text": "40%"
+        },
+        {
+          "label": "B",
+          "text": "50%"
+        },
+        {
+          "label": "C",
+          "text": "60%"
+        },
+        {
+          "label": "D",
+          "text": "70%"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    }
+  ]
+}

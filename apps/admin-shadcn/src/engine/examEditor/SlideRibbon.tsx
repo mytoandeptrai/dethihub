@@ -1,0 +1,3492 @@
+import {
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyStart,
+  BringToFront,
+  ChevronDown,
+  Crop,
+  Frame,
+  Grid3x3,
+  ImagePlus,
+  List,
+  ListOrdered,
+  Magnet,
+  MoreHorizontal,
+  Palette,
+  RotateCcw,
+  SendToBack,
+  Sigma,
+  Smile,
+  Video,
+  UnfoldVertical,
+  X,
+} from 'lucide-react'
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+
+import { cn } from '@/engine/lib/cn'
+import { uploadImage } from '@/engine/lib/mediaStore'
+import { ANIM_EFFECTS, ANIM_SPEEDS, startOf, type ElementAnimAction } from '@/engine/lib/slideAnim'
+import { previewSlideFonts, primaryFont, SLIDE_FONTS } from '@/engine/lib/slideFonts'
+import {
+  SLIDE_SYMBOLS,
+  UNICODE_SUBSCRIPTS,
+  UNICODE_SUPERSCRIPTS,
+  clearTextFormatting,
+  normalizeSlideHref,
+} from '@/engine/lib/slideFormat'
+import { graphicMainColor } from '@/engine/lib/slideGraphics'
+import {
+  SLIDE_LAYOUTS,
+  defaultTone,
+  isLayoutId,
+  isTone,
+  type SlideLayoutId,
+} from '@/engine/lib/slideLayouts'
+import { defaultBox, shapeNameOf } from '@/engine/lib/slidePresets'
+import { FRAME_PLACEHOLDER, PHOTO_FRAMES, photoFrameClip } from '@/engine/lib/slideShapes'
+import { parseSlideVideo } from '@/engine/lib/slideVideo'
+import { useAnimatedPresence } from '@/engine/lib/useAnimatedPresence'
+
+import { BackgroundMenu } from './BackgroundMenu'
+import { ColorPalette } from './ColorPalette'
+import { Dropdown } from './Dropdown'
+import { FileMenu } from './FileMenu'
+import {
+  IconAlignCenter,
+  IconAlignLeft,
+  IconAlignRight,
+  IconAlignJustify,
+  IconBorderAll,
+  IconCaret,
+  IconChart,
+  IconClearFormat,
+  IconCopy,
+  IconCut,
+  IconFooter,
+  IconFormatPainter,
+  IconGrowFont,
+  IconHighlight,
+  IconLink,
+  IconPaste,
+  IconPicture,
+  IconPosition,
+  IconRedo,
+  IconSave,
+  IconShapes,
+  IconShrinkFont,
+  IconStrikethrough,
+  IconSubscript,
+  IconSuperscript,
+  IconSymbol,
+  IconTable,
+  IconTextBox,
+  IconTrash,
+  IconUndo,
+  IconZoomIn,
+  IconZoomOut,
+} from './icons'
+import {
+  RibbonBody,
+  RibbonButton,
+  RibbonGroup,
+  RibbonIconButton,
+  RibbonTabs,
+  type RibbonTabDef,
+} from './Layout'
+import { ShapeGallery } from './ShapeGallery'
+import { SlideChrome, type SlideChromeOptions } from './SlideChrome'
+import {
+  IconApplyAll,
+  IconFillColor,
+  IconNewSlide,
+  IconObjAlignCenterH,
+  IconObjAlignLeft,
+  IconObjAlignMiddle,
+  IconObjAlignRight,
+  IconObjAlignTop,
+  IconObjAlignBottom,
+  IconObjFlipH,
+  IconObjFlipV,
+  IconPlayCurrent,
+  IconPlayFromStart,
+  IconSlideLayout,
+  IconTransFade,
+  IconTransNone,
+  IconTransPush,
+  IconTransZoom,
+} from './slideIcons'
+import { SlideTextEffectsTool } from './SlideTextEffectsTool'
+import { useAnchoredPopover, popoverStyle } from './useAnchoredPopover'
+import { useSlideViewport } from './useSlideViewport'
+
+import type { ExamCommand } from './commands'
+import type {
+  Deck,
+  DeckFooter,
+  Slide,
+  SlideElement,
+  SlideElType,
+  SlideTone,
+} from '@/engine/store/docs'
+
+export type SlideRibbonTab =
+  | 'home'
+  | 'insert'
+  | 'design'
+  | 'transitions'
+  | 'animations'
+  | 'slideShow'
+  | 'view'
+  | 'elementFormat'
+  | 'pictureFormat'
+  | 'tableDesign'
+  | 'chartDesign'
+
+export interface SlideRibbonProps {
+  chrome?: SlideChromeOptions
+  deck: Deck
+  slide: Slide | null
+  slideIndex: number
+  selected: SlideElement | null
+  activeTab: SlideRibbonTab
+  onTabChange: (tab: SlideRibbonTab) => void
+  /** menu Tệp: tạo bài giảng mới / nhập tệp / tải xuống */
+  onNewDeck?: () => void
+  onImportFile?: (file: File) => Promise<void>
+  onDownload?: () => void | Promise<void>
+  onSave?: () => void
+  onUndo: () => void
+  onRedo: () => void
+  canUndo: boolean
+  canRedo: boolean
+  onAddSlide: () => void
+  onDuplicateSlide: () => void
+  onDeleteSlide: () => void
+  onInsert: (element: SlideElement) => void
+  onUpdateSelected: (patch: Partial<SlideElement>) => void
+  /** đang mở chế độ cắt ảnh cho phần tử ảnh được chọn */
+  cropping?: boolean
+  onToggleCrop?: () => void
+  onResetCrop?: () => void
+  onDeleteSelected: () => void
+  onDuplicateSelected?: () => void
+  onCopySelected: () => void
+  onCutSelected: () => void
+  onPaste: () => void
+  canPaste: boolean
+  onArrange: (action: 'front' | 'back' | 'forward' | 'backward') => void
+  onAlign: (action: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void
+  onFlip: (axis: 'x' | 'y') => void
+  /** mở panel trái ở Mẫu → Bộ màu */
+  onOpenDesigns: () => void
+  /** mở panel trái ở tab Icon */
+  onOpenIcons: () => void
+  /** đường gióng + hít khi kéo đối tượng */
+  snapOn: boolean
+  onToggleSnap: () => void
+  /** lưới căn chỉnh trên khung slide */
+  gridOn: boolean
+  onToggleGrid: () => void
+  /** áp bố cục cho slide đang chọn (xác nhận trong SlideEditor) */
+  onApplyLayout: (layout: SlideLayoutId) => void
+  /** đổi tông nền cho slide đã có layout */
+  onTone: (tone: SlideTone) => void
+  onTransition: (transition: NonNullable<Slide['transition']>, allSlides: boolean) => void
+  /** hiệu ứng bấm-chuột-rồi-hiện: tự thêm theo bố cục hoặc xoá, cho slide này hoặc cả bài */
+  onAnimate: (mode: 'auto' | 'clear', allSlides: boolean) => void
+  /** hiệu ứng cho đối tượng đang chọn: chọn kiểu, bỏ, đổi thứ tự, hiện từng dòng, tốc độ */
+  onElementAnim: (action: ElementAnimAction) => void
+  /** tô nền slide (màu/gradient CSS) cho slide này hoặc cả bài; `null` = theo bộ màu */
+  onBackground: (background: string | null, allSlides: boolean, image?: string) => void
+  onPresent: () => void
+  onPresentFromStart: () => void
+  /** xuất PDF bằng hộp thoại in của trình duyệt */
+  onExportPdf: () => void
+  formatPaneOpen: boolean
+  onToggleFormatPane: () => void
+  /** chế độ sao chép định dạng chữ (off / once / lock) */
+  painterMode: 'off' | 'once' | 'lock'
+  onTogglePainter: (lock?: boolean) => void
+  /** cập nhật cấu hình số trang và chân trang của toàn deck */
+  onUpdateFooter: (footer: DeckFooter) => void
+  aiOpen: boolean
+  onToggleAi: () => void
+  zoom: number
+  onZoom: (zoom: number) => void
+}
+
+const TABS: RibbonTabDef[] = [
+  { id: 'home', label: 'Trang chủ' },
+  { id: 'insert', label: 'Chèn' },
+  { id: 'design', label: 'Thiết kế' },
+  { id: 'transitions', label: 'Chuyển tiếp' },
+  { id: 'animations', label: 'Hoạt ảnh' },
+  { id: 'slideShow', label: 'Trình chiếu' },
+  { id: 'view', label: 'Xem' },
+]
+
+const CONTEXT_LABELS: Record<SlideElType, { id: SlideRibbonTab; label: string } | null> = {
+  // chữ không có tab này (chỉnh ở Trang chủ); hình, icon, đồ hoạ và đường nối dùng chung tab Thành phần
+  text: null,
+  shape: { id: 'elementFormat', label: 'Thành phần' },
+  image: { id: 'pictureFormat', label: 'Định dạng ảnh' },
+  icon: { id: 'elementFormat', label: 'Thành phần' },
+  graphic: { id: 'elementFormat', label: 'Thành phần' },
+  connector: { id: 'elementFormat', label: 'Thành phần' },
+  table: { id: 'tableDesign', label: 'Thiết kế bảng' },
+  chart: { id: 'chartDesign', label: 'Thiết kế biểu đồ' },
+  formula: null,
+  // đổi link video: bấm lại nút Video ở tab Chèn khi video đang chọn
+  video: null,
+}
+
+const TRANSITIONS: Array<{ id: NonNullable<Slide['transition']>; label: string }> = [
+  { id: 'none', label: 'Không' },
+  { id: 'fade', label: 'Mờ dần' },
+  { id: 'slide', label: 'Trượt' },
+  { id: 'zoom', label: 'Thu phóng' },
+]
+
+const FONT_OPTIONS = ['Tiêu đề đậm', 'Serif', 'Sans', 'Viết tay', 'Mono', 'Hệ thống'].flatMap(
+  (group) =>
+    SLIDE_FONTS.filter((font) => font.group === group).map((font) => ({
+      value: font.family,
+      label: font.label,
+      group: font.group,
+      render: <span style={{ fontFamily: font.family }}>{font.label}</span>,
+    })),
+)
+const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 36, 44, 54]
+/** 1cqw ≈ 9.6px ở khung 960px, 1pt ≈ 1.333px → 1pt ≈ 0.139cqw */
+const PT_TO_CQW = 0.139
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10)
+}
+
+/** Popup neo theo trigger, `position: fixed` để không bị ribbon overflow cắt. */
+function Anchored({
+  open,
+  minWidth,
+  trigger,
+  children,
+}: {
+  open: boolean
+  minWidth: number
+  trigger: ReactNode
+  children: ReactNode
+}) {
+  const { triggerRef, pos } = useAnchoredPopover(open, minWidth)
+  const anim = useAnimatedPresence(open, 140)
+  return (
+    <div className="rb-drop-wrap" ref={triggerRef as React.RefObject<HTMLDivElement>}>
+      {trigger}
+      {anim.mounted && (
+        <div
+          className={cn('rb-drop-menu slide-ribbon-menu', anim.closing ? 'pop-out' : 'pop-in')}
+          style={popoverStyle(pos)}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MenuItem({
+  children,
+  onClick,
+  active,
+  disabled,
+  icon,
+}: {
+  children: ReactNode
+  onClick: () => void
+  active?: boolean
+  disabled?: boolean
+  icon?: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      className={cn('slide-ribbon-menu-item', active && 'active')}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {icon ? <span className="slide-ribbon-menu-icon">{icon}</span> : null}
+      <span>{children}</span>
+    </button>
+  )
+}
+
+/** Mũi tên nhỏ cạnh glyph của nút lớn có menu (giống ảnh GenOffice). */
+function Caret() {
+  return (
+    <span className="slide-ribbon-caret">
+      <IconCaret size={14} />
+    </span>
+  )
+}
+
+/** mẫu công thức chèn nhanh (KaTeX; \ce cho hoá học) */
+const FORMULA_PRESETS: Array<[string, string]> = [
+  ['Phân số', '\\frac{a}{b}'],
+  ['Căn bậc hai', '\\sqrt{x}'],
+  ['Luỹ thừa', 'x^{2}'],
+  ['Chỉ số dưới', 'x_{1}'],
+  ['Nghiệm bậc hai', 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}'],
+  ['Hệ phương trình', '\\begin{cases} x + y = 5 \\\\ x - y = 1 \\end{cases}'],
+  ['Tích phân', '\\int_{a}^{b} f(x)\\,dx'],
+  ['Giới hạn', '\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1'],
+  ['Tổng', '\\sum_{i=1}^{n} i'],
+  ['Phương trình hoá học', '\\ce{2H2 + O2 -> 2H2O}'],
+]
+
+export function SlideRibbon(props: SlideRibbonProps) {
+  const {
+    deck,
+    slide,
+    selected,
+    activeTab,
+    onTabChange,
+    onNewDeck,
+    onImportFile,
+    onDownload,
+    onSave,
+    onUndo,
+    onRedo,
+    canUndo,
+    canRedo,
+    onAddSlide,
+    onDuplicateSlide,
+    onDeleteSlide,
+    onInsert,
+    onUpdateSelected,
+    cropping,
+    onToggleCrop,
+    onResetCrop,
+    onDeleteSelected,
+    onCopySelected,
+    onCutSelected,
+    onPaste,
+    canPaste,
+    onArrange,
+    onAlign,
+    onFlip,
+    onOpenDesigns,
+    onOpenIcons,
+    snapOn,
+    onToggleSnap,
+    gridOn,
+    onToggleGrid,
+    onApplyLayout,
+    onTone,
+    onTransition,
+    onAnimate,
+    onElementAnim,
+    onBackground,
+    onPresent,
+    onPresentFromStart,
+    onExportPdf,
+    formatPaneOpen,
+    onToggleFormatPane,
+    painterMode,
+    onTogglePainter,
+    onUpdateFooter,
+    aiOpen,
+    onToggleAi,
+    zoom,
+    onZoom,
+  } = props
+
+  const [popup, setPopup] = useState<string | null>(null)
+  const [videoInput, setVideoInput] = useState('')
+  const [videoError, setVideoError] = useState<string | null>(null)
+  const [hrefInput, setHrefInput] = useState('')
+  const [hrefError, setHrefError] = useState<string | null>(null)
+  const [footerDraft, setFooterDraft] = useState(deck.footer?.text ?? '')
+  const [phoneSheetOpen, setPhoneSheetOpen] = useState(false)
+  const phoneSheetAnim = useAnimatedPresence(phoneSheetOpen, 180)
+  const [phoneInsertSub, setPhoneInsertSub] = useState<'menu' | 'shape' | 'layout'>('menu')
+  const [visibleGroups, setVisibleGroups] = useState<number | null>(null)
+  const [visibleTabs, setVisibleTabs] = useState<number | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const tabsWrapRef = useRef<HTMLDivElement>(null)
+  const replaceImgRef = useRef<HTMLInputElement>(null)
+  const importInputRef = useRef<HTMLInputElement>(null)
+  const { isPhone, isTablet } = useSlideViewport()
+
+  useEffect(() => {
+    if (deck.footer?.text !== undefined) setFooterDraft(deck.footer.text)
+  }, [deck.id, deck.footer?.text])
+
+  useEffect(() => {
+    if (!popup) return
+    const close = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.rb-drop-wrap, .slide-ribbon-menu')) setPopup(null)
+    }
+    window.addEventListener('mousedown', close)
+    return () => window.removeEventListener('mousedown', close)
+  }, [popup])
+
+  const toggle = (key: string) => setPopup((p) => (p === key ? null : key))
+  const close = () => setPopup(null)
+
+  const activeSlideTextarea = (): HTMLTextAreaElement | null => {
+    const ae = document.activeElement
+    return ae instanceof HTMLTextAreaElement && ae.closest('.slide-frame') && !ae.readOnly
+      ? ae
+      : null
+  }
+
+  const insertAtCursor = (snippet: string, wrapWith?: [string, string]): boolean => {
+    const ta = activeSlideTextarea()
+    if (!ta || !selected || selected.type !== 'text') return false
+    const start = ta.selectionStart ?? 0
+    const end = ta.selectionEnd ?? 0
+    const val = ta.value
+    if (wrapWith) {
+      if (start === end) return false
+      const inner = val.slice(start, end)
+      const inserted = `${wrapWith[0]}${inner}${wrapWith[1]}`
+      const next = `${val.slice(0, start)}${inserted}${val.slice(end)}`
+      onUpdateSelected({ text: next })
+      requestAnimationFrame(() => {
+        ta.focus()
+        ta.setSelectionRange(start, start + inserted.length)
+      })
+      return true
+    }
+    const next = `${val.slice(0, start)}${snippet}${val.slice(end)}`
+    onUpdateSelected({ text: next })
+    requestAnimationFrame(() => {
+      ta.focus()
+      ta.setSelectionRange(start + snippet.length, start + snippet.length)
+    })
+    return true
+  }
+
+  const insertScriptChar = (ch: string) => {
+    if (!selected || selected.type !== 'text') return
+    if (!insertAtCursor(ch)) onUpdateSelected({ text: `${selected.text ?? ''}${ch}` })
+    close()
+  }
+
+  const insertSymbolChar = (ch: string) => {
+    if (!insertAtCursor(ch)) {
+      onInsert({
+        id: uid(),
+        type: 'text',
+        x: 40,
+        y: 42,
+        w: 20,
+        h: 12,
+        text: ch,
+        variant: 'body',
+        fontSize: 4,
+        align: 'center',
+      })
+    }
+    close()
+  }
+
+  /** bật/tắt danh sách cho hộp chữ: mọi dòng đã có đúng kiểu thì gỡ, ngược lại gắn (thay kiểu cũ) */
+  const listKind = (text: string): 'bullet' | 'number' | null => {
+    const lines = text.split('\n').filter((l) => l.trim())
+    if (!lines.length) return null
+    if (lines.every((l) => /^•\s/.test(l))) return 'bullet'
+    if (lines.every((l) => /^\d+[.)]\s/.test(l))) return 'number'
+    return null
+  }
+  const toggleList = (kind: 'bullet' | 'number') => {
+    const text = selected?.text ?? ''
+    const off = listKind(text) === kind
+    let n = 0
+    const next = text
+      .split('\n')
+      .map((line) => {
+        const bare = line.replace(/^(•\s*|\d+[.)]\s*)/, '')
+        if (off || !bare.trim()) return bare
+        n++
+        return kind === 'bullet' ? `• ${bare}` : `${n}. ${bare}`
+      })
+      .join('\n')
+    onUpdateSelected({ text: next })
+  }
+
+  const context = selected ? CONTEXT_LABELS[selected.type] : null
+  const tabs = context ? [...TABS, { id: context.id, label: context.label }] : TABS
+  const activeContext = context?.id === activeTab
+  const isText = selected?.type === 'text'
+  const pt = selected?.fontSize ? Math.round(selected.fontSize / PT_TO_CQW) : 18
+
+  const insertShape = (shape: NonNullable<SlideElement['shape']>) => {
+    // sao/tim vuông vức hơn các hình khác: hộp 16:9 làm méo
+    const square = shape === 'star' || shape === 'heart'
+    onInsert({
+      id: uid(),
+      type: 'shape',
+      shape,
+      ...(square ? { x: 38, y: 28, w: 24, h: 42.7 } : { x: 25, y: 34, w: 50, h: 28 }),
+      fill: deck.theme.accent,
+    })
+    close()
+  }
+
+  /** chèn một hình của thư viện: 7 hình cũ và đường thẳng giữ cách chèn riêng, hình khác lưu thẳng tên prst */
+  const insertPreset = (prst: string) => {
+    if (prst === 'line') return insertLine('none')
+    if (prst === 'lineArrow') return insertLine('end')
+    if (prst === 'lineArrowDouble') return insertLine('both')
+    const shape = shapeNameOf(prst)
+    if (shape !== prst || ['rect', 'ellipse', 'triangle', 'heart'].includes(prst))
+      return insertShape(shape)
+    const box = defaultBox(prst)
+    onInsert({
+      id: uid(),
+      type: 'shape',
+      shape,
+      x: (100 - box.w) / 2,
+      y: (100 - box.h) / 2,
+      ...box,
+      fill: deck.theme.accent,
+    })
+    close()
+  }
+
+  /** đường thẳng (có thể có đầu mũi tên); hộp cao đủ chứa đầu mũi tên, đường chạy giữa hộp */
+  const insertLine = (lineArrow: 'none' | 'end' | 'both') => {
+    onInsert({
+      id: uid(),
+      type: 'shape',
+      shape: 'line',
+      x: 20,
+      y: 47.5,
+      w: 60,
+      h: 5,
+      fill: deck.theme.accent,
+      border: 4,
+      lineArrow,
+    })
+    close()
+  }
+
+  const insertTable = (rows: number, cols: number) => {
+    onInsert({
+      id: uid(),
+      type: 'table',
+      x: 10,
+      y: 26,
+      w: 80,
+      h: 42,
+      rows: Array.from({ length: rows }, () => Array.from({ length: cols }, () => '')),
+    })
+    close()
+  }
+
+  const insertFormula = (tex: string) =>
+    onInsert({
+      id: uid(),
+      type: 'text',
+      x: 30,
+      y: 58,
+      w: 40,
+      h: 16,
+      text: `$${tex}$`,
+      variant: 'body',
+      fontSize: 4,
+      align: 'center',
+    })
+
+  const insertChart = (type: 'bar' | 'line' | 'pie') => {
+    onInsert({
+      id: uid(),
+      type: 'chart',
+      x: 12,
+      y: 24,
+      w: 76,
+      h: 46,
+      chart: {
+        type,
+        data: [
+          { label: 'A', value: 12 },
+          { label: 'B', value: 20 },
+          { label: 'C', value: 9 },
+        ],
+      },
+    })
+    close()
+  }
+
+  const renderHome = () => (
+    <>
+      <RibbonGroup label="Bảng tạm">
+        <RibbonButton
+          data-command="slide.home.1"
+          icon={<IconPaste size={28} />}
+          label="Dán"
+          onClick={onPaste}
+          disabled={!canPaste}
+        />
+        <div className="rb-col rb-col--icons">
+          <RibbonIconButton
+            data-command="slide.home.2"
+            icon={<IconCut size={16} />}
+            title="Cắt"
+            onClick={onCutSelected}
+            disabled={!selected}
+          />
+          <RibbonIconButton
+            data-command="slide.home.3"
+            icon={<IconCopy size={16} />}
+            title="Sao chép"
+            onClick={onCopySelected}
+            disabled={!selected}
+          />
+        </div>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Slide">
+        <RibbonButton
+          data-command="slide.home.4"
+          icon={<IconNewSlide size={28} />}
+          label="Slide mới"
+          onClick={onAddSlide}
+        />
+        <Anchored
+          open={popup === 'layout'}
+          minWidth={288}
+          trigger={
+            <RibbonButton
+              data-command="slide.home.5"
+              icon={
+                <>
+                  <IconSlideLayout size={28} />
+                  <Caret />
+                </>
+              }
+              label="Bố cục"
+              onClick={() => toggle('layout')}
+              active={popup === 'layout'}
+              disabled={!slide}
+            />
+          }
+        >
+          <div className="slide-ribbon-menu-title">Bố cục slide</div>
+          <div className="slide-layout-grid">
+            {SLIDE_LAYOUTS.map((layout) => (
+              <button
+                data-command="slide.home.6"
+                key={layout.id}
+                type="button"
+                className={cn('slide-layout-card', slide?.layout === layout.id && 'active')}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onApplyLayout(layout.id)
+                  close()
+                }}
+                data-tip={layout.description}
+                disabled={!slide}
+              >
+                <span
+                  className={cn('slide-layout-thumb', `slide-layout-thumb--${layout.id}`)}
+                  aria-hidden
+                >
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <small>{layout.name}</small>
+              </button>
+            ))}
+          </div>
+        </Anchored>
+        <div className="rb-col rb-col--icons">
+          <RibbonIconButton
+            data-command="slide.home.7"
+            icon={<IconCopy size={16} />}
+            title="Nhân bản slide"
+            onClick={onDuplicateSlide}
+            disabled={!slide}
+          />
+          <RibbonIconButton
+            data-command="slide.home.8"
+            icon={<IconTrash size={16} />}
+            title="Xóa slide"
+            onClick={onDeleteSlide}
+            disabled={!slide}
+          />
+        </div>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Phông chữ">
+        <div className="rb-font-group">
+          <div className="rb-row">
+            <Dropdown
+              data-command="slide.home.9"
+              width={132}
+              ariaLabel="Phông chữ"
+              value={primaryFont(
+                selected?.fontFamily ??
+                  (selected && selected.variant !== 'body'
+                    ? (deck.theme.fonts?.heading ?? deck.theme.fontHeading)
+                    : (deck.theme.fonts?.body ?? deck.theme.fontBody)),
+              )}
+              disabled={!isText}
+              options={FONT_OPTIONS}
+              onOpen={previewSlideFonts}
+              onPick={(fontFamily) => onUpdateSelected({ fontFamily })}
+            />
+            <Dropdown
+              data-command="slide.home.10"
+              width={58}
+              ariaLabel="Cỡ chữ"
+              value={String(pt)}
+              disabled={!isText}
+              options={FONT_SIZES.map((s) => ({ value: String(s), label: String(s) }))}
+              onPick={(size) => onUpdateSelected({ fontSize: Number(size) * PT_TO_CQW })}
+            />
+            <button
+              data-command="slide.home.11"
+              type="button"
+              className="rb-icon"
+              data-tip="Tăng cỡ chữ"
+              aria-label="Tăng cỡ chữ"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onUpdateSelected({ fontSize: (pt + 2) * PT_TO_CQW })}
+              disabled={!isText}
+            >
+              <IconGrowFont size={18} />
+            </button>
+            <button
+              data-command="slide.home.12"
+              type="button"
+              className="rb-icon"
+              data-tip="Giảm cỡ chữ"
+              aria-label="Giảm cỡ chữ"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onUpdateSelected({ fontSize: Math.max(8, pt - 2) * PT_TO_CQW })}
+              disabled={!isText}
+            >
+              <IconShrinkFont size={18} />
+            </button>
+          </div>
+          <div className="rb-row">
+            <button
+              data-command="slide.home.13"
+              type="button"
+              className="rb-icon"
+              data-tip="Đậm"
+              aria-label="Đậm"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() =>
+                onUpdateSelected({ fontWeight: selected?.fontWeight === 700 ? 400 : 700 })
+              }
+              disabled={!isText}
+            >
+              <b>B</b>
+            </button>
+            <button
+              data-command="slide.home.14"
+              type="button"
+              className="rb-icon"
+              data-tip="Nghiêng"
+              aria-label="Nghiêng"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() =>
+                onUpdateSelected({
+                  fontStyle: selected?.fontStyle === 'italic' ? 'normal' : 'italic',
+                })
+              }
+              disabled={!isText}
+            >
+              <i>I</i>
+            </button>
+            <button
+              data-command="slide.home.15"
+              type="button"
+              className="rb-icon"
+              data-tip="Gạch chân"
+              aria-label="Gạch chân"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() =>
+                onUpdateSelected({
+                  textDecoration: selected?.textDecoration === 'underline' ? 'none' : 'underline',
+                })
+              }
+              disabled={!isText}
+            >
+              <u>U</u>
+            </button>
+            <button
+              data-command="slide.home.16"
+              type="button"
+              className={cn('rb-icon', selected?.textDecoration === 'line-through' && 'active')}
+              data-tip="Gạch ngang"
+              aria-label="Gạch ngang"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() =>
+                onUpdateSelected({
+                  textDecoration:
+                    selected?.textDecoration === 'line-through' ? 'none' : 'line-through',
+                })
+              }
+              disabled={!isText}
+            >
+              <IconStrikethrough size={16} />
+            </button>
+            <Anchored
+              open={popup === 'highlight'}
+              minWidth={190}
+              trigger={
+                <button
+                  data-command="slide.home.17"
+                  type="button"
+                  className={cn('rb-icon slide-ribbon-color-btn', selected?.highlight && 'active')}
+                  data-tip="Tô sáng chữ"
+                  aria-label="Tô sáng chữ"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => toggle('highlight')}
+                  disabled={!isText}
+                >
+                  <IconHighlight size={16} />
+                  <span
+                    className="rb-color-bar"
+                    style={{ background: selected?.highlight ?? 'transparent' }}
+                  />
+                </button>
+              }
+            >
+              <ColorPalette
+                data-command="slide.home.18"
+                value={selected?.highlight ?? '#fef08a'}
+                themeColors={[deck.theme.accent, '#fef08a']}
+                onPick={(highlight) => {
+                  onUpdateSelected({ highlight })
+                  close()
+                }}
+              />
+              <div className="slide-ribbon-menu-sep" />
+              <MenuItem
+                data-command="slide.home.19"
+                onClick={() => {
+                  onUpdateSelected({ highlight: undefined })
+                  close()
+                }}
+              >
+                Không tô
+              </MenuItem>
+            </Anchored>
+            <Anchored
+              open={popup === 'sup'}
+              minWidth={136}
+              trigger={
+                <button
+                  data-command="slide.home.20"
+                  type="button"
+                  className={cn('rb-icon', popup === 'sup' && 'active')}
+                  data-tip="Chỉ số trên (bôi chữ để bọc $x^{a}$ hoặc chèn ² ³ ⁿ)"
+                  aria-label="Chỉ số trên"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (insertAtCursor('', ['$^{', '}$'])) {
+                      close()
+                      return
+                    }
+                    toggle('sup')
+                  }}
+                  disabled={!isText}
+                >
+                  <IconSuperscript size={16} />
+                </button>
+              }
+            >
+              <div className="slide-ribbon-menu-title">Chèn chỉ số trên</div>
+              <div className="flex gap-1 px-2 pb-1">
+                {UNICODE_SUPERSCRIPTS.map((ch) => (
+                  <button
+                    data-command="slide.home.21"
+                    key={ch}
+                    type="button"
+                    className="slide-sym-btn border-line/60 flex-1 border font-medium"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => insertScriptChar(ch)}
+                  >
+                    x{ch}
+                  </button>
+                ))}
+              </div>
+            </Anchored>
+            <Anchored
+              open={popup === 'sub'}
+              minWidth={136}
+              trigger={
+                <button
+                  data-command="slide.home.22"
+                  type="button"
+                  className={cn('rb-icon', popup === 'sub' && 'active')}
+                  data-tip="Chỉ số dưới (bôi chữ để bọc $x_{a}$ hoặc chèn ₁ ₂ ₙ)"
+                  aria-label="Chỉ số dưới"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (insertAtCursor('', ['$_{', '}$'])) {
+                      close()
+                      return
+                    }
+                    toggle('sub')
+                  }}
+                  disabled={!isText}
+                >
+                  <IconSubscript size={16} />
+                </button>
+              }
+            >
+              <div className="slide-ribbon-menu-title">Chèn chỉ số dưới</div>
+              <div className="flex gap-1 px-2 pb-1">
+                {UNICODE_SUBSCRIPTS.map((ch) => (
+                  <button
+                    data-command="slide.home.23"
+                    key={ch}
+                    type="button"
+                    className="slide-sym-btn border-line/60 flex-1 border font-medium"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => insertScriptChar(ch)}
+                  >
+                    x{ch}
+                  </button>
+                ))}
+              </div>
+            </Anchored>
+            <Anchored
+              open={popup === 'textColor'}
+              minWidth={190}
+              trigger={
+                <button
+                  data-command="slide.home.24"
+                  type="button"
+                  className="rb-icon slide-ribbon-color-btn"
+                  data-tip="Màu chữ"
+                  aria-label="Màu chữ"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => toggle('textColor')}
+                  disabled={!isText}
+                >
+                  <span className="slide-ribbon-A">A</span>
+                  <span
+                    className="rb-color-bar"
+                    style={{ background: selected?.textColor ?? deck.theme.fg }}
+                  />
+                </button>
+              }
+            >
+              <ColorPalette
+                data-command="slide.home.25"
+                value={selected?.textColor ?? deck.theme.fg}
+                themeColors={[deck.theme.fg, deck.theme.accent]}
+                onPick={(textColor) => {
+                  onUpdateSelected({ textColor })
+                  close()
+                }}
+              />
+            </Anchored>
+            <SlideTextEffectsTool
+              data-command="slide.home.26"
+              el={selected ?? undefined}
+              accent={deck.theme.accent}
+              onUpdate={onUpdateSelected}
+              ribbon
+            />
+            <button
+              data-command="slide.home.27"
+              type="button"
+              className="rb-icon"
+              data-tip="Xoá định dạng"
+              aria-label="Xoá định dạng"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => selected && onUpdateSelected(clearTextFormatting(selected))}
+              disabled={!isText}
+            >
+              <IconClearFormat size={16} />
+            </button>
+            <button
+              data-command="slide.home.28"
+              type="button"
+              className={cn('rb-icon', painterMode !== 'off' && 'active')}
+              data-tip={
+                painterMode === 'lock'
+                  ? 'Đang khoá sao chép định dạng (bấm hoặc Esc để tắt)'
+                  : 'Sao chép định dạng (nhấp đúp để khoá)'
+              }
+              aria-label="Sao chép định dạng"
+              aria-pressed={painterMode !== 'off'}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => onTogglePainter(e.detail >= 2)}
+              onDoubleClick={() => onTogglePainter(true)}
+              disabled={!isText && painterMode === 'off'}
+            >
+              <IconFormatPainter size={16} />
+            </button>
+          </div>
+        </div>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Đoạn văn">
+        <div className="rb-row">
+          {(
+            [
+              ['left', 'Căn trái', IconAlignLeft],
+              ['center', 'Căn giữa', IconAlignCenter],
+              ['right', 'Căn phải', IconAlignRight],
+              ['justify', 'Căn đều hai bên', IconAlignJustify],
+            ] as const
+          ).map(([align, label, Icon]) => (
+            <RibbonIconButton
+              data-command="slide.home.29"
+              key={align}
+              icon={<Icon size={18} />}
+              title={label}
+              active={isText && (selected?.align ?? 'left') === align}
+              onClick={() => onUpdateSelected({ align })}
+              disabled={!isText}
+            />
+          ))}
+          <RibbonIconButton
+            data-command="slide.home.30"
+            icon={<AlignVerticalJustifyStart size={17} />}
+            title="Chữ sát mép trên hộp"
+            active={isText && selected?.valign !== 'middle' && !selected?.fill}
+            onClick={() => onUpdateSelected({ valign: 'top' })}
+            disabled={!isText || !!selected?.fill}
+          />
+          <RibbonIconButton
+            data-command="slide.home.31"
+            icon={<AlignVerticalJustifyCenter size={17} />}
+            title="Chữ ở giữa hộp (theo chiều dọc)"
+            active={isText && (selected?.valign === 'middle' || !!selected?.fill)}
+            onClick={() => onUpdateSelected({ valign: 'middle' })}
+            disabled={!isText || !!selected?.fill}
+          />
+        </div>
+        <div className="rb-row">
+          <RibbonIconButton
+            data-command="slide.home.32"
+            icon={<List size={17} />}
+            title="Danh sách gạch đầu dòng"
+            active={isText && listKind(selected?.text ?? '') === 'bullet'}
+            onClick={() => toggleList('bullet')}
+            disabled={!isText}
+          />
+          <RibbonIconButton
+            data-command="slide.home.33"
+            icon={<ListOrdered size={17} />}
+            title="Danh sách đánh số"
+            active={isText && listKind(selected?.text ?? '') === 'number'}
+            onClick={() => toggleList('number')}
+            disabled={!isText}
+          />
+          <Anchored
+            open={popup === 'lineHeight'}
+            minWidth={150}
+            trigger={
+              <RibbonIconButton
+                data-command="slide.home.34"
+                icon={<UnfoldVertical size={17} />}
+                title="Giãn dòng"
+                onClick={() => toggle('lineHeight')}
+                active={popup === 'lineHeight'}
+                disabled={!isText}
+              />
+            }
+          >
+            <div className="slide-ribbon-menu-title">Giãn dòng</div>
+            {[1, 1.15, 1.25, 1.5, 2].map((lh) => (
+              <MenuItem
+                data-command="slide.home.35"
+                key={lh}
+                onClick={() => {
+                  onUpdateSelected({ lineHeight: lh })
+                  close()
+                }}
+              >
+                {(selected?.lineHeight ?? 1.25) === lh ? '✓ ' : ''}
+                {lh.toLocaleString('vi-VN')}
+              </MenuItem>
+            ))}
+          </Anchored>
+        </div>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Bảng chọn">
+        <RibbonButton
+          data-command="slide.home.36"
+          icon={<IconPosition size={28} />}
+          label="Định dạng"
+          onClick={onToggleFormatPane}
+          active={formatPaneOpen}
+        />
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Sắp xếp">
+        <Anchored
+          open={popup === 'arrange'}
+          minWidth={200}
+          trigger={
+            <RibbonButton
+              data-command="slide.home.37"
+              icon={
+                <>
+                  <IconAlignCenter size={28} />
+                  <Caret />
+                </>
+              }
+              label="Sắp xếp"
+              onClick={() => toggle('arrange')}
+              active={popup === 'arrange'}
+              disabled={!selected}
+            />
+          }
+        >
+          <div className="slide-ribbon-menu-title">Thứ tự lớp</div>
+          <MenuItem
+            data-command="slide.home.38"
+            onClick={() => {
+              onArrange('front')
+              close()
+            }}
+          >
+            Đưa lên đầu
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.39"
+            onClick={() => {
+              onArrange('back')
+              close()
+            }}
+          >
+            Đưa xuống cuối
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.40"
+            onClick={() => {
+              onArrange('forward')
+              close()
+            }}
+          >
+            Đưa lên một lớp
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.41"
+            onClick={() => {
+              onArrange('backward')
+              close()
+            }}
+          >
+            Đưa xuống một lớp
+          </MenuItem>
+          <div className="slide-ribbon-menu-sep" />
+          <div className="slide-ribbon-menu-title">Căn vào slide</div>
+          <MenuItem
+            data-command="slide.home.42"
+            icon={<IconObjAlignLeft size={16} />}
+            onClick={() => {
+              onAlign('left')
+              close()
+            }}
+          >
+            Căn trái slide
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.43"
+            icon={<IconObjAlignCenterH size={16} />}
+            onClick={() => {
+              onAlign('center')
+              close()
+            }}
+          >
+            Căn giữa ngang
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.44"
+            icon={<IconObjAlignRight size={16} />}
+            onClick={() => {
+              onAlign('right')
+              close()
+            }}
+          >
+            Căn phải slide
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.45"
+            icon={<IconObjAlignTop size={16} />}
+            onClick={() => {
+              onAlign('top')
+              close()
+            }}
+          >
+            Căn trên slide
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.46"
+            icon={<IconObjAlignMiddle size={16} />}
+            onClick={() => {
+              onAlign('middle')
+              close()
+            }}
+          >
+            Căn giữa dọc
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.47"
+            icon={<IconObjAlignBottom size={16} />}
+            onClick={() => {
+              onAlign('bottom')
+              close()
+            }}
+          >
+            Căn dưới slide
+          </MenuItem>
+          <div className="slide-ribbon-menu-sep" />
+          <div className="slide-ribbon-menu-title">Lật</div>
+          <MenuItem
+            data-command="slide.home.48"
+            icon={<IconObjFlipH size={16} />}
+            onClick={() => {
+              onFlip('x')
+              close()
+            }}
+          >
+            Lật ngang
+          </MenuItem>
+          <MenuItem
+            data-command="slide.home.49"
+            icon={<IconObjFlipV size={16} />}
+            onClick={() => {
+              onFlip('y')
+              close()
+            }}
+          >
+            Lật dọc
+          </MenuItem>
+        </Anchored>
+      </RibbonGroup>
+    </>
+  )
+
+  const renderInsert = () => (
+    <>
+      <RibbonGroup label="Bảng">
+        <Anchored
+          open={popup === 'table'}
+          minWidth={230}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.1"
+              icon={
+                <>
+                  <IconTable size={28} />
+                  <Caret />
+                </>
+              }
+              label="Bảng"
+              onClick={() => toggle('table')}
+              active={popup === 'table'}
+            />
+          }
+        >
+          <div className="slide-ribbon-menu-title">Chọn kích thước bảng</div>
+          <div className="slide-ribbon-table-grid" onMouseLeave={() => undefined}>
+            {Array.from({ length: 40 }, (_, i) => {
+              const row = Math.floor(i / 8) + 1
+              const col = (i % 8) + 1
+              return (
+                <button
+                  data-command="slide.insert.2"
+                  key={i}
+                  type="button"
+                  aria-label={`${row} hàng ${col} cột`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => insertTable(row, col)}
+                />
+              )
+            })}
+          </div>
+        </Anchored>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Hình ảnh">
+        <RibbonButton
+          data-command="slide.insert.3"
+          icon={<IconPicture size={28} />}
+          label="Hình ảnh"
+          onClick={() => onInsert({ id: uid(), type: 'image', x: 25, y: 26, w: 50, h: 38 })}
+        />
+        <Anchored
+          open={popup === 'video'}
+          minWidth={300}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.4"
+              icon={<Video size={28} strokeWidth={1.6} />}
+              label="Video"
+              active={popup === 'video'}
+              onClick={() => {
+                setVideoInput(selected?.type === 'video' ? (selected.src ?? '') : '')
+                setVideoError(null)
+                toggle('video')
+              }}
+            />
+          }
+        >
+          <form
+            className="flex flex-col gap-2 p-2.5"
+            onSubmit={(e) => {
+              e.preventDefault()
+              const v = parseSlideVideo(videoInput)
+              if (!v) {
+                setVideoError('Dán link YouTube, Vimeo hoặc tệp .mp4 (https).')
+                return
+              }
+              const src = videoInput.trim()
+              if (selected?.type === 'video') onUpdateSelected({ src })
+              else onInsert({ id: uid(), type: 'video', src, x: 20, y: 18, w: 60, h: 60 })
+              close()
+            }}
+          >
+            <div className="text-ink-3 text-[11px] font-semibold tracking-wide uppercase">
+              {selected?.type === 'video' ? 'Đổi link video' : 'Chèn video từ link'}
+            </div>
+            <input
+              data-command="slide.insert.5"
+              type="text"
+              value={videoInput}
+              onChange={(e) => {
+                setVideoInput(e.target.value)
+                if (videoError) setVideoError(null)
+              }}
+              placeholder="https://www.youtube.com/watch?v=…"
+              aria-label="Link video"
+              autoFocus
+              className="border-line focus:border-clay w-full rounded border bg-white px-2 py-1 text-[12px] outline-none"
+            />
+            {videoError && <div className="text-[11px] text-red-600">{videoError}</div>}
+            <div className="text-ink-3 text-[11px]">
+              Video phát khi trình chiếu; xuất PPTX giữ link YouTube.
+            </div>
+            <div className="flex justify-end">
+              <button
+                data-command="slide.insert.6"
+                type="submit"
+                className="bg-clay rounded px-2.5 py-1 text-[12px] font-medium text-white hover:opacity-90"
+              >
+                {selected?.type === 'video' ? 'Đổi' : 'Chèn'}
+              </button>
+            </div>
+          </form>
+        </Anchored>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Minh họa">
+        <Anchored
+          open={popup === 'shape'}
+          minWidth={356}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.7"
+              icon={
+                <>
+                  <IconShapes size={28} />
+                  <Caret />
+                </>
+              }
+              label="Hình dạng"
+              onClick={() => toggle('shape')}
+              active={popup === 'shape'}
+            />
+          }
+        >
+          <ShapeGallery data-command="slide.insert.8" onPick={insertPreset} />
+        </Anchored>
+        <Anchored
+          open={popup === 'chart'}
+          minWidth={190}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.9"
+              icon={
+                <>
+                  <IconChart size={28} />
+                  <Caret />
+                </>
+              }
+              label="Biểu đồ"
+              onClick={() => toggle('chart')}
+              active={popup === 'chart'}
+            />
+          }
+        >
+          <MenuItem data-command="slide.insert.10" onClick={() => insertChart('bar')}>
+            Biểu đồ cột
+          </MenuItem>
+          <MenuItem data-command="slide.insert.11" onClick={() => insertChart('line')}>
+            Biểu đồ đường
+          </MenuItem>
+          <MenuItem data-command="slide.insert.12" onClick={() => insertChart('pie')}>
+            Biểu đồ tròn
+          </MenuItem>
+        </Anchored>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Văn bản">
+        <RibbonButton
+          data-command="slide.insert.13"
+          icon={<IconTextBox size={28} />}
+          label="Hộp văn bản"
+          onClick={() =>
+            onInsert({
+              id: uid(),
+              type: 'text',
+              x: 35,
+              y: 42,
+              w: 30,
+              h: 18,
+              text: 'Nhập văn bản',
+              variant: 'body',
+              fontSize: 3.2,
+            })
+          }
+        />
+        <Anchored
+          open={popup === 'formula'}
+          minWidth={220}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.14"
+              icon={
+                <>
+                  <Sigma size={28} strokeWidth={1.6} />
+                  <Caret />
+                </>
+              }
+              label="Công thức"
+              onClick={() => toggle('formula')}
+              active={popup === 'formula'}
+            />
+          }
+        >
+          <div className="slide-ribbon-menu-title">
+            Chèn công thức (sửa trong hộp chữ, viết giữa $…$)
+          </div>
+          {FORMULA_PRESETS.map(([label, tex]) => (
+            <MenuItem
+              data-command="slide.insert.15"
+              key={label}
+              onClick={() => {
+                insertFormula(tex)
+                close()
+              }}
+            >
+              {label}
+            </MenuItem>
+          ))}
+        </Anchored>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Biểu tượng">
+        <Anchored
+          open={popup === 'symbol'}
+          minWidth={300}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.16"
+              icon={
+                <>
+                  <IconSymbol size={26} />
+                  <Caret />
+                </>
+              }
+              label="Ký hiệu"
+              title="Chèn ký hiệu đặc biệt (Ω)"
+              onClick={() => toggle('symbol')}
+              active={popup === 'symbol'}
+            />
+          }
+        >
+          <div className="max-h-[320px] overflow-y-auto p-1">
+            {SLIDE_SYMBOLS.map((group, gi) => (
+              <div key={group.label}>
+                {gi > 0 && <div className="slide-ribbon-menu-sep" />}
+                <div className="slide-ribbon-menu-title">{group.label}</div>
+                <div className="slide-sym-grid px-1.5 pb-1">
+                  {group.chars.map((ch) => (
+                    <button
+                      data-command="slide.insert.17"
+                      key={ch}
+                      type="button"
+                      className="slide-sym-btn"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => insertSymbolChar(ch)}
+                    >
+                      {ch}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Anchored>
+        <RibbonButton
+          data-command="slide.insert.18"
+          icon={<Smile size={28} strokeWidth={1.6} />}
+          label="Icon"
+          onClick={onOpenIcons}
+        />
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Liên kết">
+        <Anchored
+          open={popup === 'link'}
+          minWidth={260}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.19"
+              icon={<IconLink size={26} />}
+              label="Liên kết"
+              title="Gắn liên kết web (http/https) cho phần tử đang chọn"
+              disabled={!selected}
+              active={popup === 'link' || Boolean(selected?.href)}
+              onClick={() => {
+                setHrefInput(selected?.href ?? '')
+                setHrefError(null)
+                toggle('link')
+              }}
+            />
+          }
+        >
+          <form
+            className="flex flex-col gap-2 p-2.5"
+            onSubmit={(e) => {
+              e.preventDefault()
+              const url = normalizeSlideHref(hrefInput)
+              if (!url) {
+                setHrefError('Nhập URL http(s):// hợp lệ.')
+                return
+              }
+              onUpdateSelected({ href: url })
+              setHrefError(null)
+              close()
+            }}
+          >
+            <div className="text-ink-3 text-[11px] font-semibold tracking-wide uppercase">
+              Địa chỉ liên kết
+            </div>
+            <input
+              data-command="slide.insert.20"
+              type="text"
+              value={hrefInput}
+              onChange={(e) => {
+                setHrefInput(e.target.value)
+                if (hrefError) setHrefError(null)
+              }}
+              placeholder="https://example.com"
+              aria-label="URL liên kết"
+              autoFocus
+              className="border-line focus:border-clay w-full rounded border bg-white px-2 py-1 text-[12px] outline-none"
+            />
+            {hrefError && <div className="text-[11px] text-red-600">{hrefError}</div>}
+            <div className="flex items-center justify-end gap-1.5">
+              {selected?.href ? (
+                <button
+                  data-command="slide.insert.21"
+                  type="button"
+                  onClick={() => {
+                    onUpdateSelected({ href: undefined })
+                    setHrefInput('')
+                    setHrefError(null)
+                    close()
+                  }}
+                  className="border-line text-ink-2 hover:bg-subtle rounded border px-2 py-1 text-[12px]"
+                >
+                  Gỡ
+                </button>
+              ) : null}
+              <button
+                data-command="slide.insert.22"
+                type="submit"
+                className="bg-clay rounded px-2.5 py-1 text-[12px] font-medium text-white hover:opacity-90"
+              >
+                Áp dụng
+              </button>
+            </div>
+          </form>
+        </Anchored>
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Đầu trang & chân trang">
+        <Anchored
+          open={popup === 'footer'}
+          minWidth={260}
+          trigger={
+            <RibbonButton
+              data-command="slide.insert.23"
+              icon={<IconFooter size={26} />}
+              label="Chân trang"
+              title="Bật tắt số trang và nội dung chân trang slide"
+              active={
+                popup === 'footer' || Boolean(deck.footer?.slideNumber || deck.footer?.text?.trim())
+              }
+              onClick={() => toggle('footer')}
+            />
+          }
+        >
+          <div className="text-ink flex flex-col gap-2.5 p-2.5 text-[12px]">
+            <label className="flex cursor-pointer items-center gap-2 select-none">
+              <input
+                data-command="slide.insert.24"
+                type="checkbox"
+                checked={Boolean(deck.footer?.slideNumber)}
+                onChange={(e) => onUpdateFooter({ ...deck.footer, slideNumber: e.target.checked })}
+              />
+              <span>Số trang</span>
+            </label>
+            <div className="flex flex-col gap-1.5">
+              <label className="flex cursor-pointer items-center gap-2 select-none">
+                <input
+                  data-command="slide.insert.25"
+                  type="checkbox"
+                  checked={deck.footer?.text !== undefined}
+                  onChange={(e) =>
+                    onUpdateFooter({
+                      ...deck.footer,
+                      text: e.target.checked ? footerDraft : undefined,
+                    })
+                  }
+                />
+                <span>Chân trang</span>
+              </label>
+              <input
+                data-command="slide.insert.26"
+                type="text"
+                value={deck.footer?.text ?? ''}
+                disabled={deck.footer?.text === undefined}
+                onChange={(e) => {
+                  setFooterDraft(e.target.value)
+                  onUpdateFooter({ ...deck.footer, text: e.target.value })
+                }}
+                placeholder="Nhập nội dung chân trang…"
+                aria-label="Nội dung chân trang"
+                className="border-line focus:border-clay disabled:bg-subtle disabled:text-ink-3 w-full rounded border bg-white px-2 py-1 text-[12px] outline-none"
+              />
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 select-none">
+              <input
+                data-command="slide.insert.27"
+                type="checkbox"
+                checked={Boolean(deck.footer?.skipTitle)}
+                onChange={(e) => onUpdateFooter({ ...deck.footer, skipTitle: e.target.checked })}
+              />
+              <span>Không hiện ở slide tiêu đề</span>
+            </label>
+          </div>
+        </Anchored>
+      </RibbonGroup>
+    </>
+  )
+
+  const renderDesign = () => {
+    const activeTone = slide
+      ? isTone(slide.tone)
+        ? slide.tone
+        : defaultTone(slide.layout ?? 'bullets')
+      : 'theme'
+    const toneEnabled = Boolean(slide?.layout && isLayoutId(slide.layout))
+    return (
+      <>
+        <RibbonGroup label="Bộ màu">
+          <RibbonButton
+            data-command="slide.design.1"
+            icon={<Palette size={26} strokeWidth={1.7} />}
+            label="Bộ màu…"
+            data-tip="Chọn bộ màu cho cả bài (mở tab Mẫu → Bộ màu)"
+            onClick={() => {
+              onOpenDesigns()
+              if (phoneSheetOpen) setPhoneSheetOpen(false)
+            }}
+          />
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Tông nền">
+          {(
+            [
+              ['theme', 'Theo theme', deck.theme.bg],
+              ['soft', 'Dịu', deck.theme.surface ?? deck.theme.bg],
+              ['accent', 'Nhấn', deck.theme.accent],
+            ] as const
+          ).map(([tone, label, color]) => (
+            <RibbonIconButton
+              data-command="slide.design.2"
+              key={tone}
+              icon={
+                <span
+                  className="slide-ribbon-tone-dot"
+                  style={{ background: color, borderColor: deck.theme.fg }}
+                />
+              }
+              data-tip={toneEnabled ? label : `${label} (áp bố cục trước)`}
+              onClick={() => onTone(tone)}
+              active={activeTone === tone}
+              disabled={!toneEnabled}
+            />
+          ))}
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Nền slide">
+          <Anchored
+            open={popup === 'bg'}
+            minWidth={252}
+            trigger={
+              <RibbonButton
+                data-command="slide.design.3"
+                icon={
+                  <>
+                    <IconFillColor size={28} />
+                    <Caret />
+                  </>
+                }
+                label="Màu nền"
+                onClick={() => toggle('bg')}
+                active={popup === 'bg'}
+                disabled={!slide || Boolean(slide.html)}
+              />
+            }
+          >
+            <BackgroundMenu
+              data-command="slide.design.4"
+              current={slide?.background ?? ''}
+              custom={Boolean(slide?.customBg)}
+              onPick={(background, all, image) => {
+                onBackground(background, all, image)
+                if (!all) close()
+              }}
+            />
+          </Anchored>
+        </RibbonGroup>
+      </>
+    )
+  }
+
+  const renderTransitions = () => (
+    <>
+      <RibbonGroup label="Chuyển tiếp cho slide này">
+        {TRANSITIONS.map((transition) => (
+          <RibbonButton
+            data-command="slide.transitions.1"
+            key={transition.id}
+            icon={
+              transition.id === 'fade' ? (
+                <IconTransFade size={28} />
+              ) : transition.id === 'slide' ? (
+                <IconTransPush size={28} />
+              ) : transition.id === 'zoom' ? (
+                <IconTransZoom size={28} />
+              ) : (
+                <IconTransNone size={28} />
+              )
+            }
+            label={transition.label}
+            onClick={() => onTransition(transition.id, false)}
+            active={(slide?.transition ?? 'none') === transition.id}
+          />
+        ))}
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Thời gian">
+        <RibbonButton
+          data-command="slide.transitions.2"
+          icon={<IconApplyAll size={28} />}
+          label="Áp dụng tất cả"
+          onClick={() => onTransition(slide?.transition ?? 'none', true)}
+          disabled={!slide}
+        />
+      </RibbonGroup>
+    </>
+  )
+
+  const renderAnimations = () => {
+    const start = selected ? startOf(selected) : undefined
+    const has = start !== undefined
+    const multiLine = selected?.type === 'text' && (selected.text ?? '').split('\n').length > 1
+    const speed = selected?.animMs ?? 450
+    return (
+      <>
+        <RibbonGroup
+          label={
+            selected
+              ? has
+                ? `Hiệu ứng · lần bấm ${start}`
+                : 'Hiệu ứng cho đối tượng'
+              : 'Chọn một đối tượng để thêm hiệu ứng'
+          }
+        >
+          <div className="slide-anim-gallery">
+            <button
+              data-command="slide.animations.1"
+              type="button"
+              className={cn('slide-anim-chip', selected && !has && 'is-active')}
+              onClick={() => onElementAnim({ type: 'none' })}
+              disabled={!selected}
+              data-tip="Hiện sẵn, không có hiệu ứng"
+            >
+              <span className="slide-anim-chip__stage">
+                <span className="slide-anim-chip__demo" data-anim="none" />
+              </span>
+              <span className="slide-anim-chip__label">Không</span>
+            </button>
+            {ANIM_EFFECTS.map((fx) => (
+              <button
+                data-command="slide.animations.2"
+                key={fx.id}
+                type="button"
+                className={cn(
+                  'slide-anim-chip',
+                  has && (selected?.anim ?? 'fade') === fx.id && 'is-active',
+                )}
+                onClick={() => onElementAnim({ type: 'set', anim: fx.id })}
+                disabled={!selected}
+                data-tip={`${fx.label} khi bấm chuột lúc trình chiếu`}
+              >
+                <span className="slide-anim-chip__stage">
+                  <span className="slide-anim-chip__demo" data-anim={fx.id} />
+                </span>
+                <span className="slide-anim-chip__label">{fx.label}</span>
+              </button>
+            ))}
+          </div>
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Thứ tự & thời gian">
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.animations.3"
+              icon={<span className="slide-anim-arrow">↑</span>}
+              title="Hiện sớm hơn (lên một lần bấm)"
+              onClick={() => onElementAnim({ type: 'move', dir: -1 })}
+              disabled={!has || start === 1}
+            />
+            <RibbonIconButton
+              data-command="slide.animations.4"
+              icon={<span className="slide-anim-arrow">↓</span>}
+              title="Hiện muộn hơn (lùi một lần bấm)"
+              onClick={() => onElementAnim({ type: 'move', dir: 1 })}
+              disabled={!has}
+            />
+            <Dropdown
+              data-command="slide.animations.5"
+              width={150}
+              ariaLabel="Tốc độ hiệu ứng"
+              value={String(speed)}
+              disabled={!has}
+              options={ANIM_SPEEDS.map((s) => ({ value: String(s.ms), label: s.label }))}
+              onPick={(ms) => onElementAnim({ type: 'speed', ms: Number(ms) })}
+            />
+          </div>
+          <div className="rb-row">
+            <label
+              className={cn(
+                'rb-inline-label slide-anim-byline',
+                (!has || !multiLine) && 'is-disabled',
+              )}
+              data-tip="Mỗi lần bấm hiện thêm một dòng của hộp chữ"
+            >
+              <input
+                data-command="slide.animations.6"
+                type="checkbox"
+                checked={selected?.lineStep !== undefined}
+                disabled={!has || !multiLine}
+                onChange={(e) => onElementAnim({ type: 'byLine', on: e.target.checked })}
+              />
+              Hiện từng dòng
+            </label>
+          </div>
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Bấm chuột rồi hiện (khi trình chiếu)">
+          <RibbonButton
+            data-command="slide.animations.7"
+            icon={<IconTransFade size={28} />}
+            label="Tự thêm: slide này"
+            onClick={() => onAnimate('auto', false)}
+            disabled={!slide}
+          />
+          <RibbonButton
+            data-command="slide.animations.8"
+            icon={<IconApplyAll size={28} />}
+            label="Tự thêm: cả bài"
+            onClick={() => onAnimate('auto', true)}
+          />
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Xoá hiệu ứng">
+          <RibbonButton
+            data-command="slide.animations.9"
+            icon={<IconTransNone size={28} />}
+            label="Slide này"
+            onClick={() => onAnimate('clear', false)}
+            disabled={!slide}
+          />
+          <RibbonButton
+            data-command="slide.animations.10"
+            icon={<IconTrash size={28} />}
+            label="Cả bài"
+            onClick={() => onAnimate('clear', true)}
+          />
+        </RibbonGroup>
+      </>
+    )
+  }
+
+  const renderSlideShow = () => (
+    <RibbonGroup label="Bắt đầu trình chiếu">
+      <RibbonButton
+        data-command="slide.slideshow.1"
+        icon={<IconPlayCurrent size={28} />}
+        label="Từ slide hiện tại"
+        onClick={onPresent}
+      />
+      <RibbonButton
+        data-command="slide.slideshow.2"
+        icon={<IconPlayFromStart size={28} />}
+        label="Từ đầu"
+        onClick={onPresentFromStart}
+      />
+    </RibbonGroup>
+  )
+
+  const renderView = () => (
+    <>
+      <RibbonGroup label="Hiển thị">
+        <RibbonButton
+          data-command="slide.view.1"
+          icon={<IconZoomOut size={28} />}
+          label="Thu nhỏ"
+          onClick={() => onZoom(Math.max(40, zoom - 10))}
+          disabled={zoom <= 40}
+        />
+        <RibbonButton
+          data-command="slide.view.2"
+          icon={<IconZoomIn size={28} />}
+          label="Phóng to"
+          onClick={() => onZoom(Math.min(160, zoom + 10))}
+          disabled={zoom >= 160}
+        />
+        <RibbonButton
+          data-command="slide.view.3"
+          icon={<span className="slide-ribbon-zoom-glyph">1:1</span>}
+          label={`${zoom}%`}
+          onClick={() => onZoom(100)}
+        />
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Căn chỉnh">
+        <RibbonButton
+          data-command="slide.view.4"
+          icon={<Grid3x3 size={26} strokeWidth={1.6} />}
+          label="Lưới"
+          onClick={onToggleGrid}
+          active={gridOn}
+        />
+        <RibbonButton
+          data-command="slide.view.5"
+          icon={<Magnet size={26} strokeWidth={1.6} />}
+          label="Đường gióng"
+          onClick={onToggleSnap}
+          active={snapOn}
+        />
+      </RibbonGroup>
+      <div className="ribbon-sep" />
+      <RibbonGroup label="Ngăn">
+        <RibbonButton
+          data-command="slide.view.6"
+          icon={<img src="/brand/ai-static.svg" alt="" className="slide-ribbon-ai-mark" />}
+          label="Trợ lý AI"
+          onClick={onToggleAi}
+          active={aiOpen}
+        />
+      </RibbonGroup>
+    </>
+  )
+
+  /** tab ngữ cảnh "Thành phần": hiện khi chọn hình khối, icon, đồ hoạ hoặc đường nối */
+  const renderElementFormat = () => {
+    const isShape = selected?.type === 'shape' || selected?.type === 'connector'
+    const transparency = Math.round((1 - (selected?.opacity ?? 1)) * 100)
+    return (
+      <>
+        <RibbonGroup label={isShape ? 'Tô' : selected?.type === 'graphic' ? 'Màu nét' : 'Màu'}>
+          <Anchored
+            open={popup === 'fill'}
+            minWidth={190}
+            trigger={
+              <RibbonButton
+                data-command="slide.elementformat.1"
+                icon={
+                  <>
+                    <IconFillColor size={28} />
+                    <Caret />
+                  </>
+                }
+                label={isShape ? 'Màu tô' : selected?.type === 'graphic' ? 'Màu nét' : 'Màu'}
+                onClick={() => toggle('fill')}
+                active={popup === 'fill'}
+                disabled={!selected}
+              />
+            }
+          >
+            <ColorPalette
+              data-command="slide.elementformat.2"
+              value={
+                isShape
+                  ? (selected?.fill ?? deck.theme.accent)
+                  : (selected?.textColor ?? deck.theme.fg)
+              }
+              themeColors={[deck.theme.accent, deck.theme.fg]}
+              onPick={(c) => {
+                onUpdateSelected(isShape ? { fill: c } : { textColor: c })
+                close()
+              }}
+            />
+          </Anchored>
+        </RibbonGroup>
+
+        {selected?.type === 'graphic' && (
+          <RibbonGroup label="Chủ đạo">
+            <Anchored
+              open={popup === 'main'}
+              minWidth={190}
+              trigger={
+                <RibbonButton
+                  data-command="slide.elementformat.3"
+                  icon={
+                    <>
+                      <IconFillColor size={28} />
+                      <Caret />
+                    </>
+                  }
+                  label="Màu chủ đạo"
+                  onClick={() => toggle('main')}
+                  active={popup === 'main'}
+                />
+              }
+            >
+              <ColorPalette
+                data-command="slide.elementformat.4"
+                value={selected.fill ?? graphicMainColor(selected.graphicId)}
+                themeColors={[deck.theme.accent, deck.theme.fg]}
+                onPick={(c) => onUpdateSelected({ fill: c })}
+                onClose={close}
+              />
+            </Anchored>
+          </RibbonGroup>
+        )}
+
+        {isShape && (
+          <>
+            <div className="ribbon-sep" />
+            <RibbonGroup label="Viền">
+              <div className="rb-col">
+                <div className="rb-row">
+                  <Anchored
+                    open={popup === 'border'}
+                    minWidth={190}
+                    trigger={
+                      <RibbonButton
+                        data-command="slide.elementformat.5"
+                        icon={
+                          <>
+                            <IconBorderAll size={28} />
+                            <Caret />
+                          </>
+                        }
+                        label="Màu viền"
+                        onClick={() => toggle('border')}
+                        active={popup === 'border'}
+                        disabled={!selected}
+                      />
+                    }
+                  >
+                    <ColorPalette
+                      data-command="slide.elementformat.6"
+                      value={selected?.borderColor ?? deck.theme.fg}
+                      themeColors={[deck.theme.accent, deck.theme.fg]}
+                      onPick={(c) => {
+                        onUpdateSelected({ borderColor: c })
+                        close()
+                      }}
+                    />
+                  </Anchored>
+                </div>
+                <div className="rb-row">
+                  <Dropdown
+                    data-command="slide.elementformat.7"
+                    value={String(selected?.border ?? 0)}
+                    options={[0, 1, 2, 3, 4, 6, 8].map((w) => ({
+                      value: String(w),
+                      label: w === 0 ? 'Không viền' : `${w} px`,
+                    }))}
+                    onPick={(v) => onUpdateSelected({ border: Number(v) })}
+                    disabled={!selected}
+                    ariaLabel="Độ dày viền"
+                    width={96}
+                  />
+                  <Dropdown
+                    data-command="slide.elementformat.8"
+                    value={selected?.borderStyle ?? 'solid'}
+                    options={[
+                      { value: 'solid', label: 'Liền' },
+                      { value: 'dashed', label: 'Đứt' },
+                      { value: 'dotted', label: 'Chấm' },
+                    ]}
+                    onPick={(v) =>
+                      onUpdateSelected({
+                        borderStyle: v as NonNullable<SlideElement['borderStyle']>,
+                      })
+                    }
+                    disabled={!selected}
+                    ariaLabel="Kiểu nét viền"
+                    width={80}
+                  />
+                </div>
+              </div>
+            </RibbonGroup>
+          </>
+        )}
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Hiệu ứng">
+          <div className="rb-col">
+            <div className="rb-row">
+              <label className="rb-inline-label">
+                Trong suốt
+                <input
+                  data-command="slide.elementformat.9"
+                  type="range"
+                  min={0}
+                  max={90}
+                  step={5}
+                  value={transparency}
+                  disabled={!selected}
+                  onChange={(e) => onUpdateSelected({ opacity: 1 - Number(e.target.value) / 100 })}
+                  aria-label="Độ trong suốt"
+                  className="w-24"
+                />
+                <span className="tnum">{transparency}%</span>
+              </label>
+            </div>
+            <div className="rb-row">
+              <Dropdown
+                data-command="slide.elementformat.10"
+                value={String(selected?.shadowLevel ?? 0)}
+                options={[
+                  { value: '0', label: 'Không bóng' },
+                  { value: '1', label: 'Bóng nhẹ' },
+                  { value: '2', label: 'Bóng vừa' },
+                  { value: '3', label: 'Bóng đậm' },
+                ]}
+                onPick={(v) => onUpdateSelected({ shadowLevel: Number(v) as 0 | 1 | 2 | 3 })}
+                disabled={!selected}
+                ariaLabel="Bóng đổ"
+                width={112}
+              />
+              {selected?.shape === 'round' && (
+                <label className="rb-inline-label">
+                  Bo góc
+                  <input
+                    data-command="slide.elementformat.11"
+                    className="rb-num-input"
+                    type="number"
+                    min={0}
+                    max={80}
+                    value={selected.radius ?? 0}
+                    onChange={(e) =>
+                      onUpdateSelected({ radius: Math.max(0, Number(e.target.value)) })
+                    }
+                    aria-label="Bo góc"
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Thứ tự lớp">
+          <RibbonButton
+            data-command="slide.elementformat.12"
+            icon={<BringToFront size={26} strokeWidth={1.6} />}
+            label="Đưa lên trên"
+            onClick={() => onArrange('front')}
+            disabled={!selected}
+          />
+          <RibbonButton
+            data-command="slide.elementformat.13"
+            icon={<SendToBack size={26} strokeWidth={1.6} />}
+            label="Đưa xuống dưới"
+            onClick={() => onArrange('back')}
+            disabled={!selected}
+          />
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Căn vào slide">
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.elementformat.14"
+              icon={<IconObjAlignLeft size={17} />}
+              title="Căn trái slide"
+              onClick={() => onAlign('left')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.elementformat.15"
+              icon={<IconObjAlignCenterH size={17} />}
+              title="Căn giữa ngang"
+              onClick={() => onAlign('center')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.elementformat.16"
+              icon={<IconObjAlignRight size={17} />}
+              title="Căn phải slide"
+              onClick={() => onAlign('right')}
+              disabled={!selected}
+            />
+          </div>
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.elementformat.17"
+              icon={<IconObjAlignTop size={17} />}
+              title="Căn trên slide"
+              onClick={() => onAlign('top')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.elementformat.18"
+              icon={<IconObjAlignMiddle size={17} />}
+              title="Căn giữa dọc"
+              onClick={() => onAlign('middle')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.elementformat.19"
+              icon={<IconObjAlignBottom size={17} />}
+              title="Căn dưới slide"
+              onClick={() => onAlign('bottom')}
+              disabled={!selected}
+            />
+          </div>
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Lật">
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.elementformat.20"
+              icon={<IconObjFlipH size={17} />}
+              title="Lật ngang"
+              active={!!selected?.flipX}
+              onClick={() => onFlip('x')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.elementformat.21"
+              icon={<IconObjFlipV size={17} />}
+              title="Lật dọc"
+              active={!!selected?.flipY}
+              onClick={() => onFlip('y')}
+              disabled={!selected}
+            />
+          </div>
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Xoay">
+          <div className="rb-row">
+            <label className="rb-inline-label">
+              Góc
+              <input
+                data-command="slide.elementformat.22"
+                className="rb-num-input"
+                type="number"
+                min={0}
+                max={359}
+                value={Math.round(selected?.rotation ?? 0)}
+                disabled={!selected}
+                onChange={(e) =>
+                  onUpdateSelected({ rotation: ((Number(e.target.value) % 360) + 360) % 360 })
+                }
+                aria-label="Góc xoay"
+              />
+              °
+            </label>
+          </div>
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Đối tượng">
+          <RibbonButton
+            data-command="slide.elementformat.24"
+            icon={<IconCopy size={28} />}
+            label="Nhân bản"
+            onClick={props.onDuplicateSelected}
+            disabled={!selected}
+          />
+          <RibbonButton
+            data-command="slide.elementformat.23"
+            icon={<IconTrash size={28} />}
+            label="Xóa"
+            onClick={onDeleteSelected}
+            disabled={!selected}
+          />
+        </RibbonGroup>
+      </>
+    )
+  }
+
+  /** tab ngữ cảnh "Định dạng ảnh": hiện khi đang chọn phần tử ảnh */
+  const renderPictureFormat = () => {
+    const isLocked = Boolean(selected?.locked)
+    const hasSrc = Boolean(selected?.src)
+    const rotated = (selected?.rotation ?? 0) % 360 !== 0
+    const cropDisabled = !selected || isLocked || !hasSrc || rotated
+    const cropTip = isLocked
+      ? 'Ảnh đang khoá — mở khoá để cắt'
+      : !hasSrc
+        ? 'Khung chưa có ảnh để cắt'
+        : rotated
+          ? 'Xoay về 0° trước khi cắt ảnh'
+          : cropping
+            ? 'Xác nhận vùng cắt (Enter)'
+            : 'Cắt ảnh theo khung'
+    const isFramed = Boolean(photoFrameClip(selected?.shape))
+    const borderW = selected?.border ?? 0
+    const borderColor = selected?.borderColor ?? deck.theme.fg
+    const borderStyle = selected?.borderStyle ?? 'solid'
+    const radiusVal = selected?.radius ?? 10
+    const transparency = Math.round((1 - (selected?.opacity ?? 1)) * 100)
+
+    return (
+      <>
+        <RibbonGroup label="Ảnh">
+          <input
+            data-command="slide.pictureformat.1"
+            ref={replaceImgRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              e.target.value = ''
+              if (!file || !selected || selected.type !== 'image') return
+              const reader = new FileReader()
+              reader.onload = () => {
+                const data = String(reader.result)
+                uploadImage(data)
+                  .then((src) => onUpdateSelected({ src, crop: undefined }))
+                  .catch(() => onUpdateSelected({ src: data, crop: undefined }))
+              }
+              reader.readAsDataURL(file)
+            }}
+          />
+          <RibbonButton
+            data-command="slide.pictureformat.2"
+            icon={<ImagePlus size={26} strokeWidth={1.6} />}
+            label="Thay ảnh"
+            title="Thay ảnh mới nhưng giữ nguyên vị trí, kích thước và hiệu ứng"
+            onClick={() => replaceImgRef.current?.click()}
+            disabled={!selected || isLocked}
+          />
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Cắt ảnh">
+          <RibbonButton
+            data-command="slide.pictureformat.3"
+            icon={<Crop size={26} strokeWidth={1.6} />}
+            label="Cắt"
+            title={cropTip}
+            active={cropping}
+            onClick={onToggleCrop}
+            disabled={cropDisabled}
+          />
+          <RibbonButton
+            data-command="slide.pictureformat.4"
+            icon={<RotateCcw size={24} strokeWidth={1.6} />}
+            label="Bỏ cắt"
+            title="Khôi phục ảnh gốc ban đầu"
+            onClick={onResetCrop}
+            disabled={!selected || isLocked || !selected?.crop}
+          />
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Khung & bo góc">
+          <Anchored
+            open={popup === 'photoFrame'}
+            minWidth={268}
+            trigger={
+              <RibbonButton
+                data-command="slide.pictureformat.5"
+                icon={
+                  <>
+                    <Frame size={26} strokeWidth={1.6} />
+                    <Caret />
+                  </>
+                }
+                label="Khung hình"
+                title="Chọn khung cắt ảnh"
+                onClick={() => toggle('photoFrame')}
+                active={popup === 'photoFrame'}
+                disabled={!selected || isLocked}
+              />
+            }
+          >
+            <div className="slide-ribbon-menu-title">Khung hình</div>
+            <div className="mb-1.5 px-1">
+              <button
+                data-command="slide.pictureformat.6"
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onUpdateSelected({ shape: undefined })
+                  close()
+                }}
+                className={cn(
+                  'w-full rounded border px-2 py-1 text-left text-[12px] font-medium transition-colors',
+                  !selected?.shape
+                    ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]'
+                    : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--bg-subtle)]',
+                )}
+              >
+                Không khung (bo góc tự do)
+              </button>
+            </div>
+            <div className="grid max-h-[260px] grid-cols-5 gap-1.5 overflow-y-auto p-1">
+              {PHOTO_FRAMES.map((f) => (
+                <button
+                  data-command="slide.pictureformat.7"
+                  key={f.id}
+                  type="button"
+                  data-tip={f.label}
+                  aria-label={f.label}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    onUpdateSelected({ shape: f.id })
+                    close()
+                  }}
+                  className={cn(
+                    'flex aspect-square items-center justify-center rounded border p-1 transition-colors',
+                    selected?.shape === f.id
+                      ? 'border-[var(--accent)] bg-[var(--accent-soft)]'
+                      : 'border-transparent hover:bg-[var(--bg-subtle)]',
+                  )}
+                >
+                  <img
+                    src={FRAME_PLACEHOLDER}
+                    alt=""
+                    className="size-full object-cover"
+                    style={{ clipPath: f.clip }}
+                  />
+                </button>
+              ))}
+            </div>
+          </Anchored>
+          <div className="rb-col">
+            <label
+              className="rb-inline-label"
+              data-tip={
+                isFramed
+                  ? 'Đang dùng khung hình — chọn Không khung để chỉnh bo góc'
+                  : 'Độ bo góc ảnh (0–50)'
+              }
+            >
+              Bo góc
+              <input
+                data-command="slide.pictureformat.8"
+                type="range"
+                min={0}
+                max={50}
+                step={1}
+                value={radiusVal}
+                disabled={!selected || isFramed}
+                onChange={(e) => onUpdateSelected({ radius: Number(e.target.value) })}
+                aria-label="Bo góc"
+                className="w-20"
+              />
+              <span className="tnum w-6 text-right">{radiusVal}</span>
+            </label>
+            <label className="rb-inline-label" data-tip="Độ trong suốt ảnh">
+              Mờ
+              <input
+                data-command="slide.pictureformat.9"
+                type="range"
+                min={0}
+                max={90}
+                step={5}
+                value={transparency}
+                disabled={!selected}
+                onChange={(e) => onUpdateSelected({ opacity: 1 - Number(e.target.value) / 100 })}
+                aria-label="Độ trong suốt"
+                className="w-20"
+              />
+              <span className="tnum w-7 text-right">{transparency}%</span>
+            </label>
+          </div>
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Đổ bóng">
+          <div className="grid grid-cols-2 gap-1">
+            {(['Không', 'Nhẹ', 'Vừa', 'Đậm'] as const).map((label, lvl) => {
+              const cur = (selected?.shadowLevel ?? 0) === lvl
+              return (
+                <button
+                  data-command="slide.pictureformat.10"
+                  key={label}
+                  type="button"
+                  data-tip={`Đổ bóng: ${label}`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onUpdateSelected({ shadowLevel: lvl as 0 | 1 | 2 | 3 })}
+                  disabled={!selected}
+                  className={cn(
+                    'h-[26px] rounded px-2 text-[11.5px] font-medium transition-colors',
+                    cur
+                      ? 'border border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]'
+                      : 'border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--bg-subtle)]',
+                  )}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Viền ảnh">
+          <Anchored
+            open={popup === 'imgBorderColor'}
+            minWidth={190}
+            trigger={
+              <RibbonButton
+                data-command="slide.pictureformat.11"
+                icon={
+                  <span className="flex flex-col items-center">
+                    <IconBorderAll size={24} />
+                    <span
+                      className="mt-0.5 h-1 w-6 rounded-sm"
+                      style={{ background: borderColor }}
+                    />
+                  </span>
+                }
+                label="Màu viền"
+                title="Chọn màu viền ảnh"
+                onClick={() => toggle('imgBorderColor')}
+                active={popup === 'imgBorderColor'}
+                disabled={!selected}
+              />
+            }
+          >
+            <ColorPalette
+              data-command="slide.pictureformat.12"
+              value={borderColor}
+              themeColors={[deck.theme.accent, deck.theme.fg]}
+              onPick={(c) => {
+                onUpdateSelected({ borderColor: c, ...(borderW === 0 ? { border: 2 } : {}) })
+                close()
+              }}
+              onClose={close}
+            />
+          </Anchored>
+          <div className="rb-col">
+            <Dropdown
+              data-command="slide.pictureformat.13"
+              value={String(borderW)}
+              options={[
+                { value: '0', label: 'Không viền' },
+                { value: '1', label: '1 px' },
+                { value: '2', label: '2 px' },
+                { value: '4', label: '4 px' },
+                { value: '6', label: '6 px' },
+              ]}
+              onPick={(v) => {
+                const n = Number(v)
+                onUpdateSelected({
+                  border: n,
+                  ...(n > 0 && !selected?.borderColor ? { borderColor: deck.theme.fg } : {}),
+                })
+              }}
+              disabled={!selected}
+              ariaLabel="Độ dày viền ảnh"
+              width={108}
+            />
+            <Dropdown
+              data-command="slide.pictureformat.14"
+              value={borderStyle}
+              options={[
+                { value: 'solid', label: 'Nét liền' },
+                { value: 'dashed', label: 'Nét đứt' },
+                { value: 'dotted', label: 'Nét chấm' },
+              ]}
+              onPick={(v) => onUpdateSelected({ borderStyle: v as 'solid' | 'dashed' | 'dotted' })}
+              disabled={!selected || borderW === 0}
+              ariaLabel="Kiểu nét viền ảnh"
+              width={108}
+            />
+          </div>
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Thứ tự lớp">
+          <RibbonButton
+            data-command="slide.pictureformat.15"
+            icon={<BringToFront size={26} strokeWidth={1.6} />}
+            label="Đưa lên trên"
+            onClick={() => onArrange('front')}
+            disabled={!selected}
+          />
+          <RibbonButton
+            data-command="slide.pictureformat.16"
+            icon={<SendToBack size={26} strokeWidth={1.6} />}
+            label="Đưa xuống dưới"
+            onClick={() => onArrange('back')}
+            disabled={!selected}
+          />
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Căn vào slide">
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.pictureformat.17"
+              icon={<IconObjAlignLeft size={17} />}
+              title="Căn trái slide"
+              onClick={() => onAlign('left')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.pictureformat.18"
+              icon={<IconObjAlignCenterH size={17} />}
+              title="Căn giữa ngang"
+              onClick={() => onAlign('center')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.pictureformat.19"
+              icon={<IconObjAlignRight size={17} />}
+              title="Căn phải slide"
+              onClick={() => onAlign('right')}
+              disabled={!selected}
+            />
+          </div>
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.pictureformat.20"
+              icon={<IconObjAlignTop size={17} />}
+              title="Căn trên slide"
+              onClick={() => onAlign('top')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.pictureformat.21"
+              icon={<IconObjAlignMiddle size={17} />}
+              title="Căn giữa dọc"
+              onClick={() => onAlign('middle')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.pictureformat.22"
+              icon={<IconObjAlignBottom size={17} />}
+              title="Căn dưới slide"
+              onClick={() => onAlign('bottom')}
+              disabled={!selected}
+            />
+          </div>
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Lật">
+          <div className="rb-row">
+            <RibbonIconButton
+              data-command="slide.pictureformat.23"
+              icon={<IconObjFlipH size={17} />}
+              title="Lật ngang"
+              active={!!selected?.flipX}
+              onClick={() => onFlip('x')}
+              disabled={!selected}
+            />
+            <RibbonIconButton
+              data-command="slide.pictureformat.24"
+              icon={<IconObjFlipV size={17} />}
+              title="Lật dọc"
+              active={!!selected?.flipY}
+              onClick={() => onFlip('y')}
+              disabled={!selected}
+            />
+          </div>
+        </RibbonGroup>
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Xoay">
+          <div className="rb-row">
+            <label className="rb-inline-label">
+              Góc
+              <input
+                data-command="slide.pictureformat.25"
+                className="rb-num-input"
+                type="number"
+                min={0}
+                max={359}
+                value={Math.round(selected?.rotation ?? 0)}
+                disabled={!selected}
+                onChange={(e) =>
+                  onUpdateSelected({ rotation: ((Number(e.target.value) % 360) + 360) % 360 })
+                }
+                aria-label="Góc xoay"
+              />
+              °
+            </label>
+          </div>
+        </RibbonGroup>
+
+        <div className="ribbon-sep" />
+        <RibbonGroup label="Đối tượng">
+          <RibbonButton
+            data-command="slide.pictureformat.27"
+            icon={<IconCopy size={28} />}
+            label="Nhân bản"
+            onClick={props.onDuplicateSelected}
+            disabled={!selected}
+          />
+          <RibbonButton
+            data-command="slide.pictureformat.26"
+            icon={<IconTrash size={28} />}
+            label="Xóa"
+            onClick={onDeleteSelected}
+            disabled={!selected}
+          />
+        </RibbonGroup>
+      </>
+    )
+  }
+
+  const rawBody = activeContext
+    ? context?.id === 'pictureFormat'
+      ? renderPictureFormat()
+      : renderElementFormat()
+    : activeTab === 'home'
+      ? renderHome()
+      : activeTab === 'insert'
+        ? renderInsert()
+        : activeTab === 'design'
+          ? renderDesign()
+          : activeTab === 'transitions'
+            ? renderTransitions()
+            : activeTab === 'animations'
+              ? renderAnimations()
+              : activeTab === 'slideShow'
+                ? renderSlideShow()
+                : activeTab === 'view'
+                  ? renderView()
+                  : renderHome()
+
+  // Tách các RibbonGroup để ở khổ tablet có thể thu nhóm tràn vào menu "Thêm"
+  const rawChildren =
+    isValidElement<{ children?: ReactNode }>(rawBody) && rawBody.type === Fragment
+      ? Children.toArray(rawBody.props.children)
+      : [rawBody]
+  const groups = rawChildren.filter((child) => isValidElement(child) && child.type === RibbonGroup)
+
+  useLayoutEffect(() => {
+    if (props.chrome || !isTablet) {
+      setVisibleGroups(null)
+      return
+    }
+    const el = bodyRef.current
+    if (!el) return
+    const measure = () => {
+      const avail = el.clientWidth - 24 // padding ngang
+      if (avail <= 0) return
+      const nodes = [...el.querySelectorAll<HTMLElement>('[data-ribbon-measure]')]
+      if (!nodes.length) return
+      let used = 0
+      let count = 0
+      const moreReserve = 78
+      for (let i = 0; i < nodes.length; i++) {
+        const w = nodes[i].offsetWidth + (i > 0 ? 13 : 0) // + sep
+        const needMore = i < nodes.length - 1 ? moreReserve : 0
+        if (used + w + needMore <= avail || i === 0) {
+          used += w
+          count++
+        } else {
+          break
+        }
+      }
+      setVisibleGroups(count >= nodes.length ? null : count)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [isTablet, activeTab, groups.length, selected?.id])
+
+  useLayoutEffect(() => {
+    if (props.chrome || !isTablet) {
+      setVisibleTabs(null)
+      return
+    }
+    const el = tabsWrapRef.current
+    if (!el) return
+    const measure = () => {
+      const bar = el.querySelector<HTMLElement>('.ribbon-tabs')
+      if (!bar) return
+      const avail = bar.clientWidth - 16
+      const leadingNodes = [...bar.querySelectorAll<HTMLElement>('.file-menu, .qa-btn, .qa-sep')]
+      let used = 0
+      for (const n of leadingNodes) used += n.offsetWidth + 4
+      const tabNodes = [...el.querySelectorAll<HTMLElement>('[data-measure-tab]')]
+      let count = 0
+      const moreReserve = 76
+      for (let i = 0; i < tabNodes.length; i++) {
+        const w = tabNodes[i].offsetWidth + 4
+        const needMore = i < tabNodes.length - 1 ? moreReserve : 0
+        if (used + w + needMore <= avail || i === 0) {
+          used += w
+          count++
+        } else {
+          break
+        }
+      }
+      setVisibleTabs(count >= tabs.length ? null : count)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [isTablet, tabs.length, activeContext])
+
+  const leadingControls = (
+    <>
+      {onNewDeck && onImportFile ? (
+        <FileMenu
+          kind="slide"
+          onNew={onNewDeck}
+          onImport={onImportFile}
+          onDownload={onDownload ?? (() => {})}
+          downloadHint=".pptx"
+          extra={{
+            label: 'Xuất PDF',
+            hint: 'Mở hộp thoại in → chọn Lưu thành PDF',
+            onClick: onExportPdf,
+          }}
+          downloadNote="Máy thiếu phông sẽ dùng phông thay thế."
+        />
+      ) : null}
+      <span className="qa-sep" aria-hidden="true" />
+      {onSave && (
+        <button type="button" className="qa-btn" data-tip="Lưu" aria-label="Lưu" onClick={onSave}>
+          <IconSave size={16} />
+        </button>
+      )}
+      <button
+        type="button"
+        className="qa-btn"
+        data-tip="Hoàn tác"
+        aria-label="Hoàn tác"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onUndo}
+        disabled={!canUndo}
+      >
+        <IconUndo size={16} />
+      </button>
+      <button
+        type="button"
+        className="qa-btn"
+        data-tip="Làm lại"
+        aria-label="Làm lại"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onRedo}
+        disabled={!canRedo}
+      >
+        <IconRedo size={16} />
+      </button>
+      <span className="qa-sep" aria-hidden="true" />
+    </>
+  )
+
+  if (props.chrome) {
+    const bodies = {
+      home: renderHome(),
+      insert: renderInsert(),
+      design: renderDesign(),
+      transitions: renderTransitions(),
+      animations: renderAnimations(),
+      slideShow: renderSlideShow(),
+      view: renderView(),
+      elementFormat: renderElementFormat(),
+      pictureFormat: renderPictureFormat(),
+    }
+    const flatten = (node: ReactNode): ReactNode[] =>
+      Children.toArray(node).flatMap((child) =>
+        isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment
+          ? flatten(child.props.children)
+          : [child],
+      )
+    const definitions = Object.fromEntries(
+      Object.entries(bodies).map(([tab, body]) => [
+        tab,
+        flatten(body)
+          .filter((child) => isValidElement(child) && child.type === RibbonGroup)
+          .map((child, index) => ({
+            id: `slide.${tab}.${index}`,
+            label: isValidElement<{ label: string }>(child) ? child.props.label : '',
+            render: () => child,
+          })),
+      ]),
+    )
+    const extra: ExamCommand[] = [
+      {
+        id: 'slide.file.new',
+        family: 'file',
+        label: 'Bài giảng mới',
+        group: 'Tệp',
+        tab: 'Tệp',
+        run: () => onNewDeck?.(),
+      },
+      {
+        id: 'slide.file.import',
+        family: 'file',
+        label: 'Nhập file',
+        group: 'Tệp',
+        tab: 'Tệp',
+        run: () => importInputRef.current?.click(),
+      },
+      {
+        id: 'slide.file.pptx',
+        family: 'file',
+        label: 'Xuất PPTX',
+        group: 'Tệp',
+        tab: 'Tệp',
+        run: () => {
+          void onDownload?.()
+        },
+      },
+      {
+        id: 'slide.file.pdf',
+        family: 'file',
+        label: 'Xuất PDF',
+        group: 'Tệp',
+        tab: 'Tệp',
+        run: onExportPdf,
+      },
+      {
+        id: 'slide.file.save',
+        family: 'file',
+        label: 'Lưu',
+        group: 'Tệp',
+        tab: 'Tệp',
+        run: () => onSave?.(),
+      },
+      {
+        id: 'slide.file.undo',
+        family: 'file',
+        label: 'Hoàn tác',
+        group: 'Tệp',
+        tab: 'Tệp',
+        disabled: !canUndo,
+        run: onUndo,
+      },
+      {
+        id: 'slide.file.redo',
+        family: 'file',
+        label: 'Làm lại',
+        group: 'Tệp',
+        tab: 'Tệp',
+        disabled: !canRedo,
+        run: onRedo,
+      },
+    ]
+    return (
+      <SlideChrome
+        options={props.chrome}
+        tabs={definitions}
+        selected={selected}
+        context={
+          selected?.type === 'image'
+            ? 'pictureFormat'
+            : selected &&
+                ['shape', 'icon', 'graphic', 'connector', 'table', 'chart'].includes(selected.type)
+              ? 'elementFormat'
+              : 'home'
+        }
+        extra={extra}
+        fileMenu={
+          onNewDeck && onImportFile ? (
+            <FileMenu
+              kind="slide"
+              onNew={onNewDeck}
+              onImport={onImportFile}
+              onDownload={onDownload ?? (() => {})}
+              importInputRef={importInputRef}
+              downloadHint=".pptx"
+              extra={{ label: 'Xuất PDF', hint: 'In hoặc lưu PDF', onClick: onExportPdf }}
+            />
+          ) : null
+        }
+      />
+    )
+  }
+
+  if (isPhone) {
+    return (
+      <div className="ribbon slide-ribbon slide-ribbon--phone" ref={rootRef}>
+        <div className="slide-ribbon__phone-top">
+          <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto max-[359px]:gap-0.5">
+            {onNewDeck && onImportFile ? (
+              <FileMenu
+                kind="slide"
+                onNew={onNewDeck}
+                onImport={onImportFile}
+                onDownload={onDownload ?? (() => {})}
+                downloadHint=".pptx"
+                extra={{
+                  label: 'Xuất PDF',
+                  hint: 'Mở hộp thoại in → chọn Lưu thành PDF',
+                  onClick: onExportPdf,
+                }}
+                downloadNote="Máy thiếu phông sẽ dùng phông thay thế."
+              />
+            ) : null}
+            {onSave && (
+              <button
+                type="button"
+                className="qa-btn shrink-0"
+                data-tip="Lưu"
+                aria-label="Lưu"
+                onClick={onSave}
+              >
+                <IconSave size={16} />
+              </button>
+            )}
+            <button
+              type="button"
+              className="qa-btn shrink-0"
+              data-tip="Hoàn tác"
+              aria-label="Hoàn tác"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={onUndo}
+              disabled={!canUndo}
+            >
+              <IconUndo size={16} />
+            </button>
+            <button
+              type="button"
+              className="qa-btn shrink-0"
+              data-tip="Làm lại"
+              aria-label="Làm lại"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={onRedo}
+              disabled={!canRedo}
+            >
+              <IconRedo size={16} />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setPhoneSheetOpen(true)}
+            aria-label="Mở tất cả công cụ"
+            className="border-line bg-surface text-ink hover:bg-paper-2 flex min-h-[36px] shrink-0 items-center gap-1 rounded-md border px-2.5 text-[12px] font-medium whitespace-nowrap max-[359px]:gap-0.5 max-[359px]:px-1.5 max-[359px]:text-[11.5px]"
+          >
+            <span>Công cụ</span>
+            <ChevronDown className="size-3.5" />
+          </button>
+        </div>
+
+        <div className="slide-ribbon__phone-quick">
+          <button
+            type="button"
+            className="slide-ribbon__qbtn"
+            data-tip="Slide mới"
+            aria-label="Slide mới"
+            onClick={onAddSlide}
+          >
+            <IconNewSlide size={20} />
+          </button>
+          <button
+            type="button"
+            className={cn('slide-ribbon__qbtn', selected?.fontWeight === 700 && 'active')}
+            data-tip="Đậm"
+            aria-label="Đậm"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() =>
+              onUpdateSelected({ fontWeight: selected?.fontWeight === 700 ? 400 : 700 })
+            }
+            disabled={!isText}
+          >
+            <b>B</b>
+          </button>
+          <button
+            type="button"
+            className={cn('slide-ribbon__qbtn', selected?.fontStyle === 'italic' && 'active')}
+            data-tip="Nghiêng"
+            aria-label="Nghiêng"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() =>
+              onUpdateSelected({
+                fontStyle: selected?.fontStyle === 'italic' ? 'normal' : 'italic',
+              })
+            }
+            disabled={!isText}
+          >
+            <i>I</i>
+          </button>
+          <Anchored
+            open={popup === 'phoneColor'}
+            minWidth={248}
+            trigger={
+              <button
+                type="button"
+                className="slide-ribbon__qbtn slide-ribbon-color-btn"
+                data-tip="Màu chữ"
+                aria-label="Màu chữ"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => toggle('phoneColor')}
+                disabled={!isText}
+              >
+                <span className="slide-ribbon-A">A</span>
+                <span
+                  className="rb-color-bar"
+                  style={{ background: selected?.textColor ?? deck.theme.fg }}
+                />
+              </button>
+            }
+          >
+            <ColorPalette
+              value={selected?.textColor ?? deck.theme.fg}
+              themeColors={[deck.theme.fg, deck.theme.accent]}
+              onPick={(textColor) => {
+                onUpdateSelected({ textColor })
+                close()
+              }}
+            />
+          </Anchored>
+          <Anchored
+            open={popup === 'phoneInsert'}
+            minWidth={296}
+            trigger={
+              <button
+                type="button"
+                className={cn(
+                  'slide-ribbon__qbtn slide-ribbon__qbtn--wide',
+                  popup === 'phoneInsert' && 'active',
+                )}
+                data-tip="Chèn"
+                aria-label="Chèn"
+                onClick={() => {
+                  setPhoneInsertSub('menu')
+                  toggle('phoneInsert')
+                }}
+              >
+                <IconShapes size={18} />
+                <span>Chèn</span>
+                <ChevronDown className="size-3.5" />
+              </button>
+            }
+          >
+            {phoneInsertSub === 'menu' ? (
+              <>
+                <MenuItem
+                  icon={<IconPicture size={16} />}
+                  onClick={() => {
+                    onInsert({ id: uid(), type: 'image', x: 25, y: 26, w: 50, h: 38 })
+                    close()
+                  }}
+                >
+                  Hình ảnh
+                </MenuItem>
+                <MenuItem
+                  icon={<IconShapes size={16} />}
+                  onClick={() => setPhoneInsertSub('shape')}
+                >
+                  Hình dạng…
+                </MenuItem>
+                <MenuItem
+                  icon={<IconTextBox size={16} />}
+                  onClick={() => {
+                    onInsert({
+                      id: uid(),
+                      type: 'text',
+                      x: 35,
+                      y: 42,
+                      w: 30,
+                      h: 18,
+                      text: 'Nhập văn bản',
+                      variant: 'body',
+                      fontSize: 3.2,
+                    })
+                    close()
+                  }}
+                >
+                  Hộp văn bản
+                </MenuItem>
+                <MenuItem
+                  icon={<IconSlideLayout size={16} />}
+                  onClick={() => setPhoneInsertSub('layout')}
+                  disabled={!slide}
+                >
+                  Bố cục slide…
+                </MenuItem>
+                <MenuItem icon={<IconTable size={16} />} onClick={() => insertTable(3, 3)}>
+                  Bảng 3×3
+                </MenuItem>
+                <MenuItem icon={<IconChart size={16} />} onClick={() => insertChart('bar')}>
+                  Biểu đồ cột
+                </MenuItem>
+              </>
+            ) : phoneInsertSub === 'shape' ? (
+              <div className="max-w-[calc(100vw-32px)]">
+                <button
+                  type="button"
+                  onClick={() => setPhoneInsertSub('menu')}
+                  className="text-clay mb-1.5 flex min-h-[36px] items-center gap-1 px-1 text-[12px] font-medium"
+                >
+                  ← Quay lại
+                </button>
+                <ShapeGallery onPick={insertPreset} />
+              </div>
+            ) : (
+              <div className="max-w-[calc(100vw-32px)]">
+                <button
+                  type="button"
+                  onClick={() => setPhoneInsertSub('menu')}
+                  className="text-clay mb-1.5 flex min-h-[36px] items-center gap-1 px-1 text-[12px] font-medium"
+                >
+                  ← Quay lại
+                </button>
+                <div className="slide-layout-grid">
+                  {SLIDE_LAYOUTS.map((layout) => (
+                    <button
+                      key={layout.id}
+                      type="button"
+                      className={cn('slide-layout-card', slide?.layout === layout.id && 'active')}
+                      onClick={() => {
+                        onApplyLayout(layout.id)
+                        close()
+                      }}
+                    >
+                      <span
+                        className={cn('slide-layout-thumb', `slide-layout-thumb--${layout.id}`)}
+                        aria-hidden
+                      >
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      <small>{layout.name}</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Anchored>
+          <button
+            type="button"
+            className="slide-ribbon__qbtn slide-ribbon__qbtn--play"
+            data-tip="Trình chiếu"
+            aria-label="Trình chiếu"
+            onClick={onPresent}
+          >
+            <IconPlayCurrent size={20} />
+          </button>
+        </div>
+
+        {phoneSheetAnim.mounted && (
+          <>
+            <div
+              className={cn(
+                'fixed inset-0 z-50 bg-black/35',
+                phoneSheetAnim.closing ? 'backdrop-out' : 'backdrop-in',
+              )}
+              aria-hidden="true"
+              onClick={() => setPhoneSheetOpen(false)}
+            />
+            <div
+              role="dialog"
+              aria-label="Công cụ trình soạn slide"
+              className={cn(
+                'slide-ribbon__phone-sheet border-line bg-surface fixed inset-x-0 bottom-0 z-50 flex max-h-[78dvh] flex-col rounded-t-2xl border-t pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_-12px_rgb(0_0_0/0.4)]',
+                phoneSheetAnim.closing ? 'sheet-out-down' : 'sheet-in-up',
+              )}
+            >
+              <div className="border-line flex shrink-0 items-center justify-between border-b px-3 py-2">
+                <span className="text-ink text-[14px] font-semibold">Công cụ slide</span>
+                <button
+                  type="button"
+                  aria-label="Đóng"
+                  onClick={() => setPhoneSheetOpen(false)}
+                  className="text-ink-2 hover:bg-paper-2 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-md"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+              <div
+                className="border-line flex shrink-0 flex-wrap gap-1.5 border-b px-3 py-2"
+                role="tablist"
+              >
+                {tabs.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === t.id}
+                    onClick={() => onTabChange(t.id as SlideRibbonTab)}
+                    className={cn(
+                      'min-h-[36px] rounded-full px-3 text-[12px] font-medium transition-colors',
+                      activeTab === t.id
+                        ? 'bg-clay text-white'
+                        : 'bg-paper-2 text-ink-2 hover:text-ink',
+                    )}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="slide-ribbon__phone-sheet-body flex-1 overflow-y-auto p-3">
+                {rawBody}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  if (isTablet) {
+    const tabCut = visibleTabs ?? tabs.length
+    const mainTabs = tabs.slice(0, tabCut)
+    const overflowTabs = tabs.slice(tabCut)
+    const groupCut = visibleGroups ?? groups.length
+    const visibleGroupEls = groups.slice(0, groupCut)
+    const overflowGroupEls = groups.slice(groupCut)
+
+    return (
+      <div className="ribbon slide-ribbon slide-ribbon--tablet" ref={rootRef}>
+        <div ref={tabsWrapRef} className="relative">
+          <RibbonTabs
+            tabs={mainTabs}
+            active={activeTab}
+            onChange={(id) => onTabChange(id as SlideRibbonTab)}
+            leading={leadingControls}
+          >
+            {overflowTabs.length > 0 && (
+              <Anchored
+                open={popup === 'moreTabs'}
+                minWidth={170}
+                trigger={
+                  <button
+                    type="button"
+                    className={cn(
+                      'ribbon-tab flex items-center gap-1',
+                      overflowTabs.some((t) => t.id === activeTab) && 'active',
+                    )}
+                    onClick={() => toggle('moreTabs')}
+                    aria-label="Thêm thẻ ribbon"
+                  >
+                    <span>Thêm</span>
+                    <ChevronDown className="size-3.5" />
+                  </button>
+                }
+              >
+                {overflowTabs.map((t) => (
+                  <MenuItem
+                    key={t.id}
+                    active={activeTab === t.id}
+                    onClick={() => {
+                      onTabChange(t.id as SlideRibbonTab)
+                      close()
+                    }}
+                  >
+                    {t.label}
+                  </MenuItem>
+                ))}
+              </Anchored>
+            )}
+          </RibbonTabs>
+          {/* Phần tử ẩn để đo chiều rộng tự nhiên của tất cả tab khi resize */}
+          <div
+            className="pointer-events-none invisible absolute top-0 left-0 flex whitespace-nowrap"
+            aria-hidden="true"
+          >
+            {tabs.map((t) => (
+              <span key={t.id} data-measure-tab={t.id} className="ribbon-tab">
+                {t.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div ref={bodyRef} className="ribbon-body">
+          <div key={activeTab} className="ribbon-tab-page slide-ribbon__tablet-page">
+            {visibleGroupEls.map((g, idx) => (
+              <Fragment key={idx}>
+                {idx > 0 && <div className="ribbon-sep" />}
+                {g}
+              </Fragment>
+            ))}
+            {overflowGroupEls.length > 0 && (
+              <>
+                <div className="ribbon-sep" />
+                <Anchored
+                  open={popup === 'moreGroups'}
+                  minWidth={260}
+                  trigger={
+                    <RibbonButton
+                      icon={<MoreHorizontal size={22} />}
+                      label="Thêm"
+                      onClick={() => toggle('moreGroups')}
+                      active={popup === 'moreGroups'}
+                    />
+                  }
+                >
+                  <div className="slide-ribbon__overflow-groups">{overflowGroupEls}</div>
+                </Anchored>
+              </>
+            )}
+            {/* Bản sao ẩn để ResizeObserver đo bề rộng thật của từng nhóm */}
+            <div className="slide-ribbon__measure-row" aria-hidden="true">
+              {groups.map((g, idx) => (
+                <div key={idx} data-ribbon-measure={idx}>
+                  {g}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="ribbon slide-ribbon" ref={rootRef}>
+      <RibbonTabs
+        tabs={tabs}
+        active={activeTab}
+        onChange={(id) => onTabChange(id as SlideRibbonTab)}
+        leading={leadingControls}
+      />
+      <RibbonBody activeKey={activeTab}>{rawBody}</RibbonBody>
+    </div>
+  )
+}

@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing'
 
 import { AppModule } from '@/app.module'
 import { createValidationPipe } from '@/app/config/validation.config'
+import { PrismaService } from '@/app/database/prisma.service'
 import { AllExceptionsFilter } from '@/app/filters/all-exceptions.filter'
 import { ProblemDetailsFilter } from '@/app/filters/problem-details.filter'
 import { ThrottlerExceptionFilter } from '@/app/filters/throttler-exception.filter'
@@ -14,7 +15,9 @@ import { RequestContextInterceptor } from '@/app/interceptors/request-context.in
 import { TimeoutInterceptor } from '@/app/interceptors/timeout.interceptor'
 import { TraceContextInterceptor } from '@/app/interceptors/trace-context.interceptor'
 import { TransformInterceptor } from '@/app/interceptors/transform.interceptor'
+import { CACHE_PORT } from '@/shared-kernel/application/ports/cache.port'
 
+import type { CachePort } from '@/shared-kernel/application/ports/cache.port'
 import type { INestApplication, Type } from '@nestjs/common'
 
 export interface CreateTestAppOptions {
@@ -60,4 +63,20 @@ export async function createTestApp(options: CreateTestAppOptions = {}): Promise
 
   await app.init()
   return app
+}
+
+export async function closeTestApp(app: INestApplication): Promise<void> {
+  const prisma = app.get(PrismaService)
+  const cache = app.get<CachePort>(CACHE_PORT)
+  const userIds = [...globalThis.e2eAuth.users.keys()]
+  try {
+    await prisma.userItem.deleteMany({ where: { ownerId: { in: userIds } } })
+    await prisma.presence.deleteMany({ where: { userId: { in: userIds } } })
+    await prisma.appUserRole.deleteMany({ where: { userId: { in: userIds } } })
+    await Promise.all(
+      userIds.flatMap((id) => [cache.del(`platform:ban:${id}`), cache.del(`platform:role:${id}`)]),
+    )
+  } finally {
+    await app.close()
+  }
 }

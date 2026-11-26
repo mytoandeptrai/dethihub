@@ -13,19 +13,19 @@ const WINDOW_MS = 10 * 60 * 1000
 
 /** Hits per window as [guest, signed-in user] */
 export const RATE_LIMITS: Record<RateLimitName, readonly [number, number]> = {
-  llm: [20, 300],
-  image: [3, 40],
-  upload: [20, 300],
-  extract: [20, 200],
-  attempt: [500, 500],
+  'llm': [20, 300],
+  'image': [3, 40],
+  'upload': [20, 300],
+  'extract': [20, 200],
+  'attempt': [500, 500],
   'attempt-exam': [60, 60],
-  exam: [1000, 1000],
-  admin: [20, 600],
-  pay: [10, 120],
+  'exam': [1000, 1000],
+  'admin': [20, 600],
+  'pay': [10, 120],
   'payos-webhook': [300, 300],
-  workspace: [0, 600],
-  files: [600, 600],
-  feedback: [5, 30],
+  'workspace': [0, 600],
+  'files': [600, 600],
+  'feedback': [5, 30],
 }
 
 interface TrackedRequest {

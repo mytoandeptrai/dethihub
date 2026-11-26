@@ -16,9 +16,10 @@ export class SiteStatusController {
   @ApiOperation({ summary: 'Maintenance state and the announcements to show' })
   @ApiResponse({ status: 200, type: SiteStatusResponseDto })
   async get(): Promise<SiteStatusResponseDto> {
-    const { maintenance, announcements } = await this.status.get()
+    const { maintenance, announcements, features } = await this.status.get()
     return {
       maintenance,
+      features,
       announcements: announcements.map(({ id, title, text, image, tryPath, until }) => ({
         id,
         title,

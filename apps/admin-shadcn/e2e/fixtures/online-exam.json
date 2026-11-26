@@ -1,0 +1,52 @@
+{
+  "id": "phase3c-example",
+  "status": "done",
+  "meta": {
+    "title": "Đề ôn tập Toán 10",
+    "subject": "Toán",
+    "grade": "Lớp 10",
+    "school": "Trường THPT Đề Thi Hub",
+    "year": "2025–2026",
+    "term": "Học kỳ I",
+    "durationMinutes": 45
+  },
+  "questions": [
+    {
+      "id": "phase3c-question-one",
+      "number": 1,
+      "type": "trac-nghiem",
+      "points": 5,
+      "prompt": "Cho hàm số $y=x^2$. Giá trị của hàm số tại $x=2$ bằng bao nhiêu?",
+      "options": [
+        {
+          "key": "A",
+          "text": "$2$"
+        },
+        {
+          "key": "B",
+          "text": "$4$"
+        },
+        {
+          "key": "C",
+          "text": "$6$"
+        },
+        {
+          "key": "D",
+          "text": "$8$"
+        }
+      ],
+      "answer": "B"
+    },
+    {
+      "id": "phase3c-question-two",
+      "number": 2,
+      "type": "tra-loi-ngan",
+      "points": 5,
+      "prompt": "Tính tổng $1+2+3+4+5$.",
+      "answer": "15"
+    }
+  ],
+  "settings": {},
+  "createdAt": "2026-01-01T08:00:00.000Z",
+  "updatedAt": "2026-01-01T08:00:00.000Z"
+}
