@@ -17,17 +17,10 @@ import type { useMarketingContainer } from '@/modules/public-pages/hooks'
 const NAV = [
   { to: appPaths.home.href, label: t('publicCopy.m318'), end: true },
   { to: appPaths.editor.href, label: t('publicCopy.m319') },
-  { to: appPaths.onlineExams.href, label: t('publicCopy.m320'), beta: true },
+  { to: appPaths.onlineExams.href, label: t('publicCopy.m320') },
   { to: appPaths.community.href, label: t('publicCopy.m321') },
   { to: appPaths.library.href, label: t('publicCopy.m322') },
 ]
-function BetaTagUi() {
-  return (
-    <span className="bg-clay-soft text-clay ml-1.5 rounded-full px-1.5 py-px align-[2px] text-[10px] font-bold tracking-wide uppercase">
-      {t('publicCopy.m323')}
-    </span>
-  )
-}
 function LogoUi({ className, eager = false }: { className?: string; eager?: boolean }) {
   return (
     <Image
@@ -83,7 +76,6 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
               {({ isActive }) => (
                 <>
                   {item.label}
-                  {'beta' in item && item.beta ? <BetaTagUi /> : null}
                   {isActive ? <span className="hidden" /> : null}
                 </>
               )}
@@ -180,7 +172,6 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
                 }
               >
                 {item.label}
-                {'beta' in item && item.beta ? <BetaTagUi /> : null}
               </NavLink>
             ))}
             {canPay ? (

@@ -14,7 +14,6 @@ import {
   Plus,
   Send,
   Sparkles,
-  TriangleAlert,
   Upload,
 } from 'lucide-react'
 
@@ -54,14 +53,7 @@ export function OnlineListOnlineListUi(
         {props.staffDisabled && <FeatureNotice staff />}
         <PageHeader
           eyebrow={t('onlineExamsCopy.m76')}
-          title={
-            <>
-              {t('onlineExamsCopy.m77')}
-              <Badge tone="clay" className="ml-2 align-middle text-xs">
-                {t('onlineExamsCopy.m78')}
-              </Badge>
-            </>
-          }
+          title={t('onlineExamsCopy.m77')}
           count={
             <>
               {items.length}
@@ -78,14 +70,6 @@ export function OnlineListOnlineListUi(
             )
           }
         />
-
-        <div
-          role="note"
-          className="border-honey/40 bg-honey-soft text-ink-2 mb-8 flex items-start gap-2.5 rounded-[8px] border px-4 py-3 text-[14px] leading-[1.6]"
-        >
-          <TriangleAlert className="text-honey mt-0.5 size-4 shrink-0" />
-          {t('onlineExamsCopy.m81')}
-        </div>
 
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="min-w-0">
           <Toolbar>

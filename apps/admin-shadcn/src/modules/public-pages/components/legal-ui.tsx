@@ -126,7 +126,6 @@ const TERMS: SectionUi[] = [
         t('publicCopy.m225'),
         t('publicCopy.m226'),
         t('publicCopy.m227'),
-        t('publicCopy.m228'),
       ],
     ],
   },
