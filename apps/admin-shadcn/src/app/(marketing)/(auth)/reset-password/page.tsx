@@ -1,5 +1,8 @@
-import { ResetPasswordContainer } from '@/modules/auth/reset-password'
+import { redirect } from 'next/navigation'
 
-export default ResetPasswordContainer
+import { appPaths } from '@/config/app-paths'
 
-export const metadata = { title: 'Đặt lại mật khẩu' }
+// Google-only login: email flows are disabled.
+export default function Page() {
+  redirect(appPaths.auth.login.href)
+}

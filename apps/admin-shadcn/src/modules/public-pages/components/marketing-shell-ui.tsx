@@ -137,15 +137,9 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
             </div>
           ) : (
             <div className="hidden items-center gap-1.5 md:flex">
-              <Link
-                to={appPaths.auth.login.href}
-                className="text-ink-3 hover:text-ink rounded-full px-3.5 py-2 text-[13.5px] font-semibold whitespace-nowrap transition-colors"
-              >
-                {t('publicCopy.m327')}
-              </Link>
-              <Link to={appPaths.auth.register.href}>
+              <Link to={appPaths.auth.login.href}>
                 <Button variant="outline" size="sm" className="whitespace-nowrap">
-                  {t('publicCopy.m328')}
+                  {t('publicCopy.m327')}
                 </Button>
               </Link>
             </div>
@@ -219,20 +213,12 @@ export function HeaderUi(props: ReturnType<typeof useMarketingContainer>) {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link
-                    to={appPaths.auth.login.href}
-                    className="text-ink-2 hover:bg-sunken block rounded-xl px-3 py-2.5 text-[14.5px] font-semibold"
-                  >
-                    {t('publicCopy.m327')}
-                  </Link>
-                  <Link
-                    to={appPaths.auth.register.href}
-                    className="text-ink-2 hover:bg-sunken block rounded-xl px-3 py-2.5 text-[14.5px] font-semibold"
-                  >
-                    {t('publicCopy.m328')}
-                  </Link>
-                </>
+                <Link
+                  to={appPaths.auth.login.href}
+                  className="text-ink-2 hover:bg-sunken block rounded-xl px-3 py-2.5 text-[14.5px] font-semibold"
+                >
+                  {t('publicCopy.m327')}
+                </Link>
               )}
             </div>
           </div>

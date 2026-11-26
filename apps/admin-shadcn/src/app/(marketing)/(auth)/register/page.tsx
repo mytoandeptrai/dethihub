@@ -1,5 +1,8 @@
-import { RegisterContainer } from '@/modules/auth/register'
+import { redirect } from 'next/navigation'
 
-export default RegisterContainer
+import { appPaths } from '@/config/app-paths'
 
-export const metadata = { title: 'Đăng ký tài khoản' }
+// Google-only login: email flows are disabled.
+export default function Page() {
+  redirect(appPaths.auth.login.href)
+}

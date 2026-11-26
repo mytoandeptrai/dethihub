@@ -35,6 +35,8 @@ const AuthFormUi = ({
     register,
     formState: { errors },
   } = form
+  // Login is Google-only: Supabase creates the user on first Google sign-in.
+  const googleOnly = mode === 'login'
 
   return (
     <div
@@ -169,14 +171,16 @@ const AuthFormUi = ({
                     </svg>
                     {t('google')}
                   </Button>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="h-px flex-1 bg-border" />
-                    {t('emailDivider')}
-                    <span className="h-px flex-1 bg-border" />
-                  </div>
+                  {!googleOnly && (
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="h-px flex-1 bg-border" />
+                      {t('emailDivider')}
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                  )}
                 </>
               )}
-              {fields.map((field) => (
+              {(googleOnly ? [] : fields).map((field) => (
                 <div key={field.name} className="space-y-1.5">
                   <label htmlFor={field.name} className="text-ink-2 text-[13px] font-semibold">
                     {field.label}
@@ -222,31 +226,23 @@ const AuthFormUi = ({
                   {notice}
                 </p>
               )}
-              <Button
-                type="submit"
-                className="h-12 w-full rounded-lg font-semibold shadow-accent"
-                disabled={isBusy}
-              >
-                {isBusy ? t('processing') : submitLabel}
-                {!isBusy && <ArrowRight className="size-4" />}
-              </Button>
-              <div className="flex flex-wrap justify-between gap-3 pt-2 text-sm text-muted-foreground">
-                {mode === 'login' ? (
-                  <>
-                    <Link href={appPaths.auth.forgot.href}>{t('forgotTitle')}?</Link>
-                    <Link
-                      href={appPaths.auth.register.getHref(redirectTo)}
-                      className="font-semibold text-foreground"
-                    >
-                      {t('registerTitle')}
+              {!googleOnly && (
+                <>
+                  <Button
+                    type="submit"
+                    className="h-12 w-full rounded-lg font-semibold shadow-accent"
+                    disabled={isBusy}
+                  >
+                    {isBusy ? t('processing') : submitLabel}
+                    {!isBusy && <ArrowRight className="size-4" />}
+                  </Button>
+                  <div className="flex flex-wrap justify-between gap-3 pt-2 text-sm text-muted-foreground">
+                    <Link href={appPaths.auth.login.getHref(redirectTo)}>
+                      {t(mode === 'register' ? 'existingAccount' : 'backLogin')}
                     </Link>
-                  </>
-                ) : (
-                  <Link href={appPaths.auth.login.getHref(redirectTo)}>
-                    {t(mode === 'register' ? 'existingAccount' : 'backLogin')}
-                  </Link>
-                )}
-              </div>
+                  </div>
+                </>
+              )}
             </form>
           )}
         </div>
